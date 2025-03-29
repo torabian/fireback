@@ -87,6 +87,9 @@ export class WorkspaceInviteEntity extends BaseEntity {
       Rquery: "workspace-invites",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "workspaceInvite",
   "features": {},
   "gormMap": {},

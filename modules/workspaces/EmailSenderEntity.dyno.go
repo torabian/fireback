@@ -30,6 +30,36 @@ func ResetEmailSenderSeeders(fs *embed.FS) {
 	emailSenderSeedersFs = fs
 }
 
+type EmailSenderEntityQs struct {
+	FromName         QueriableField `cli:"from-name" table:"email_sender" column:"from_name" qs:"fromName"`
+	FromEmailAddress QueriableField `cli:"from-email-address" table:"email_sender" column:"from_email_address" qs:"fromEmailAddress"`
+	ReplyTo          QueriableField `cli:"reply-to" table:"email_sender" column:"reply_to" qs:"replyTo"`
+	NickName         QueriableField `cli:"nick-name" table:"email_sender" column:"nick_name" qs:"nickName"`
+}
+
+func (x *EmailSenderEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var EmailSenderQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "from-name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "from-email-address",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "reply-to",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "nick-name",
+		Usage: "",
+	},
+}
+
 type EmailSenderEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1122,7 +1152,8 @@ var EMAIL_SENDER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, EmailSenderActions.Query)
+			qs := &EmailSenderEntityQs{}
+			HttpQueryEntity(c, EmailSenderActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1132,17 +1163,19 @@ var EMAIL_SENDER_ACTION_QUERY = Module3Action{
 		Entity: "EmailSenderEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &EmailSenderEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			EmailSenderActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, EmailSenderQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var EMAIL_SENDER_ACTION_EXPORT = Module3Action{

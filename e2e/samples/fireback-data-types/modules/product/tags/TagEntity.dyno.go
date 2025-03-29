@@ -32,6 +32,31 @@ func ResetTagSeeders(fs *embed.FS) {
 	tagSeedersFs = fs
 }
 
+type TagEntityQs struct {
+	Name        workspaces.QueriableField `cli:"name" table:"tag" column:"name" qs:"name"`
+	Description workspaces.QueriableField `cli:"description" table:"tag" column:"description" qs:"description"`
+	Importance  workspaces.QueriableField `cli:"importance" table:"tag" column:"importance" qs:"importance"`
+}
+
+func (x *TagEntityQs) GetQuery() string {
+	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var TagQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "description",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "importance",
+		Usage: "",
+	},
+}
+
 type TagEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -68,7 +93,7 @@ type TagEntity struct {
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"id,omitempty" yaml:"id,omitempty"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	// Unique id of the record across the table. This value will be accessed from public APIs,
 	// and many other places intead of numeric ID property.
 	// Upon generation, a UUID automatically is being assigned, and if user has specified the
@@ -418,7 +443,7 @@ func TagActionCreateFn(dto *TagEntity, query workspaces.QueryDSL) (*TagEntity, *
 	err := dbref.Create(&dto).Error
 	if err != nil {
 		err := workspaces.GormErrorToIError(err)
-		return dto, err
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	TagAssociationCreate(dto, query)
@@ -490,6 +515,7 @@ func TagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TagEntity)
 	query.TriggerEventName = TAG_EVENT_UPDATED
 	TagEntityPreSanitize(fields, query)
 	var item TagEntity
+	var itemRefetched TagEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
@@ -511,16 +537,16 @@ func TagUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TagEntity)
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&TagEntity{UniqueId: uniqueId}).
-		First(&item).Error
+		First(&itemRefetched).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
-	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
-	}
-	return &item, nil
+	return &itemRefetched, nil
 }
 func TagActionUpdateFn(query workspaces.QueryDSL, fields *TagEntity) (*TagEntity, *workspaces.IError) {
 	if fields == nil {
@@ -667,7 +693,17 @@ var TagCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    `name`,
+		Usage:    `name (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "description",
+		Required: false,
+		Usage:    `description (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "importance",
+		Required: false,
+		Usage:    `importance (float64?)`,
 	},
 }
 var TagCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
@@ -707,7 +743,17 @@ var TagCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
-		Usage:    `name`,
+		Usage:    `name (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "description",
+		Required: false,
+		Usage:    `description (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "importance",
+		Required: false,
+		Usage:    `importance (float64?)`,
 	},
 }
 var TagCreateCmd cli.Command = TAG_ACTION_POST_ONE.ToCli()
@@ -773,9 +819,9 @@ func CastTagFromCli(c *cli.Context) *TagEntity {
 	}
 	return template
 }
-func TagSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
+func TagSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
 	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+		q,
 		TagActions.Create,
 		reflect.ValueOf(&TagEntity{}).Elem(),
 		fsRef,
@@ -837,7 +883,8 @@ func TagsActionQueryString(keyword string, page int) ([]string, *workspaces.Quer
 	return stringItems, meta, err
 }
 
-var TagImportExportCommands = []cli.Command{
+var TagDevCommands = []cli.Command{
+	TagWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -881,6 +928,33 @@ var TagImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			workspaces.CommonCliImportEmbedCmd(c,
+				TagActions.Create,
+				reflect.ValueOf(&TagEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var TagImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -927,31 +1001,6 @@ var TagImportExportCommands = []cli.Command{
 				TagActions.Create,
 				reflect.ValueOf(&TagEntity{}).Elem(),
 				tagSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
-				TagActions.Create,
-				reflect.ValueOf(&TagEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1014,7 +1063,6 @@ var TagCliCommands []cli.Command = []cli.Command{
 	TagUpdateCmd,
 	TagAskCmd,
 	TagCreateInteractiveCmd,
-	TagWipeCmd,
 	workspaces.GetCommonRemoveQuery(
 		reflect.ValueOf(&TagEntity{}).Elem(),
 		TagActions.Remove,
@@ -1023,6 +1071,9 @@ var TagCliCommands []cli.Command = []cli.Command{
 
 func TagCliFn() cli.Command {
 	commands := append(TagImportExportCommands, TagCliCommands...)
+	if !workspaces.GetConfig().Production {
+		commands = append(commands, TagDevCommands...)
+	}
 	return cli.Command{
 		Name:        "tag",
 		Description: "Tags module actions",
@@ -1060,7 +1111,8 @@ var TAG_ACTION_QUERY = workspaces.Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, TagActions.Query)
+			qs := &TagEntityQs{}
+			workspaces.HttpQueryEntity(c, TagActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1070,17 +1122,19 @@ var TAG_ACTION_QUERY = workspaces.Module3Action{
 		Entity: "TagEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+		qs := &TagEntityQs{}
+		workspaces.CommonCliQueryCmd3(
 			c,
 			TagActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         append(workspaces.CommonQueryFlags, TagQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var TAG_ACTION_EXPORT = workspaces.Module3Action{
@@ -1236,25 +1290,30 @@ func GetTagModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
+var PERM_ROOT_TAG = workspaces.PermissionInfo{
+	CompleteKey: "root.modules.product.tags.tag.*",
+	Name:        "Entire tag actions (*)",
+	Description: "",
+}
 var PERM_ROOT_TAG_DELETE = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.tags.tag.delete",
 	Name:        "Delete tag",
+	Description: "",
 }
 var PERM_ROOT_TAG_CREATE = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.tags.tag.create",
 	Name:        "Create tag",
+	Description: "",
 }
 var PERM_ROOT_TAG_UPDATE = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.tags.tag.update",
 	Name:        "Update tag",
+	Description: "",
 }
 var PERM_ROOT_TAG_QUERY = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.tags.tag.query",
 	Name:        "Query tag",
-}
-var PERM_ROOT_TAG = workspaces.PermissionInfo{
-	CompleteKey: "root.modules.product.tags.tag.*",
-	Name:        "Entire tag actions (*)",
+	Description: "",
 }
 var ALL_TAG_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_TAG_DELETE,

@@ -97,6 +97,9 @@ func (x *Module3) Upper() string {
 func (x *Module3Field) ComputedCliName() string {
 	return strings.ReplaceAll(ToSnakeCase((x.Name)), "_", "-")
 }
+func (x *Module3Field) ComputedSnakeName() string {
+	return ToSnakeCase((x.Name))
+}
 
 func (x *Module3Field) DistinctBy() string {
 	return ""

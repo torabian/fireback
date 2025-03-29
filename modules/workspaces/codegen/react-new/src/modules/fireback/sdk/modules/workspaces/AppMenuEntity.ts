@@ -16,11 +16,25 @@ export type AppMenuEntityKeys =
   keyof typeof AppMenuEntity.Fields;
 export class AppMenuEntity extends BaseEntity {
   public children?: AppMenuEntity[] | null;
+  /**
+  Label that will be visible to user
+  */
   public label?: string | null;
+  /**
+  Location that will be navigated in case of click or selection on ui
+  */
   public href?: string | null;
+  /**
+  Icon string address which matches the resources on the front-end apps.
+  */
   public icon?: string | null;
+  /**
+  Custom window location url matchers, for inner screens.
+  */
   public activeMatcher?: string | null;
-  public applyType?: string | null;
+  /**
+  The permission which is required for the menu to be visible.
+  */
   public capability?: CapabilityEntity | null;
       capabilityId?: string | null;
   public static Navigation = {
@@ -46,6 +60,9 @@ export class AppMenuEntity extends BaseEntity {
       Rquery: "app-menus",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "appMenu",
   "features": {},
   "gormMap": {},
@@ -53,6 +70,7 @@ export class AppMenuEntity extends BaseEntity {
     {
       "name": "label",
       "recommended": true,
+      "description": "Label that will be visible to user",
       "type": "string",
       "translate": true,
       "computedType": "string",
@@ -61,6 +79,7 @@ export class AppMenuEntity extends BaseEntity {
     {
       "name": "href",
       "recommended": true,
+      "description": "Location that will be navigated in case of click or selection on ui",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
@@ -68,24 +87,21 @@ export class AppMenuEntity extends BaseEntity {
     {
       "name": "icon",
       "recommended": true,
+      "description": "Icon string address which matches the resources on the front-end apps.",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
       "name": "activeMatcher",
-      "type": "string",
-      "computedType": "string",
-      "gormMap": {}
-    },
-    {
-      "name": "applyType",
+      "description": "Custom window location url matchers, for inner screens.",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
     },
     {
       "name": "capability",
+      "description": "The permission which is required for the menu to be visible.",
       "type": "one",
       "target": "CapabilityEntity",
       "computedType": "CapabilityEntity",
@@ -101,7 +117,6 @@ public static Fields = {
       href: `href`,
       icon: `icon`,
       activeMatcher: `activeMatcher`,
-      applyType: `applyType`,
           capabilityId: `capabilityId`,
       capability$: `capability`,
         capability: CapabilityEntity.Fields,

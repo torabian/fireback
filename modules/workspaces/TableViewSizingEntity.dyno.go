@@ -30,6 +30,26 @@ func ResetTableViewSizingSeeders(fs *embed.FS) {
 	tableViewSizingSeedersFs = fs
 }
 
+type TableViewSizingEntityQs struct {
+	TableName QueriableField `cli:"table-name" table:"table_view_sizing" column:"table_name" qs:"tableName"`
+	Sizes     QueriableField `cli:"sizes" table:"table_view_sizing" column:"sizes" qs:"sizes"`
+}
+
+func (x *TableViewSizingEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var TableViewSizingQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "table-name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "sizes",
+		Usage: "",
+	},
+}
+
 type TableViewSizingEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1070,7 +1090,8 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, TableViewSizingActions.Query)
+			qs := &TableViewSizingEntityQs{}
+			HttpQueryEntity(c, TableViewSizingActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1080,17 +1101,19 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = Module3Action{
 		Entity: "TableViewSizingEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &TableViewSizingEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			TableViewSizingActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, TableViewSizingQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var TABLE_VIEW_SIZING_ACTION_EXPORT = Module3Action{

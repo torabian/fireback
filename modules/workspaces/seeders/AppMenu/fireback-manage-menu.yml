@@ -37,7 +37,6 @@ items:
     - languageId: en
       label: Workspaces
   parentId: root-actions
-  applyType: permission
   capabilityId: root.manage.workspaces.workspace.query
 - href: "/manage/workspace-config"
   workspaceId: system
@@ -52,7 +51,6 @@ items:
     - languageId: en
       label: Workspace Config
   parentId: root-actions
-  # applyType: permission
   capabilityId: root.manage.workspaces.workspace-config.query
 
 - href: "/manage/email-senders"
@@ -68,7 +66,6 @@ items:
     - languageId: en
       label: Email Sender
   parentId: root-actions
-  # applyType: permission
   capabilityId: root.manage.workspaces.email-sender.query
 - href: "/manage/workspace-types"
   workspaceId: system
@@ -83,7 +80,6 @@ items:
     - languageId: en
       label: Workspace Types
   parentId: root-actions
-  # applyType: permission
   capabilityId: root.manage.workspaces.workspace-type.query
 
 - href: "/manage/email-providers"
@@ -99,7 +95,6 @@ items:
     - languageId: en
       label: Email Provider
   parentId: root-actions
-  # # applyType: permission
   capabilityId: root.manage.workspaces.email-provider.query
 
 - href: "/manage/drive"
@@ -115,7 +110,6 @@ items:
       label: Drive & Files
   activeMatcher: drives
   parentId: root-actions
-  applyType: permission
   capabilityId: root.manage.workspaces.file.query
 - href: "/manage/users"
   workspaceId: system
@@ -130,7 +124,6 @@ items:
     - languageId: en
       label: Users
   parentId: root-actions
-  # applyType: permission
   capabilityId: root.manage.workspaces.user.query
 - href: "/manage/passport-methods"
   workspaceId: system
@@ -145,5 +138,4 @@ items:
     - languageId: en
       label: Passport Methods
   parentId: root-actions
-  # applyType: permission
   capabilityId: root.manage.workspaces.passport-method.query

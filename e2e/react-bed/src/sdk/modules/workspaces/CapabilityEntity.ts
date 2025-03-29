@@ -38,6 +38,9 @@ export class CapabilityEntity extends BaseEntity {
       Rquery: "capabilities",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

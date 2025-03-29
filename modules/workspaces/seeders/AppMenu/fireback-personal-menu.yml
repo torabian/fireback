@@ -49,4 +49,3 @@ items:
     - languageId: en
       label: My Invitations
   parentId: personal
-  applyType: permission

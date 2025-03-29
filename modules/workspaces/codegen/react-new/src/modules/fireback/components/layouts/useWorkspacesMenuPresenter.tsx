@@ -15,6 +15,7 @@ export function useWorkspacesMenuPresenter() {
   const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
   const { query: queryWorkspaces } = useGetUrwQuery({
     queryOptions: { cacheTime: 50 },
+    query: {},
   });
 
   const items = queryWorkspaces.data?.data?.items || [];

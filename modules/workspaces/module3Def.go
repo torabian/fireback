@@ -269,10 +269,25 @@ type Module3EntityPermissionRewrite struct {
 	With    string `yaml:"with,omitempty" json:"with,omitempty" jsonschema:"description=The value to be replaced"`
 }
 
+type Module3ActionConfig struct {
+	Qs      []Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Typesafe query strings."`
+	Headers []Module3Field `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"description=Typesafe headers."`
+}
+
+// Contains extra configuration for each rpc which will be generated on fireback
+// this is an attempt to reduce the need for custom actions, by giving you some control over
+// the code might be generated.
+type Module3EntityActionConfig struct {
+	Query Module3ActionConfig `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=Modify the query rpc code."`
+}
+
 // Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
 // features such as permissions, actions, security, and common actions which might be created or extra
 // queries based on the type
 type Module3Entity struct {
+
+	// Modify the actions configuration, add headers, params and more to default generated actions and code
+	Rpc Module3EntityActionConfig `yaml:"rpc,omitempty" json:"rpc,omitempty" jsonschema:"Modify the actions configuration, add headers, params and more to default generated actions and code."`
 
 	// Rewrites the default permission generated value, for example if you want to regroup them somehow else.
 	PremissionsRewrite *Module3EntityPermissionRewrite `yaml:"permRewrite,omitempty" json:"permRewrite,omitempty" jsonschema:"description=Rewrites the default permission generated value, for example if you want to regroup them somehow else."`
@@ -402,8 +417,11 @@ type Module3Action struct {
 	// HTTP method type including standard and Fireback-specific methods.
 	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
 
-	// Type-safe query parameters for CLI and HTTP requests.
-	Query []*Module3Field `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`
+	// Type-safe query strings for action
+	Query []*Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`
+
+	// Typesafe headers for the action
+	Headers []Module3Field `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"description=Typesafe headers."`
 
 	// Action description used in API specs and documentation.
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Action description used in API specs and documentation"`

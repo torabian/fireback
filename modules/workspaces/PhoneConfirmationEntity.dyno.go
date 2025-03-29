@@ -30,6 +30,41 @@ func ResetPhoneConfirmationSeeders(fs *embed.FS) {
 	phoneConfirmationSeedersFs = fs
 }
 
+type PhoneConfirmationEntityQs struct {
+	User        QueriableField `cli:"user" table:"phone_confirmation" column:"user" qs:"user"`
+	Status      QueriableField `cli:"status" table:"phone_confirmation" column:"status" qs:"status"`
+	PhoneNumber QueriableField `cli:"phone-number" table:"phone_confirmation" column:"phone_number" qs:"phoneNumber"`
+	Key         QueriableField `cli:"key" table:"phone_confirmation" column:"key" qs:"key"`
+	ExpiresAt   QueriableField `cli:"expires-at" table:"phone_confirmation" column:"expires_at" qs:"expiresAt"`
+}
+
+func (x *PhoneConfirmationEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PhoneConfirmationQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "user",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "status",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "phone-number",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "key",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "expires-at",
+		Usage: "",
+	},
+}
+
 type PhoneConfirmationEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1133,7 +1168,8 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PhoneConfirmationActions.Query)
+			qs := &PhoneConfirmationEntityQs{}
+			HttpQueryEntity(c, PhoneConfirmationActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1143,17 +1179,19 @@ var PHONE_CONFIRMATION_ACTION_QUERY = Module3Action{
 		Entity: "PhoneConfirmationEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PhoneConfirmationEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PhoneConfirmationActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PhoneConfirmationQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PHONE_CONFIRMATION_ACTION_EXPORT = Module3Action{

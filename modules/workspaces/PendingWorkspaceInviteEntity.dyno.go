@@ -30,6 +30,41 @@ func ResetPendingWorkspaceInviteSeeders(fs *embed.FS) {
 	pendingWorkspaceInviteSeedersFs = fs
 }
 
+type PendingWorkspaceInviteEntityQs struct {
+	Value         QueriableField `cli:"value" table:"pending_workspace_invite" column:"value" qs:"value"`
+	Type          QueriableField `cli:"type" table:"pending_workspace_invite" column:"type" qs:"type"`
+	CoverLetter   QueriableField `cli:"cover-letter" table:"pending_workspace_invite" column:"cover_letter" qs:"coverLetter"`
+	WorkspaceName QueriableField `cli:"workspace-name" table:"pending_workspace_invite" column:"workspace_name" qs:"workspaceName"`
+	Role          QueriableField `cli:"role" table:"pending_workspace_invite" column:"role" qs:"role"`
+}
+
+func (x *PendingWorkspaceInviteEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PendingWorkspaceInviteQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "value",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "cover-letter",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "workspace-name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "role",
+		Usage: "",
+	},
+}
+
 type PendingWorkspaceInviteEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1134,7 +1169,8 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PendingWorkspaceInviteActions.Query)
+			qs := &PendingWorkspaceInviteEntityQs{}
+			HttpQueryEntity(c, PendingWorkspaceInviteActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1144,17 +1180,19 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = Module3Action{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PendingWorkspaceInviteEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PendingWorkspaceInviteActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PendingWorkspaceInviteQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = Module3Action{

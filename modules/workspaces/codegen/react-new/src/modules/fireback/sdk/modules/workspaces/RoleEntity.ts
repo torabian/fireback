@@ -42,6 +42,9 @@ export class RoleEntity extends BaseEntity {
       Rquery: "roles",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "role",
   "features": {},
   "messages": {

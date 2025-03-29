@@ -30,6 +30,61 @@ func ResetPassportSeeders(fs *embed.FS) {
 	passportSeedersFs = fs
 }
 
+type PassportEntityQs struct {
+	ThirdPartyVerifier QueriableField `cli:"third-party-verifier" table:"passport" column:"third_party_verifier" qs:"thirdPartyVerifier"`
+	Type               QueriableField `cli:"type" table:"passport" column:"type" qs:"type"`
+	User               QueriableField `cli:"user" table:"passport" column:"user" qs:"user"`
+	Value              QueriableField `cli:"value" table:"passport" column:"value" qs:"value"`
+	TotpSecret         QueriableField `cli:"totp-secret" table:"passport" column:"totp_secret" qs:"totpSecret"`
+	TotpConfirmed      QueriableField `cli:"totp-confirmed" table:"passport" column:"totp_confirmed" qs:"totpConfirmed"`
+	Password           QueriableField `cli:"password" table:"passport" column:"password" qs:"password"`
+	Confirmed          QueriableField `cli:"confirmed" table:"passport" column:"confirmed" qs:"confirmed"`
+	AccessToken        QueriableField `cli:"access-token" table:"passport" column:"access_token" qs:"accessToken"`
+}
+
+func (x *PassportEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PassportQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "third-party-verifier",
+		Usage: "When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.",
+	},
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "user",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "value",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "totp-secret",
+		Usage: "Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.",
+	},
+	&cli.StringFlag{
+		Name:  "totp-confirmed",
+		Usage: "Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.",
+	},
+	&cli.StringFlag{
+		Name:  "password",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirmed",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "access-token",
+		Usage: "",
+	},
+}
+
 type PassportEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1215,7 +1270,8 @@ var PASSPORT_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PassportActions.Query)
+			qs := &PassportEntityQs{}
+			HttpQueryEntity(c, PassportActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1225,17 +1281,19 @@ var PASSPORT_ACTION_QUERY = Module3Action{
 		Entity: "PassportEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PassportEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PassportActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PassportQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PASSPORT_ACTION_EXPORT = Module3Action{

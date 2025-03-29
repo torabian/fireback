@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
@@ -403,4 +404,162 @@ type ModuleActionsBundle struct {
 	// these are actions used for web generally, more general. In ideal world these
 	// could be used to create cli actions
 	Actions []Module3Action
+}
+
+type QueriableField struct {
+	Query     string
+	Operation string
+}
+
+func (q QueriableField) String() string {
+	if q.Query == "" {
+		return ""
+	}
+
+	// Now we need to check, if there are no special signs, such as
+	// =, < > ! , {", then user intended to be equal
+
+	autoPrefix := "="
+	if len(q.Query) > 0 {
+		if q.Query[0] == '<' || q.Query[0] == '>' || q.Query[0] == '%' || q.Query[0] == '!' || q.Query[0] == '=' || q.Query[0] == '{' {
+			// Then it's assumed user completed the expq.Queryssion,
+			autoPrefix = ""
+		}
+	}
+
+	// I need the reflect tag column from itself
+	return "$col " + autoPrefix + q.Query
+}
+
+func QueriableFieldFromCliContext(v reflect.Value, parent string, c *cli.Context) {
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem() // Dereference pointer
+	}
+	if v.Kind() != reflect.Struct {
+		return
+	}
+
+	t := v.Type() // Get the struct type
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		name := parent + field.Name
+
+		cli := field.Tag.Get("cli")
+
+		// Handle embedded/nested struct
+		if field.Type.Kind() == reflect.Struct {
+			QueriableFieldFromCliContext(v.Field(i), name+".", c)
+		}
+
+		if cli == "" {
+			continue
+		}
+
+		// Set value if the field is a struct with a `Value` field
+		fieldValue := v.Field(i)
+		if fieldValue.CanSet() {
+			if fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
+				fieldValue.Set(reflect.ValueOf(QueriableField{Query: c.String(cli)}))
+			}
+		}
+
+	}
+}
+
+func QueriableFieldFromGinContext(v reflect.Value, parent string, c *gin.Context) {
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem() // Dereference pointer
+	}
+	if v.Kind() != reflect.Struct {
+		return
+	}
+
+	t := v.Type() // Get the struct type
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		name := parent + field.Name
+
+		qs := field.Tag.Get("qs")
+
+		// Handle embedded/nested struct
+		if field.Type.Kind() == reflect.Struct {
+			QueriableFieldFromGinContext(v.Field(i), name+".", c)
+		}
+
+		if qs == "" {
+			continue
+		}
+
+		// Set value if the field is a struct with a `Value` field
+		fieldValue := v.Field(i)
+		if fieldValue.CanSet() {
+			if fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
+
+				qk, ok := c.GetQuery(qs)
+				if ok {
+					fieldValue.Set(reflect.ValueOf(QueriableField{Query: qk}))
+				}
+			}
+		}
+
+	}
+}
+
+func GenerateQueryStringStyle(v reflect.Value, parent string) string {
+	data := GenerateQuery(v, parent)
+
+	query := strings.Join(data, " and ")
+	return query
+}
+
+func GenerateQuery(v reflect.Value, parent string) []string {
+	var values []string
+
+	// Dereference pointer if it's a pointer
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	// Only proceed if it's a struct
+	if v.Kind() != reflect.Struct {
+		return values
+	}
+
+	t := v.Type() // Get the struct type
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		name := parent + field.Name
+
+		// Handle embedded/nested structs
+		if field.Type.Kind() == reflect.Struct {
+			values = append(values, GenerateQuery(v.Field(i), name+".")...)
+		}
+
+		// Skip non-QueriableField fields
+		if !strings.Contains(field.Type.String(), "QueriableField") {
+			continue
+		}
+
+		// Call the String method for QueriableField
+		fieldValue := v.Field(i)
+		if fieldValue.CanAddr() {
+			method := fieldValue.Addr().MethodByName("String")
+			if method.IsValid() {
+				result := method.Call(nil) // Call String() with no arguments
+				if len(result) > 0 {
+					// Append the result to the values slice
+					res := result[0].Interface().(string)
+
+					if strings.TrimSpace(res) != "" {
+						values = append(values, strings.ReplaceAll(res, "$col", field.Tag.Get("column")))
+					}
+				}
+			}
+		}
+	}
+
+	return values
 }

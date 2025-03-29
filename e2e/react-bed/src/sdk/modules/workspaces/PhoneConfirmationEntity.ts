@@ -44,6 +44,9 @@ export class PhoneConfirmationEntity extends BaseEntity {
       Rquery: "phone-confirmations",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

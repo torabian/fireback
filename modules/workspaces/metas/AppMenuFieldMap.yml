@@ -11,9 +11,6 @@ fieldTranslations:
   activeMatcher:
     en: Active Matcher
     fa: ''
-  applyType:
-    en: Apply Type
-    fa: ''
   capability:
     en: Capability
     fa: ''

@@ -7,9 +7,6 @@
         BaseDto,
         BaseEntity,
     } from "../../core/definitions"
-    import {
-        PersonEntity,
-    } from "./PersonEntity"
 // In this section we have sub entities related to this object
 export class UserImportPassports extends BaseDto {
   public value?: string | null;
@@ -27,8 +24,6 @@ export type UserImportDtoKeys =
 export class UserImportDto extends BaseDto {
   public avatar?: string | null;
   public passports?: UserImportPassports[] | null;
-  public person?: PersonEntity | null;
-      personId?: string | null;
   public address?: UserImportAddress | null;
 public static Fields = {
   ...BaseEntity.Fields,
@@ -42,9 +37,6 @@ public static Fields = {
       password: `passports[${index}].password`,
         };
       },
-          personId: `personId`,
-      person$: `person`,
-        person: PersonEntity.Fields,
       address$: 'address',
       address: {
   ...BaseEntity.Fields,
@@ -84,13 +76,6 @@ public static Fields = {
         }
       ],
       "linkedTo": "UserImportDto"
-    },
-    {
-      "name": "person",
-      "type": "one",
-      "target": "PersonEntity",
-      "computedType": "PersonEntity",
-      "gormMap": {}
     },
     {
       "name": "address",

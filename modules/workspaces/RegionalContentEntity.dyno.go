@@ -30,6 +30,41 @@ func ResetRegionalContentSeeders(fs *embed.FS) {
 	regionalContentSeedersFs = fs
 }
 
+type RegionalContentEntityQs struct {
+	Content    QueriableField `cli:"content" table:"regional_content" column:"content" qs:"content"`
+	Region     QueriableField `cli:"region" table:"regional_content" column:"region" qs:"region"`
+	Title      QueriableField `cli:"title" table:"regional_content" column:"title" qs:"title"`
+	LanguageId QueriableField `cli:"language-id" table:"regional_content" column:"language_id" qs:"languageId"`
+	KeyGroup   QueriableField `cli:"key-group" table:"regional_content" column:"key_group" qs:"keyGroup"`
+}
+
+func (x *RegionalContentEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var RegionalContentQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "content",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "region",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "title",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "language-id",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "key-group",
+		Usage: "",
+	},
+}
+
 type RegionalContentEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1156,7 +1191,8 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, RegionalContentActions.Query)
+			qs := &RegionalContentEntityQs{}
+			HttpQueryEntity(c, RegionalContentActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1166,17 +1202,19 @@ var REGIONAL_CONTENT_ACTION_QUERY = Module3Action{
 		Entity: "RegionalContentEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &RegionalContentEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			RegionalContentActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, RegionalContentQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var REGIONAL_CONTENT_ACTION_EXPORT = Module3Action{

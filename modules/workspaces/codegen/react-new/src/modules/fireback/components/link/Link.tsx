@@ -16,9 +16,11 @@ const Link = ({
   const { compiler } = useCompiler();
   const noPrefix = process.env.REACT_APP_NO_LOCALE_PREFIX === "true";
 
-  let href: string = rest.href || router.asPath;
-  if (href.indexOf("http") === 0) skip = true;
-  if (locale$ && !skip && !href.startsWith(".")) {
+  let href: string = rest?.href || router?.asPath || "";
+
+  if (typeof href === "string" && href?.indexOf && href.indexOf("http") === 0)
+    skip = true;
+  if (typeof href === "string" && locale$ && !skip && !href.startsWith(".")) {
     href = href
       ? (!noPrefix ? `/${locale}` : "") + href
       : router.pathname?.replace("[locale]", locale$);

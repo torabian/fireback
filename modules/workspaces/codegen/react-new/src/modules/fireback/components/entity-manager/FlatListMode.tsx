@@ -151,7 +151,7 @@ export const FlatListMode = ({
                   <FixedSizeList
                     height={height}
                     itemCount={indexedData.length}
-                    itemSize={columns.length * 40 + 10}
+                    itemSize={columns.length * 24 + 10}
                     width={width}
                     onScroll={onScroll}
                     onItemsRendered={onItemsRendered}

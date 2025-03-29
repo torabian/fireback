@@ -13,7 +13,6 @@ items:
     - languageId: en
       label: Public join keys
   parentId: fireback
-  # applyType: permission
   capabilityId: root.modules.workspaces.public-join-key.query
 - href: "/selfservice/roles"
   workspaceId: system
@@ -28,7 +27,6 @@ items:
     - languageId: en
       label: Roles
   parentId: fireback
-  # applyType: permission
   capabilityId: root.modules.workspaces.role.query
 
 - href: "/selfservice/workspace-invites"
@@ -44,5 +42,4 @@ items:
     - languageId: en
       label: Invites
   parentId: fireback
-  # applyType: permission
   capabilityId: root.modules.workspaces.workspace-invite.query

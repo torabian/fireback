@@ -30,6 +30,21 @@ func ResetPreferenceSeeders(fs *embed.FS) {
 	preferenceSeedersFs = fs
 }
 
+type PreferenceEntityQs struct {
+	Timezone QueriableField `cli:"timezone" table:"preference" column:"timezone" qs:"timezone"`
+}
+
+func (x *PreferenceEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PreferenceQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "timezone",
+		Usage: "",
+	},
+}
+
 type PreferenceEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1045,7 +1060,8 @@ var PREFERENCE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PreferenceActions.Query)
+			qs := &PreferenceEntityQs{}
+			HttpQueryEntity(c, PreferenceActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1055,17 +1071,19 @@ var PREFERENCE_ACTION_QUERY = Module3Action{
 		Entity: "PreferenceEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PreferenceEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PreferenceActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PreferenceQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PREFERENCE_ACTION_EXPORT = Module3Action{

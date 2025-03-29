@@ -44,6 +44,9 @@ export class EmailConfirmationEntity extends BaseEntity {
       Rquery: "email-confirmations",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "emailConfirmation",
   "features": {},
   "gormMap": {},

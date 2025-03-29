@@ -15,7 +15,7 @@ import { useGetUrwQuery } from "../sdk/modules/workspaces/useGetUrwQuery";
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const queryClient = useQueryClient();
   const { selectedUrw } = useContext(RemoteQueryContext) as any;
-  const { query: queryWorkspaces } = useGetUrwQuery({});
+  const { query: queryWorkspaces } = useGetUrwQuery({ query: {} });
   const { query } = useGetCteAppMenus({
     queryClient,
     queryOptions: { refetchOnWindowFocus: false },

@@ -39,7 +39,7 @@ export const FormCheckbox = (props: FormCheckboxProps) => {
   } = props;
 
   const [focused, setFocused] = useState(false);
-  const ref = useRef<HTMLInputElement | null>();
+  const ref = useRef<HTMLInputElement | null>(null);
   const onClick = useCallback(() => {
     ref.current?.focus();
   }, [ref.current]);
@@ -49,7 +49,7 @@ export const FormCheckbox = (props: FormCheckboxProps) => {
       <label className="form-label mr-2">
         <input
           {...restProps}
-          ref={(el) => (ref.current = el)}
+          ref={ref}
           checked={!!value}
           type={"checkbox"}
           onChange={(e) => onChange && onChange(!value)}

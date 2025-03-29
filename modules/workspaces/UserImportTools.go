@@ -54,11 +54,6 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 
 	user := &UserEntity{
 		UniqueId: "ux_" + dto.Passports[0].Value,
-		Person: &PersonEntity{
-			UniqueId:  "ux_" + dto.Passports[0].Value,
-			FirstName: dto.Person.FirstName,
-			LastName:  dto.Person.LastName,
-		},
 	}
 
 	passwordHashed, _ := HashPassword(dto.Passports[0].Password)
@@ -74,7 +69,7 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 	// For now, it's random. But make sure later we have the track of workspaces
 	wid := UUID()
 	workspace := &WorkspaceEntity{
-		Name:        dto.Person.FirstName,
+
 		UniqueId:    wid,
 		WorkspaceId: NewString(wid),
 		LinkerId:    NewString(ROOT_VAR),
@@ -83,8 +78,8 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 	}
 
 	role := &RoleEntity{
-		UniqueId:    "ROLE_WORKSPACE_" + UUID(),
-		Name:        dto.Person.FirstName,
+		UniqueId: "ROLE_WORKSPACE_" + UUID(),
+
 		WorkspaceId: NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{UniqueId: ROOT_ALL_ACCESS, Visibility: NewString("A")},

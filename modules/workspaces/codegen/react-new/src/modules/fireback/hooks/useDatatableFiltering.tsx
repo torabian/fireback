@@ -1,5 +1,5 @@
 import { Filter, Sorting } from "@devexpress/dx-react-grid";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import {
   IMenuActionItem,
@@ -15,37 +15,27 @@ import { DeleteRequest } from "../sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";
 import { useT } from "./useT";
+import { useLocation } from "react-router-dom";
+import { parse, stringify } from "qs";
 
 export function useDatatableFiltering({
   urlMask,
   submitDelete,
   onRecordsDeleted,
   initialFilters,
-  fnFilterNormalizer,
 }: {
   urlMask: string;
   onRecordsDeleted?: () => void;
-  fnFilterNormalizer?: (data: {
-    rawFilters: Filter[] | undefined;
-    startIndex: number;
-  }) => {
-    rawFilters: Filter[] | undefined;
-    startIndex: number;
-  };
   submitDelete?: any;
   initialFilters?: Partial<Filters>;
 }) {
   const t = useT();
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const { locale } = useLocale();
 
   const { withDebounce } = useDebouncedEffect();
   const init = {
-    itemsPerPage: 15,
+    itemsPerPage: 100,
     startIndex: 0,
-    query: "",
-    rawFilters: [],
     sorting: [],
     ...(initialFilters || {}),
   };
@@ -54,67 +44,88 @@ export function useDatatableFiltering({
   const [debouncedFilters, setDebouncedFilters] =
     useState<Partial<Filters>>(init);
 
+  const { search } = useLocation();
+
+  const locked = useRef(false);
+  useEffect(() => {
+    if (locked.current) {
+      return;
+    }
+    locked.current = true;
+
+    let filters: Partial<Filters> = {};
+
+    try {
+      filters = parse(search.substring(1));
+
+      // startIndex is being removed, and I am not sure if that's a good idea or not.
+      // When user scrolls down a lot, and then tries to share the link with someone or refresh,
+      // He doesn't have the content which was there before hand, therefor sees a empty screen
+      delete filters.startIndex;
+    } catch (error) {}
+
+    setFilters({ ...init, ...filters });
+    setDebouncedFilters({ ...init, ...filters });
+  }, [search]);
+
   const [selection, setSelection$] = useState<Array<string>>([]);
+  // const [queryHash, setQueryHash] = useState("{}");
+
+  const computeQueryKey = (filters) => {
+    const queryHashItems = { ...filters };
+    delete queryHashItems.startIndex;
+    delete queryHashItems.itemsPerPage;
+    if (queryHashItems?.sorting?.length === 0) {
+      delete queryHashItems.sorting;
+    }
+    return JSON.stringify(queryHashItems);
+  };
+
+  const queryHash = computeQueryKey(filters);
 
   const setSelection = (selection: string[]) => {
     setSelection$(selection);
   };
 
-  const setFilter = (
-    newFiltersObj: Partial<Filters>,
-    withAddressBarChang = true
-  ) => {
+  const setFilter = (newFiltersObj: Partial<Filters>, reset = true) => {
     const newFilters = {
       ...filters,
       ...newFiltersObj,
     };
 
-    const reflectToAddressBar: Object = {
-      ...newFilters,
-      rawFilters:
-        newFilters.rawFilters && JSON.stringify(newFilters.rawFilters),
-      sorting: newFilters.sorting && JSON.stringify(newFilters.sorting),
-    };
-
-    if (withAddressBarChang) {
-      withDebounce(() => setLocationWithFilters(reflectToAddressBar), 250);
+    if (reset) {
+      newFilters.startIndex = 0;
     }
+
     setFilters(newFilters);
-    withDebounce(() => setDebouncedFilters(newFilters), 500);
-  };
+    // setQueryHash(computeQueryKey(newFilters));
 
-  const setLocationWithFilters = (filters: Object) => {
-    const searchParams = new URLSearchParams();
-    const params = filters as any;
-    Object.keys(params).forEach(
-      (key) =>
-        params[key] !== undefined && searchParams.append(key, params[key])
-    );
-
-    const q = searchParams.toString();
-    // router.push(
-    //   `/${locale}/${urlMask}`.replace("//", "/"),
-    //   `/${locale}/${urlMask}?${q}`.replace("//", "/"),
-    //   {
-    //     shallow: true,
-    //   }
-    // );
+    router.push("?" + stringify(newFilters), undefined, {}, true);
+    withDebounce(() => {
+      setDebouncedFilters(newFilters);
+    }, 500);
   };
 
   const setPageSize = (page: number) => {
-    setFilter({ itemsPerPage: page });
+    setFilter({ itemsPerPage: page }, false);
+  };
+
+  const toSortString = (sorting: Sorting[]) => {
+    return sorting
+      .map((sort) => `${sort.columnName} ${sort.direction}`)
+      .join(", ");
   };
 
   const setSorting = (sorting: Sorting[] | undefined) => {
-    setFilter({ sorting });
+    setFilter({ sorting, sort: toSortString(sorting) }, false);
   };
 
   const setStartIndex = (index: number) => {
-    setFilter({ startIndex: index });
+    setFilter({ startIndex: index }, false);
   };
 
   const onFiltersChange = (filters: Filter[] | undefined) => {
-    let newFilters = { rawFilters: filters, startIndex: 0 };
+    let newFilters = { startIndex: 0 };
     setFilter(newFilters);
   };
 
@@ -176,7 +187,10 @@ export function useDatatableFiltering({
     selection,
     setSelection,
     onFiltersChange,
+    queryHash,
     setPageSize,
     debouncedFilters,
   };
 }
+
+export type Udf = ReturnType<typeof useDatatableFiltering>;

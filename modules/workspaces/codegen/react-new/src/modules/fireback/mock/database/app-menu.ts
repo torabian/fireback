@@ -3,13 +3,11 @@ import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
 export const AppMenuEntities: AppMenuEntity[] = [
   {
     activeMatcher: null,
-    applyType: null,
     capability: null,
     capabilityId: null,
     children: [
       {
         activeMatcher: "/workspace/invite(s)?",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161316914000,
@@ -24,7 +22,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "publicjoinkey",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161310930000,
@@ -39,7 +36,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "/role/",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161314546000,
@@ -64,13 +60,11 @@ export const AppMenuEntities: AppMenuEntity[] = [
   },
   {
     activeMatcher: null,
-    applyType: null,
     capability: null,
     capabilityId: null,
     children: [
       {
         activeMatcher: "drives",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161320805000,
@@ -85,7 +79,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "email-provider",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161309663000,
@@ -100,7 +93,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "email-sender",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161312110000,
@@ -115,7 +107,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "/user/",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161318088000,
@@ -130,7 +121,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "/workspace/config",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161315700000,
@@ -145,7 +135,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "workspace-type",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161313308000,
@@ -160,7 +149,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "/workspaces/|workspace/new",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161322160000,
@@ -185,13 +173,11 @@ export const AppMenuEntities: AppMenuEntity[] = [
   },
   {
     activeMatcher: null,
-    applyType: null,
     capability: null,
     capabilityId: null,
     children: [
       {
         activeMatcher: "/invites/",
-        applyType: "permission",
         capability: null,
         capabilityId: null,
         created: 1711043161328479000,
@@ -206,7 +192,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "/settings",
-        applyType: null,
         capability: null,
         capabilityId: null,
         created: 1711043161325229000,
@@ -221,7 +206,6 @@ export const AppMenuEntities: AppMenuEntity[] = [
       },
       {
         activeMatcher: "/selfservice",
-        applyType: null,
         capability: null,
         capabilityId: null,
         created: 1711043161325229000,

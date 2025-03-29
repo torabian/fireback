@@ -97,6 +97,46 @@ func (x *FileVariations) RootObjectName() string {
 	return "FileEntity"
 }
 
+type FileEntityQs struct {
+	Name        QueriableField `cli:"name" table:"file" column:"name" qs:"name"`
+	DiskPath    QueriableField `cli:"disk-path" table:"file" column:"disk_path" qs:"diskPath"`
+	Size        QueriableField `cli:"size" table:"file" column:"size" qs:"size"`
+	VirtualPath QueriableField `cli:"virtual-path" table:"file" column:"virtual_path" qs:"virtualPath"`
+	Type        QueriableField `cli:"type" table:"file" column:"type" qs:"type"`
+	Variations  QueriableField `cli:"variations" table:"file" column:"variations" qs:"variations"`
+}
+
+func (x *FileEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var FileQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "disk-path",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "size",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "virtual-path",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "variations",
+		Usage: "",
+	},
+}
+
 type FileEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1302,7 +1342,8 @@ var FILE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, FileActions.Query)
+			qs := &FileEntityQs{}
+			HttpQueryEntity(c, FileActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1312,17 +1353,19 @@ var FILE_ACTION_QUERY = Module3Action{
 		Entity: "FileEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &FileEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			FileActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, FileQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var FILE_ACTION_EXPORT = Module3Action{

@@ -11,10 +11,18 @@ import {
   UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
+import { stringify } from "qs";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
         RoleEntity,
     } from "../workspaces/RoleEntity"
+// Fireback gives the option to have typesafe query string
+export type GetRolesQs = {
+}
+export type GetRolesUrlParams = {
+}
+export type GetRolesHeaders = {
+}
 export function useGetRoles({
   queryOptions,
   query,
@@ -22,7 +30,7 @@ export function useGetRoles({
   execFnOverride,
   unauthorized,
   optionFn
-}: UseRemoteQuery) {
+}: UseRemoteQuery & {query?: GetRolesQs}) {
   const { options, execFn } = useContext(RemoteQueryContext);
   const computedOptions = optionFn ? optionFn(options) : options;
   // Calculare the function which will do the remote calls.
@@ -35,9 +43,7 @@ export function useGetRoles({
     : execApiFn(computedOptions);
   // Url of the remote affix.
   const url = "/roles".substr(1);
-  let computedUrl = `${url}?${new URLSearchParams(
-    queryBeforeSend(query)
-  ).toString()}`;
+  let computedUrl = `${url}?${stringify(query)}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);

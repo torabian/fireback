@@ -30,6 +30,26 @@ func ResetWorkspaceRoleSeeders(fs *embed.FS) {
 	workspaceRoleSeedersFs = fs
 }
 
+type WorkspaceRoleEntityQs struct {
+	UserWorkspace QueriableField `cli:"user-workspace" table:"workspace_role" column:"user_workspace" qs:"userWorkspace"`
+	Role          QueriableField `cli:"role" table:"workspace_role" column:"role" qs:"role"`
+}
+
+func (x *WorkspaceRoleEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var WorkspaceRoleQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "user-workspace",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "role",
+		Usage: "",
+	},
+}
+
 type WorkspaceRoleEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1055,7 +1075,8 @@ var WORKSPACE_ROLE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceRoleActions.Query)
+			qs := &WorkspaceRoleEntityQs{}
+			HttpQueryEntity(c, WorkspaceRoleActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1065,17 +1086,19 @@ var WORKSPACE_ROLE_ACTION_QUERY = Module3Action{
 		Entity: "WorkspaceRoleEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &WorkspaceRoleEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			WorkspaceRoleActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, WorkspaceRoleQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_ROLE_ACTION_EXPORT = Module3Action{

@@ -53,6 +53,9 @@ export class TimezoneGroupEntity extends BaseEntity {
       },
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "name": "timezoneGroup",
   "features": {},
   "queryScope": "public",

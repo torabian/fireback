@@ -19,6 +19,7 @@ import { FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
 import { CopyCell } from "./CopyCell";
 import { OpenInNewRouter } from "./OpenInNewRouter";
+import { PaginateTable } from "../common-data-table/PaginateTable";
 
 const media = matchMedia("(max-width: 600px)");
 
@@ -157,8 +158,8 @@ export const CommonListManager = ({
       <Link href={uniqueIdHrefHandler && uniqueIdHrefHandler(value)}>
         {value}
       </Link>
-      <CopyCell value={value} />
-      <OpenInNewRouter value={value} />
+      {/* <CopyCell value={value} />
+      <OpenInNewRouter value={value} /> */}
     </div>
   );
 
@@ -166,32 +167,20 @@ export const CommonListManager = ({
     <DataTypeProvider formatterComponent={UniqueIdCellRenderer} {...props} />
   );
 
-  const f = [
-    ...(udf.debouncedFilters.rawFilters || []),
-    ...(queryFilters || []),
-  ];
+  const f = [...(queryFilters || [])];
 
   const jsonQuery = useMemo(() => filtersToJsonQuery(f as any), [f]);
 
   const q = queryHook({
     query: {
       deep: deep === undefined ? true : deep,
-      itemsPerPage: udf.debouncedFilters.itemsPerPage,
-      startIndex: udf.debouncedFilters.startIndex || 0,
-      sort: castSortToString(udf.debouncedFilters.sorting),
-      query: dxFilterToSqlAlike(f),
-      jsonQuery,
+      ...udf.debouncedFilters,
       withPreloads,
     },
     queryClient: queryClient,
   });
 
   q.jsonQuery = jsonQuery;
-
-  useEffect(() => {
-    // udf.setFilter(urlStringToFilters(), false);
-    // q?.query?.refetch();
-  }, []);
 
   const rows: any = q.query.data?.data?.items || [];
 
@@ -218,16 +207,13 @@ export const CommonListManager = ({
       )}
 
       {view === "datatable" && (
-        <CommonDataTable
+        <PaginateTable
           udf={udf}
           selectable={selectable}
           bulkEditHook={bulkEditHook}
           RowDetail={RowDetail}
-          onColumnWidthsChange={
-            columns.length === columnSizes.length
-              ? onColumnWidthsChange
-              : undefined
-          }
+          uniqueIdHrefHandler={uniqueIdHrefHandler}
+          onColumnWidthsChange={onColumnWidthsChange}
           columns={columns}
           columnSizes={columnSizes}
           inlineInsertHook={inlineInsertHook}
@@ -240,7 +226,7 @@ export const CommonListManager = ({
           <BooleanTypeProvider for={["uniqueId"]} />
 
           {children}
-        </CommonDataTable>
+        </PaginateTable>
       )}
     </>
   );

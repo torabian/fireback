@@ -17,7 +17,7 @@ export const UserSingleScreen = () => {
 
   const getSingleHook = useGetUserByUniqueId({ query: { uniqueId } });
   var d: UserEntity | undefined = getSingleHook.query.data?.data;
-  usePageTitle(d?.person?.firstName || "");
+  usePageTitle(d?.firstName || "");
 
   return (
     <>
@@ -32,11 +32,11 @@ export const UserSingleScreen = () => {
           fields={[
             {
               label: t.users.firstName,
-              elem: d?.person?.firstName,
+              elem: d?.firstName,
             },
             {
               label: t.users.lastName,
-              elem: d?.person?.lastName,
+              elem: d?.lastName,
             },
           ]}
         />

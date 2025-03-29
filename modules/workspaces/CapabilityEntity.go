@@ -47,10 +47,12 @@ func treeToCapabilityChild(items []NestedNode) []*CapabilityChild {
 }
 
 func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
+ 
 	if query.UserAccessPerWorkspace == nil {
 		return []string{}, []string{}
 	}
 
+ 
 	data := *query.UserAccessPerWorkspace
 	workspaceAccesses := []string{}
 	rolesPermission := []string{}

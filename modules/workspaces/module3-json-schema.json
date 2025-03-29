@@ -172,12 +172,19 @@
           ],
           "description": "HTTP method type including standard and Fireback-specific methods"
         },
-        "query": {
+        "qs": {
           "items": {
             "$ref": "#/definitions/Module3Field"
           },
           "type": "array",
           "description": "Type-safe query parameters for CLI and HTTP requests"
+        },
+        "headers": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Typesafe headers."
         },
         "description": {
           "type": "string",
@@ -223,6 +230,26 @@
         },
         "primitive": {
           "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3ActionConfig": {
+      "properties": {
+        "qs": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Typesafe query strings."
+        },
+        "headers": {
+          "items": {
+            "$ref": "#/definitions/Module3Field"
+          },
+          "type": "array",
+          "description": "Typesafe headers."
         }
       },
       "additionalProperties": false,
@@ -337,6 +364,9 @@
     },
     "Module3Entity": {
       "properties": {
+        "rpc": {
+          "$ref": "#/definitions/Module3EntityActionConfig"
+        },
         "permRewrite": {
           "$ref": "#/definitions/Module3EntityPermissionRewrite",
           "description": "Rewrites the default permission generated value"
@@ -448,6 +478,16 @@
         "postFormatter": {
           "type": "string",
           "description": "The name of the golang function which will recieve entity pointer to make some modification upon query"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3EntityActionConfig": {
+      "properties": {
+        "query": {
+          "$ref": "#/definitions/Module3ActionConfig",
+          "description": "Modify the query rpc code."
         }
       },
       "additionalProperties": false,

@@ -11,10 +11,18 @@ import {
   UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
+import { stringify } from "qs";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
         FileEntity,
     } from "../workspaces/FileEntity"
+// Fireback gives the option to have typesafe query string
+export type GetFilesQs = {
+}
+export type GetFilesUrlParams = {
+}
+export type GetFilesHeaders = {
+}
 export function useGetFiles({
   queryOptions,
   query,
@@ -22,7 +30,7 @@ export function useGetFiles({
   execFnOverride,
   unauthorized,
   optionFn
-}: UseRemoteQuery) {
+}: UseRemoteQuery & {query?: GetFilesQs}) {
   const { options, execFn } = useContext(RemoteQueryContext);
   const computedOptions = optionFn ? optionFn(options) : options;
   // Calculare the function which will do the remote calls.
@@ -35,9 +43,7 @@ export function useGetFiles({
     : execApiFn(computedOptions);
   // Url of the remote affix.
   const url = "/files".substr(1);
-  let computedUrl = `${url}?${new URLSearchParams(
-    queryBeforeSend(query)
-  ).toString()}`;
+  let computedUrl = `${url}?${stringify(query)}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);

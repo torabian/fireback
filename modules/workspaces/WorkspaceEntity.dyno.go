@@ -32,6 +32,31 @@ func ResetWorkspaceSeeders(fs *embed.FS) {
 	workspaceSeedersFs = fs
 }
 
+type WorkspaceEntityQs struct {
+	Description QueriableField `cli:"description" table:"workspace" column:"description" qs:"description"`
+	Name        QueriableField `cli:"name" table:"workspace" column:"name" qs:"name"`
+	Type        QueriableField `cli:"type" table:"workspace" column:"type" qs:"type"`
+}
+
+func (x *WorkspaceEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var WorkspaceQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "description",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+}
+
 type WorkspaceEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1144,7 +1169,8 @@ var WORKSPACE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceActions.Query)
+			qs := &WorkspaceEntityQs{}
+			HttpQueryEntity(c, WorkspaceActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1154,17 +1180,19 @@ var WORKSPACE_ACTION_QUERY = Module3Action{
 		Entity: "WorkspaceEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &WorkspaceEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			WorkspaceActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, WorkspaceQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_ACTION_QUERY_CTE = Module3Action{
@@ -1176,7 +1204,8 @@ var WORKSPACE_ACTION_QUERY_CTE = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceActions.CteQuery)
+			qs := &WorkspaceEntityQs{}
+			HttpQueryEntity(c, WorkspaceActions.CteQuery, qs)
 		},
 	},
 	Format:         "QUERY",

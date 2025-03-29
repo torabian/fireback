@@ -30,6 +30,26 @@ func ResetPublicJoinKeySeeders(fs *embed.FS) {
 	publicJoinKeySeedersFs = fs
 }
 
+type PublicJoinKeyEntityQs struct {
+	Role      QueriableField `cli:"role" table:"public_join_key" column:"role" qs:"role"`
+	Workspace QueriableField `cli:"workspace" table:"public_join_key" column:"workspace" qs:"workspace"`
+}
+
+func (x *PublicJoinKeyEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var PublicJoinKeyQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "role",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "workspace",
+		Usage: "",
+	},
+}
+
 type PublicJoinKeyEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1053,7 +1073,8 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, PublicJoinKeyActions.Query)
+			qs := &PublicJoinKeyEntityQs{}
+			HttpQueryEntity(c, PublicJoinKeyActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1063,17 +1084,19 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = Module3Action{
 		Entity: "PublicJoinKeyEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &PublicJoinKeyEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			PublicJoinKeyActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, PublicJoinKeyQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PUBLIC_JOIN_KEY_ACTION_EXPORT = Module3Action{

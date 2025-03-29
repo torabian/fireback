@@ -37,6 +37,9 @@ export class BackupTableMetaEntity extends BaseEntity {
       Rquery: "backup-table-metas",
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

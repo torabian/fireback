@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -21,14 +24,62 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var productSeedersFs = &seeders.ViewsFs
 
 func ResetProductSeeders(fs *embed.FS) {
 	productSeedersFs = fs
+}
+
+type ProductEntityQs struct {
+	Name                  workspaces.QueriableField `cli:"name" table:"product" column:"name" qs:"name"`
+	Sku                   workspaces.QueriableField `cli:"sku" table:"product" column:"sku" qs:"sku"`
+	Rating                workspaces.QueriableField `cli:"rating" table:"product" column:"rating" qs:"rating"`
+	Price                 workspaces.QueriableField `cli:"price" table:"product" column:"price" qs:"price"`
+	Weight                workspaces.QueriableField `cli:"weight" table:"product" column:"weight" qs:"weight"`
+	ProductMarketDuration workspaces.QueriableField `cli:"product-market-duration" table:"product" column:"product_market_duration" qs:"productMarketDuration"`
+	IsFeatured            workspaces.QueriableField `cli:"is-featured" table:"product" column:"is_featured" qs:"isFeatured"`
+	Available             workspaces.QueriableField `cli:"available" table:"product" column:"available" qs:"available"`
+}
+
+func (x *ProductEntityQs) GetQuery() string {
+	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var ProductQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "Name of the product",
+	},
+	&cli.StringFlag{
+		Name:  "sku",
+		Usage: "Stock keeping unit (optional)",
+	},
+	&cli.StringFlag{
+		Name:  "rating",
+		Usage: "Average rating of the product (optional)",
+	},
+	&cli.StringFlag{
+		Name:  "price",
+		Usage: "Price of the product",
+	},
+	&cli.StringFlag{
+		Name:  "weight",
+		Usage: "Weight of the product in kilograms (optional)",
+	},
+	&cli.StringFlag{
+		Name:  "product-market-duration",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "is-featured",
+		Usage: "Whether the product is featured (optional)",
+	},
+	&cli.StringFlag{
+		Name:  "available",
+		Usage: "Is the product available?",
+	},
 }
 
 type ProductEntity struct {
@@ -369,11 +420,13 @@ func ProductRecursiveAddUniqueId(dto *ProductEntity, query workspaces.QueryDSL) 
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func ProductMultiInsertFn(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.IError) {
@@ -954,7 +1007,8 @@ func ProductsActionQueryString(keyword string, page int) ([]string, *workspaces.
 	return stringItems, meta, err
 }
 
-var ProductImportExportCommands = []cli.Command{
+var ProductDevCommands = []cli.Command{
+	ProductWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -998,6 +1052,33 @@ var ProductImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+	cli.Command{
+		Name:  "mlist",
+		Usage: "Prints the list of embedded mocks into the app",
+		Action: func(c *cli.Context) error {
+			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+				fmt.Println(err.Error())
+			} else {
+				f, _ := json.MarshalIndent(entity, "", "  ")
+				fmt.Println(string(f))
+			}
+			return nil
+		},
+	},
+	cli.Command{
+		Name:  "msync",
+		Usage: "Tries to sync mocks into the system",
+		Action: func(c *cli.Context) error {
+			workspaces.CommonCliImportEmbedCmd(c,
+				ProductActions.Create,
+				reflect.ValueOf(&ProductEntity{}).Elem(),
+				&mocks.ViewsFs,
+			)
+			return nil
+		},
+	},
+}
+var ProductImportExportCommands = []cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1044,31 +1125,6 @@ var ProductImportExportCommands = []cli.Command{
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				productSeedersFs,
-			)
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "mlist",
-		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
-				fmt.Println(err.Error())
-			} else {
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
-			}
-			return nil
-		},
-	},
-	cli.Command{
-		Name:  "msync",
-		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
-				ProductActions.Create,
-				reflect.ValueOf(&ProductEntity{}).Elem(),
-				&mocks.ViewsFs,
 			)
 			return nil
 		},
@@ -1131,7 +1187,6 @@ var ProductCliCommands []cli.Command = []cli.Command{
 	ProductUpdateCmd,
 	ProductAskCmd,
 	ProductCreateInteractiveCmd,
-	ProductWipeCmd,
 	workspaces.GetCommonRemoveQuery(
 		reflect.ValueOf(&ProductEntity{}).Elem(),
 		ProductActions.Remove,
@@ -1140,6 +1195,9 @@ var ProductCliCommands []cli.Command = []cli.Command{
 
 func ProductCliFn() cli.Command {
 	commands := append(ProductImportExportCommands, ProductCliCommands...)
+	if !workspaces.GetConfig().Production {
+		commands = append(commands, ProductDevCommands...)
+	}
 	return cli.Command{
 		Name:        "product",
 		Description: "Products module actions",
@@ -1177,7 +1235,8 @@ var PRODUCT_ACTION_QUERY = workspaces.Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, ProductActions.Query)
+			qs := &ProductEntityQs{}
+			workspaces.HttpQueryEntity(c, ProductActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1187,17 +1246,19 @@ var PRODUCT_ACTION_QUERY = workspaces.Module3Action{
 		Entity: "ProductEntity",
 	},
 	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+		qs := &ProductEntityQs{}
+		workspaces.CommonCliQueryCmd3(
 			c,
 			ProductActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         append(workspaces.CommonQueryFlags, ProductQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var PRODUCT_ACTION_EXPORT = workspaces.Module3Action{
@@ -1353,25 +1414,30 @@ func GetProductModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
+var PERM_ROOT_PRODUCT = workspaces.PermissionInfo{
+	CompleteKey: "root.modules.product.product.*",
+	Name:        "Entire product actions (*)",
+	Description: "",
+}
 var PERM_ROOT_PRODUCT_DELETE = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.product.delete",
 	Name:        "Delete product",
+	Description: "",
 }
 var PERM_ROOT_PRODUCT_CREATE = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.product.create",
 	Name:        "Create product",
+	Description: "",
 }
 var PERM_ROOT_PRODUCT_UPDATE = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.product.update",
 	Name:        "Update product",
+	Description: "",
 }
 var PERM_ROOT_PRODUCT_QUERY = workspaces.PermissionInfo{
 	CompleteKey: "root.modules.product.product.query",
 	Name:        "Query product",
-}
-var PERM_ROOT_PRODUCT = workspaces.PermissionInfo{
-	CompleteKey: "root.modules.product.product.*",
-	Name:        "Entire product actions (*)",
+	Description: "",
 }
 var ALL_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PRODUCT_DELETE,

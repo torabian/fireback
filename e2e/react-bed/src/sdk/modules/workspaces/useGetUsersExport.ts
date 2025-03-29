@@ -11,10 +11,18 @@ import {
   UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
+import { stringify } from "qs";
 import { execApiFn, IResponseList } from "../../core/http-tools";
     import {
         UserEntity,
     } from "../workspaces/UserEntity"
+// Fireback gives the option to have typesafe query string
+export type GetUsersExportQs = {
+}
+export type GetUsersExportUrlParams = {
+}
+export type GetUsersExportHeaders = {
+}
 export function useGetUsersExport({
   queryOptions,
   query,
@@ -22,7 +30,7 @@ export function useGetUsersExport({
   execFnOverride,
   unauthorized,
   optionFn
-}: UseRemoteQuery) {
+}: UseRemoteQuery & {query?: GetUsersExportQs}) {
   const { options, execFn } = useContext(RemoteQueryContext);
   const computedOptions = optionFn ? optionFn(options) : options;
   // Calculare the function which will do the remote calls.
@@ -35,9 +43,7 @@ export function useGetUsersExport({
     : execApiFn(computedOptions);
   // Url of the remote affix.
   const url = "/users/export".substr(1);
-  let computedUrl = `${url}?${new URLSearchParams(
-    queryBeforeSend(query)
-  ).toString()}`;
+  let computedUrl = `${url}?${stringify(query)}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
   const fn = () => rpcFn("GET", computedUrl);

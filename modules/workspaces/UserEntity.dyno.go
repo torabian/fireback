@@ -30,6 +30,51 @@ func ResetUserSeeders(fs *embed.FS) {
 	userSeedersFs = fs
 }
 
+type UserEntityQs struct {
+	FirstName QueriableField `cli:"first-name" table:"user" column:"first_name" qs:"firstName"`
+	LastName  QueriableField `cli:"last-name" table:"user" column:"last_name" qs:"lastName"`
+	Photo     QueriableField `cli:"photo" table:"user" column:"photo" qs:"photo"`
+	Gender    QueriableField `cli:"gender" table:"user" column:"gender" qs:"gender"`
+	Title     QueriableField `cli:"title" table:"user" column:"title" qs:"title"`
+	BirthDate QueriableField `cli:"birth-date" table:"user" column:"birth_date" qs:"birthDate"`
+	Avatar    QueriableField `cli:"avatar" table:"user" column:"avatar" qs:"avatar"`
+}
+
+func (x *UserEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var UserQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "first-name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "last-name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "photo",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "gender",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "title",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "birth-date",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "avatar",
+		Usage: "",
+	},
+}
+
 type UserEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -88,12 +133,18 @@ type UserEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string        `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Person           *PersonEntity `json:"person" yaml:"person"    gorm:"foreignKey:PersonId;references:UniqueId"      `
-	PersonId         String        `json:"personId" yaml:"personId"`
-	Avatar           string        `json:"avatar" yaml:"avatar"        `
-	Children         []*UserEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo         *UserEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	FirstName        string `json:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName         string `json:"lastName" yaml:"lastName"  validate:"required"        `
+	Photo            string `json:"photo" yaml:"photo"        `
+	Gender           Int    `json:"gender" yaml:"gender"        `
+	Title            string `json:"title" yaml:"title"        `
+	BirthDate        XDate  `json:"birthDate" yaml:"birthDate"        `
+	// Date range is a complex date storage
+	BirthDateDateInfo XDateMetaData `json:"birthDateDateInfo" yaml:"birthDateDateInfo" sql:"-" gorm:"-"`
+	Avatar            string        `json:"avatar" yaml:"avatar"        `
+	Children          []*UserEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo          *UserEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func UserEntityStream(q QueryDSL) (chan []*UserEntity, *QueryResultMeta, error) {
@@ -187,8 +238,13 @@ var USER_EVENTS = []string{
 }
 
 type UserFieldMap struct {
-	Person TranslatedString `yaml:"person"`
-	Avatar TranslatedString `yaml:"avatar"`
+	FirstName TranslatedString `yaml:"firstName"`
+	LastName  TranslatedString `yaml:"lastName"`
+	Photo     TranslatedString `yaml:"photo"`
+	Gender    TranslatedString `yaml:"gender"`
+	Title     TranslatedString `yaml:"title"`
+	BirthDate TranslatedString `yaml:"birthDate"`
+	Avatar    TranslatedString `yaml:"avatar"`
 }
 
 var UserEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -198,6 +254,7 @@ func entityUserFormatter(dto *UserEntity, query QueryDSL) {
 	if dto == nil {
 		return
 	}
+	dto.BirthDateDateInfo = ComputeXDateMetaData(&dto.BirthDate, query)
 	if dto.Created > 0 {
 		dto.CreatedFormatted = FormatDateBasedOnQuery(dto.Created, query)
 	}
@@ -267,27 +324,9 @@ func UserAssociationCreate(dto *UserEntity, query QueryDSL) error {
 * If we want to create them, we need to do it before. This is not association.
 **/
 func UserRelationContentCreate(dto *UserEntity, query QueryDSL) error {
-	{
-		if dto.Person != nil {
-			dt, err := PersonActions.Create(dto.Person, query)
-			if err != nil {
-				return err
-			}
-			dto.Person = dt
-		}
-	}
 	return nil
 }
 func UserRelationContentUpdate(dto *UserEntity, query QueryDSL) error {
-	{
-		if dto.Person != nil {
-			dt, err := PersonActions.Update(query, dto.Person)
-			if err != nil {
-				return err
-			}
-			dto.Person = dt
-		}
-	}
 	return nil
 }
 func UserPolyglotUpdateHandler(dto *UserEntity, query QueryDSL) {
@@ -335,7 +374,12 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-Person: (type: one) Description: 
+FirstName: (type: string) Description: 
+LastName: (type: string) Description: 
+Photo: (type: string) Description: 
+Gender: (type: int?) Description: 
+Title: (type: string) Description: 
+BirthDate: (type: date) Description: 
 Avatar: (type: string) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
@@ -679,9 +723,34 @@ var UserCommonCliFlags = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "person-id",
+		Name:     "first-name",
+		Required: true,
+		Usage:    `firstName (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "last-name",
+		Required: true,
+		Usage:    `lastName (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "photo",
 		Required: false,
-		Usage:    `person (one)`,
+		Usage:    `photo (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "gender",
+		Required: false,
+		Usage:    `gender (int?)`,
+	},
+	&cli.StringFlag{
+		Name:     "title",
+		Required: false,
+		Usage:    `title (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "birth-date",
+		Required: false,
+		Usage:    `birthDate (date)`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
@@ -690,6 +759,38 @@ var UserCommonCliFlags = []cli.Flag{
 	},
 }
 var UserCommonInteractiveCliFlags = []CliInteractiveFlag{
+	{
+		Name:        "firstName",
+		StructField: "FirstName",
+		Required:    true,
+		Recommended: false,
+		Usage:       `firstName`,
+		Type:        "string",
+	},
+	{
+		Name:        "lastName",
+		StructField: "LastName",
+		Required:    true,
+		Recommended: false,
+		Usage:       `lastName`,
+		Type:        "string",
+	},
+	{
+		Name:        "photo",
+		StructField: "Photo",
+		Required:    false,
+		Recommended: false,
+		Usage:       `photo`,
+		Type:        "string",
+	},
+	{
+		Name:        "title",
+		StructField: "Title",
+		Required:    false,
+		Recommended: false,
+		Usage:       `title`,
+		Type:        "string",
+	},
 	{
 		Name:        "avatar",
 		StructField: "Avatar",
@@ -716,9 +817,34 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "person-id",
+		Name:     "first-name",
+		Required: true,
+		Usage:    `firstName (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "last-name",
+		Required: true,
+		Usage:    `lastName (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "photo",
 		Required: false,
-		Usage:    `person (one)`,
+		Usage:    `photo (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "gender",
+		Required: false,
+		Usage:    `gender (int?)`,
+	},
+	&cli.StringFlag{
+		Name:     "title",
+		Required: false,
+		Usage:    `title (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "birth-date",
+		Required: false,
+		Usage:    `birthDate (date)`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
@@ -783,8 +909,21 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 	if c.IsSet("pid") {
 		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
-	if c.IsSet("person-id") {
-		template.PersonId = NewStringAutoNull(c.String("person-id"))
+	if c.IsSet("first-name") {
+		template.FirstName = c.String("first-name")
+	}
+	if c.IsSet("last-name") {
+		template.LastName = c.String("last-name")
+	}
+	if c.IsSet("photo") {
+		template.Photo = c.String("photo")
+	}
+	if c.IsSet("title") {
+		template.Title = c.String("title")
+	}
+	if c.IsSet("birth-date") {
+		value := c.String("birth-date")
+		template.BirthDate.Scan(value)
 	}
 	if c.IsSet("avatar") {
 		template.Avatar = c.String("avatar")
@@ -1085,7 +1224,8 @@ var USER_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, UserActions.Query)
+			qs := &UserEntityQs{}
+			HttpQueryEntity(c, UserActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1095,17 +1235,19 @@ var USER_ACTION_QUERY = Module3Action{
 		Entity: "UserEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &UserEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			UserActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, UserQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var USER_ACTION_EXPORT = Module3Action{

@@ -30,6 +30,151 @@ func ResetNotificationConfigSeeders(fs *embed.FS) {
 	notificationConfigSeedersFs = fs
 }
 
+type NotificationConfigEntityQs struct {
+	CascadeToSubWorkspaces                 QueriableField `cli:"cascade-to-sub-workspaces" table:"notification_config" column:"cascade_to_sub_workspaces" qs:"cascadeToSubWorkspaces"`
+	ForcedCascadeEmailProvider             QueriableField `cli:"forced-cascade-email-provider" table:"notification_config" column:"forced_cascade_email_provider" qs:"forcedCascadeEmailProvider"`
+	GeneralEmailProvider                   QueriableField `cli:"general-email-provider" table:"notification_config" column:"general_email_provider" qs:"generalEmailProvider"`
+	GeneralGsmProvider                     QueriableField `cli:"general-gsm-provider" table:"notification_config" column:"general_gsm_provider" qs:"generalGsmProvider"`
+	InviteToWorkspaceContent               QueriableField `cli:"invite-to-workspace-content" table:"notification_config" column:"invite_to_workspace_content" qs:"inviteToWorkspaceContent"`
+	InviteToWorkspaceContentExcerpt        QueriableField `cli:"invite-to-workspace-content-excerpt" table:"notification_config" column:"invite_to_workspace_content_excerpt" qs:"inviteToWorkspaceContentExcerpt"`
+	InviteToWorkspaceContentDefault        QueriableField `cli:"invite-to-workspace-content-default" table:"notification_config" column:"invite_to_workspace_content_default" qs:"inviteToWorkspaceContentDefault"`
+	InviteToWorkspaceContentDefaultExcerpt QueriableField `cli:"invite-to-workspace-content-default-excerpt" table:"notification_config" column:"invite_to_workspace_content_default_excerpt" qs:"inviteToWorkspaceContentDefaultExcerpt"`
+	InviteToWorkspaceTitle                 QueriableField `cli:"invite-to-workspace-title" table:"notification_config" column:"invite_to_workspace_title" qs:"inviteToWorkspaceTitle"`
+	InviteToWorkspaceTitleDefault          QueriableField `cli:"invite-to-workspace-title-default" table:"notification_config" column:"invite_to_workspace_title_default" qs:"inviteToWorkspaceTitleDefault"`
+	InviteToWorkspaceSender                QueriableField `cli:"invite-to-workspace-sender" table:"notification_config" column:"invite_to_workspace_sender" qs:"inviteToWorkspaceSender"`
+	AccountCenterEmailSender               QueriableField `cli:"account-center-email-sender" table:"notification_config" column:"account_center_email_sender" qs:"accountCenterEmailSender"`
+	ForgetPasswordContent                  QueriableField `cli:"forget-password-content" table:"notification_config" column:"forget_password_content" qs:"forgetPasswordContent"`
+	ForgetPasswordContentExcerpt           QueriableField `cli:"forget-password-content-excerpt" table:"notification_config" column:"forget_password_content_excerpt" qs:"forgetPasswordContentExcerpt"`
+	ForgetPasswordContentDefault           QueriableField `cli:"forget-password-content-default" table:"notification_config" column:"forget_password_content_default" qs:"forgetPasswordContentDefault"`
+	ForgetPasswordContentDefaultExcerpt    QueriableField `cli:"forget-password-content-default-excerpt" table:"notification_config" column:"forget_password_content_default_excerpt" qs:"forgetPasswordContentDefaultExcerpt"`
+	ForgetPasswordTitle                    QueriableField `cli:"forget-password-title" table:"notification_config" column:"forget_password_title" qs:"forgetPasswordTitle"`
+	ForgetPasswordTitleDefault             QueriableField `cli:"forget-password-title-default" table:"notification_config" column:"forget_password_title_default" qs:"forgetPasswordTitleDefault"`
+	ForgetPasswordSender                   QueriableField `cli:"forget-password-sender" table:"notification_config" column:"forget_password_sender" qs:"forgetPasswordSender"`
+	AcceptLanguage                         QueriableField `cli:"accept-language" table:"notification_config" column:"accept_language" qs:"acceptLanguage"`
+	ConfirmEmailSender                     QueriableField `cli:"confirm-email-sender" table:"notification_config" column:"confirm_email_sender" qs:"confirmEmailSender"`
+	ConfirmEmailContent                    QueriableField `cli:"confirm-email-content" table:"notification_config" column:"confirm_email_content" qs:"confirmEmailContent"`
+	ConfirmEmailContentExcerpt             QueriableField `cli:"confirm-email-content-excerpt" table:"notification_config" column:"confirm_email_content_excerpt" qs:"confirmEmailContentExcerpt"`
+	ConfirmEmailContentDefault             QueriableField `cli:"confirm-email-content-default" table:"notification_config" column:"confirm_email_content_default" qs:"confirmEmailContentDefault"`
+	ConfirmEmailContentDefaultExcerpt      QueriableField `cli:"confirm-email-content-default-excerpt" table:"notification_config" column:"confirm_email_content_default_excerpt" qs:"confirmEmailContentDefaultExcerpt"`
+	ConfirmEmailTitle                      QueriableField `cli:"confirm-email-title" table:"notification_config" column:"confirm_email_title" qs:"confirmEmailTitle"`
+	ConfirmEmailTitleDefault               QueriableField `cli:"confirm-email-title-default" table:"notification_config" column:"confirm_email_title_default" qs:"confirmEmailTitleDefault"`
+}
+
+func (x *NotificationConfigEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var NotificationConfigQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "cascade-to-sub-workspaces",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forced-cascade-email-provider",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "general-email-provider",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "general-gsm-provider",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-content",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-content-excerpt",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-content-default",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-content-default-excerpt",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-title",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-title-default",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-sender",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "account-center-email-sender",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-content",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-content-excerpt",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-content-default",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-content-default-excerpt",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-title",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-title-default",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "forget-password-sender",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "accept-language",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-sender",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-content",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-content-excerpt",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-content-default",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-content-default-excerpt",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-title",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "confirm-email-title-default",
+		Usage: "",
+	},
+}
+
 type NotificationConfigEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1636,7 +1781,8 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, NotificationConfigActions.Query)
+			qs := &NotificationConfigEntityQs{}
+			HttpQueryEntity(c, NotificationConfigActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1646,17 +1792,19 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = Module3Action{
 		Entity: "NotificationConfigEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &NotificationConfigEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			NotificationConfigActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, NotificationConfigQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var NOTIFICATION_CONFIG_ACTION_EXPORT = Module3Action{

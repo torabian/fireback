@@ -53,6 +53,9 @@ export class FileEntity extends BaseEntity {
       },
   };
   public static definition = {
+  "rpc": {
+    "query": {}
+  },
   "permRewrite": {
     "replace": "root.modules",
     "with": "root.manage"

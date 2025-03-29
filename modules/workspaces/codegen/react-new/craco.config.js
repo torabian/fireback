@@ -14,6 +14,7 @@ const appConfigs = {
 const options = {
   devServer: {
     ...appConfigs[process.env.TARGET_APP],
+    port: 3670,
   },
   environment: {},
   webpack: {

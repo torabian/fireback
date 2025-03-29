@@ -30,6 +30,21 @@ func ResetBackupTableMetaSeeders(fs *embed.FS) {
 	backupTableMetaSeedersFs = fs
 }
 
+type BackupTableMetaEntityQs struct {
+	TableNameInDb QueriableField `cli:"table-name-in-db" table:"backup_table_meta" column:"table_name_in_db" qs:"tableNameInDb"`
+}
+
+func (x *BackupTableMetaEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var BackupTableMetaQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "table-name-in-db",
+		Usage: "",
+	},
+}
+
 type BackupTableMetaEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1045,7 +1060,8 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, BackupTableMetaActions.Query)
+			qs := &BackupTableMetaEntityQs{}
+			HttpQueryEntity(c, BackupTableMetaActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1055,17 +1071,19 @@ var BACKUP_TABLE_META_ACTION_QUERY = Module3Action{
 		Entity: "BackupTableMetaEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &BackupTableMetaEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			BackupTableMetaActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, BackupTableMetaQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var BACKUP_TABLE_META_ACTION_EXPORT = Module3Action{

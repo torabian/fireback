@@ -30,6 +30,36 @@ func ResetWorkspaceTypeSeeders(fs *embed.FS) {
 	workspaceTypeSeedersFs = fs
 }
 
+type WorkspaceTypeEntityQs struct {
+	Title       QueriableField `cli:"title" table:"workspace_type" column:"title" qs:"title"`
+	Description QueriableField `cli:"description" table:"workspace_type" column:"description" qs:"description"`
+	Slug        QueriableField `cli:"slug" table:"workspace_type" column:"slug" qs:"slug"`
+	Role        QueriableField `cli:"role" table:"workspace_type" column:"role" qs:"role"`
+}
+
+func (x *WorkspaceTypeEntityQs) GetQuery() string {
+	return GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var WorkspaceTypeQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "title",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "description",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "slug",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "role",
+		Usage: "The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected",
+	},
+}
+
 type WorkspaceTypeEntity struct {
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
@@ -1094,7 +1124,8 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpQueryEntity(c, WorkspaceTypeActions.Query)
+			qs := &WorkspaceTypeEntityQs{}
+			HttpQueryEntity(c, WorkspaceTypeActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
@@ -1104,17 +1135,19 @@ var WORKSPACE_TYPE_ACTION_QUERY = Module3Action{
 		Entity: "WorkspaceTypeEntity",
 	},
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
-		CommonCliQueryCmd2(
+		qs := &WorkspaceTypeEntityQs{}
+		CommonCliQueryCmd3(
 			c,
 			WorkspaceTypeActions.Query,
 			security,
+			qs,
 		)
 		return nil
 	},
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         CommonQueryFlags,
+	Flags:         append(CommonQueryFlags, WorkspaceTypeQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
 var WORKSPACE_TYPE_ACTION_EXPORT = Module3Action{

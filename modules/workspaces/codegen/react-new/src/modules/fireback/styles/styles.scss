@@ -15,4 +15,37 @@
 @import "./theme-basic.scss";
 @import "./not-found.scss";
 
-  
+.data-table-filter-input  {
+    position: absolute;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.data-table-sort-actions {
+    position: absolute;
+    top: 0;
+    z-index: 9;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 5px;
+
+    button {
+        border: 0;
+        background-color: transparent;
+    }
+
+    .sort-icon {
+        width: 20px;
+    }
+}
