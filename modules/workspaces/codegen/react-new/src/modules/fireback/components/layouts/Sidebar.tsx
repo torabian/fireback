@@ -39,10 +39,6 @@ export function dataMenuToMenu(
 }
 
 function castMenuDefinitionToDisplayFn(data: AppMenuEntity) {
-  if (data.capabilityId) {
-    return onPermission(data.capabilityId);
-  }
-
   return () => true;
 }
 
