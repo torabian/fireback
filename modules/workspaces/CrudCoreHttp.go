@@ -313,6 +313,9 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 		"startIndex":   f.StartIndex,
 		"itemsPerPage": f.ItemsPerPage,
 		"items":        mappedItems,
+		"next": gin.H{
+			"cursor": meta.Cursor,
+		},
 	}
 
 	if meta != nil {
