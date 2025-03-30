@@ -1,4 +1,4 @@
-# v1.2.2
+# v1.2.3
 
 Shift to user user interface provided for the admin and new projects.
 
@@ -18,7 +18,7 @@ Shift to user user interface provided for the admin and new projects.
 - [ ] Explore the audio streams and how they work to have endpoints
 - [ ] Extensive testing for http json requests, to match the json and more
 
-# v1.2.1
+# v1.2.2
 
 Goal of this version is to improve the fireback backend mostly, not the UI or usecases.
 The plan is the backend be perfect, and can generate major code for front-end technologies
@@ -38,10 +38,25 @@ and reduce the time in between.
 - [ ] Revise the code generated for the typescript, specially fields on nested objects to have the path.
 - [ ] Add the replica option for the clickhouse for time series data, investigate the time series formats.
 - [ ] Comments added on typescript missing @description flag.
+- [ ] Complete the all scenarios for user accepting invitation and joining workspaces, with tests.
+- [ ] Generate the typings for the queries.
+- [ ] Passports list UI for manage
+- [ ] Bring the Arura functionality from a legacy project, make it default available on child projects with a sample.
+- [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
+- [ ] On react UI ask for signout instead of immediate signout
+- [ ] Add demo to add extra configuration for child project env files
+- [ ] Document the file upload system, allow integration with S3.
+- [ ] Configure the search functionality
+- [ ] AuthroizeOS functionality revise, document.
+- [ ] Explore the option to have custom header, query params in actions, entities actions.
+- [ ] Test the custom actions in the entities.
+- [ ] Document better the reactive actions, and make them custom types other than string only.
+- [ ] Unify the exporting mechanism for both cli and http, to get output in csv, json, and yaml formats.
+- [ ] Revise the notifications service, use integrate email service the same in otp
 
-# v1.2.0
+# v1.2.1
 
-The changes planned for 1.2.0 are the following:
+The changes planned for 1.2.1 are the following:
 
 - [x] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
 - [x] Test and fix the issues with exporting
@@ -67,21 +82,6 @@ The changes planned for 1.2.0 are the following:
 - [x] Allow customization of the token reading/creation scenario, for microservice projects.
 - [x] Add production flag, and disable mock, wipe, delete functionality.
 - [x] New data table and sorting fix, with mapping query string in golang, cli and http mapping
-- [ ] Complete the all scenarios for user accepting invitation and joining workspaces, with tests.
-- [ ] Generate the typings for the queries.
-- [ ] Passports list UI for manage
-- [ ] Bring the Arura functionality from a legacy project, make it default available on child projects with a sample.
-- [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
-- [ ] On react UI ask for signout instead of immediate signout
-- [ ] Add demo to add extra configuration for child project env files
-- [ ] Document the file upload system, allow integration with S3.
-- [ ] Configure the search functionality
-- [ ] AuthroizeOS functionality revise, document.
-- [ ] Explore the option to have custom header, query params in actions, entities actions.
-- [ ] Test the custom actions in the entities.
-- [ ] Document better the reactive actions, and make them custom types other than string only.
-- [ ] Unify the exporting mechanism for both cli and http, to get output in csv, json, and yaml formats.
-- [ ] Revise the notifications service, use integrate email service the same in otp
 
 # v1.1.28
 
