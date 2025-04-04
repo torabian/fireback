@@ -5,14 +5,15 @@ package abac
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/workspaces"
-import queries "github.com/torabian/fireback/modules/abac/queries"
-import "encoding/json"
-import "github.com/urfave/cli"
-import "gopkg.in/yaml.v2"
-import "fmt"
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
+
+	queries "github.com/torabian/fireback/modules/abac/queries"
+	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
 )
 
 func AbacJson() string {
@@ -723,7 +724,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetBoolean(c, config.Production, func(value bool) {
+						return workspaces.ConfigSetBoolean(c, config.Production, func(value bool) {
 							config.Production = value
 							config.Save(".env")
 						})
@@ -746,7 +747,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.TablePrefix, func(value string) {
+						return workspaces.ConfigSetString(c, config.TablePrefix, func(value string) {
 							config.TablePrefix = value
 							config.Save(".env")
 						})
@@ -769,7 +770,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.TokenGenerationStrategy, func(value string) {
+						return workspaces.ConfigSetString(c, config.TokenGenerationStrategy, func(value string) {
 							config.TokenGenerationStrategy = value
 							config.Save(".env")
 						})
@@ -792,7 +793,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.JwtSecretKey, func(value string) {
+						return workspaces.ConfigSetString(c, config.JwtSecretKey, func(value string) {
 							config.JwtSecretKey = value
 							config.Save(".env")
 						})
@@ -815,7 +816,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetBoolean(c, config.WithTaskServer, func(value bool) {
+						return workspaces.ConfigSetBoolean(c, config.WithTaskServer, func(value bool) {
 							config.WithTaskServer = value
 							config.Save(".env")
 						})
@@ -838,7 +839,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.Name, func(value string) {
+						return workspaces.ConfigSetString(c, config.Name, func(value string) {
 							config.Name = value
 							config.Save(".env")
 						})
@@ -861,7 +862,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbName, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbName, func(value string) {
 							config.DbName = value
 							config.Save(".env")
 						})
@@ -884,7 +885,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.CertFile, func(value string) {
+						return workspaces.ConfigSetString(c, config.CertFile, func(value string) {
 							config.CertFile = value
 							config.Save(".env")
 						})
@@ -907,7 +908,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.KeyFile, func(value string) {
+						return workspaces.ConfigSetString(c, config.KeyFile, func(value string) {
 							config.KeyFile = value
 							config.Save(".env")
 						})
@@ -930,7 +931,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbLogLevel, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbLogLevel, func(value string) {
 							config.DbLogLevel = value
 							config.Save(".env")
 						})
@@ -953,7 +954,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetBoolean(c, config.UseSSL, func(value bool) {
+						return workspaces.ConfigSetBoolean(c, config.UseSSL, func(value bool) {
 							config.UseSSL = value
 							config.Save(".env")
 						})
@@ -976,7 +977,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetInt64(c, config.DbPort, func(value int64) {
+						return workspaces.ConfigSetInt64(c, config.DbPort, func(value int64) {
 							config.DbPort = value
 							config.Save(".env")
 						})
@@ -999,7 +1000,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetBoolean(c, config.DriveEnabled, func(value bool) {
+						return workspaces.ConfigSetBoolean(c, config.DriveEnabled, func(value bool) {
 							config.DriveEnabled = value
 							config.Save(".env")
 						})
@@ -1022,7 +1023,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbDsn, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbDsn, func(value string) {
 							config.DbDsn = value
 							config.Save(".env")
 						})
@@ -1045,7 +1046,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbHost, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbHost, func(value string) {
 							config.DbHost = value
 							config.Save(".env")
 						})
@@ -1068,7 +1069,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbUsername, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbUsername, func(value string) {
 							config.DbUsername = value
 							config.Save(".env")
 						})
@@ -1091,7 +1092,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbPassword, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbPassword, func(value string) {
 							config.DbPassword = value
 							config.Save(".env")
 						})
@@ -1114,7 +1115,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.GinMode, func(value string) {
+						return workspaces.ConfigSetString(c, config.GinMode, func(value string) {
 							config.GinMode = value
 							config.Save(".env")
 						})
@@ -1137,7 +1138,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.Storage, func(value string) {
+						return workspaces.ConfigSetString(c, config.Storage, func(value string) {
 							config.Storage = value
 							config.Save(".env")
 						})
@@ -1160,7 +1161,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DbVendor, func(value string) {
+						return workspaces.ConfigSetString(c, config.DbVendor, func(value string) {
 							config.DbVendor = value
 							config.Save(".env")
 						})
@@ -1183,7 +1184,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.StdOut, func(value string) {
+						return workspaces.ConfigSetString(c, config.StdOut, func(value string) {
 							config.StdOut = value
 							config.Save(".env")
 						})
@@ -1206,7 +1207,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.WorkerAddress, func(value string) {
+						return workspaces.ConfigSetString(c, config.WorkerAddress, func(value string) {
 							config.WorkerAddress = value
 							config.Save(".env")
 						})
@@ -1229,7 +1230,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetInt(c, config.WorkerConcurrency, func(value int) {
+						return workspaces.ConfigSetInt(c, config.WorkerConcurrency, func(value int) {
 							config.WorkerConcurrency = value
 							config.Save(".env")
 						})
@@ -1252,7 +1253,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.StdErr, func(value string) {
+						return workspaces.ConfigSetString(c, config.StdErr, func(value string) {
 							config.StdErr = value
 							config.Save(".env")
 						})
@@ -1275,7 +1276,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.TusPort, func(value string) {
+						return workspaces.ConfigSetString(c, config.TusPort, func(value string) {
 							config.TusPort = value
 							config.Save(".env")
 						})
@@ -1298,7 +1299,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.CliToken, func(value string) {
+						return workspaces.ConfigSetString(c, config.CliToken, func(value string) {
 							config.CliToken = value
 							config.Save(".env")
 						})
@@ -1321,7 +1322,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.CliRegion, func(value string) {
+						return workspaces.ConfigSetString(c, config.CliRegion, func(value string) {
 							config.CliRegion = value
 							config.Save(".env")
 						})
@@ -1344,7 +1345,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.CliLanguage, func(value string) {
+						return workspaces.ConfigSetString(c, config.CliLanguage, func(value string) {
 							config.CliLanguage = value
 							config.Save(".env")
 						})
@@ -1367,7 +1368,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.CliWorkspace, func(value string) {
+						return workspaces.ConfigSetString(c, config.CliWorkspace, func(value string) {
 							config.CliWorkspace = value
 							config.Save(".env")
 						})
@@ -1390,7 +1391,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetInt64(c, config.Port, func(value int64) {
+						return workspaces.ConfigSetInt64(c, config.Port, func(value int64) {
 							config.Port = value
 							config.Save(".env")
 						})
@@ -1413,7 +1414,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.Host, func(value string) {
+						return workspaces.ConfigSetString(c, config.Host, func(value string) {
 							config.Host = value
 							config.Save(".env")
 						})
@@ -1436,7 +1437,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.MacIdentifier, func(value string) {
+						return workspaces.ConfigSetString(c, config.MacIdentifier, func(value string) {
 							config.MacIdentifier = value
 							config.Save(".env")
 						})
@@ -1459,7 +1460,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.DebianIdentifier, func(value string) {
+						return workspaces.ConfigSetString(c, config.DebianIdentifier, func(value string) {
 							config.DebianIdentifier = value
 							config.Save(".env")
 						})
@@ -1482,7 +1483,7 @@ func GetConfigCli() []cli.Command {
 				{
 					Name: "set",
 					Action: func(c *cli.Context) error {
-						return ConfigSetString(c, config.WindowsIdentifier, func(value string) {
+						return workspaces.ConfigSetString(c, config.WindowsIdentifier, func(value string) {
 							config.WindowsIdentifier = value
 							config.Save(".env")
 						})
