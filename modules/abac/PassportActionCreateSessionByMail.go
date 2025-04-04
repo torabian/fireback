@@ -1,9 +1,10 @@
-package workspaces
+package abac
 
 import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 /**
@@ -11,7 +12,7 @@ import (
 *	Usually, this makes sense for desktop/mobile apps which are having a light or complete
 *	Version of the backend installed on them. Make sure this is not accessbile on the web version or cloud version.
 **/
-func PassportActionAuthorizeOs2(dto *EmptyRequest, query QueryDSL) (*UserSessionDto, *IError) {
+func PassportActionAuthorizeOs2(dto *workspaces.EmptyRequest, query workspaces.QueryDSL) (*UserSessionDto, *workspaces.IError) {
 	return SigninWithOsUser2(query)
 }
 
@@ -21,9 +22,9 @@ func PassportActionAuthorizeOs2(dto *EmptyRequest, query QueryDSL) (*UserSession
 // Before creating each token, we are looking for existing token in the database
 // and if it exists and is still valid for that specific user,
 // we skip generating new one.
-func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
+func (x *UserEntity) AuthorizeWithToken(q workspaces.QueryDSL) (string, error) {
 
-	ref := GetRef(q)
+	ref := workspaces.GetRef(q)
 
 	// generating token based on random hash, or jwt here can be decided.
 	var tokenString string
@@ -35,12 +36,12 @@ func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		if jwttoken, err := token.SignedString([]byte(config.JwtSecretKey)); err != nil {
-			tokenString = GenerateSecureToken(32)
+			tokenString = workspaces.GenerateSecureToken(32)
 		} else {
 			tokenString = jwttoken
 		}
 	} else {
-		tokenString = GenerateSecureToken(32)
+		tokenString = workspaces.GenerateSecureToken(32)
 
 	}
 
@@ -66,13 +67,13 @@ func (x *UserEntity) AuthorizeWithToken(q QueryDSL) (string, error) {
 		}
 	}
 
-	until := XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
+	until := workspaces.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{
-		UniqueId:    UUID(),
-		UserId:      NewString(x.UniqueId),
+		UniqueId:    workspaces.UUID(),
+		UserId:      workspaces.NewString(x.UniqueId),
 		Token:       tokenString,
 		ValidUntil:  until,
-		WorkspaceId: NewString(ROOT_VAR),
+		WorkspaceId: workspaces.NewString(ROOT_VAR),
 	}
 	if err3 := ref.Create(token).Error; err3 != nil {
 		return "", err3

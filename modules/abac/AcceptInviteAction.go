@@ -1,6 +1,7 @@
-package workspaces
+package abac
 
 import (
+	"github.com/torabian/fireback/modules/workspaces"
 	"gorm.io/gorm"
 )
 
@@ -10,8 +11,8 @@ func init() {
 }
 func AcceptInviteAction(
 	req *AcceptInviteActionReqDto,
-	q QueryDSL) (string,
-	*IError,
+	q workspaces.QueryDSL) (string,
+	*workspaces.IError,
 ) {
 
 	// First of all, we will find the invitation and gather some information.
@@ -24,10 +25,10 @@ func AcceptInviteAction(
 	}
 
 	if invite == nil {
-		return "", Create401Error(&WorkspacesMessages.InvitationNotFound, []string{})
+		return "", workspaces.Create401Error(&AbacMessages.InvitationNotFound, []string{})
 	}
 
-	err2d := GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err2d := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
 
 		q.Tx = tx
 		// In order to add a user to a workspace, we need to know the role which he will have.
@@ -46,7 +47,7 @@ func AcceptInviteAction(
 		}
 
 		wre := &WorkspaceRoleEntity{
-			UserWorkspaceId: NewString(uw.UniqueId),
+			UserWorkspaceId: workspaces.NewString(uw.UniqueId),
 			RoleId:          invite.RoleId,
 			WorkspaceId:     invite.WorkspaceId,
 		}
@@ -68,7 +69,7 @@ func AcceptInviteAction(
 	})
 
 	if err2d != nil {
-		return "", err2d.(*IError)
+		return "", err2d.(*workspaces.IError)
 	}
 
 	// Implement the logic here.

@@ -87,8 +87,8 @@ func CapabilityActionGetTree(query QueryDSL) (*CapabilitiesResult, *IError) {
 		}
 
 		// Filter based on the workspace and role and not allow to create more access than the user has.
-		meetsUser := meetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
-		meetsWorkspace := meetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
+		meetsUser := MeetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
+		meetsWorkspace := MeetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
 
 		if !meetsUser || !meetsWorkspace {
 			continue

@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import "encoding/json"
 

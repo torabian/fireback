@@ -1,9 +1,11 @@
-package workspaces
+package abac
 
 import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func (x *UserEntity) FullName() string {
@@ -90,9 +92,9 @@ func init() {
 
 			FirstName: getRandomName(firstNames),
 			LastName:  getRandomName(lastNames),
-			BirthDate: XDate((getRandomBirthDate())),
+			BirthDate: workspaces.XDate((getRandomBirthDate())),
 			Photo:     getRandomAvatarURL(),
-			Gender:    NewInt(randomZeroOrOne()),
+			Gender:    workspaces.NewInt(randomZeroOrOne()),
 		}
 	}
 

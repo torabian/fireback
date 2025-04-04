@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 var PassportTypes = newPassportFactory()
 

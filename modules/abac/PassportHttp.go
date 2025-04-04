@@ -1,29 +1,30 @@
-package workspaces
+package abac
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func init() {
 
-	AppendPassportRouter = func(r *[]Module3Action) {
+	AppendPassportRouter = func(r *[]workspaces.Module3Action) {
 
 		*r = append(*r,
 
-			Module3Action{
+			workspaces.Module3Action{
 				Method: "POST",
 				Url:    ("/passport/authorizeOs"),
 				Handlers: []gin.HandlerFunc{
 					func(c *gin.Context) {
-						HttpPostEntity(c, PassportActionAuthorizeOs2)
+						workspaces.HttpPostEntity(c, PassportActionAuthorizeOs2)
 					},
 				},
 				RequestEntity:  &EmailAccountSigninDto{},
 				ResponseEntity: &UserSessionDto{},
-				In: &Module3ActionBody{
+				In: &workspaces.Module3ActionBody{
 					Dto: "EmailAccountSigninDto",
 				},
-				Out: &Module3ActionBody{
+				Out: &workspaces.Module3ActionBody{
 					Dto: "UserSessionDto",
 				},
 				Action: PassportActionAuthorizeOs2,

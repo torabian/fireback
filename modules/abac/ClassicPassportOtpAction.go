@@ -1,7 +1,9 @@
-package workspaces
+package abac
 
 import (
 	"time"
+
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func init() {
@@ -9,8 +11,8 @@ func init() {
 	ClassicPassportOtpActionImp = ClassicPassportOtpAction
 }
 
-func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
-	*ClassicPassportOtpActionResDto, *IError,
+func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q workspaces.QueryDSL) (
+	*ClassicPassportOtpActionResDto, *workspaces.IError,
 ) {
 
 	ClearPassportValue(&req.Value)
@@ -19,13 +21,13 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 	}
 
 	olderEntity := &PublicAuthenticationEntity{}
-	GetDbRef().Where(&PublicAuthenticationEntity{
+	workspaces.GetDbRef().Where(&PublicAuthenticationEntity{
 		PassportValue: req.Value,
 		Otp:           req.Otp,
 	}).Order("id DESC").Find(olderEntity)
 
 	if olderEntity == nil || time.Now().UnixNano() >= olderEntity.BlockedUntil {
-		return nil, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
+		return nil, workspaces.Create401Error(&AbacMessages.OtpCodeInvalid, []string{})
 	}
 
 	if olderEntity.IsInCreationProcess.Bool {
@@ -82,22 +84,22 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 				session := &UserSessionDto{}
 
 				if token, err := user.AuthorizeWithToken(q); err != nil {
-					return nil, CastToIError(err)
+					return nil, workspaces.CastToIError(err)
 				} else {
 					session.Token = token
 				}
 
 				if err != nil {
-					return nil, GormErrorToIError(err)
+					return nil, workspaces.GormErrorToIError(err)
 				}
 
 				// Delete the session so user cannot login again
-				err2 := GetDbRef().Where(
-					&PublicAuthenticationEntity{PassportId: NewString(passport.UniqueId), Otp: req.Otp},
+				err2 := workspaces.GetDbRef().Where(
+					&PublicAuthenticationEntity{PassportId: workspaces.NewString(passport.UniqueId), Otp: req.Otp},
 				).Delete(&PublicAuthenticationEntity{}).Error
 
 				if err2 != nil {
-					return nil, GormErrorToIError(err)
+					return nil, workspaces.GormErrorToIError(err)
 				}
 
 				return &ClassicPassportOtpActionResDto{
@@ -106,5 +108,5 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q QueryDSL) (
 			}
 		}
 	}
-	return nil, Create401Error(&WorkspacesMessages.OtpCodeInvalid, []string{})
+	return nil, workspaces.Create401Error(&AbacMessages.OtpCodeInvalid, []string{})
 }

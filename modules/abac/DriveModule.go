@@ -1,12 +1,13 @@
-package workspaces
+package abac
 
 import (
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
-func DriveModuleSetup() *ModuleProvider {
-	module := &ModuleProvider{
+func DriveModuleSetup() *workspaces.ModuleProvider {
+	module := &workspaces.ModuleProvider{
 		// This is also weird for me. We need a mechanism for naming module better
 		// now because of react/java/swift compiler I write this the same name as folder.
 		Name: "workspaces",
@@ -15,7 +16,7 @@ func DriveModuleSetup() *ModuleProvider {
 	module.ProvidePermissionHandler(ALL_FILE_PERMISSIONS)
 
 	// Drive is not coverting route definitions, needs to be fixed
-	module.Actions = [][]Module3Action{
+	module.Actions = [][]workspaces.Module3Action{
 		GetFileModule3Actions(),
 	}
 

@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import (
 	"embed"
@@ -14,20 +14,21 @@ import (
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
 )
 
 func FileActionCreate(
-	dto *FileEntity, query QueryDSL,
-) (*FileEntity, *IError) {
+	dto *FileEntity, query workspaces.QueryDSL,
+) (*FileEntity, *workspaces.IError) {
 	return FileActionCreateFn(dto, query)
 }
 
 func FileActionUpdate(
-	query QueryDSL,
+	query workspaces.QueryDSL,
 	fields *FileEntity,
-) (*FileEntity, *IError) {
+) (*FileEntity, *workspaces.IError) {
 	return FileActionUpdateFn(query, fields)
 }
 
@@ -48,9 +49,9 @@ type Directory struct {
 func CreateFile(model *FileEntity) error {
 
 	if model.UniqueId == "" {
-		model.UniqueId = UUID()
+		model.UniqueId = workspaces.UUID()
 	}
-	return GetDbRef().Create(&model).Error
+	return workspaces.GetDbRef().Create(&model).Error
 }
 
 /*
@@ -64,7 +65,7 @@ type FileUploadContext struct {
 	AfterCreatedHooks []UploadEventHook
 }
 
-func afterTusUploadedOnDisk(event *tusd.HookEvent, q *QueryDSL, ctx *FileUploadContext) (*FileEntity, error) {
+func afterTusUploadedOnDisk(event *tusd.HookEvent, q *workspaces.QueryDSL, ctx *FileUploadContext) (*FileEntity, error) {
 	fname := event.Upload.MetaData["filename"]
 	fpath := event.Upload.MetaData["path"]
 	fsize := event.Upload.Size
@@ -77,8 +78,8 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *QueryDSL, ctx *FileUploadC
 		UniqueId:    event.Upload.ID,
 		Size:        fsize,
 		Type:        ftype,
-		WorkspaceId: NewString(q.WorkspaceId),
-		UserId:      NewString(q.UserId),
+		WorkspaceId: workspaces.NewString(q.WorkspaceId),
+		UserId:      workspaces.NewString(q.UserId),
 	}
 
 	if ctx != nil {
@@ -133,11 +134,11 @@ func LiftTusServer() {
 			result, err = WithAuthorizationPure(&AuthContextDto{
 				WorkspaceId:  wi,
 				Token:        tk,
-				Capabilities: []PermissionInfo{},
+				Capabilities: []workspaces.PermissionInfo{},
 			})
 
 			if result != nil {
-				q := QueryDSL{
+				q := workspaces.QueryDSL{
 					WorkspaceId: wi,
 					UserId:      result.User.UniqueId,
 				}
@@ -197,11 +198,11 @@ func LiftTusServerInHttp(app *gin.Engine) {
 			result, err = WithAuthorizationPure(&AuthContextDto{
 				WorkspaceId:  wi,
 				Token:        tk,
-				Capabilities: []PermissionInfo{},
+				Capabilities: []workspaces.PermissionInfo{},
 			})
 
 			if result != nil {
-				q := QueryDSL{
+				q := workspaces.QueryDSL{
 					WorkspaceId: wi,
 					UserId:      result.User.UniqueId,
 				}
@@ -232,7 +233,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 	mtype, _ := mimetype.DetectFile(filePath)
 
 	file := tusd.FileInfo{
-		ID: UUID_Long(),
+		ID: workspaces.UUID_Long(),
 		MetaData: tusd.MetaData{
 			"filename": filepath.Base(filePath),
 			"filetype": mtype.String(),
@@ -250,7 +251,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 	copyFile(filePath, fileTarget)
 	os.WriteFile(path.Join(config.Storage, file.ID+".info"), dicJson, 0644)
 
-	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
+	entity, err := afterTusUploadedOnDisk(&event, &workspaces.QueryDSL{
 		WorkspaceId: "system",
 		UserId:      "system",
 	}, GlobalTusFileUploadContext)
@@ -279,7 +280,7 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	mimetype := ""
 
 	file := tusd.FileInfo{
-		ID: UUID_Long(),
+		ID: workspaces.UUID_Long(),
 		MetaData: tusd.MetaData{
 			"filename": filepath.Base(filePath),
 			"filetype": mimetype,
@@ -310,7 +311,7 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 		return nil, "", err
 	}
 
-	entity, err := afterTusUploadedOnDisk(&event, &QueryDSL{
+	entity, err := afterTusUploadedOnDisk(&event, &workspaces.QueryDSL{
 		WorkspaceId: "system",
 		UserId:      "system",
 	}, GlobalTusFileUploadContext)

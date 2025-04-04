@@ -1,26 +1,27 @@
-package workspaces
+package abac
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func HttpSendTestMail(c *gin.Context) {
-	HttpPostEntity(c, NotificationTestMailAction)
+	workspaces.HttpPostEntity(c, NotificationTestMailAction)
 }
 
 func HttpGetNotificationWorkspaceConfig(c *gin.Context) {
-	HttpGetEntity(c, NotificationWorkspaecConfigActionGet)
+	workspaces.HttpGetEntity(c, NotificationWorkspaecConfigActionGet)
 }
 
 func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
-	HttpUpdateEntity(c, NotificationWorkspaceConfigActionUpdate)
+	workspaces.HttpUpdateEntity(c, NotificationWorkspaceConfigActionUpdate)
 }
 
 func init() {
 
-	AppendNotificationConfigRouter = func(r *[]Module3Action) {
+	AppendNotificationConfigRouter = func(r *[]workspaces.Module3Action) {
 		*r = append(*r,
-			Module3Action{
+			workspaces.Module3Action{
 				Method: "POST",
 				Url:    "/notification/testmail",
 				Handlers: []gin.HandlerFunc{
@@ -28,42 +29,42 @@ func init() {
 				},
 				RequestEntity:  &TestMailDto{},
 				ResponseEntity: &OkayResponseDto{},
-				Out: &Module3ActionBody{
+				Out: &workspaces.Module3ActionBody{
 					Dto: "OkayResponseDto",
 				},
-				In: &Module3ActionBody{
+				In: &workspaces.Module3ActionBody{
 					Dto: "TestMailDto",
 				},
 			},
-			Module3Action{
+			workspaces.Module3Action{
 				Method: "GET",
 				Url:    "/notification/workspace/config",
 				Handlers: []gin.HandlerFunc{
-					WithAuthorization(&SecurityModel{
-						ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+					WithAuthorization(&workspaces.SecurityModel{
+						ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
 					}),
 					HttpGetNotificationWorkspaceConfig,
 				},
 				ResponseEntity: &NotificationConfigEntity{},
-				Out: &Module3ActionBody{
+				Out: &workspaces.Module3ActionBody{
 					Entity: "NotificationConfigEntity",
 				},
 			},
-			Module3Action{
+			workspaces.Module3Action{
 				Method: "PATCH",
 				Url:    "/notification/workspace/config",
 				Handlers: []gin.HandlerFunc{
-					WithAuthorization(&SecurityModel{
-						ActionRequires: []PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+					WithAuthorization(&workspaces.SecurityModel{
+						ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
 					}),
 					HttpUpdateNotificationWorkspaceConfig,
 				},
 				RequestEntity:  &NotificationConfigEntity{},
 				ResponseEntity: &NotificationConfigEntity{},
-				Out: &Module3ActionBody{
+				Out: &workspaces.Module3ActionBody{
 					Entity: "NotificationConfigEntity",
 				},
-				In: &Module3ActionBody{
+				In: &workspaces.Module3ActionBody{
 					Entity: "NotificationConfigEntity",
 				},
 			},

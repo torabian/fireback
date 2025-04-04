@@ -1,6 +1,10 @@
-package workspaces
+package abac
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/torabian/fireback/modules/workspaces"
+)
 
 func init() {
 	// Override the implementation with our actual code.
@@ -8,9 +12,9 @@ func init() {
 }
 
 func QueryUserRoleWorkspacesAction(
-	q QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
-	*QueryResultMeta,
-	*IError,
+	q workspaces.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
+	*workspaces.QueryResultMeta,
+	*workspaces.IError,
 ) {
 
 	items := []*QueryUserRoleWorkspacesActionResDto{}

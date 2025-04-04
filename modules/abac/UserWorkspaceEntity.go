@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 func CastUserRoleWorkspacDtoMap(data map[string]*UserRoleWorkspaceDto) []UserRoleWorkspaceDto {
 	items := []UserRoleWorkspaceDto{}

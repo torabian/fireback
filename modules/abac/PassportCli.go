@@ -1,9 +1,10 @@
-package workspaces
+package abac
 
 import (
 	"fmt"
 	"log"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -46,7 +47,7 @@ var CreateRootUser cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilder(c)
 
 		if c.NumFlags() == 0 {
 			// This is gonna be an interactive, there are no flags
@@ -69,9 +70,9 @@ var AuthorizeOsCmd cli.Command = cli.Command{
 	Usage: "Authorizes the user, as os owner. Useful for desktop offline apps or mobile apps",
 
 	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilder(c)
-		result, err := PassportActionAuthorizeOs2(&EmptyRequest{}, query)
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		query := workspaces.CommonCliQueryDSLBuilder(c)
+		result, err := PassportActionAuthorizeOs2(&workspaces.EmptyRequest{}, query)
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
@@ -101,7 +102,7 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 
-		f := QueryDSL{
+		f := workspaces.QueryDSL{
 			UserId: c.String("user-id"),
 		}
 
@@ -141,6 +142,6 @@ var PassportCli cli.Command = cli.Command{
 		OauthAuthenticateActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
-		GetCommonQuery(PassportActions.Query),
-	}, WorkspacesCustomActionsCli...),
+		workspaces.GetCommonQuery(PassportActions.Query),
+	}, workspaces.WorkspacesCustomActionsCli...),
 }

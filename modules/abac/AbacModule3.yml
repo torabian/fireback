@@ -1,5 +1,4 @@
-name: workspaces
-meta-workspace: true
+name: abac
 config:
 
   - name: production

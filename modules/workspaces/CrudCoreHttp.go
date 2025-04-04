@@ -16,7 +16,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var upgrader = websocket.Upgrader{
+var Upgrader = websocket.Upgrader{
 	//Solve "request origin not allowed by Upgrader.CheckOrigin"
 	CheckOrigin: func(r *http.Request) bool {
 		return true
@@ -26,7 +26,7 @@ var upgrader = websocket.Upgrader{
 func HttpReactiveQuery[T any](ctx *gin.Context, fn func(QueryDSL, chan bool, chan map[string]interface{}) chan *T) {
 	f := ExtractQueryDslFromGinContext(ctx)
 
-	c, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		c.WriteJSON(GormErrorToIError(err))
 
@@ -83,7 +83,7 @@ func HttpReactiveQuery[T any](ctx *gin.Context, fn func(QueryDSL, chan bool, cha
 func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead func(QueryDSL, interface{})) {
 	f := ExtractQueryDslFromGinContext(ctx)
 
-	c, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
 		c.WriteJSON(GormErrorToIError(err))
 

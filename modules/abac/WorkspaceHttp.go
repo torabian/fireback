@@ -1,24 +1,26 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
 
-	AppendWorkspaceRouter = func(r *[]Module3Action) {
+	AppendWorkspaceRouter = func(r *[]workspaces.Module3Action) {
 		*r = append(*r,
-			Module3Action{
+			workspaces.Module3Action{
 				Method:         "REACTIVE",
 				ResponseEntity: &ReactiveSearchResultDto{},
-				Out: &Module3ActionBody{
+				Out: &workspaces.Module3ActionBody{
 					Dto: "ReactiveSearchResultDto",
 				},
 			},
-			Module3Action{
+			workspaces.Module3Action{
 				Method:         "POST",
 				ResponseEntity: &ImportRequestDto{},
 				RequestEntity:  &ImportRequestDto{},
-				Out: &Module3ActionBody{
+				Out: &workspaces.Module3ActionBody{
 					Dto: "ImportRequestDto",
 				},
-				In: &Module3ActionBody{
+				In: &workspaces.Module3ActionBody{
 					Dto: "ImportRequestDto",
 				},
 			},

@@ -1,11 +1,13 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
 	// Override the implementation with our actual code.
 	GsmSendSmsActionImp = GsmSendSmsAction
 }
 
-func GsmSendSmsAction(req *GsmSendSmsActionReqDto, q QueryDSL) (*GsmSendSmsActionResDto, *IError) {
+func GsmSendSmsAction(req *GsmSendSmsActionReqDto, q workspaces.QueryDSL) (*GsmSendSmsActionResDto, *workspaces.IError) {
 
 	if err := GsmSendSmsActionReqValidator(req); err != nil {
 		return nil, err

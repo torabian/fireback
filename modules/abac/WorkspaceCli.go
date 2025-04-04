@@ -1,10 +1,11 @@
-package workspaces
+package abac
 
 import (
 	"fmt"
 	"log"
 	"strings"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 )
 
@@ -21,20 +22,20 @@ var GetUserAccessScope cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		query := CommonCliQueryDSLBuilder(c)
+		query := workspaces.CommonCliQueryDSLBuilder(c)
 		query.UserId = c.String("id")
 		access, err := GetUserAccessLevels(query)
-		HandleActionInCli(c, access, err, map[string]map[string]string{})
+		workspaces.HandleActionInCli(c, access, err, map[string]map[string]string{})
 
 		return nil
 	},
 }
 
-func PermissionInfoFromString(items []string) []PermissionInfo {
-	res := []PermissionInfo{}
+func PermissionInfoFromString(items []string) []workspaces.PermissionInfo {
+	res := []workspaces.PermissionInfo{}
 
 	for _, item := range items {
-		res = append(res, PermissionInfo{
+		res = append(res, workspaces.PermissionInfo{
 			CompleteKey: item,
 		})
 	}
@@ -61,16 +62,16 @@ var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		f := CommonCliQueryDSLBuilder(c)
+		f := workspaces.CommonCliQueryDSLBuilder(c)
 		f.UserId = c.String("id")
 		access, _ := GetUserAccessLevels(f)
 
-		query := QueryDSL{
+		query := workspaces.QueryDSL{
 			UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 			ActionRequires:         PermissionInfoFromString(strings.Split(c.String("capabilities"), ",")),
 		}
 
-		meets, missing := MeetsAccessLevel(query, false)
+		meets, missing := workspaces.MeetsAccessLevel(query, false)
 
 		if !meets {
 			fmt.Println("Not enough access level. Missing:")
@@ -133,7 +134,7 @@ var ViewAuthorize cli.Command = cli.Command{
 		fmt.Println("Workspace:", config.CliWorkspace)
 		fmt.Println("Token:", config.CliToken)
 
-		result, err := CliAuth(nil)
+		result, err := workspaces.CliAuth(nil)
 		if err != nil {
 			log.Fatalln(err)
 		} else {

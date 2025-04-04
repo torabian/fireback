@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func meetsCheck(actionRequires []PermissionInfo, perms []string) bool {
+func MeetsCheck(actionRequires []PermissionInfo, perms []string) bool {
 	meets := true
 	for _, requiredPermission := range actionRequires {
 
@@ -37,8 +37,8 @@ func MeetsAccessLevel(query QueryDSL, rootOrSystem bool) (bool, []string) {
 		return false, missingPerms
 	}
 
-	meetsUser := meetsCheck(query.ActionRequires, query.UserHas)
-	meetsWorkspace := meetsCheck(query.ActionRequires, query.WorkspaceHas)
+	meetsUser := MeetsCheck(query.ActionRequires, query.UserHas)
+	meetsWorkspace := MeetsCheck(query.ActionRequires, query.WorkspaceHas)
 
 	if !meetsUser || !meetsWorkspace {
 		for _, perm := range query.ActionRequires {

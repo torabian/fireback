@@ -1,9 +1,10 @@
-package workspaces
+package abac
 
 import (
 	"fmt"
 	reflect "reflect"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 )
 
@@ -22,14 +23,14 @@ var NotificationConfigTestCmd cli.Command = cli.Command{
 func init() {
 	NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigTestCmd)
 }
-func NotificationConfigActionGetOneByWorkspace(query QueryDSL) (*NotificationConfigEntity, *IError) {
+func NotificationConfigActionGetOneByWorkspace(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	item, err := GetOneEntityByWorkspace[NotificationConfigEntity](query, refl)
+	item, err := workspaces.GetOneEntityByWorkspace[NotificationConfigEntity](query, refl)
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
 
-func GetRootNotificationConfig() (*NotificationConfigEntity, *IError) {
-	return NotificationConfigActionGetOneByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+func GetRootNotificationConfig() (*NotificationConfigEntity, *workspaces.IError) {
+	return NotificationConfigActionGetOneByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR})
 
 }

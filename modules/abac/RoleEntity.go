@@ -1,21 +1,23 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
-	RoleActions.Create = func(dto *RoleEntity, query QueryDSL) (*RoleEntity, *IError) {
+	RoleActions.Create = func(dto *RoleEntity, query workspaces.QueryDSL) (*RoleEntity, *workspaces.IError) {
 		filterPermissions(dto, query)
 
 		if len(dto.CapabilitiesListId) == 0 && len(dto.Capabilities) == 0 {
-			return nil, Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
+			return nil, workspaces.Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
 		}
 
 		return RoleActionCreateFn(dto, query)
 	}
 
-	RoleActions.Update = func(query QueryDSL, dto *RoleEntity) (*RoleEntity, *IError) {
+	RoleActions.Update = func(query workspaces.QueryDSL, dto *RoleEntity) (*RoleEntity, *workspaces.IError) {
 		filterPermissions(dto, query)
 
 		if len(dto.CapabilitiesListId) == 0 && len(dto.Capabilities) == 0 {
-			return nil, Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
+			return nil, workspaces.Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
 		}
 
 		return RoleActionUpdateFn(query, dto)
@@ -23,15 +25,15 @@ func init() {
 
 }
 
-func filterPermissions(dto *RoleEntity, query QueryDSL) {
-	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(query)
+func filterPermissions(dto *RoleEntity, query workspaces.QueryDSL) {
+	workspaceAccesses, rolesPermission := workspaces.GetWorkspaceAndUserAccesses(query)
 
 	// Let's filter out the permissions that user actually doesn't have
 	itemsFiltered := []string{}
 
 	for _, capability := range dto.CapabilitiesListId {
-		meetsUser := meetsCheck([]PermissionInfo{{CompleteKey: capability}}, rolesPermission)
-		meetsWorkspace := meetsCheck([]PermissionInfo{{CompleteKey: capability}}, workspaceAccesses)
+		meetsUser := workspaces.MeetsCheck([]workspaces.PermissionInfo{{CompleteKey: capability}}, rolesPermission)
+		meetsWorkspace := workspaces.MeetsCheck([]workspaces.PermissionInfo{{CompleteKey: capability}}, workspaceAccesses)
 
 		if !meetsUser || !meetsWorkspace {
 			continue

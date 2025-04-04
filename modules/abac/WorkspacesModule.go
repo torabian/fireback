@@ -1,10 +1,10 @@
-package workspaces
+package abac
 
 import (
 	"embed"
 	"fmt"
-	"log"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -12,41 +12,16 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
-	var entity *CapabilityEntity = nil
-	perm := permInfo.CompleteKey
-
-	if hasChildren {
-		perm = perm + ".*"
-	}
-
-	system := "system"
-
-	if (db.Where(CapabilityEntity{UniqueId: perm}).First(&entity).Error != nil) {
-		err := db.Create(&CapabilityEntity{
-			UniqueId:    perm,
-			WorkspaceId: NewString(system),
-			Visibility:  NewString("A"),
-			Description: permInfo.Description,
-			Name:        permInfo.Name,
-		}).Error
-
-		if err != nil {
-			log.Fatalln("Cannot start the app because a permission creation failed.", perm, err)
-		}
-	}
-}
-
-func AppMenuWriteQueryCteMock(ctx MockQueryContext) {
+func AppMenuWriteQueryCteMock(ctx workspaces.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := AppMenuActions.CteQuery(f)
-		result := QueryEntitySuccessResult(f, items, count)
-		WriteMockDataToFile(lang, "", "AppMenu", result)
+		result := workspaces.QueryEntitySuccessResult(f, items, count)
+		workspaces.WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
 }
 
@@ -55,7 +30,7 @@ var EverRunEntities []interface{} = []interface{}{
 	&CapabilityEntityPolyglot{},
 }
 
-func workspaceModuleCore(module *ModuleProvider) {
+func workspaceModuleCore(module *workspaces.ModuleProvider) {
 
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
@@ -75,7 +50,7 @@ func workspaceModuleCore(module *ModuleProvider) {
 		ALL_CAPABILITY_PERMISSIONS,
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_PERMISSIONS,
-		ALL_PERM_WORKSPACES_MODULE,
+		ALL_PERM_ABAC_MODULE,
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
@@ -108,7 +83,7 @@ func workspaceModuleCore(module *ModuleProvider) {
 
 		for _, item := range items2 {
 			if err := dbref.AutoMigrate(item); err != nil {
-				fmt.Println("Migrating entity issue:", GetInterfaceName(item))
+				fmt.Println("Migrating entity issue:", workspaces.GetInterfaceName(item))
 				return err
 			}
 		}
@@ -130,19 +105,19 @@ type MicroserviceSetupConfig struct {
 // context contains the token, workspace-id in header, and you need to decide if the action is allowed
 // Maybe it's gonna be a good practise to provide headers here as well, in case only token is not enough
 // to decide but for now it's only context and workspaceId
-func MicroserviceWithoutContextResolver(context *AuthContextDto) (*AuthResultDto, *IError) {
+func MicroserviceWithoutContextResolver(context *AuthContextDto) (*AuthResultDto, *workspaces.IError) {
 	return &AuthResultDto{}, nil
 }
 
-func FirebackMicroService(config *MicroserviceSetupConfig) *ModuleProvider {
-	module := &ModuleProvider{
+func FirebackMicroService(config *MicroserviceSetupConfig) *workspaces.ModuleProvider {
+	module := &workspaces.ModuleProvider{
 		Name: "workspaces",
 
 		EntityProvider: func(d *gorm.DB) error {
 
 			for _, item := range EverRunEntities {
-				if err := dbref.AutoMigrate(item); err != nil {
-					fmt.Println("Migrating entity issue:", GetInterfaceName(item))
+				if err := workspaces.GetDbRef().AutoMigrate(item); err != nil {
+					fmt.Println("Migrating entity issue:", workspaces.GetInterfaceName(item))
 					return err
 				}
 			}
@@ -170,8 +145,8 @@ func FirebackMicroService(config *MicroserviceSetupConfig) *ModuleProvider {
 	return module
 }
 
-func WorkspaceModuleSetup() *ModuleProvider {
-	module := &ModuleProvider{
+func WorkspaceModuleSetup() *workspaces.ModuleProvider {
+	module := &workspaces.ModuleProvider{
 		Name:        "workspaces",
 		Definitions: &Module3Definitions,
 	}
@@ -184,13 +159,12 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
 	})
 
-	module.ProvideTests(UserTests,
-		[]Test{
-			TestNewModuleProjectGen,
+	module.ProvideTests(workspaces.UserTests,
+		[]workspaces.Test{
+			workspaces.TestNewModuleProjectGen,
 		},
-		WorkspaceCreationTests,
 		AppMenuTests,
-		IntelisenseTest,
+		workspaces.IntelisenseTest,
 	)
 
 	module.ProvideSeederImportHandler(func() {
@@ -206,7 +180,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		// GsmProviderImportMocks()
 	})
 
-	module.Actions = [][]Module3Action{
+	module.Actions = [][]workspaces.Module3Action{
 		GetUserModule3Actions(),
 		GetWorkspaceModule3Actions(),
 		GetRoleModule3Actions(),
@@ -218,7 +192,7 @@ func WorkspaceModuleSetup() *ModuleProvider {
 		GetTableViewSizingModule3Actions(),
 		GetAppMenuModule3Actions(),
 		GetEmailConfirmationModule3Actions(),
-		WorkspacesCustomActions(),
+		AbacCustomActions(),
 		GetUserWorkspaceModule3Actions(),
 		GetWorkspaceRoleModule3Actions(),
 		GetTimezoneGroupModule3Actions(),

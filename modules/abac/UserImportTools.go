@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 /*
 	This file is a focus on creating users, their passports, workspaces related to them
@@ -14,14 +14,15 @@ import (
 	"fmt"
 
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/workspaces"
 	seeders "github.com/torabian/fireback/modules/workspaces/mocks/User"
 )
 
-func ImportFromFs(req *ImportUserActionReqDto, q QueryDSL) (*OkayResponseDto, *IError) {
+func ImportFromFs(req *ImportUserActionReqDto, q workspaces.QueryDSL) (*OkayResponseDto, *workspaces.IError) {
 
-	var content ContentImport[UserImportDto]
-	if err := ReadYamlFileEmbed[ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
-		return nil, Create401Error(&WorkspacesMessages.FileNotFound, []string{})
+	var content workspaces.ContentImport[UserImportDto]
+	if err := workspaces.ReadYamlFileEmbed[workspaces.ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
+		return nil, workspaces.Create401Error(&AbacMessages.FileNotFound, []string{})
 	}
 	bar := progressbar.Default(int64(len(content.Items)))
 	for _, item := range content.Items {
@@ -56,7 +57,7 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 		UniqueId: "ux_" + dto.Passports[0].Value,
 	}
 
-	passwordHashed, _ := HashPassword(dto.Passports[0].Password)
+	passwordHashed, _ := workspaces.HashPassword(dto.Passports[0].Password)
 	method, _ := DetectSignupMechanismOverValue(dto.Passports[0].Value)
 
 	passport := &PassportEntity{
@@ -67,22 +68,22 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 	}
 
 	// For now, it's random. But make sure later we have the track of workspaces
-	wid := UUID()
+	wid := workspaces.UUID()
 	workspace := &WorkspaceEntity{
 
 		UniqueId:    wid,
-		WorkspaceId: NewString(wid),
-		LinkerId:    NewString(ROOT_VAR),
-		ParentId:    NewString(ROOT_VAR),
-		TypeId:      NewString(ROOT_VAR),
+		WorkspaceId: workspaces.NewString(wid),
+		LinkerId:    workspaces.NewString(ROOT_VAR),
+		ParentId:    workspaces.NewString(ROOT_VAR),
+		TypeId:      workspaces.NewString(ROOT_VAR),
 	}
 
 	role := &RoleEntity{
-		UniqueId: "ROLE_WORKSPACE_" + UUID(),
+		UniqueId: "ROLE_WORKSPACE_" + workspaces.UUID(),
 
-		WorkspaceId: NewString(workspace.UniqueId),
+		WorkspaceId: workspaces.NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS, Visibility: NewString("A")},
+			{UniqueId: ROOT_ALL_ACCESS, Visibility: workspaces.NewString("A")},
 		},
 	}
 

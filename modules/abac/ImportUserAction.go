@@ -1,4 +1,6 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
 	// Override the implementation with our actual code.
@@ -6,8 +8,8 @@ func init() {
 }
 func ImportUserAction(
 	req *ImportUserActionReqDto,
-	q QueryDSL) (*OkayResponseDto,
-	*IError,
+	q workspaces.QueryDSL) (*OkayResponseDto,
+	*workspaces.IError,
 ) {
 	// Implement the logic here.
 	return nil, nil

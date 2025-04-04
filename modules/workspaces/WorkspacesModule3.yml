@@ -1,0 +1,235 @@
+name: workspaces
+meta-workspace: true
+config:
+
+  - name: production
+    type: bool
+    description: 
+      If true, set's the environment behavior to production, and some functionality will be limited
+
+  - name: tablePrefix
+    type: string
+    description: 
+      Prefix all gorm tables with some string
+  - name: tokenGenerationStrategy
+    type: string
+    default: random
+    description: 
+      Fireback supports generating tokens based on random short string, or jwt.
+
+  - name: jwtSecretKey
+    type: string
+    description: 
+      If tokenGenerationStrategy is set to jwt, then these secret will be used.
+  - name: withTaskServer
+    description: 
+      Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run
+      everything in single instance
+    type: bool
+    default: false
+  - name: name
+    description: >-
+      Environment name, such as dev, prod, test, test-eu, etc...
+  - name: dbName
+    default: ':memory:'
+    description: >-
+      Database name for vendors which provide database names, such as mysql.
+      Filename on disk for sqlite.
+  - name: certFile
+    description: SSL Certification location to server on http listener
+  - name: keyFile
+    description: SSL Certification key file
+  - name: dbLogLevel
+    description: Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.
+    default: silent
+  - name: useSSL
+    description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
+    type: bool
+  - name: dbPort
+    description: 'Database port for those which are having a port, 3306 on mysql for example'
+    type: int64
+  - name: driveEnabled
+    type: bool
+    description: >-
+      Drive is a mechanism to have file upload and download, inlining integrated
+      into the fireback
+    default: true
+  - name: dbDsn
+    description: >-
+      Connection dsn to database. Some databases allow connection using a string
+      with all credentials and configs. This has hight priority, if set other
+      details will be ignored.
+  - name: dbHost
+    description: 'Database host, such as localhost, or 127.0.0.1'
+  - name: dbUsername
+    description: 'Database username for connection, such as root.'
+  - name: dbPassword
+    description: Database password for connection. Can be empty if there is no password
+  - name: ginMode
+    description: 'Gin framework mode, which could be ''test'', ''debug'', ''release'''
+  - name: storage
+    description: This is the storage url which files will be uploaded to
+  - name: dbVendor
+    default: sqlite
+    description: >-
+      Database vendor name, such as sqlite, mysql, or any other supported
+      database.
+  - name: stdOut
+    description: Writes the logs instead of std out into these log files.
+  - name: workerAddress
+    description: >-
+      This is the url (host and port) of a queue service. If not set, we use the
+      internal queue system
+    default: '127.0.0.1:6379'
+  - name: workerConcurrency
+    description: How many tasks worker can take concurrently
+    default: 10
+    type: int
+  - name: stdErr
+    description: Writes the errors instead of std err into these log files.
+  - name: tusPort
+    description: Resumable file upload server port.
+  - name: cliToken
+    description: 'Authorization token for cli apps, to access resoruces similar on http api'
+  - name: cliRegion
+    description: 'Region, for example us or pl'
+    default: us
+  - name: cliLanguage
+    description: 'Language of the cli operations, for example en or pl'
+    default: en
+  - name: cliWorkspace
+    description: Selected workspace in the cli context.
+  - name: port
+    description: The port which application would be lifted
+    default: 4500
+    type: int64
+  - name: host
+    default: localhost
+    description: Application host which http server will be lifted
+  - name: macIdentifier
+    default: fireback
+    description: Used name for installing app as system service on macos installers
+  - name: debianIdentifier
+    description: Used name for installing app as system service on ubuntu installers
+    default: fireback
+  - name: windowsIdentifier
+    description: Used name for installing app as system service on windows installers
+    default: fireback
+messages:
+  recaptcha2Error:
+    en: Recaptcha is not correct. Try again to solve the recaptcha.
+  recaptcha2Needed:
+    en: You need to provide recaptcha2 for this api.
+  dataTypeDoesNotExistsInFireback:
+    en: This data type does not exist in fireback. %name %location
+  inviteToWorkspaceMailSenderMissing:
+    en: >-
+      We cannot send the invitation via email address, because sender email is
+      not available, or not configurated.
+    fa: >-
+      امکان ارسال دعوت نامه از طریق ایمیل وجود ندارد، چون مدیریت تنظیمات لازم
+      برای ایمیل را انجام نداده یا آن را برای شما محدود کرده است.
+  userWhichHasThisTokenDoesNotExist:
+    en: User which has this token does not exists
+    fa: >-
+      کاربری که با این دسترسی وارد شده بود وجود ندارد. لطفا دوباره به سیستم وارد
+      شوید
+  provideTokenInAuthorization:
+    en: >-
+      Request requires authroization, please make sure you are logged in, and
+      have enough access level
+    fa: شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید
+  userNotFoundOrDeleted:
+    en: >-
+      User not found, your account might be deleted, or access level has been
+      reduced.
+    fa: >-
+      کاربر پیدا نشد ممکن است اکانت حذف شده باشد یا سطح دسترسی آن کاهش پیدا کرده
+      باشد
+  selectWorkspaceId:
+    en: You need to select a correct workspace-id in header section
+    fa: شما باید تیم یا ورک اسپیس را در بخش هدر با فیلد workspace-id تعیین کنید
+  emailConfigurationMissing:
+    en: Email configuration is not available
+  gsmConfigurationIsNotAvailable:
+    en: GSM Services configuration is not available
+  emailConfigurationIsNotAvailable:
+    en: Email configuration is not available
+  passportUserNotAvailable:
+    en: User with this passport is not available at this moment
+  userDoesNotExist:
+    en: User is not available.
+  alreadyConfirmed:
+    en: Already confirmed
+  emailNotFound:
+    en: Email is not found
+  emailIsNotValid:
+    en: The email address is not valid.
+  phoneNumberIsNotValid:
+    en: The phone number is not valid.
+  invitationExpired:
+    en: Invitation has been expired.
+  passwordRequired:
+    en: Password is required
+  passportNotAvailable:
+    en: This passport is not available. Please check credentials and try again
+  resetNotFound:
+    en: Reset not found
+  passportNotFound:
+    en: This passport is not available. Please check credentials and try again
+  passwordDidNotUpdated:
+    en: Password did not get updated for some unknown reason.
+  otaRequestBlockedUntil:
+    en: Request is blocked until.
+  emailIsNotConfigured:
+    en: Email server is not configured
+  otpCodeInvalid:
+    en: Otp code is invalid
+  invalidContent:
+    en: Body content is not correct. You need a valid json.
+  bodyIsMissing:
+    en: Body content is not correct. You need a valid json.
+  notEnoughPermission:
+    en: You do not have enough permission for this section
+  invalidExchangeKey:
+    en: Invalid exchange key
+  smsNotSent:
+    en: Sending text message has failed.
+  invokeUrlMissing:
+    en: Invoking url is missing
+  fileNotFound:
+    en: File not found
+  validationFailedOnSomeFields:
+    en: Validation has failed on some fields
+  actionOnlyInRoot:
+    en: This action is only allowed when user belongs to root workspace, and root is selected
+  otpNotAvailableForThisType:
+    en: This type of account does not have any otp method for authentication.
+  sessionSecretIsNeeded:
+    en: Session secret is needed to continue creating a user. Use checkClassicPassport first with value, to get the required steps for account creation.
+  totpIsNotAvailableForThisPassport:
+    en: This passport doesn't have totp setup. Contact the administrator to set it up for you.
+  totpCodeIsNotValid:
+    en: The totp code from the app is incorrect. Double check and try again.
+  passportTotpNotConfirmed:
+    en: The totp code from app is correct, but we could not store it in your account. You might be asked to setup again later.
+  sessionSecretIsNotAvailable:
+    en: Session secret is not available or expired. Try to use the checkClassicPassport flow again.
+  otpFailed:
+    en: At the moment we cannot send you one time password. Please contact the support.
+  passwordDoesNotMeetTheSecurityRequirement:
+    en: Password choosen doesn't meet the security requirement.
+  fieldRequired:
+    en: This field is required
+  fieldInvalidEmail:
+    en: Invalid email address
+  fieldOneOf:
+    en: "The value you have provided needs to be one of these values: %s"
+  unsupportedOAuth:
+    en: OAuth service is not available or not supported yet.
+  invalidToken:
+    en: Token provided is not valid.
+  failedToDecodeGoogle:
+    en: Failed to decode the google token, it's not available at this moment.
+  invitationNotFound:
+    en: Invitation not found or expired.

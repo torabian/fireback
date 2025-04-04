@@ -1,4 +1,6 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
 	// Override the implementation with our actual code.
@@ -9,7 +11,7 @@ func init() {
 *	Creates a workspace, considering the parent workspace,
 *	Who creates it, and might accept even manager and roles in the first
 **/
-func CreateWorkspaceAction(req *CreateWorkspaceActionReqDto, q QueryDSL) (*WorkspaceEntity, *IError) {
+func CreateWorkspaceAction(req *CreateWorkspaceActionReqDto, q workspaces.QueryDSL) (*WorkspaceEntity, *workspaces.IError) {
 
 	context := &GenerateUserDto{
 		createUser:      false,
@@ -19,7 +21,7 @@ func CreateWorkspaceAction(req *CreateWorkspaceActionReqDto, q QueryDSL) (*Works
 		},
 		user: &UserEntity{
 			UniqueId: q.UserId,
-			UserId:   NewString(q.UserId),
+			UserId:   workspaces.NewString(q.UserId),
 		},
 		restricted: true,
 		// createRole: true,

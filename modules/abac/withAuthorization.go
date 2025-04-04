@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import (
 	"encoding/json"
@@ -8,53 +8,54 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 var ROOT_VAR = "root"
 
 // Bare minimum handler
 
-type WithAuthorizationPureImpl func(context *AuthContextDto) (*AuthResultDto, *IError)
+type WithAuthorizationPureImpl func(context *AuthContextDto) (*AuthResultDto, *workspaces.IError)
 
-var WithAuthorizationPure func(context *AuthContextDto) (*AuthResultDto, *IError)
+var WithAuthorizationPure func(context *AuthContextDto) (*AuthResultDto, *workspaces.IError)
 
 // Default authorization compute function for Fireback ABAC.
 // You can get inspired by this function and make the authorization
-func WithAuthorizationPureDefault(context *AuthContextDto) (*AuthResultDto, *IError) {
+func WithAuthorizationPureDefault(context *AuthContextDto) (*AuthResultDto, *workspaces.IError) {
 	result := &AuthResultDto{}
 
 	// workspaceId := context.WorkspaceId
 	token := context.Token
 
 	if token == "" {
-		return nil, Create401Error(&WorkspacesMessages.ProvideTokenInAuthorization, []string{})
+		return nil, workspaces.Create401Error(&AbacMessages.ProvideTokenInAuthorization, []string{})
 	}
 
 	user, err := GetUserFromToken(token)
 
 	if err != nil {
-		return nil, Create401Error(&WorkspacesMessages.UserNotFoundOrDeleted, []string{})
+		return nil, workspaces.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
 	}
 
 	if user == nil {
-		return nil, Create401Error(&WorkspacesMessages.UserNotFoundOrDeleted, []string{})
+		return nil, workspaces.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
 	}
 
-	access, accessError := GetUserAccessLevels(QueryDSL{UserId: user.UniqueId})
+	access, accessError := GetUserAccessLevels(workspaces.QueryDSL{UserId: user.UniqueId})
 
 	if accessError != nil {
 		return nil, accessError
 	}
 
-	query := QueryDSL{
+	query := workspaces.QueryDSL{
 		UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 		ActionRequires:         context.Capabilities,
 	}
 
-	meets, missing := MeetsAccessLevel(query, false)
+	meets, missing := workspaces.MeetsAccessLevel(query, false)
 
 	if err != nil || !meets {
-		return nil, Create401Error(&WorkspacesMessages.NotEnoughPermission, missing)
+		return nil, workspaces.Create401Error(&AbacMessages.NotEnoughPermission, missing)
 	}
 
 	result.User = user
@@ -70,9 +71,9 @@ func WithAuthorizationPureDefault(context *AuthContextDto) (*AuthResultDto, *IEr
 	// Fix this allow only on root.
 	if context.Security != nil && context.Security.AllowOnRoot {
 		if context.WorkspaceId != ROOT_VAR {
-			return nil, &IError{
+			return nil, &workspaces.IError{
 				HttpCode: 400,
-				Message:  WorkspacesMessages.ActionOnlyInRoot,
+				Message:  AbacMessages.ActionOnlyInRoot,
 			}
 		}
 	}
@@ -107,7 +108,7 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 		context := &AuthContextDto{
 			WorkspaceId:  wi,
 			Token:        tk,
-			Capabilities: []PermissionInfo{},
+			Capabilities: []workspaces.PermissionInfo{},
 		}
 
 		_, err := WithAuthorizationPure(context)
@@ -122,16 +123,16 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 }
 
 // Combine all for gin
-func WithAuthorization(securityModel *SecurityModel) gin.HandlerFunc {
+func WithAuthorization(securityModel *workspaces.SecurityModel) gin.HandlerFunc {
 	return WithAuthorizationFn(securityModel, false)
 }
-func WithAuthorizationSkip(securityModel *SecurityModel) gin.HandlerFunc {
+func WithAuthorizationSkip(securityModel *workspaces.SecurityModel) gin.HandlerFunc {
 	return WithAuthorizationFn(securityModel, true)
 }
 
 var USER_SYSTEM = "system"
 
-func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
+func WithSocketAuthorization(securityModel *workspaces.SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -180,11 +181,11 @@ func WithSocketAuthorization(securityModel *SecurityModel, skipWorkspaceId bool)
 	}
 }
 
-func WithAuthorizationFn(securityModel *SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
+func WithAuthorizationFn(securityModel *workspaces.SecurityModel, skipWorkspaceId bool) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
-		q := ExtractQueryDslFromGinContext(c)
+		q := workspaces.ExtractQueryDslFromGinContext(c)
 		wi := c.GetHeader("Workspace-id")
 		ri := c.GetHeader("Role-id")
 		tk := c.GetHeader("Authorization")

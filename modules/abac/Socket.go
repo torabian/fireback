@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	"github.com/gorilla/websocket"
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 type SocketConnection struct {
@@ -42,7 +43,7 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 	context := &AuthContextDto{
 		WorkspaceId:  workspaceId,
 		Token:        token,
-		Capabilities: []PermissionInfo{},
+		Capabilities: []workspaces.PermissionInfo{},
 	}
 
 	res, err2 := WithAuthorizationPure(context)
@@ -52,7 +53,7 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 		return
 	}
 
-	wsSession, err := upgrader.Upgrade(ginContext.Writer, ginContext.Request, nil)
+	wsSession, err := workspaces.Upgrader.Upgrade(ginContext.Writer, ginContext.Request, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

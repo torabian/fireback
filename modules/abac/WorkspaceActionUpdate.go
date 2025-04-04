@@ -1,37 +1,39 @@
-package workspaces
+package abac
 
 import (
 	"strings"
+
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
-func WorkspaceActionUpdate(query QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *IError) {
+func WorkspaceActionUpdate(query workspaces.QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *workspaces.IError) {
 
 	var item WorkspaceEntity
-	err := GetDbRef().
+	err := workspaces.GetDbRef().
 		Where(&WorkspaceEntity{UniqueId: fields.UniqueId}).
 		First(&item).
 		UpdateColumns(fields).Error
 	if err != nil {
-		return &item, GormErrorToIError(err)
+		return &item, workspaces.GormErrorToIError(err)
 	}
 
 	return &item, nil
 }
 
-func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) *IError {
+func SendInviteEmail(query workspaces.QueryDSL, invite *WorkspaceInviteEntity) *workspaces.IError {
 
-	config, err := NotificationConfigActionGetOneByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err := NotificationConfigActionGetOneByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR})
 
 	if err != nil {
 		return err
 	}
 
 	if config == nil {
-		return Create401Error(&WorkspacesMessages.EmailConfigurationIsNotAvailable, []string{})
+		return workspaces.Create401Error(&AbacMessages.EmailConfigurationIsNotAvailable, []string{})
 	}
 
 	if config.InviteToWorkspaceSender == nil {
-		return Create401Error(&WorkspacesMessages.UserWhichHasThisTokenDoesNotExist, []string{})
+		return workspaces.Create401Error(&AbacMessages.UserWhichHasThisTokenDoesNotExist, []string{})
 	}
 
 	content := config.InviteToWorkspaceContent
@@ -52,7 +54,7 @@ func SendInviteEmail(query QueryDSL, invite *WorkspaceInviteEntity) *IError {
 	}, config.GeneralEmailProvider)
 
 	if err3 != nil {
-		return GormErrorToIError(err3)
+		return workspaces.GormErrorToIError(err3)
 	}
 
 	return nil

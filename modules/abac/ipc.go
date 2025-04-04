@@ -1,16 +1,18 @@
-package workspaces
+package abac
 
 import (
 	"net/url"
 	"strings"
+
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
-func WithIPCAuthorization(q *QueryDSL, sourceQuery string, actionPath string, ipcSecurity string) {
+func WithIPCAuthorization(q *workspaces.QueryDSL, sourceQuery string, actionPath string, ipcSecurity string) {
 	if q.ItemsPerPage == 0 {
 		q.ItemsPerPage = 10
 	}
 
-	var getBookPath = NewUrl(actionPath)
+	var getBookPath = workspaces.NewUrl(actionPath)
 	match, ok := getBookPath.Match("/" + sourceQuery)
 	if ok && match.Params["uniqueId"] != "" {
 		q.UniqueId = match.Params["uniqueId"]
@@ -66,29 +68,29 @@ func WithIPCAuthorization(q *QueryDSL, sourceQuery string, actionPath string, ip
 
 }
 
-func ActionArgumentFormatQuery(query string, affix string, ipcSecurity string) QueryDSL {
+func ActionArgumentFormatQuery(query string, affix string, ipcSecurity string) workspaces.QueryDSL {
 
-	queryParsed := DtoFromString[QueryDSL](query)
+	queryParsed := workspaces.DtoFromString[workspaces.QueryDSL](query)
 	WithIPCAuthorization(&queryParsed, query, affix, ipcSecurity)
 	return queryParsed
 }
 
-func ActionArgumentsFormatPostOne[T any](dto string, query string, affix string, ipcSecurity string) (*T, QueryDSL) {
-	dtoParsed := DtoFromString[T](dto)
-	queryParsed := DtoFromString[QueryDSL](query)
+func ActionArgumentsFormatPostOne[T any](dto string, query string, affix string, ipcSecurity string) (*T, workspaces.QueryDSL) {
+	dtoParsed := workspaces.DtoFromString[T](dto)
+	queryParsed := workspaces.DtoFromString[workspaces.QueryDSL](query)
 	WithIPCAuthorization(&queryParsed, query, affix, ipcSecurity)
 	return &dtoParsed, queryParsed
 }
 
-func ActionArgumentsFormatUpdateOne[T any](dto string, query string, affix string, ipcSecurity string) (QueryDSL, *T) {
-	dtoParsed := DtoFromString[T](dto)
-	queryParsed := DtoFromString[QueryDSL](query)
+func ActionArgumentsFormatUpdateOne[T any](dto string, query string, affix string, ipcSecurity string) (workspaces.QueryDSL, *T) {
+	dtoParsed := workspaces.DtoFromString[T](dto)
+	queryParsed := workspaces.DtoFromString[workspaces.QueryDSL](query)
 	WithIPCAuthorization(&queryParsed, query, affix, ipcSecurity)
 	return queryParsed, &dtoParsed
 }
 
-func ActionArgumentsFormatDeleteDSL(query string, affix string, ipcSecurity string) QueryDSL {
-	queryParsed := DtoFromString[QueryDSL](query)
+func ActionArgumentsFormatDeleteDSL(query string, affix string, ipcSecurity string) workspaces.QueryDSL {
+	queryParsed := workspaces.DtoFromString[workspaces.QueryDSL](query)
 	WithIPCAuthorization(&queryParsed, query, affix, ipcSecurity)
 	return queryParsed
 }

@@ -1,4 +1,6 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 /*
 This file holds in memory some temporary solution to tokens that need to be used upon redirection
@@ -12,7 +14,7 @@ type exchangeItem struct {
 var exchangePool map[string]exchangeItem = map[string]exchangeItem{}
 
 func PutTokenInExchangePool(token string) string {
-	uniqueId := UUID()
+	uniqueId := workspaces.UUID()
 
 	exchangePool[uniqueId] = exchangeItem{
 		token: token,
@@ -21,13 +23,13 @@ func PutTokenInExchangePool(token string) string {
 	return uniqueId
 }
 
-func GetTokenFromExchangePoolAction(query QueryDSL) (*ExchangeKeyInformationDto, *IError) {
+func GetTokenFromExchangePoolAction(query workspaces.QueryDSL) (*ExchangeKeyInformationDto, *workspaces.IError) {
 	item := exchangePool[query.UniqueId]
 	token := item.token
 	delete(exchangePool, query.UniqueId)
 
 	if token == "" {
-		return nil, Create401Error(&WorkspacesMessages.InvalidExchangeKey, []string{})
+		return nil, workspaces.Create401Error(&AbacMessages.InvalidExchangeKey, []string{})
 	}
 
 	return &ExchangeKeyInformationDto{Key: token}, nil
@@ -165,25 +167,25 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 
 	var item TokenEntity
 
-	if err := GetDbRef().Preload("User").Where(RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
+	if err := workspaces.GetDbRef().Preload("User").Where(workspaces.RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
 		return &UserEntity{}, err
 	}
 
-	user, _ := UserActions.GetOne(QueryDSL{UniqueId: item.UserId.String})
+	user, _ := UserActions.GetOne(workspaces.QueryDSL{UniqueId: item.UserId.String})
 	return user, nil
 }
 
 func UserActionCreate(
-	dto *UserEntity, query QueryDSL,
-) (*UserEntity, *IError) {
+	dto *UserEntity, query workspaces.QueryDSL,
+) (*UserEntity, *workspaces.IError) {
 	query.WorkspaceId = "root"
 	return UserActionCreateFn(dto, query)
 }
 
 func UserActionUpdate(
-	query QueryDSL,
+	query workspaces.QueryDSL,
 	fields *UserEntity,
-) (*UserEntity, *IError) {
+) (*UserEntity, *workspaces.IError) {
 	return UserActionUpdateFn(query, fields)
 }
 

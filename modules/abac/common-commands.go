@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
+	"github.com/torabian/fireback/modules/workspaces"
 	systemconfigs "github.com/torabian/fireback/modules/workspaces/systemconfigs"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
@@ -1029,7 +1030,7 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) cli.Commands {
 	}
 }
 
-func GetCliMockTools(xapp *FirebackApp) cli.Command {
+func GetCliMockTools(xapp *workspaces.FirebackApp) cli.Command {
 	return cli.Command{
 		Name:  "mock",
 		Usage: "Generates or export mocks based on all available content inside the database",
@@ -1123,7 +1124,7 @@ var CLIMIDCommand cli.Command = cli.Command{
 
 	Action: func(c *cli.Context) error {
 
-		fmt.Println(UNIQUE_MACHINE_ID)
+		fmt.Println(workspaces.UNIQUE_MACHINE_ID)
 		return nil
 	},
 }

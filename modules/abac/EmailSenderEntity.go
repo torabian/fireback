@@ -1,3 +1,3 @@
-package workspaces
+package abac
 
 func init() {}

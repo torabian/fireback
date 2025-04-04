@@ -1,12 +1,13 @@
-package workspaces
+package abac
 
 import (
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
-func NotificationModuleSetup() *ModuleProvider {
-	module := &ModuleProvider{
+func NotificationModuleSetup() *workspaces.ModuleProvider {
+	module := &workspaces.ModuleProvider{
 		Name: "workspaces",
 	}
 
@@ -16,7 +17,7 @@ func NotificationModuleSetup() *ModuleProvider {
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	)
 
-	module.Actions = [][]Module3Action{
+	module.Actions = [][]workspaces.Module3Action{
 		GetEmailProviderModule3Actions(),
 		GetEmailSenderModule3Actions(),
 		GetNotificationConfigModule3Actions(),

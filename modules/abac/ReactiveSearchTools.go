@@ -1,6 +1,8 @@
-package workspaces
+package abac
 
-func QueryMenusReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
+import "github.com/torabian/fireback/modules/workspaces"
+
+func QueryMenusReact(query workspaces.QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "label %" + query.SearchPhrase + "%"
@@ -11,7 +13,7 @@ func QueryMenusReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 			continue
 		}
 
-		uid := UUID()
+		uid := workspaces.UUID()
 		chanStream <- &ReactiveSearchResultDto{
 			Phrase:      item.Label,
 			Description: item.Label,
@@ -24,7 +26,7 @@ func QueryMenusReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	}
 
 }
-func QueryRolesReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
+func QueryRolesReact(query workspaces.QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "name %" + query.SearchPhrase + "%"
@@ -34,7 +36,7 @@ func QueryRolesReact(query QueryDSL, chanStream chan *ReactiveSearchResultDto) {
 	for _, item := range items {
 		loc := "/role/" + item.UniqueId
 
-		uid := UUID()
+		uid := workspaces.UUID()
 
 		chanStream <- &ReactiveSearchResultDto{
 			Phrase:      item.Name,

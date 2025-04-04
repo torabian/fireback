@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -62,7 +63,7 @@ Use the following code for single time authorization
 {{ .Otp }}
 `
 
-func QuickGetOtpMessage(q QueryDSL, field RegionContentKey) *RegionalContentEntity {
+func QuickGetOtpMessage(q workspaces.QueryDSL, field RegionContentKey) *RegionalContentEntity {
 	if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
 		LanguageId:       q.Language,
 		Region:           "any",
@@ -107,13 +108,13 @@ func (x *RegionalContentEntity) CompileTitle(data map[string]string) (string, er
 
 }
 
-func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q QueryDSL) (*RegionalContentEntity, *IError) {
+func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
 
 	key := string(dto.RegionContentKey)
 	var item RegionalContentEntity
 	condition := &RegionalContentEntity{LanguageId: dto.LanguageId, Region: dto.Region, KeyGroup: key}
 
-	if err := GetRef(q).
+	if err := workspaces.GetRef(q).
 		Debug().
 		Model(&RegionalContentEntity{}).
 		Where(condition).
@@ -125,15 +126,15 @@ func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q QueryDSL) (*R
 			condition.LanguageId = "en"
 			condition.Region = "any"
 
-			if err2 := GetRef(q).
+			if err2 := workspaces.GetRef(q).
 				Debug().
 				Model(&RegionalContentEntity{}).
 				Where(condition).
 				First(&item).Error; err2 != nil {
-				return nil, GormErrorToIError(err2)
+				return nil, workspaces.GormErrorToIError(err2)
 			}
 		} else {
-			return nil, GormErrorToIError(err)
+			return nil, workspaces.GormErrorToIError(err)
 		}
 	}
 
@@ -164,14 +165,14 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		f := CommonCliQueryDSLBuilder(c)
+		f := workspaces.CommonCliQueryDSLBuilder(c)
 
 		result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
 			LanguageId:       c.String("lang"),
 			Region:           c.String("region"),
 			RegionContentKey: RegionContentKey(c.String(("key"))),
 		}, f)
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
 
 		return nil
 	},

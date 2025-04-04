@@ -1,10 +1,11 @@
-package workspaces
+package abac
 
 import (
 	"encoding/json"
 	"errors"
 	"strings"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	queries "github.com/torabian/fireback/modules/workspaces/queries"
 	"gorm.io/gorm"
 )
@@ -40,12 +41,12 @@ type GenerateUserDto struct {
 *	and it would never be exported to public access directly
  */
 
-func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *UserSessionDto) *IError {
+func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q workspaces.QueryDSL, session *UserSessionDto) *workspaces.IError {
 	workspaceId := dto.workspace.UniqueId
 	q.WorkspaceId = workspaceId
 
 	q.UserId = dto.user.UniqueId
-	dto.workspace.WorkspaceId = NewString(workspaceId)
+	dto.workspace.WorkspaceId = workspaces.NewString(workspaceId)
 	var actualWorkspace *WorkspaceEntity = nil
 	if ws, err := WorkspaceActions.Create(dto.workspace, q); err != nil {
 		if dto.restricted {
@@ -61,8 +62,8 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 	// This is a bit special table, I did not want introduce a new concept
 	// In fireback, so it would be like this to modify things directly.
 	if userWorkspace, err := UserWorkspaceActions.Create(&UserWorkspaceEntity{
-		WorkspaceId: NewString(workspaceId),
-		UserId:      NewString(q.UserId),
+		WorkspaceId: workspaces.NewString(workspaceId),
+		UserId:      workspaces.NewString(q.UserId),
 	}, q); err != nil {
 		if dto.restricted {
 			return err
@@ -77,14 +78,14 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q QueryDSL, session *Use
 }
 
 func runTransaction[T any](
-	entity *T, query QueryDSL,
+	entity *T, query workspaces.QueryDSL,
 	fn func(tx *gorm.DB) error,
-) (*T, *IError) {
+) (*T, *workspaces.IError) {
 
-	vf := GetRef(query).Transaction(fn)
+	vf := workspaces.GetRef(query).Transaction(fn)
 
 	if vf != nil {
-		return nil, CastToIError(vf)
+		return nil, workspaces.CastToIError(vf)
 	}
 	return entity, nil
 }
@@ -92,17 +93,17 @@ func runTransaction[T any](
 // This is core function of creating a new user in the system.
 // All passport methods, need to pass through this logic in order to
 // create account publicly.
-func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IError) {
+func UnsafeGenerateUser(dto *GenerateUserDto, q workspaces.QueryDSL) (*UserSessionDto, *workspaces.IError) {
 	session := &UserSessionDto{}
 
 	return runTransaction(session, q, func(tx *gorm.DB) error {
 		q.Tx = tx
 
 		if dto.createPassport && dto.passport != nil {
-			dto.passport.UserId = NewString(dto.user.UniqueId)
+			dto.passport.UserId = workspaces.NewString(dto.user.UniqueId)
 
 			// Passport and user always belong to the root workspace
-			dto.passport.WorkspaceId = NewString(ROOT_VAR)
+			dto.passport.WorkspaceId = workspaces.NewString(ROOT_VAR)
 			q.WorkspaceId = ROOT_VAR
 			q.UserId = dto.user.UniqueId
 			if passportdb, err := PassportActions.Create(dto.passport, q); err != nil {
@@ -146,9 +147,9 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 			// Note: here we skipped to add the workspace role into the session
 			// this is used somewhere else
 			wre := &WorkspaceRoleEntity{
-				UserWorkspaceId: NewString(session.UserWorkspaces[0].UniqueId),
-				RoleId:          NewString(dto.role.UniqueId),
-				WorkspaceId:     NewString(dto.workspace.UniqueId),
+				UserWorkspaceId: workspaces.NewString(session.UserWorkspaces[0].UniqueId),
+				RoleId:          workspaces.NewString(dto.role.UniqueId),
+				WorkspaceId:     workspaces.NewString(dto.workspace.UniqueId),
 			}
 
 			wsid := q.WorkspaceId
@@ -184,11 +185,11 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q QueryDSL) (*UserSessionDto, *IEr
 *	Do any effect on the database
 **/
 func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity) {
-	osUser := GetOsUserWithPhone()
+	osUser := workspaces.GetOsUserWithPhone()
 	name := osUser.Name + "'s workspace"
 	user := &UserEntity{
 		UniqueId:    "OS_USER_" + osUser.Uid,
-		WorkspaceId: NewString(ROOT_VAR),
+		WorkspaceId: workspaces.NewString(ROOT_VAR),
 		FirstName:   osUser.Username,
 		LastName:    osUser.Username,
 	}
@@ -197,22 +198,22 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	workspace := &WorkspaceEntity{
 		Name:        name,
 		UniqueId:    wid,
-		WorkspaceId: NewString(wid),
-		LinkerId:    NewString(ROOT_VAR),
-		ParentId:    NewString(ROOT_VAR),
-		TypeId:      NewString(ROOT_VAR),
+		WorkspaceId: workspaces.NewString(wid),
+		LinkerId:    workspaces.NewString(ROOT_VAR),
+		ParentId:    workspaces.NewString(ROOT_VAR),
+		TypeId:      workspaces.NewString(ROOT_VAR),
 	}
 
 	osRole := "OS User"
 	role := &RoleEntity{
 		UniqueId:    "ROLE_WORKSPACE_" + osUser.Uid,
 		Name:        osRole,
-		WorkspaceId: NewString(workspace.UniqueId),
+		WorkspaceId: workspaces.NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{
 				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  NewString("A"),
-				WorkspaceId: NewString("system"),
+				Visibility:  workspaces.NewString("A"),
+				WorkspaceId: workspaces.NewString("system"),
 			},
 		},
 	}
@@ -220,7 +221,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	return user, role, workspace
 }
 
-func DetectSignupMechanismOverValue(value string) (string, *IError) {
+func DetectSignupMechanismOverValue(value string) (string, *workspaces.IError) {
 	if strings.Contains(value, "@") {
 		return PASSPORT_METHOD_EMAIL, nil
 	}
@@ -228,16 +229,16 @@ func DetectSignupMechanismOverValue(value string) (string, *IError) {
 		return PASSPORT_METHOD_PHONE, nil
 	}
 
-	return "", Create401Error(&WorkspacesMessages.PassportNotAvailable, []string{})
+	return "", workspaces.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 
 }
 
 func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
 
-	userId := UUID()
-	workspaceId := UUID()
-	roleId := UUID()
-	passportId := UUID()
+	userId := workspaces.UUID()
+	workspaceId := workspaces.UUID()
+	roleId := workspaces.UUID()
+	passportId := workspaces.UUID()
 
 	user := &UserEntity{
 		UniqueId:  userId,
@@ -249,8 +250,8 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	workspace := &WorkspaceEntity{
 		UniqueId: workspaceId,
 		Name:     wname,
-		LinkerId: NewString(ROOT_VAR),
-		ParentId: NewString(ROOT_VAR),
+		LinkerId: workspaces.NewString(ROOT_VAR),
+		ParentId: workspaces.NewString(ROOT_VAR),
 		TypeId:   dto.WorkspaceTypeId,
 	}
 
@@ -258,12 +259,12 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	role := &RoleEntity{
 		UniqueId:    roleId,
 		Name:        osRole,
-		WorkspaceId: NewString(workspace.UniqueId),
+		WorkspaceId: workspaces.NewString(workspace.UniqueId),
 		Capabilities: []*CapabilityEntity{
 			{
 				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  NewString("A"),
-				WorkspaceId: NewString("system"),
+				Visibility:  workspaces.NewString("A"),
+				WorkspaceId: workspaces.NewString("system"),
 			},
 		},
 	}
@@ -271,7 +272,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 	method, _ := DetectSignupMechanismOverValue(dto.Value)
 	passwordHashed := ""
 	if strings.TrimSpace(dto.Password) != "" {
-		genPass, _ := HashPassword(dto.Password)
+		genPass, _ := workspaces.HashPassword(dto.Password)
 		passwordHashed = genPass
 	}
 
@@ -306,17 +307,17 @@ func (x *UserAccessPerWorkspaceDto) Json() string {
 	return ""
 }
 
-func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *IError) {
+func GetUserAccessLevels(query workspaces.QueryDSL) (*UserAccessLevelDto, *workspaces.IError) {
 
 	access := &UserAccessLevelDto{}
 	query.ItemsPerPage = 1000
 
-	items, _, err := UnsafeQuerySqlFromFs[UserRoleWorkspacePermissionDto](
+	items, _, err := workspaces.UnsafeQuerySqlFromFs[UserRoleWorkspacePermissionDto](
 		&queries.QueriesFs, "UserRolePermission", query,
 	)
 
 	if err != nil {
-		return nil, CastToIError(err)
+		return nil, workspaces.CastToIError(err)
 	}
 
 	ws := UserAccessPerWorkspaceDto{}

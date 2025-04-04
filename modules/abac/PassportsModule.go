@@ -1,13 +1,14 @@
-package workspaces
+package abac
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
-func PassportsModuleSetup() *ModuleProvider {
-	module := &ModuleProvider{
+func PassportsModuleSetup() *workspaces.ModuleProvider {
+	module := &workspaces.ModuleProvider{
 
 		// it must write on the workspaces instead
 		Name: "workspaces",
@@ -18,7 +19,7 @@ func PassportsModuleSetup() *ModuleProvider {
 			var result *UserSessionDto
 			if result != nil {
 
-				WriteMockDataToFile(lang, "", "UserSessionDto", gin.H{
+				workspaces.WriteMockDataToFile(lang, "", "UserSessionDto", gin.H{
 					"data": gin.H{
 						"user":     result.User,
 						"passport": result.Passport,
@@ -38,7 +39,7 @@ func PassportsModuleSetup() *ModuleProvider {
 		ALL_USER_PERMISSIONS,
 	)
 
-	module.Actions = [][]Module3Action{
+	module.Actions = [][]workspaces.Module3Action{
 		GetPassportMethodModule3Actions(),
 		GetPassportModule3Actions(),
 		GetPublicJoinKeyModule3Actions(),

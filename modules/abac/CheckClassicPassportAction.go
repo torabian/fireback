@@ -1,4 +1,4 @@
-package workspaces
+package abac
 
 import (
 	"encoding/json"
@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+
+	"github.com/torabian/fireback/modules/workspaces"
 )
 
 func init() {
 	CheckClassicPassportActionImp = CheckClassicPassportAction
 }
 
-func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDSL) (*CheckClassicPassportActionResDto, *IError) {
+func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q workspaces.QueryDSL) (*CheckClassicPassportActionResDto, *workspaces.IError) {
 
 	if err := validateValueFormat(req.Value); err != nil {
 		return nil, err
@@ -37,7 +39,7 @@ func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q QueryDS
 
 // in some operations, the only option is otp either on signin or signup.
 // so we send the otp anyway, and next step can be immediately signup.
-func implicitlyRequestForOtp(passportValue string, q QueryDSL) (*CheckClassicPassportResDtoOtpInfo, *IError) {
+func implicitlyRequestForOtp(passportValue string, q workspaces.QueryDSL) (*CheckClassicPassportResDtoOtpInfo, *workspaces.IError) {
 	otpInfo, otpFailed := ClassicPassportRequestOtpAction(&ClassicPassportRequestOtpActionReqDto{Value: passportValue}, q)
 
 	// No point of continuing if the type doesn't support otp
@@ -67,9 +69,9 @@ func implicitlyRequestForOtp(passportValue string, q QueryDSL) (*CheckClassicPas
 	return nil, otpFailed
 }
 
-func findPassport(value string, q QueryDSL) *PassportEntity {
+func findPassport(value string, q workspaces.QueryDSL) *PassportEntity {
 	var passport *PassportEntity
-	if err := GetRef(q).
+	if err := workspaces.GetRef(q).
 		Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).
 		First(&passport).Error; err == nil && passport.Value != "" {
 		if passport.Value == value {
@@ -79,13 +81,13 @@ func findPassport(value string, q QueryDSL) *PassportEntity {
 	return nil
 }
 
-func validateValueFormat(value string) *IError {
+func validateValueFormat(value string) *workspaces.IError {
 	if validx, typeof := validatePassportType(value); !validx {
 		if typeof == PASSPORT_METHOD_EMAIL {
-			return Create401Error(&WorkspacesMessages.EmailIsNotValid, []string{})
+			return workspaces.Create401Error(&AbacMessages.EmailIsNotValid, []string{})
 		}
 		if typeof == PASSPORT_METHOD_PHONE {
-			return Create401Error(&WorkspacesMessages.PhoneNumberIsNotValid, []string{})
+			return workspaces.Create401Error(&AbacMessages.PhoneNumberIsNotValid, []string{})
 		}
 	}
 
@@ -93,14 +95,14 @@ func validateValueFormat(value string) *IError {
 }
 
 // Some general tests and preparation which doesn't affect logic much
-func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL) (*WorkspaceConfigEntity, *IError) {
+func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError) {
 	if err := CheckClassicPassportActionReqValidator(req); err != nil {
 		return nil, err
 	}
 
 	ClearPassportValue(&req.Value)
 
-	config, err := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err := WorkspaceConfigActions.GetByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
 		if err.HttpCode != 404 {
 			return nil, err
@@ -110,10 +112,10 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q QueryDSL
 	// If recaptcha 2 is needed
 	if config != nil && config.EnableRecaptcha2.Bool && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
 		if req.SecurityToken == "" {
-			return nil, &IError{Message: WorkspacesMessages.Recaptcha2Needed}
+			return nil, &workspaces.IError{Message: AbacMessages.Recaptcha2Needed}
 		}
 		if err := validateRecaptcha(req.SecurityToken, config.Recaptcha2ServerKey); err != nil {
-			return nil, &IError{Message: WorkspacesMessages.Recaptcha2Error}
+			return nil, &workspaces.IError{Message: AbacMessages.Recaptcha2Error}
 		}
 	}
 
@@ -154,7 +156,7 @@ func validatePassportType(input string) (bool, string) {
 }
 
 // used when a passport (email/phone) exists and they want to authenticate
-func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceConfigEntity, q QueryDSL) (*CheckClassicPassportActionResDto, *IError) {
+func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceConfigEntity, q workspaces.QueryDSL) (*CheckClassicPassportActionResDto, *workspaces.IError) {
 	res := &CheckClassicPassportActionResDto{}
 
 	// if otp is forced, then user can only authenticate using otp.
@@ -201,7 +203,7 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	return res, nil
 }
 
-func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q QueryDSL) (*CheckClassicPassportActionResDto, *IError) {
+func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q workspaces.QueryDSL) (*CheckClassicPassportActionResDto, *workspaces.IError) {
 	res := &CheckClassicPassportActionResDto{}
 
 	enableTotp := config != nil && config.EnableTotp.Bool
@@ -226,7 +228,7 @@ func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity
 		// since the otp is only option, and if it has been failed then we should tell client
 		if res.OtpInfo == nil {
 			log.Default().Println("Failed to send otp:", errMsg)
-			return nil, Create401Error(&WorkspacesMessages.OtpFailed, []string{})
+			return nil, workspaces.Create401Error(&AbacMessages.OtpFailed, []string{})
 		}
 
 		return res, nil

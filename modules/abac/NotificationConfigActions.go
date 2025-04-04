@@ -1,29 +1,30 @@
-package workspaces
+package abac
 
 import (
 	"io/ioutil"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	seeders "github.com/torabian/fireback/modules/workspaces/seeders"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 func NotificationConfigActionCreate(
-	dto *NotificationConfigEntity, query QueryDSL,
-) (*NotificationConfigEntity, *IError) {
+	dto *NotificationConfigEntity, query workspaces.QueryDSL,
+) (*NotificationConfigEntity, *workspaces.IError) {
 	return NotificationConfigActionCreateFn(dto, query)
 }
 
 func NotificationConfigActionUpdate(
-	query QueryDSL,
+	query workspaces.QueryDSL,
 	fields *NotificationConfigEntity,
-) (*NotificationConfigEntity, *IError) {
+) (*NotificationConfigEntity, *workspaces.IError) {
 	return NotificationConfigActionUpdateFn(query, fields)
 }
 
 func NotificationTestMailAction(
-	dto *TestMailDto, query QueryDSL,
-) (*OkayResponseDto, *IError) {
+	dto *TestMailDto, query workspaces.QueryDSL,
+) (*OkayResponseDto, *workspaces.IError) {
 
 	q := query
 	q.UniqueId = dto.SenderId
@@ -36,7 +37,7 @@ func NotificationTestMailAction(
 	conf, err2 := NotificationWorkspaecConfigActionGet(query)
 
 	if err2 != nil {
-		return nil, GormErrorToIError(err2)
+		return nil, workspaces.GormErrorToIError(err2)
 	}
 
 	err3 := SendMail(EmailMessageContent{
@@ -49,34 +50,34 @@ func NotificationTestMailAction(
 	}, conf.GeneralEmailProvider)
 
 	if err3 != nil {
-		return nil, GormErrorToIError(err)
+		return nil, workspaces.GormErrorToIError(err)
 	}
 
-	return nil, GormErrorToIError(err)
+	return nil, workspaces.GormErrorToIError(err)
 }
 
-func NotificationWorkspaecConfigActionGet(query QueryDSL) (*NotificationConfigEntity, *IError) {
+func NotificationWorkspaecConfigActionGet(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
 
 	var item *NotificationConfigEntity
 
-	q := GetDbRef()
+	q := workspaces.GetDbRef()
 	err := q.Preload("GeneralEmailProvider").
 		Preload("InviteToWorkspaceSender").
 		Preload("ForgetPasswordSender").
 		Preload("ConfirmEmailSender").
-		Where(RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
+		Where(workspaces.RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
 
 	if err == gorm.ErrRecordNotFound {
 		item = &NotificationConfigEntity{
-			UniqueId:       UUID(),
-			WorkspaceId:    NewString(query.WorkspaceId),
+			UniqueId:       workspaces.UUID(),
+			WorkspaceId:    workspaces.NewString(query.WorkspaceId),
 			AcceptLanguage: "*",
 		}
 
 		err = q.Create(&item).Error
 
 		if err != nil {
-			return item, GormErrorToIError(err)
+			return item, workspaces.GormErrorToIError(err)
 		}
 	}
 
@@ -108,7 +109,7 @@ func NotificationWorkspaecConfigActionGet(query QueryDSL) (*NotificationConfigEn
 	item.ConfirmEmailTitleDefault = ConfirmMailTitle
 
 	if err != nil {
-		return item, GormErrorToIError(err)
+		return item, workspaces.GormErrorToIError(err)
 	}
 
 	return item, nil
@@ -147,24 +148,24 @@ func init() {
 }
 
 func NotificationWorkspaceConfigActionUpdate(
-	query QueryDSL,
+	query workspaces.QueryDSL,
 	fields *NotificationConfigEntity,
-) (*NotificationConfigEntity, *IError) {
+) (*NotificationConfigEntity, *workspaces.IError) {
 
 	NotificationConfigEntityPreSanitize(fields, query)
 	var item NotificationConfigEntity
-	q := GetDbRef().
-		Where(&NotificationConfigEntity{WorkspaceId: NewString(query.WorkspaceId)}).
+	q := workspaces.GetDbRef().
+		Where(&NotificationConfigEntity{WorkspaceId: workspaces.NewString(query.WorkspaceId)}).
 		First(&item)
 
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, GormErrorToIError(err)
+		return nil, workspaces.GormErrorToIError(err)
 	}
 
-	err = GetDbRef().
+	err = workspaces.GetDbRef().
 		Preload(clause.Associations).
-		Where(&NotificationConfigEntity{WorkspaceId: NewString(query.WorkspaceId)}).
+		Where(&NotificationConfigEntity{WorkspaceId: workspaces.NewString(query.WorkspaceId)}).
 		First(&item).Error
 
 	return &item, nil

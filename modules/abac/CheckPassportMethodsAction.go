@@ -1,15 +1,17 @@
-package workspaces
+package abac
+
+import "github.com/torabian/fireback/modules/workspaces"
 
 func init() {
 	// Override the implementation with our actual code.
 	CheckPassportMethodsActionImp = CheckPassportMethodsAction
 }
 
-func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, *IError) {
+func CheckPassportMethodsAction(q workspaces.QueryDSL) (*CheckPassportMethodsActionResDto, *workspaces.IError) {
 	state := &CheckPassportMethodsActionResDto{}
 
 	// Get the workspacec configuration as well, for different reasons such as captcha info
-	config, err2 := WorkspaceConfigActions.GetByWorkspace(QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err2 := WorkspaceConfigActions.GetByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR})
 	if err2 != nil {
 		if err2.HttpCode != 404 {
 			return nil, err2
@@ -30,9 +32,9 @@ func CheckPassportMethodsAction(q QueryDSL) (*CheckPassportMethodsActionResDto, 
 	// Known unsafe operation. We need all the records in the database, in order
 	// to determine the best authentication option for the user.
 	// configuration field are not being returned publicly, only the final state.
-	stream, _, err := PassportMethodEntityStream(QueryDSL{})
+	stream, _, err := PassportMethodEntityStream(workspaces.QueryDSL{})
 	if err != nil {
-		return nil, CastToIError(err)
+		return nil, workspaces.CastToIError(err)
 	}
 
 	for items := range stream {
