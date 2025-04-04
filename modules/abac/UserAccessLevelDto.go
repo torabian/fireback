@@ -46,8 +46,8 @@ var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserAccessLevelDto struct {
-	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
-	UserAccessPerWorkspaceId workspaces.String          `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
+	UserAccessPerWorkspace   *workspaces.UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
+	UserAccessPerWorkspaceId workspaces.String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
 }
 type UserAccessLevelDtoList struct {
 	Items []*UserAccessLevelDto

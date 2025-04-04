@@ -70,10 +70,10 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AuthResultDto struct {
-	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
-	UserAccessPerWorkspaceId workspaces.String          `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
-	User                     *UserEntity                `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	UserId                   workspaces.String          `json:"userId" yaml:"userId"        `
+	UserAccessPerWorkspace   *workspaces.UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
+	UserAccessPerWorkspaceId workspaces.String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
+	User                     *UserEntity                           `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	UserId                   workspaces.String                     `json:"userId" yaml:"userId"        `
 	// After authentication, this object contains the workspace permissions and current selected role permissions, to create context sql query based on that
 	SqlContext string `json:"sqlContext" yaml:"sqlContext"        `
 }

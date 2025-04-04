@@ -218,7 +218,7 @@ func WithAuthorizationFn(securityModel *workspaces.SecurityModel, skipWorkspaceI
 
 // It would convert the current selected role_id and workspace_id into a sql
 // with given permissions to make the queries do not need check that again
-func GetSqlContext(x *UserAccessPerWorkspaceDto, activeWorkspaceId string, allowCascade bool) string {
+func GetSqlContext(x *workspaces.UserAccessPerWorkspaceDto, activeWorkspaceId string, allowCascade bool) string {
 	conditions := []string{
 
 		// Visibility A means that the content is accessible across the entire project.

@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/workspaces"
 	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
+	"github.com/urfave/cli"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -59,14 +61,14 @@ var xapp = &workspaces.FirebackApp{
 	},
 	Modules: []*workspaces.ModuleProvider{
 		// Important to setup the workspaces at first, so the capabilties module is there
-		// workspaces.WorkspaceModuleSetup(),
-		// workspaces.DriveModuleSetup(),
-		// workspaces.NotificationModuleSetup(),
-		// workspaces.PassportsModuleSetup(),
-		// &workspaces.ModuleProvider{
-		// 	CliHandlers: []cli.Command{
-		// 		workspaces.NewProjectCli(),
-		// 	},
-		// },
+		abac.WorkspaceModuleSetup(),
+		abac.DriveModuleSetup(),
+		abac.NotificationModuleSetup(),
+		abac.PassportsModuleSetup(),
+		&workspaces.ModuleProvider{
+			CliHandlers: []cli.Command{
+				workspaces.NewProjectCli(),
+			},
+		},
 	},
 }
