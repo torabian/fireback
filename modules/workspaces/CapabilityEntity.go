@@ -47,12 +47,11 @@ func treeToCapabilityChild(items []NestedNode) []*CapabilityChild {
 }
 
 func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
- 
+
 	if query.UserAccessPerWorkspace == nil {
 		return []string{}, []string{}
 	}
 
- 
 	data := *query.UserAccessPerWorkspace
 	workspaceAccesses := []string{}
 	rolesPermission := []string{}
@@ -162,6 +161,17 @@ func GetCapabilityRefreshCommand(xapp *FirebackApp) cli.Command {
 
 }
 
+var ListCapabilitiesActionCmd cli.Command = cli.Command{
+	Name:  "list",
+	Usage: `Lists all of the capabilities in database as a array of string as root access`,
+	Action: func(c *cli.Context) {
+		/// XXXX
+		// query := CommonCliQueryDSLBuilderAuthorize(c, ListCapabilitiesSecurityModel)
+		// result, err := ListCapabilitiesActionFn(query)
+		// HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
+
 func init() {
 	CapabilityCliCommands = append(CapabilityCliCommands, CapabilityTreeCmd, ListCapabilitiesActionCmd)
 	AppendCapabilityRouter = func(r *[]Module3Action) {
@@ -170,9 +180,10 @@ func init() {
 			Method: "GET",
 			Url:    "/capabilitiesTree",
 			Handlers: []gin.HandlerFunc{
-				WithAuthorization(&SecurityModel{
-					ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
-				}),
+				/// XXXX
+				// WithAuthorization(&SecurityModel{
+				// 	ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+				// }),
 				func(c *gin.Context) {
 					HttpGetEntity(c, CapabilityActionGetTree)
 				},
@@ -189,15 +200,15 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 	for _, item := range x.Modules {
 
-		if item.BackupTables != nil && len(item.BackupTables) > 0 {
-			for _, table := range item.BackupTables {
+		// if item.BackupTables != nil && len(item.BackupTables) > 0 {
+		// 	for _, table := range item.BackupTables {
 
-				GetDbRef().Model(&BackupTableMetaEntity{}).Create(&BackupTableMetaEntity{
-					UniqueId:      table.EntityName,
-					TableNameInDb: table.TableNameInDb,
-				})
-			}
-		}
+		// 		GetDbRef().Model(&BackupTableMetaEntity{}).Create(&BackupTableMetaEntity{
+		// 			UniqueId:      table.EntityName,
+		// 			TableNameInDb: table.TableNameInDb,
+		// 		})
+		// 	}
+		// }
 
 		// Insert the permissions into the database
 		item.PermissionsProvider = append(item.PermissionsProvider, PermissionInfo{

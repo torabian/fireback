@@ -4,8 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"path"
-	"path/filepath"
 	reflect "reflect"
 	"regexp"
 
@@ -289,17 +287,18 @@ func ImportYamlFromFsResources(fs *embed.FS, filePath string) []ResourceMap {
 		log.Fatalln("Error importing content:", err, filePath)
 	}
 
-	for _, resource := range resources.Resources {
-		actualPath := path.Join(filepath.Dir(filePath), resource.Path)
-		entity, fileId, _ := UploadFromFs(fs, actualPath)
-		result = append(result, ResourceMap{
-			DriveId:  entity.UniqueId,
-			FileId:   fileId,
-			Key:      resource.Key,
-			DiskPath: actualPath,
-		})
+	/// XXX
+	// for _, resource := range resources.Resources {
+	// 	actualPath := path.Join(filepath.Dir(filePath), resource.Path)
+	// 	entity, fileId, _ := UploadFromFs(fs, actualPath)
+	// 	result = append(result, ResourceMap{
+	// 		DriveId:  entity.UniqueId,
+	// 		FileId:   fileId,
+	// 		Key:      resource.Key,
+	// 		DiskPath: actualPath,
+	// 	})
 
-	}
+	// }
 
 	return result
 }

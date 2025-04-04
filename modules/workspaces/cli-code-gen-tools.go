@@ -264,7 +264,8 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 					}
 
 					fmt.Println("File", c.String("file"))
-					CreateBackup(xinfo, c.String("file"))
+					// CreateBackup(xinfo, c.String("file"))
+					/// XXXX
 
 					return nil
 				},
@@ -299,7 +300,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 				Usage: "Import system data from a previous export",
 				Action: func(c *cli.Context) error {
 					xinfo := []TableMetaData{}
-					f := CommonCliQueryDSLBuilder(c)
+					// f := CommonCliQueryDSLBuilder(c)
 
 					for _, module := range xapp.Modules {
 						for _, item := range module.BackupTables {
@@ -308,7 +309,8 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 					}
 
 					fmt.Println("File", c.String("file"))
-					ImportBackup(xinfo, c.String("file"), f)
+					// ImportBackup(xinfo, c.String("file"), f)
+					/// XXXX
 
 					return nil
 				},

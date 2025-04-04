@@ -222,6 +222,19 @@ func hasSuffix(path string, suffixes []string) bool {
 	return false
 }
 
+type HttpServerInstanceConfig struct {
+
+	// Shows some charts and keeps track of active connections
+	Monitor bool
+
+	// Override the port
+	Port int64
+
+	SSL bool
+
+	Slow bool
+}
+
 func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	r := gin.New()

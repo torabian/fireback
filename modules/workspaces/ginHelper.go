@@ -165,7 +165,9 @@ func CastRouteToHandler(r Module3Action) []gin.HandlerFunc {
 			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel, false)}, items...)
 
 		} else {
-			items = append([]gin.HandlerFunc{WithAuthorization(r.SecurityModel)}, items...)
+
+			/// XXXX
+			// items = append([]gin.HandlerFunc{WithAuthorization(r.SecurityModel)}, items...)
 		}
 	}
 

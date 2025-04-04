@@ -5,7 +5,6 @@ import (
 	"github.com/torabian/fireback/modules/workspaces"
 	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
-	"github.com/urfave/cli"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -23,20 +22,20 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 var xapp = &workspaces.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders: []workspaces.SearchProviderFn{
-		workspaces.QueryMenusReact,
-		workspaces.QueryRolesReact,
+	SearchProviders:    []workspaces.SearchProviderFn{
+		// workspaces.QueryMenusReact,
+		// workspaces.QueryRolesReact,
 		// shop.QueryProductSubmissionsReact,
 	},
 	SeedersSync: func() {
-		workspaces.PassportMethodSyncSeeders()
-		workspaces.AppMenuSyncSeeders()
+		// workspaces.PassportMethodSyncSeeders()
+		// workspaces.AppMenuSyncSeeders()
 	},
 	RunTus: func() {
-		workspaces.LiftTusServer()
+		// workspaces.LiftTusServer()
 	},
 	RunSocket: func(e *gin.Engine) {
-		workspaces.HandleSocket(e)
+		// workspaces.HandleSocket(e)
 	},
 	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
@@ -60,14 +59,14 @@ var xapp = &workspaces.FirebackApp{
 	},
 	Modules: []*workspaces.ModuleProvider{
 		// Important to setup the workspaces at first, so the capabilties module is there
-		workspaces.WorkspaceModuleSetup(),
-		workspaces.DriveModuleSetup(),
-		workspaces.NotificationModuleSetup(),
-		workspaces.PassportsModuleSetup(),
-		&workspaces.ModuleProvider{
-			CliHandlers: []cli.Command{
-				workspaces.NewProjectCli(),
-			},
-		},
+		// workspaces.WorkspaceModuleSetup(),
+		// workspaces.DriveModuleSetup(),
+		// workspaces.NotificationModuleSetup(),
+		// workspaces.PassportsModuleSetup(),
+		// &workspaces.ModuleProvider{
+		// 	CliHandlers: []cli.Command{
+		// 		workspaces.NewProjectCli(),
+		// 	},
+		// },
 	},
 }
