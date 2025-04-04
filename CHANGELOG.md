@@ -1,4 +1,4 @@
-# v1.2.3
+# v1.2.5
 
 Shift to user user interface provided for the admin and new projects.
 
@@ -18,7 +18,7 @@ Shift to user user interface provided for the admin and new projects.
 - [ ] Explore the audio streams and how they work to have endpoints
 - [ ] Extensive testing for http json requests, to match the json and more
 
-# v1.2.2
+# v1.2.4
 
 Goal of this version is to improve the fireback backend mostly, not the UI or usecases.
 The plan is the backend be perfect, and can generate major code for front-end technologies
@@ -30,8 +30,6 @@ and reduce the time in between.
 - [ ] Improve the SDK with more functions, specially on react.js one it has some dead code, remove, and comment everything
 - [ ] Make sure the documentation (openapi) does contain all of the necessary explanations.
 - [ ] Improve the SwiftUI codegen, test it via github actions
-- [ ] Improve the Android code gen
-- [ ] More detailed errors if the json matching for post requests is not available
 - [ ] Streaming content such as audio or video
 - [ ] Autoscaling for the project demo to queue every request.
 - [ ] Extensive test for the socket connection and changes coming from server to be reflected on UI.
@@ -47,12 +45,30 @@ and reduce the time in between.
 - [ ] Add demo to add extra configuration for child project env files
 - [ ] Document the file upload system, allow integration with S3.
 - [ ] Configure the search functionality
-- [ ] AuthroizeOS functionality revise, document.
 - [ ] Explore the option to have custom header, query params in actions, entities actions.
 - [ ] Test the custom actions in the entities.
 - [ ] Document better the reactive actions, and make them custom types other than string only.
 - [ ] Unify the exporting mechanism for both cli and http, to get output in csv, json, and yaml formats.
 - [ ] Revise the notifications service, use integrate email service the same in otp
+- [ ] AuthroizeOS functionality revise, document.
+
+# v1.2.3
+
+Goal of this release will be making it easier for consumer apps
+
+
+# v1.2.2
+
+Goal of this version is to make it ready for building a new infotainment service, using Android and Kotlin.
+
+- [ ] Revise the reactive endpoints, and events happening in the app, make it easier to communicate through channels
+- [ ] Support the direct socket connection as a service
+- [ ] Possibliy separate fireback and abac module.
+- [ ] Revise the logging, add the uber structured login to system.
+- [ ] More detailed errors if the json matching for post requests is not available
+- [ ] Fix the bug with http server start which time to time fails.
+- [ ] Android codegen using kotlin to generate as deep as possible.
+
 
 # v1.2.1
 
