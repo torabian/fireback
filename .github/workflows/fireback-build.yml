@@ -472,7 +472,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
  
       - run: |
-          cd modules/workspaces/codegen/react-new/src/modules/fireback && npm version --no-git-tag-version 1.2.1-${{ github.sha }} && npm publish --tag=latest --access public
+          cd modules/workspaces/codegen/react-new/src/modules/fireback && npm version --no-git-tag-version 1.2.2-${{ github.sha }} && npm publish --tag=latest --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH }}

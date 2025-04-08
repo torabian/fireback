@@ -141,3 +141,13 @@ The reason I have started this project was to change the course of action for en
 ## Sample client key OAuth google
 
 1040931581120-prdfdml80dl7uaq3999jkge72dph280l.apps.googleusercontent.com
+
+## Change the fireback version
+
+In order to release a new fireback, follow these steps:
+
+- cmd/fireback/fireback-deb.sh
+- OVERVIEW.md
+- cmd/fireback/msi/Product.wxs
+- .github/workflows/fireback-build.yml
+- modules/workspaces/version.go
