@@ -2,4 +2,4 @@ package workspaces
 
 // Do not change the structure of this versioning.
 // a 'v' will be prefixed for go packages
-var FIREBACK_VERSION = "1.2.2"
+var FIREBACK_VERSION = "1.2.3"
