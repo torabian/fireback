@@ -1,13 +1,12 @@
-import {FormText} from '@/modules/fireback/components/form-text/FormText';
-import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/abac/usePostWorkspacePassportCheck';
-import React, {useContext} from 'react';
-import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {useTheme} from '../theme';
-import {FormManager} from './FormManager';
-import {usePostPassportsSigninClassic} from '../../sdk/modules/abac/usePostPassportsSigninClassic';
-import {RemoteQueryContext} from '../../sdk/core/react-tools';
-import {useNavigation} from '@react-navigation/native';
-import {UserArchiveScreen} from '../users/user/UserArchiveScreen';
+import { FormText } from '@/modules/fireback/components/form-text/FormText';
+import { useNavigation } from '@react-navigation/native';
+import { useContext } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RemoteQueryContext } from '../../sdk/core/react-tools';
+import { usePostPassportsSigninClassic } from '../../sdk/modules/abac/usePostPassportsSigninClassic';
+import { useTheme } from '../theme';
+import { UserArchiveScreen } from '../users/user/UserArchiveScreen';
+import { FormManager } from './FormManager';
 
 interface EnterPasswordScreenProps {
   route: {
