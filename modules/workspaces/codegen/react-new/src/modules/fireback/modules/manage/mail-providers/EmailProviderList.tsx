@@ -1,9 +1,9 @@
 import { useT } from "@/modules/fireback/hooks/useT";
 import { columns } from "./EmailProviderColumns";
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useGetEmailProviders } from "@/modules/fireback/sdk/modules/workspaces/useGetEmailProviders";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
-import { useDeleteEmailProvider } from "@/modules/fireback/sdk/modules/workspaces/useDeleteEmailProvider";
+import { useGetEmailProviders } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviders";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { useDeleteEmailProvider } from "@/modules/fireback/sdk/modules/abac/useDeleteEmailProvider";
 
 export const EmailProviderList = () => {
   const t = useT();

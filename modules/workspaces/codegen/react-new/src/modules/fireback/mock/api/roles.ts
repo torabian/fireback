@@ -1,6 +1,6 @@
 import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { IResponse, IResponseList } from "../../sdk/core/http-tools";
-import { RoleEntity } from "../../sdk/modules/workspaces/RoleEntity";
+import { RoleEntity } from "../../sdk/modules/abac/RoleEntity";
 import { MockRoles } from "./../database/role.db";
 import { QueryToId } from "../database/memory-db";
 

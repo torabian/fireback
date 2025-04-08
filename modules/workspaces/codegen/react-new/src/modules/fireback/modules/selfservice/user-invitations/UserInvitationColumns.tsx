@@ -1,4 +1,4 @@
-import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/workspaces/UserInvitationsQueryColumns";
+import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
 import { DatatableColumn } from "../../../definitions/definitions";
 import { strings } from "./strings/translations";
 

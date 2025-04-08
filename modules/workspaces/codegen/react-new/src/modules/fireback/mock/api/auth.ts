@@ -1,13 +1,14 @@
 import { IResponse, IResponseList } from "../../definitions/JSONStyle";
 import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
-import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
 import {
   CheckClassicPassportActionResDto,
   CheckPassportMethodsActionResDto,
   ClassicSignupActionResDto,
   ConfirmClassicPassportTotpActionResDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { WorkspaceTypeEntity } from "../../sdk/modules/workspaces/WorkspaceTypeEntity";
+} from "../../sdk/modules/abac/AbacActionsDto";
+import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
+
+import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
 
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {

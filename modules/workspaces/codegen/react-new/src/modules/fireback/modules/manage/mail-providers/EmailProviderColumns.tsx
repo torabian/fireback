@@ -1,4 +1,4 @@
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
 import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations) => [

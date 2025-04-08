@@ -1,4 +1,4 @@
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/workspaces/PublicJoinKeyEntity";
+import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
 import { enTranslations } from "@/modules/fireback/translations/en";
 
 export const columns = (t: typeof enTranslations) => [

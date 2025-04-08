@@ -3,7 +3,7 @@ import { FormText } from "@/modules/fireback/components/forms/form-text/FormText
 import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
 
 export const EmailProviderEditForm = ({
   form,

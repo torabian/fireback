@@ -15,20 +15,24 @@ export const CapabilityForm = ({
   const s = useS(strings);
   return (
     <>
-        <FormText
-          value={values.name }
-          onChange={(value) => setFieldValue(CapabilityEntity.Fields.name, value, false)}
-          errorMessage={errors.name }
-          label={s.capabilities.name }
-          hint={s.capabilities.nameHint}
-        />
-        <FormText
-          value={values.description }
-          onChange={(value) => setFieldValue(CapabilityEntity.Fields.description, value, false)}
-          errorMessage={errors.description }
-          label={s.capabilities.description }
-          hint={s.capabilities.descriptionHint}
-        />
+      <FormText
+        value={values.name}
+        onChange={(value) =>
+          setFieldValue(CapabilityEntity.Fields.name, value, false)
+        }
+        errorMessage={errors.name}
+        label={s.capabilities.name}
+        hint={s.capabilities.nameHint}
+      />
+      <FormText
+        value={values.description}
+        onChange={(value) =>
+          setFieldValue(CapabilityEntity.Fields.description, value, false)
+        }
+        errorMessage={errors.description}
+        label={s.capabilities.description}
+        hint={s.capabilities.descriptionHint}
+      />
     </>
   );
 };

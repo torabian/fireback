@@ -4,7 +4,7 @@ import { useT } from "../../../hooks/useT";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { FormikProps } from "formik";
 import { useContext } from "react";
-import { WorkspaceEntity } from "../../../sdk/modules/workspaces/WorkspaceEntity";
+import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
 import { EmailProviderEditForm } from "../mail-providers/EmailProviderEditForm";
 
 export const MailTemplateForm = ({

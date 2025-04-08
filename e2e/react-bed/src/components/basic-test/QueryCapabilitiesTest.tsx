@@ -1,4 +1,4 @@
-import { useGetCapabilities } from "../../sdk/modules/workspaces/useGetCapabilities";
+import { useGetCapabilities } from "../../sdk/modules/abac/useGetCapabilities";
 
 export function QueryCapabilitiesTest() {
   const { items, query } = useGetCapabilities({});

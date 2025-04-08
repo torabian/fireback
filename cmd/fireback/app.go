@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/workspaces"
 	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
@@ -24,19 +25,18 @@ var xapp = &workspaces.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
-		workspaces.QueryMenusReact,
-		workspaces.QueryRolesReact,
-		// shop.QueryProductSubmissionsReact,
+		abac.QueryMenusReact,
+		abac.QueryRolesReact,
 	},
 	SeedersSync: func() {
-		workspaces.PassportMethodSyncSeeders()
-		workspaces.AppMenuSyncSeeders()
+		abac.PassportMethodSyncSeeders()
+		abac.AppMenuSyncSeeders()
 	},
 	RunTus: func() {
-		workspaces.LiftTusServer()
+		abac.LiftTusServer()
 	},
 	RunSocket: func(e *gin.Engine) {
-		workspaces.HandleSocket(e)
+		// workspaces.HandleSocket(e)
 	},
 	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
@@ -54,20 +54,15 @@ var xapp = &workspaces.FirebackApp{
 		{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
-		// You can uncomment the sample theme for shop here
-		// zayshop.Bootstrap(e)
 
 	},
-	Modules: []*workspaces.ModuleProvider{
-		// Important to setup the workspaces at first, so the capabilties module is there
-		workspaces.WorkspaceModuleSetup(),
-		workspaces.DriveModuleSetup(),
-		workspaces.NotificationModuleSetup(),
-		workspaces.PassportsModuleSetup(),
-		&workspaces.ModuleProvider{
+	Modules: append([]*workspaces.ModuleProvider{
+		// Add the very core module, such as capabilities
+		workspaces.FirebackModuleSetup(nil),
+		{
 			CliHandlers: []cli.Command{
 				workspaces.NewProjectCli(),
 			},
 		},
-	},
+	}, abac.AbacCompleteModules()...),
 }

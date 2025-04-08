@@ -1,5 +1,5 @@
 import { DatatableColumn } from "@/modules/fireback/definitions/definitions";
-import { UserEntity } from "../../../sdk/modules/workspaces/UserEntity";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 import { enTranslations } from "../../../translations/en";
 import { GenderView } from "./GenderView";
 

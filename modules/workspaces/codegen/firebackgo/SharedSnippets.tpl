@@ -1884,7 +1884,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
     {{ end }}
     {{ if or (eq .Type "one") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
-        template.{{ .PublicName }}Id = {{ $prefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}-id"))
+        template.{{ .PublicName }}Id = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}-id"))
       }
 	  {{ end }}
     {{ if or (eq .Type "daterange") }}

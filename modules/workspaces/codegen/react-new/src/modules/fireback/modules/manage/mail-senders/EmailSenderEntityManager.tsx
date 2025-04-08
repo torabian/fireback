@@ -4,10 +4,10 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailSenderEntity";
-import { useGetEmailSenderByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetEmailSenderByUniqueId";
-import { usePatchEmailSender } from "@/modules/fireback/sdk/modules/workspaces/usePatchEmailSender";
-import { usePostEmailSender } from "@/modules/fireback/sdk/modules/workspaces/usePostEmailSender";
+import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
+import { useGetEmailSenderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailSenderByUniqueId";
+import { usePatchEmailSender } from "@/modules/fireback/sdk/modules/abac/usePatchEmailSender";
+import { usePostEmailSender } from "@/modules/fireback/sdk/modules/abac/usePostEmailSender";
 import { EmailSenderEditForm } from "./EmailSenderEditForm";
 
 export const EmailSenderEntityManager = ({

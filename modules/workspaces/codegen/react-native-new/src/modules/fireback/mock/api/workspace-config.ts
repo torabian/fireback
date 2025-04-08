@@ -5,7 +5,7 @@ import {
   uriMatch,
 } from "@/modules/fireback/hooks/mock-tools";
 import { IResponse } from "../../sdk/core/http-tools";
-import { WorkspaceConfigEntity } from "../../sdk/modules/workspaces/WorkspaceConfigEntity";
+import { WorkspaceConfigEntity } from "../../sdk/modules/abac/WorkspaceConfigEntity";
 
 export class WorkspaceConfigMockServer {
   @uriMatch("workspace/config")

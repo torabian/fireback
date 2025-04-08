@@ -5,7 +5,7 @@ import {
   uriMatch,
 } from "@/modules/fireback/hooks/mock-tools";
 import { IResponse } from "../../definitions/JSONStyle";
-import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
+import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
 
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {

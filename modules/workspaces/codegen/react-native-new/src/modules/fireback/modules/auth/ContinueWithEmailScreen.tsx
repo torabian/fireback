@@ -1,6 +1,6 @@
 import {FormText} from '@/modules/fireback/components/form-text/FormText';
-import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/workspaces/usePostWorkspacePassportCheck';
-import {CheckClassicPassportActionReqDto} from '@/modules/fireback/sdk/modules/workspaces/WorkspacesActionsDto';
+import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/abac/usePostWorkspacePassportCheck';
+import {CheckClassicPassportActionReqDto} from '@/modules/fireback/sdk/modules/abac/WorkspacesActionsDto';
 import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';

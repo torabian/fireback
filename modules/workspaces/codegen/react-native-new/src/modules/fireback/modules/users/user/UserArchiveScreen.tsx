@@ -5,7 +5,7 @@ import {InfinteList} from '../../../components/infinite-list/InfiniteList';
 import {useDatatableFiltering} from '../../../hooks/useDatatableFiltering';
 import {useReindexedContent} from '../../../hooks/useReindexedContent';
 import {UserEntity} from '../../../sdk/core/react-tools';
-import {useGetUsers} from '../../../sdk/modules/workspaces/useGetUsers';
+import {useGetUsers} from '../../../sdk/modules/abac/useGetUsers';
 import {UserItemCard} from './UserItemCard';
 import {ListLayout} from '@/modules/fireback/components/list-layout/ListLayout';
 

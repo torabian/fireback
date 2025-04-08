@@ -1,5 +1,5 @@
 import { DatatableColumn } from "@/modules/fireback/definitions/definitions";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceInviteEntity";
+import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 import { enTranslations } from "@/modules/fireback/translations/en";
 
 export const columns = (t: typeof enTranslations): DatatableColumn[] => [

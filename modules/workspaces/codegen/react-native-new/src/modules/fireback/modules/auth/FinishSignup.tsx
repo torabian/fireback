@@ -1,5 +1,5 @@
 import {FormText} from '@/modules/fireback/components/form-text/FormText';
-import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/workspaces/usePostWorkspacePassportCheck';
+import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/abac/usePostWorkspacePassportCheck';
 import React from 'react';
 import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';
 import Button from '../../components/button/Button';

@@ -1,4 +1,4 @@
-import {UserEntity} from '../../sdk/modules/workspaces/UserEntity';
+import {UserEntity} from '../../sdk/modules/abac/UserEntity';
 import {MemoryEntity} from './memory-db';
 
 export const MockUsers = new MemoryEntity<UserEntity>([

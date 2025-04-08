@@ -196,7 +196,7 @@ type PipeAction struct {
 
 func testInitializeProject(dir string, exePath string, args []string) error {
 	shortDelay := 400
-	initProjectSequence := []PipeAction{
+	InitEnvironmentSequence := []PipeAction{
 		{
 			Write: "testproject\n",
 			Wait:  shortDelay,
@@ -302,7 +302,7 @@ func testInitializeProject(dir string, exePath string, args []string) error {
 			Wait:  2000,
 		},
 	}
-	if err := ExecInteractive(dir, exePath, args, initProjectSequence); err != nil {
+	if err := ExecInteractive(dir, exePath, args, InitEnvironmentSequence); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return err
 	} else {

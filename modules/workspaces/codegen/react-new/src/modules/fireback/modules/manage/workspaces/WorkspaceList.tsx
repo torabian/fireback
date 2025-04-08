@@ -2,9 +2,9 @@ import { useT } from "../../../hooks/useT";
 
 import { CommonRowDetail } from "../../../components/detail-table/DetailTable";
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
-import { useGetCteWorkspaces } from "../../../sdk/modules/workspaces/useGetCteWorkspaces";
+import { useGetCteWorkspaces } from "../../../sdk/modules/abac/useGetCteWorkspaces";
 import { columns } from "./WorkspaceColumns";
-import { WorkspaceEntity } from "../../../sdk/modules/workspaces/WorkspaceEntity";
+import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
 
 export const WorkspaceList = () => {
   const t = useT();

@@ -3,13 +3,13 @@ import { useEffect, useRef } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
-import { useGetPassportsAvailableMethods } from "../../sdk/modules/workspaces/useGetPassportsAvailableMethods";
-import { usePostWorkspacePassportCheck } from "../../sdk/modules/workspaces/usePostWorkspacePassportCheck";
-import { CheckClassicPassportActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { useGetPassportsAvailableMethods } from "../../sdk/modules/abac/useGetPassportsAvailableMethods";
+import { usePostWorkspacePassportCheck } from "../../sdk/modules/abac/usePostWorkspacePassportCheck";
 import { AuthMethod } from "./auth.common";
 import { useRecaptcha2 } from "../../hooks/useRecaptcha2";
 import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
+import { CheckClassicPassportActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const s = useS(strings);

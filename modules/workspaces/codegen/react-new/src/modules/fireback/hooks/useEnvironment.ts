@@ -1,4 +1,4 @@
-import { FileEntity } from "../sdk/modules/workspaces/FileEntity";
+import { FileEntity } from "../sdk/modules/abac/FileEntity";
 import { replacePossibleMetaPaths } from "../components/helpers/MetaPathAwareContent";
 
 export enum Compiler {

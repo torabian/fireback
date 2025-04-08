@@ -9,8 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/torabian/fireback/fireback-data-types/cmd/fireback-data-types-server/menu"
-
 	"github.com/torabian/fireback/modules/workspaces"
 )
 
@@ -22,22 +20,15 @@ var xapp = &workspaces.FirebackApp{
 	Title: PRODUCT_DESCRIPTION,
 
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders: []workspaces.SearchProviderFn{
-
-		workspaces.QueryMenusReact,
-		workspaces.QueryRolesReact,
-	},
+	SearchProviders:    []workspaces.SearchProviderFn{},
 	SeedersSync: func() {
-		// Sample menu item to make it easier for demos
-		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"}, workspaces.QueryDSL{
-			WorkspaceId: "system",
-		})
+
 	},
 	RunTus: func() {
-		workspaces.LiftTusServer()
+
 	},
 	RunSocket: func(e *gin.Engine) {
-		workspaces.HandleSocket(e)
+
 	},
 	RunSearch:     workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
@@ -56,10 +47,10 @@ var xapp = &workspaces.FirebackApp{
 	Modules: []*workspaces.ModuleProvider{
 
 		// Important to setup the workspaces at first, so the capabilties module is there
-		workspaces.WorkspaceModuleSetup(),
-		workspaces.DriveModuleSetup(),
-		workspaces.NotificationModuleSetup(),
-		workspaces.PassportsModuleSetup(),
+		// abac.WorkspaceModuleSetup(),
+		// abac.DriveModuleSetup(),
+		// abac.NotificationModuleSetup(),
+		// abac.PassportsModuleSetup(),
 
 		// do not remove this comment line - it's used by fireback to append new modules
 		tags.TagsModuleSetup(nil),

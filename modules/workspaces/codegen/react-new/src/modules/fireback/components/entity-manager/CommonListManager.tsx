@@ -3,8 +3,8 @@ import { Filter } from "../../definitions/definitions";
 import { dxFilterToSqlAlike } from "../../hooks/datatabletools";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
-import { useGetTableViewSizingByUniqueId } from "../../sdk/modules/workspaces/useGetTableViewSizingByUniqueId";
-import { usePatchTableViewSizing } from "../../sdk/modules/workspaces/usePatchTableViewSizing";
+import { useGetTableViewSizingByUniqueId } from "../../sdk/modules/abac/useGetTableViewSizingByUniqueId";
+import { usePatchTableViewSizing } from "../../sdk/modules/abac/usePatchTableViewSizing";
 import {
   DataTypeProvider,
   Sorting,

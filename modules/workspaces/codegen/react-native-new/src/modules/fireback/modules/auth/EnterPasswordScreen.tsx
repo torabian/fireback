@@ -1,10 +1,10 @@
 import {FormText} from '@/modules/fireback/components/form-text/FormText';
-import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/workspaces/usePostWorkspacePassportCheck';
+import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/abac/usePostWorkspacePassportCheck';
 import React, {useContext} from 'react';
 import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {useTheme} from '../theme';
 import {FormManager} from './FormManager';
-import {usePostPassportsSigninClassic} from '../../sdk/modules/workspaces/usePostPassportsSigninClassic';
+import {usePostPassportsSigninClassic} from '../../sdk/modules/abac/usePostPassportsSigninClassic';
 import {RemoteQueryContext} from '../../sdk/core/react-tools';
 import {useNavigation} from '@react-navigation/native';
 import {UserArchiveScreen} from '../users/user/UserArchiveScreen';

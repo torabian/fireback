@@ -4,10 +4,10 @@ import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 
 import { useS } from "../../hooks/useS";
-import { ClassicPassportOtpActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 import { usePresenter } from "./Otp.presenter";
 import { strings } from "./strings/translations";
+import { ClassicPassportOtpActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export const OtpScreen = ({}: {}) => {
   const { goBack, submit, mutation, form, s } = usePresenter();

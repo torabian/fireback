@@ -1,6 +1,6 @@
 # Welcome to a fireback backend project :)
 
-This is a boilerplate which would be provided via `fireback new` or downloadable from github releases since v1.2.0
+This is a boilerplate which would be provided via `fireback new` or downloadable from github releases since v1.2.1
 
 - Make sure you have installed golang, and make.
 - run `make` :D 

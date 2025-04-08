@@ -152,6 +152,10 @@ type EntitySecurityModel struct {
 	ResolveStrategy *string `json:"resolveStrategy,omitempty" yaml:"resolveStrategy,omitempty" jsonschema:"enum=workspace,enum=user, description=Resolve strategy means that the content belongs either to workspace or user. It affects the query."`
 }
 
+func WithAuthorization(securityModel *SecurityModel) gin.HandlerFunc {
+	return WithAuthorizationFn(securityModel)
+}
+
 // Converts the security policy and action into the gin
 func CastRouteToHandler(r Module3Action) []gin.HandlerFunc {
 
@@ -161,10 +165,10 @@ func CastRouteToHandler(r Module3Action) []gin.HandlerFunc {
 	// Seems other models are not required
 	if r.SecurityModel != nil && r.SecurityModel.ResolveStrategy != ResolveStrategyPublic {
 		if r.Method == "REACTIVE" {
-			fmt.Println("REACTIVE:::::", r)
-			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel, false)}, items...)
+			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel)}, items...)
 
 		} else {
+
 			items = append([]gin.HandlerFunc{WithAuthorization(r.SecurityModel)}, items...)
 		}
 	}

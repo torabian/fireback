@@ -1,8 +1,6 @@
 import { DisplayDetectionProps } from "../definitions/common";
+import { QueryUserRoleWorkspacesActionResDto } from "../sdk/modules/abac/AbacActionsDto";
 import { CapabilityEntity } from "../sdk/modules/workspaces/CapabilityEntity";
-import { UserRoleWorkspaceDtoKeys } from "../sdk/modules/workspaces/UserRoleWorkspaceDto";
-import { UserWorkspaceEntity } from "../sdk/modules/workspaces/UserWorkspaceEntity";
-import { QueryUserRoleWorkspacesActionResDto } from "../sdk/modules/workspaces/WorkspacesActionsDto";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;

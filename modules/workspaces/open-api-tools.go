@@ -172,12 +172,11 @@ func OpenApiToFireback(s openapi3.Spec) *Module3 {
 
 			if opt.Responses.MapOfResponseOrRefValues != nil {
 
-				for resType, response := range opt.Responses.MapOfResponseOrRefValues {
+				for _, response := range opt.Responses.MapOfResponseOrRefValues {
 
 					if content, okay := response.Response.Content["application/json"]; okay {
 
 						if content.Schema.SchemaReference != nil {
-							fmt.Println(5, resType, content.Schema.SchemaReference.Ref)
 						} else if schema := content.Schema.Schema; schema != nil {
 
 							for _, ref := range schema.AllOf {

@@ -8,10 +8,10 @@ import {
 // import { usePatchWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePatchWorkspaceWorkspaceType";
 // import { usePostWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePostWorkspaceWorkspaceType";
 import { WorkspaceTypeEditForm } from "./WorkspaceTypeEditForm";
-import { useGetWorkspaceTypeByUniqueId } from "../../../sdk/modules/workspaces/useGetWorkspaceTypeByUniqueId";
-import { usePostWorkspaceType } from "../../../sdk/modules/workspaces/usePostWorkspaceType";
-import { usePatchWorkspaceType } from "../../../sdk/modules/workspaces/usePatchWorkspaceType";
-import { WorkspaceTypeEntity } from "../../../sdk/modules/workspaces/WorkspaceTypeEntity";
+import { useGetWorkspaceTypeByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceTypeByUniqueId";
+import { usePostWorkspaceType } from "../../../sdk/modules/abac/usePostWorkspaceType";
+import { usePatchWorkspaceType } from "../../../sdk/modules/abac/usePatchWorkspaceType";
+import { WorkspaceTypeEntity } from "../../../sdk/modules/abac/WorkspaceTypeEntity";
 
 export const WorkspaceTypeEntityManager = ({
   data,

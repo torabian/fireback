@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/torabian/fireback/modules/workspaces"
 	"strings"
 	"github.com/urfave/cli"
 )
@@ -68,6 +69,9 @@ func (x* {{ .e.DtoName }}) Json() string {
 
 func (x* {{ .e.DtoName }}) JsonPrint()  {
     fmt.Println(x.Json())
+
+	// Somehow to make the import always needed, makes no sense.
+	_ = workspaces.Body 
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.
