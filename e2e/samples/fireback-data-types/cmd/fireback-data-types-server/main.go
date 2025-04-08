@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/torabian/fireback/fireback-data-types/modules/product/tags"
+	"github.com/urfave/cli"
 
 	"github.com/torabian/fireback/fireback-data-types/modules/product"
 
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/workspaces"
 )
 
@@ -44,18 +46,18 @@ var xapp = &workspaces.FirebackApp{
 	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
 
 	},
-	Modules: []*workspaces.ModuleProvider{
 
-		// Important to setup the workspaces at first, so the capabilties module is there
-		// abac.WorkspaceModuleSetup(),
-		// abac.DriveModuleSetup(),
-		// abac.NotificationModuleSetup(),
-		// abac.PassportsModuleSetup(),
-
-		// do not remove this comment line - it's used by fireback to append new modules
+	Modules: append([]*workspaces.ModuleProvider{
+		// Add the very core module, such as capabilities
 		tags.TagsModuleSetup(nil),
 		product.ProductModuleSetup(nil),
-	},
+		workspaces.FirebackModuleSetup(nil),
+		{
+			CliHandlers: []cli.Command{
+				workspaces.NewProjectCli(),
+			},
+		},
+	}, abac.AbacCompleteModules()...),
 }
 
 func main() {
