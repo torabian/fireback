@@ -30,8 +30,6 @@ and reduce the time in between.
 - [ ] Improve the SDK with more functions, specially on react.js one it has some dead code, remove, and comment everything
 - [ ] Make sure the documentation (openapi) does contain all of the necessary explanations.
 - [ ] Improve the SwiftUI codegen, test it via github actions
-- [ ] Improve the Android code gen
-- [ ] More detailed errors if the json matching for post requests is not available
 - [ ] Streaming content such as audio or video
 - [ ] Autoscaling for the project demo to queue every request.
 - [ ] Extensive test for the socket connection and changes coming from server to be reflected on UI.
