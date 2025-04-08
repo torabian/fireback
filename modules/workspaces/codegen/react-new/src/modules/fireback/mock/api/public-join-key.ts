@@ -1,7 +1,7 @@
 import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { IResponse } from "../../definitions/JSONStyle";
 import { IResponseList } from "../../sdk/core/http-tools";
-import { PublicJoinKeyEntity } from "../../sdk/modules/workspaces/PublicJoinKeyEntity";
+import { PublicJoinKeyEntity } from "../../sdk/modules/abac/PublicJoinKeyEntity";
 import { mdb } from "../database/databases";
 import { QueryToId } from "../database/memory-db";
 

@@ -1,10 +1,9 @@
-import {FormText} from '@/modules/fireback/components/form-text/FormText';
-import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/workspaces/usePostWorkspacePassportCheck';
-import React from 'react';
-import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';
+import { FormText } from '@/modules/fireback/components/form-text/FormText';
+import { usePostWorkspacePassportCheck } from '@/modules/fireback/sdk/modules/abac/usePostWorkspacePassportCheck';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Button from '../../components/button/Button';
-import {useTheme} from '../theme';
-import {FormManager} from './FormManager';
+import { useTheme } from '../theme';
+import { FormManager } from './FormManager';
 
 const FinishSignup = () => {
   const {theme} = useTheme();

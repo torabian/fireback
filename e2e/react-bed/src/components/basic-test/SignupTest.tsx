@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ClassicSignupActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { usePostPassportsSigninClassic } from "../../sdk/modules/workspaces/usePostPassportsSigninClassic";
+import { usePostPassportsSigninClassic } from "../../sdk/modules/abac/usePostPassportsSigninClassic";
+import { ClassicSignupActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export function SignupTest() {
   const [dto, setDto] = useState<ClassicSignupActionReqDto>(

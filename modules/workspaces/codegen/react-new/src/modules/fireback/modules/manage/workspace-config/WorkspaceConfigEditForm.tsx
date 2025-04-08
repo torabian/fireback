@@ -2,7 +2,7 @@ import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/Fo
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
+import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
 import { strings } from "./strings/translations";
 import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
 

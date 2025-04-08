@@ -8,8 +8,9 @@ package workspaces
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/urfave/cli"
 	"strings"
+
+	"github.com/urfave/cli"
 )
 
 func CastAuthResultFromCli(c *cli.Context) *AuthResultDto {
@@ -70,11 +71,13 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 type AuthResultDto struct {
 	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
 	UserAccessPerWorkspaceId String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
-	User                     *UserEntity                `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
 	UserId                   String                     `json:"userId" yaml:"userId"        `
+	WorkspaceId              String                     `json:"workspaceId" yaml:"workspaceId"        `
+	RoleId                   String                     `json:"roleId" yaml:"roleId"`
 	// After authentication, this object contains the workspace permissions and current selected role permissions, to create context sql query based on that
 	SqlContext string `json:"sqlContext" yaml:"sqlContext"        `
 }
+
 type AuthResultDtoList struct {
 	Items []*AuthResultDto
 }

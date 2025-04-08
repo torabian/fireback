@@ -52,7 +52,7 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 		return
 	}
 
-	wsSession, err := upgrader.Upgrade(ginContext.Writer, ginContext.Request, nil)
+	wsSession, err := Upgrader.Upgrade(ginContext.Writer, ginContext.Request, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,9 +61,9 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 		SocketSessionPool[workspaceId] = map[string]*SocketConnection{}
 	}
 
-	SocketSessionPool[workspaceId][res.User.UniqueId] = &SocketConnection{
+	SocketSessionPool[workspaceId][res.UserId.String] = &SocketConnection{
 		Connection: wsSession,
-		UserId:     res.User.UniqueId,
+		UserId:     res.UserId.String,
 	}
 
 	for {
@@ -77,7 +77,7 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 
 	}
 
-	delete(SocketSessionPool[workspaceId], res.User.UniqueId)
+	delete(SocketSessionPool[workspaceId], res.UserId.String)
 	if len(SocketSessionPool[workspaceId]) == 0 {
 		delete(SocketSessionPool, workspaceId)
 

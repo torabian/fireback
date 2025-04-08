@@ -5,7 +5,7 @@ import {
   uriMatch,
 } from "@/modules/fireback/hooks/mock-tools";
 import { IResponseList } from "../../sdk/core/http-tools";
-import { FileEntity } from "../../sdk/modules/workspaces/FileEntity";
+import { FileEntity } from "../../sdk/modules/abac/FileEntity";
 import { MockFiles } from "../database/file.db";
 
 export class DriveMockServer {

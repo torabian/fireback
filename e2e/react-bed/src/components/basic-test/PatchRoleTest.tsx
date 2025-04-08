@@ -1,5 +1,5 @@
-import { usePatchRole } from "../../sdk/modules/workspaces/usePatchRole";
-import { usePostWorkspacePassportCheck } from "../../sdk/modules/workspaces/usePostWorkspacePassportCheck";
+import { usePatchRole } from "../../sdk/modules/abac/usePatchRole";
+import { usePostWorkspacePassportCheck } from "../../sdk/modules/abac/usePostWorkspacePassportCheck";
 
 export function PatchRoleTest() {
   const { submit } = usePatchRole();

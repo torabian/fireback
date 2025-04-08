@@ -4,9 +4,9 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
-import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceConfigDistinct";
-import { usePatchWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/workspaces/usePatchWorkspaceConfigDistinct";
+import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
+import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceConfigDistinct";
+import { usePatchWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/abac/usePatchWorkspaceConfigDistinct";
 import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
 import { strings } from "./strings/translations";
 export const WorkspaceConfigEntityManager = ({

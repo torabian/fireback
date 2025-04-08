@@ -1,4 +1,4 @@
-import { RoleEntity } from "../../sdk/modules/workspaces/RoleEntity";
+import { RoleEntity } from "../../sdk/modules/abac/RoleEntity";
 import { MemoryEntity } from "./memory-db";
 
 export const MockRoles = new MemoryEntity<RoleEntity>([

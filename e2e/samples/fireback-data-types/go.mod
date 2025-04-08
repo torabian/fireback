@@ -154,4 +154,4 @@ require (
 	modernc.org/sqlite v1.23.1 // indirect
 )
 
-replace github.com/torabian/fireback v1.2.0 => /Users/ali/work/fireback
+replace github.com/torabian/fireback v1.2.1 => /Users/ali/work/fireback

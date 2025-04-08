@@ -8,8 +8,8 @@ import {
 } from "./MailTemplateEntityManager";
 import { FormEmailSenderPicker } from "./FormEmailSenderPicker";
 import { enTranslations } from "../../../translations/en";
-import { NotificationConfigEntity } from "../../../sdk/modules/workspaces/NotificationConfigEntity";
-import { EmailSenderEntity } from "../../../sdk/modules/workspaces/EmailSenderEntity";
+import { NotificationConfigEntity } from "../../../sdk/modules/abac/NotificationConfigEntity";
+import { EmailSenderEntity } from "../../../sdk/modules/abac/EmailSenderEntity";
 
 type Templates =
   | "inviteToWorkspaceSender"

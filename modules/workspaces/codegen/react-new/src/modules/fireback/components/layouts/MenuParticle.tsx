@@ -9,7 +9,7 @@ import { useContext } from "react";
 import { useQueryClient } from "react-query";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
-import { useGetUserWorkspaces } from "../../sdk/modules/workspaces/useGetUserWorkspaces";
+import { useGetUserWorkspaces } from "../../sdk/modules/abac/useGetUserWorkspaces";
 import { RemoteQueryContext } from "../../hooks/RemoteQueryProvider";
 
 function renderMenu(

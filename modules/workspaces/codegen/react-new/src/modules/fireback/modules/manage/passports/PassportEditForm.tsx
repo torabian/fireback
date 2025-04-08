@@ -3,7 +3,7 @@ import { FormText } from "../../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../../definitions/definitions";
 import { createQuerySource } from "../../../hooks/useAsQuery";
 import { useS } from "../../../hooks/useS";
-import { PassportEntity } from "../../../sdk/modules/workspaces/PassportEntity";
+import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
 import { getPassportTypes } from "./PassportCommon";
 import { strings } from "./strings/translations";
 

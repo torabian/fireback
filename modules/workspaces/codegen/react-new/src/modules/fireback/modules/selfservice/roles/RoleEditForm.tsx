@@ -1,6 +1,6 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
 import { RolePermissionTree } from "./RolePermissionTree";
 import { useT } from "@/modules/fireback/hooks/useT";
 

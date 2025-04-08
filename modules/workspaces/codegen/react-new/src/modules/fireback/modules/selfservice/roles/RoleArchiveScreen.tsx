@@ -2,7 +2,7 @@ import { useT } from "@/modules/fireback/hooks/useT";
 import { RoleList } from "./RoleList";
 import { useCommonArchiveExportTools } from "@/modules/fireback/components/action-menu/ActionMenu";
 import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
 
 export const RoleArchiveScreen = () => {
   const t = useT();

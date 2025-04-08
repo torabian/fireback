@@ -4,10 +4,10 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
-import { useGetRoleByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetRoleByUniqueId";
-import { usePatchRole } from "@/modules/fireback/sdk/modules/workspaces/usePatchRole";
-import { usePostRole } from "@/modules/fireback/sdk/modules/workspaces/usePostRole";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { useGetRoleByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetRoleByUniqueId";
+import { usePatchRole } from "@/modules/fireback/sdk/modules/abac/usePatchRole";
+import { usePostRole } from "@/modules/fireback/sdk/modules/abac/usePostRole";
 import { RoleEditForm } from "./RoleEditForm";
 
 export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {

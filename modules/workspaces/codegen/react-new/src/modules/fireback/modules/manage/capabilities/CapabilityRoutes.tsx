@@ -8,19 +8,19 @@ export function useCapabilityRoutes() {
     <>
       <Route
         element={<CapabilityEntityManager />}
-        path={ CapabilityEntity.Navigation.Rcreate}
+        path={CapabilityEntity.Navigation.Rcreate}
       />
       <Route
         element={<CapabilitySingleScreen />}
-        path={ CapabilityEntity.Navigation.Rsingle}
+        path={CapabilityEntity.Navigation.Rsingle}
       ></Route>
       <Route
         element={<CapabilityEntityManager />}
-        path={ CapabilityEntity.Navigation.Redit}
+        path={CapabilityEntity.Navigation.Redit}
       ></Route>
       <Route
         element={<CapabilityArchiveScreen />}
-        path={  CapabilityEntity.Navigation.Rquery}
+        path={CapabilityEntity.Navigation.Rquery}
       ></Route>
     </>
   );

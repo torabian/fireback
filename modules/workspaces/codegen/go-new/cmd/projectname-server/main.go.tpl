@@ -11,6 +11,10 @@ import (
 
 	"github.com/torabian/fireback/modules/workspaces"
 
+	{{ if .ctx.IsMonolith }}
+	"github.com/torabian/fireback/modules/abac"
+	{{ end }}
+
 	{{ if or (.ctx.SelfService) }}
 	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
 	{{ end }}
@@ -51,24 +55,31 @@ var xapp = &workspaces.FirebackApp{
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []workspaces.SearchProviderFn{
 		{{ if .ctx.IsMonolith }}
-		workspaces.QueryMenusReact,
-		workspaces.QueryRolesReact,
+		abac.QueryMenusReact,
+		abac.QueryRolesReact,
 		{{ end }}
 	},
 	SeedersSync: func() {
 		{{ if .ctx.IsMonolith }}
 		// Sample menu item to make it easier for demos
-		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"}, workspaces.QueryDSL{
+		abac.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"}, workspaces.QueryDSL{
 			WorkspaceId: "system",
 		})
 		{{ end }}
 	},
+
+	{{ if ne .ctx.IsMonolith true }}
+	/* File uploader is a part of drive module in abac module
+	{{ end }}
 	RunTus: func() {
-		workspaces.LiftTusServer()
+		abac.LiftTusServer()
 	},
+	{{ if ne .ctx.IsMonolith true }}
+	*/
 	RunSocket: func(e *gin.Engine) {
 		workspaces.HandleSocket(e)
 	},
+	{{ end }}
 	RunSearch:     workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
@@ -106,10 +117,10 @@ var xapp = &workspaces.FirebackApp{
 		// Projects generated as microservice, will not include the following modules,
 		// and that's all the difference between microservice and monolith in fireback
 		{{ end }}
-		workspaces.WorkspaceModuleSetup(),
-		workspaces.DriveModuleSetup(),
-		workspaces.NotificationModuleSetup(),
-		workspaces.PassportsModuleSetup(),
+		abac.WorkspaceModuleSetup(),
+		abac.DriveModuleSetup(),
+		abac.NotificationModuleSetup(),
+		abac.PassportsModuleSetup(),
 		
 		{{ if ne .ctx.IsMonolith true }}
 		*/
@@ -118,7 +129,7 @@ var xapp = &workspaces.FirebackApp{
 		// which essentially changes the Authorization resolver to allow everything,
 		// and adds Capability* tables into the database.
 		// You can uncomment the WorkspaceModuleSetup or other default Modules and go back to normal.
-		workspaces.FirebackMicroService(nil),
+		workspaces.FirebackModuleSetup(nil),
 		{{ end }}
 
 		// do not remove this comment line - it's used by fireback to append new modules

@@ -1,13 +1,12 @@
-import {FormText} from '@/modules/fireback/components/form-text/FormText';
-import {usePostWorkspacePassportCheck} from '@/modules/fireback/sdk/modules/workspaces/usePostWorkspacePassportCheck';
-import {CheckClassicPassportActionReqDto} from '@/modules/fireback/sdk/modules/workspaces/WorkspacesActionsDto';
-import {useNavigation} from '@react-navigation/native';
-import React from 'react';
-import {Alert, ScrollView, StyleSheet, Text, View} from 'react-native';
-import {useTheme} from '../theme';
+import { FormText } from '@/modules/fireback/components/form-text/FormText';
+import { CheckClassicPassportActionReqDto } from '@/modules/fireback/sdk/modules/abac/AbacActionsDto';
+import { usePostWorkspacePassportCheck } from '@/modules/fireback/sdk/modules/abac/usePostWorkspacePassportCheck';
+import { useNavigation } from '@react-navigation/native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTheme } from '../theme';
 import EnterPasswordScreen from './EnterPasswordScreen';
 import FinishSignup from './FinishSignup';
-import {FormManager} from './FormManager';
+import { FormManager } from './FormManager';
 
 const ContinueWithEmailScreen = () => {
   const {theme} = useTheme();
