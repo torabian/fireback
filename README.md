@@ -1,25 +1,44 @@
-# Fireback ‐ Ultimate Go FullStack Framework
+# Fireback – Microservice-First Fullstack Framework in Go
 
-Fireback is a backend framework written in Go, for Go developers. Fireback is opinated,
-it could be making developing of certain type of projects 20x-30x faster, and easier.
-Fireback depends on definition files to create entities, actions, dto and uses those
-definitions to create go code, react code, android and ios.
+Fireback is a **microservice-oriented backend framework** written in Go. It's designed for developers who want to build fast, scalable, and modular systems without boilerplate. It can accelerate development **20x-30x** for many common backends.
 
 <img src=".github/logo.svg" alt="Fireback logo" width="200"/>
 
-Although fireback is for creating backend, it has a look on Android, Swift, React/Native apps
-and generates sdk for them, to make it easier to use your backend or microservice directly
-in the apps. When you complete your backend in fireback, cli tools can be used to generate
-react sdk, and other platform tools.
 
-Fireback is pure golang, you can organize your code as you want after all, you can use
-it in new projects or add it to your existing projects. Code tries to be independent as
-much as possible, but it is on top of Gin and Gorm libraries, and has few other things
-for cli.
 
-Fireback comes with `workspaces` module, which includes many day to day functionality,
-such as user signin, signup, forget password, ABAC, role permission system, and many
-more you might need to build a mid to large scale backend.
+## Getting started
+
+If you want to build a new go project using fireback, easiest is to download the https://github.com/torabian/fireback/releases/download/latest/fireback-microservice-boilerplate.zip 
+
+and continue from there. Make sure you have installed necessary vscode extensions, for code completion.
+
+Or you can go deeper, and install CLI:
+
+- [Download and install fireback](./download-and-install-fireback)
+- [Your first fireback project](./first-fireback-project)
+
+
+### Microservices Made Easy
+
+At its core, Fireback is built around **definition files** that let you describe your services, entities, and APIs in a structured way. From those definitions, Fireback generates:
+
+- Go microservices with REST endpoints  
+- React SDKs  
+- Android/iOS SDKs (via Swift/Kotlin)  
+- DTOs and boilerplate handlers
+
+Your backend becomes a network of services, each independently deployable and easy to integrate across clients.
+
+
+
+### Fullstack Codegen for Microservices
+
+Once your microservices are defined, Fireback’s CLI tools generate frontends and SDKs for various platforms—React, Android, iOS—making it dead-simple for apps to consume your services. Backend and client are always in sync.
+
+
+### Modular by Design
+
+Fireback services are cleanly separated and **decoupled**, built on top of **Gin** and **Gorm**, with minimal overhead. You can add Fireback to new or existing systems. Each generated microservice can live on its own or be composed in larger systems.
 
 ## License
 
@@ -29,22 +48,6 @@ This project is licensed under the [GNU Affero General Public License (AGPL)](LI
 
 The original documents are provided in https://torabi.io/fireback but for quick understanding you
 can continue reading this document.
-
-## Initial Web UI
-
-When generating a new fireback project, now it's possible to use `--ui` flag, and a complete
-react.js dashboard compatible with fireback will be created. It already has a set of fireback components, screens, hooks, which you can modify, delete or create your own set instead.
-
-<img src=".github/fireback-initial-web-ui.png" width="500" />
-
-## Getting started
-
-You can create a new project by installing fireback, and using `fireback new` command,
-create some actions and entities and build your first backend with tons of functionalities in 10 minutes.
-It would be an interactive question set, which initializes everything.
-
-- [Download and install fireback](https://pixelplux.com/en/fireback/download-and-install-fireback)
-- [Your first fireback project](https://pixelplux.com/en/fireback/your-first-fireback-project)
 
 
 ## Watch on youtube (How to build a backend in 15 minutes)
