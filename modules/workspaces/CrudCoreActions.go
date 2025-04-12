@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -393,7 +394,30 @@ func GetRef(query QueryDSL) *gorm.DB {
 	return dbref
 }
 
-func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *QueryResultMeta, error) {
+type CursorInfo struct {
+	Field    string
+	Value    string
+	Operator string
+}
+
+func parseCursor(cursor string) CursorInfo {
+	re := regexp.MustCompile(`(\w+)\((\d+)\)`)
+
+	matches := re.FindStringSubmatch(cursor)
+	if len(matches) > 0 {
+		return CursorInfo{
+			Field: matches[1],
+			Value: matches[2],
+
+			// This needs to be based on the sorting I believe
+			Operator: ">",
+		}
+	}
+
+	return CursorInfo{}
+}
+
+func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *QueryResultMeta, error) {
 	ref := GetRef(query)
 	var items []*T
 	var item *T
@@ -402,6 +426,13 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	q := ref.
 		Offset(query.StartIndex).
 		Limit(query.ItemsPerPage)
+
+	if query.Cursor != nil {
+		info := parseCursor(*query.Cursor)
+		if info.Field != "" {
+			q = q.Where(fmt.Sprintf("%v %v %v", info.Field, info.Operator, info.Value))
+		}
+	}
 
 	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
 
@@ -445,7 +476,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	v.Model(item).Count(&countTotalAvailable)
 
 	if query.Deep {
-		preloads := ListGormSubEntities(reflect)
+		preloads := ListGormSubEntities(refl)
 
 		for _, f := range preloads {
 			q = q.Preload(f)
@@ -465,7 +496,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	}
 
 	if query.Query != "" {
-		queryAdaptor := sql_adaptor.NewDefaultAdaptorFromStruct(reflect)
+		queryAdaptor := sql_adaptor.NewDefaultAdaptorFromStruct(refl)
 		parsedQuery, dslError := queryAdaptor.Parse(query.Query)
 		if dslError == nil {
 			countQ = countQ.Where(parsedQuery.Raw, sql_adaptor.StringSliceToInterfaceSlice(parsedQuery.Values)...)
@@ -477,10 +508,24 @@ func QueryEntitiesPointer[T any](query QueryDSL, reflect reflect.Value) ([]*T, *
 	q = q.Order(ToSnakeCase(query.Sort)).Find(&items)
 	err := q.Error
 
+	var cursor *string
+
+	if len(items) > 0 {
+		v2 := reflect.ValueOf(items[len(items)-1])
+		idField := v2.Elem().FieldByName("ID")
+		if idField.IsValid() {
+			val := idField.Uint()
+			cur := fmt.Sprintf("id(%v)", val)
+			cursor = &cur
+		}
+	}
+
 	meta := &QueryResultMeta{
 		TotalItems:          count,
 		TotalAvailableItems: countTotalAvailable,
+		Cursor:              cursor,
 	}
+
 	if err != nil {
 		return items, meta, err
 	}
