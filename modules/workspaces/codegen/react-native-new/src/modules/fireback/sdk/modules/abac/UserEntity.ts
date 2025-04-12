@@ -8,6 +8,32 @@
         BaseEntity,
     } from "../../core/definitions"
 // In this section we have sub entities related to this object
+export class UserPrimaryAddress extends BaseEntity {
+  /**
+  Street address, building number
+  */
+  public addressLine1?: string | null;
+  /**
+  Apartment, suite, floor (optional)
+  */
+  public addressLine2?: string | null;
+  /**
+  City or locality
+  */
+  public city?: string | null;
+  /**
+  State, region, or province
+  */
+  public stateOrProvince?: string | null;
+  /**
+  ZIP or postal code
+  */
+  public postalCode?: string | null;
+  /**
+  ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")
+  */
+  public countryCode?: string | null;
+}
 // Class body
 export type UserEntityKeys =
   keyof typeof UserEntity.Fields;
@@ -20,6 +46,14 @@ export class UserEntity extends BaseEntity {
   public title?: string | null;
   public birthDate?: Date | null;
   public avatar?: string | null;
+  /**
+  User last connecting ip address
+  */
+  public lastIpAddress?: string | null;
+  /**
+  User primary address location. Can be useful for simple projects that a user is associated with a single address.
+  */
+  public primaryAddress?: UserPrimaryAddress | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/user/edit/${uniqueId}`;
@@ -41,6 +75,14 @@ export class UserEntity extends BaseEntity {
       Rcreate: "user/new",
       Rsingle: "user/:uniqueId",
       Rquery: "users",
+      rPrimaryAddressCreate: "user/:linkerId/primary_address/new",
+      rPrimaryAddressEdit: "user/:linkerId/primary_address/edit/:uniqueId",
+      editPrimaryAddress(linkerId: string, uniqueId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/user/${linkerId}/primary_address/edit/${uniqueId}`;
+      },
+      createPrimaryAddress(linkerId: string, locale?: string) {
+          return `${locale ? '/' + locale : ''}/user/${linkerId}/primary_address/new`;
+      },
   };
   public static definition = {
   "rpc": {
@@ -108,6 +150,66 @@ export class UserEntity extends BaseEntity {
       "type": "string",
       "computedType": "string",
       "gormMap": {}
+    },
+    {
+      "name": "lastIpAddress",
+      "description": "User last connecting ip address",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
+      "name": "primaryAddress",
+      "description": "User primary address location. Can be useful for simple projects that a user is associated with a single address.",
+      "type": "embed",
+      "computedType": "UserPrimaryAddress",
+      "gormMap": {},
+      "-": "UserPrimaryAddress",
+      "fields": [
+        {
+          "name": "addressLine1",
+          "description": "Street address, building number",
+          "type": "string",
+          "computedType": "string",
+          "gormMap": {}
+        },
+        {
+          "name": "addressLine2",
+          "description": "Apartment, suite, floor (optional)",
+          "type": "string?",
+          "computedType": "string",
+          "gormMap": {}
+        },
+        {
+          "name": "city",
+          "description": "City or locality",
+          "type": "string?",
+          "computedType": "string",
+          "gormMap": {}
+        },
+        {
+          "name": "stateOrProvince",
+          "description": "State, region, or province",
+          "type": "string?",
+          "computedType": "string",
+          "gormMap": {}
+        },
+        {
+          "name": "postalCode",
+          "description": "ZIP or postal code",
+          "type": "string?",
+          "computedType": "string",
+          "gormMap": {}
+        },
+        {
+          "name": "countryCode",
+          "description": "ISO 3166-1 alpha-2 (e.g., \\\"US\\\", \\\"DE\\\")",
+          "type": "string?",
+          "computedType": "string",
+          "gormMap": {}
+        }
+      ],
+      "linkedTo": "UserEntity"
     }
   ],
   "description": "Manage the users who are in the current app (root only)"
@@ -121,5 +223,16 @@ public static Fields = {
       title: `title`,
       birthDate: `birthDate`,
       avatar: `avatar`,
+      lastIpAddress: `lastIpAddress`,
+      primaryAddress$: 'primaryAddress',
+      primaryAddress: {
+  ...BaseEntity.Fields,
+      addressLine1: `primaryAddress.addressLine1`,
+      addressLine2: `primaryAddress.addressLine2`,
+      city: `primaryAddress.city`,
+      stateOrProvince: `primaryAddress.stateOrProvince`,
+      postalCode: `primaryAddress.postalCode`,
+      countryCode: `primaryAddress.countryCode`,
+      },
 }
 }

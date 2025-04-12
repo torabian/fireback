@@ -518,7 +518,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 		idField := v2.Elem().FieldByName("ID")
 		if idField.IsValid() {
 			val := idField.Uint()
-			cur := fmt.Sprintf("id(%v)", val)
+			cur := fmt.Sprintf("id(%v)+sort(%v)", val, query.Sort)
 			cursor = &cur
 		}
 	}
