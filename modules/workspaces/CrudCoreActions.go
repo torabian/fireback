@@ -76,6 +76,9 @@ func ListGormSubEntities(entity reflect.Value) []string {
 		if t == "workspaces.Int" || t == "Int" {
 			continue
 		}
+		if t == "workspaces.XDateTime" || t == "XDateTime" {
+			continue
+		}
 		if t == "workspaces.Int64" || t == "Int64" {
 			continue
 		}

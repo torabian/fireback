@@ -89,12 +89,13 @@ func init() {
 
 	UserActions.SeederInit = func() *UserEntity {
 		return &UserEntity{
-
-			FirstName: getRandomName(firstNames),
-			LastName:  getRandomName(lastNames),
-			BirthDate: workspaces.XDate((getRandomBirthDate())),
-			Photo:     getRandomAvatarURL(),
-			Gender:    workspaces.NewInt(randomZeroOrOne()),
+			FirstName:      getRandomName(firstNames),
+			LastName:       getRandomName(lastNames),
+			BirthDate:      workspaces.XDate((getRandomBirthDate())),
+			Photo:          getRandomAvatarURL(),
+			Gender:         workspaces.NewInt(randomZeroOrOne()),
+			LastIpAddress:  randomPublicIP(),
+			PrimaryAddress: RandomUserPrimaryAddress(),
 		}
 	}
 
@@ -106,4 +107,93 @@ func init() {
 		AcceptInviteActionCmd,
 		UserInvitationsActionCmd,
 	)
+}
+
+func randomPublicIP() string {
+	rand.Seed(time.Now().UnixNano())
+
+	for {
+		a := rand.Intn(256)
+		b := rand.Intn(256)
+		c := rand.Intn(256)
+		d := rand.Intn(256)
+
+		// Skip reserved/private ranges
+		if a == 10 || // 10.0.0.0/8
+			(a == 172 && b >= 16 && b <= 31) || // 172.16.0.0 – 172.31.255.255
+			(a == 192 && b == 168) || // 192.168.0.0/16
+			a == 127 || // loopback
+			a >= 224 { // multicast/reserved
+			continue
+		}
+		return fmt.Sprintf("%d.%d.%d.%d", a, b, c, d)
+	}
+}
+
+type sampleAddress struct {
+	CountryCode, City, State, Address1, Address2, Postcode string
+}
+
+var addresses = []sampleAddress{
+	{"US", "Springfield", "IL", "742 Evergreen Terrace", "Apt 4B", "62704"},
+	{"DE", "Berlin", "Berlin", "Musterstraße 12", "EG", "10115"},
+	{"IR", "تهران", "تهران", "خیابان ولیعصر، پلاک ۲۳", "طبقه سوم", "1599616313"},
+	{"PL", "Warszawa", "Mazowieckie", "ul. Długa 45", "mieszkanie 12", "00-238"},
+	{"FR", "Paris", "Île-de-France", "10 Rue de Rivoli", "5ème étage", "75001"},
+	{"UK", "London", "Greater London", "221B Baker Street", "Flat 2", "NW1 6XE"},
+	{"IT", "Rome", "Lazio", "Via Nazionale 75", "Scala B", "00184"},
+	{"ES", "Madrid", "Community of Madrid", "Calle Mayor 3", "Piso 1", "28013"},
+	{"CA", "Toronto", "Ontario", "123 Queen St W", "Unit 1502", "M5H 2M9"},
+	{"AU", "Sydney", "NSW", "88 George Street", "Suite 7", "2000"},
+	{"IN", "Mumbai", "Maharashtra", "12 Linking Road", "Flat 501", "400050"},
+	{"RU", "Moscow", "Moscow", "ул. Тверская, д. 7", "кв. 23", "125009"},
+	{"CN", "Beijing", "Beijing", "东直门南大街 5号", "三层", "100007"},
+	{"JP", "Tokyo", "Tokyo", "1-2-3 Shibuya", "Apt 301", "150-0002"},
+	{"BR", "São Paulo", "SP", "Av. Paulista, 1000", "Ap 102", "01310-100"},
+	{"MX", "Mexico City", "CDMX", "Av. Reforma 222", "Depto 33", "06600"},
+	{"AR", "Buenos Aires", "CABA", "Calle Florida 100", "Piso 2", "1005"},
+	{"TR", "Istanbul", "Istanbul", "İstiklal Caddesi 56", "Kat 4", "34433"},
+	{"NL", "Amsterdam", "North Holland", "Damrak 89", "2nd Floor", "1012 LP"},
+	{"SE", "Stockholm", "Stockholm", "Drottninggatan 50", "Lgh 1101", "11121"},
+	{"NO", "Oslo", "Oslo", "Karl Johans gate 15", "Etasje 3", "0159"},
+	{"FI", "Helsinki", "Uusimaa", "Mannerheimintie 10", "Asunto 2A", "00100"},
+	{"DK", "Copenhagen", "Capital Region", "Strøget 20", "2. sal", "1154"},
+	{"CH", "Zurich", "Zurich", "Bahnhofstrasse 10", "Stock 3", "8001"},
+	{"BE", "Brussels", "Brussels-Capital", "Rue Neuve 15", "Etage 2", "1000"},
+	{"AT", "Vienna", "Vienna", "Mariahilfer Str. 99", "Top 6", "1060"},
+	{"GR", "Athens", "Attica", "Ermou 20", "2ος Όροφος", "10563"},
+	{"PT", "Lisbon", "Lisbon", "Avenida da Liberdade 144", "Apartamento 5D", "1250-146"},
+	{"RO", "Bucharest", "Bucharest", "Strada Lipscani 35", "Etaj 1", "030036"},
+	{"BG", "Sofia", "Sofia", "Vitosha Blvd 18", "Ap. 12", "1000"},
+	{"HU", "Budapest", "Budapest", "Andrássy út 45", "2nd floor", "1061"},
+	{"CZ", "Prague", "Prague", "Wenceslas Square 1", "Suite 4", "110 00"},
+	{"SK", "Bratislava", "Bratislava", "Obchodná 12", "Byt 6", "811 06"},
+	{"HR", "Zagreb", "Zagreb", "Ilica 50", "Kat 1", "10000"},
+	{"SI", "Ljubljana", "Ljubljana", "Slovenska cesta 25", "Nadstropje 3", "1000"},
+	{"EE", "Tallinn", "Harju", "Pikk 23", "Korter 5", "10133"},
+	{"LV", "Riga", "Riga", "Brīvības iela 100", "Dzīvoklis 8", "LV-1011"},
+	{"LT", "Vilnius", "Vilnius", "Gedimino pr. 9", "Butas 2", "01103"},
+	{"UA", "Kyiv", "Kyiv", "Khreshchatyk St, 22", "kv 10", "01001"},
+	{"RS", "Belgrade", "Belgrade", "Knez Mihailova 14", "Sprat 3", "11000"},
+	{"BA", "Sarajevo", "Sarajevo", "Ferhadija 12", "Stan 7", "71000"},
+	{"MK", "Skopje", "Skopje", "Makedonija Str. 5", "Apartment 11", "1000"},
+	{"AL", "Tirana", "Tirana", "Rruga Myslym Shyri 77", "Kati 2", "1001"},
+	{"GE", "Tbilisi", "Tbilisi", "Rustaveli Ave 40", "Apt 9", "0108"},
+	{"AM", "Yerevan", "Yerevan", "Abovyan St 22", "Flat 4", "0001"},
+	{"KZ", "Almaty", "Almaty", "Dostyk Ave 34", "Kv 16", "050010"},
+	{"AZ", "Baku", "Baku", "Nizami St 78", "Mənzil 5", "AZ1000"},
+	{"SA", "Riyadh", "Riyadh", "Olaya St 234", "Floor 6", "12211"},
+}
+
+func RandomUserPrimaryAddress() *UserPrimaryAddress {
+	rand.Seed(time.Now().UnixNano())
+	s := addresses[rand.Intn(len(addresses))]
+	return &UserPrimaryAddress{
+		AddressLine1:    (s.Address1),
+		AddressLine2:    workspaces.NewString(s.Address2),
+		City:            workspaces.NewString(s.City),
+		StateOrProvince: workspaces.NewString(s.State),
+		PostalCode:      workspaces.NewString(s.Postcode),
+		CountryCode:     workspaces.NewString(s.CountryCode),
+	}
 }
