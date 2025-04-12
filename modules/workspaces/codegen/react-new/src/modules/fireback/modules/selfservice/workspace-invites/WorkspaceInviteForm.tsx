@@ -1,13 +1,13 @@
 import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { strings } from "./strings/translations";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceInviteEntity";
+import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
 import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/workspaces/useGetRoles";
+import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
 import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
 import { interfaceLanguages } from "../personal-settings/Langugages";
 

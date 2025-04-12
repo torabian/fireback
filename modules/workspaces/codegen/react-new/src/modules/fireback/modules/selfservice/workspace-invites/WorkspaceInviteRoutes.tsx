@@ -1,4 +1,4 @@
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceInviteEntity";
+import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 import { WorkspaceInviteEntityManager } from "./WorkspaceInviteEntityManager";
 import { Route } from "react-router-dom";
 import { WorkspaceInviteSingleScreen } from "./WorkspaceInviteScreen";

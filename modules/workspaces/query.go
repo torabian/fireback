@@ -37,6 +37,7 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
 		result, err := CliAuth(security)
+
 		if err != nil {
 
 			if err.ToPublicEndUser(&q).Message != err.ToPublicEndUser(&q).MessageTranslated {
@@ -47,8 +48,8 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 
 		q.ResolveStrategy = security.ResolveStrategy
 		q.InternalQuery = result.SqlContext
-		if result.User != nil {
-			q.UserId = result.User.UniqueId
+		if result.UserId.Present && result.UserId.String != "" {
+			q.UserId = result.UserId.String
 		}
 		q.UserAccessPerWorkspace = result.UserAccessPerWorkspace
 

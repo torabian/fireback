@@ -10,11 +10,11 @@ import {
   uriMatch,
 } from "../../hooks/mock-tools";
 import { IResponse, IResponseList } from "../../sdk/core/http-tools";
-import { PublicJoinKeyEntity } from "../../sdk/modules/workspaces/PublicJoinKeyEntity";
-import { RoleEntity } from "../../sdk/modules/workspaces/RoleEntity";
-import { UserEntity } from "../../sdk/modules/workspaces/UserEntity";
-import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
-import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
+import { PublicJoinKeyEntity } from "../../sdk/modules/abac/PublicJoinKeyEntity";
+import { RoleEntity } from "../../sdk/modules/abac/RoleEntity";
+import { UserEntity } from "../../sdk/modules/abac/UserEntity";
+import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
+import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
 export class SelfServiceMockProvider {
   @uriMatch("passport/signin/email")

@@ -4,10 +4,10 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { useGetWorkspaceInviteByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceInviteByUniqueId";
-import { usePatchWorkspaceInvite } from "@/modules/fireback/sdk/modules/workspaces/usePatchWorkspaceInvite";
-import { usePostWorkspaceInvite } from "@/modules/fireback/sdk/modules/workspaces/usePostWorkspaceInvite";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceInviteEntity";
+import { useGetWorkspaceInviteByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceInviteByUniqueId";
+import { usePatchWorkspaceInvite } from "@/modules/fireback/sdk/modules/abac/usePatchWorkspaceInvite";
+import { usePostWorkspaceInvite } from "@/modules/fireback/sdk/modules/abac/usePostWorkspaceInvite";
+import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
 
 export const WorkspaceInviteEntityManager = ({

@@ -1,16 +1,16 @@
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
-import { usePostWorkspace } from "../../../sdk/modules/workspaces/usePostWorkspace";
+import { usePostWorkspace } from "../../../sdk/modules/abac/usePostWorkspace";
 
 import {
   CommonEntityManager,
   DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { useT } from "../../../hooks/useT";
-import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/workspaces/useGetWorkspaceByUniqueId";
-import { usePatchWorkspace } from "../../../sdk/modules/workspaces/usePatchWorkspace";
+import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceByUniqueId";
+import { usePatchWorkspace } from "../../../sdk/modules/abac/usePatchWorkspace";
 import { WorkspaceEditForm } from "./WorkspaceEditForm";
-import { WorkspaceEntity } from "../../../sdk/modules/workspaces/WorkspaceEntity";
+import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
 
 export const WorkspaceEntityManager = ({
   data,

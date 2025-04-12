@@ -9,7 +9,7 @@ require (
 	github.com/gookit/event v1.0.6
 	github.com/json-iterator/go v1.1.12
 	github.com/schollz/progressbar/v3 v3.13.0
-	github.com/torabian/fireback v1.2.0
+	github.com/torabian/fireback v1.2.1
 	github.com/urfave/cli v1.22.9
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/gorm v1.25.7
@@ -154,4 +154,4 @@ require (
 	modernc.org/sqlite v1.23.1 // indirect
 )
 
-replace github.com/torabian/fireback v1.2.0 => /Users/ali/work/fireback
+replace github.com/torabian/fireback v1.2.1 => /Users/ali/work/fireback

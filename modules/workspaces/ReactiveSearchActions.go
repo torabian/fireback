@@ -14,7 +14,7 @@ func InjectReactiveSearch(e *gin.Engine, app *FirebackApp) {
 			Handlers: []gin.HandlerFunc{
 
 				// @todo Doesn't search require a security anyway?
-				WithSocketAuthorization(&SecurityModel{}, true),
+				WithSocketAuthorization(&SecurityModel{}),
 				func(ctx *gin.Context) {
 					HttpReactiveQuery(ctx,
 						func(query QueryDSL, j chan bool, read chan map[string]interface{}) chan *ReactiveSearchResultDto {

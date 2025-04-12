@@ -3,8 +3,8 @@ import { GeneralEntityView } from "@/modules/fireback/components/general-entity-
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/workspaces/PublicJoinKeyEntity";
-import { useGetPublicJoinKeyByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetPublicJoinKeyByUniqueId";
+import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
+import { useGetPublicJoinKeyByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetPublicJoinKeyByUniqueId";
 
 export const PublicJoinKeySingleScreen = () => {
   const router = useRouter();

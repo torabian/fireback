@@ -4,8 +4,8 @@ import {
 } from "@/modules/fireback/components/forms/form-select/FormSelect";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import usePresistentState from "@/modules/fireback/hooks/usePresistentState";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/workspaces/useGetRoles";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
 import { Formik, FormikProps } from "formik";
 import { useMemo, useState } from "react";
 

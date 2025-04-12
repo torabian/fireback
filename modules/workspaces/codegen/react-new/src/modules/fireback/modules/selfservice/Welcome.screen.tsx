@@ -8,11 +8,11 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { usePostPassportViaOauth } from "../../sdk/modules/workspaces/usePostPassportViaOauth";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { usePostPassportViaOauth } from "../../sdk/modules/abac/usePostPassportViaOauth";
 import { AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export const WelcomeScreen = () => {
   const {

@@ -2,12 +2,12 @@ import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
-import { usePostPassportTotpConfirm } from "../../sdk/modules/workspaces/usePostPassportTotpConfirm";
+import { usePostPassportTotpConfirm } from "../../sdk/modules/abac/usePostPassportTotpConfirm";
+import { useCompleteAuth } from "./auth.common";
 import {
   ConfirmClassicPassportTotpActionReqDto,
   ConfirmClassicPassportTotpActionResDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { useCompleteAuth } from "./auth.common";
+} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const { goBack, state } = useRouter();

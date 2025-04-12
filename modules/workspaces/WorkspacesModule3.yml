@@ -1,0 +1,176 @@
+name: workspaces
+meta-workspace: true
+config:
+
+  - name: production
+    type: bool
+    description: 
+      If true, set's the environment behavior to production, and some functionality will be limited
+
+  - name: tablePrefix
+    type: string
+    description: 
+      Prefix all gorm tables with some string
+  - name: tokenGenerationStrategy
+    type: string
+    default: random
+    description: 
+      Fireback supports generating tokens based on random short string, or jwt.
+
+  - name: jwtSecretKey
+    type: string
+    description: 
+      If tokenGenerationStrategy is set to jwt, then these secret will be used.
+  - name: withTaskServer
+    description: 
+      Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run
+      everything in single instance
+    type: bool
+    default: false
+  - name: name
+    description: >-
+      Environment name, such as dev, prod, test, test-eu, etc...
+  - name: dbName
+    default: ':memory:'
+    description: >-
+      Database name for vendors which provide database names, such as mysql.
+      Filename on disk for sqlite.
+  - name: certFile
+    description: SSL Certification location to server on http listener
+  - name: keyFile
+    description: SSL Certification key file
+  - name: dbLogLevel
+    description: Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.
+    default: silent
+  - name: useSSL
+    description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
+    type: bool
+  - name: dbPort
+    description: 'Database port for those which are having a port, 3306 on mysql for example'
+    type: int64
+  - name: driveEnabled
+    type: bool
+    description: >-
+      Drive is a mechanism to have file upload and download, inlining integrated
+      into the fireback
+    default: true
+  - name: dbDsn
+    description: >-
+      Connection dsn to database. Some databases allow connection using a string
+      with all credentials and configs. This has hight priority, if set other
+      details will be ignored.
+  - name: dbHost
+    description: 'Database host, such as localhost, or 127.0.0.1'
+  - name: dbUsername
+    description: 'Database username for connection, such as root.'
+  - name: dbPassword
+    description: Database password for connection. Can be empty if there is no password
+  - name: ginMode
+    description: 'Gin framework mode, which could be ''test'', ''debug'', ''release'''
+  - name: storage
+    description: This is the storage url which files will be uploaded to
+  - name: dbVendor
+    default: sqlite
+    description: >-
+      Database vendor name, such as sqlite, mysql, or any other supported
+      database.
+  - name: stdOut
+    description: Writes the logs instead of std out into these log files.
+  - name: workerAddress
+    description: >-
+      This is the url (host and port) of a queue service. If not set, we use the
+      internal queue system
+    default: '127.0.0.1:6379'
+  - name: workerConcurrency
+    description: How many tasks worker can take concurrently
+    default: 10
+    type: int
+  - name: stdErr
+    description: Writes the errors instead of std err into these log files.
+  - name: tusPort
+    description: Resumable file upload server port.
+  - name: cliToken
+    description: 'Authorization token for cli apps, to access resoruces similar on http api'
+  - name: cliRegion
+    description: 'Region, for example us or pl'
+    default: us
+  - name: cliLanguage
+    description: 'Language of the cli operations, for example en or pl'
+    default: en
+  - name: cliWorkspace
+    description: Selected workspace in the cli context.
+  - name: port
+    description: The port which application would be lifted
+    default: 4500
+    type: int64
+  - name: host
+    default: localhost
+    description: Application host which http server will be lifted
+  - name: macIdentifier
+    default: fireback
+    description: Used name for installing app as system service on macos installers
+  - name: debianIdentifier
+    description: Used name for installing app as system service on ubuntu installers
+    default: fireback
+  - name: windowsIdentifier
+    description: Used name for installing app as system service on windows installers
+    default: fireback
+messages:
+  invalidContent:
+    en: Body content is not correct. You need a valid json.
+  bodyIsMissing:
+    en: Body content is not correct. You need a valid json.
+  validationFailedOnSomeFields:
+    en: Validation has failed on some fields
+  fieldRequired:
+    en: This field is required
+  fieldInvalidEmail:
+    en: Invalid email address
+  fieldOneOf:
+    en: "The value you have provided needs to be one of these values: %s"
+
+actions:
+  - name: listCapabilities
+    cliName: list
+    description: 
+      Lists all of the capabilities in database as a array of string as root access
+    out:
+      primitive: "[]string"
+  - name: capabilitiesTree
+    cliName: treex
+    url: /capabilitiesTree
+    method: get
+    security:
+      requires:
+        - completeKey: root.manage.workspaces.capability.query
+      resolveStrategy: workspace
+    format: GET_ONE
+    description: 
+      dLists all of the capabilities in database as a array of string as root access
+    out:
+      fields:
+        - name: capabilities
+          target: CapabilityEntity
+          type: many2many
+        - name: nested
+          target: CapabilityEntity
+          type: many2many
+dtos:
+  - name: okayResponse
+entities:
+  - name: capability
+    permRewrite:
+      replace: root.modules
+      with: root.manage
+    cliShort: cap
+    security:
+      writeOnRoot: true
+    description: >-
+      Manage the capabilities inside the application, both builtin to core and
+      custom defined ones
+    fields:
+      - name: name
+        type: string
+      - name: description
+        type: string
+        translate: true

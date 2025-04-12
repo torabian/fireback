@@ -5,7 +5,7 @@ import { debounce } from "lodash";
 import { useRef } from "react";
 import { useFileListener } from "../../window-drop/WindowDrop";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
-import { FileEntity } from "../../../sdk/modules/workspaces/FileEntity";
+import { FileEntity } from "../../../sdk/modules/abac/FileEntity";
 
 export interface ImageAsset {
   width?: number | undefined;

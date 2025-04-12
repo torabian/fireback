@@ -4,13 +4,14 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { IResponse } from "../../sdk/core/http-tools";
-import { usePostWorkspacePassportOtp } from "../../sdk/modules/workspaces/usePostWorkspacePassportOtp";
+import { usePostWorkspacePassportOtp } from "../../sdk/modules/abac/usePostWorkspacePassportOtp";
+
+import { useCompleteAuth } from "./auth.common";
+import { strings } from "./strings/translations";
 import {
   ClassicPassportOtpActionReqDto,
   ClassicPassportOtpActionResDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { useCompleteAuth } from "./auth.common";
-import { strings } from "./strings/translations";
+} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();

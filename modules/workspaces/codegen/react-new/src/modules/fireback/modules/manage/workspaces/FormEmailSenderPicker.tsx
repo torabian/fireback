@@ -1,4 +1,4 @@
-import { EmailSenderEntity } from "../../../sdk/modules/workspaces/EmailSenderEntity";
+import { EmailSenderEntity } from "../../../sdk/modules/abac/EmailSenderEntity";
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 

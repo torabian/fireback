@@ -2,7 +2,7 @@ import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
 import { PassportMethodList } from "./PassportMethodList";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/workspaces/PassportMethodEntity";
+import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
 export const PassportMethodArchiveScreen = () => {
   const s = useS(strings);
   return (

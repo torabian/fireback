@@ -4,7 +4,7 @@ import { useT } from "../../../hooks/useT";
 
 import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
 import { WorkspaceTypeList } from "./WorkspaceTypeList";
-import { WorkspaceTypeEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceTypeEntity";
+import { WorkspaceTypeEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceTypeEntity";
 
 export const WorkspaceTypeArchiveScreen = () => {
   const t = useT();

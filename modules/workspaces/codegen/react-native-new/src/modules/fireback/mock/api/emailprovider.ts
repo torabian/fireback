@@ -6,7 +6,7 @@ import {
 } from "@/modules/fireback/hooks/mock-tools";
 import { IResponse } from "../../definitions/JSONStyle";
 import { IResponseList } from "../../sdk/core/http-tools";
-import { EmailProviderEntity } from "../../sdk/modules/workspaces/EmailProviderEntity";
+import { EmailProviderEntity } from "../../sdk/modules/abac/EmailProviderEntity";
 import { mdb } from "../database/databases";
 import { QueryToId } from "../database/memory-db";
 
