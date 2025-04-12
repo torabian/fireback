@@ -29,6 +29,10 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "Add the start index",
 		Value: 0,
 	},
+	&cli.StringFlag{
+		Name:  "cursor",
+		Usage: "Cursor value from the pagination",
+	},
 	&cli.IntFlag{
 		Name:  "limit",
 		Usage: "Items per page",

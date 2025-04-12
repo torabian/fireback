@@ -31,14 +31,43 @@ func ResetUserSeeders(fs *embed.FS) {
 	userSeedersFs = fs
 }
 
+type UserPrimaryAddress struct {
+	// Street address, building number
+	AddressLine1 string `json:"addressLine1" yaml:"addressLine1"        `
+	// Apartment, suite, floor (optional)
+	AddressLine2 workspaces.String `json:"addressLine2" yaml:"addressLine2"        `
+	// City or locality
+	City workspaces.String `json:"city" yaml:"city"        `
+	// State, region, or province
+	StateOrProvince workspaces.String `json:"stateOrProvince" yaml:"stateOrProvince"        `
+	// ZIP or postal code
+	PostalCode workspaces.String `json:"postalCode" yaml:"postalCode"        `
+	// ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")
+	CountryCode workspaces.String `json:"countryCode" yaml:"countryCode"        `
+	LinkedTo    *UserEntity       `yaml:"-" gorm:"-" json:"-" sql:"-"`
+}
+
+func (x *UserPrimaryAddress) RootObjectName() string {
+	return "UserEntity"
+}
+
 type UserEntityQs struct {
-	FirstName workspaces.QueriableField `cli:"first-name" table:"user" column:"first_name" qs:"firstName"`
-	LastName  workspaces.QueriableField `cli:"last-name" table:"user" column:"last_name" qs:"lastName"`
-	Photo     workspaces.QueriableField `cli:"photo" table:"user" column:"photo" qs:"photo"`
-	Gender    workspaces.QueriableField `cli:"gender" table:"user" column:"gender" qs:"gender"`
-	Title     workspaces.QueriableField `cli:"title" table:"user" column:"title" qs:"title"`
-	BirthDate workspaces.QueriableField `cli:"birth-date" table:"user" column:"birth_date" qs:"birthDate"`
-	Avatar    workspaces.QueriableField `cli:"avatar" table:"user" column:"avatar" qs:"avatar"`
+	FirstName      workspaces.QueriableField `cli:"first-name" table:"user" column:"first_name" qs:"firstName"`
+	LastName       workspaces.QueriableField `cli:"last-name" table:"user" column:"last_name" qs:"lastName"`
+	Photo          workspaces.QueriableField `cli:"photo" table:"user" column:"photo" qs:"photo"`
+	Gender         workspaces.QueriableField `cli:"gender" table:"user" column:"gender" qs:"gender"`
+	Title          workspaces.QueriableField `cli:"title" table:"user" column:"title" qs:"title"`
+	BirthDate      workspaces.QueriableField `cli:"birth-date" table:"user" column:"birth_date" qs:"birthDate"`
+	Avatar         workspaces.QueriableField `cli:"avatar" table:"user" column:"avatar" qs:"avatar"`
+	LastIpAddress  workspaces.QueriableField `cli:"last-ip-address" table:"user" column:"last_ip_address" qs:"lastIpAddress"`
+	PrimaryAddress struct {
+		AddressLine1    workspaces.QueriableField `cli:"primary-address.address-line1" table:"user" column:"address_line1" qs:"addressLine1"`
+		AddressLine2    workspaces.QueriableField `cli:"primary-address.address-line2" table:"user" column:"address_line2" qs:"addressLine2"`
+		City            workspaces.QueriableField `cli:"primary-address.city" table:"user" column:"city" qs:"city"`
+		StateOrProvince workspaces.QueriableField `cli:"primary-address.state-or-province" table:"user" column:"state_or_province" qs:"stateOrProvince"`
+		PostalCode      workspaces.QueriableField `cli:"primary-address.postal-code" table:"user" column:"postal_code" qs:"postalCode"`
+		CountryCode     workspaces.QueriableField `cli:"primary-address.country-code" table:"user" column:"country_code" qs:"countryCode"`
+	}
 }
 
 func (x *UserEntityQs) GetQuery() string {
@@ -73,6 +102,34 @@ var UserQsFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "avatar",
 		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "last-ip-address",
+		Usage: "User last connecting ip address",
+	},
+	&cli.StringFlag{
+		Name:  "primary-address-address-line1",
+		Usage: "Street address, building number",
+	},
+	&cli.StringFlag{
+		Name:  "primary-address-address-line2",
+		Usage: "Apartment, suite, floor (optional)",
+	},
+	&cli.StringFlag{
+		Name:  "primary-address-city",
+		Usage: "City or locality",
+	},
+	&cli.StringFlag{
+		Name:  "primary-address-state-or-province",
+		Usage: "State, region, or province",
+	},
+	&cli.StringFlag{
+		Name:  "primary-address-postal-code",
+		Usage: "ZIP or postal code",
+	},
+	&cli.StringFlag{
+		Name:  "primary-address-country-code",
+		Usage: "ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")",
 	},
 }
 
@@ -144,8 +201,12 @@ type UserEntity struct {
 	// Date range is a complex date storage
 	BirthDateDateInfo workspaces.XDateMetaData `json:"birthDateDateInfo" yaml:"birthDateDateInfo" sql:"-" gorm:"-"`
 	Avatar            string                   `json:"avatar" yaml:"avatar"        `
-	Children          []*UserEntity            `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo          *UserEntity              `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	// User last connecting ip address
+	LastIpAddress string `json:"lastIpAddress" yaml:"lastIpAddress"        `
+	// User primary address location. Can be useful for simple projects that a user is associated with a single address.
+	PrimaryAddress *UserPrimaryAddress `json:"primaryAddress" yaml:"primaryAddress"    gorm:"embedded"      `
+	Children       []*UserEntity       `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo       *UserEntity         `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func UserEntityStream(q workspaces.QueryDSL) (chan []*UserEntity, *workspaces.QueryResultMeta, error) {
@@ -239,13 +300,15 @@ var USER_EVENTS = []string{
 }
 
 type UserFieldMap struct {
-	FirstName workspaces.TranslatedString `yaml:"firstName"`
-	LastName  workspaces.TranslatedString `yaml:"lastName"`
-	Photo     workspaces.TranslatedString `yaml:"photo"`
-	Gender    workspaces.TranslatedString `yaml:"gender"`
-	Title     workspaces.TranslatedString `yaml:"title"`
-	BirthDate workspaces.TranslatedString `yaml:"birthDate"`
-	Avatar    workspaces.TranslatedString `yaml:"avatar"`
+	FirstName      workspaces.TranslatedString `yaml:"firstName"`
+	LastName       workspaces.TranslatedString `yaml:"lastName"`
+	Photo          workspaces.TranslatedString `yaml:"photo"`
+	Gender         workspaces.TranslatedString `yaml:"gender"`
+	Title          workspaces.TranslatedString `yaml:"title"`
+	BirthDate      workspaces.TranslatedString `yaml:"birthDate"`
+	Avatar         workspaces.TranslatedString `yaml:"avatar"`
+	LastIpAddress  workspaces.TranslatedString `yaml:"lastIpAddress"`
+	PrimaryAddress workspaces.TranslatedString `yaml:"primaryAddress"`
 }
 
 var UserEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -313,7 +376,9 @@ func (x *UserEntity) Seeder() string {
 	return string(v)
 }
 func UserActionSeederInitFn() *UserEntity {
-	entity := &UserEntity{}
+	entity := &UserEntity{
+		PrimaryAddress: &UserPrimaryAddress{},
+	}
 	return entity
 }
 func UserAssociationCreate(dto *UserEntity, query workspaces.QueryDSL) error {
@@ -382,6 +447,8 @@ Gender: (type: int?) Description:
 Title: (type: string) Description: 
 BirthDate: (type: date) Description: 
 Avatar: (type: string) Description: 
+LastIpAddress: (type: string) Description: User last connecting ip address
+PrimaryAddress: (type: embed) Description: User primary address location. Can be useful for simple projects that a user is associated with a single address.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -758,6 +825,56 @@ var UserCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `avatar (string)`,
 	},
+	&cli.StringFlag{
+		Name:     "last-ip-address",
+		Required: false,
+		Usage:    `User last connecting ip address (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-uid",
+		Required: false,
+		Usage:    "Unique Id - external unique hash to query entity",
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-address-line1",
+		Required: false,
+		Usage:    `Street address, building number (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-address-line2",
+		Required: false,
+		Usage:    `Apartment, suite, floor (optional) (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-city",
+		Required: false,
+		Usage:    `City or locality (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-state-or-province",
+		Required: false,
+		Usage:    `State, region, or province (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-postal-code",
+		Required: false,
+		Usage:    `ZIP or postal code (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-country-code",
+		Required: false,
+		Usage:    `ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\") (string?)`,
+	},
 }
 var UserCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 	{
@@ -798,6 +915,14 @@ var UserCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
 		Required:    false,
 		Recommended: false,
 		Usage:       `avatar`,
+		Type:        "string",
+	},
+	{
+		Name:        "lastIpAddress",
+		StructField: "LastIpAddress",
+		Required:    false,
+		Recommended: false,
+		Usage:       `User last connecting ip address`,
 		Type:        "string",
 	},
 }
@@ -851,6 +976,56 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 		Name:     "avatar",
 		Required: false,
 		Usage:    `avatar (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "last-ip-address",
+		Required: false,
+		Usage:    `User last connecting ip address (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-wid",
+		Required: false,
+		Usage:    "Provide workspace id, if you want to change the data workspace",
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-uid",
+		Required: false,
+		Usage:    "Unique Id - external unique hash to query entity",
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-pid",
+		Required: false,
+		Usage:    " Parent record id of the same type",
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-address-line1",
+		Required: false,
+		Usage:    `Street address, building number (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-address-line2",
+		Required: false,
+		Usage:    `Apartment, suite, floor (optional) (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-city",
+		Required: false,
+		Usage:    `City or locality (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-state-or-province",
+		Required: false,
+		Usage:    `State, region, or province (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-postal-code",
+		Required: false,
+		Usage:    `ZIP or postal code (string?)`,
+	},
+	&cli.StringFlag{
+		Name:     "primaryAddress-country-code",
+		Required: false,
+		Usage:    `ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\") (string?)`,
 	},
 }
 var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()
@@ -928,6 +1103,9 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 	}
 	if c.IsSet("avatar") {
 		template.Avatar = c.String("avatar")
+	}
+	if c.IsSet("last-ip-address") {
+		template.LastIpAddress = c.String("last-ip-address")
 	}
 	return template
 }
@@ -1452,5 +1630,6 @@ var UserEntityBundle = workspaces.EntityBundle{
 	MockProvider: UserImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&UserEntity{},
+		&UserPrimaryAddress{},
 	},
 }

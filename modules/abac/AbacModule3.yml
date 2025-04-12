@@ -1137,6 +1137,36 @@ entities:
         type: date
       - name: avatar
         type: string
+      - name: lastIpAddress
+        type: string
+        description: 
+          User last connecting ip address
+      - name: primaryAddress
+        type: embed
+        description: 
+          User primary address location. Can be useful for simple projects that a user is associated
+          with a single address. 
+        fields:
+        - name: addressLine1       
+          description: Street address, building number
+          type: string
+        - name: addressLine2       
+          description: Apartment, suite, floor (optional)
+          type: string?
+        - name: city             
+          description: City or locality
+          type: string?
+        - name: stateOrProvince   
+          description: State, region, or province
+          type: string?
+        - name: postalCode         
+          description: ZIP or postal code
+          type: string?
+        - name: countryCode        
+          description: ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")
+          type: string?
+
+
   - name: userProfile
     fields:
       - name: firstName

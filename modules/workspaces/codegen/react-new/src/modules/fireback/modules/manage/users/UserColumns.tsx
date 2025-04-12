@@ -57,4 +57,34 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
       </>
     ),
   },
+  {
+    name: UserEntity.Fields.primaryAddress.countryCode,
+    title: "Country code",
+    width: 40,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.countryCode}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.addressLine1,
+    title: "Address Line 1",
+    width: 180,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine1}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.addressLine2,
+    title: "Address Line 2",
+    width: 180,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine2}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.city,
+    title: "City",
+    width: 180,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.city}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.postalCode,
+    title: "Postal Code",
+    width: 80,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.postalCode}</>,
+  },
 ];

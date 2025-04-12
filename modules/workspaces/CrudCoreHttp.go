@@ -316,6 +316,9 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 	}
 
 	if meta != nil {
+		data["next"] = gin.H{
+			"cursor": meta.Cursor,
+		}
 		data["totalItems"] = meta.TotalItems
 		data["totalAvailableItems"] = meta.TotalAvailableItems
 	}

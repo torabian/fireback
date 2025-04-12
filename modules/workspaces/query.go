@@ -62,6 +62,12 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	queryString := c.String("query")
 	startIndex := c.Int("offset")
+	var cursor *string = nil
+	if c.IsSet("cursor") {
+		val := c.String("cursor")
+		cursor = &val
+	}
+
 	itemsPerPage := c.Int("limit")
 
 	if startIndex < 0 {
@@ -92,6 +98,7 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 	var f QueryDSL = QueryDSL{
 		Query:        queryString,
 		StartIndex:   startIndex,
+		Cursor:       cursor,
 		WorkspaceId:  workspaceId,
 		Language:     lang,
 		Region:       strings.ToUpper(region),
@@ -232,6 +239,9 @@ func CommonCliQueryCmd2[T any](
 				"itemsPerPage": f.ItemsPerPage,
 				"items":        items,
 				"totalItems":   count.TotalItems,
+				"next": gin.H{
+					"cursor": count.Cursor,
+				},
 			},
 		}
 		if c.Bool("yaml") {

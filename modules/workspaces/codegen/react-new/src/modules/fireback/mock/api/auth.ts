@@ -1,5 +1,11 @@
 import { IResponse, IResponseList } from "../../definitions/JSONStyle";
-import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
+import {
+  Context,
+  DeepPartial,
+  emptyList,
+  method,
+  uriMatch,
+} from "../../hooks/mock-tools";
 import {
   CheckClassicPassportActionResDto,
   CheckPassportMethodsActionResDto,
@@ -7,6 +13,7 @@ import {
   ConfirmClassicPassportTotpActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
 import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
+import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
 import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
 
@@ -28,6 +35,14 @@ export class AuthMockServer {
     ctx: Context
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
+  }
+
+  @uriMatch("users/invitations")
+  @method("get")
+  async getUserInvites(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<WorkspaceInviteEntity>>> {
+    return emptyList;
   }
 
   @uriMatch("passports/signin/classic")
