@@ -137,6 +137,7 @@ messages:
   bodyIsEmptyEof:
     en: Body is empty. Please provide the necessary data and try again.
     $key: io.EOF
+  
   bodyReadAfterClose:
     en: Body is read after closed. The request might have been processed incorrectly.
     $key: http.ErrBodyReadAfterClose
@@ -147,6 +148,20 @@ messages:
     en: We cannot read the body of your request.
   jsonUnmarshalUnsupportedType:
     en: Unsupported type when unmarshalling json
+  yamlTypeError:
+    en: One of the values is in the wrong format. For example, you might have entered text instead of a number or used quotes incorrectly.
+  yamlDecodingError:
+    en: There’s something wrong with the format of your YAML. Please check indentation, colons, and line breaks to fix the formatting.
+  xmlMalformed:
+    en: The XML format is broken or incomplete. Please make sure all tags are properly opened and closed.
+  xmlUnmarshalError:
+    en: The XML structure doesn’t match the expected format. Some elements may be missing or in the wrong place.
+  xmlDecodingError:
+    en: Something went wrong while processing the XML. Please check the content or try again later.
+  formDataMalformed:
+    en: The form data submitted is malformed or contains invalid fields. Please check the form and ensure all required fields are properly filled out.
+  invalidFormDataContentType:
+    en: The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.
 actions:
   - name: listCapabilities
     cliName: list

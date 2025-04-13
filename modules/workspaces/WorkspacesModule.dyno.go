@@ -38,13 +38,20 @@ const (
 	FieldInvalidEmail            workspacesCode = "FieldInvalidEmail"
 	FieldOneOf                   workspacesCode = "FieldOneOf"
 	FieldRequired                workspacesCode = "FieldRequired"
+	FormDataMalformed            workspacesCode = "FormDataMalformed"
 	InvalidContent               workspacesCode = "InvalidContent"
+	InvalidFormDataContentType   workspacesCode = "InvalidFormDataContentType"
 	JsonDecodingError            workspacesCode = "JsonDecodingError"
 	JsonInvalidFieldType         workspacesCode = "JsonInvalidFieldType"
 	JsonMalformed                workspacesCode = "JsonMalformed"
 	JsonUnmarshalUnsupportedType workspacesCode = "JsonUnmarshalUnsupportedType"
 	UnknownErrorReadingBody      workspacesCode = "UnknownErrorReadingBody"
 	ValidationFailedOnSomeFields workspacesCode = "ValidationFailedOnSomeFields"
+	XmlDecodingError             workspacesCode = "XmlDecodingError"
+	XmlMalformed                 workspacesCode = "XmlMalformed"
+	XmlUnmarshalError            workspacesCode = "XmlUnmarshalError"
+	YamlDecodingError            workspacesCode = "YamlDecodingError"
+	YamlTypeError                workspacesCode = "YamlTypeError"
 )
 
 var WorkspacesMessages = newWorkspacesMessageCode()
@@ -82,9 +89,17 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "FieldRequired",
 			"en": "This field is required",
 		},
+		FormDataMalformed: ErrorItem{
+			"$":  "FormDataMalformed",
+			"en": "The form data submitted is malformed or contains invalid fields. Please check the form and ensure all required fields are properly filled out.",
+		},
 		InvalidContent: ErrorItem{
 			"$":  "InvalidContent",
 			"en": "Body content is not correct. You need a valid json.",
+		},
+		InvalidFormDataContentType: ErrorItem{
+			"$":  "InvalidFormDataContentType",
+			"en": "The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.",
 		},
 		JsonDecodingError: ErrorItem{
 			"$":  "JsonDecodingError",
@@ -110,6 +125,26 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "ValidationFailedOnSomeFields",
 			"en": "Validation has failed on some fields",
 		},
+		XmlDecodingError: ErrorItem{
+			"$":  "XmlDecodingError",
+			"en": "Something went wrong while processing the XML. Please check the content or try again later.",
+		},
+		XmlMalformed: ErrorItem{
+			"$":  "XmlMalformed",
+			"en": "The XML format is broken or incomplete. Please make sure all tags are properly opened and closed.",
+		},
+		XmlUnmarshalError: ErrorItem{
+			"$":  "XmlUnmarshalError",
+			"en": "The XML structure doesn’t match the expected format. Some elements may be missing or in the wrong place.",
+		},
+		YamlDecodingError: ErrorItem{
+			"$":  "YamlDecodingError",
+			"en": "There’s something wrong with the format of your YAML. Please check indentation, colons, and line breaks to fix the formatting.",
+		},
+		YamlTypeError: ErrorItem{
+			"$":  "YamlTypeError",
+			"en": "One of the values is in the wrong format. For example, you might have entered text instead of a number or used quotes incorrectly.",
+		},
 	}
 }
 
@@ -121,13 +156,20 @@ type workspacesMsgs struct {
 	FieldInvalidEmail            ErrorItem
 	FieldOneOf                   ErrorItem
 	FieldRequired                ErrorItem
+	FormDataMalformed            ErrorItem
 	InvalidContent               ErrorItem
+	InvalidFormDataContentType   ErrorItem
 	JsonDecodingError            ErrorItem
 	JsonInvalidFieldType         ErrorItem
 	JsonMalformed                ErrorItem
 	JsonUnmarshalUnsupportedType ErrorItem
 	UnknownErrorReadingBody      ErrorItem
 	ValidationFailedOnSomeFields ErrorItem
+	XmlDecodingError             ErrorItem
+	XmlMalformed                 ErrorItem
+	XmlUnmarshalError            ErrorItem
+	YamlDecodingError            ErrorItem
+	YamlTypeError                ErrorItem
 }
 type Config struct {
 	// If true, set's the environment behavior to production, and some functionality will be limited
