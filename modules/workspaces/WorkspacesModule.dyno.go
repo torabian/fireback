@@ -31,11 +31,19 @@ var ALL_PERM_WORKSPACES_MODULE = []PermissionInfo{
 type workspacesCode string
 
 const (
+	BodyIsEmptyEof               workspacesCode = "BodyIsEmptyEof"
 	BodyIsMissing                workspacesCode = "BodyIsMissing"
+	BodyReadAfterClose           workspacesCode = "BodyReadAfterClose"
+	BodyUnexpectedEof            workspacesCode = "BodyUnexpectedEof"
 	FieldInvalidEmail            workspacesCode = "FieldInvalidEmail"
 	FieldOneOf                   workspacesCode = "FieldOneOf"
 	FieldRequired                workspacesCode = "FieldRequired"
 	InvalidContent               workspacesCode = "InvalidContent"
+	JsonDecodingError            workspacesCode = "JsonDecodingError"
+	JsonInvalidFieldType         workspacesCode = "JsonInvalidFieldType"
+	JsonMalformed                workspacesCode = "JsonMalformed"
+	JsonUnmarshalUnsupportedType workspacesCode = "JsonUnmarshalUnsupportedType"
+	UnknownErrorReadingBody      workspacesCode = "UnknownErrorReadingBody"
 	ValidationFailedOnSomeFields workspacesCode = "ValidationFailedOnSomeFields"
 )
 
@@ -43,9 +51,24 @@ var WorkspacesMessages = newWorkspacesMessageCode()
 
 func newWorkspacesMessageCode() *workspacesMsgs {
 	return &workspacesMsgs{
+		BodyIsEmptyEof: ErrorItem{
+			"$":    "BodyIsEmptyEof",
+			"$key": "io.EOF",
+			"en":   "Body is empty. Please provide the necessary data and try again.",
+		},
 		BodyIsMissing: ErrorItem{
 			"$":  "BodyIsMissing",
 			"en": "Body content is not correct. You need a valid json.",
+		},
+		BodyReadAfterClose: ErrorItem{
+			"$":    "BodyReadAfterClose",
+			"$key": "http.ErrBodyReadAfterClose",
+			"en":   "Body is read after closed. The request might have been processed incorrectly.",
+		},
+		BodyUnexpectedEof: ErrorItem{
+			"$":    "BodyUnexpectedEof",
+			"$key": "io.ErrUnexpectedEOF",
+			"en":   "Body unexpected EOF. The data you sent appears incomplete. Please check your request and try again.",
 		},
 		FieldInvalidEmail: ErrorItem{
 			"$":  "FieldInvalidEmail",
@@ -63,6 +86,26 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 			"$":  "InvalidContent",
 			"en": "Body content is not correct. You need a valid json.",
 		},
+		JsonDecodingError: ErrorItem{
+			"$":  "JsonDecodingError",
+			"en": "Unknown error happened upon decoding.",
+		},
+		JsonInvalidFieldType: ErrorItem{
+			"$":  "JsonInvalidFieldType",
+			"en": "Expected type '%expected' but got a different type '%actual' on %offset (line %line, col %col)",
+		},
+		JsonMalformed: ErrorItem{
+			"$":  "JsonMalformed",
+			"en": "Json is malformed. Check your commas, braces, etc.",
+		},
+		JsonUnmarshalUnsupportedType: ErrorItem{
+			"$":  "JsonUnmarshalUnsupportedType",
+			"en": "Unsupported type when unmarshalling json",
+		},
+		UnknownErrorReadingBody: ErrorItem{
+			"$":  "UnknownErrorReadingBody",
+			"en": "We cannot read the body of your request.",
+		},
 		ValidationFailedOnSomeFields: ErrorItem{
 			"$":  "ValidationFailedOnSomeFields",
 			"en": "Validation has failed on some fields",
@@ -71,11 +114,19 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 }
 
 type workspacesMsgs struct {
+	BodyIsEmptyEof               ErrorItem
 	BodyIsMissing                ErrorItem
+	BodyReadAfterClose           ErrorItem
+	BodyUnexpectedEof            ErrorItem
 	FieldInvalidEmail            ErrorItem
 	FieldOneOf                   ErrorItem
 	FieldRequired                ErrorItem
 	InvalidContent               ErrorItem
+	JsonDecodingError            ErrorItem
+	JsonInvalidFieldType         ErrorItem
+	JsonMalformed                ErrorItem
+	JsonUnmarshalUnsupportedType ErrorItem
+	UnknownErrorReadingBody      ErrorItem
 	ValidationFailedOnSomeFields ErrorItem
 }
 type Config struct {

@@ -23,6 +23,16 @@ func Create401Error(msg *ErrorItem, list []string) *IError {
 	return &result
 }
 
+func Create401ParamOnly(msg *ErrorItem, params map[string]interface{}) *IError {
+	result := IError{
+		Message:       *msg,
+		HttpCode:      401,
+		MessageParams: params,
+	}
+
+	return &result
+}
+
 func Create401ErrorWithItems(msg *ErrorItem, items []*IErrorItem) *IError {
 
 	result := IError{

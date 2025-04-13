@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"reflect"
@@ -152,6 +153,23 @@ func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (*V, *IErr
 
 }
 
+func ginBodyToBytes(c *gin.Context) ([]byte, *IError) {
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return nil, Create401Error(&WorkspacesMessages.BodyIsEmptyEof, []string{})
+		} else if errors.Is(err, io.ErrUnexpectedEOF) {
+			return nil, Create401Error(&WorkspacesMessages.BodyUnexpectedEof, []string{})
+		} else if errors.Is(err, http.ErrBodyReadAfterClose) {
+			return nil, Create401Error(&WorkspacesMessages.BodyReadAfterClose, []string{})
+		} else {
+			return nil, Create401Error(&WorkspacesMessages.UnknownErrorReadingBody, []string{})
+		}
+	}
+
+	return bodyBytes, nil
+}
+
 func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
@@ -162,18 +180,22 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 
 	var body T
 
-	if err := c.BindJSON(&body); err != nil {
+	bodyBytes, err := ginBodyToBytes(c)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error2": err.ToPublicEndUser(&f)})
+		return
+	}
 
-		c.AbortWithStatusJSON(500, gin.H{
-			"error": gin.H{
-				"code": "CORRECT_BODY_SIGNATURE_IS_NEEDED",
-			},
-		})
+	// Reset the body so it can be read again later
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	if err := BindJsonStringWithDetails(bodyBytes, &body); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
 		return
 	}
 
 	if entity, err := fn(body, f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+		c.AbortWithStatusJSON(500, gin.H{"error3": err.ToPublicEndUser(&f), "data": entity})
 	} else {
 		c.JSON(200, gin.H{
 			"data": entity,

@@ -8,6 +8,8 @@ package workspaces
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -18,10 +20,11 @@ import (
  */
 
 type IError struct {
-	Message           ErrorItem     `json:"message,omitempty"`
-	MessageTranslated string        `json:"messageTranslated,omitempty"`
-	Errors            []*IErrorItem `json:"errors,omitempty"`
-	HttpCode          int32         `json:"httpCode,omitempty"`
+	Message           ErrorItem              `json:"message,omitempty"`
+	MessageParams     map[string]interface{} `json:"messageParams,omitempty"`
+	MessageTranslated string                 `json:"messageTranslated,omitempty"`
+	Errors            []*IErrorItem          `json:"errors,omitempty"`
+	HttpCode          int32                  `json:"httpCode,omitempty"`
 }
 
 func (x *IError) Json() string {
@@ -39,10 +42,11 @@ func (x *IError) Json() string {
 * before sending it through http, cli, etc.
  */
 type IPublicError struct {
-	Message           string              `json:"message,omitempty"`
-	MessageTranslated string              `json:"messageTranslated,omitempty"`
-	Errors            []*IPublicErrorItem `json:"errors,omitempty"`
-	HttpCode          int32               `json:"httpCode,omitempty"`
+	Message           string                 `json:"message,omitempty"`
+	MessageTranslated string                 `json:"messageTranslated,omitempty"`
+	MessageParams     map[string]interface{} `json:"messageParams,omitempty"`
+	Errors            []*IPublicErrorItem    `json:"errors,omitempty"`
+	HttpCode          int32                  `json:"httpCode,omitempty"`
 }
 
 // IPublicErrorItem represents an error item that can be used to convey specific
@@ -70,6 +74,30 @@ type IErrorItem struct {
 	Type       string     `json:"type,omitempty"`
 }
 
+func ReplacePlaceholders(input string, values map[string]interface{}) string {
+	if values == nil {
+		return input
+	}
+	for key, val := range values {
+		placeholder := "%" + key
+
+		var strVal string
+		switch v := val.(type) {
+		case string:
+			strVal = v
+		case int, int64, float64, float32:
+			strVal = fmt.Sprintf("%v", v)
+		case bool:
+			strVal = strconv.FormatBool(v)
+		default:
+			strVal = fmt.Sprintf("%v", v)
+		}
+
+		input = strings.ReplaceAll(input, placeholder, strVal)
+	}
+	return input
+}
+
 // ToPublicEndUser converts an IError to an IPublicError.
 // Ensure you do not return IError directly to the public to avoid exposing internal error details.
 //
@@ -90,8 +118,8 @@ func (r *IError) ToPublicEndUser(q interface {
 
 	err := &IPublicError{}
 	err.HttpCode = r.HttpCode
-	err.MessageTranslated = r.Message[lang]
-
+	err.MessageTranslated = ReplacePlaceholders(r.Message[lang], r.MessageParams)
+	err.MessageParams = r.MessageParams
 	err.Message = r.Message["$"]
 
 	for _, item := range r.Errors {

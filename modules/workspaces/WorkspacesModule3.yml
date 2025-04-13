@@ -128,7 +128,25 @@ messages:
     en: Invalid email address
   fieldOneOf:
     en: "The value you have provided needs to be one of these values: %s"
-
+  jsonInvalidFieldType:
+    en: Expected type '%expected' but got a different type '%actual' on %offset (line %line, col %col)
+  jsonMalformed:
+    en: Json is malformed. Check your commas, braces, etc.
+  jsonDecodingError:
+    en: Unknown error happened upon decoding.
+  bodyIsEmptyEof:
+    en: Body is empty. Please provide the necessary data and try again.
+    $key: io.EOF
+  bodyReadAfterClose:
+    en: Body is read after closed. The request might have been processed incorrectly.
+    $key: http.ErrBodyReadAfterClose
+  bodyUnexpectedEof:
+    en: Body unexpected EOF. The data you sent appears incomplete. Please check your request and try again.
+    $key: io.ErrUnexpectedEOF
+  unknownErrorReadingBody:
+    en: We cannot read the body of your request.
+  jsonUnmarshalUnsupportedType:
+    en: Unsupported type when unmarshalling json
 actions:
   - name: listCapabilities
     cliName: list
