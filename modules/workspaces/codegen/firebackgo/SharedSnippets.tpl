@@ -36,43 +36,43 @@ import  "{{ $key}}"
     {{ if .Description }}
     {{ goComment .Description }}
     {{ end }}
-    {{ .PublicName }} {{ if eq .Type "json" }} *{{ $wsprefix }} {{ end }} {{ template "golangtype" . }} {{ .ComputedType }} `json:"{{ if .Json }}{{.Json}}{{ else }}{{.PrivateName }}{{ end }}" yaml:"{{ if .Yaml }}{{.Yaml}}{{ else }}{{.PrivateName }}{{ end }}" {{ template "validaterow" . }} {{ template "gormrow" . }} {{ template "sqlrow" . }}{{ if .Translate }} translate:"true" {{ end }} {{ if $useUrl }} {{ template "useurl" . }} {{ end }}`
+    {{ .PublicName }} {{ if eq .Type "json" }} *{{ $wsprefix }} {{ end }} {{ template "golangtype" . }} {{ .ComputedType }} `json:"{{ if .Json }}{{.Json}}{{ else }}{{.PrivateName }}{{ end }}" xml:"{{ if .Xml }}{{.Xml}}{{ else }}{{.PrivateName }}{{ end }}" yaml:"{{ if .Yaml }}{{.Yaml}}{{ else }}{{.PrivateName }}{{ end }}" {{ template "validaterow" . }} {{ template "gormrow" . }} {{ template "sqlrow" . }}{{ if .Translate }} translate:"true" {{ end }} {{ if $useUrl }} {{ template "useurl" . }} {{ end }}`
     {{ end }}
 
     {{ if eq .Type "datenano" }}
     // Datenano also has a text representation
-    {{ .PublicName }}Formatted string `json:"{{ .PrivateName }}Formatted" yaml:"{{ .PrivateName }}Formatted"`
+    {{ .PublicName }}Formatted string `json:"{{ .PrivateName }}Formatted" xml:"{{ .PrivateName }}Formatted" yaml:"{{ .PrivateName }}Formatted"`
     {{ end }}
     
     {{ if eq .Type "daterange" }}
     // Date range is a complex date storage
-    {{ .PublicName }}Start {{ $wsprefix }}XDate `json:"{{ .PrivateName }}Start" yaml:"{{ .PrivateName }}Start"`
-    {{ .PublicName }}End {{ $wsprefix }}XDate `json:"{{ .PrivateName }}End" yaml:"{{ .PrivateName }}End"`
-    {{ .PublicName }} {{ $wsprefix }}XDateComputed `json:"{{ .PrivateName }}" yaml:"{{ .PrivateName }}" gorm:"-" sql:"-"`
+    {{ .PublicName }}Start {{ $wsprefix }}XDate `json:"{{ .PrivateName }}Start" yaml:"{{ .PrivateName }}Start" xml:"{{ .PrivateName }}Start"`
+    {{ .PublicName }}End {{ $wsprefix }}XDate `json:"{{ .PrivateName }}End" yaml:"{{ .PrivateName }}End" xml:"{{ .PrivateName }}End"`
+    {{ .PublicName }} {{ $wsprefix }}XDateComputed `json:"{{ .PrivateName }}" yaml:"{{ .PrivateName }}" xml:"{{ .PrivateName }}" gorm:"-" sql:"-"`
     {{ end }}
     
     {{ if eq .Type "date" }}
     // Date range is a complex date storage
-    {{ .PublicName }}DateInfo {{ $wsprefix }}XDateMetaData `json:"{{ .PrivateName }}DateInfo" yaml:"{{ .PrivateName }}DateInfo" sql:"-" gorm:"-"`
+    {{ .PublicName }}DateInfo {{ $wsprefix }}XDateMetaData `json:"{{ .PrivateName }}DateInfo" yaml:"{{ .PrivateName }}DateInfo" xml:"{{ .PrivateName }}DateInfo" sql:"-" gorm:"-"`
     {{ end }}
     
     
     {{ if eq .Type "text" }}
-    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
+    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt" xml:"{{ .PrivateName }}Excerpt"`
     {{ end }}
     
     {{ if eq .Type "one" }}
         {{ if and (ne .Name "user") (ne .Name "workspace") }}
-        {{ .PublicName }}Id {{ $wsprefix }}String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id"{{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
+        {{ .PublicName }}Id {{ $wsprefix }}String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id" xml:"{{ .PrivateName }}Id" {{ if .IdFieldGorm }} {{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
         {{ end }}
     {{ end }}
     
     {{ if eq .Type "many2many" }}
-    {{ .PublicName }}ListId []string `json:"{{ .PrivateName }}ListId" yaml:"{{ .PrivateName }}ListId" gorm:"-" sql:"-"`
+    {{ .PublicName }}ListId []string `json:"{{ .PrivateName }}ListId" yaml:"{{ .PrivateName }}ListId" xml:"{{ .PrivateName }}ListId" gorm:"-" sql:"-"`
     {{ end }}
     
     {{ if eq .Type "html" }}
-    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt"`
+    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt" xml:"{{ .PrivateName }}Excerpt"`
     {{ end }}
     
   {{ end }}
@@ -89,41 +89,41 @@ import  "{{ $key}}"
     // Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
     // by default, visibility of record are 0, means they are protected by the workspace
     // which are being created, and visible to every member of the workspace
-    Visibility       {{$prefix}}String                         `json:"visibility,omitempty" yaml:"visibility,omitempty"`
+    Visibility       {{$prefix}}String                         `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 
     // The unique-id of the workspace which content belongs to. Upon creation this will be designated
     // to the selected workspace by user, if they have write access. You can change this value
     // or prevent changes to it manually (on root features for example modifying other workspace)
-    WorkspaceId      {{$prefix}}String                         `json:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if $v.GormMap.WorkspaceId }} gorm:"{{ $v.GormMap.WorkspaceId }}" {{ end }}{{ if eq $v.DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
+    WorkspaceId      {{$prefix}}String                         `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if $v.GormMap.WorkspaceId }} gorm:"{{ $v.GormMap.WorkspaceId }}" {{ end }}{{ if eq $v.DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
 
     // The unique-id of the parent table, which this record is being linked to.
     // used internally for making relations in fireback, generally does not need manual changes
     // or modification by the developer or user. For example, if you have a object inside an object
     // the unique-id of the parent will be written in the child.
-    LinkerId         {{$prefix}}String                         `json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+    LinkerId         {{$prefix}}String                         `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 
     // Used for recursive or parent-child operations. Some tables, are having nested relations,
     // and this field makes the table self refrenceing. ParentId needs to exist in the table before
     // creating of modifying a record.
-    ParentId         {{$prefix}}String                         `json:"parentId,omitempty" yaml:"parentId,omitempty"`
+    ParentId         {{$prefix}}String                         `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 
     // Makes a field deletable. Some records should not be deletable at all.
     // default it's true.
-    IsDeletable         *bool                         `json:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+    IsDeletable         *bool                         `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
     
     // Makes a field updatable. Some records should not be updatable at all.
     // default it's true.
-    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+    IsUpdatable         *bool                         `json:"isUpdatable,omitempty" xml:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
 
     // The unique-id of the user which is creating the record, or the record belongs to.
     // Administration might want to change this to any user, by default Fireback fills
     // it to the current authenticated user.
-    UserId           {{$prefix}}String                         `json:"userId,omitempty" yaml:"userId,omitempty"{{ if $v.GormMap.UserId }} gorm:"{{ $v.GormMap.UserId }}" {{ end }}`
+    UserId           {{$prefix}}String                         `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"{{ if $v.GormMap.UserId }} gorm:"{{ $v.GormMap.UserId }}" {{ end }}`
 
     // General mechanism to rank the elements. From code perspective, it's just a number,
     // but you can sort it based on any logic for records to make a ranking, sorting.
     // they should not be unique across a table.
-    Rank             {{$prefix}}Int64                           `json:"rank,omitempty" gorm:"type:int;name:rank"`
+    Rank             {{$prefix}}Int64                           `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
     {{ end }}
 
     {{ if $v.DataFields.PrimaryId }}
@@ -131,7 +131,7 @@ import  "{{ $key}}"
     // Primary numeric key in the database. This value is not meant to be exported to public
     // or be used to access data at all. Rather a mechanism of indexing columns internally
     // or cursor pagination in future releases of fireback, or better search performance.
-    ID    uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
+    ID    uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-" xml:"-"`
 
 
     // Unique id of the record across the table. This value will be accessed from public APIs,
@@ -139,59 +139,59 @@ import  "{{ $key}}"
     // Upon generation, a UUID automatically is being assigned, and if user has specified the
     // Unique id in the post body, it will be used. This mechanism allows to manage unsaved
     // content on front-end much easier than requiring parent to exists first.
-    UniqueId         string                          `json:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+    UniqueId         string                          `json:"uniqueId,omitempty" xml:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
     {{ end }}
     
     {{ if $v.DataFields.NumericTimestamp }}
 
     // The time that the record has been created in nano-seconds.
     // the field will be automatically populated by gorm orm.
-    Created          int64                           `json:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
+    Created          int64                           `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
 
     // The time that the record has been updated in nano-seconds.
     // the field will be automatically populated by gorm orm.
-    Updated          int64                           `json:"updated,omitempty" yaml:"updated,omitempty"`
+    Updated          int64                           `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
 
     // The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano seconds
     // you need to make sure check this field if writing custom sql queries.
     // the field will be automatically populated by gorm orm.
-    Deleted          int64                           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+    Deleted          int64                           `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
     
     {{ if $v.DataFields.DateTimestamp }}
     // The time that the record has been updated in datetime.
     // the field will be automatically populated by gorm orm.
-    Updated          *time.Time                           `json:"updated,omitempty" yaml:"updated,omitempty"`
+    Updated          *time.Time                           `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
 
     // The time that the record has been created in datetime.
     // the field will be automatically populated by gorm orm.
-    Created          *time.Time                           `json:"created,omitempty" yaml:"created,omitempty"`
+    Created          *time.Time                           `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty"`
 
     // The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
     // you need to make sure check this field if writing custom sql queries.
     // the field will be automatically populated by gorm orm.
-    Deleted          *time.Time                           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+    Deleted          *time.Time                           `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
 
     // Record creation date time formatting based on locale of the headers, or other
     // possible factors.
-    CreatedFormatted string                          `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+    CreatedFormatted string                          `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 
     // Record update date time formatting based on locale of the headers, or other
     // possible factors.
-    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+    UpdatedFormatted string                          `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 {{ end }}
 
 {{ define "polyglottable" }}
   {{ if .e.HasTranslations }}
 
   type {{ .e.PolyglotName}} struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" yaml:"languageId,omitempty"`
+    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
 
     {{ range .e.CompleteFields }}
       {{ if .Translate }}
-        {{.PublicName}} string `yaml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"`
+        {{.PublicName}} string `yaml:"{{.Name}},omitempty" xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"`
       {{ end }}
     {{ end }}
   }
