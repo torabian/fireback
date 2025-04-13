@@ -53,10 +53,10 @@ var EmailOtpResponseDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type EmailOtpResponseDto struct {
-	Request       *PublicAuthenticationEntity `json:"request" yaml:"request"    gorm:"foreignKey:RequestId;references:UniqueId"      `
-	RequestId     workspaces.String           `json:"requestId" yaml:"requestId"`
-	UserSession   *UserSessionDto             `json:"userSession" yaml:"userSession"    gorm:"foreignKey:UserSessionId;references:UniqueId"      `
-	UserSessionId workspaces.String           `json:"userSessionId" yaml:"userSessionId"`
+	Request       *PublicAuthenticationEntity `json:"request" xml:"request" yaml:"request"    gorm:"foreignKey:RequestId;references:UniqueId"      `
+	RequestId     workspaces.String           `json:"requestId" yaml:"requestId" xml:"requestId"  `
+	UserSession   *UserSessionDto             `json:"userSession" xml:"userSession" yaml:"userSession"    gorm:"foreignKey:UserSessionId;references:UniqueId"      `
+	UserSessionId workspaces.String           `json:"userSessionId" yaml:"userSessionId" xml:"userSessionId"  `
 }
 type EmailOtpResponseDtoList struct {
 	Items []*EmailOtpResponseDto

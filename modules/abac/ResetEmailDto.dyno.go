@@ -45,7 +45,7 @@ var ResetEmailDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ResetEmailDto struct {
-	Password string `json:"password" yaml:"password"        `
+	Password string `json:"password" xml:"password" yaml:"password"        `
 }
 type ResetEmailDtoList struct {
 	Items []*ResetEmailDto

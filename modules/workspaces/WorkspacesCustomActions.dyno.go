@@ -51,10 +51,10 @@ var CapabilitiesTreeSecurityModel = &SecurityModel{
 }
 
 type CapabilitiesTreeActionResDto struct {
-	Capabilities       []*CapabilityEntity `json:"capabilities" yaml:"capabilities"    gorm:"many2many:_capabilities;foreignKey:UniqueId;references:UniqueId"      `
-	CapabilitiesListId []string            `json:"capabilitiesListId" yaml:"capabilitiesListId" gorm:"-" sql:"-"`
-	Nested             []*CapabilityEntity `json:"nested" yaml:"nested"    gorm:"many2many:_nested;foreignKey:UniqueId;references:UniqueId"      `
-	NestedListId       []string            `json:"nestedListId" yaml:"nestedListId" gorm:"-" sql:"-"`
+	Capabilities       []*CapabilityEntity `json:"capabilities" xml:"capabilities" yaml:"capabilities"    gorm:"many2many:_capabilities;foreignKey:UniqueId;references:UniqueId"      `
+	CapabilitiesListId []string            `json:"capabilitiesListId" yaml:"capabilitiesListId" xml:"capabilitiesListId" gorm:"-" sql:"-"`
+	Nested             []*CapabilityEntity `json:"nested" xml:"nested" yaml:"nested"    gorm:"many2many:_nested;foreignKey:UniqueId;references:UniqueId"      `
+	NestedListId       []string            `json:"nestedListId" yaml:"nestedListId" xml:"nestedListId" gorm:"-" sql:"-"`
 }
 
 func (x *CapabilitiesTreeActionResDto) RootObjectName() string {

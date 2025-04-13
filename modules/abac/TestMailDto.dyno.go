@@ -77,11 +77,11 @@ var TestMailDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type TestMailDto struct {
-	SenderId string `json:"senderId" yaml:"senderId"        `
-	ToName   string `json:"toName" yaml:"toName"        `
-	ToEmail  string `json:"toEmail" yaml:"toEmail"        `
-	Subject  string `json:"subject" yaml:"subject"        `
-	Content  string `json:"content" yaml:"content"        `
+	SenderId string `json:"senderId" xml:"senderId" yaml:"senderId"        `
+	ToName   string `json:"toName" xml:"toName" yaml:"toName"        `
+	ToEmail  string `json:"toEmail" xml:"toEmail" yaml:"toEmail"        `
+	Subject  string `json:"subject" xml:"subject" yaml:"subject"        `
+	Content  string `json:"content" xml:"content" yaml:"content"        `
 }
 type TestMailDtoList struct {
 	Items []*TestMailDto

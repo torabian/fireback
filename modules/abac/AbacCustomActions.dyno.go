@@ -13,17 +13,17 @@ import (
 
 // using shared actions here
 type QueryUserRoleWorkspacesResDtoRoles struct {
-	Name     string `json:"name" yaml:"name"        `
-	UniqueId string `json:"uniqueId" yaml:"uniqueId"        `
+	Name     string `json:"name" xml:"name" yaml:"name"        `
+	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
 	// Capabilities related to this role which are available
-	Capabilities []string `json:"capabilities" yaml:"capabilities"        `
+	Capabilities []string `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
 }
 type CheckClassicPassportResDtoOtpInfo struct {
-	SuspendUntil int64 `json:"suspendUntil" yaml:"suspendUntil"        `
-	ValidUntil   int64 `json:"validUntil" yaml:"validUntil"        `
-	BlockedUntil int64 `json:"blockedUntil" yaml:"blockedUntil"        `
+	SuspendUntil int64 `json:"suspendUntil" xml:"suspendUntil" yaml:"suspendUntil"        `
+	ValidUntil   int64 `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
+	BlockedUntil int64 `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
 	// The amount of time left to unblock for next request
-	SecondsToUnblock int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
+	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
 var AcceptInviteSecurityModel = &workspaces.SecurityModel{
@@ -33,7 +33,7 @@ var AcceptInviteSecurityModel = &workspaces.SecurityModel{
 
 type AcceptInviteActionReqDto struct {
 	// The invitation id which will be used to process
-	InvitationUniqueId string `json:"invitationUniqueId" yaml:"invitationUniqueId"  validate:"required"        `
+	InvitationUniqueId string `json:"invitationUniqueId" xml:"invitationUniqueId" yaml:"invitationUniqueId"  validate:"required"        `
 }
 
 func (x *AcceptInviteActionReqDto) RootObjectName() string {
@@ -96,9 +96,9 @@ var OauthAuthenticateSecurityModel *workspaces.SecurityModel = nil
 
 type OauthAuthenticateActionReqDto struct {
 	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
-	Token string `json:"token" yaml:"token"        `
+	Token string `json:"token" xml:"token" yaml:"token"        `
 	// The service name, such as "google" which later backend will use to authorize the token and create the user.
-	Service string `json:"service" yaml:"service"        `
+	Service string `json:"service" xml:"service" yaml:"service"        `
 }
 
 func (x *OauthAuthenticateActionReqDto) RootObjectName() string {
@@ -134,10 +134,10 @@ func CastOauthAuthenticateFromCli(c *cli.Context) *OauthAuthenticateActionReqDto
 }
 
 type OauthAuthenticateActionResDto struct {
-	Session   *UserSessionDto   `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId"`
+	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// The next possible action which is suggested.
-	Next []string `json:"next" yaml:"next"        `
+	Next []string `json:"next" xml:"next" yaml:"next"        `
 }
 
 func (x *OauthAuthenticateActionResDto) RootObjectName() string {
@@ -183,13 +183,13 @@ var UserPassportsSecurityModel = &workspaces.SecurityModel{
 
 type UserPassportsActionResDto struct {
 	// The passport value, such as email address or phone number
-	Value string `json:"value" yaml:"value"        `
+	Value string `json:"value" xml:"value" yaml:"value"        `
 	// Unique identifier of the passport to operate some action on top of it
-	UniqueId string `json:"uniqueId" yaml:"uniqueId"        `
+	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
 	// The type of the passport, such as email, phone number
-	Type string `json:"type" yaml:"type"        `
+	Type string `json:"type" xml:"type" yaml:"type"        `
 	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
-	TotpConfirmed bool `json:"totpConfirmed" yaml:"totpConfirmed"        `
+	TotpConfirmed bool `json:"totpConfirmed" xml:"totpConfirmed" yaml:"totpConfirmed"        `
 }
 
 func (x *UserPassportsActionResDto) RootObjectName() string {
@@ -234,9 +234,9 @@ var ChangePasswordSecurityModel = &workspaces.SecurityModel{
 
 type ChangePasswordActionReqDto struct {
 	// New password meeting the security requirements.
-	Password string `json:"password" yaml:"password"  validate:"required"        `
+	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
 	// The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.
-	UniqueId string `json:"uniqueId" yaml:"uniqueId"  validate:"required"        `
+	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"  validate:"required"        `
 }
 
 func (x *ChangePasswordActionReqDto) RootObjectName() string {
@@ -343,11 +343,11 @@ var ConfirmClassicPassportTotpSecurityModel *workspaces.SecurityModel = nil
 
 type ConfirmClassicPassportTotpActionReqDto struct {
 	// Passport value, email or phone number which is already successfully registered.
-	Value string `json:"value" yaml:"value"  validate:"required"        `
+	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
 	// Password related to the passport. Totp is only available for passports with a password. Basically totp is protecting passport, not otp over email or sms.
-	Password string `json:"password" yaml:"password"  validate:"required"        `
+	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
 	// The totp code generated by authenticator such as google or microsft apps.
-	TotpCode string `json:"totpCode" yaml:"totpCode"  validate:"required"        `
+	TotpCode string `json:"totpCode" xml:"totpCode" yaml:"totpCode"  validate:"required"        `
 }
 
 func (x *ConfirmClassicPassportTotpActionReqDto) RootObjectName() string {
@@ -391,8 +391,8 @@ func CastConfirmClassicPassportTotpFromCli(c *cli.Context) *ConfirmClassicPasspo
 }
 
 type ConfirmClassicPassportTotpActionResDto struct {
-	Session   *UserSessionDto   `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId"`
+	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 }
 
 func (x *ConfirmClassicPassportTotpActionResDto) RootObjectName() string {
@@ -434,12 +434,12 @@ var ConfirmClassicPassportTotpActionCmd cli.Command = cli.Command{
 var CheckPassportMethodsSecurityModel *workspaces.SecurityModel = nil
 
 type CheckPassportMethodsActionResDto struct {
-	Email                bool   `json:"email" yaml:"email"        `
-	Phone                bool   `json:"phone" yaml:"phone"        `
-	Google               bool   `json:"google" yaml:"google"        `
-	GoogleOAuthClientKey string `json:"googleOAuthClientKey" yaml:"googleOAuthClientKey"        `
-	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
-	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
+	Email                bool   `json:"email" xml:"email" yaml:"email"        `
+	Phone                bool   `json:"phone" xml:"phone" yaml:"phone"        `
+	Google               bool   `json:"google" xml:"google" yaml:"google"        `
+	GoogleOAuthClientKey string `json:"googleOAuthClientKey" xml:"googleOAuthClientKey" yaml:"googleOAuthClientKey"        `
+	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" xml:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
+	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 }
 
 func (x *CheckPassportMethodsActionResDto) RootObjectName() string {
@@ -477,10 +477,10 @@ var CheckPassportMethodsActionCmd cli.Command = cli.Command{
 var QueryWorkspaceTypesPubliclySecurityModel *workspaces.SecurityModel = nil
 
 type QueryWorkspaceTypesPubliclyActionResDto struct {
-	Title       string `json:"title" yaml:"title"        `
-	Description string `json:"description" yaml:"description"        `
-	UniqueId    string `json:"uniqueId" yaml:"uniqueId"        `
-	Slug        string `json:"slug" yaml:"slug"        `
+	Title       string `json:"title" xml:"title" yaml:"title"        `
+	Description string `json:"description" xml:"description" yaml:"description"        `
+	UniqueId    string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
+	Slug        string `json:"slug" xml:"slug" yaml:"slug"        `
 }
 
 func (x *QueryWorkspaceTypesPubliclyActionResDto) RootObjectName() string {
@@ -524,11 +524,11 @@ var QueryUserRoleWorkspacesSecurityModel = &workspaces.SecurityModel{
 }
 
 type QueryUserRoleWorkspacesActionResDto struct {
-	Name string `json:"name" yaml:"name"        `
+	Name string `json:"name" xml:"name" yaml:"name"        `
 	// Workspace level capabilities which are available
-	Capabilities []string                              `json:"capabilities" yaml:"capabilities"        `
-	UniqueId     string                                `json:"uniqueId" yaml:"uniqueId"        `
-	Roles        []*QueryUserRoleWorkspacesResDtoRoles `json:"roles" yaml:"roles"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Capabilities []string                              `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
+	UniqueId     string                                `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
+	Roles        []*QueryUserRoleWorkspacesResDtoRoles `json:"roles" xml:"roles" yaml:"roles"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 
 func (x *QueryUserRoleWorkspacesActionResDto) RootObjectName() string {
@@ -581,7 +581,7 @@ var ReactiveSearchActionCmd cli.Command = cli.Command{
 var ImportUserSecurityModel *workspaces.SecurityModel = nil
 
 type ImportUserActionReqDto struct {
-	Path string `json:"path" yaml:"path"        `
+	Path string `json:"path" xml:"path" yaml:"path"        `
 }
 
 func (x *ImportUserActionReqDto) RootObjectName() string {
@@ -643,8 +643,8 @@ var ImportUserActionCmd cli.Command = cli.Command{
 var SendEmailSecurityModel *workspaces.SecurityModel = nil
 
 type SendEmailActionReqDto struct {
-	ToAddress string `json:"toAddress" yaml:"toAddress"  validate:"required"        `
-	Body      string `json:"body" yaml:"body"  validate:"required"        `
+	ToAddress string `json:"toAddress" xml:"toAddress" yaml:"toAddress"  validate:"required"        `
+	Body      string `json:"body" xml:"body" yaml:"body"  validate:"required"        `
 }
 
 func (x *SendEmailActionReqDto) RootObjectName() string {
@@ -680,7 +680,7 @@ func CastSendEmailFromCli(c *cli.Context) *SendEmailActionReqDto {
 }
 
 type SendEmailActionResDto struct {
-	QueueId string `json:"queueId" yaml:"queueId"        `
+	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
 }
 
 func (x *SendEmailActionResDto) RootObjectName() string {
@@ -722,10 +722,10 @@ var SendEmailActionCmd cli.Command = cli.Command{
 var SendEmailWithProviderSecurityModel *workspaces.SecurityModel = nil
 
 type SendEmailWithProviderActionReqDto struct {
-	EmailProvider   *EmailProviderEntity `json:"emailProvider" yaml:"emailProvider"    gorm:"foreignKey:EmailProviderId;references:UniqueId"      `
-	EmailProviderId workspaces.String    `json:"emailProviderId" yaml:"emailProviderId"`
-	ToAddress       string               `json:"toAddress" yaml:"toAddress"  validate:"required"        `
-	Body            string               `json:"body" yaml:"body"  validate:"required"        `
+	EmailProvider   *EmailProviderEntity `json:"emailProvider" xml:"emailProvider" yaml:"emailProvider"    gorm:"foreignKey:EmailProviderId;references:UniqueId"      `
+	EmailProviderId workspaces.String    `json:"emailProviderId" yaml:"emailProviderId" xml:"emailProviderId"  `
+	ToAddress       string               `json:"toAddress" xml:"toAddress" yaml:"toAddress"  validate:"required"        `
+	Body            string               `json:"body" xml:"body" yaml:"body"  validate:"required"        `
 }
 
 func (x *SendEmailWithProviderActionReqDto) RootObjectName() string {
@@ -769,7 +769,7 @@ func CastSendEmailWithProviderFromCli(c *cli.Context) *SendEmailWithProviderActi
 }
 
 type SendEmailWithProviderActionResDto struct {
-	QueueId string `json:"queueId" yaml:"queueId"        `
+	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
 }
 
 func (x *SendEmailWithProviderActionResDto) RootObjectName() string {
@@ -845,8 +845,8 @@ var InviteToWorkspaceActionCmd cli.Command = cli.Command{
 var GsmSendSmsSecurityModel *workspaces.SecurityModel = nil
 
 type GsmSendSmsActionReqDto struct {
-	ToNumber string `json:"toNumber" yaml:"toNumber"  validate:"required"        `
-	Body     string `json:"body" yaml:"body"  validate:"required"        `
+	ToNumber string `json:"toNumber" xml:"toNumber" yaml:"toNumber"  validate:"required"        `
+	Body     string `json:"body" xml:"body" yaml:"body"  validate:"required"        `
 }
 
 func (x *GsmSendSmsActionReqDto) RootObjectName() string {
@@ -882,7 +882,7 @@ func CastGsmSendSmsFromCli(c *cli.Context) *GsmSendSmsActionReqDto {
 }
 
 type GsmSendSmsActionResDto struct {
-	QueueId string `json:"queueId" yaml:"queueId"        `
+	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
 }
 
 func (x *GsmSendSmsActionResDto) RootObjectName() string {
@@ -924,10 +924,10 @@ var GsmSendSmsActionCmd cli.Command = cli.Command{
 var GsmSendSmsWithProviderSecurityModel *workspaces.SecurityModel = nil
 
 type GsmSendSmsWithProviderActionReqDto struct {
-	GsmProvider   *GsmProviderEntity `json:"gsmProvider" yaml:"gsmProvider"    gorm:"foreignKey:GsmProviderId;references:UniqueId"      `
-	GsmProviderId workspaces.String  `json:"gsmProviderId" yaml:"gsmProviderId"`
-	ToNumber      string             `json:"toNumber" yaml:"toNumber"  validate:"required"        `
-	Body          string             `json:"body" yaml:"body"  validate:"required"        `
+	GsmProvider   *GsmProviderEntity `json:"gsmProvider" xml:"gsmProvider" yaml:"gsmProvider"    gorm:"foreignKey:GsmProviderId;references:UniqueId"      `
+	GsmProviderId workspaces.String  `json:"gsmProviderId" yaml:"gsmProviderId" xml:"gsmProviderId"  `
+	ToNumber      string             `json:"toNumber" xml:"toNumber" yaml:"toNumber"  validate:"required"        `
+	Body          string             `json:"body" xml:"body" yaml:"body"  validate:"required"        `
 }
 
 func (x *GsmSendSmsWithProviderActionReqDto) RootObjectName() string {
@@ -971,7 +971,7 @@ func CastGsmSendSmsWithProviderFromCli(c *cli.Context) *GsmSendSmsWithProviderAc
 }
 
 type GsmSendSmsWithProviderActionResDto struct {
-	QueueId string `json:"queueId" yaml:"queueId"        `
+	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
 }
 
 func (x *GsmSendSmsWithProviderActionResDto) RootObjectName() string {
@@ -1013,12 +1013,12 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 var ClassicSigninSecurityModel *workspaces.SecurityModel = nil
 
 type ClassicSigninActionReqDto struct {
-	Value    string `json:"value" yaml:"value"  validate:"required"        `
-	Password string `json:"password" yaml:"password"  validate:"required"        `
+	Value    string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
+	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
 	// Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.
-	TotpCode string `json:"totpCode" yaml:"totpCode"        `
+	TotpCode string `json:"totpCode" xml:"totpCode" yaml:"totpCode"        `
 	// Session secret when logging in to the application requires more steps to complete.
-	SessionSecret string `json:"sessionSecret" yaml:"sessionSecret"        `
+	SessionSecret string `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
 }
 
 func (x *ClassicSigninActionReqDto) RootObjectName() string {
@@ -1070,14 +1070,14 @@ func CastClassicSigninFromCli(c *cli.Context) *ClassicSigninActionReqDto {
 }
 
 type ClassicSigninActionResDto struct {
-	Session   *UserSessionDto   `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId"`
+	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// The next possible action which is suggested.
-	Next []string `json:"next" yaml:"next"        `
+	Next []string `json:"next" xml:"next" yaml:"next"        `
 	// In case the account doesn't have totp, but enforced by installation, this value will contain the link
-	TotpUrl string `json:"totpUrl" yaml:"totpUrl"        `
+	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
 	// Returns a secret session if the authentication requires more steps.
-	SessionSecret string `json:"sessionSecret" yaml:"sessionSecret"        `
+	SessionSecret string `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
 }
 
 func (x *ClassicSigninActionResDto) RootObjectName() string {
@@ -1119,16 +1119,16 @@ var ClassicSigninActionCmd cli.Command = cli.Command{
 var ClassicSignupSecurityModel *workspaces.SecurityModel = nil
 
 type ClassicSignupActionReqDto struct {
-	Value string `json:"value" yaml:"value"  validate:"required"        `
+	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
 	// Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup.
-	SessionSecret   string            `json:"sessionSecret" yaml:"sessionSecret"        `
-	Type            string            `json:"type" yaml:"type"  validate:"required"        `
-	Password        string            `json:"password" yaml:"password"  validate:"required"        `
-	FirstName       string            `json:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName        string            `json:"lastName" yaml:"lastName"  validate:"required"        `
-	InviteId        workspaces.String `json:"inviteId" yaml:"inviteId"        `
-	PublicJoinKeyId workspaces.String `json:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
-	WorkspaceTypeId workspaces.String `json:"workspaceTypeId" yaml:"workspaceTypeId"  validate:"required"        `
+	SessionSecret   string            `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
+	Type            string            `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	Password        string            `json:"password" xml:"password" yaml:"password"  validate:"required"        `
+	FirstName       string            `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName        string            `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
+	InviteId        workspaces.String `json:"inviteId" xml:"inviteId" yaml:"inviteId"        `
+	PublicJoinKeyId workspaces.String `json:"publicJoinKeyId" xml:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
+	WorkspaceTypeId workspaces.String `json:"workspaceTypeId" xml:"workspaceTypeId" yaml:"workspaceTypeId"  validate:"required"        `
 }
 
 func (x *ClassicSignupActionReqDto) RootObjectName() string {
@@ -1221,14 +1221,14 @@ func CastClassicSignupFromCli(c *cli.Context) *ClassicSignupActionReqDto {
 
 type ClassicSignupActionResDto struct {
 	// Returns the user session in case that signup is completely successful.
-	Session   *UserSessionDto   `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId"`
+	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// If time based otp is available, we add it response to make it easier for ui.
-	TotpUrl string `json:"totpUrl" yaml:"totpUrl"        `
+	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
 	// Returns true and session will be empty if, the totp is required by the installation. In such scenario, you need to forward user to setup totp screen.
-	ContinueToTotp bool `json:"continueToTotp" yaml:"continueToTotp"        `
+	ContinueToTotp bool `json:"continueToTotp" xml:"continueToTotp" yaml:"continueToTotp"        `
 	// Determines if user must complete totp in order to continue based on workspace or installation
-	ForcedTotp bool `json:"forcedTotp" yaml:"forcedTotp"        `
+	ForcedTotp bool `json:"forcedTotp" xml:"forcedTotp" yaml:"forcedTotp"        `
 }
 
 func (x *ClassicSignupActionResDto) RootObjectName() string {
@@ -1270,9 +1270,9 @@ var ClassicSignupActionCmd cli.Command = cli.Command{
 var CreateWorkspaceSecurityModel *workspaces.SecurityModel = nil
 
 type CreateWorkspaceActionReqDto struct {
-	Name        string            `json:"name" yaml:"name"        `
-	Workspace   *WorkspaceEntity  `json:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	WorkspaceId workspaces.String `json:"workspaceId" yaml:"workspaceId"        `
+	Name        string            `json:"name" xml:"name" yaml:"name"        `
+	Workspace   *WorkspaceEntity  `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
+	WorkspaceId workspaces.String `json:"workspaceId" xml:"workspaceId" yaml:"workspaceId"        `
 }
 
 func (x *CreateWorkspaceActionReqDto) RootObjectName() string {
@@ -1350,9 +1350,9 @@ var CreateWorkspaceActionCmd cli.Command = cli.Command{
 var CheckClassicPassportSecurityModel *workspaces.SecurityModel = nil
 
 type CheckClassicPassportActionReqDto struct {
-	Value string `json:"value" yaml:"value"  validate:"required"        `
+	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
 	// This can be the value of recaptcha2, recaptch3, or generate security image or voice for verification. Will be used based on the configuration.
-	SecurityToken string `json:"securityToken" yaml:"securityToken"        `
+	SecurityToken string `json:"securityToken" xml:"securityToken" yaml:"securityToken"        `
 }
 
 func (x *CheckClassicPassportActionReqDto) RootObjectName() string {
@@ -1389,11 +1389,11 @@ func CastCheckClassicPassportFromCli(c *cli.Context) *CheckClassicPassportAction
 
 type CheckClassicPassportActionResDto struct {
 	// The next possible action which is suggested.
-	Next []string `json:"next" yaml:"next"        `
+	Next []string `json:"next" xml:"next" yaml:"next"        `
 	// Extra information that can be useful actually when doing onboarding. Make sure sensetive information doesn't go out.
-	Flags []string `json:"flags" yaml:"flags"        `
+	Flags []string `json:"flags" xml:"flags" yaml:"flags"        `
 	// If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.
-	OtpInfo *CheckClassicPassportResDtoOtpInfo `json:"otpInfo" yaml:"otpInfo"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	OtpInfo *CheckClassicPassportResDtoOtpInfo `json:"otpInfo" xml:"otpInfo" yaml:"otpInfo"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 
 func (x *CheckClassicPassportActionResDto) RootObjectName() string {
@@ -1435,8 +1435,8 @@ var CheckClassicPassportActionCmd cli.Command = cli.Command{
 var ClassicPassportOtpSecurityModel *workspaces.SecurityModel = nil
 
 type ClassicPassportOtpActionReqDto struct {
-	Value string `json:"value" yaml:"value"  validate:"required"        `
-	Otp   string `json:"otp" yaml:"otp"  validate:"required"        `
+	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
+	Otp   string `json:"otp" xml:"otp" yaml:"otp"  validate:"required"        `
 }
 
 func (x *ClassicPassportOtpActionReqDto) RootObjectName() string {
@@ -1472,14 +1472,14 @@ func CastClassicPassportOtpFromCli(c *cli.Context) *ClassicPassportOtpActionReqD
 }
 
 type ClassicPassportOtpActionResDto struct {
-	Session   *UserSessionDto   `json:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId"`
+	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// If time based otp is available, we add it response to make it easier for ui.
-	TotpUrl string `json:"totpUrl" yaml:"totpUrl"        `
+	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
 	// The session secret will be used to call complete user registeration api.
-	SessionSecret string `json:"sessionSecret" yaml:"sessionSecret"        `
+	SessionSecret string `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
 	// If return true, means the OTP is correct and user needs to be created before continue the authentication processs.
-	ContinueWithCreation bool `json:"continueWithCreation" yaml:"continueWithCreation"        `
+	ContinueWithCreation bool `json:"continueWithCreation" xml:"continueWithCreation" yaml:"continueWithCreation"        `
 }
 
 func (x *ClassicPassportOtpActionResDto) RootObjectName() string {
@@ -1522,7 +1522,7 @@ var ClassicPassportRequestOtpSecurityModel *workspaces.SecurityModel = nil
 
 type ClassicPassportRequestOtpActionReqDto struct {
 	// Passport value (email, phone number) which would be recieving the otp code.
-	Value string `json:"value" yaml:"value"  validate:"required"        `
+	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
 }
 
 func (x *ClassicPassportRequestOtpActionReqDto) RootObjectName() string {
@@ -1550,11 +1550,11 @@ func CastClassicPassportRequestOtpFromCli(c *cli.Context) *ClassicPassportReques
 }
 
 type ClassicPassportRequestOtpActionResDto struct {
-	SuspendUntil int64 `json:"suspendUntil" yaml:"suspendUntil"        `
-	ValidUntil   int64 `json:"validUntil" yaml:"validUntil"        `
-	BlockedUntil int64 `json:"blockedUntil" yaml:"blockedUntil"        `
+	SuspendUntil int64 `json:"suspendUntil" xml:"suspendUntil" yaml:"suspendUntil"        `
+	ValidUntil   int64 `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
+	BlockedUntil int64 `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
 	// The amount of time left to unblock for next request
-	SecondsToUnblock int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"        `
+	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
 func (x *ClassicPassportRequestOtpActionResDto) RootObjectName() string {

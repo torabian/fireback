@@ -53,8 +53,8 @@ var ExchangeKeyInformationDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ExchangeKeyInformationDto struct {
-	Key        string `json:"key" yaml:"key"        `
-	Visibility string `json:"visibility" yaml:"visibility"        `
+	Key        string `json:"key" xml:"key" yaml:"key"        `
+	Visibility string `json:"visibility" xml:"visibility" yaml:"visibility"        `
 }
 type ExchangeKeyInformationDtoList struct {
 	Items []*ExchangeKeyInformationDto

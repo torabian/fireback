@@ -63,7 +63,7 @@ import  "{{ $key}}"
     
     {{ if eq .Type "one" }}
         {{ if and (ne .Name "user") (ne .Name "workspace") }}
-        {{ .PublicName }}Id {{ $wsprefix }}String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id" xml:"{{ .PrivateName }}Id" {{ if .IdFieldGorm }} {{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
+        {{ .PublicName }}Id {{ $wsprefix }}String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id" xml:"{{ .PrivateName }}Id"  {{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
         {{ end }}
     {{ end }}
     

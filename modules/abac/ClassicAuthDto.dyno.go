@@ -93,13 +93,13 @@ var ClassicAuthDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ClassicAuthDto struct {
-	Value           string `json:"value" yaml:"value"  validate:"required"        `
-	Password        string `json:"password" yaml:"password"  validate:"required"        `
-	FirstName       string `json:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName        string `json:"lastName" yaml:"lastName"  validate:"required"        `
-	InviteId        string `json:"inviteId" yaml:"inviteId"        `
-	PublicJoinKeyId string `json:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
-	WorkspaceTypeId string `json:"workspaceTypeId" yaml:"workspaceTypeId"        `
+	Value           string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
+	Password        string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
+	FirstName       string `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName        string `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
+	InviteId        string `json:"inviteId" xml:"inviteId" yaml:"inviteId"        `
+	PublicJoinKeyId string `json:"publicJoinKeyId" xml:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
+	WorkspaceTypeId string `json:"workspaceTypeId" xml:"workspaceTypeId" yaml:"workspaceTypeId"        `
 }
 type ClassicAuthDtoList struct {
 	Items []*ClassicAuthDto
