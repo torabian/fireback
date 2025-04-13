@@ -69,10 +69,10 @@ var OtpAuthenticateDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type OtpAuthenticateDto struct {
-	Value    string `json:"value" yaml:"value"  validate:"required"        `
-	Otp      string `json:"otp" yaml:"otp"        `
-	Type     string `json:"type" yaml:"type"  validate:"required"        `
-	Password string `json:"password" yaml:"password"  validate:"required"        `
+	Value    string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
+	Otp      string `json:"otp" xml:"otp" yaml:"otp"        `
+	Type     string `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
 }
 type OtpAuthenticateDtoList struct {
 	Items []*OtpAuthenticateDto

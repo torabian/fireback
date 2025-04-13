@@ -79,11 +79,11 @@ var AssignRoleDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type AssignRoleDto struct {
-	RoleId     string `json:"roleId" yaml:"roleId"        `
-	UserId     string `json:"userId" yaml:"userId"        `
-	Visibility string `json:"visibility" yaml:"visibility"        `
-	Updated    int64  `json:"updated" yaml:"updated"        `
-	Created    int64  `json:"created" yaml:"created"        `
+	RoleId     string `json:"roleId" xml:"roleId" yaml:"roleId"        `
+	UserId     string `json:"userId" xml:"userId" yaml:"userId"        `
+	Visibility string `json:"visibility" xml:"visibility" yaml:"visibility"        `
+	Updated    int64  `json:"updated" xml:"updated" yaml:"updated"        `
+	Created    int64  `json:"created" xml:"created" yaml:"created"        `
 }
 type AssignRoleDtoList struct {
 	Items []*AssignRoleDto

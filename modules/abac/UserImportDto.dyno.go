@@ -14,8 +14,8 @@ import (
 )
 
 type UserImportPassports struct {
-	Value    string `json:"value" yaml:"value"        `
-	Password string `json:"password" yaml:"password"        `
+	Value    string `json:"value" xml:"value" yaml:"value"        `
+	Password string `json:"password" xml:"password" yaml:"password"        `
 }
 
 func (x *UserImportPassports) RootObjectName() string {
@@ -23,10 +23,10 @@ func (x *UserImportPassports) RootObjectName() string {
 }
 
 type UserImportAddress struct {
-	Street  string `json:"street" yaml:"street"        `
-	ZipCode string `json:"zipCode" yaml:"zipCode"        `
-	City    string `json:"city" yaml:"city"        `
-	Country string `json:"country" yaml:"country"        `
+	Street  string `json:"street" xml:"street" yaml:"street"        `
+	ZipCode string `json:"zipCode" xml:"zipCode" yaml:"zipCode"        `
+	City    string `json:"city" xml:"city" yaml:"city"        `
+	Country string `json:"country" xml:"country" yaml:"country"        `
 }
 
 func (x *UserImportAddress) RootObjectName() string {
@@ -104,9 +104,9 @@ var UserImportDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserImportDto struct {
-	Avatar    string                 `json:"avatar" yaml:"avatar"        `
-	Passports []*UserImportPassports `json:"passports" yaml:"passports"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Address   *UserImportAddress     `json:"address" yaml:"address"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Avatar    string                 `json:"avatar" xml:"avatar" yaml:"avatar"        `
+	Passports []*UserImportPassports `json:"passports" xml:"passports" yaml:"passports"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Address   *UserImportAddress     `json:"address" xml:"address" yaml:"address"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 }
 type UserImportDtoList struct {
 	Items []*UserImportDto

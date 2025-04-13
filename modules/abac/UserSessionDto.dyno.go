@@ -91,14 +91,14 @@ var UserSessionDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserSessionDto struct {
-	Passport             *PassportEntity        `json:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
-	PassportId           workspaces.String      `json:"passportId" yaml:"passportId"`
-	Token                string                 `json:"token" yaml:"token"        `
-	ExchangeKey          string                 `json:"exchangeKey" yaml:"exchangeKey"        `
-	UserWorkspaces       []*UserWorkspaceEntity `json:"userWorkspaces" yaml:"userWorkspaces"    gorm:"many2many:_userWorkspaces;foreignKey:UniqueId;references:UniqueId"      `
-	UserWorkspacesListId []string               `json:"userWorkspacesListId" yaml:"userWorkspacesListId" gorm:"-" sql:"-"`
-	User                 *UserEntity            `json:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	UserId               workspaces.String      `json:"userId" yaml:"userId"        `
+	Passport             *PassportEntity        `json:"passport" xml:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
+	PassportId           workspaces.String      `json:"passportId" yaml:"passportId" xml:"passportId"  `
+	Token                string                 `json:"token" xml:"token" yaml:"token"        `
+	ExchangeKey          string                 `json:"exchangeKey" xml:"exchangeKey" yaml:"exchangeKey"        `
+	UserWorkspaces       []*UserWorkspaceEntity `json:"userWorkspaces" xml:"userWorkspaces" yaml:"userWorkspaces"    gorm:"many2many:_userWorkspaces;foreignKey:UniqueId;references:UniqueId"      `
+	UserWorkspacesListId []string               `json:"userWorkspacesListId" yaml:"userWorkspacesListId" xml:"userWorkspacesListId" gorm:"-" sql:"-"`
+	User                 *UserEntity            `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	UserId               workspaces.String      `json:"userId" xml:"userId" yaml:"userId"        `
 }
 type UserSessionDtoList struct {
 	Items []*UserSessionDto

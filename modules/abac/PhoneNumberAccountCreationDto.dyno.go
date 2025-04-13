@@ -45,7 +45,7 @@ var PhoneNumberAccountCreationDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type PhoneNumberAccountCreationDto struct {
-	PhoneNumber string `json:"phoneNumber" yaml:"phoneNumber"        `
+	PhoneNumber string `json:"phoneNumber" xml:"phoneNumber" yaml:"phoneNumber"        `
 }
 type PhoneNumberAccountCreationDtoList struct {
 	Items []*PhoneNumberAccountCreationDto

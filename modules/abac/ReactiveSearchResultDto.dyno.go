@@ -93,13 +93,13 @@ var ReactiveSearchResultDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ReactiveSearchResultDto struct {
-	UniqueId    string `json:"uniqueId" yaml:"uniqueId"        `
-	Phrase      string `json:"phrase" yaml:"phrase"        `
-	Icon        string `json:"icon" yaml:"icon"        `
-	Description string `json:"description" yaml:"description"        `
-	Group       string `json:"group" yaml:"group"        `
-	UiLocation  string `json:"uiLocation" yaml:"uiLocation"        `
-	ActionFn    string `json:"actionFn" yaml:"actionFn"        `
+	UniqueId    string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
+	Phrase      string `json:"phrase" xml:"phrase" yaml:"phrase"        `
+	Icon        string `json:"icon" xml:"icon" yaml:"icon"        `
+	Description string `json:"description" xml:"description" yaml:"description"        `
+	Group       string `json:"group" xml:"group" yaml:"group"        `
+	UiLocation  string `json:"uiLocation" xml:"uiLocation" yaml:"uiLocation"        `
+	ActionFn    string `json:"actionFn" xml:"actionFn" yaml:"actionFn"        `
 }
 type ReactiveSearchResultDtoList struct {
 	Items []*ReactiveSearchResultDto

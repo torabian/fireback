@@ -359,19 +359,19 @@ type abacMsgs struct {
 */
 type UserInvitationsQueryColumns struct {
 	// UserUniqueId
-	UserId string `json:"userId" yaml:"userId"        `
+	UserId string `json:"userId" xml:"userId" yaml:"userId"        `
 	// Invitation unique id
-	UniqueId string `json:"uniqueId" yaml:"uniqueId"        `
+	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
 	// The value of the passport (email/phone)
-	Value string `json:"value" yaml:"value"        `
+	Value string `json:"value" xml:"value" yaml:"value"        `
 	// Name of the role that user will get
-	RoleName string `json:"roleName" yaml:"roleName"        `
+	RoleName string `json:"roleName" xml:"roleName" yaml:"roleName"        `
 	// Name of the workspace which user is invited to.
-	WorkspaceName string `json:"workspaceName" yaml:"workspaceName"        `
+	WorkspaceName string `json:"workspaceName" xml:"workspaceName" yaml:"workspaceName"        `
 	// The method of the invitation, such as email.
-	Type string `json:"type" yaml:"type"        `
+	Type string `json:"type" xml:"type" yaml:"type"        `
 	// The content that user will receive to understand the reason of the letter.
-	CoverLetter string `json:"coverLetter" yaml:"coverLetter"        `
+	CoverLetter string `json:"coverLetter" xml:"coverLetter" yaml:"coverLetter"        `
 }
 
 func (x *UserInvitationsQueryColumns) Json() string {

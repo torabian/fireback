@@ -45,8 +45,8 @@ var UserRoleWorkspaceDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserRoleWorkspaceDto struct {
-	RoleId       string   `json:"roleId" yaml:"roleId"        `
-	Capabilities []string `json:"capabilities" yaml:"capabilities"        `
+	RoleId       string   `json:"roleId" xml:"roleId" yaml:"roleId"        `
+	Capabilities []string `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
 }
 type UserRoleWorkspaceDtoList struct {
 	Items []*UserRoleWorkspaceDto

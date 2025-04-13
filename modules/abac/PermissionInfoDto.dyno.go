@@ -61,9 +61,9 @@ var PermissionInfoDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type PermissionInfoDto struct {
-	Name        string `json:"name" yaml:"name"        `
-	Description string `json:"description" yaml:"description"        `
-	CompleteKey string `json:"completeKey" yaml:"completeKey"        `
+	Name        string `json:"name" xml:"name" yaml:"name"        `
+	Description string `json:"description" xml:"description" yaml:"description"        `
+	CompleteKey string `json:"completeKey" xml:"completeKey" yaml:"completeKey"        `
 }
 type PermissionInfoDtoList struct {
 	Items []*PermissionInfoDto

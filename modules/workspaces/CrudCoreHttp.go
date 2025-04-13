@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"reflect"
@@ -21,90 +22,6 @@ var Upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
-}
-
-func HttpReactiveQuery[T any](ctx *gin.Context, fn func(QueryDSL, chan bool, chan map[string]interface{}) chan *T) {
-	f := ExtractQueryDslFromGinContext(ctx)
-
-	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-	if err != nil {
-		c.WriteJSON(GormErrorToIError(err))
-
-		c.Close()
-		return
-	}
-
-	done := make(chan bool)
-	read := make(chan map[string]interface{})
-
-	// Add done channel here to be passed later on
-	act := fn(f, done, read)
-
-	defer c.Close()
-
-	go func() {
-
-		for {
-			// defer close(done)
-
-			var k interface{} = nil
-			err := c.ReadJSON(&k)
-
-			if err != nil {
-				fmt.Println("Closed")
-				close(done)
-				// done <- true
-				// close(done)
-				close(act)
-				return
-			}
-			read <- k.(map[string]interface{})
-		}
-	}()
-
-	for {
-		select {
-		case <-done:
-			fmt.Println("Done222")
-			// defer close(act)
-
-			return
-		case row, more := <-act:
-			err := c.WriteJSON(row)
-			if err != nil || !more {
-				return
-			}
-
-		}
-	}
-
-}
-
-func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead func(QueryDSL, interface{})) {
-	f := ExtractQueryDslFromGinContext(ctx)
-
-	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-	if err != nil {
-		c.WriteJSON(GormErrorToIError(err))
-
-		c.Close()
-		return
-	}
-
-	go func() {
-		for {
-			_, k, err := c.ReadMessage()
-			if err != nil {
-				return
-			}
-			onRead(f, string(k))
-		}
-	}()
-
-	fn(f, func(data string) {
-
-		c.WriteMessage(websocket.TextMessage, []byte(data))
-	})
 }
 
 type QueryableAction[T any] func(query QueryDSL) ([]*T, *QueryResultMeta, error)
@@ -152,33 +69,24 @@ func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (*V, *IErr
 
 }
 
-func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
-	f := ExtractQueryDslFromGinContext(c)
-
-	id := c.Param("uniqueId")
-	if id != "" {
-		f.UniqueId = id
+func ginBodyToBytes(c *gin.Context) ([]byte, *IError) {
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return nil, Create401Error(&WorkspacesMessages.BodyIsEmptyEof, []string{})
+		} else if errors.Is(err, io.ErrUnexpectedEOF) {
+			return nil, Create401Error(&WorkspacesMessages.BodyUnexpectedEof, []string{})
+		} else if errors.Is(err, http.ErrBodyReadAfterClose) {
+			return nil, Create401Error(&WorkspacesMessages.BodyReadAfterClose, []string{})
+		} else {
+			return nil, Create401Error(&WorkspacesMessages.UnknownErrorReadingBody, []string{})
+		}
 	}
 
-	var body T
+	// Reset the body so it can be read again later
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
-	if err := c.BindJSON(&body); err != nil {
-
-		c.AbortWithStatusJSON(500, gin.H{
-			"error": gin.H{
-				"code": "CORRECT_BODY_SIGNATURE_IS_NEEDED",
-			},
-		})
-		return
-	}
-
-	if entity, err := fn(body, f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
-	} else {
-		c.JSON(200, gin.H{
-			"data": entity,
-		})
-	}
+	return bodyBytes, nil
 }
 
 func isMap(m interface{}) bool {
@@ -328,199 +236,53 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 	}
 }
 
-func HttpStreamFileChannel(
-	c *gin.Context,
-	fn func(query QueryDSL) (chan []byte, *IError),
-) {
-	f := ExtractQueryDslFromGinContext(c)
-	chanStream, err := fn(f)
+// Use it for requests which are kinda having body, such as post, put, patch, etc.
+// It would read the body (either if it's json, form-data, yaml, etc, based on headers)
+// and cast it to the 'body'. Make sure calling this with &body, not body
+// Extend this function if you want to support different formats.
+func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any, f QueryDSL) (aborted bool) {
+
+	bodyBytes, err := ginBodyToBytes(c)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
+		return true
 	}
 
-	GinStreamFromChannel(c, chanStream)
+	switch DetectGinContentType(c) {
 
-}
-func HttpQueryEntity[T any](
-	c *gin.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
-	qs interface{},
-) {
+	case ContentTypeYAML:
+		if err := BindYamlStringWithDetails(bodyBytes, body); err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
+			return true
+		}
+	case ContentTypeFormData:
+		if err := BindMultiPartFormDataWithDetails(c, body); err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
+			return true
+		}
+	case ContentTypeURLEncoded:
+		if err := BindFormUrlEncodedWithDetails(c, body); err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
+			return true
+		}
+	case ContentTypeXML:
+		if err := BindXmlStringWithDetails(bodyBytes, body); err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
+			return true
+		}
 
-	f := ExtractQueryDslFromGinContext(c)
-
-	QueriableFieldFromGinContext(reflect.ValueOf(qs), "", c)
-
-	method := reflect.ValueOf(qs).MethodByName("GetQuery")
-	if method.IsValid() {
-		results := method.Call(nil) // Call the method with no arguments
-
-		// Check if it returns at least one result
-		if len(results) > 0 {
-			f.Query = results[0].Interface().(string)
+	default:
+		if err := BindJsonStringWithDetails(bodyBytes, body); err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
+			return true
 		}
 	}
 
-	if items, count, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err,
-		})
-	} else {
-		result := QueryEntitySuccessResult(f, items, count)
-		result["jsonQuery"] = c.Query("jsonQuery")
-		c.JSON(200, result)
-	}
-}
-func HttpQueryEntity2[T any](
-	c *gin.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
-) {
-
-	f := ExtractQueryDslFromGinContext(c)
-
-	if items, count, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
-	} else {
-		result := QueryEntitySuccessResult(f, items, count)
-		result["jsonQuery"] = c.Query("jsonQuery")
-		c.JSON(200, result)
-	}
-}
-
-func HttpRawQuery[T any](
-	c *gin.Context,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
-) {
-
-	f := ExtractQueryDslFromGinContext(c)
-
-	if items, count, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
-	} else {
-
-		mappedItems := []map[string]interface{}{}
-		for _, item := range items {
-			content := PolyglotQueryHandler(item, &f)
-			mappedItems = append(mappedItems, content)
-		}
-
-		c.JSON(200, gin.H{
-			"data": gin.H{
-				"startIndex":          f.StartIndex,
-				"itemsPerPage":        f.ItemsPerPage,
-				"items":               mappedItems,
-				"totalItems":          count.TotalItems,
-				"totalAvailableItems": count.TotalAvailableItems,
-			},
-		})
-	}
-}
-
-func HttpGetEntity[T any](
-	c *gin.Context,
-	fn func(QueryDSL) (T, *IError),
-) {
-	id := c.Param("uniqueId")
-	f := ExtractQueryDslFromGinContext(c)
-	f.UniqueId = id
-
-	if item, err := fn(f); err != nil {
-
-		code := http.StatusBadRequest
-
-		if err.HttpCode > 0 {
-			code = int(err.HttpCode)
-		}
-		c.AbortWithStatusJSON(code, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
-
-	} else {
-
-		data := PolyglotQueryHandler(item, &f)
-
-		c.JSON(200, gin.H{
-			"data": data,
-		})
-	}
-}
-
-func HttpRemoveEntity[T any](c *gin.Context, fn func(QueryDSL) (T, *IError)) {
-	f := ExtractQueryDslFromGinContext(c)
-
-	var body DeleteRequest
-	if err := c.ShouldBind(&body); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	f.Query = body.Query
-
-	if item, err := fn(f); err != nil {
-		c.JSON(400, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
-	} else {
-		c.JSON(200, gin.H{
-			"data": gin.H{
-				"rowsAffected": item,
-			},
-		})
-	}
-}
-
-func HttpUpdateEntity[T any, V any](c *gin.Context, fn func(QueryDSL, T) (V, *IError)) {
-	f := ExtractQueryDslFromGinContext(c)
-
-	var body T
-	if err := c.ShouldBind(&body); err != nil {
-		c.JSON(400, gin.H{
-			"error": gin.H{
-				"message": err.Error(),
-			},
-		})
-		return
-	}
-
-	if entity, err := fn(f, body); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.ToPublicEndUser(&f)})
-	} else {
-		c.JSON(200, gin.H{
-			"data": entity,
-		})
-	}
+	return false
 }
 
 type BulkRecordRequest[T any] struct {
 	Records []*T `json:"records"`
-}
-
-func HttpUpdateEntities[T any](c *gin.Context, fn func(QueryDSL, *BulkRecordRequest[T]) (*BulkRecordRequest[T], *IError)) {
-	f := ExtractQueryDslFromGinContext(c)
-
-	var body BulkRecordRequest[T]
-	if err := c.ShouldBind(&body); err != nil {
-		c.JSON(400, gin.H{
-			"error": gin.H{
-				"message": err.Error(),
-			},
-		})
-		return
-	}
-
-	if entity, err := fn(f, &body); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.ToPublicEndUser(&f)})
-	} else {
-		c.JSON(200, gin.H{
-			"data": entity,
-		})
-	}
 }
 
 func Contains(s []string, e string) bool {

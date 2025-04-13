@@ -53,8 +53,8 @@ var EmailAccountSigninDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type EmailAccountSigninDto struct {
-	Email    string `json:"email" yaml:"email"  validate:"required"        `
-	Password string `json:"password" yaml:"password"  validate:"required"        `
+	Email    string `json:"email" xml:"email" yaml:"email"  validate:"required"        `
+	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
 }
 type EmailAccountSigninDtoList struct {
 	Items []*EmailAccountSigninDto

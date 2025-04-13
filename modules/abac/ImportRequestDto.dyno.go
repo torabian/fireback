@@ -45,7 +45,7 @@ var ImportRequestDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type ImportRequestDto struct {
-	File string `json:"file" yaml:"file"        `
+	File string `json:"file" xml:"file" yaml:"file"        `
 }
 type ImportRequestDtoList struct {
 	Items []*ImportRequestDto
