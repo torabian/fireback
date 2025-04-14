@@ -32,6 +32,9 @@ and reduce the time in between.
 - [ ] Improve the SwiftUI codegen, test it via github actions
 - [ ] Streaming content such as audio or video
 - [ ] Autoscaling for the project demo to queue every request.
+- [ ] Revise the event system completely and make sure that the scenario of multiple instances works fine
+        with socket connection, test it in docker with multiple instances and remember each user
+        with correct session id. 
 - [ ] Extensive test for the socket connection and changes coming from server to be reflected on UI.
 - [ ] Revise the code generated for the typescript, specially fields on nested objects to have the path.
 - [ ] Add the replica option for the clickhouse for time series data, investigate the time series formats.
