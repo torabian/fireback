@@ -53,7 +53,9 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
     width: 40,
     getCellValue: (e: UserEntity) => (
       <>
-        <img src={e?.photo} style={{ width: "20px", height: "20px" }} />
+        {e?.photo && (
+          <img src={e?.photo} style={{ width: "20px", height: "20px" }} />
+        )}
       </>
     ),
   },

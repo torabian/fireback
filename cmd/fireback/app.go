@@ -36,7 +36,7 @@ var xapp = &workspaces.FirebackApp{
 		abac.LiftTusServer()
 	},
 	RunSocket: func(e *gin.Engine) {
-		// workspaces.HandleSocket(e)
+		workspaces.HandleSocket(e)
 	},
 	RunSearch: workspaces.InjectReactiveSearch,
 	PublicFolders: []workspaces.PublicFolderInfo{
