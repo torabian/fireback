@@ -11,7 +11,6 @@ Shift to user user interface provided for the admin and new projects.
 - [ ] Self service can delete account
 - [ ] Self service can quite from workspace
 - [ ] Allow project init to contain the workspace modules into the new project and be independent of the original fireback project.
-- [ ] Consider mongodb query system
 - [ ] Add the tabs in the project
 - [ ] Add the drawer in the project with promise/resolve/reject
 - [ ] Prepare react pre-templates. For lists, single form, single view screen, single tabbed screen, wizard
@@ -24,7 +23,7 @@ Goal of this version is to improve the fireback backend mostly, not the UI or us
 The plan is the backend be perfect, and can generate major code for front-end technologies
 and reduce the time in between.
 
-- [ ] Form demo, date, datetime, daterange, datetimerange components on react.
+- [x] Form demo, date, datetime, daterange, datetimerange components on react.
 - [ ] Review the nested modules generated and their behavior on the front-end
 - [ ] Make sure the query params, headers, url params are available and accessible via generated sdk
 - [ ] Improve the SDK with more functions, specially on react.js one it has some dead code, remove, and comment everything
