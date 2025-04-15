@@ -1,69 +1,23 @@
-import { useCallback, useRef, useState } from "react";
-import { DateRangePicker } from "react-date-range";
-import { enUS } from "react-date-range/dist/locale";
-
 import {
-  BaseFormElement,
-  BaseFormElementProps,
-} from "../base-form-element/BaseFormElement";
+  FormDateTimeRange,
+  FormDateTimeRangeProps,
+} from "../form-datetime-range/FormDateTimeRange";
 
-import "react-date-range/dist/styles.css"; // main style file
-import "react-date-range/dist/theme/default.css"; // theme css file
+export const FormDateRange = (props: FormDateTimeRangeProps) => {
+  const normalizeDate = (d?: Date) =>
+    d ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : undefined;
 
-export interface FormDateRangeProps extends BaseFormElementProps {
-  placeholder?: string;
-  label?: string;
-  disabled?: boolean;
-  onChange?: (value: string) => void;
-  secureTextEntry?: boolean;
-  Icon?: any;
-  dir?: string;
-  errorMessage?: string;
-  autoFocus?: boolean;
-  validMessage?: string;
-  value?: any | null;
-  type?: "jalali" | "european";
-  focused?: boolean;
-  inputProps?: any;
-  getInputRef?: (ref: any) => void;
-  pattern?: string;
-}
+  const value = {
+    startDate: normalizeDate(new Date(props.value?.startDate)),
+    endDate: normalizeDate(new Date(props.value?.endDate)),
+  };
 
-export const FormDateRange = (props: FormDateRangeProps) => {
-  const {
-    placeholder,
-    label,
-    getInputRef,
-    secureTextEntry,
-    Icon,
-    onChange,
-    errorMessage,
-    type,
-    focused: f = false,
-    autoFocus,
-    ...restProps
-  } = props;
+  const onChange = (value) => {
+    props.onChange({
+      startDate: normalizeDate(value.startDate),
+      endDate: normalizeDate(value.endDate),
+    });
+  };
 
-  const [focused, setFocused] = useState(false);
-  const ref = useRef<HTMLInputElement | null>();
-  const onClick = useCallback(() => {
-    ref.current?.focus();
-  }, [ref.current]);
-
-  return (
-    <BaseFormElement focused={focused} onClick={onClick} {...props}>
-      <DateRangePicker
-        locale={enUS}
-        date={props.value}
-        months={2}
-        showSelectionPreview={true}
-        direction="horizontal"
-        moveRangeOnFirstSelection={false}
-        ranges={[{ ...(props.value || {}), key: "selection" }]}
-        onChange={(value) => {
-          props.onChange?.(value.selection);
-        }}
-      />
-    </BaseFormElement>
-  );
+  return <FormDateTimeRange {...props} value={value} onChange={onChange} />;
 };

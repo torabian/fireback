@@ -1,6 +1,8 @@
 import { FormDateRange } from "@/modules/fireback/components/forms/form-date-range/FormDateRange";
 import { FormDate } from "@/modules/fireback/components/forms/form-date/FormDate";
+import { FormDateTimeRange } from "@/modules/fireback/components/forms/form-datetime-range/FormDateTimeRange";
 import { FormDateTime } from "@/modules/fireback/components/forms/form-datetime/FormDateTime";
+import { FormTime } from "@/modules/fireback/components/forms/form-time/FormTime";
 import { Formik, FormikProps } from "formik";
 
 export function DemoFormDates() {
@@ -17,7 +19,13 @@ export function DemoFormDates() {
         <FormDateExample />
       </div>
       <div className="mt-5 mb-5">
+        <FormTimeExample />
+      </div>
+      <div className="mt-5 mb-5">
         <FormDateTimeExample />
+      </div>
+      <div className="mt-5 mb-5">
+        <FormDateTimeRangeExample />
       </div>
       <div className="mt-5 mb-5">
         <FormDateRangeExample />
@@ -56,6 +64,45 @@ function FormDateExample() {
               label="When did you born?"
               onChange={(value) =>
                 form.setFieldValue(FormDataSample.Fields.date, value)
+              }
+            />
+          </div>
+        )}
+      </Formik>
+    </div>
+  );
+}
+
+function FormTimeExample() {
+  class FormDataSample {
+    time: string;
+
+    static Fields = {
+      time: "time",
+    };
+  }
+
+  return (
+    <div>
+      <h2>Form Date demo</h2>
+      <p>
+        Sometimes we just need to store a time, without anything else. 5
+        characters 00:00
+      </p>
+      <Formik
+        initialValues={{ time: "22:10" } as FormDataSample}
+        onSubmit={(data) => {
+          alert(JSON.stringify(data, null, 2));
+        }}
+      >
+        {(form: FormikProps<Partial<FormDataSample>>) => (
+          <div>
+            <pre>Form: {JSON.stringify(form.values, null, 2)}</pre>
+            <FormTime
+              value={form.values.time}
+              label="At which hour did you born?"
+              onChange={(value) =>
+                form.setFieldValue(FormDataSample.Fields.time, value)
               }
             />
           </div>
@@ -109,15 +156,15 @@ function FormDateTimeExample() {
 function FormDateRangeExample() {
   class FormDataSample {
     daterange: {
-      start?: Date | null;
-      end?: Date | null;
+      startDate?: Date | null;
+      endDate?: Date | null;
     };
 
     static Fields = {
       daterange$: "daterange",
       daterange: {
-        start: "start",
-        end: "end",
+        startDate: "startDate",
+        endDate: "endDate",
       },
     };
   }
@@ -133,8 +180,8 @@ function FormDateRangeExample() {
         initialValues={
           {
             daterange: {
-              end: new Date(),
-              start: new Date(),
+              endDate: new Date(),
+              startDate: new Date(),
             },
           } as FormDataSample
         }
@@ -148,6 +195,59 @@ function FormDateRangeExample() {
             <FormDateRange
               value={form.values.daterange}
               label="How many days take to eggs become chicken?"
+              onChange={(value) =>
+                form.setFieldValue(FormDataSample.Fields.daterange$, value)
+              }
+            />
+          </div>
+        )}
+      </Formik>
+    </div>
+  );
+}
+
+function FormDateTimeRangeExample() {
+  class FormDataSample {
+    daterange: {
+      startDate?: Date | null;
+      endDte?: Date | null;
+    };
+
+    static Fields = {
+      daterange$: "daterange",
+      daterange: {
+        startDate: "startDate",
+        endDate: "endDate",
+      },
+    };
+  }
+
+  return (
+    <div>
+      <h2>Form DateTimeRange demo</h2>
+      <p>
+        Choosing a date range also is an important thing in many applications, a
+        localised timezone.
+      </p>
+      <Formik
+        initialValues={
+          {
+            daterange: {
+              endDate: new Date(),
+              startDate: new Date(),
+            },
+          } as FormDataSample
+        }
+        onSubmit={(data) => {
+          alert(JSON.stringify(data, null, 2));
+        }}
+      >
+        {(form: FormikProps<Partial<FormDataSample>>) => (
+          <div>
+            <pre>Form: {JSON.stringify(form.values, null, 2)}</pre>
+            <FormDateTimeRange
+              value={form.values.daterange}
+              label="Exactly what time egg came and gone??"
               onChange={(value) =>
                 form.setFieldValue(FormDataSample.Fields.daterange$, value)
               }
