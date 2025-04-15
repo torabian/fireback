@@ -23,9 +23,7 @@ export const UserInvitationList = () => {
       component: () => <div>{s.confirmAcceptDescription}</div>,
       onSubmit: async () => {
         return acceptInvite({ invitationUniqueId: dto.uniqueId }).then(
-          (res) => {
-            console.log("Accept:", res);
-          }
+          (res) => {}
         );
       },
     });
