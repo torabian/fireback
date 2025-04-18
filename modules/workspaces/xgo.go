@@ -353,6 +353,31 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		`)
 	})
 
+	r.GET("/swagger", func(c *gin.Context) {
+
+		c.Header("content-type", "text/html")
+		c.String(200, `<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swagger UI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+    <script>
+      SwaggerUIBundle({
+        url: "/openapi.yml",
+        dom_id: '#swagger-ui'
+      });
+    </script>
+  </body>
+</html>
+
+		`)
+	})
+
 	r.GET("/openapi.yml", func(c *gin.Context) {
 		data, err := ConvertStructToOpenAPIYaml(x)
 
@@ -396,11 +421,21 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 	// r.Use(GinPostTranslateErrorMessages(translations))
 
 	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"data": gin.H{
-				"pong": "yes",
-			},
-		})
+		if config.Production {
+			c.JSON(200, gin.H{
+				"data": gin.H{
+					"pong": "yes",
+				},
+			})
+		} else {
+
+			c.JSON(200, gin.H{
+				"data": gin.H{
+					"pong":       "yes",
+					"instanceId": SERVER_INSTANCE,
+				},
+			})
+		}
 	})
 
 	for _, item := range x.PublicFolders {

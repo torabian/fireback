@@ -19,8 +19,6 @@ type SocketConnection struct {
 
 var SocketSessionPool = make(map[string]map[string]*SocketConnection)
 
-// var sessionPool []*SocketConnection = []*SocketConnection{}
-
 func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Context
 
 	wsURL := ginContext.Request.URL
