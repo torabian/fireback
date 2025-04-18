@@ -52,10 +52,14 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 			GetCapabilityModule3Actions(),
 			WorkspacesCustomActions(),
 		},
+		EntityBundles: []EntityBundle{
+			WebPushConfigEntityBundle,
+		},
 	}
 
 	module.ProvideCliHandlers([]cli.Command{
 		CapabilityCliFn(),
+		PushNotificationCmd,
 	})
 
 	workspaceModuleCore(module)

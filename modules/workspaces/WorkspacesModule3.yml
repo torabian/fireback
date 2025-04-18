@@ -11,6 +11,14 @@ config:
     type: string
     description: 
       Prefix all gorm tables with some string
+  - name: vapidPublicKey
+    type: string
+    description: 
+      VAPID Web push notification public key
+  - name: vapidPrivateKey
+    type: string
+    description: 
+      VAPID Web push notification private key
   - name: tokenGenerationStrategy
     type: string
     default: random
@@ -191,6 +199,18 @@ actions:
 dtos:
   - name: okayResponse
 entities:
+  - name: webPushConfig
+    security:
+      resolveStrategy: user
+    distinctBy: user
+    description: 
+      Keep the web push notification configuration for each user
+    fields: 
+    - name: subscription
+      type: json
+      validate: required
+      description: 
+        The json content of the web push after getting it from browser
   - name: capability
     permRewrite:
       replace: root.modules

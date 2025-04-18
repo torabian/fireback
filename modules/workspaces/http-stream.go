@@ -31,25 +31,25 @@ func checkWriter(writer io.Writer) stringWriter {
 	}
 }
 
-type Event struct {
+type HttpEvent struct {
 	Event string
 	Id    string
 	Retry uint
 	Data  []byte
 }
 
-func Encode(writer io.Writer, event Event) error {
+func Encode(writer io.Writer, event HttpEvent) error {
 	w := checkWriter(writer)
 	w.WriteString(string(event.Data))
 
 	return nil
 }
 
-func (r Event) Render(w http.ResponseWriter) error {
+func (r HttpEvent) Render(w http.ResponseWriter) error {
 	return Encode(w, r)
 }
 
-func (r Event) WriteContentType(w http.ResponseWriter) {
+func (r HttpEvent) WriteContentType(w http.ResponseWriter) {
 	header := w.Header()
 	header["Content-Type"] = contentType
 
@@ -77,7 +77,7 @@ func Stream(c *gin.Context, step func(w io.Writer) bool) bool {
 }
 
 func WriteToStream(c *gin.Context, data []byte) {
-	c.Render(-1, Event{
+	c.Render(-1, HttpEvent{
 		Data: data,
 	})
 }

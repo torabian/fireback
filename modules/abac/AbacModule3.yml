@@ -7,6 +7,7 @@ actions:
       Use it when user accepts an invitation, and it will complete the joining process
     security:
       resolveStrategy: user
+        
     in:
       fields:
         - name: invitationUniqueId

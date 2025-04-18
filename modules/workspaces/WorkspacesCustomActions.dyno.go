@@ -147,6 +147,7 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	Subcommands: cli.Commands{
 		ListCapabilitiesActionCmd,
 		CapabilitiesTreeActionCmd,
+		WebPushConfigCliFn(),
 		CapabilityCliFn(),
 	},
 }

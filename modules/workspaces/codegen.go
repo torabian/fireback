@@ -2862,6 +2862,18 @@ func (x *Module3) RenderActions(
 
 	}
 
+	for _, notification := range x.Notifications {
+		if notification.Payload != nil {
+			ComputeFieldTypesAbsolute(notification.Payload.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+	}
+
+	for _, event := range x.Events {
+		if event.Payload != nil {
+			ComputeFieldTypesAbsolute(event.Payload.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+	}
+
 	for _, action := range x.Actions {
 
 		ComputeFieldTypesAbsolute(action.Query, isWorkspace, ctx.Catalog.ComputeField)
@@ -3065,6 +3077,31 @@ func RemoteTaskAppend(ctx *CodeGenContext, remotes []*Module3Task, isWorkspace b
 	return res
 }
 
+func NotificationAppend(ctx *CodeGenContext, notifications []*Module3Notification, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
+
+	for _, item := range notifications {
+		if item.Payload == nil || len(item.Payload.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Notification", item.Payload.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+func EventAppend(ctx *CodeGenContext, events []*Module3Event, isWorkspace bool) [][]*Module3Field {
+	res := [][]*Module3Field{}
+
+	for _, item := range events {
+		if item.Payload == nil || len(item.Payload.Fields) == 0 {
+			continue
+		}
+		res = append(res, ChildItemsCommon(ToUpper(item.Name)+"Event", item.Payload.Fields, ctx, isWorkspace))
+	}
+
+	return res
+}
+
 func QueryAppend(ctx *CodeGenContext, queries []*Module3Query, isWorkspace bool) [][]*Module3Field {
 	res := [][]*Module3Field{}
 
@@ -3205,6 +3242,8 @@ func (x *Module3) RenderTemplate(
 		"fv":                   FIREBACK_VERSION,
 		"remoteQueryChildren":  RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
 		"taskChildren":         RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
+		"notificationChildren": NotificationAppend(ctx, x.Notifications, isWorkspace),
+		"eventChildren":        EventAppend(ctx, x.Events, isWorkspace),
 		"queriesChildren":      QueryAppend(ctx, x.Queries, isWorkspace),
 		"gofModule":            ctx.GofModuleName,
 		"remoteResChildrenMap": RemoteChildrenMapResponse(ctx, x.Remotes, isWorkspace),

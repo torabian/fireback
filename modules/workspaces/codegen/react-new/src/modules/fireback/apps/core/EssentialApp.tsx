@@ -61,6 +61,14 @@ export function EssentialApp({
   const [queryClient] = React.useState(() => new QueryClient());
   const { config } = useContext(AppConfigContext);
 
+  useEffect(() => {
+    if ("serviceWorker" in navigator && "PushManager" in window) {
+      navigator.serviceWorker.register("sw.js").then((reg) => {
+        console.log("Service Worker registered", reg);
+      });
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <UIStateProvider>

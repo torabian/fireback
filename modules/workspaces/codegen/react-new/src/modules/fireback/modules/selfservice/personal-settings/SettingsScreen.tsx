@@ -8,6 +8,7 @@ import { DebuggerSettings } from "./DebuggerSettings";
 import { ThemeSettings } from "./ThemeSettings";
 import { AccessiblitySettings } from "./AccessiblitySettings";
 import { usePageTitle } from "../../../components/page-title/PageTitle";
+import { NotificationSettings } from "./NotificationSettings";
 
 export function SettingsScreen({}: {}) {
   const t = useT();
@@ -19,6 +20,7 @@ export function SettingsScreen({}: {}) {
       {/* {process.env.REACT_APP_FORCE_REMOTE_SERVICE !== "true" ? (
         <RemoteServiceSetting />
       ) : null} */}
+      <NotificationSettings />
       {process.env.REACT_APP_FORCED_LOCALE ? null : <InterfaceSettings />}
       <RichTextEditorSettings />
       <AccessiblitySettings />
