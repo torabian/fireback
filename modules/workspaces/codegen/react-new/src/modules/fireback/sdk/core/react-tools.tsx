@@ -527,7 +527,9 @@ export function useSocket(remote, token, workspaceId, queryClient) {
           if (msg?.data.entityKey) {
             queryClient.invalidateQueries(msg?.data.entityKey);
           }
-        } catch (e: any) {}
+        } catch (e: any) {
+          console.err(evt);
+        }
       };
       conn.onopen = function (evt) {
         setSocketState({ state: "connected" });
