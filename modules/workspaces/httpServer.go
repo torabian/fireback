@@ -27,6 +27,8 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
+var SERVER_INSTANCE string = UUID_Long()
+
 // We lift two instances of webserver per application.
 // One is for manager of the server, to let them have control on their
 // users, workspace, support them, make changes to their credentials.

@@ -421,11 +421,21 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 	// r.Use(GinPostTranslateErrorMessages(translations))
 
 	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"data": gin.H{
-				"pong": "yes",
-			},
-		})
+		if config.Production {
+			c.JSON(200, gin.H{
+				"data": gin.H{
+					"pong": "yes",
+				},
+			})
+		} else {
+
+			c.JSON(200, gin.H{
+				"data": gin.H{
+					"pong":       "yes",
+					"instanceId": SERVER_INSTANCE,
+				},
+			})
+		}
 	})
 
 	for _, item := range x.PublicFolders {
