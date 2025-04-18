@@ -36,6 +36,8 @@ var xapp = &workspaces.FirebackApp{
 		abac.LiftTusServer()
 	},
 	RunSocket: func(e *gin.Engine) {
+		e.POST("/webrtc/offer", WebRTCOfferHandler)
+
 		workspaces.HandleSocket(e)
 	},
 	RunSearch: workspaces.InjectReactiveSearch,
