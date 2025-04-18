@@ -1,3 +1,4 @@
+import { DemoFormDates } from "./DemoFormDates";
 import { DemoFormSelect } from "./DemoFormSelect";
 
 export function DemoScreen() {
@@ -9,6 +10,7 @@ export function DemoScreen() {
       </p>
       <hr />
       <DemoFormSelect />
+      <DemoFormDates />
     </div>
   );
 }

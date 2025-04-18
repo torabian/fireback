@@ -202,7 +202,6 @@ export function useFileUploader() {
                 { uploadId, bytesSent, bytesTotal, filename: file.name },
               ]);
             }
-            console.log(bytesSent, bytesTotal);
           },
         });
 
@@ -516,7 +515,6 @@ export function useSocket(remote, token, workspaceId, queryClient) {
         `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
       );
       conn.onerror = function (evt) {
-        console.log("Closed", evt);
         setSocketState({ state: "error" });
       };
       conn.onclose = function (evt) {
@@ -530,7 +528,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
             queryClient.invalidateQueries(msg?.data.entityKey);
           }
         } catch (e: any) {
-          console.log(evt);
+          console.err(evt);
         }
       };
       conn.onopen = function (evt) {

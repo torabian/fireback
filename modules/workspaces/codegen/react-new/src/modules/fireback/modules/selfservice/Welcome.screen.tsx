@@ -48,8 +48,6 @@ export const WelcomeScreen = () => {
     );
   }
 
-  console.log(1, availableOptions);
-
   return (
     <div className="signin-form-container">
       {availableOptions.googleOAuthClientKey ? (

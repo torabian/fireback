@@ -12,7 +12,6 @@ export const usePersistFormik = (form: FormikProps<unknown>) => {
     if (unlock.current) {
       const query = qs.stringify(form.values, { addQueryPrefix: true });
       router.replace(query, query, {});
-      console.log("triggered");
     }
   }, [form.values]);
 
@@ -26,7 +25,6 @@ export const usePersistFormik = (form: FormikProps<unknown>) => {
           ignoreQueryPrefix: true,
         }
       );
-      console.log("Params", params);
       form.setValues(params);
     }
     unlock.current = true;

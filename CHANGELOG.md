@@ -11,7 +11,6 @@ Shift to user user interface provided for the admin and new projects.
 - [ ] Self service can delete account
 - [ ] Self service can quite from workspace
 - [ ] Allow project init to contain the workspace modules into the new project and be independent of the original fireback project.
-- [ ] Consider mongodb query system
 - [ ] Add the tabs in the project
 - [ ] Add the drawer in the project with promise/resolve/reject
 - [ ] Prepare react pre-templates. For lists, single form, single view screen, single tabbed screen, wizard
@@ -24,7 +23,7 @@ Goal of this version is to improve the fireback backend mostly, not the UI or us
 The plan is the backend be perfect, and can generate major code for front-end technologies
 and reduce the time in between.
 
-- [ ] Form demo, date, datetime, daterange, datetimerange components on react.
+- [x] Form demo, date, datetime, daterange, datetimerange components on react.
 - [ ] Review the nested modules generated and their behavior on the front-end
 - [ ] Make sure the query params, headers, url params are available and accessible via generated sdk
 - [ ] Improve the SDK with more functions, specially on react.js one it has some dead code, remove, and comment everything
@@ -32,6 +31,9 @@ and reduce the time in between.
 - [ ] Improve the SwiftUI codegen, test it via github actions
 - [ ] Streaming content such as audio or video
 - [ ] Autoscaling for the project demo to queue every request.
+- [ ] Revise the event system completely and make sure that the scenario of multiple instances works fine
+        with socket connection, test it in docker with multiple instances and remember each user
+        with correct session id. 
 - [ ] Extensive test for the socket connection and changes coming from server to be reflected on UI.
 - [ ] Revise the code generated for the typescript, specially fields on nested objects to have the path.
 - [ ] Add the replica option for the clickhouse for time series data, investigate the time series formats.
