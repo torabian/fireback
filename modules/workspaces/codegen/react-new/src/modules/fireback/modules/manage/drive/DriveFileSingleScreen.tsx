@@ -4,8 +4,8 @@ import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useT } from "../../../hooks/useT";
 import { useRouter } from "../../../hooks/useRouter";
-import { FileEntity } from "../../../sdk/modules/workspaces/FileEntity";
-import { useGetFileByUniqueId } from "../../../sdk/modules/workspaces/useGetFileByUniqueId";
+import { FileEntity } from "../../../sdk/modules/abac/FileEntity";
+import { useGetFileByUniqueId } from "../../../sdk/modules/abac/useGetFileByUniqueId";
 
 export const DriveFileSingleScreen = () => {
   const router = useRouter();

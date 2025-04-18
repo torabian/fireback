@@ -1,4 +1,4 @@
-import { WorkspaceTypeEntity } from "../../../sdk/modules/workspaces/WorkspaceTypeEntity";
+import { WorkspaceTypeEntity } from "../../../sdk/modules/abac/WorkspaceTypeEntity";
 import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations) => [

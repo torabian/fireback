@@ -1,11 +1,12 @@
+import { FormDate } from "@/modules/fireback/components/forms/form-date/FormDate";
 import {
   FormSelectMultiple,
   FormSelect,
 } from "@/modules/fireback/components/forms/form-select/FormSelect";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import usePresistentState from "@/modules/fireback/hooks/usePresistentState";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/workspaces/useGetRoles";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
 import { Formik, FormikProps } from "formik";
 import { useMemo, useState } from "react";
 
@@ -41,6 +42,9 @@ export function DemoFormSelect() {
       </div>
       <div className="mt-5 mb-5">
         <SelectingPrimitivesOnFormEffect />
+      </div>
+      <div className="mt-5 mb-5">
+        <FormDateExample />
       </div>
     </div>
   );
@@ -374,6 +378,45 @@ function SelectingPrimitivesOnFormEffect() {
                   return item.sisters;
                 },
               }}
+            />
+          </div>
+        )}
+      </Formik>
+    </div>
+  );
+}
+
+function FormDateExample() {
+  class FormDataSample {
+    date: string;
+
+    static Fields = {
+      date: "date",
+    };
+  }
+
+  return (
+    <div>
+      <h2>Form Date demo</h2>
+      <p>
+        In many examples you want to select only a date string, nothing more.
+        This input does that clearly.
+      </p>
+      <Formik
+        initialValues={{ date: "2020-10-10" } as FormDataSample}
+        onSubmit={(data) => {
+          alert(JSON.stringify(data, null, 2));
+        }}
+      >
+        {(form: FormikProps<Partial<FormDataSample>>) => (
+          <div>
+            <pre>Form: {JSON.stringify(form.values, null, 2)}</pre>
+            <FormDate
+              value={form.values.date}
+              label="When did you born?"
+              onChange={(value) =>
+                form.setFieldValue(FormDataSample.Fields.date, value)
+              }
             />
           </div>
         )}

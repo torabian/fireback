@@ -1,15 +1,15 @@
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
-import { useGetPassportByUniqueId } from "../../../sdk/modules/workspaces/useGetPassportByUniqueId";
-import { usePatchPassport } from "../../../sdk/modules/workspaces/usePatchPassport";
-import { usePostPassport } from "../../../sdk/modules/workspaces/usePostPassport";
+import { useGetPassportByUniqueId } from "../../../sdk/modules/abac/useGetPassportByUniqueId";
+import { usePatchPassport } from "../../../sdk/modules/abac/usePatchPassport";
+import { usePostPassport } from "../../../sdk/modules/abac/usePostPassport";
 
 import {
   CommonEntityManager,
   DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { PassportEditForm } from "./PassportEditForm";
-import { PassportEntity } from "../../../sdk/modules/workspaces/PassportEntity";
+import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
 import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 

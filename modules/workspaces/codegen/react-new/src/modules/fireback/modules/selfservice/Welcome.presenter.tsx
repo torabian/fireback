@@ -3,12 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
-import { useGetPassportsAvailableMethods } from "../../sdk/modules/workspaces/useGetPassportsAvailableMethods";
+import { useGetPassportsAvailableMethods } from "../../sdk/modules/abac/useGetPassportsAvailableMethods";
+import { AuthAvailableMethods, AuthMethod } from "./auth.common";
 import {
   CheckPassportMethodsActionResDto,
   ClassicSigninActionReqDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { AuthAvailableMethods, AuthMethod } from "./auth.common";
+} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const t = useT();

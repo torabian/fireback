@@ -1,4 +1,4 @@
-import { useDeleteRole } from "../../sdk/modules/workspaces/useDeleteRole";
+import { useDeleteRole } from "../../sdk/modules/abac/useDeleteRole";
 import { useGetCapabilities } from "../../sdk/modules/workspaces/useGetCapabilities";
 
 export function DeleteRoleTest() {

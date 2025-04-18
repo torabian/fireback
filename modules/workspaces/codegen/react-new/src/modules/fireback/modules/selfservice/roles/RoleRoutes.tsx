@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import { RoleEntityManager } from "./RoleEntityManager";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
 import { RoleSingleScreen } from "./RoleSingleScreen";
 import { RoleArchiveScreen } from "./RoleArchiveScreen";
 

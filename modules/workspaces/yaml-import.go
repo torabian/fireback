@@ -4,8 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"path"
-	"path/filepath"
 	reflect "reflect"
 	"regexp"
 
@@ -280,26 +278,9 @@ type ResourceMap struct {
 	DiskPath string
 }
 
-func ImportYamlFromFsResources(fs *embed.FS, filePath string) []ResourceMap {
-	result := []ResourceMap{}
-	var resources ContentImport[any]
-	err := ReadYamlFileEmbed(fs, filePath, &resources)
+// Implement this
+var ImportYamlFromFsResources func(fs *embed.FS, filePath string) []ResourceMap = func(fs *embed.FS, filePath string) []ResourceMap {
+	fmt.Println("Importing file:", filePath, " is skipped. You need to override this function with a storage module")
 
-	if err != nil {
-		log.Fatalln("Error importing content:", err, filePath)
-	}
-
-	for _, resource := range resources.Resources {
-		actualPath := path.Join(filepath.Dir(filePath), resource.Path)
-		entity, fileId, _ := UploadFromFs(fs, actualPath)
-		result = append(result, ResourceMap{
-			DriveId:  entity.UniqueId,
-			FileId:   fileId,
-			Key:      resource.Key,
-			DiskPath: actualPath,
-		})
-
-	}
-
-	return result
+	return []ResourceMap{}
 }

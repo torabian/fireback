@@ -2,7 +2,7 @@ import { FormCheckbox } from "../../../components/forms/form-switch/FormSwitch";
 import Link from "../../../components/link/Link";
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useT } from "../../../hooks/useT";
-import { useGetUserWorkspaces } from "../../../sdk/modules/workspaces/useGetUserWorkspaces";
+import { useGetUserWorkspaces } from "../../../sdk/modules/abac/useGetUserWorkspaces";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
 import {

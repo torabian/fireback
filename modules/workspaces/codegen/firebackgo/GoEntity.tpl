@@ -77,7 +77,7 @@ type {{ .FullName }} struct {
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 
 	{{ if .LinkedTo }}
-	LinkedTo *{{ .LinkedTo }} `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	LinkedTo *{{ .LinkedTo }} `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	{{ end }}
 }
 
@@ -141,12 +141,12 @@ type {{ .e.EntityName }} struct {
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
 
     {{ if .e.HasTranslations }}
-    Translations     []*{{ .e.PolyglotName}} `json:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+    Translations     []*{{ .e.PolyglotName}} `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
     {{ end }}
 
-    Children []*{{ .e.EntityName }} `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+    Children []*{{ .e.EntityName }} `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 
-    LinkedTo *{{ .e.EntityName }} `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+    LinkedTo *{{ .e.EntityName }} `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 

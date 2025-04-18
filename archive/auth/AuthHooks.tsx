@@ -1,7 +1,7 @@
 import { FormCheckbox } from "../../components/forms/form-switch/FormSwitch";
 import { KeyValue } from "../../definitions/definitions";
 import { useT } from "../../hooks/useT";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/WorkspacesActionsDto";
 import { enTranslations } from "../../translations/en";
 import { FormikProps } from "formik";
 import React, { useEffect, useState } from "react";

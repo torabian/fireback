@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import { PublicJoinKeyEntityManager } from "./PublicJoinKeyEntityManager";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/workspaces/PublicJoinKeyEntity";
+import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
 import { PublicJoinKeySingleScreen } from "./PublicJoinKeySingleScreen";
 import { PublicJoinKeyArchiveScreen } from "./PublicJoinKeyArchiveScreen";
 

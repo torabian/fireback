@@ -12,7 +12,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func askProjectName(originalName string) (string, error) {
+func askEnvironmentName(originalName string) (string, error) {
 	validate := func(input string) error {
 		re := regexp.MustCompile(`^[a-z0-9-]*$`)
 

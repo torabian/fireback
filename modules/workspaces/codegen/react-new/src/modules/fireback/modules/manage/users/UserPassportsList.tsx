@@ -1,6 +1,6 @@
 import { PageSection } from "../../../components/page-section/PageSection";
-import { PassportEntity } from "../../../sdk/modules/workspaces/PassportEntity";
-import { useGetPassports } from "../../../sdk/modules/workspaces/useGetPassports";
+import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
+import { useGetPassports } from "../../../sdk/modules/abac/useGetPassports";
 
 export const UserPassportList = ({ userId }: { userId: string }) => {
   const { items } = useGetPassports({

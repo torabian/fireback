@@ -1,4 +1,4 @@
-import { WorkspaceTypeEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceTypeEntity";
+import { WorkspaceTypeEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceTypeEntity";
 import { WorkspaceTypeEntityManager } from "./WorkspaceTypeEntityManager";
 import { Route } from "react-router-dom";
 import { WorkspaceTypeArchiveScreen } from "./WorkspaceTypeArchiveScreen";

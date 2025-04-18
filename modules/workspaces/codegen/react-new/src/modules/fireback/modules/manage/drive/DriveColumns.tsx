@@ -1,4 +1,4 @@
-import { FileEntity } from "../../../sdk/modules/workspaces/FileEntity";
+import { FileEntity } from "../../../sdk/modules/abac/FileEntity";
 import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations) => [

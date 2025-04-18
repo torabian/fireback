@@ -1,7 +1,7 @@
 import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
 import { useT } from "../../../hooks/useT";
 
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
 import { EmailProviderList } from "./EmailProviderList";
 
 export const EmailProviderArchiveScreen = () => {

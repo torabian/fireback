@@ -2,9 +2,9 @@ import { FormikProps, useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { usePostPassportChangePassword } from "../../sdk/modules/workspaces/usePostPassportChangePassword";
-import { ChangePasswordActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { usePostPassportChangePassword } from "../../sdk/modules/abac/usePostPassportChangePassword";
 import { strings } from "./strings/translations";
+import { ChangePasswordActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 // We extend it because the repeat password is only a front-end validation
 export class ChangePasswordDto extends ChangePasswordActionReqDto {

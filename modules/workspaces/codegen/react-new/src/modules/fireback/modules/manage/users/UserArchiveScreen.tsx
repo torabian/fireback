@@ -4,7 +4,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
 import { useLocale } from "../../../hooks/useLocale";
 import { UserList } from "./UserList";
-import { UserEntity } from "../../../sdk/modules/workspaces/UserEntity";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 
 export const UserArchiveScreen = () => {
   const t = useT();

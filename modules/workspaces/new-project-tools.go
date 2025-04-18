@@ -3,6 +3,7 @@ package workspaces
 import (
 	"embed"
 	"io/fs"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -82,6 +83,14 @@ func newProjectContentWriter(fsys embed.FS, ctx *NewProjectContext, prefix strin
 	if err != nil {
 		panic(err)
 	}
+}
+
+func copyFile(src string, dst string) {
+	// Read all content of src to data, may cause OOM for a large file.
+	data, _ := ioutil.ReadFile(src)
+
+	ioutil.WriteFile(dst, data, 0644)
+
 }
 
 type NewProjectContext struct {

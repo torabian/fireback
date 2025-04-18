@@ -1,7 +1,7 @@
 import { FormText } from "../../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
-import { UserEntity } from "../../../sdk/modules/workspaces/UserEntity";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 import { FormikProps } from "formik";
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";

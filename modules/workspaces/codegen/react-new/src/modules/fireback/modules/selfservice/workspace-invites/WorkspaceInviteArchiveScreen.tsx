@@ -1,7 +1,7 @@
 import { useT } from "@/modules/fireback/hooks/useT";
 import { WorkspaceInviteList } from "./WorkspaceInviteList";
 import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceInviteEntity";
+import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 
 export const WorkspaceInviteArchiveScreen = () => {
   const t = useT();

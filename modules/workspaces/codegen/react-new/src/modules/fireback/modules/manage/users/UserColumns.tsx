@@ -1,5 +1,5 @@
 import { DatatableColumn } from "@/modules/fireback/definitions/definitions";
-import { UserEntity } from "../../../sdk/modules/workspaces/UserEntity";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 import { enTranslations } from "../../../translations/en";
 import { GenderView } from "./GenderView";
 
@@ -53,8 +53,40 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
     width: 40,
     getCellValue: (e: UserEntity) => (
       <>
-        <img src={e?.photo} style={{ width: "20px", height: "20px" }} />
+        {e?.photo && (
+          <img src={e?.photo} style={{ width: "20px", height: "20px" }} />
+        )}
       </>
     ),
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.countryCode,
+    title: "Country code",
+    width: 40,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.countryCode}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.addressLine1,
+    title: "Address Line 1",
+    width: 180,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine1}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.addressLine2,
+    title: "Address Line 2",
+    width: 180,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine2}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.city,
+    title: "City",
+    width: 180,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.city}</>,
+  },
+  {
+    name: UserEntity.Fields.primaryAddress.postalCode,
+    title: "Postal Code",
+    width: 80,
+    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.postalCode}</>,
   },
 ];

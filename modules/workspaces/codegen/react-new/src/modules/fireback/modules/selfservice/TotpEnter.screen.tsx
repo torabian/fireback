@@ -3,10 +3,10 @@ import { UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { useS } from "../../hooks/useS";
-import { ConfirmClassicPassportTotpActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpEnter.presenter";
+import { ConfirmClassicPassportTotpActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export const TotpEnter = ({}: {}) => {
   const { goBack, mutation, form } = usePresenter();

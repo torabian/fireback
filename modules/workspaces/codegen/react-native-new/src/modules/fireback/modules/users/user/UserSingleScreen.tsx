@@ -1,5 +1,5 @@
-import {UserEntity} from '@/modules/fireback/sdk/modules/workspaces/UserEntity';
-import {useGetUserByUniqueId} from '../../../sdk/modules/workspaces/useGetUserByUniqueId';
+import {UserEntity} from '@/modules/fireback/sdk/modules/abac/UserEntity';
+import {useGetUserByUniqueId} from '../../../sdk/modules/abac/useGetUserByUniqueId';
 import {useS} from '@/modules/fireback/hooks/useS';
 import {strings} from './strings/translations';
 

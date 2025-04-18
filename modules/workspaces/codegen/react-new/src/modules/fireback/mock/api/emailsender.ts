@@ -1,7 +1,7 @@
 import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { IResponse } from "../../definitions/JSONStyle";
 import { IResponseList } from "../../sdk/core/http-tools";
-import { EmailSenderEntity } from "../../sdk/modules/workspaces/EmailSenderEntity";
+import { EmailSenderEntity } from "../../sdk/modules/abac/EmailSenderEntity";
 import { mdb } from "../database/databases";
 import { QueryToId } from "../database/memory-db";
 

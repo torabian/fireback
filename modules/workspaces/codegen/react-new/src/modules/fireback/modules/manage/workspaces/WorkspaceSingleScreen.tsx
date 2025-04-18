@@ -4,8 +4,8 @@ import { GeneralEntityView } from "../../../components/general-entity-view/Gener
 import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useLocale } from "../../../hooks/useLocale";
 import { useT } from "../../../hooks/useT";
-import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/workspaces/useGetWorkspaceByUniqueId";
-import { WorkspaceEntity } from "../../../sdk/modules/workspaces/WorkspaceEntity";
+import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceByUniqueId";
+import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
 
 export const WorkspaceSingleScreen = () => {
   const router = useRouter();

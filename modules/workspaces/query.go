@@ -37,6 +37,7 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
 		result, err := CliAuth(security)
+
 		if err != nil {
 
 			if err.ToPublicEndUser(&q).Message != err.ToPublicEndUser(&q).MessageTranslated {
@@ -47,8 +48,8 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 
 		q.ResolveStrategy = security.ResolveStrategy
 		q.InternalQuery = result.SqlContext
-		if result.User != nil {
-			q.UserId = result.User.UniqueId
+		if result.UserId.Present && result.UserId.String != "" {
+			q.UserId = result.UserId.String
 		}
 		q.UserAccessPerWorkspace = result.UserAccessPerWorkspace
 
@@ -61,6 +62,12 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 
 	queryString := c.String("query")
 	startIndex := c.Int("offset")
+	var cursor *string = nil
+	if c.IsSet("cursor") {
+		val := c.String("cursor")
+		cursor = &val
+	}
+
 	itemsPerPage := c.Int("limit")
 
 	if startIndex < 0 {
@@ -91,6 +98,7 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 	var f QueryDSL = QueryDSL{
 		Query:        queryString,
 		StartIndex:   startIndex,
+		Cursor:       cursor,
 		WorkspaceId:  workspaceId,
 		Language:     lang,
 		Region:       strings.ToUpper(region),
@@ -231,6 +239,9 @@ func CommonCliQueryCmd2[T any](
 				"itemsPerPage": f.ItemsPerPage,
 				"items":        items,
 				"totalItems":   count.TotalItems,
+				"next": gin.H{
+					"cursor": count.Cursor,
+				},
 			},
 		}
 		if c.Bool("yaml") {

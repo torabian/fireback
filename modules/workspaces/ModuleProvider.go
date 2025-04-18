@@ -60,6 +60,10 @@ type ModuleProvider struct {
 
 	Children      []*ModuleProvider
 	EntityBundles []EntityBundle
+
+	// A set of functions that you can add, when project is being initialised then they will be called.
+	// each module can have those hook inits, for example abac adds some other questions.
+	OnEnvInit func() error
 }
 
 func (x *ModuleProvider) ToModule3() Module3 {

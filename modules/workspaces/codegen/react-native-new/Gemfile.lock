@@ -54,7 +54,7 @@ GEM
     cocoapods-trunk (1.6.0)
       nap (>= 0.8, < 2.0)
       netrc (~> 0.11)
-    cocoapods-try (1.2.0)
+    cocoapods-try (1.2.1)
     colored2 (3.1.2)
     concurrent-ruby (1.2.3)
     escape (0.0.4)

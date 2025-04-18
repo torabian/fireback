@@ -1,4 +1,4 @@
-import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
+import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
 
 export const AppMenuEntities: AppMenuEntity[] = [
   {

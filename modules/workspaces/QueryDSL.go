@@ -15,6 +15,9 @@ type QueryDSL struct {
 	// and in SQL becomes as offset
 	StartIndex int `json:"startIndex"`
 
+	// Numeric cursor
+	Cursor *string `json:"cursor"`
+
 	// Useful for paginated queries, similar to limit in SQL queries
 	ItemsPerPage int `json:"itemsPerPage"`
 

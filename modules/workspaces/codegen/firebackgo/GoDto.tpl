@@ -10,6 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	{{ if ne .m.MetaWorkspace true }}
+	"github.com/torabian/fireback/modules/workspaces"
+	{{ end }}
 	"strings"
 	"github.com/urfave/cli"
 )
@@ -68,6 +71,11 @@ func (x* {{ .e.DtoName }}) Json() string {
 
 func (x* {{ .e.DtoName }}) JsonPrint()  {
     fmt.Println(x.Json())
+
+	{{ if ne .m.MetaWorkspace true }}
+	// Somehow to make the import always needed, makes no sense.
+	_ = workspaces.Body 
+	{{ end }}
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.

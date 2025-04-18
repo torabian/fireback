@@ -1,13 +1,21 @@
 import { IResponse, IResponseList } from "../../definitions/JSONStyle";
-import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
-import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
+import {
+  Context,
+  DeepPartial,
+  emptyList,
+  method,
+  uriMatch,
+} from "../../hooks/mock-tools";
 import {
   CheckClassicPassportActionResDto,
   CheckPassportMethodsActionResDto,
   ClassicSignupActionResDto,
   ConfirmClassicPassportTotpActionResDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { WorkspaceTypeEntity } from "../../sdk/modules/workspaces/WorkspaceTypeEntity";
+} from "../../sdk/modules/abac/AbacActionsDto";
+import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
+import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
+
+import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
 
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {
@@ -27,6 +35,14 @@ export class AuthMockServer {
     ctx: Context
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
+  }
+
+  @uriMatch("users/invitations")
+  @method("get")
+  async getUserInvites(
+    ctx: Context
+  ): Promise<IResponseList<DeepPartial<WorkspaceInviteEntity>>> {
+    return emptyList;
   }
 
   @uriMatch("passports/signin/classic")

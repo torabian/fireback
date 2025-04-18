@@ -4,8 +4,8 @@ import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
-import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetEmailProviderByUniqueId";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
 
 export const EmailProviderSingleScreen = () => {
   const router = useRouter();

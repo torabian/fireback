@@ -5,7 +5,7 @@ import {
   uriMatch,
 } from "@/modules/fireback/hooks/mock-tools";
 import { IResponse, IResponseList } from "../../sdk/core/http-tools";
-import { WorkspaceEntity } from "../../sdk/modules/workspaces/WorkspaceEntity";
+import { WorkspaceEntity } from "../../sdk/modules/abac/WorkspaceEntity";
 
 import { QueryToId } from "../database/memory-db";
 import { mdb } from "../database/databases";

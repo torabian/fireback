@@ -111,7 +111,7 @@ func EnvManagement(xapp *FirebackApp) cli.Command {
 						return nil
 					}
 
-					// InitProject(xapp, envName)
+					// InitEnvironment(xapp, envName)
 
 					return nil
 				},

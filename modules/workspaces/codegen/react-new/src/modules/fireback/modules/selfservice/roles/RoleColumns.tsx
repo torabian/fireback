@@ -1,5 +1,5 @@
 import { QueryArchiveColumn } from "@/modules/fireback/definitions/common";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/workspaces/RoleEntity";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
 import { enTranslations } from "@/modules/fireback/translations/en";
 
 export const columns = (t: typeof enTranslations): QueryArchiveColumn[] => [

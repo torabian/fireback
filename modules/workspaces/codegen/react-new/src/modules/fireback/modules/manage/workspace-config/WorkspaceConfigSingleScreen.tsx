@@ -1,8 +1,8 @@
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/workspaces/useGetWorkspaceConfigDistinct";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/workspaces/WorkspaceConfigEntity";
+import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceConfigDistinct";
+import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
 import { strings } from "./strings/translations";
 
 export const WorkspaceConfigSingleScreen = () => {

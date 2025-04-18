@@ -1,0 +1,169 @@
+package abac
+
+import (
+	"github.com/torabian/fireback/modules/workspaces"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+func NotificationConfigActionCreate(
+	dto *NotificationConfigEntity, query workspaces.QueryDSL,
+) (*NotificationConfigEntity, *workspaces.IError) {
+	return NotificationConfigActionCreateFn(dto, query)
+}
+
+func NotificationConfigActionUpdate(
+	query workspaces.QueryDSL,
+	fields *NotificationConfigEntity,
+) (*NotificationConfigEntity, *workspaces.IError) {
+	return NotificationConfigActionUpdateFn(query, fields)
+}
+
+func NotificationTestMailAction(
+	dto *TestMailDto, query workspaces.QueryDSL,
+) (*OkayResponseDto, *workspaces.IError) {
+
+	q := query
+	q.UniqueId = dto.SenderId
+	item, err := EmailSenderActions.GetOne(q)
+
+	if err != nil {
+		return nil, err
+	}
+
+	conf, err2 := NotificationWorkspaecConfigActionGet(query)
+
+	if err2 != nil {
+		return nil, workspaces.GormErrorToIError(err2)
+	}
+
+	err3 := SendMail(EmailMessageContent{
+		FromEmail: item.FromEmailAddress,
+		FromName:  item.FromName,
+		ToName:    dto.ToName,
+		ToEmail:   dto.ToEmail,
+		Subject:   dto.Subject,
+		Content:   dto.Content,
+	}, conf.GeneralEmailProvider)
+
+	if err3 != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+
+	return nil, workspaces.GormErrorToIError(err)
+}
+
+func NotificationWorkspaecConfigActionGet(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
+
+	var item *NotificationConfigEntity
+
+	q := workspaces.GetDbRef()
+	err := q.Preload("GeneralEmailProvider").
+		Preload("InviteToWorkspaceSender").
+		Preload("ForgetPasswordSender").
+		Preload("ConfirmEmailSender").
+		Where(workspaces.RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
+
+	if err == gorm.ErrRecordNotFound {
+		item = &NotificationConfigEntity{
+			UniqueId:       workspaces.UUID(),
+			WorkspaceId:    workspaces.NewString(query.WorkspaceId),
+			AcceptLanguage: "*",
+		}
+
+		err = q.Create(&item).Error
+
+		if err != nil {
+			return item, workspaces.GormErrorToIError(err)
+		}
+	}
+
+	if item.ForgetPasswordContent == "" {
+		item.ForgetPasswordContent = ForgetPasswordDefaultTemplate
+	}
+	item.ForgetPasswordContentDefault = ForgetPasswordDefaultTemplate
+	if item.ForgetPasswordTitle == "" {
+		item.ForgetPasswordTitle = ForgetPasswordDefaultTitle
+	}
+	item.ForgetPasswordTitleDefault = ForgetPasswordDefaultTitle
+
+	if item.InviteToWorkspaceContent == "" {
+		item.InviteToWorkspaceContent = InviteWorkspaceTemplate
+	}
+	item.InviteToWorkspaceContentDefault = InviteWorkspaceTemplate
+	if item.InviteToWorkspaceTitle == "" {
+		item.InviteToWorkspaceTitle = InviteWorkspaceTitle
+	}
+	item.InviteToWorkspaceTitleDefault = InviteWorkspaceTitle
+
+	if item.ConfirmEmailContent == "" {
+		item.ConfirmEmailContent = ConfirmMailTemplate
+	}
+	item.ConfirmEmailContentDefault = ConfirmMailTemplate
+	if item.ConfirmEmailTitle == "" {
+		item.ConfirmEmailTitle = ConfirmMailTitle
+	}
+	item.ConfirmEmailTitleDefault = ConfirmMailTitle
+
+	if err != nil {
+		return item, workspaces.GormErrorToIError(err)
+	}
+
+	return item, nil
+
+}
+
+var ForgetPasswordDefaultTemplate string
+var ForgetPasswordDefaultTitle string
+
+var ConfirmMailTemplate string
+var ConfirmMailTitle string
+
+var InviteWorkspaceTemplate string
+var InviteWorkspaceTitle string
+
+func init() {
+
+	// ForgetPasswordDefaultTitle = "Reset password"
+	// ConfirmMailTitle = "Confirm your email address"
+	// InviteWorkspaceTitle = "You are invited!"
+
+	// f, _ := seeders.ViewsFs.Open("forget-password.html")
+	// body, _ := ioutil.ReadAll(f)
+	// f.Close()
+	// ForgetPasswordDefaultTemplate = string(body)
+
+	// f, _ = seeders.ViewsFs.Open("confirm-mail.html")
+	// body, _ = ioutil.ReadAll(f)
+	// f.Close()
+	// ConfirmMailTemplate = string(body)
+
+	// f, _ = seeders.ViewsFs.Open("invitation-to-workspace.html")
+	// body, _ = ioutil.ReadAll(f)
+	// f.Close()
+	// InviteWorkspaceTemplate = string(body)
+}
+
+func NotificationWorkspaceConfigActionUpdate(
+	query workspaces.QueryDSL,
+	fields *NotificationConfigEntity,
+) (*NotificationConfigEntity, *workspaces.IError) {
+
+	NotificationConfigEntityPreSanitize(fields, query)
+	var item NotificationConfigEntity
+	q := workspaces.GetDbRef().
+		Where(&NotificationConfigEntity{WorkspaceId: workspaces.NewString(query.WorkspaceId)}).
+		First(&item)
+
+	err := q.UpdateColumns(fields).Error
+	if err != nil {
+		return nil, workspaces.GormErrorToIError(err)
+	}
+
+	err = workspaces.GetDbRef().
+		Preload(clause.Associations).
+		Where(&NotificationConfigEntity{WorkspaceId: workspaces.NewString(query.WorkspaceId)}).
+		First(&item).Error
+
+	return &item, nil
+}

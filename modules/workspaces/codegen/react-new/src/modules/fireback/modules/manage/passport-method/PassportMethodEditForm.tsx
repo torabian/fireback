@@ -2,7 +2,7 @@ import { FormText } from "@/modules/fireback/components/forms/form-text/FormText
 import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/workspaces/PassportMethodEntity";
+import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
 import { useContext } from "react";
 import { strings } from "./strings/translations";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";

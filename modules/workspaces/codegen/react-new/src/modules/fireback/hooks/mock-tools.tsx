@@ -33,7 +33,7 @@ export const mockExecFn = (
     const itemsPerPage = itp === null ? 10 : +itp;
     const startIndex = si === null ? 0 : +si;
 
-    console.log("Mock:", method, url);
+    console.log("Mock action:", method, url);
 
     /**
      * We scan the methods inside the mock instance.
@@ -74,7 +74,6 @@ export const mockExecFn = (
       }
     }
 
-    console.log("Did not match anything");
     return Promise.reject({
       error: {
         message: "Message",

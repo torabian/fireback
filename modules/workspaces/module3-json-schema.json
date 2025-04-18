@@ -621,11 +621,15 @@
         },
         "json": {
           "type": "string",
-          "description": "The json tag of the generated field. Defaults to the name but can be overwritt"
+          "description": "The json tag of the generated field. Defaults to the name but can be overwritten"
         },
         "yaml": {
           "type": "string",
-          "description": "The yaml tag of the generated field. Defaults to the name but can be overwritt"
+          "description": "The yaml tag of the generated field. Defaults to the name but can be overwritten"
+        },
+        "xml": {
+          "type": "string",
+          "description": "The xml tag of the generated field. Defaults to the name but can be overwritten"
         },
         "of": {
           "items": {

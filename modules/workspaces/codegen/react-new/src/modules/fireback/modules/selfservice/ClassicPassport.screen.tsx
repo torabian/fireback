@@ -4,10 +4,10 @@ import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { FormText } from "../../components/forms/form-text/FormText";
 import { useS } from "../../hooks/useS";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
 import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicPassport.presenter";
 import { strings } from "./strings/translations";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
   const {

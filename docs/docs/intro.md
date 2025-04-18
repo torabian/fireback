@@ -1,27 +1,23 @@
 ---
 sidebar_position: 1
 ---
-# Fireback ‐ Ultimate Go FullStack Framework
+# Fireback – Microservice-First Fullstack Framework in Go
 
-Fireback is a backend framework written in Go, for Go developers. Fireback is opinated,
-it could be making developing of certain type of projects 20x-30x faster, and easier.
-Fireback depends on definition files to create entities, actions, dto and uses those
-definitions to create go code, react code, android and ios.
+Fireback is a backend framework written in Go, built for creating **modular microservices** and 
+fullstack applications. It helps you move fast by generating Go services, client SDKs, 
+and boilerplate code based on **definition files**.
 
+These definitions describe your entities, actions, and DTOs, which Fireback uses to generate:
 
-Although fireback is for creating backend, it has a look on Android, Swift, React/Native apps
-and generates sdk for them, to make it easier to use your backend or microservice directly
-in the apps. When you complete your backend in fireback, cli tools can be used to generate
-react sdk, and other platform tools.
+- Go microservices with REST APIs  
+- React SDKs  
+- Android and iOS SDKs (via Kotlin/Swift)
 
-Fireback is pure golang, you can organize your code as you want after all, you can use
-it in new projects or add it to your existing projects. Code tries to be independent as
-much as possible, but it is on top of Gin and Gorm libraries, and has few other things
-for cli.
+This ensures consistent communication between backend and frontend, and lets your apps consume microservices directly with minimal integration effort.
 
-Fireback comes with `workspaces` module, which includes many day to day functionality,
-such as user signin, signup, forget password, ABAC, role permission system, and many
-more you might need to build a mid to large scale backend.
+Fireback is written in pure Go. You can structure your services as needed—use it in greenfield projects or drop it into existing systems. While it's built on top of **Gin** and **Gorm**, Fireback keeps dependencies minimal and avoids lock-in.
+
+It also includes tools for common backend needs, such as authentication, ABAC, and role-permission management—making it a solid foundation for mid to large-scale distributed systems.
 
 ## License
 
@@ -44,8 +40,8 @@ You can create a new project by installing fireback, and using `fireback new` co
 create some actions and entities and build your first backend with tons of functionalities in 10 minutes.
 It would be an interactive question set, which initializes everything.
 
-- [Download and install fireback](https://pixelplux.com/en/fireback/download-and-install-fireback)
-- [Your first fireback project](https://pixelplux.com/en/fireback/your-first-fireback-project)
+- [Download and install fireback](./download-and-install-fireback)
+- [Your first fireback project](./first-fireback-project)
 
 
 ## Watch on youtube (How to build a backend in 15 minutes)

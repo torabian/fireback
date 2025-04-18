@@ -7,8 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const ContentType = "text/event-stream"
-
 var contentType = []string{}
 var noCache = []string{"no-cache"}
 

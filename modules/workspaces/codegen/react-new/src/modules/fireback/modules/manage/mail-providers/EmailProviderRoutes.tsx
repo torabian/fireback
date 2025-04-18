@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
 import { EmailProviderEntityManager } from "./EmailProviderEntityManager";
 import { EmailProviderSingleScreen } from "./EmailProviderSingleScreen";
 import { EmailProviderArchiveScreen } from "./EmailProviderArchiveScreen";

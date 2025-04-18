@@ -6,7 +6,7 @@ import {
 
 import {themeEl} from '../../../../../themes/theme';
 import {Avatar} from '../../../components/avatar/Avatar';
-import {UserEntity} from '@/modules/fireback/sdk/modules/workspaces/UserEntity';
+import {UserEntity} from '@/modules/fireback/sdk/modules/abac/UserEntity';
 
 export const UserItemCard = (props: {entity: UserEntity}) => {
   return (

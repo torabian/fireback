@@ -4,9 +4,9 @@ import { GeneralEntityView } from "../../../components/general-entity-view/Gener
 import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useLocale } from "../../../hooks/useLocale";
 import { useT } from "../../../hooks/useT";
-import { UserEntity } from "../../../sdk/modules/workspaces/UserEntity";
-import { useGetUserByUniqueId } from "../../../sdk/modules/workspaces/useGetUserByUniqueId";
-import { useGetPassports } from "../../../sdk/modules/workspaces/useGetPassports";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { useGetUserByUniqueId } from "../../../sdk/modules/abac/useGetUserByUniqueId";
+import { useGetPassports } from "../../../sdk/modules/abac/useGetPassports";
 import { UserPassportList } from "./UserPassportsList";
 
 export const UserSingleScreen = () => {

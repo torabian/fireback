@@ -3,10 +3,10 @@ import {
   DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/workspaces/PublicJoinKeyEntity";
-import { useGetPublicJoinKeyByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetPublicJoinKeyByUniqueId";
-import { usePatchPublicJoinKey } from "@/modules/fireback/sdk/modules/workspaces/usePatchPublicJoinKey";
-import { usePostPublicJoinKey } from "@/modules/fireback/sdk/modules/workspaces/usePostPublicJoinKey";
+import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
+import { useGetPublicJoinKeyByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetPublicJoinKeyByUniqueId";
+import { usePatchPublicJoinKey } from "@/modules/fireback/sdk/modules/abac/usePatchPublicJoinKey";
+import { usePostPublicJoinKey } from "@/modules/fireback/sdk/modules/abac/usePostPublicJoinKey";
 import { PublicJoinKeyEditForm } from "./PublicJoinKeyEditForm";
 
 export const PublicJoinKeyEntityManager = ({

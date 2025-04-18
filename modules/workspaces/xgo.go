@@ -222,6 +222,19 @@ func hasSuffix(path string, suffixes []string) bool {
 	return false
 }
 
+type HttpServerInstanceConfig struct {
+
+	// Shows some charts and keeps track of active connections
+	Monitor bool
+
+	// Override the port
+	Port int64
+
+	SSL bool
+
+	Slow bool
+}
+
 func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	r := gin.New()
@@ -337,6 +350,31 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		
 		  </body>
 		</html>
+		`)
+	})
+
+	r.GET("/swagger", func(c *gin.Context) {
+
+		c.Header("content-type", "text/html")
+		c.String(200, `<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swagger UI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+    <script>
+      SwaggerUIBundle({
+        url: "/openapi.yml",
+        dom_id: '#swagger-ui'
+      });
+    </script>
+  </body>
+</html>
+
 		`)
 	})
 

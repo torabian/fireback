@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import { EmailSenderEntityManager } from "./EmailSenderEntityManager";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailSenderEntity";
+import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
 import { EmailSenderSingleScreen } from "./EmailSenderSingleScreen";
 import { EmailSenderArchiveScreen } from "./EmailSenderArchiveScreen";
 

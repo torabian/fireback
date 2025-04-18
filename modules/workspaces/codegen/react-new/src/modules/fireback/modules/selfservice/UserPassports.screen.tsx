@@ -1,7 +1,7 @@
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import ActiveLink from "../../components/link/ActiveLink";
 import { useS } from "../../hooks/useS";
-import { UserPassportsActionResDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { UserPassportsActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./UserPassports.presenter";
 

@@ -4,13 +4,15 @@ import {
   DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { PassportMethodForm } from "./PassportMethodEditForm";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/workspaces/PassportMethodEntity";
-import { useGetPassportMethodByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetPassportMethodByUniqueId";
-import { usePostPassportMethod } from "@/modules/fireback/sdk/modules/workspaces/usePostPassportMethod";
-import { usePatchPassportMethod } from "@/modules/fireback/sdk/modules/workspaces/usePatchPassportMethod";
+import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
+import { useGetPassportMethodByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetPassportMethodByUniqueId";
+import { usePostPassportMethod } from "@/modules/fireback/sdk/modules/abac/usePostPassportMethod";
+import { usePatchPassportMethod } from "@/modules/fireback/sdk/modules/abac/usePatchPassportMethod";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
-export const PassportMethodEntityManager = ({ data }: DtoEntity<PassportMethodEntity>) => {
+export const PassportMethodEntityManager = ({
+  data,
+}: DtoEntity<PassportMethodEntity>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<PassportMethodEntity>
@@ -35,13 +37,13 @@ export const PassportMethodEntityManager = ({ data }: DtoEntity<PassportMethodEn
         router.goBackOrDefault(
           PassportMethodEntity.Navigation.query(undefined, locale)
         );
-      } }
+      }}
       onFinishUriResolver={(response, locale) =>
         PassportMethodEntity.Navigation.single(response.data?.uniqueId, locale)
       }
-      Form={ PassportMethodForm }
-      onEditTitle={s.passportMethods.editPassportMethod }
-      onCreateTitle={s.passportMethods.newPassportMethod }
+      Form={PassportMethodForm}
+      onEditTitle={s.passportMethods.editPassportMethod}
+      onCreateTitle={s.passportMethods.newPassportMethod}
       data={data}
     />
   );

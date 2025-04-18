@@ -2,5 +2,6 @@ package queries
 
 import "embed"
 
-//go:embed *.sql *.vsql
+//go:embed *
 var QueriesFs embed.FS
+

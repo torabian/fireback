@@ -4,7 +4,7 @@ import { useT } from "../modules/workspaces/codegen/react-new/src/modules/fireba
 import { RemoteQueryContext } from "../modules/workspaces/codegen/react-new/src/modules/fireback/sdk/core/react-tools";
 import { FormikProps } from "formik";
 import { useContext } from "react";
-import { WorkspaceEntity } from "../modules/workspaces/codegen/react-new/src/modules/fireback/sdk/modules/workspaces/WorkspaceEntity";
+import { WorkspaceEntity } from "../modules/workspaces/codegen/react-new/src/modules/fireback/sdk/modules/abac/WorkspaceEntity";
 import { EmailProviderEditForm } from "../modules/workspaces/codegen/react-new/src/modules/fireback/modules/manage/mail-providers/EmailProviderEditForm";
 
 export const MailTemplateForm = ({

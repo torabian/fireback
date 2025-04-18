@@ -5,15 +5,16 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useGetWorkspacePublicTypes } from "../../sdk/modules/workspaces/useGetWorkspacePublicTypes";
-import { usePostPassportsSignupClassic } from "../../sdk/modules/workspaces/usePostPassportsSignupClassic";
-import {
-  ClassicSignupActionReqDto,
-  ClassicSignupActionResDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { useGetWorkspacePublicTypes } from "../../sdk/modules/abac/useGetWorkspacePublicTypes";
+import { usePostPassportsSignupClassic } from "../../sdk/modules/abac/usePostPassportsSignupClassic";
+
 import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
 import { useCompleteAuth } from "./auth.common";
+import {
+  ClassicSignupActionReqDto,
+  ClassicSignupActionResDto,
+} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();

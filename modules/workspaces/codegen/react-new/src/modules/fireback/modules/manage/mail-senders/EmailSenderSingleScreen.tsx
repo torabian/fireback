@@ -4,8 +4,8 @@ import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailSenderEntity";
-import { useGetEmailSenderByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetEmailSenderByUniqueId";
+import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
+import { useGetEmailSenderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailSenderByUniqueId";
 import { useState } from "react";
 
 export const EmailSenderSingleScreen = () => {

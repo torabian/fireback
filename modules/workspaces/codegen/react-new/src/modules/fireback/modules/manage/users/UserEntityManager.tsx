@@ -1,15 +1,15 @@
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
-import { useGetUserByUniqueId } from "../../../sdk/modules/workspaces/useGetUserByUniqueId";
-import { usePatchUser } from "../../../sdk/modules/workspaces/usePatchUser";
-import { usePostUser } from "../../../sdk/modules/workspaces/usePostUser";
+import { useGetUserByUniqueId } from "../../../sdk/modules/abac/useGetUserByUniqueId";
+import { usePatchUser } from "../../../sdk/modules/abac/usePatchUser";
+import { usePostUser } from "../../../sdk/modules/abac/usePostUser";
 
 import {
   CommonEntityManager,
   DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { UserEditForm } from "./UserEditForm";
-import { UserEntity } from "../../../sdk/modules/workspaces/UserEntity";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 
 export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
   const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<

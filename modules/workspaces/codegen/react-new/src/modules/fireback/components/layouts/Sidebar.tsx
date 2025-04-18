@@ -1,5 +1,4 @@
 import { MenuItem } from "../../definitions/common";
-import { onPermission, onPermissionInRoot } from "../../hooks/accessLevels";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
 
@@ -7,7 +6,7 @@ import classNames from "classnames";
 import React, { useContext } from "react";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { osResources } from "../../resources/resources";
-import { AppMenuEntity } from "../../sdk/modules/workspaces/AppMenuEntity";
+import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";

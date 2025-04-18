@@ -2,8 +2,8 @@ import { FormSelect } from "@/modules/fireback/components/forms/form-select/Form
 import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/workspaces/PublicJoinKeyEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/workspaces/useGetRoles";
+import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
+import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
 import { useContext } from "react";
 
 export const PublicJoinKeyEditForm = ({

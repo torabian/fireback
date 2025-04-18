@@ -1,12 +1,12 @@
 import { dataMenuToMenu } from "../components/layouts/Sidebar";
 import { MenuItem } from "../definitions/common";
-import { useGetCteAppMenus } from "../sdk/modules/workspaces/useGetCteAppMenus";
+import { useGetCteAppMenus } from "../sdk/modules/abac/useGetCteAppMenus";
 import { useContext, useEffect } from "react";
 import { useQueryClient } from "react-query";
 import { useLocale } from "./useLocale";
 import { RemoteQueryContext } from "../sdk/core/react-tools";
 import { userMeetsAccess2 } from "./accessLevels";
-import { useGetUrwQuery } from "../sdk/modules/workspaces/useGetUrwQuery";
+import { useGetUrwQuery } from "../sdk/modules/abac/useGetUrwQuery";
 
 /**
  *

@@ -1,12 +1,12 @@
 import { FormText } from "../../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
-import { WorkspaceTypeEntity } from "../../../sdk/modules/workspaces/WorkspaceTypeEntity";
+import { WorkspaceTypeEntity } from "../../../sdk/modules/abac/WorkspaceTypeEntity";
 
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { useGetRoles } from "../../../sdk/modules/workspaces/useGetRoles";
+import { useGetRoles } from "../../../sdk/modules/abac/useGetRoles";
 
 export const WorkspaceTypeEditForm = ({
   form,

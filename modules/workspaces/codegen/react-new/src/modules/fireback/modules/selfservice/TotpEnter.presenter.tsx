@@ -2,12 +2,12 @@ import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
-import { usePostPassportsSigninClassic } from "../../sdk/modules/workspaces/usePostPassportsSigninClassic";
+import { usePostPassportsSigninClassic } from "../../sdk/modules/abac/usePostPassportsSigninClassic";
+import { useCompleteAuth } from "./auth.common";
 import {
   ClassicSigninActionReqDto,
   ClassicSigninActionResDto,
-} from "../../sdk/modules/workspaces/WorkspacesActionsDto";
-import { useCompleteAuth } from "./auth.common";
+} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();

@@ -1,4 +1,4 @@
-import { WorkspaceTypeEntity } from "../../sdk/modules/workspaces/WorkspaceTypeEntity";
+import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
 import { MemoryEntity } from "./memory-db";
 
 export const MockWorkspaceType = new MemoryEntity<WorkspaceTypeEntity>([

@@ -3,10 +3,10 @@ import {
   DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/workspaces/EmailProviderEntity";
-import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/workspaces/useGetEmailProviderByUniqueId";
-import { usePatchEmailProvider } from "@/modules/fireback/sdk/modules/workspaces/usePatchEmailProvider";
-import { usePostEmailProvider } from "@/modules/fireback/sdk/modules/workspaces/usePostEmailProvider";
+import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
+import { usePatchEmailProvider } from "@/modules/fireback/sdk/modules/abac/usePatchEmailProvider";
+import { usePostEmailProvider } from "@/modules/fireback/sdk/modules/abac/usePostEmailProvider";
 import { EmailProviderEditForm } from "./EmailProviderEditForm";
 
 export const EmailProviderEntityManager = ({

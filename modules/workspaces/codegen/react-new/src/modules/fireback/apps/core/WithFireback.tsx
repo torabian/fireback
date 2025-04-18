@@ -22,6 +22,7 @@ export function WithFireback({
 }) {
   return (
     <FirebackQueryProvider
+      socket
       preferredAcceptLanguage={locale || config.interfaceLanguage}
       identifier="fireback"
       prefix={prefix}
