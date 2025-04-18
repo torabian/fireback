@@ -176,6 +176,10 @@ type Config struct {
 	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
+	// VAPID Web push notification public key
+	VapidPublicKey string `envconfig:"VAPID_PUBLIC_KEY" description:"VAPID Web push notification public key"`
+	// VAPID Web push notification private key
+	VapidPrivateKey string `envconfig:"VAPID_PRIVATE_KEY" description:"VAPID Web push notification private key"`
 	// Fireback supports generating tokens based on random short string, or jwt.
 	TokenGenerationStrategy string `envconfig:"TOKEN_GENERATION_STRATEGY" description:"Fireback supports generating tokens based on random short string, or jwt."`
 	// If tokenGenerationStrategy is set to jwt, then these secret will be used.
@@ -254,6 +258,14 @@ func GetConfigCliFlags() []cli.Flag {
 		cli.StringFlag{
 			Name:  "table-prefix",
 			Usage: "Prefix all gorm tables with some string",
+		},
+		cli.StringFlag{
+			Name:  "vapid-public-key",
+			Usage: "VAPID Web push notification public key",
+		},
+		cli.StringFlag{
+			Name:  "vapid-private-key",
+			Usage: "VAPID Web push notification private key",
 		},
 		cli.StringFlag{
 			Name:  "token-generation-strategy",
@@ -391,6 +403,12 @@ func CastConfigFromCli(config *Config, c *cli.Context) {
 	}
 	if c.IsSet("table-prefix") {
 		config.TablePrefix = c.String("table-prefix")
+	}
+	if c.IsSet("vapid-public-key") {
+		config.VapidPublicKey = c.String("vapid-public-key")
+	}
+	if c.IsSet("vapid-private-key") {
+		config.VapidPrivateKey = c.String("vapid-private-key")
 	}
 	if c.IsSet("token-generation-strategy") {
 		config.TokenGenerationStrategy = c.String("token-generation-strategy")
@@ -530,6 +548,52 @@ func GetConfigCli() []cli.Command {
 					Action: func(c *cli.Context) error {
 						return ConfigSetString(c, config.TablePrefix, func(value string) {
 							config.TablePrefix = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "vapid-public-key",
+			Usage: "VAPID Web push notification public key (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.VapidPublicKey)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.VapidPublicKey, func(value string) {
+							config.VapidPublicKey = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "vapid-private-key",
+			Usage: "VAPID Web push notification private key (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.VapidPrivateKey)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.VapidPrivateKey, func(value string) {
+							config.VapidPrivateKey = value
 							config.Save(".env")
 						})
 						return nil

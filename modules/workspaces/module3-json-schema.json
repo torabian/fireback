@@ -119,6 +119,20 @@
           "type": "array",
           "description": "Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here."
         },
+        "notifications": {
+          "items": {
+            "$ref": "#/definitions/Module3Notification"
+          },
+          "type": "array",
+          "description": "Notifications are end-user messages"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/definitions/Module3Event"
+          },
+          "type": "array",
+          "description": "Events are internal changes that can be triggered by different sources"
+        },
         "queries": {
           "items": {
             "$ref": "#/definitions/Module3Query"
@@ -533,6 +547,24 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Module3Event": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the event which will be generated in golang and used as key to trigger or subscribe"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the event (developer visible only)"
+        },
+        "payload": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Payload of the event"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Module3Field": {
       "properties": {
         "name": {
@@ -727,6 +759,31 @@
         },
         "type": "object"
       },
+      "type": "object"
+    },
+    "Module3Notification": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the notification which will be generated in golang and used as key to trigger or subscribe"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the event (developer visible only)"
+        },
+        "payload": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Payload of the notification"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "List of permissions that is required for the notification"
+        }
+      },
+      "additionalProperties": false,
       "type": "object"
     },
     "Module3Permission": {

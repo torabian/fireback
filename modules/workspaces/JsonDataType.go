@@ -84,6 +84,10 @@ func (j JSON) String() string {
 	return string(j)
 }
 
+func (j JSON) Bytes() []byte {
+	return j
+}
+
 // GormDataType gorm common data type
 func (JSON) GormDataType() string {
 	return "json"

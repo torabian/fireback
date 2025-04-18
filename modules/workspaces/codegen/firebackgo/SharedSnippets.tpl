@@ -1417,7 +1417,7 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
 
       // It's distinct by user, then unique id and user needs to be equal
       fields.UniqueId = query.UserId
-      fields.UserId = &query.UserId
+      fields.UserId = {{ .wsprefix }}NewString(query.UserId)
     {{ end }}
 
 
@@ -1581,7 +1581,7 @@ func {{ .e.Upper }}ActionImport(
       {{ template "entityCommonCliFlag" (arr .Fields $newPrefix)}}
     {{ end }}
 
-    {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "text") (eq .Type "html") (eq .Type "")}}
+    {{ if or (eq .Type "string") (eq .Type "json") (eq .Type "enum") (eq .Type "text") (eq .Type "html") (eq .Type "")}}
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
@@ -1849,9 +1849,14 @@ type x{{$prefix}}{{ .PublicName}} struct {
 
   {{ range $fields }}
 
-    {{ if or (eq .Type "string") (eq .Type "enum") (eq .Type "html") (eq .Type "text")}}
+    {{ if or (eq .Type "string")  (eq .Type "enum") (eq .Type "html") (eq .Type "text")}}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         template.{{ .PublicName }} = c.String("{{ $prefix }}{{ .ComputedCliName }}")
+      }
+	  {{ end }}
+    {{ if or (eq .Type "json")}}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        template.{{ .PublicName }} = {{ $wsprefix }}JSONFrom("{{ $prefix }}{{ .ComputedCliName }}")
       }
 	  {{ end }}
     {{ if or (eq .Type "string?") }}

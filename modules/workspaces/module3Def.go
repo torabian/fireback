@@ -56,6 +56,12 @@ type Module3 struct {
 	// Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here.
 	Remotes []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty" jsonschema:"description=Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here."`
 
+	// Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels
+	Notifications []*Module3Notification `yaml:"notifications,omitempty" json:"notifications,omitempty" jsonschema:"description=Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels"`
+
+	// Events are internal changes that can be triggered by different sources
+	Events []*Module3Event `yaml:"events,omitempty" json:"events,omitempty" jsonschema:"description=Events are internal changes that can be triggered by different sources"`
+
 	// Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code.
 	Queries []*Module3Query `yaml:"queries,omitempty" json:"queries,omitempty" jsonschema:"description=Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code."`
 
@@ -366,6 +372,37 @@ type Module3Entity struct {
 	// The name of the golang function which will recieve entity pointer to make some modification
 	// upon query, get or other details.
 	PostFormatter string `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty" jsonschema:"description=The name of the golang function which will recieve entity pointer to make some modification upon query, get or other details."`
+}
+
+// Events are definitions of a low level occurence across the application,
+// for example an entity created - a user logged in - etc.
+type Module3Event struct {
+
+	// Name of the event which will be generated in golang and used as key to trigger or subscribe
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the event which will be generated in golang and used as key to trigger or subscribe"`
+
+	// Description of the event (developer visible only)
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the event (developer visible only)"`
+
+	// Payload of the event
+	Payload *Module3ActionBody `yaml:"payload,omitempty" json:"payload,omitempty" jsonschema:"description=Payload of the event"`
+}
+
+// Events are definitions of a low level occurence across the application,
+// for example an entity created - a user logged in - etc.
+type Module3Notification struct {
+
+	// Name of the notification which will be generated in golang and used as key to trigger or subscribe
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the notification which will be generated in golang and used as key to trigger or subscribe"`
+
+	// Description of the event (developer visible only)
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the event (developer visible only)"`
+
+	// Payload of the notification
+	Payload *Module3ActionBody `yaml:"payload,omitempty" json:"payload,omitempty" jsonschema:"description=Payload of the notification"`
+
+	// List of permissions that is required for the notification
+	Permissions []string `yaml:"permissions,omitempty" json:"permissions,omitempty" jsonschema:"description=List of permissions that is required for the notification"`
 }
 
 // Represents a dto in an application. Can be used for variety of reasons,
