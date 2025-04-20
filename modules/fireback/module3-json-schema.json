@@ -71,7 +71,7 @@
         },
         "meta-workspace": {
           "type": "boolean",
-          "description": "Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback"
+          "description": "Magic property for Fireback FirebackModule3.yml file. It's gonna be true only in a single file internally in Fireback"
         },
         "name": {
           "type": "string",

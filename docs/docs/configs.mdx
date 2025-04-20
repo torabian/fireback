@@ -11,11 +11,11 @@ Configurations are an easy way to make the env variables typesafe, and more vers
 than direct accessing it via env. You neede to define an array of the configuration,
 and they become golang struct, and helper functions on top of them will be generated.
 
-WorkspacesModule3.yml contains the general fireback env variables. **Important that the `config` is singular,
+FirebackModule3.yml contains the general fireback env variables. **Important that the `config` is singular,
 eventhough it's an array**.
 
 ```yaml
-name: workspaces
+name: fireback
 meta-workspace: true
 config:
   - name: name

@@ -32,8 +32,8 @@ type Module3 struct {
 	// Version of the module. Helpful for different code generation phases but it's not necessary.
 	Version string `yaml:"version,omitempty" json:"version,omitempty" jsonschema:"description=Version of the module. Helpful for different code generation phases but it's not necessary."`
 
-	// Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback
-	MetaWorkspace bool `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty" jsonschema:"description=Magic property for Fireback WorkspacesModule3.yml file. It's gonna be true only in a single file internally in Fireback"`
+	// Magic property for Fireback FirebackModule3.yml file. It's gonna be true only in a single file internally in Fireback
+	MetaWorkspace bool `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty" jsonschema:"description=Magic property for Fireback FirebackModule3.yml file. It's gonna be true only in a single file internally in Fireback"`
 
 	// Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name.
 	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name."`
