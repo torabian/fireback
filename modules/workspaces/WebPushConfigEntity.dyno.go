@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
@@ -20,6 +19,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -429,12 +429,20 @@ func WebPushConfigActionCreateFn(dto *WebPushConfigEntity, query QueryDSL) (*Web
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WebPushConfigAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(WEB_PUSH_CONFIG_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": GetTypeString(&WebPushConfigEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewWebPushConfigCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(WEB_PUSH_CONFIG_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": GetTypeString(&WebPushConfigEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func WebPushConfigActionGetOneFn(query QueryDSL) (*WebPushConfigEntity, *IError) {
@@ -522,11 +530,18 @@ func WebPushConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WebPushConf
 	if err != nil {
 		return nil, GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewWebPushConfigUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func WebPushConfigActionUpdateFn(query QueryDSL, fields *WebPushConfigEntity) (*WebPushConfigEntity, *IError) {
@@ -1357,6 +1372,44 @@ func WebPushConfigDistinctActionGetOne(
 		return &WebPushConfigEntity{}, nil
 	}
 	return entity, err
+}
+func NewWebPushConfigCreatedEvent(
+	payload *WebPushConfigEntity,
+	query *QueryDSL,
+) (*Event, error) {
+	event := &Event{
+		Name:    "WebPushConfigCreated",
+		Payload: payload,
+		Security: &SecurityModel{
+			ActionRequires: []PermissionInfo{
+				PERM_ROOT_WEB_PUSH_CONFIG_QUERY,
+			},
+			ResolveStrategy: "user",
+		},
+		CacheKey: "*workspaces.WebPushConfigEntity",
+	}
+	// Apply the source of the event based on querydsl
+	ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewWebPushConfigUpdatedEvent(
+	payload *WebPushConfigEntity,
+	query *QueryDSL,
+) (*Event, error) {
+	event := &Event{
+		Name:    "WebPushConfigUpdated",
+		Payload: payload,
+		Security: &SecurityModel{
+			ActionRequires: []PermissionInfo{
+				PERM_ROOT_WEB_PUSH_CONFIG_QUERY,
+			},
+			ResolveStrategy: "user",
+		},
+		CacheKey: "*workspaces.WebPushConfigEntity",
+	}
+	// Apply the source of the event based on querydsl
+	ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
 }
 
 var WebPushConfigEntityBundle = EntityBundle{

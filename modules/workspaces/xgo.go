@@ -428,11 +428,14 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 				},
 			})
 		} else {
-
+			socketUsers, socketUserErr := GetEventBusInstance().ListUsers(SERVER_INSTANCE)
 			c.JSON(200, gin.H{
 				"data": gin.H{
-					"pong":       "yes",
-					"instanceId": SERVER_INSTANCE,
+					"pong":           "yes",
+					"instanceId":     SERVER_INSTANCE,
+					"socketUsers":    socketUsers,
+					"socketUserErr":  socketUserErr,
+					"socketSnapshot": SocketSessionPool,
 				},
 			})
 		}

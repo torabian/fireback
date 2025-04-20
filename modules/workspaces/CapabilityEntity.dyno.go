@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/workspaces/metas"
@@ -20,6 +19,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -454,12 +454,20 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 	// 5. Create sub entities, objects or arrays, association to other entities
 	CapabilityAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(CAPABILITY_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": GetTypeString(&CapabilityEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewCapabilityCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(CAPABILITY_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": GetTypeString(&CapabilityEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func CapabilityActionGetOneFn(query QueryDSL) (*CapabilityEntity, *IError) {
@@ -547,11 +555,18 @@ func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEnti
 	if err != nil {
 		return nil, GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewCapabilityUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func CapabilityActionUpdateFn(query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
@@ -1328,6 +1343,44 @@ var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
 	PERM_ROOT_CAPABILITY_QUERY,
 	PERM_ROOT_CAPABILITY,
 }
+
+func NewCapabilityCreatedEvent(
+	payload *CapabilityEntity,
+	query *QueryDSL,
+) (*Event, error) {
+	event := &Event{
+		Name:    "CapabilityCreated",
+		Payload: payload,
+		Security: &SecurityModel{
+			ActionRequires: []PermissionInfo{
+				PERM_ROOT_CAPABILITY_QUERY,
+			},
+		},
+		CacheKey: "*workspaces.CapabilityEntity",
+	}
+	// Apply the source of the event based on querydsl
+	ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewCapabilityUpdatedEvent(
+	payload *CapabilityEntity,
+	query *QueryDSL,
+) (*Event, error) {
+	event := &Event{
+		Name:    "CapabilityUpdated",
+		Payload: payload,
+		Security: &SecurityModel{
+			ActionRequires: []PermissionInfo{
+				PERM_ROOT_CAPABILITY_QUERY,
+			},
+		},
+		CacheKey: "*workspaces.CapabilityEntity",
+	}
+	// Apply the source of the event based on querydsl
+	ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var CapabilityEntityBundle = EntityBundle{
 	Permissions: ALL_CAPABILITY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

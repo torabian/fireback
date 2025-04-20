@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -462,12 +462,20 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PendingWorkspaceInviteAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PENDING_WORKSPACE_INVITE_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&PendingWorkspaceInviteEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewPendingWorkspaceInviteCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(PENDING_WORKSPACE_INVITE_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&PendingWorkspaceInviteEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func PendingWorkspaceInviteActionGetOneFn(query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
@@ -555,11 +563,18 @@ func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL,
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewPendingWorkspaceInviteUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func PendingWorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
@@ -1381,6 +1396,44 @@ var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
 	PERM_ROOT_PENDING_WORKSPACE_INVITE,
 }
+
+func NewPendingWorkspaceInviteCreatedEvent(
+	payload *PendingWorkspaceInviteEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "PendingWorkspaceInviteCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
+			},
+		},
+		CacheKey: "*abac.PendingWorkspaceInviteEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewPendingWorkspaceInviteUpdatedEvent(
+	payload *PendingWorkspaceInviteEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "PendingWorkspaceInviteUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
+			},
+		},
+		CacheKey: "*abac.PendingWorkspaceInviteEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var PendingWorkspaceInviteEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

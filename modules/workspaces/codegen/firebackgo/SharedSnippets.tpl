@@ -828,12 +828,21 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 	{{ .e.Upper }}AssociationCreate(dto, query)
 
 	// 6. Fire the event into system
+  actionEvent, eventErr := New{{.e.Upper}}CreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		{{ .wsprefix }}GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+
+  /*
 	event.MustFire({{ .e.EventCreated }}, event.M{
 		"entity":   dto,
 		"entityKey": {{ .wsprefix }}GetTypeString(&{{ .e.EntityName }}{}),
 		"target":   "workspace",
 		"unqiueId": query.WorkspaceId,
 	})
+  */
 
 	return dto, nil
 }
@@ -1286,11 +1295,19 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
       return nil, {{ .wsprefix }}GormErrorToIError(err)
     }
 
+    actionEvent, eventErr := New{{.e.Upper}}UpdatedEvent(fields, &query)
+    if actionEvent != nil && eventErr == nil {
+      {{ .wsprefix }}GetEventBusInstance().FireEvent(query, *actionEvent)
+    } else {
+      log.Default().Panicln("Updating event has failed for %v", fields)
+    }
+
+    /*
     event.MustFire(query.TriggerEventName, event.M{
       "entity":   &item,
       "target":   "workspace",
       "unqiueId": query.WorkspaceId,
-    })
+    })*/
 
     return &itemRefetched, nil
   }
@@ -3142,4 +3159,125 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
 }
 
 
+{{ end }}
+
+
+{{ define "notificationInformation" }}
+  {{ $notifications := index . 0 }}
+  {{ $wsprefix := index . 1 }}
+  
+  {{ range $notifications }}
+
+    {{ if .Payload }}
+      {{ if .Payload.Fields }}
+      type {{ upper .Name }}NotificationPayload struct {
+        {{ if .Payload.Fields }}
+          {{ template "definitionrow" (arr .Payload.Fields $wsprefix) }}
+        {{ end }}
+      }
+      func (x *{{ upper .Name }}NotificationPayload) Json() string {
+        if x != nil {
+          str, _ := json.MarshalIndent(x, "", "  ")
+          return (string(str))
+        }
+        return ""
+      }
+      {{ end }}
+    {{ end }}
+
+    func New{{ upper .Name }}Notification(
+      {{ if .Payload }}
+      payload *{{ template "notificationPayload" . }},
+      {{ end }}
+      query *{{ $wsprefix }}QueryDSL,
+    ) (*{{ $wsprefix }}Notification, error) {
+      {{ if .Payload }}
+      payloadBytes, err := json.Marshal(payload)
+      if err != nil {
+        return nil, err
+      }
+      {{ end }}
+
+      return &{{ $wsprefix }}Notification{
+        Name: "{{ upper .Name }}",
+        {{ if .Payload }}
+        Payload: payloadBytes,
+        {{ end }}
+        Permissions: []string{
+          {{ range .Permissions}}
+          "{{.}}",
+          {{ end }}
+        },
+      }, nil
+    }
+
+  {{ end }}
+{{ end }}
+
+{{ define "eventPayload" }} {{ if .Payload }} {{ if .Payload.Dto}} {{ .Payload.Dto }} {{ end }}{{ if .Payload.Entity}} {{ .Payload.Entity }} {{ end }}{{ if .Payload.Fields}} {{ upper .Name }}EventPayload {{ end }}{{ end }}{{ end }}
+{{ define "notificationPayload" }} {{ if .Payload }} {{ if .Payload.Dto}} {{ .Payload.Dto }} {{ end }}{{ if .Payload.Entity}} {{ .Payload.Entity }} {{ end }}{{ if .Payload.Fields}} {{ upper .Name }}NotificationPayload {{ end }}{{ end }}{{ end }}
+
+{{ define "eventInformation" }}
+  {{ $events := index . 0 }}
+  {{ $wsprefix := index . 1 }}
+  
+  {{ range $events }}
+
+    {{ if .Payload }}
+      {{ if .Payload.Fields }}
+      type {{ upper .Name }}EventPayload struct {
+        {{ if .Payload.Fields }}
+          {{ template "definitionrow" (arr .Payload.Fields $wsprefix) }}
+        {{ end }}
+      }
+      func (x *{{ upper .Name }}EventPayload) Json() string {
+        if x != nil {
+          str, _ := json.MarshalIndent(x, "", "  ")
+          return (string(str))
+        }
+        return ""
+      }
+      {{ end }}
+    {{ end }}
+
+    func New{{ upper .Name }}Event(
+      {{ if .Payload }}
+      payload *{{ template "eventPayload" . }},
+      {{ end }}
+      query *{{ $wsprefix }}QueryDSL,
+    ) (*{{ $wsprefix }}Event, error) {
+
+      event := &{{ $wsprefix }}Event{
+        Name: "{{ upper .Name }}",
+        {{ if .Payload }}
+        Payload: payload,
+        {{ end }}
+
+        {{ if .SecurityModel }}
+        Security: &{{ $wsprefix }}SecurityModel{
+          ActionRequires: []{{ $wsprefix }}PermissionInfo{ 
+            {{ range .SecurityModel.ActionRequires }}
+              {{ .CompleteKey }},
+            {{ end }}
+          },
+          {{ if and  (.SecurityModel.ResolveStrategy) }}
+            ResolveStrategy: "{{ .SecurityModel.ResolveStrategy }}",
+          {{ end }}
+          {{ if and (.SecurityModel.AllowOnRoot) }}
+            AllowOnRoot: true,
+          {{ end }}
+        },
+        {{ end }}
+        {{ if .CacheKey }}
+        CacheKey: "{{.CacheKey}}",
+        {{ end }}
+      }
+
+      // Apply the source of the event based on querydsl
+      {{ $wsprefix }}ApplyQueryDslContextToEvent(event, *query)
+
+      return event, nil
+    }
+
+  {{ end }}
 {{ end }}

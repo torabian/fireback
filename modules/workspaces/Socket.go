@@ -2,39 +2,37 @@ package workspaces
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	"github.com/gorilla/websocket"
 )
 
 type SocketConnection struct {
-	UserId     string
-	Connection *websocket.Conn
+	UserId     string                    `json:"userId"`
+	Connection *websocket.Conn           `json:"-"`
+	URW        UserAccessPerWorkspaceDto `json:"urw"`
 }
 
-var SocketSessionPool = make(map[string]map[string]*SocketConnection)
+var (
+	SocketSessionPool = make(map[string]map[string][]*SocketConnection) // workspaceId -> userId -> []*SocketConnection
+	socketMutex       sync.Mutex
+)
 
-func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Context
+func SocketConnectEndpoint(c *gin.Context) {
+	wsURLParam, _ := url.ParseQuery(c.Request.URL.RawQuery)
 
-	wsURL := ginContext.Request.URL
-	wsURLParam, err3 := url.ParseQuery(wsURL.RawQuery)
+	workspaceId := c.Request.Header.Get("Workspace-id")
+	token := c.Request.Header.Get("authorization")
 
-	workspaceId := ginContext.Request.Header.Get("Workspace-id")
-	token := ginContext.Request.Header.Get("authorization")
-
-	if err3 == nil && wsURLParam["token"] != nil && len(wsURLParam["token"]) == 1 {
-
-		token = wsURLParam["token"][0]
+	if val, ok := wsURLParam["token"]; ok && len(val) == 1 {
+		token = val[0]
 	}
-
-	if err3 == nil && wsURLParam["workspaceId"] != nil && len(wsURLParam["workspaceId"]) == 1 {
-
-		workspaceId = wsURLParam["workspaceId"][0]
+	if val, ok := wsURLParam["workspaceId"]; ok && len(val) == 1 {
+		workspaceId = val[0]
 	}
 
 	context := &AuthContextDto{
@@ -43,71 +41,66 @@ func SocketConnectEndpoint(ginContext *gin.Context) { //Usually use c *gin.Conte
 		Capabilities: []PermissionInfo{},
 	}
 
-	res, err2 := WithAuthorizationPure(context)
-	if err2 != nil {
-		f, _ := json.MarshalIndent(gin.H{"error": err2}, "", "  ")
-		http.Error(ginContext.Writer, string(f), int(err2.HttpCode))
+	res, err := WithAuthorizationPure(context)
+	if err != nil {
+		resp, _ := json.MarshalIndent(gin.H{"error": err}, "", "  ")
+		http.Error(c.Writer, string(resp), int(err.HttpCode))
 		return
 	}
 
-	wsSession, err := Upgrader.Upgrade(ginContext.Writer, ginContext.Request, nil)
-	if err != nil {
-		log.Fatal(err)
+	ws, err2 := Upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err2 != nil {
+		log.Println("WebSocket upgrade error:", err)
+		return
 	}
 
-	if SocketSessionPool[workspaceId] == nil {
-		SocketSessionPool[workspaceId] = map[string]*SocketConnection{}
-	}
+	GetEventBusInstance().AddUser(SERVER_INSTANCE, res.UserId.String)
 
-	SocketSessionPool[workspaceId][res.UserId.String] = &SocketConnection{
-		Connection: wsSession,
+	socket := &SocketConnection{
 		UserId:     res.UserId.String,
+		Connection: ws,
+		URW:        *res.UserAccessPerWorkspace,
 	}
 
+	socketMutex.Lock()
+	if SocketSessionPool[workspaceId] == nil {
+		SocketSessionPool[workspaceId] = make(map[string][]*SocketConnection)
+	}
+	SocketSessionPool[workspaceId][res.UserId.String] = append(SocketSessionPool[workspaceId][res.UserId.String], socket)
+	socketMutex.Unlock()
+
+	// Read loop
 	for {
 		var msg interface{}
-		err := wsSession.ReadJSON(&msg)
-		if err != nil {
-			log.Println("read:", err)
-			// optional: log the error
+		if err := ws.ReadJSON(&msg); err != nil {
 			break
 		}
-
+		// Handle msg if needed
 	}
 
-	delete(SocketSessionPool[workspaceId], res.UserId.String)
+	// Cleanup
+	ws.Close()
+	socketMutex.Lock()
+	conns := SocketSessionPool[workspaceId][res.UserId.String]
+	for i, conn := range conns {
+		if conn.Connection == ws {
+			conns = append(conns[:i], conns[i+1:]...)
+			break
+		}
+	}
+	if len(conns) == 0 {
+		delete(SocketSessionPool[workspaceId], res.UserId.String)
+	} else {
+		SocketSessionPool[workspaceId][res.UserId.String] = conns
+	}
 	if len(SocketSessionPool[workspaceId]) == 0 {
 		delete(SocketSessionPool, workspaceId)
-
 	}
+	socketMutex.Unlock()
 
-	wsSession.Close()
-}
-
-/**
-*	Routes all internal events of the application over socket.
-* 	This is an exteremly dangerous function, has access to every small details of the application
-**/
-func UNSAFE_AppEventsOverSocketRouter() {
-	dbListener1 := event.ListenerFunc(func(e event.Event) error {
-		fmt.Printf("handle event: %s\n", e.Name())
-		if len(SocketSessionPool) > 0 {
-
-			for _, v := range SocketSessionPool {
-				for _, v2 := range v {
-					v2.Connection.WriteJSON(gin.H{"data": e.Data()})
-				}
-			}
-		}
-
-		return nil
-	})
-
-	event.On("*", dbListener1, event.Normal)
-
+	GetEventBusInstance().RemoveUser(SERVER_INSTANCE, res.UserId.String)
 }
 
 func HandleSocket(e *gin.Engine) {
 	e.Any("ws", SocketConnectEndpoint)
-	UNSAFE_AppEventsOverSocketRouter()
 }

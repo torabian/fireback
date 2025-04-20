@@ -13,11 +13,11 @@ import (
 	"github.com/torabian/fireback/modules/workspaces"
 	{{ end }}
  
+	"log"
 	"fmt"
 	"encoding/json"
 	"strings"
 	"github.com/schollz/progressbar/v3"
-	"github.com/gookit/event"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -364,6 +364,12 @@ func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]stri
 {{ if .e.Actions }}
 	{{ template "actions-section" (arr .e.Actions $.wsprefix .e.Name )}}
 {{ end }}
+
+
+{{ template "eventInformation" (arr .e.Events $.wsprefix) }}
+{{ template "eventInformation" (arr .e.DefaultEvents $.wsprefix) }}
+{{ template "notificationInformation" (arr .e.Notifications $.wsprefix) }}
+
 
 var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	Permissions: ALL_{{ .e.AllUpper }}_PERMISSIONS,

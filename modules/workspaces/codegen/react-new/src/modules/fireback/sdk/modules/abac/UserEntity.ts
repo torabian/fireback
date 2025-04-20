@@ -85,6 +85,22 @@ export class UserEntity extends BaseEntity {
       },
   };
   public static definition = {
+  "events": [
+    {
+      "name": "Googoli2",
+      "description": "Googlievent",
+      "payload": {
+        "fields": [
+          {
+            "name": "entity",
+            "type": "string",
+            "computedType": "string",
+            "gormMap": {}
+          }
+        ]
+      }
+    }
+  ],
   "rpc": {
     "query": {
       "qs": [

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -461,12 +461,20 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query workspa
 	// 5. Create sub entities, objects or arrays, association to other entities
 	EmailConfirmationAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(EMAIL_CONFIRMATION_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&EmailConfirmationEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewEmailConfirmationCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(EMAIL_CONFIRMATION_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&EmailConfirmationEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func EmailConfirmationActionGetOneFn(query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError) {
@@ -554,11 +562,18 @@ func EmailConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewEmailConfirmationUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func EmailConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *workspaces.IError) {
@@ -1380,6 +1395,44 @@ var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
 	PERM_ROOT_EMAIL_CONFIRMATION,
 }
+
+func NewEmailConfirmationCreatedEvent(
+	payload *EmailConfirmationEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "EmailConfirmationCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
+			},
+		},
+		CacheKey: "*abac.EmailConfirmationEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewEmailConfirmationUpdatedEvent(
+	payload *EmailConfirmationEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "EmailConfirmationUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
+			},
+		},
+		CacheKey: "*abac.EmailConfirmationEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var EmailConfirmationEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_EMAIL_CONFIRMATION_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

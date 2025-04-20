@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -429,12 +429,20 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query workspaces.
 	// 5. Create sub entities, objects or arrays, association to other entities
 	BackupTableMetaAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(BACKUP_TABLE_META_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&BackupTableMetaEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewBackupTableMetaCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(BACKUP_TABLE_META_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&BackupTableMetaEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func BackupTableMetaActionGetOneFn(query workspaces.QueryDSL) (*BackupTableMetaEntity, *workspaces.IError) {
@@ -522,11 +530,18 @@ func BackupTableMetaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewBackupTableMetaUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func BackupTableMetaActionUpdateFn(query workspaces.QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *workspaces.IError) {
@@ -1272,6 +1287,44 @@ var ALL_BACKUP_TABLE_META_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_BACKUP_TABLE_META_QUERY,
 	PERM_ROOT_BACKUP_TABLE_META,
 }
+
+func NewBackupTableMetaCreatedEvent(
+	payload *BackupTableMetaEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "BackupTableMetaCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_BACKUP_TABLE_META_QUERY,
+			},
+		},
+		CacheKey: "*abac.BackupTableMetaEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewBackupTableMetaUpdatedEvent(
+	payload *BackupTableMetaEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "BackupTableMetaUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_BACKUP_TABLE_META_QUERY,
+			},
+		},
+		CacheKey: "*abac.BackupTableMetaEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var BackupTableMetaEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_BACKUP_TABLE_META_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

@@ -1642,6 +1642,9 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
+
+			entity.RootModule = x
+
 			if !HasSeeders(ctx.Path, &entity) {
 				err7 := CreateSeederDirectory(ctx.Path, &entity)
 				if err7 != nil {
@@ -2723,10 +2726,25 @@ func (x *Module3Entity) RenderTemplate(
 		isWorkspace = true
 	}
 
+	for _, notification := range x.Notifications {
+		if notification.Payload != nil {
+			ComputeFieldTypesAbsolute(notification.Payload.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+	}
+
+	for _, event := range x.Events {
+		if event.Payload != nil {
+			ComputeFieldTypesAbsolute(event.Payload.Fields, isWorkspace, ctx.Catalog.ComputeField)
+		}
+	}
+
 	params := gin.H{
-		"e":           x,
-		"m":           module,
-		"fv":          FIREBACK_VERSION,
+		"e":  x,
+		"m":  module,
+		"fv": FIREBACK_VERSION,
+		// They might have children we need to take care of this
+		// "notificationChildren": NotificationAppend(ctx, x.Notifications, isWorkspace),
+		// "eventChildren":        EventAppend(ctx, x.Events, isWorkspace),
 		"gofModule":   ctx.GofModuleName,
 		"ctx":         ctx,
 		"children":    ChildItems(x, ctx, isWorkspace),

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -447,12 +447,20 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query workspaces.Qu
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PassportMethodAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PASSPORT_METHOD_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&PassportMethodEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewPassportMethodCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(PASSPORT_METHOD_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&PassportMethodEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func PassportMethodActionGetOneFn(query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError) {
@@ -540,11 +548,18 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields 
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewPassportMethodUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func PassportMethodActionUpdateFn(query workspaces.QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *workspaces.IError) {
@@ -1329,6 +1344,45 @@ func newPassportMethodRegion() *xPassportMethodRegion {
 
 type xPassportMethodRegion struct {
 	Global string
+}
+
+func NewPassportMethodCreatedEvent(
+	payload *PassportMethodEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "PassportMethodCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_PASSPORT_METHOD_QUERY,
+			},
+			ResolveStrategy: "workspace",
+		},
+		CacheKey: "*abac.PassportMethodEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewPassportMethodUpdatedEvent(
+	payload *PassportMethodEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "PassportMethodUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_PASSPORT_METHOD_QUERY,
+			},
+			ResolveStrategy: "workspace",
+		},
+		CacheKey: "*abac.PassportMethodEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
 }
 
 var PassportMethodEntityBundle = workspaces.EntityBundle{

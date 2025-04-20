@@ -6,6 +6,12 @@ config:
     type: bool
     description: 
       If true, set's the environment behavior to production, and some functionality will be limited
+  - name: redisEventsUrl
+    type: string
+    description: 
+      The address of the redis, which will be used to distribute the events. If provided empty,
+      internal golang event library will be used, and events won't be distributed across different instances
+    default: '127.0.0.1:6379'
 
   - name: tablePrefix
     type: string

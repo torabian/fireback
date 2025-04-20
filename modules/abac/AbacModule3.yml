@@ -1121,6 +1121,13 @@ entities:
           - name: withImages
             type: bool?
     description: Manage the users who are in the current app (root only)
+    events:
+    - name: Googoli2
+      description: Googlievent
+      payload:
+        fields:
+          - name: entity
+            type: string
     fields:
       - name: firstName
         type: string

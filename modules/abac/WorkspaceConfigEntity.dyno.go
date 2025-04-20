@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -511,12 +511,20 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query workspaces.
 	// 5. Create sub entities, objects or arrays, association to other entities
 	WorkspaceConfigAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(WORKSPACE_CONFIG_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&WorkspaceConfigEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewWorkspaceConfigCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(WORKSPACE_CONFIG_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&WorkspaceConfigEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func WorkspaceConfigActionGetOneFn(query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError) {
@@ -604,11 +612,18 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewWorkspaceConfigUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func WorkspaceConfigActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *workspaces.IError) {
@@ -1563,6 +1578,46 @@ func WorkspaceConfigDistinctActionGetOne(
 		return &WorkspaceConfigEntity{}, nil
 	}
 	return entity, err
+}
+func NewWorkspaceConfigCreatedEvent(
+	payload *WorkspaceConfigEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "WorkspaceConfigCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_WORKSPACE_CONFIG_QUERY,
+			},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
+		},
+		CacheKey: "*abac.WorkspaceConfigEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewWorkspaceConfigUpdatedEvent(
+	payload *WorkspaceConfigEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "WorkspaceConfigUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_WORKSPACE_CONFIG_QUERY,
+			},
+			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
+		},
+		CacheKey: "*abac.WorkspaceConfigEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
 }
 
 var WorkspaceConfigEntityBundle = workspaces.EntityBundle{

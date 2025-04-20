@@ -1,11 +1,10 @@
 import { Fallback } from "@/modules/fireback/components/fallback/Fallback";
 
-import "./styles.scss";
 import { ErrorBoundary } from "react-error-boundary";
 import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
-import { EntityScreen } from "./EntityScreen";
-import { ModuleScreen } from "./ModuleScreen";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { ModuleScreen } from "./ModuleScreen";
+import "./styles.scss";
 
 const Router = HashRouter;
 
@@ -17,7 +16,7 @@ function App() {
         // Reset the state of your app so the error doesn't happen again
       }}
     >
-      <Router>
+      <Router future={{ v7_startTransition: true }}>
         <AnimatedRoutes />
       </Router>
     </ErrorBoundary>

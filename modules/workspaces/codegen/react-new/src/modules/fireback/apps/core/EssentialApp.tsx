@@ -63,9 +63,7 @@ export function EssentialApp({
 
   useEffect(() => {
     if ("serviceWorker" in navigator && "PushManager" in window) {
-      navigator.serviceWorker.register("sw.js").then((reg) => {
-        console.log("Service Worker registered", reg);
-      });
+      navigator.serviceWorker.register("sw.js").then((reg) => {});
     }
   }, []);
 
@@ -150,7 +148,7 @@ function ApplicationPanels({
 
   if (!session && checked) {
     return (
-      <Router>
+      <Router future={{ v7_startTransition: true }}>
         <Routes>
           <Route path=":locale">{selfServicePublicRoutes}</Route>
           <Route
@@ -164,7 +162,10 @@ function ApplicationPanels({
 
   return (
     <PanelGroup direction="horizontal" style={{ height: "100vh" }}>
-      <Router basename={useHashRouter ? undefined : process.env.PUBLIC_URL}>
+      <Router
+        future={{ v7_startTransition: true }}
+        basename={useHashRouter ? undefined : process.env.PUBLIC_URL}
+      >
         <ForcedAuthenticated>
           <SidebarPanel />
           <GeneralPanel

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -437,12 +437,20 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query workspaces.QueryDSL
 	// 5. Create sub entities, objects or arrays, association to other entities
 	UserProfileAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(USER_PROFILE_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&UserProfileEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewUserProfileCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(USER_PROFILE_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&UserProfileEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func UserProfileActionGetOneFn(query workspaces.QueryDSL) (*UserProfileEntity, *workspaces.IError) {
@@ -530,11 +538,18 @@ func UserProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Us
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewUserProfileUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func UserProfileActionUpdateFn(query workspaces.QueryDSL, fields *UserProfileEntity) (*UserProfileEntity, *workspaces.IError) {
@@ -1301,6 +1316,44 @@ var ALL_USER_PROFILE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_USER_PROFILE_QUERY,
 	PERM_ROOT_USER_PROFILE,
 }
+
+func NewUserProfileCreatedEvent(
+	payload *UserProfileEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "UserProfileCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_USER_PROFILE_QUERY,
+			},
+		},
+		CacheKey: "*abac.UserProfileEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewUserProfileUpdatedEvent(
+	payload *UserProfileEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "UserProfileUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_USER_PROFILE_QUERY,
+			},
+		},
+		CacheKey: "*abac.UserProfileEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var UserProfileEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_USER_PROFILE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -461,12 +461,20 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query workspaces.Quer
 	// 5. Create sub entities, objects or arrays, association to other entities
 	UserWorkspaceAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(USER_WORKSPACE_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&UserWorkspaceEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewUserWorkspaceCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(USER_WORKSPACE_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&UserWorkspaceEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func UserWorkspaceActionGetOneFn(query workspaces.QueryDSL) (*UserWorkspaceEntity, *workspaces.IError) {
@@ -554,11 +562,18 @@ func UserWorkspaceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewUserWorkspaceUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func UserWorkspaceActionUpdateFn(query workspaces.QueryDSL, fields *UserWorkspaceEntity) (*UserWorkspaceEntity, *workspaces.IError) {
@@ -1321,6 +1336,46 @@ var ALL_USER_WORKSPACE_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_USER_WORKSPACE_QUERY,
 	PERM_ROOT_USER_WORKSPACE,
 }
+
+func NewUserWorkspaceCreatedEvent(
+	payload *UserWorkspaceEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "UserWorkspaceCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_USER_WORKSPACE_QUERY,
+			},
+			ResolveStrategy: "user",
+		},
+		CacheKey: "*abac.UserWorkspaceEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewUserWorkspaceUpdatedEvent(
+	payload *UserWorkspaceEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "UserWorkspaceUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_USER_WORKSPACE_QUERY,
+			},
+			ResolveStrategy: "user",
+		},
+		CacheKey: "*abac.UserWorkspaceEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var UserWorkspaceEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_USER_WORKSPACE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

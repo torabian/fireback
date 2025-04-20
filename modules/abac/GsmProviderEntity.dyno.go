@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -461,12 +461,20 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query workspaces.QueryDSL
 	// 5. Create sub entities, objects or arrays, association to other entities
 	GsmProviderAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(GSM_PROVIDER_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&GsmProviderEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewGsmProviderCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(GSM_PROVIDER_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&GsmProviderEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func GsmProviderActionGetOneFn(query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError) {
@@ -554,11 +562,18 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Gs
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewGsmProviderUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func GsmProviderActionUpdateFn(query workspaces.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *workspaces.IError) {
@@ -1402,6 +1417,43 @@ type xGsmProviderType struct {
 	Url      string
 	Terminal string
 	Mediana  string
+}
+
+func NewGsmProviderCreatedEvent(
+	payload *GsmProviderEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "GsmProviderCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_GSM_PROVIDER_QUERY,
+			},
+		},
+		CacheKey: "*abac.GsmProviderEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewGsmProviderUpdatedEvent(
+	payload *GsmProviderEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "GsmProviderUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_GSM_PROVIDER_QUERY,
+			},
+		},
+		CacheKey: "*abac.GsmProviderEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
 }
 
 var GsmProviderEntityBundle = workspaces.EntityBundle{
