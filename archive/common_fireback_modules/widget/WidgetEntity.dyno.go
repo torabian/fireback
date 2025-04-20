@@ -535,7 +535,7 @@ func WidgetUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WidgetEnt
 }
 func WidgetActionUpdateFn(query fireback.QueryDSL, fields *WidgetEntity) (*WidgetEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WidgetValidator(fields, true); iError != nil {
@@ -652,7 +652,7 @@ func WidgetActionImport(
 	var content WidgetEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WidgetActionCreate(&content, query)

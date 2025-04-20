@@ -573,7 +573,7 @@ func EmailSenderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Emai
 }
 func EmailSenderActionUpdateFn(query fireback.QueryDSL, fields *EmailSenderEntity) (*EmailSenderEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := EmailSenderValidator(fields, true); iError != nil {
@@ -691,7 +691,7 @@ func EmailSenderActionImport(
 	var content EmailSenderEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := EmailSenderActions.Create(&content, query)

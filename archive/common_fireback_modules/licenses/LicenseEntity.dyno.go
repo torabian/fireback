@@ -665,7 +665,7 @@ func LicenseUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *LicenseE
 }
 func LicenseActionUpdateFn(query fireback.QueryDSL, fields *LicenseEntity) (*LicenseEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := LicenseValidator(fields, true); iError != nil {
@@ -791,7 +791,7 @@ func LicenseActionImport(
 	var content LicenseEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := LicenseActionCreate(&content, query)

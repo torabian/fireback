@@ -598,7 +598,7 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 }
 func RegionalContentActionUpdateFn(query fireback.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := RegionalContentValidator(fields, true); iError != nil {
@@ -716,7 +716,7 @@ func RegionalContentActionImport(
 	var content RegionalContentEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := RegionalContentActions.Create(&content, query)

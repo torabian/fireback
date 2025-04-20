@@ -756,7 +756,7 @@ func TimezoneGroupUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Ti
 }
 func TimezoneGroupActionUpdateFn(query fireback.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := TimezoneGroupValidator(fields, true); iError != nil {
@@ -882,7 +882,7 @@ func TimezoneGroupActionImport(
 	var content TimezoneGroupEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := TimezoneGroupActions.Create(&content, query)

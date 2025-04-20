@@ -643,7 +643,7 @@ func PriceTagUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PriceTa
 }
 func PriceTagActionUpdateFn(query fireback.QueryDSL, fields *PriceTagEntity) (*PriceTagEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PriceTagValidator(fields, true); iError != nil {
@@ -769,7 +769,7 @@ func PriceTagActionImport(
 	var content PriceTagEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PriceTagActionCreate(&content, query)

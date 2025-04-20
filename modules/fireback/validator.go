@@ -25,7 +25,7 @@ func (x *Module3Field) DialectValidate() []*IErrorItem {
 
 	if !slices.Contains(AVAILABLE_FIREBACK_DATA_TYPES, x.Type) {
 		res = append(res, &IErrorItem{
-			// Message: &WorkspacesMessages.DataTypeDoesNotExistsInFireback,
+			// Message: &FirebackMessages.DataTypeDoesNotExistsInFireback,
 		})
 	}
 

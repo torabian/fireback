@@ -5,15 +5,12 @@ package fireback
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import (
-	"encoding/json"
-	"fmt"
+import "encoding/json"
+import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
+import "fmt"
 
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
-)
-
-func WorkspacesJson() string {
+func FirebackJson() string {
 	e := cli.BoolFlag{}
 	_ = e
 	fmt.Println("Module test config")
@@ -24,43 +21,43 @@ func WorkspacesJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_WORKSPACES_EVERYTHING = PermissionInfo{
+var PERM_ROOT_FIREBACK_EVERYTHING = PermissionInfo{
 	CompleteKey: "root.modules.fireback.*",
 }
-var ALL_PERM_WORKSPACES_MODULE = []PermissionInfo{
-	PERM_ROOT_WORKSPACES_EVERYTHING,
+var ALL_PERM_FIREBACK_MODULE = []PermissionInfo{
+	PERM_ROOT_FIREBACK_EVERYTHING,
 }
 
-type workspacesCode string
+type firebackCode string
 
 const (
-	BodyIsEmptyEof               workspacesCode = "BodyIsEmptyEof"
-	BodyIsMissing                workspacesCode = "BodyIsMissing"
-	BodyReadAfterClose           workspacesCode = "BodyReadAfterClose"
-	BodyUnexpectedEof            workspacesCode = "BodyUnexpectedEof"
-	FieldInvalidEmail            workspacesCode = "FieldInvalidEmail"
-	FieldOneOf                   workspacesCode = "FieldOneOf"
-	FieldRequired                workspacesCode = "FieldRequired"
-	FormDataMalformed            workspacesCode = "FormDataMalformed"
-	InvalidContent               workspacesCode = "InvalidContent"
-	InvalidFormDataContentType   workspacesCode = "InvalidFormDataContentType"
-	JsonDecodingError            workspacesCode = "JsonDecodingError"
-	JsonInvalidFieldType         workspacesCode = "JsonInvalidFieldType"
-	JsonMalformed                workspacesCode = "JsonMalformed"
-	JsonUnmarshalUnsupportedType workspacesCode = "JsonUnmarshalUnsupportedType"
-	UnknownErrorReadingBody      workspacesCode = "UnknownErrorReadingBody"
-	ValidationFailedOnSomeFields workspacesCode = "ValidationFailedOnSomeFields"
-	XmlDecodingError             workspacesCode = "XmlDecodingError"
-	XmlMalformed                 workspacesCode = "XmlMalformed"
-	XmlUnmarshalError            workspacesCode = "XmlUnmarshalError"
-	YamlDecodingError            workspacesCode = "YamlDecodingError"
-	YamlTypeError                workspacesCode = "YamlTypeError"
+	BodyIsEmptyEof               firebackCode = "BodyIsEmptyEof"
+	BodyIsMissing                firebackCode = "BodyIsMissing"
+	BodyReadAfterClose           firebackCode = "BodyReadAfterClose"
+	BodyUnexpectedEof            firebackCode = "BodyUnexpectedEof"
+	FieldInvalidEmail            firebackCode = "FieldInvalidEmail"
+	FieldOneOf                   firebackCode = "FieldOneOf"
+	FieldRequired                firebackCode = "FieldRequired"
+	FormDataMalformed            firebackCode = "FormDataMalformed"
+	InvalidContent               firebackCode = "InvalidContent"
+	InvalidFormDataContentType   firebackCode = "InvalidFormDataContentType"
+	JsonDecodingError            firebackCode = "JsonDecodingError"
+	JsonInvalidFieldType         firebackCode = "JsonInvalidFieldType"
+	JsonMalformed                firebackCode = "JsonMalformed"
+	JsonUnmarshalUnsupportedType firebackCode = "JsonUnmarshalUnsupportedType"
+	UnknownErrorReadingBody      firebackCode = "UnknownErrorReadingBody"
+	ValidationFailedOnSomeFields firebackCode = "ValidationFailedOnSomeFields"
+	XmlDecodingError             firebackCode = "XmlDecodingError"
+	XmlMalformed                 firebackCode = "XmlMalformed"
+	XmlUnmarshalError            firebackCode = "XmlUnmarshalError"
+	YamlDecodingError            firebackCode = "YamlDecodingError"
+	YamlTypeError                firebackCode = "YamlTypeError"
 )
 
-var WorkspacesMessages = newWorkspacesMessageCode()
+var FirebackMessages = newFirebackMessageCode()
 
-func newWorkspacesMessageCode() *workspacesMsgs {
-	return &workspacesMsgs{
+func newFirebackMessageCode() *firebackMsgs {
+	return &firebackMsgs{
 		BodyIsEmptyEof: ErrorItem{
 			"$":    "BodyIsEmptyEof",
 			"$key": "io.EOF",
@@ -151,7 +148,7 @@ func newWorkspacesMessageCode() *workspacesMsgs {
 	}
 }
 
-type workspacesMsgs struct {
+type firebackMsgs struct {
 	BodyIsEmptyEof               ErrorItem
 	BodyIsMissing                ErrorItem
 	BodyReadAfterClose           ErrorItem

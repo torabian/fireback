@@ -1054,7 +1054,7 @@ var {{ .e.EntityName }}JsonSchema = {{ .wsprefix }}ExtractEntityFields(reflect.V
 {{ define "entityUpdateAction" }}
   func {{ .e.Upper}}ActionUpdateFn(query {{ .wsprefix }}QueryDSL, fields *{{ .e.EntityName }}) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError) {
     if fields == nil {
-      return nil, {{ $.wsprefix }}Create401Error(&{{ .wsprefix }}WorkspacesMessages.BodyIsMissing, []string{})
+      return nil, {{ $.wsprefix }}Create401Error(&{{ .wsprefix }}FirebackMessages.BodyIsMissing, []string{})
     }
 
 
@@ -1524,7 +1524,7 @@ func {{ .e.Upper }}ActionImport(
 	var content {{ .e.EntityName}}
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return {{ $.wsprefix }}Create401Error(&{{ $.wsprefix }}WorkspacesMessages.InvalidContent, []string{})
+		return {{ $.wsprefix }}Create401Error(&{{ $.wsprefix }}FirebackMessages.InvalidContent, []string{})
 	}
  
 	json.Unmarshal(cx, &content)

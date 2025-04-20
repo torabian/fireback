@@ -581,7 +581,7 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GsmP
 }
 func GsmProviderActionUpdateFn(query fireback.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GsmProviderValidator(fields, true); iError != nil {
@@ -698,7 +698,7 @@ func GsmProviderActionImport(
 	var content GsmProviderEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GsmProviderActions.Create(&content, query)

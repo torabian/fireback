@@ -667,7 +667,7 @@ func UserUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserEntity)
 }
 func UserActionUpdateFn(query fireback.QueryDSL, fields *UserEntity) (*UserEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := UserValidator(fields, true); iError != nil {
@@ -785,7 +785,7 @@ func UserActionImport(
 	var content UserEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := UserActions.Create(&content, query)

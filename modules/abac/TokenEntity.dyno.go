@@ -565,7 +565,7 @@ func TokenUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TokenEntit
 }
 func TokenActionUpdateFn(query fireback.QueryDSL, fields *TokenEntity) (*TokenEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := TokenValidator(fields, true); iError != nil {
@@ -683,7 +683,7 @@ func TokenActionImport(
 	var content TokenEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := TokenActions.Create(&content, query)

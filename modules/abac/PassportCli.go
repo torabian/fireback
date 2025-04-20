@@ -143,5 +143,5 @@ var PassportCli cli.Command = cli.Command{
 		PassportWipeCmd,
 		PassportUpdateCmd,
 		fireback.GetCommonQuery(PassportActions.Query),
-	}, fireback.WorkspacesCustomActionsCli...),
+	}, fireback.FirebackCustomActionsCli...),
 }

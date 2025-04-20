@@ -9,7 +9,7 @@ import (
 func BindMultiPartFormDataWithDetails(c *gin.Context, target any) *IError {
 	// For URL-encoded forms
 	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10MB limit
-		return Create401ParamOnly(&WorkspacesMessages.FormDataMalformed, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.FormDataMalformed, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -32,14 +32,14 @@ func BindMultiPartFormDataWithDetails(c *gin.Context, target any) *IError {
 	// Convert the form map to a JSON string
 	formJSON, err := json.Marshal(formMap)
 	if err != nil {
-		return Create401ParamOnly(&WorkspacesMessages.FormDataMalformed, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.FormDataMalformed, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
 
 	// Now unmarshal the JSON into the struct
 	if err := json.Unmarshal(formJSON, target); err != nil {
-		return Create401ParamOnly(&WorkspacesMessages.FormDataMalformed, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.FormDataMalformed, map[string]interface{}{
 			"error": err.Error(),
 		})
 		return nil

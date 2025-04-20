@@ -73,13 +73,13 @@ func ginBodyToBytes(c *gin.Context) ([]byte, *IError) {
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		if errors.Is(err, io.EOF) {
-			return nil, Create401Error(&WorkspacesMessages.BodyIsEmptyEof, []string{})
+			return nil, Create401Error(&FirebackMessages.BodyIsEmptyEof, []string{})
 		} else if errors.Is(err, io.ErrUnexpectedEOF) {
-			return nil, Create401Error(&WorkspacesMessages.BodyUnexpectedEof, []string{})
+			return nil, Create401Error(&FirebackMessages.BodyUnexpectedEof, []string{})
 		} else if errors.Is(err, http.ErrBodyReadAfterClose) {
-			return nil, Create401Error(&WorkspacesMessages.BodyReadAfterClose, []string{})
+			return nil, Create401Error(&FirebackMessages.BodyReadAfterClose, []string{})
 		} else {
-			return nil, Create401Error(&WorkspacesMessages.UnknownErrorReadingBody, []string{})
+			return nil, Create401Error(&FirebackMessages.UnknownErrorReadingBody, []string{})
 		}
 	}
 

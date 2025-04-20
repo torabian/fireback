@@ -172,11 +172,11 @@ func IsNilish(val any) bool {
 func CastFieldErrorToErrorItem(fe validator.FieldError) *ErrorItem {
 	switch fe.Tag() {
 	case "required":
-		return &WorkspacesMessages.FieldRequired
+		return &FirebackMessages.FieldRequired
 	case "email":
-		return &WorkspacesMessages.FieldInvalidEmail
+		return &FirebackMessages.FieldInvalidEmail
 	case "oneof":
-		return &WorkspacesMessages.FieldOneOf
+		return &FirebackMessages.FieldOneOf
 	}
 
 	return &ErrorItem{
@@ -203,7 +203,7 @@ func dotToCamelCase(input string) string {
 func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 
 	if dto == nil {
-		return Create401Error(&WorkspacesMessages.BodyIsMissing, []string{})
+		return Create401Error(&FirebackMessages.BodyIsMissing, []string{})
 	}
 
 	var validate *validator.Validate = validator.New()
@@ -243,7 +243,7 @@ func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 
 	if len(errors) > 0 {
 		var result IError = IError{
-			Message: WorkspacesMessages.ValidationFailedOnSomeFields,
+			Message: FirebackMessages.ValidationFailedOnSomeFields,
 			Errors:  errors,
 		}
 		return &result

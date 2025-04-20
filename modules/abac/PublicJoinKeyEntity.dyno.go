@@ -558,7 +558,7 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Pu
 }
 func PublicJoinKeyActionUpdateFn(query fireback.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PublicJoinKeyValidator(fields, true); iError != nil {
@@ -675,7 +675,7 @@ func PublicJoinKeyActionImport(
 	var content PublicJoinKeyEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PublicJoinKeyActions.Create(&content, query)

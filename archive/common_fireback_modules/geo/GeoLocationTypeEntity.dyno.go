@@ -525,7 +525,7 @@ func GeoLocationTypeUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 }
 func GeoLocationTypeActionUpdateFn(query fireback.QueryDSL, fields *GeoLocationTypeEntity) (*GeoLocationTypeEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GeoLocationTypeValidator(fields, true); iError != nil {
@@ -642,7 +642,7 @@ func GeoLocationTypeActionImport(
 	var content GeoLocationTypeEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GeoLocationTypeActionCreate(&content, query)

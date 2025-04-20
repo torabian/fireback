@@ -832,7 +832,7 @@ func KeyboardShortcutUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields 
 }
 func KeyboardShortcutActionUpdateFn(query fireback.QueryDSL, fields *KeyboardShortcutEntity) (*KeyboardShortcutEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := KeyboardShortcutValidator(fields, true); iError != nil {
@@ -967,7 +967,7 @@ func KeyboardShortcutActionImport(
 	var content KeyboardShortcutEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := KeyboardShortcutActionCreate(&content, query)

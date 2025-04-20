@@ -636,7 +636,7 @@ func PublicAuthenticationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fie
 }
 func PublicAuthenticationActionUpdateFn(query fireback.QueryDSL, fields *PublicAuthenticationEntity) (*PublicAuthenticationEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PublicAuthenticationValidator(fields, true); iError != nil {
@@ -754,7 +754,7 @@ func PublicAuthenticationActionImport(
 	var content PublicAuthenticationEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PublicAuthenticationActions.Create(&content, query)

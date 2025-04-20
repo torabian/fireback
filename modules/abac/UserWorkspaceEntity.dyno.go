@@ -581,7 +581,7 @@ func UserWorkspaceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Us
 }
 func UserWorkspaceActionUpdateFn(query fireback.QueryDSL, fields *UserWorkspaceEntity) (*UserWorkspaceEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := UserWorkspaceValidator(fields, true); iError != nil {
@@ -699,7 +699,7 @@ func UserWorkspaceActionImport(
 	var content UserWorkspaceEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := UserWorkspaceActions.Create(&content, query)

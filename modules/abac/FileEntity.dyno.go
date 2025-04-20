@@ -727,7 +727,7 @@ func FileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *FileEntity)
 }
 func FileActionUpdateFn(query fireback.QueryDSL, fields *FileEntity) (*FileEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := FileValidator(fields, true); iError != nil {
@@ -853,7 +853,7 @@ func FileActionImport(
 	var content FileEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := FileActions.Create(&content, query)

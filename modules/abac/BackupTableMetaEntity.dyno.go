@@ -549,7 +549,7 @@ func BackupTableMetaUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 }
 func BackupTableMetaActionUpdateFn(query fireback.QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := BackupTableMetaValidator(fields, true); iError != nil {
@@ -666,7 +666,7 @@ func BackupTableMetaActionImport(
 	var content BackupTableMetaEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := BackupTableMetaActions.Create(&content, query)

@@ -58,7 +58,7 @@ type CapabilitiesTreeActionResDto struct {
 }
 
 func (x *CapabilitiesTreeActionResDto) RootObjectName() string {
-	return "Workspaces"
+	return "Fireback"
 }
 
 type capabilitiesTreeActionImpSig func(
@@ -90,7 +90,7 @@ var CapabilitiesTreeActionCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspacesCustomActions() []Module3Action {
+func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
 			Method:        "",
@@ -133,15 +133,15 @@ func WorkspacesCustomActions() []Module3Action {
 	return routes
 }
 
-var WorkspacesCustomActionsCli = []cli.Command{
+var FirebackCustomActionsCli = []cli.Command{
 	ListCapabilitiesActionCmd,
 	CapabilitiesTreeActionCmd,
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var WorkspacesCliActionsBundle = &CliActionsBundle{
-	Name:  "workspaces",
+var FirebackCliActionsBundle = &CliActionsBundle{
+	Name:  "fireback",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
@@ -152,12 +152,12 @@ var WorkspacesCliActionsBundle = &CliActionsBundle{
 	},
 }
 
-func GetWorkspacesActionsBundle() *ModuleActionsBundle {
+func GetFirebackActionsBundle() *ModuleActionsBundle {
 	return &ModuleActionsBundle{
-		Actions:   WorkspacesCustomActions(),
-		CliAction: WorkspacesCliActionsBundle,
+		Actions:   FirebackCustomActions(),
+		CliAction: FirebackCliActionsBundle,
 	}
 }
-func GetWorkspacesActionsCli() []cli.Command {
-	return WorkspacesCustomActionsCli
+func GetFirebackActionsCli() []cli.Command {
+	return FirebackCustomActionsCli
 }

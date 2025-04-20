@@ -535,7 +535,7 @@ func LicensableProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields
 }
 func LicensableProductActionUpdateFn(query fireback.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := LicensableProductValidator(fields, true); iError != nil {
@@ -652,7 +652,7 @@ func LicensableProductActionImport(
 	var content LicensableProductEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := LicensableProductActionCreate(&content, query)

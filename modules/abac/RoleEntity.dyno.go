@@ -596,7 +596,7 @@ func RoleUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *RoleEntity)
 }
 func RoleActionUpdateFn(query fireback.QueryDSL, fields *RoleEntity) (*RoleEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := RoleValidator(fields, true); iError != nil {
@@ -713,7 +713,7 @@ func RoleActionImport(
 	var content RoleEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := RoleActions.Create(&content, query)

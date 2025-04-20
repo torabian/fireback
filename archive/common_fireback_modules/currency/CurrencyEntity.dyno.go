@@ -553,7 +553,7 @@ func CurrencyUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Currenc
 }
 func CurrencyActionUpdateFn(query fireback.QueryDSL, fields *CurrencyEntity) (*CurrencyEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := CurrencyValidator(fields, true); iError != nil {
@@ -670,7 +670,7 @@ func CurrencyActionImport(
 	var content CurrencyEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := CurrencyActionCreate(&content, query)

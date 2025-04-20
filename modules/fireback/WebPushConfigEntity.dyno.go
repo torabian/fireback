@@ -549,7 +549,7 @@ func WebPushConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WebPushConf
 }
 func WebPushConfigActionUpdateFn(query QueryDSL, fields *WebPushConfigEntity) (*WebPushConfigEntity, *IError) {
 	if fields == nil {
-		return nil, Create401Error(&WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, Create401Error(&FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WebPushConfigValidator(fields, true); iError != nil {
@@ -667,7 +667,7 @@ func WebPushConfigActionImport(
 	var content WebPushConfigEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
+		return Create401Error(&FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WebPushConfigActions.Create(&content, query)

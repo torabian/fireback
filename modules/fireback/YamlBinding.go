@@ -11,11 +11,11 @@ func BindYamlStringWithDetails(yamlInput []byte, target any) *IError {
 	err := yaml.Unmarshal(yamlInput, &node)
 	if err != nil {
 		if syntaxErr, ok := err.(*yaml.TypeError); ok && len(syntaxErr.Errors) > 0 {
-			return Create401ParamOnly(&WorkspacesMessages.YamlTypeError, map[string]interface{}{
+			return Create401ParamOnly(&FirebackMessages.YamlTypeError, map[string]interface{}{
 				"errors": syntaxErr.Errors,
 			})
 		}
-		return Create401ParamOnly(&WorkspacesMessages.YamlDecodingError, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.YamlDecodingError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
@@ -25,12 +25,12 @@ func BindYamlStringWithDetails(yamlInput []byte, target any) *IError {
 	if err != nil {
 		var yamlNodeErr *yaml.TypeError
 		if errors.As(err, &yamlNodeErr) && len(yamlNodeErr.Errors) > 0 {
-			return Create401ParamOnly(&WorkspacesMessages.YamlTypeError, map[string]interface{}{
+			return Create401ParamOnly(&FirebackMessages.YamlTypeError, map[string]interface{}{
 				"errors": yamlNodeErr.Errors,
 			})
 		}
 
-		return Create401ParamOnly(&WorkspacesMessages.YamlDecodingError, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.YamlDecodingError, map[string]interface{}{
 			"error": err.Error(),
 		})
 	}

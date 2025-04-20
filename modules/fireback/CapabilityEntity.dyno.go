@@ -574,7 +574,7 @@ func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEnti
 }
 func CapabilityActionUpdateFn(query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
 	if fields == nil {
-		return nil, Create401Error(&WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, Create401Error(&FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := CapabilityValidator(fields, true); iError != nil {
@@ -692,7 +692,7 @@ func CapabilityActionImport(
 	var content CapabilityEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return Create401Error(&WorkspacesMessages.InvalidContent, []string{})
+		return Create401Error(&FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := CapabilityActions.Create(&content, query)

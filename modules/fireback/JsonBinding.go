@@ -40,7 +40,7 @@ func BindJsonStringWithDetails(jsonInput []byte, target any) *IError {
 
 		line, col := getLineAndCharFromOffset(jsonInput, unmarshalTypeErr.Offset)
 
-		return Create401ParamOnly(&WorkspacesMessages.JsonInvalidFieldType, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.JsonInvalidFieldType, map[string]interface{}{
 			"field":    fieldPath,
 			"expected": unmarshalTypeErr.Type.String(),
 			"offset":   unmarshalTypeErr.Offset,
@@ -52,18 +52,18 @@ func BindJsonStringWithDetails(jsonInput []byte, target any) *IError {
 	case errors.As(err, &syntaxErr):
 		line, col := getLineAndCharFromOffset(jsonInput, syntaxErr.Offset)
 
-		return Create401ParamOnly(&WorkspacesMessages.JsonMalformed, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.JsonMalformed, map[string]interface{}{
 			"offset": syntaxErr.Offset,
 			"line":   line,
 			"col":    col,
 		})
 	case errors.As(err, &unsupportedTypeErr):
-		return Create401ParamOnly(&WorkspacesMessages.JsonUnmarshalUnsupportedType, map[string]interface{}{
+		return Create401ParamOnly(&FirebackMessages.JsonUnmarshalUnsupportedType, map[string]interface{}{
 			"type": unsupportedTypeErr.Type,
 		})
 
 	default:
-		return Create401ParamOnly(&WorkspacesMessages.JsonDecodingError, nil)
+		return Create401ParamOnly(&FirebackMessages.JsonDecodingError, nil)
 	}
 
 }

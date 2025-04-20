@@ -46,11 +46,11 @@ type FirebackModuleConfig struct{}
 func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 	module := &ModuleProvider{
-		Name:        "workspaces",
+		Name:        "fireback",
 		Definitions: &Module3Definitions,
 		Actions: [][]Module3Action{
 			GetCapabilityModule3Actions(),
-			WorkspacesCustomActions(),
+			FirebackCustomActions(),
 		},
 		EntityBundles: []EntityBundle{
 			WebPushConfigEntityBundle,

@@ -41,7 +41,7 @@ and Also:
 
 ```go
 
-var WorkspacesMessages = newWorkspacesMessageCode()
+var FirebackMessages = newWorkspacesMessageCode()
 
 func newWorkspacesMessageCode() *workspacesMsgs {
 	return &workspacesMsgs{
@@ -56,6 +56,6 @@ As you see, `$` is the key of the error, which needs to be always present and is
 Later on, in your actions or other go codes you can use when `IError` is required:
 
 ```
-return Create401Error(&WorkspacesMessages.DataTypeDoesNotExistsInFireback, []string{})
+return Create401Error(&FirebackMessages.DataTypeDoesNotExistsInFireback, []string{})
 ```
 

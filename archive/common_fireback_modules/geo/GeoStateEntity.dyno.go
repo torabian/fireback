@@ -525,7 +525,7 @@ func GeoStateUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GeoStat
 }
 func GeoStateActionUpdateFn(query fireback.QueryDSL, fields *GeoStateEntity) (*GeoStateEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GeoStateValidator(fields, true); iError != nil {
@@ -642,7 +642,7 @@ func GeoStateActionImport(
 	var content GeoStateEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GeoStateActionCreate(&content, query)

@@ -519,7 +519,7 @@ func GeoCityUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GeoCityE
 }
 func GeoCityActionUpdateFn(query fireback.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GeoCityValidator(fields, true); iError != nil {
@@ -636,7 +636,7 @@ func GeoCityActionImport(
 	var content GeoCityEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GeoCityActionCreate(&content, query)
