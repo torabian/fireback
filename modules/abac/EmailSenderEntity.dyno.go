@@ -1414,7 +1414,7 @@ func NewEmailSenderUpdatedEvent(
 				PERM_ROOT_EMAIL_SENDER_QUERY,
 			},
 		},
-		CacheKey: "EmailSenderEntity",
+		CacheKey: "*abac.EmailSenderEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

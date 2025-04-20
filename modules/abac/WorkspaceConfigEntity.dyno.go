@@ -1613,7 +1613,7 @@ func NewWorkspaceConfigUpdatedEvent(
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		},
-		CacheKey: "WorkspaceConfigEntity",
+		CacheKey: "*abac.WorkspaceConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

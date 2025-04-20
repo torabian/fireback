@@ -1348,7 +1348,7 @@ func NewTableViewSizingUpdatedEvent(
 				PERM_ROOT_TABLE_VIEW_SIZING_QUERY,
 			},
 		},
-		CacheKey: "TableViewSizingEntity",
+		CacheKey: "*abac.TableViewSizingEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

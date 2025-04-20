@@ -1405,7 +1405,7 @@ func NewRoleUpdatedEvent(
 				PERM_ROOT_ROLE_QUERY,
 			},
 		},
-		CacheKey: "RoleEntity",
+		CacheKey: "*abac.RoleEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

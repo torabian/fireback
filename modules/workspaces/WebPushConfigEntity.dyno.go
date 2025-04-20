@@ -1405,7 +1405,7 @@ func NewWebPushConfigUpdatedEvent(
 			},
 			ResolveStrategy: "user",
 		},
-		CacheKey: "WebPushConfigEntity",
+		CacheKey: "*workspaces.WebPushConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
 	ApplyQueryDslContextToEvent(event, *query)

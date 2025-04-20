@@ -1427,7 +1427,7 @@ func NewPendingWorkspaceInviteUpdatedEvent(
 				PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
 			},
 		},
-		CacheKey: "PendingWorkspaceInviteEntity",
+		CacheKey: "*abac.PendingWorkspaceInviteEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

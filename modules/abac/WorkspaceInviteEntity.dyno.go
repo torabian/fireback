@@ -1583,7 +1583,7 @@ func NewWorkspaceInviteUpdatedEvent(
 				PERM_ROOT_WORKSPACE_INVITE_QUERY,
 			},
 		},
-		CacheKey: "WorkspaceInviteEntity",
+		CacheKey: "*abac.WorkspaceInviteEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

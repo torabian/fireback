@@ -1318,7 +1318,7 @@ func NewBackupTableMetaUpdatedEvent(
 				PERM_ROOT_BACKUP_TABLE_META_QUERY,
 			},
 		},
-		CacheKey: "BackupTableMetaEntity",
+		CacheKey: "*abac.BackupTableMetaEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

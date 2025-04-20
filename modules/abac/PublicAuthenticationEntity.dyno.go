@@ -1577,7 +1577,7 @@ func NewPublicAuthenticationUpdatedEvent(
 				PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY,
 			},
 		},
-		CacheKey: "PublicAuthenticationEntity",
+		CacheKey: "*abac.PublicAuthenticationEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

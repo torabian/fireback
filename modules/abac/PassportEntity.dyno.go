@@ -1532,7 +1532,7 @@ func NewPassportUpdatedEvent(
 				PERM_ROOT_PASSPORT_QUERY,
 			},
 		},
-		CacheKey: "PassportEntity",
+		CacheKey: "*abac.PassportEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

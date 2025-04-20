@@ -2134,7 +2134,7 @@ func NewNotificationConfigUpdatedEvent(
 			},
 			ResolveStrategy: "workspace",
 		},
-		CacheKey: "NotificationConfigEntity",
+		CacheKey: "*abac.NotificationConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

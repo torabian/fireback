@@ -17,13 +17,20 @@ func GetEventBusInstance() InstanceUserSocketManager {
 func StartEventBus() {
 
 	if config.RedisEventsUrl == "" {
-		log.Default().Println("Event bus is not enabled (redisEventsUrl is missing).")
+		log.Default().Println("Event bus is not enabled (redisEventsUrl is missing). Using internal")
+		instance = NewLocalEventManager()
+
 		return
 	}
 
-	instance = NewRedisManager(config.RedisEventsUrl)
-	go instance.Subscribe(ctx, EVENT_BUS_TOPIC)
+	// Try to use redis. If fails fallback to internal
+	if redis, err := NewRedisManager(config.RedisEventsUrl); err == nil {
+		instance = redis
+	} else {
+		instance = NewLocalEventManager()
+	}
 
+	go instance.Subscribe(ctx, EVENT_BUS_TOPIC)
 }
 
 // When a event bus is being sent over socket, we cast it to this struct
@@ -75,7 +82,7 @@ func HandleEventForSocketConnections(event Event) {
 	sourceContext, _ := ToSourceContext(event.SourceContext)
 	if len(SocketSessionPool) > 0 {
 		for workspaceId, workspace := range SocketSessionPool {
-			fmt.Println("Scanning workspae:", workspaceId, " event source workspace:", sourceContext.WorkspaceId)
+
 			if workspaceId != sourceContext.WorkspaceId {
 				// Does not belong to this workspace, continue
 				continue

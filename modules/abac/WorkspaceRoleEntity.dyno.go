@@ -1333,7 +1333,7 @@ func NewWorkspaceRoleUpdatedEvent(
 				PERM_ROOT_WORKSPACE_ROLE_QUERY,
 			},
 		},
-		CacheKey: "WorkspaceRoleEntity",
+		CacheKey: "*abac.WorkspaceRoleEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

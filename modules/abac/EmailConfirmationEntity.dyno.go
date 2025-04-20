@@ -1426,7 +1426,7 @@ func NewEmailConfirmationUpdatedEvent(
 				PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
 			},
 		},
-		CacheKey: "EmailConfirmationEntity",
+		CacheKey: "*abac.EmailConfirmationEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

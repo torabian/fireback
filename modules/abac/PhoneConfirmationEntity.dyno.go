@@ -1426,7 +1426,7 @@ func NewPhoneConfirmationUpdatedEvent(
 				PERM_ROOT_PHONE_CONFIRMATION_QUERY,
 			},
 		},
-		CacheKey: "PhoneConfirmationEntity",
+		CacheKey: "*abac.PhoneConfirmationEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

@@ -1466,7 +1466,7 @@ func NewRegionalContentUpdatedEvent(
 				PERM_ROOT_REGIONAL_CONTENT_QUERY,
 			},
 		},
-		CacheKey: "RegionalContentEntity",
+		CacheKey: "*abac.RegionalContentEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

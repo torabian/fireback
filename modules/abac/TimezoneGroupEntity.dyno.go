@@ -1681,7 +1681,7 @@ func NewTimezoneGroupUpdatedEvent(
 				PERM_ROOT_TIMEZONE_GROUP_QUERY,
 			},
 		},
-		CacheKey: "TimezoneGroupEntity",
+		CacheKey: "*abac.TimezoneGroupEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

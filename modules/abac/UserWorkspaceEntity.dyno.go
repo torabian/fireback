@@ -1369,7 +1369,7 @@ func NewUserWorkspaceUpdatedEvent(
 			},
 			ResolveStrategy: "user",
 		},
-		CacheKey: "UserWorkspaceEntity",
+		CacheKey: "*abac.UserWorkspaceEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

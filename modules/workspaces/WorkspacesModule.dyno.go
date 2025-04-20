@@ -174,8 +174,8 @@ type workspacesMsgs struct {
 type Config struct {
 	// If true, set's the environment behavior to production, and some functionality will be limited
 	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
-	// The address of the redis, which will be used to distribute the events
-	RedisEventsUrl string `envconfig:"REDIS_EVENTS_URL" description:"The address of the redis, which will be used to distribute the events"`
+	// The address of the redis, which will be used to distribute the events. If provided empty, internal golang event library will be used, and events won't be distributed across different instances
+	RedisEventsUrl string `envconfig:"REDIS_EVENTS_URL" description:"The address of the redis, which will be used to distribute the events. If provided empty, internal golang event library will be used, and events won't be distributed across different instances"`
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
 	// VAPID Web push notification public key
@@ -259,7 +259,7 @@ func GetConfigCliFlags() []cli.Flag {
 		},
 		cli.StringFlag{
 			Name:  "redis-events-url",
-			Usage: "The address of the redis, which will be used to distribute the events",
+			Usage: "The address of the redis, which will be used to distribute the events. If provided empty, internal golang event library will be used, and events won't be distributed across different instances",
 		},
 		cli.StringFlag{
 			Name:  "table-prefix",
@@ -543,7 +543,7 @@ func GetConfigCli() []cli.Command {
 		},
 		{
 			Name:  "redis-events-url",
-			Usage: "The address of the redis, which will be used to distribute the events (string)",
+			Usage: "The address of the redis, which will be used to distribute the events. If provided empty, internal golang event library will be used, and events won't be distributed across different instances (string)",
 			Subcommands: []cli.Command{
 				{
 					Name: "get",

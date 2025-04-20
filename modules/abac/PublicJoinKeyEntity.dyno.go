@@ -1331,7 +1331,7 @@ func NewPublicJoinKeyUpdatedEvent(
 				PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
 			},
 		},
-		CacheKey: "PublicJoinKeyEntity",
+		CacheKey: "*abac.PublicJoinKeyEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

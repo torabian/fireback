@@ -1374,7 +1374,7 @@ func NewCapabilityUpdatedEvent(
 				PERM_ROOT_CAPABILITY_QUERY,
 			},
 		},
-		CacheKey: "CapabilityEntity",
+		CacheKey: "*workspaces.CapabilityEntity",
 	}
 	// Apply the source of the event based on querydsl
 	ApplyQueryDslContextToEvent(event, *query)

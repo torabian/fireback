@@ -1318,7 +1318,7 @@ func NewPreferenceUpdatedEvent(
 				PERM_ROOT_PREFERENCE_QUERY,
 			},
 		},
-		CacheKey: "PreferenceEntity",
+		CacheKey: "*abac.PreferenceEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

@@ -1441,7 +1441,7 @@ func NewWorkspaceTypeUpdatedEvent(
 			},
 			AllowOnRoot: true,
 		},
-		CacheKey: "WorkspaceTypeEntity",
+		CacheKey: "*abac.WorkspaceTypeEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

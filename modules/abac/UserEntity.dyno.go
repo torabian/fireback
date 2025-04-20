@@ -1687,7 +1687,7 @@ func NewUserUpdatedEvent(
 				PERM_ROOT_USER_QUERY,
 			},
 		},
-		CacheKey: "UserEntity",
+		CacheKey: "*abac.UserEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

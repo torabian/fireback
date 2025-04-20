@@ -1449,7 +1449,7 @@ func NewGsmProviderUpdatedEvent(
 				PERM_ROOT_GSM_PROVIDER_QUERY,
 			},
 		},
-		CacheKey: "GsmProviderEntity",
+		CacheKey: "*abac.GsmProviderEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

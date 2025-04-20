@@ -1378,7 +1378,7 @@ func NewPassportMethodUpdatedEvent(
 			},
 			ResolveStrategy: "workspace",
 		},
-		CacheKey: "PassportMethodEntity",
+		CacheKey: "*abac.PassportMethodEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

@@ -1522,7 +1522,7 @@ func NewAppMenuUpdatedEvent(
 				PERM_ROOT_APP_MENU_QUERY,
 			},
 		},
-		CacheKey: "AppMenuEntity",
+		CacheKey: "*abac.AppMenuEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

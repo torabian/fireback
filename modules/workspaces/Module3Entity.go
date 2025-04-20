@@ -40,7 +40,7 @@ func (x *Module3Entity) DefaultEvents() []*Module3Event {
 			Payload: &Module3ActionBody{
 				Entity: x.Upper() + "Entity",
 			},
-			CacheKey: x.EntityName(),
+			CacheKey: cacheKey,
 			SecurityModel: &SecurityModel{
 				AllowOnRoot:     allowOnRoot,
 				ResolveStrategy: resolveStrategy,

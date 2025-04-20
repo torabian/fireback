@@ -15,20 +15,21 @@ type RedisManager struct {
 	ctx    context.Context
 }
 
-func NewRedisManager(redisURL string) *RedisManager {
+func NewRedisManager(redisURL string) (*RedisManager, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: redisURL,
 	})
 
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		log.Fatalf("❌ Failed to connect to Redis at %s: %v", config.RedisEventsUrl, err)
+		log.Println("❌ Failed to connect to Redis at %s: %v - fallback to internal event system", config.RedisEventsUrl, err)
+		return nil, err
 	}
 
 	return &RedisManager{
 		client: rdb,
 		ctx:    context.Background(),
-	}
+	}, nil
 }
 
 func (r *RedisManager) key(instanceId string) string {

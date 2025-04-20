@@ -1356,7 +1356,7 @@ func NewTokenUpdatedEvent(
 				PERM_ROOT_TOKEN_QUERY,
 			},
 		},
-		CacheKey: "TokenEntity",
+		CacheKey: "*abac.TokenEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)

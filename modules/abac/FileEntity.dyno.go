@@ -1671,7 +1671,7 @@ func NewFileUpdatedEvent(
 				PERM_ROOT_FILE_QUERY,
 			},
 		},
-		CacheKey: "FileEntity",
+		CacheKey: "*abac.FileEntity",
 	}
 	// Apply the source of the event based on querydsl
 	workspaces.ApplyQueryDslContextToEvent(event, *query)
