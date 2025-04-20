@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
@@ -13,7 +13,7 @@ func init() {
 }
 
 // Responsible for user creation from public flows in the application.
-func ClassicSignupAction(dto *ClassicSignupActionReqDto, q workspaces.QueryDSL) (*ClassicSignupActionResDto, *workspaces.IError) {
+func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*ClassicSignupActionResDto, *fireback.IError) {
 	if err := ClassicSignupActionReqValidator(dto); err != nil {
 		return nil, err
 	}
@@ -21,7 +21,7 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q workspaces.QueryDSL) 
 	ClearPassportValue(&dto.Value)
 
 	// Look for the configuration to check if the session secret is needed
-	config, err := WorkspaceConfigActions.GetByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
+	config, err := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
 	if err != nil {
 		if err.HttpCode != 404 {
 			return nil, err
@@ -41,14 +41,14 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q workspaces.QueryDSL) 
 	var publicSession *PublicAuthenticationEntity = nil
 	if requiresSessionSecret {
 		if strings.TrimSpace(dto.SessionSecret) == "" {
-			return nil, workspaces.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
 		}
 
 		// Here we need to do some comparison to make sure this is the correct session secret
-		workspaces.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: dto.SessionSecret}).Find(&publicSession)
+		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: dto.SessionSecret}).Find(&publicSession)
 
 		if strings.TrimSpace(dto.SessionSecret) == "" {
-			return nil, workspaces.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
 		}
 	}
 
@@ -62,11 +62,11 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q workspaces.QueryDSL) 
 // and change it for this specific function
 func completeClassicSignupProcess(
 	dto *ClassicSignupActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 	publicSession *PublicAuthenticationEntity,
 	config *WorkspaceConfigEntity,
 	beforeProcess func(*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity),
-) (*ClassicSignupActionResDto, *workspaces.IError) {
+) (*ClassicSignupActionResDto, *fireback.IError) {
 
 	user, role, workspace, passport := GetEmailPassportSignupMechanism(dto)
 
@@ -126,7 +126,7 @@ func completeClassicSignupProcess(
 
 	// Clear the value so next time user can login directly
 	if sessionError == nil && session != nil && passport != nil && passport.Value != "" {
-		workspaces.GetRef(q).Where(&PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&PublicAuthenticationEntity{})
+		fireback.GetRef(q).Where(&PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&PublicAuthenticationEntity{})
 	}
 
 	return &ClassicSignupActionResDto{

@@ -8,7 +8,7 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"strings"
 )
@@ -75,7 +75,7 @@ func (x *UserRoleWorkspaceDto) Json() string {
 func (x *UserRoleWorkspaceDto) JsonPrint() {
 	fmt.Println(x.Json())
 	// Somehow to make the import always needed, makes no sense.
-	_ = workspaces.Body
+	_ = fireback.Body
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.

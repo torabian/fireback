@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/PublicJoinKey"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PublicJoinKey"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,12 +32,12 @@ func ResetPublicJoinKeySeeders(fs *embed.FS) {
 }
 
 type PublicJoinKeyEntityQs struct {
-	Role      workspaces.QueriableField `cli:"role" table:"public_join_key" column:"role" qs:"role"`
-	Workspace workspaces.QueriableField `cli:"workspace" table:"public_join_key" column:"workspace" qs:"workspace"`
+	Role      fireback.QueriableField `cli:"role" table:"public_join_key" column:"role" qs:"role"`
+	Workspace fireback.QueriableField `cli:"workspace" table:"public_join_key" column:"workspace" qs:"workspace"`
 }
 
 func (x *PublicJoinKeyEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var PublicJoinKeyQsFlags = []cli.Flag{
@@ -53,23 +53,23 @@ var PublicJoinKeyQsFlags = []cli.Flag{
 
 type PublicJoinKeyEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -79,11 +79,11 @@ type PublicJoinKeyEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -111,13 +111,13 @@ type PublicJoinKeyEntity struct {
 	// possible factors.
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Role             *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           workspaces.String      `json:"roleId" yaml:"roleId" xml:"roleId"  `
+	RoleId           fireback.String        `json:"roleId" yaml:"roleId" xml:"roleId"  `
 	Workspace        *WorkspaceEntity       `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
 	Children         []*PublicJoinKeyEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo         *PublicJoinKeyEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PublicJoinKeyEntityStream(q workspaces.QueryDSL) (chan []*PublicJoinKeyEntity, *workspaces.QueryResultMeta, error) {
+func PublicJoinKeyEntityStream(q fireback.QueryDSL) (chan []*PublicJoinKeyEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*PublicJoinKeyEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -153,8 +153,8 @@ func (x *PublicJoinKeyEntityList) Json() string {
 	}
 	return ""
 }
-func (x *PublicJoinKeyEntityList) ToTree() *workspaces.TreeOperation[PublicJoinKeyEntity] {
-	return workspaces.NewTreeOperation(
+func (x *PublicJoinKeyEntityList) ToTree() *fireback.TreeOperation[PublicJoinKeyEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *PublicJoinKeyEntity) string {
 			if !t.ParentId.Valid {
@@ -171,15 +171,15 @@ func (x *PublicJoinKeyEntityList) ToTree() *workspaces.TreeOperation[PublicJoinK
 var PublicJoinKeyPreloadRelations []string = []string{}
 
 type publicJoinKeyActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *workspaces.IError)
-	Create         func(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError)
-	Upsert         func(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *fireback.IError)
+	Create         func(dto *PublicJoinKeyEntity, query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
+	Upsert         func(dto *PublicJoinKeyEntity, query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
 	SeederInit     func() *PublicJoinKeyEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*PublicJoinKeyEntity, query workspaces.QueryDSL) ([]*PublicJoinKeyEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*PublicJoinKeyEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.QueryResultMeta, error)
 }
 
 var PublicJoinKeyActions publicJoinKeyActionsSig = publicJoinKeyActionsSig{
@@ -194,7 +194,7 @@ var PublicJoinKeyActions publicJoinKeyActionsSig = publicJoinKeyActionsSig{
 	Query:          PublicJoinKeyActionQueryFn,
 }
 
-func PublicJoinKeyActionUpsertFn(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyActionUpsertFn(dto *PublicJoinKeyEntity, query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -208,25 +208,25 @@ var PUBLIC_JOIN_KEY_EVENTS = []string{
 }
 
 type PublicJoinKeyFieldMap struct {
-	Role      workspaces.TranslatedString `yaml:"role"`
-	Workspace workspaces.TranslatedString `yaml:"workspace"`
+	Role      fireback.TranslatedString `yaml:"role"`
+	Workspace fireback.TranslatedString `yaml:"workspace"`
 }
 
 var PublicJoinKeyEntityMetaConfig map[string]int64 = map[string]int64{}
-var PublicJoinKeyEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&PublicJoinKeyEntity{}))
+var PublicJoinKeyEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&PublicJoinKeyEntity{}))
 
-func entityPublicJoinKeyFormatter(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) {
+func entityPublicJoinKeyFormatter(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PublicJoinKeyActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func PublicJoinKeyActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -253,7 +253,7 @@ func PublicJoinKeyActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func PublicJoinKeyActionSeeder(query workspaces.QueryDSL, count int) {
+func PublicJoinKeyActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -279,7 +279,7 @@ func PublicJoinKeyActionSeederInitFn() *PublicJoinKeyEntity {
 	entity := &PublicJoinKeyEntity{}
 	return entity
 }
-func PublicJoinKeyAssociationCreate(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) error {
+func PublicJoinKeyAssociationCreate(dto *PublicJoinKeyEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -287,13 +287,13 @@ func PublicJoinKeyAssociationCreate(dto *PublicJoinKeyEntity, query workspaces.Q
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func PublicJoinKeyRelationContentCreate(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) error {
+func PublicJoinKeyRelationContentCreate(dto *PublicJoinKeyEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PublicJoinKeyRelationContentUpdate(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) error {
+func PublicJoinKeyRelationContentUpdate(dto *PublicJoinKeyEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PublicJoinKeyPolyglotUpdateHandler(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) {
+func PublicJoinKeyPolyglotUpdateHandler(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -304,8 +304,8 @@ func PublicJoinKeyPolyglotUpdateHandler(dto *PublicJoinKeyEntity, query workspac
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func PublicJoinKeyValidator(dto *PublicJoinKeyEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func PublicJoinKeyValidator(dto *PublicJoinKeyEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -350,17 +350,17 @@ And here is the actual object signature:
 	},
 }
 
-func PublicJoinKeyEntityPreSanitize(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) {
+func PublicJoinKeyEntityPreSanitize(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
 }
-func PublicJoinKeyEntityBeforeCreateAppend(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) {
+func PublicJoinKeyEntityBeforeCreateAppend(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	PublicJoinKeyRecursiveAddUniqueId(dto, query)
 }
-func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) {
+func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -372,7 +372,7 @@ func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query workspace
   at this moment.
 *
 */
-func PublicJoinKeyMultiInsertFn(dtos []*PublicJoinKeyEntity, query workspaces.QueryDSL) ([]*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyMultiInsertFn(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PublicJoinKeyEntityPreSanitize(dtos[index], query)
@@ -380,19 +380,19 @@ func PublicJoinKeyMultiInsertFn(dtos []*PublicJoinKeyEntity, query workspaces.Qu
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func PublicJoinKeyActionBatchCreateFn(dtos []*PublicJoinKeyEntity, query workspaces.QueryDSL) ([]*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyActionBatchCreateFn(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PublicJoinKeyEntity{}
 		for _, item := range dtos {
@@ -406,12 +406,12 @@ func PublicJoinKeyActionBatchCreateFn(dtos []*PublicJoinKeyEntity, query workspa
 	}
 	return dtos, nil
 }
-func PublicJoinKeyDeleteEntireChildren(query workspaces.QueryDSL, dto *PublicJoinKeyEntity) *workspaces.IError {
+func PublicJoinKeyDeleteEntireChildren(query fireback.QueryDSL, dto *PublicJoinKeyEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := PublicJoinKeyValidator(dto, false); iError != nil {
 		return nil, iError
@@ -425,14 +425,14 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query workspaces.Quer
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -440,35 +440,35 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query workspaces.Quer
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewPublicJoinKeyCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(PUBLIC_JOIN_KEY_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&PublicJoinKeyEntity{}),
+			"entityKey": fireback.GetTypeString(&PublicJoinKeyEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func PublicJoinKeyActionGetOneFn(query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyActionGetOneFn(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
-	item, err := workspaces.GetOneEntity[PublicJoinKeyEntity](query, refl)
+	item, err := fireback.GetOneEntity[PublicJoinKeyEntity](query, refl)
 	entityPublicJoinKeyFormatter(item, query)
 	return item, err
 }
-func PublicJoinKeyActionGetByWorkspaceFn(query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyActionGetByWorkspaceFn(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[PublicJoinKeyEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[PublicJoinKeyEntity](query, refl)
 	entityPublicJoinKeyFormatter(item, query)
 	return item, err
 }
-func PublicJoinKeyActionQueryFn(query workspaces.QueryDSL) ([]*PublicJoinKeyEntity, *workspaces.QueryResultMeta, error) {
+func PublicJoinKeyActionQueryFn(query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[PublicJoinKeyEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[PublicJoinKeyEntity](query, refl)
 	for _, item := range items {
 		entityPublicJoinKeyFormatter(item, query)
 	}
@@ -478,7 +478,7 @@ func PublicJoinKeyActionQueryFn(query workspaces.QueryDSL) ([]*PublicJoinKeyEnti
 var publicJoinKeyMemoryItems []*PublicJoinKeyEntity = []*PublicJoinKeyEntity{}
 
 func PublicJoinKeyEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -508,7 +508,7 @@ func PublicJoinKeyMemJoin(items []uint) []*PublicJoinKeyEntity {
 	}
 	return res
 }
-func PublicJoinKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PUBLIC_JOIN_KEY_EVENT_UPDATED
 	PublicJoinKeyEntityPreSanitize(fields, query)
@@ -523,7 +523,7 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	PublicJoinKeyRelationContentUpdate(fields, query)
@@ -537,11 +537,11 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		Where(&PublicJoinKeyEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewPublicJoinKeyUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -553,9 +553,9 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	   })*/
 	return &itemRefetched, nil
 }
-func PublicJoinKeyActionUpdateFn(query workspaces.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *workspaces.IError) {
+func PublicJoinKeyActionUpdateFn(query fireback.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PublicJoinKeyValidator(fields, true); iError != nil {
@@ -565,11 +565,11 @@ func PublicJoinKeyActionUpdateFn(query workspaces.QueryDSL, fields *PublicJoinKe
 	// PublicJoinKeyRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *PublicJoinKeyEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = PublicJoinKeyUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -577,7 +577,7 @@ func PublicJoinKeyActionUpdateFn(query workspaces.QueryDSL, fields *PublicJoinKe
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return PublicJoinKeyUpdateExec(dbref, query, fields)
@@ -588,8 +588,8 @@ var PublicJoinKeyWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire publicjoinkeys ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
 		})
 		count, _ := PublicJoinKeyActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -597,16 +597,16 @@ var PublicJoinKeyWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PublicJoinKeyActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func PublicJoinKeyActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}
-	return workspaces.RemoveEntity[PublicJoinKeyEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}
+	return fireback.RemoveEntity[PublicJoinKeyEntity](query, refl)
 }
-func PublicJoinKeyActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func PublicJoinKeyActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[PublicJoinKeyEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[PublicJoinKeyEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'PublicJoinKeyEntity'", subErr)
 			return count, subErr
@@ -617,11 +617,11 @@ func PublicJoinKeyActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func PublicJoinKeyActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PublicJoinKeyEntity]) (
-	*workspaces.BulkRecordRequest[PublicJoinKeyEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[PublicJoinKeyEntity]) (
+	*fireback.BulkRecordRequest[PublicJoinKeyEntity], *fireback.IError,
 ) {
 	result := []*PublicJoinKeyEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := PublicJoinKeyActions.Update(query, record)
@@ -636,7 +636,7 @@ func PublicJoinKeyActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *PublicJoinKeyEntity) Json() string {
 	if x != nil {
@@ -646,7 +646,7 @@ func (x *PublicJoinKeyEntity) Json() string {
 	return ""
 }
 
-var PublicJoinKeyEntityMeta = workspaces.TableMetaData{
+var PublicJoinKeyEntityMeta = fireback.TableMetaData{
 	EntityName:    "PublicJoinKey",
 	ExportKey:     "public-join-keys",
 	TableNameInDb: "public-join-key_entities",
@@ -656,23 +656,23 @@ var PublicJoinKeyEntityMeta = workspaces.TableMetaData{
 }
 
 func PublicJoinKeyActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[PublicJoinKeyEntity](query, PublicJoinKeyActions.Query, PublicJoinKeyPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[PublicJoinKeyEntity](query, PublicJoinKeyActions.Query, PublicJoinKeyPreloadRelations)
 }
 func PublicJoinKeyActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[PublicJoinKeyEntity](query, PublicJoinKeyActions.Query, PublicJoinKeyPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[PublicJoinKeyEntity](query, PublicJoinKeyActions.Query, PublicJoinKeyPreloadRelations)
 }
 func PublicJoinKeyActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content PublicJoinKeyEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PublicJoinKeyActions.Create(&content, query)
@@ -706,7 +706,7 @@ var PublicJoinKeyCommonCliFlags = []cli.Flag{
 		Usage:    `workspace (one)`,
 	},
 }
-var PublicJoinKeyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{}
+var PublicJoinKeyCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{}
 var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "wid",
@@ -745,16 +745,16 @@ var PublicJoinKeyCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 		})
 		entity := &PublicJoinKeyEntity{}
-		workspaces.PopulateInteractively(entity, c, PublicJoinKeyCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, PublicJoinKeyCommonInteractiveCliFlags)
 		if entity, err := PublicJoinKeyActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -764,8 +764,8 @@ var PublicJoinKeyUpdateCmd cli.Command = cli.Command{
 	Flags:   PublicJoinKeyCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
 		})
 		entity := CastPublicJoinKeyFromCli(c)
 		if entity, err := PublicJoinKeyActions.Update(query, entity); err != nil {
@@ -787,18 +787,18 @@ func CastPublicJoinKeyFromCli(c *cli.Context) *PublicJoinKeyEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("role-id") {
-		template.RoleId = workspaces.NewStringAutoNull(c.String("role-id"))
+		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
 	}
 	if c.IsSet("workspace-id") {
-		template.WorkspaceId = workspaces.NewStringAutoNull(c.String("workspace-id"))
+		template.WorkspaceId = fireback.NewStringAutoNull(c.String("workspace-id"))
 	}
 	return template
 }
-func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
@@ -808,8 +808,8 @@ func PublicJoinKeySyncSeederFromFs(fsRef *embed.FS, fileNames []string, q worksp
 	)
 }
 func PublicJoinKeySyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		publicJoinKeySeedersFs,
@@ -818,8 +818,8 @@ func PublicJoinKeySyncSeeders() {
 	)
 }
 func PublicJoinKeyImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		PublicJoinKeyActions.Create,
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -827,19 +827,19 @@ func PublicJoinKeyImportMocks() {
 		false,
 	)
 }
-func PublicJoinKeyWriteQueryMock(ctx workspaces.MockQueryContext) {
+func PublicJoinKeyWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := PublicJoinKeyActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "PublicJoinKey", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "PublicJoinKey", result)
 	}
 }
-func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -851,7 +851,7 @@ func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *works
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := PublicJoinKeyActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -878,8 +878,8 @@ var PublicJoinKeyDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 			})
 			if c.Bool("batch") {
 				PublicJoinKeyActionSeederMultiple(query, c.Int("count"))
@@ -902,7 +902,7 @@ var PublicJoinKeyDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := PublicJoinKeyActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -910,7 +910,7 @@ var PublicJoinKeyDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -923,7 +923,7 @@ var PublicJoinKeyDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PublicJoinKeyActions.Create,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -953,7 +953,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of public-join-keys, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]PublicJoinKeyEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -962,7 +962,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(publicJoinKeySeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(publicJoinKeySeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -975,7 +975,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PublicJoinKeyActions.Create,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				publicJoinKeySeedersFs,
@@ -986,7 +986,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -994,7 +994,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				PublicJoinKeyEntityStream,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				c.String("file"),
@@ -1008,7 +1008,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1018,12 +1018,12 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				PublicJoinKeyActions.Create,
 				reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 				},
 				func() PublicJoinKeyEntity {
 					v := CastPublicJoinKeyFromCli(c)
@@ -1041,7 +1041,7 @@ var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
 	PublicJoinKeyUpdateCmd,
 	PublicJoinKeyAskCmd,
 	PublicJoinKeyCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		PublicJoinKeyActions.Remove,
 	),
@@ -1049,7 +1049,7 @@ var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
 
 func PublicJoinKeyCliFn() cli.Command {
 	commands := append(PublicJoinKeyImportExportCommands, PublicJoinKeyCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, PublicJoinKeyDevCommands...)
 	}
 	return cli.Command{
@@ -1066,14 +1066,14 @@ func PublicJoinKeyCliFn() cli.Command {
 	}
 }
 
-var PUBLIC_JOIN_KEY_ACTION_TABLE = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PublicJoinKeyActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			PublicJoinKeyActions.Query,
 			security,
 			reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
@@ -1081,27 +1081,27 @@ var PUBLIC_JOIN_KEY_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_QUERY = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/public-join-keys",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &PublicJoinKeyEntityQs{}
-			workspaces.HttpQueryEntity(c, PublicJoinKeyActions.Query, qs)
+			fireback.HttpQueryEntity(c, PublicJoinKeyActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PublicJoinKeyActions.Query,
 	ResponseEntity: &[]PublicJoinKeyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &PublicJoinKeyEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			PublicJoinKeyActions.Query,
 			security,
@@ -1112,138 +1112,138 @@ var PUBLIC_JOIN_KEY_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, PublicJoinKeyQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, PublicJoinKeyQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PUBLIC_JOIN_KEY_ACTION_EXPORT = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/public-join-keys/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, PublicJoinKeyActionExport)
+			fireback.HttpStreamFileChannel(c, PublicJoinKeyActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PublicJoinKeyActionExport,
 	ResponseEntity: &[]PublicJoinKeyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_GET_ONE = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/public-join-key/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, PublicJoinKeyActions.GetOne)
+			fireback.HttpGetEntity(c, PublicJoinKeyActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         PublicJoinKeyActions.GetOne,
 	ResponseEntity: &PublicJoinKeyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_POST_ONE = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new publicJoinKey",
 	Flags:         PublicJoinKeyCommonCliFlags,
 	Method:        "POST",
 	Url:           "/public-join-key",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, PublicJoinKeyActions.Create)
+			fireback.HttpPostEntity(c, PublicJoinKeyActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, PublicJoinKeyActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, PublicJoinKeyActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         PublicJoinKeyActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PublicJoinKeyEntity{},
 	ResponseEntity: &PublicJoinKeyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_PATCH = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PublicJoinKeyCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/public-join-key",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, PublicJoinKeyActions.Update)
+			fireback.HttpUpdateEntity(c, PublicJoinKeyActions.Update)
 		},
 	},
 	Action:         PublicJoinKeyActions.Update,
 	RequestEntity:  &PublicJoinKeyEntity{},
 	ResponseEntity: &PublicJoinKeyEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/public-join-keys",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, PublicJoinKeyActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, PublicJoinKeyActionBulkUpdate)
 		},
 	},
 	Action:         PublicJoinKeyActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[PublicJoinKeyEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[PublicJoinKeyEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[PublicJoinKeyEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[PublicJoinKeyEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_DELETE = workspaces.Module3Action{
+var PUBLIC_JOIN_KEY_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/public-join-key",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, PublicJoinKeyActions.Remove)
+			fireback.HttpRemoveEntity(c, PublicJoinKeyActions.Remove)
 		},
 	},
 	Action:         PublicJoinKeyActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &PublicJoinKeyEntity{},
 }
 
@@ -1251,10 +1251,10 @@ var PUBLIC_JOIN_KEY_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on PublicJoinKeyEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPublicJoinKeyRouter = func(r *[]workspaces.Module3Action) {}
+var AppendPublicJoinKeyRouter = func(r *[]fireback.Module3Action) {}
 
-func GetPublicJoinKeyModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetPublicJoinKeyModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PUBLIC_JOIN_KEY_ACTION_QUERY,
 		PUBLIC_JOIN_KEY_ACTION_EXPORT,
 		PUBLIC_JOIN_KEY_ACTION_GET_ONE,
@@ -1268,32 +1268,32 @@ func GetPublicJoinKeyModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PUBLIC_JOIN_KEY = workspaces.PermissionInfo{
+var PERM_ROOT_PUBLIC_JOIN_KEY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.public-join-key.*",
 	Name:        "Entire public join key actions (*)",
 	Description: "",
 }
-var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.public-join-key.delete",
 	Name:        "Delete public join key",
 	Description: "",
 }
-var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PUBLIC_JOIN_KEY_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.public-join-key.create",
 	Name:        "Create public join key",
 	Description: "",
 }
-var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.public-join-key.update",
 	Name:        "Update public join key",
 	Description: "",
 }
-var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PUBLIC_JOIN_KEY_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.public-join-key.query",
 	Name:        "Query public join key",
 	Description: "",
 }
-var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PUBLIC_JOIN_KEY_DELETE,
 	PERM_ROOT_PUBLIC_JOIN_KEY_CREATE,
 	PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE,
@@ -1303,42 +1303,42 @@ var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewPublicJoinKeyCreatedEvent(
 	payload *PublicJoinKeyEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PublicJoinKeyCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
 			},
 		},
 		CacheKey: "*abac.PublicJoinKeyEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewPublicJoinKeyUpdatedEvent(
 	payload *PublicJoinKeyEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PublicJoinKeyUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
 			},
 		},
 		CacheKey: "*abac.PublicJoinKeyEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var PublicJoinKeyEntityBundle = workspaces.EntityBundle{
+var PublicJoinKeyEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

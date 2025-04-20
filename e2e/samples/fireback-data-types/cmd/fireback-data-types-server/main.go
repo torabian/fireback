@@ -11,18 +11,18 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/torabian/fireback/modules/abac"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback-data-types"
 var PRODUCT_DESCRIPTION = "Sample project which uses all datatypes avaialble in fireback"
 var PRODUCT_LANGUAGES = []string{"en"}
 
-var xapp = &workspaces.FirebackApp{
+var xapp = &fireback.FirebackApp{
 	Title: PRODUCT_DESCRIPTION,
 
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders:    []workspaces.SearchProviderFn{},
+	SearchProviders:    []fireback.SearchProviderFn{},
 	SeedersSync: func() {
 
 	},
@@ -32,8 +32,8 @@ var xapp = &workspaces.FirebackApp{
 	RunSocket: func(e *gin.Engine) {
 
 	},
-	RunSearch:     workspaces.InjectReactiveSearch,
-	PublicFolders: []workspaces.PublicFolderInfo{
+	RunSearch:     fireback.InjectReactiveSearch,
+	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to
 		// Bootstrap those themes
@@ -43,18 +43,18 @@ var xapp = &workspaces.FirebackApp{
 		// and then uncomment this, for example to serve static react or angular content
 		// {Fs: &ui, Folder: "ui"},
 	},
-	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
+	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
 
 	},
 
-	Modules: append([]*workspaces.ModuleProvider{
+	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
 		tags.TagsModuleSetup(nil),
 		product.ProductModuleSetup(nil),
-		workspaces.FirebackModuleSetup(nil),
+		fireback.FirebackModuleSetup(nil),
 		{
 			CliHandlers: []cli.Command{
-				workspaces.NewProjectCli(),
+				fireback.NewProjectCli(),
 			},
 		},
 	}, abac.AbacCompleteModules()...),

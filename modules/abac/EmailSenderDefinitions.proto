@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.com/torabian/fireback/modules/workspaces";
+option go_package = "github.com/torabian/fireback/modules/fireback";
 
 /**
 * Add your custom services, and messages here.

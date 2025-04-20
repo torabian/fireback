@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/PendingWorkspaceInvite"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PendingWorkspaceInvite"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,15 +32,15 @@ func ResetPendingWorkspaceInviteSeeders(fs *embed.FS) {
 }
 
 type PendingWorkspaceInviteEntityQs struct {
-	Value         workspaces.QueriableField `cli:"value" table:"pending_workspace_invite" column:"value" qs:"value"`
-	Type          workspaces.QueriableField `cli:"type" table:"pending_workspace_invite" column:"type" qs:"type"`
-	CoverLetter   workspaces.QueriableField `cli:"cover-letter" table:"pending_workspace_invite" column:"cover_letter" qs:"coverLetter"`
-	WorkspaceName workspaces.QueriableField `cli:"workspace-name" table:"pending_workspace_invite" column:"workspace_name" qs:"workspaceName"`
-	Role          workspaces.QueriableField `cli:"role" table:"pending_workspace_invite" column:"role" qs:"role"`
+	Value         fireback.QueriableField `cli:"value" table:"pending_workspace_invite" column:"value" qs:"value"`
+	Type          fireback.QueriableField `cli:"type" table:"pending_workspace_invite" column:"type" qs:"type"`
+	CoverLetter   fireback.QueriableField `cli:"cover-letter" table:"pending_workspace_invite" column:"cover_letter" qs:"coverLetter"`
+	WorkspaceName fireback.QueriableField `cli:"workspace-name" table:"pending_workspace_invite" column:"workspace_name" qs:"workspaceName"`
+	Role          fireback.QueriableField `cli:"role" table:"pending_workspace_invite" column:"role" qs:"role"`
 }
 
 func (x *PendingWorkspaceInviteEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var PendingWorkspaceInviteQsFlags = []cli.Flag{
@@ -68,23 +68,23 @@ var PendingWorkspaceInviteQsFlags = []cli.Flag{
 
 type PendingWorkspaceInviteEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -94,11 +94,11 @@ type PendingWorkspaceInviteEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -130,12 +130,12 @@ type PendingWorkspaceInviteEntity struct {
 	CoverLetter      string                          `json:"coverLetter" xml:"coverLetter" yaml:"coverLetter"        `
 	WorkspaceName    string                          `json:"workspaceName" xml:"workspaceName" yaml:"workspaceName"        `
 	Role             *RoleEntity                     `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           workspaces.String               `json:"roleId" yaml:"roleId" xml:"roleId"  `
+	RoleId           fireback.String                 `json:"roleId" yaml:"roleId" xml:"roleId"  `
 	Children         []*PendingWorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo         *PendingWorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PendingWorkspaceInviteEntityStream(q workspaces.QueryDSL) (chan []*PendingWorkspaceInviteEntity, *workspaces.QueryResultMeta, error) {
+func PendingWorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*PendingWorkspaceInviteEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -171,8 +171,8 @@ func (x *PendingWorkspaceInviteEntityList) Json() string {
 	}
 	return ""
 }
-func (x *PendingWorkspaceInviteEntityList) ToTree() *workspaces.TreeOperation[PendingWorkspaceInviteEntity] {
-	return workspaces.NewTreeOperation(
+func (x *PendingWorkspaceInviteEntityList) ToTree() *fireback.TreeOperation[PendingWorkspaceInviteEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *PendingWorkspaceInviteEntity) string {
 			if !t.ParentId.Valid {
@@ -189,15 +189,15 @@ func (x *PendingWorkspaceInviteEntityList) ToTree() *workspaces.TreeOperation[Pe
 var PendingWorkspaceInvitePreloadRelations []string = []string{}
 
 type pendingWorkspaceInviteActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *workspaces.IError)
-	Create         func(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError)
-	Upsert         func(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *fireback.IError)
+	Create         func(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
+	Upsert         func(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
 	SeederInit     func() *PendingWorkspaceInviteEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*PendingWorkspaceInviteEntity, query workspaces.QueryDSL) ([]*PendingWorkspaceInviteEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*PendingWorkspaceInviteEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, error)
 }
 
 var PendingWorkspaceInviteActions pendingWorkspaceInviteActionsSig = pendingWorkspaceInviteActionsSig{
@@ -212,7 +212,7 @@ var PendingWorkspaceInviteActions pendingWorkspaceInviteActionsSig = pendingWork
 	Query:          PendingWorkspaceInviteActionQueryFn,
 }
 
-func PendingWorkspaceInviteActionUpsertFn(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteActionUpsertFn(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -226,28 +226,28 @@ var PENDING_WORKSPACE_INVITE_EVENTS = []string{
 }
 
 type PendingWorkspaceInviteFieldMap struct {
-	Value         workspaces.TranslatedString `yaml:"value"`
-	Type          workspaces.TranslatedString `yaml:"type"`
-	CoverLetter   workspaces.TranslatedString `yaml:"coverLetter"`
-	WorkspaceName workspaces.TranslatedString `yaml:"workspaceName"`
-	Role          workspaces.TranslatedString `yaml:"role"`
+	Value         fireback.TranslatedString `yaml:"value"`
+	Type          fireback.TranslatedString `yaml:"type"`
+	CoverLetter   fireback.TranslatedString `yaml:"coverLetter"`
+	WorkspaceName fireback.TranslatedString `yaml:"workspaceName"`
+	Role          fireback.TranslatedString `yaml:"role"`
 }
 
 var PendingWorkspaceInviteEntityMetaConfig map[string]int64 = map[string]int64{}
-var PendingWorkspaceInviteEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&PendingWorkspaceInviteEntity{}))
+var PendingWorkspaceInviteEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&PendingWorkspaceInviteEntity{}))
 
-func entityPendingWorkspaceInviteFormatter(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) {
+func entityPendingWorkspaceInviteFormatter(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PendingWorkspaceInviteActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func PendingWorkspaceInviteActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -274,7 +274,7 @@ func PendingWorkspaceInviteActionSeederMultiple(query workspaces.QueryDSL, count
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func PendingWorkspaceInviteActionSeeder(query workspaces.QueryDSL, count int) {
+func PendingWorkspaceInviteActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -300,7 +300,7 @@ func PendingWorkspaceInviteActionSeederInitFn() *PendingWorkspaceInviteEntity {
 	entity := &PendingWorkspaceInviteEntity{}
 	return entity
 }
-func PendingWorkspaceInviteAssociationCreate(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) error {
+func PendingWorkspaceInviteAssociationCreate(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -308,13 +308,13 @@ func PendingWorkspaceInviteAssociationCreate(dto *PendingWorkspaceInviteEntity, 
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func PendingWorkspaceInviteRelationContentCreate(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) error {
+func PendingWorkspaceInviteRelationContentCreate(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PendingWorkspaceInviteRelationContentUpdate(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) error {
+func PendingWorkspaceInviteRelationContentUpdate(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PendingWorkspaceInvitePolyglotUpdateHandler(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) {
+func PendingWorkspaceInvitePolyglotUpdateHandler(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -325,8 +325,8 @@ func PendingWorkspaceInvitePolyglotUpdateHandler(dto *PendingWorkspaceInviteEnti
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func PendingWorkspaceInviteValidator(dto *PendingWorkspaceInviteEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func PendingWorkspaceInviteValidator(dto *PendingWorkspaceInviteEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -374,17 +374,17 @@ And here is the actual object signature:
 	},
 }
 
-func PendingWorkspaceInviteEntityPreSanitize(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) {
+func PendingWorkspaceInviteEntityPreSanitize(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
 }
-func PendingWorkspaceInviteEntityBeforeCreateAppend(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) {
+func PendingWorkspaceInviteEntityBeforeCreateAppend(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	PendingWorkspaceInviteRecursiveAddUniqueId(dto, query)
 }
-func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) {
+func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -396,7 +396,7 @@ func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntit
   at this moment.
 *
 */
-func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, query workspaces.QueryDSL) ([]*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PendingWorkspaceInviteEntityPreSanitize(dtos[index], query)
@@ -404,19 +404,19 @@ func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, q
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func PendingWorkspaceInviteActionBatchCreateFn(dtos []*PendingWorkspaceInviteEntity, query workspaces.QueryDSL) ([]*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteActionBatchCreateFn(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PendingWorkspaceInviteEntity{}
 		for _, item := range dtos {
@@ -430,12 +430,12 @@ func PendingWorkspaceInviteActionBatchCreateFn(dtos []*PendingWorkspaceInviteEnt
 	}
 	return dtos, nil
 }
-func PendingWorkspaceInviteDeleteEntireChildren(query workspaces.QueryDSL, dto *PendingWorkspaceInviteEntity) *workspaces.IError {
+func PendingWorkspaceInviteDeleteEntireChildren(query fireback.QueryDSL, dto *PendingWorkspaceInviteEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := PendingWorkspaceInviteValidator(dto, false); iError != nil {
 		return nil, iError
@@ -449,14 +449,14 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -464,35 +464,35 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewPendingWorkspaceInviteCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(PENDING_WORKSPACE_INVITE_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&PendingWorkspaceInviteEntity{}),
+			"entityKey": fireback.GetTypeString(&PendingWorkspaceInviteEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func PendingWorkspaceInviteActionGetOneFn(query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteActionGetOneFn(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
-	item, err := workspaces.GetOneEntity[PendingWorkspaceInviteEntity](query, refl)
+	item, err := fireback.GetOneEntity[PendingWorkspaceInviteEntity](query, refl)
 	entityPendingWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func PendingWorkspaceInviteActionGetByWorkspaceFn(query workspaces.QueryDSL) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteActionGetByWorkspaceFn(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[PendingWorkspaceInviteEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[PendingWorkspaceInviteEntity](query, refl)
 	entityPendingWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func PendingWorkspaceInviteActionQueryFn(query workspaces.QueryDSL) ([]*PendingWorkspaceInviteEntity, *workspaces.QueryResultMeta, error) {
+func PendingWorkspaceInviteActionQueryFn(query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[PendingWorkspaceInviteEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[PendingWorkspaceInviteEntity](query, refl)
 	for _, item := range items {
 		entityPendingWorkspaceInviteFormatter(item, query)
 	}
@@ -502,7 +502,7 @@ func PendingWorkspaceInviteActionQueryFn(query workspaces.QueryDSL) ([]*PendingW
 var pendingWorkspaceInviteMemoryItems []*PendingWorkspaceInviteEntity = []*PendingWorkspaceInviteEntity{}
 
 func PendingWorkspaceInviteEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -532,7 +532,7 @@ func PendingWorkspaceInviteMemJoin(items []uint) []*PendingWorkspaceInviteEntity
 	}
 	return res
 }
-func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PENDING_WORKSPACE_INVITE_EVENT_UPDATED
 	PendingWorkspaceInviteEntityPreSanitize(fields, query)
@@ -547,7 +547,7 @@ func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL,
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	PendingWorkspaceInviteRelationContentUpdate(fields, query)
@@ -561,11 +561,11 @@ func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL,
 		Where(&PendingWorkspaceInviteEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewPendingWorkspaceInviteUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -577,9 +577,9 @@ func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL,
 	   })*/
 	return &itemRefetched, nil
 }
-func PendingWorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *workspaces.IError) {
+func PendingWorkspaceInviteActionUpdateFn(query fireback.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PendingWorkspaceInviteValidator(fields, true); iError != nil {
@@ -589,11 +589,11 @@ func PendingWorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *Pen
 	// PendingWorkspaceInviteRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *PendingWorkspaceInviteEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = PendingWorkspaceInviteUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -601,7 +601,7 @@ func PendingWorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *Pen
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return PendingWorkspaceInviteUpdateExec(dbref, query, fields)
@@ -612,8 +612,8 @@ var PendingWorkspaceInviteWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire pendingworkspaceinvites ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
 		})
 		count, _ := PendingWorkspaceInviteActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -621,16 +621,16 @@ var PendingWorkspaceInviteWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PendingWorkspaceInviteActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func PendingWorkspaceInviteActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}
-	return workspaces.RemoveEntity[PendingWorkspaceInviteEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}
+	return fireback.RemoveEntity[PendingWorkspaceInviteEntity](query, refl)
 }
-func PendingWorkspaceInviteActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func PendingWorkspaceInviteActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[PendingWorkspaceInviteEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[PendingWorkspaceInviteEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'PendingWorkspaceInviteEntity'", subErr)
 			return count, subErr
@@ -641,11 +641,11 @@ func PendingWorkspaceInviteActionWipeClean(query workspaces.QueryDSL) (int64, er
 	return count, err
 }
 func PendingWorkspaceInviteActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PendingWorkspaceInviteEntity]) (
-	*workspaces.BulkRecordRequest[PendingWorkspaceInviteEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[PendingWorkspaceInviteEntity]) (
+	*fireback.BulkRecordRequest[PendingWorkspaceInviteEntity], *fireback.IError,
 ) {
 	result := []*PendingWorkspaceInviteEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := PendingWorkspaceInviteActions.Update(query, record)
@@ -660,7 +660,7 @@ func PendingWorkspaceInviteActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *PendingWorkspaceInviteEntity) Json() string {
 	if x != nil {
@@ -670,7 +670,7 @@ func (x *PendingWorkspaceInviteEntity) Json() string {
 	return ""
 }
 
-var PendingWorkspaceInviteEntityMeta = workspaces.TableMetaData{
+var PendingWorkspaceInviteEntityMeta = fireback.TableMetaData{
 	EntityName:    "PendingWorkspaceInvite",
 	ExportKey:     "pending-workspace-invites",
 	TableNameInDb: "pending-workspace-invite_entities",
@@ -680,23 +680,23 @@ var PendingWorkspaceInviteEntityMeta = workspaces.TableMetaData{
 }
 
 func PendingWorkspaceInviteActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActions.Query, PendingWorkspaceInvitePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActions.Query, PendingWorkspaceInvitePreloadRelations)
 }
 func PendingWorkspaceInviteActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActions.Query, PendingWorkspaceInvitePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[PendingWorkspaceInviteEntity](query, PendingWorkspaceInviteActions.Query, PendingWorkspaceInvitePreloadRelations)
 }
 func PendingWorkspaceInviteActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content PendingWorkspaceInviteEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PendingWorkspaceInviteActions.Create(&content, query)
@@ -745,7 +745,7 @@ var PendingWorkspaceInviteCommonCliFlags = []cli.Flag{
 		Usage:    `role (one)`,
 	},
 }
-var PendingWorkspaceInviteCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var PendingWorkspaceInviteCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "value",
 		StructField: "Value",
@@ -832,16 +832,16 @@ var PendingWorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 		})
 		entity := &PendingWorkspaceInviteEntity{}
-		workspaces.PopulateInteractively(entity, c, PendingWorkspaceInviteCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, PendingWorkspaceInviteCommonInteractiveCliFlags)
 		if entity, err := PendingWorkspaceInviteActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -851,8 +851,8 @@ var PendingWorkspaceInviteUpdateCmd cli.Command = cli.Command{
 	Flags:   PendingWorkspaceInviteCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
 		})
 		entity := CastPendingWorkspaceInviteFromCli(c)
 		if entity, err := PendingWorkspaceInviteActions.Update(query, entity); err != nil {
@@ -874,7 +874,7 @@ func CastPendingWorkspaceInviteFromCli(c *cli.Context) *PendingWorkspaceInviteEn
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("value") {
 		template.Value = c.String("value")
@@ -889,12 +889,12 @@ func CastPendingWorkspaceInviteFromCli(c *cli.Context) *PendingWorkspaceInviteEn
 		template.WorkspaceName = c.String("workspace-name")
 	}
 	if c.IsSet("role-id") {
-		template.RoleId = workspaces.NewStringAutoNull(c.String("role-id"))
+		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
 	}
 	return template
 }
-func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
@@ -904,8 +904,8 @@ func PendingWorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string,
 	)
 }
 func PendingWorkspaceInviteSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		pendingWorkspaceInviteSeedersFs,
@@ -914,8 +914,8 @@ func PendingWorkspaceInviteSyncSeeders() {
 	)
 }
 func PendingWorkspaceInviteImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		PendingWorkspaceInviteActions.Create,
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -923,19 +923,19 @@ func PendingWorkspaceInviteImportMocks() {
 		false,
 	)
 }
-func PendingWorkspaceInviteWriteQueryMock(ctx workspaces.MockQueryContext) {
+func PendingWorkspaceInviteWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := PendingWorkspaceInviteActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "PendingWorkspaceInvite", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "PendingWorkspaceInvite", result)
 	}
 }
-func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -947,7 +947,7 @@ func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]strin
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := PendingWorkspaceInviteActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -974,8 +974,8 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 			})
 			if c.Bool("batch") {
 				PendingWorkspaceInviteActionSeederMultiple(query, c.Int("count"))
@@ -998,7 +998,7 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := PendingWorkspaceInviteActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1006,7 +1006,7 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1019,7 +1019,7 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1049,7 +1049,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of pending-workspace-invites, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]PendingWorkspaceInviteEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1058,7 +1058,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(pendingWorkspaceInviteSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(pendingWorkspaceInviteSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1071,7 +1071,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				pendingWorkspaceInviteSeedersFs,
@@ -1082,7 +1082,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1090,7 +1090,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				PendingWorkspaceInviteEntityStream,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
@@ -1104,7 +1104,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1114,12 +1114,12 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				PendingWorkspaceInviteActions.Create,
 				reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 				},
 				func() PendingWorkspaceInviteEntity {
 					v := CastPendingWorkspaceInviteFromCli(c)
@@ -1137,7 +1137,7 @@ var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	PendingWorkspaceInviteUpdateCmd,
 	PendingWorkspaceInviteAskCmd,
 	PendingWorkspaceInviteCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		PendingWorkspaceInviteActions.Remove,
 	),
@@ -1145,7 +1145,7 @@ var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 
 func PendingWorkspaceInviteCliFn() cli.Command {
 	commands := append(PendingWorkspaceInviteImportExportCommands, PendingWorkspaceInviteCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, PendingWorkspaceInviteDevCommands...)
 	}
 	return cli.Command{
@@ -1162,14 +1162,14 @@ func PendingWorkspaceInviteCliFn() cli.Command {
 	}
 }
 
-var PENDING_WORKSPACE_INVITE_ACTION_TABLE = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PendingWorkspaceInviteActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			PendingWorkspaceInviteActions.Query,
 			security,
 			reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
@@ -1177,27 +1177,27 @@ var PENDING_WORKSPACE_INVITE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_QUERY = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/pending-workspace-invites",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &PendingWorkspaceInviteEntityQs{}
-			workspaces.HttpQueryEntity(c, PendingWorkspaceInviteActions.Query, qs)
+			fireback.HttpQueryEntity(c, PendingWorkspaceInviteActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PendingWorkspaceInviteActions.Query,
 	ResponseEntity: &[]PendingWorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &PendingWorkspaceInviteEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			PendingWorkspaceInviteActions.Query,
 			security,
@@ -1208,138 +1208,138 @@ var PENDING_WORKSPACE_INVITE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, PendingWorkspaceInviteQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, PendingWorkspaceInviteQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/pending-workspace-invites/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, PendingWorkspaceInviteActionExport)
+			fireback.HttpStreamFileChannel(c, PendingWorkspaceInviteActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PendingWorkspaceInviteActionExport,
 	ResponseEntity: &[]PendingWorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/pending-workspace-invite/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, PendingWorkspaceInviteActions.GetOne)
+			fireback.HttpGetEntity(c, PendingWorkspaceInviteActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         PendingWorkspaceInviteActions.GetOne,
 	ResponseEntity: &PendingWorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new pendingWorkspaceInvite",
 	Flags:         PendingWorkspaceInviteCommonCliFlags,
 	Method:        "POST",
 	Url:           "/pending-workspace-invite",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, PendingWorkspaceInviteActions.Create)
+			fireback.HttpPostEntity(c, PendingWorkspaceInviteActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, PendingWorkspaceInviteActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, PendingWorkspaceInviteActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         PendingWorkspaceInviteActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PendingWorkspaceInviteEntity{},
 	ResponseEntity: &PendingWorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_PATCH = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PendingWorkspaceInviteCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/pending-workspace-invite",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, PendingWorkspaceInviteActions.Update)
+			fireback.HttpUpdateEntity(c, PendingWorkspaceInviteActions.Update)
 		},
 	},
 	Action:         PendingWorkspaceInviteActions.Update,
 	RequestEntity:  &PendingWorkspaceInviteEntity{},
 	ResponseEntity: &PendingWorkspaceInviteEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/pending-workspace-invites",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, PendingWorkspaceInviteActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, PendingWorkspaceInviteActionBulkUpdate)
 		},
 	},
 	Action:         PendingWorkspaceInviteActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[PendingWorkspaceInviteEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[PendingWorkspaceInviteEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[PendingWorkspaceInviteEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[PendingWorkspaceInviteEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_DELETE = workspaces.Module3Action{
+var PENDING_WORKSPACE_INVITE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/pending-workspace-invite",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, PendingWorkspaceInviteActions.Remove)
+			fireback.HttpRemoveEntity(c, PendingWorkspaceInviteActions.Remove)
 		},
 	},
 	Action:         PendingWorkspaceInviteActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &PendingWorkspaceInviteEntity{},
 }
 
@@ -1347,10 +1347,10 @@ var PENDING_WORKSPACE_INVITE_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on PendingWorkspaceInviteEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPendingWorkspaceInviteRouter = func(r *[]workspaces.Module3Action) {}
+var AppendPendingWorkspaceInviteRouter = func(r *[]fireback.Module3Action) {}
 
-func GetPendingWorkspaceInviteModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetPendingWorkspaceInviteModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PENDING_WORKSPACE_INVITE_ACTION_QUERY,
 		PENDING_WORKSPACE_INVITE_ACTION_EXPORT,
 		PENDING_WORKSPACE_INVITE_ACTION_GET_ONE,
@@ -1364,32 +1364,32 @@ func GetPendingWorkspaceInviteModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PENDING_WORKSPACE_INVITE = workspaces.PermissionInfo{
+var PERM_ROOT_PENDING_WORKSPACE_INVITE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.pending-workspace-invite.*",
 	Name:        "Entire pending workspace invite actions (*)",
 	Description: "",
 }
-var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.pending-workspace-invite.delete",
 	Name:        "Delete pending workspace invite",
 	Description: "",
 }
-var PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.pending-workspace-invite.create",
 	Name:        "Create pending workspace invite",
 	Description: "",
 }
-var PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.pending-workspace-invite.update",
 	Name:        "Update pending workspace invite",
 	Description: "",
 }
-var PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.pending-workspace-invite.query",
 	Name:        "Query pending workspace invite",
 	Description: "",
 }
-var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE,
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE,
 	PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE,
@@ -1399,42 +1399,42 @@ var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewPendingWorkspaceInviteCreatedEvent(
 	payload *PendingWorkspaceInviteEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PendingWorkspaceInviteCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
 			},
 		},
 		CacheKey: "*abac.PendingWorkspaceInviteEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewPendingWorkspaceInviteUpdatedEvent(
 	payload *PendingWorkspaceInviteEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PendingWorkspaceInviteUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY,
 			},
 		},
 		CacheKey: "*abac.PendingWorkspaceInviteEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var PendingWorkspaceInviteEntityBundle = workspaces.EntityBundle{
+var PendingWorkspaceInviteEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/EmailConfirmation"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/EmailConfirmation"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,15 +32,15 @@ func ResetEmailConfirmationSeeders(fs *embed.FS) {
 }
 
 type EmailConfirmationEntityQs struct {
-	User      workspaces.QueriableField `cli:"user" table:"email_confirmation" column:"user" qs:"user"`
-	Status    workspaces.QueriableField `cli:"status" table:"email_confirmation" column:"status" qs:"status"`
-	Email     workspaces.QueriableField `cli:"email" table:"email_confirmation" column:"email" qs:"email"`
-	Key       workspaces.QueriableField `cli:"key" table:"email_confirmation" column:"key" qs:"key"`
-	ExpiresAt workspaces.QueriableField `cli:"expires-at" table:"email_confirmation" column:"expires_at" qs:"expiresAt"`
+	User      fireback.QueriableField `cli:"user" table:"email_confirmation" column:"user" qs:"user"`
+	Status    fireback.QueriableField `cli:"status" table:"email_confirmation" column:"status" qs:"status"`
+	Email     fireback.QueriableField `cli:"email" table:"email_confirmation" column:"email" qs:"email"`
+	Key       fireback.QueriableField `cli:"key" table:"email_confirmation" column:"key" qs:"key"`
+	ExpiresAt fireback.QueriableField `cli:"expires-at" table:"email_confirmation" column:"expires_at" qs:"expiresAt"`
 }
 
 func (x *EmailConfirmationEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var EmailConfirmationQsFlags = []cli.Flag{
@@ -68,23 +68,23 @@ var EmailConfirmationQsFlags = []cli.Flag{
 
 type EmailConfirmationEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -94,11 +94,11 @@ type EmailConfirmationEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -134,7 +134,7 @@ type EmailConfirmationEntity struct {
 	LinkedTo         *EmailConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func EmailConfirmationEntityStream(q workspaces.QueryDSL) (chan []*EmailConfirmationEntity, *workspaces.QueryResultMeta, error) {
+func EmailConfirmationEntityStream(q fireback.QueryDSL) (chan []*EmailConfirmationEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*EmailConfirmationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -170,8 +170,8 @@ func (x *EmailConfirmationEntityList) Json() string {
 	}
 	return ""
 }
-func (x *EmailConfirmationEntityList) ToTree() *workspaces.TreeOperation[EmailConfirmationEntity] {
-	return workspaces.NewTreeOperation(
+func (x *EmailConfirmationEntityList) ToTree() *fireback.TreeOperation[EmailConfirmationEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *EmailConfirmationEntity) string {
 			if !t.ParentId.Valid {
@@ -188,15 +188,15 @@ func (x *EmailConfirmationEntityList) ToTree() *workspaces.TreeOperation[EmailCo
 var EmailConfirmationPreloadRelations []string = []string{}
 
 type emailConfirmationActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *EmailConfirmationEntity) (*EmailConfirmationEntity, *workspaces.IError)
-	Create         func(dto *EmailConfirmationEntity, query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError)
-	Upsert         func(dto *EmailConfirmationEntity, query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *EmailConfirmationEntity) (*EmailConfirmationEntity, *fireback.IError)
+	Create         func(dto *EmailConfirmationEntity, query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
+	Upsert         func(dto *EmailConfirmationEntity, query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
 	SeederInit     func() *EmailConfirmationEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*EmailConfirmationEntity, query workspaces.QueryDSL) ([]*EmailConfirmationEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*EmailConfirmationEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.QueryResultMeta, error)
 }
 
 var EmailConfirmationActions emailConfirmationActionsSig = emailConfirmationActionsSig{
@@ -211,7 +211,7 @@ var EmailConfirmationActions emailConfirmationActionsSig = emailConfirmationActi
 	Query:          EmailConfirmationActionQueryFn,
 }
 
-func EmailConfirmationActionUpsertFn(dto *EmailConfirmationEntity, query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationActionUpsertFn(dto *EmailConfirmationEntity, query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -225,28 +225,28 @@ var EMAIL_CONFIRMATION_EVENTS = []string{
 }
 
 type EmailConfirmationFieldMap struct {
-	User      workspaces.TranslatedString `yaml:"user"`
-	Status    workspaces.TranslatedString `yaml:"status"`
-	Email     workspaces.TranslatedString `yaml:"email"`
-	Key       workspaces.TranslatedString `yaml:"key"`
-	ExpiresAt workspaces.TranslatedString `yaml:"expiresAt"`
+	User      fireback.TranslatedString `yaml:"user"`
+	Status    fireback.TranslatedString `yaml:"status"`
+	Email     fireback.TranslatedString `yaml:"email"`
+	Key       fireback.TranslatedString `yaml:"key"`
+	ExpiresAt fireback.TranslatedString `yaml:"expiresAt"`
 }
 
 var EmailConfirmationEntityMetaConfig map[string]int64 = map[string]int64{}
-var EmailConfirmationEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&EmailConfirmationEntity{}))
+var EmailConfirmationEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&EmailConfirmationEntity{}))
 
-func entityEmailConfirmationFormatter(dto *EmailConfirmationEntity, query workspaces.QueryDSL) {
+func entityEmailConfirmationFormatter(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func EmailConfirmationActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func EmailConfirmationActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -273,7 +273,7 @@ func EmailConfirmationActionSeederMultiple(query workspaces.QueryDSL, count int)
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func EmailConfirmationActionSeeder(query workspaces.QueryDSL, count int) {
+func EmailConfirmationActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -299,7 +299,7 @@ func EmailConfirmationActionSeederInitFn() *EmailConfirmationEntity {
 	entity := &EmailConfirmationEntity{}
 	return entity
 }
-func EmailConfirmationAssociationCreate(dto *EmailConfirmationEntity, query workspaces.QueryDSL) error {
+func EmailConfirmationAssociationCreate(dto *EmailConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -307,13 +307,13 @@ func EmailConfirmationAssociationCreate(dto *EmailConfirmationEntity, query work
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func EmailConfirmationRelationContentCreate(dto *EmailConfirmationEntity, query workspaces.QueryDSL) error {
+func EmailConfirmationRelationContentCreate(dto *EmailConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func EmailConfirmationRelationContentUpdate(dto *EmailConfirmationEntity, query workspaces.QueryDSL) error {
+func EmailConfirmationRelationContentUpdate(dto *EmailConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func EmailConfirmationPolyglotUpdateHandler(dto *EmailConfirmationEntity, query workspaces.QueryDSL) {
+func EmailConfirmationPolyglotUpdateHandler(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -324,8 +324,8 @@ func EmailConfirmationPolyglotUpdateHandler(dto *EmailConfirmationEntity, query 
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func EmailConfirmationValidator(dto *EmailConfirmationEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func EmailConfirmationValidator(dto *EmailConfirmationEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -373,17 +373,17 @@ And here is the actual object signature:
 	},
 }
 
-func EmailConfirmationEntityPreSanitize(dto *EmailConfirmationEntity, query workspaces.QueryDSL) {
+func EmailConfirmationEntityPreSanitize(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
 }
-func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query workspaces.QueryDSL) {
+func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	EmailConfirmationRecursiveAddUniqueId(dto, query)
 }
-func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query workspaces.QueryDSL) {
+func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -395,7 +395,7 @@ func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query w
   at this moment.
 *
 */
-func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query workspaces.QueryDSL) ([]*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			EmailConfirmationEntityPreSanitize(dtos[index], query)
@@ -403,19 +403,19 @@ func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query works
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query workspaces.QueryDSL) ([]*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*EmailConfirmationEntity{}
 		for _, item := range dtos {
@@ -429,12 +429,12 @@ func EmailConfirmationActionBatchCreateFn(dtos []*EmailConfirmationEntity, query
 	}
 	return dtos, nil
 }
-func EmailConfirmationDeleteEntireChildren(query workspaces.QueryDSL, dto *EmailConfirmationEntity) *workspaces.IError {
+func EmailConfirmationDeleteEntireChildren(query fireback.QueryDSL, dto *EmailConfirmationEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := EmailConfirmationValidator(dto, false); iError != nil {
 		return nil, iError
@@ -448,14 +448,14 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query workspa
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -463,35 +463,35 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query workspa
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewEmailConfirmationCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(EMAIL_CONFIRMATION_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&EmailConfirmationEntity{}),
+			"entityKey": fireback.GetTypeString(&EmailConfirmationEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func EmailConfirmationActionGetOneFn(query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationActionGetOneFn(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
-	item, err := workspaces.GetOneEntity[EmailConfirmationEntity](query, refl)
+	item, err := fireback.GetOneEntity[EmailConfirmationEntity](query, refl)
 	entityEmailConfirmationFormatter(item, query)
 	return item, err
 }
-func EmailConfirmationActionGetByWorkspaceFn(query workspaces.QueryDSL) (*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationActionGetByWorkspaceFn(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[EmailConfirmationEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[EmailConfirmationEntity](query, refl)
 	entityEmailConfirmationFormatter(item, query)
 	return item, err
 }
-func EmailConfirmationActionQueryFn(query workspaces.QueryDSL) ([]*EmailConfirmationEntity, *workspaces.QueryResultMeta, error) {
+func EmailConfirmationActionQueryFn(query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
 	for _, item := range items {
 		entityEmailConfirmationFormatter(item, query)
 	}
@@ -501,7 +501,7 @@ func EmailConfirmationActionQueryFn(query workspaces.QueryDSL) ([]*EmailConfirma
 var emailConfirmationMemoryItems []*EmailConfirmationEntity = []*EmailConfirmationEntity{}
 
 func EmailConfirmationEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -531,7 +531,7 @@ func EmailConfirmationMemJoin(items []uint) []*EmailConfirmationEntity {
 	}
 	return res
 }
-func EmailConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = EMAIL_CONFIRMATION_EVENT_UPDATED
 	EmailConfirmationEntityPreSanitize(fields, query)
@@ -546,7 +546,7 @@ func EmailConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	EmailConfirmationRelationContentUpdate(fields, query)
@@ -560,11 +560,11 @@ func EmailConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 		Where(&EmailConfirmationEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewEmailConfirmationUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -576,9 +576,9 @@ func EmailConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 	   })*/
 	return &itemRefetched, nil
 }
-func EmailConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *workspaces.IError) {
+func EmailConfirmationActionUpdateFn(query fireback.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := EmailConfirmationValidator(fields, true); iError != nil {
@@ -588,11 +588,11 @@ func EmailConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *EmailCon
 	// EmailConfirmationRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *EmailConfirmationEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = EmailConfirmationUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -600,7 +600,7 @@ func EmailConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *EmailCon
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return EmailConfirmationUpdateExec(dbref, query, fields)
@@ -611,8 +611,8 @@ var EmailConfirmationWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire emailconfirmations ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
 		})
 		count, _ := EmailConfirmationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -620,16 +620,16 @@ var EmailConfirmationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailConfirmationActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func EmailConfirmationActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}
-	return workspaces.RemoveEntity[EmailConfirmationEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}
+	return fireback.RemoveEntity[EmailConfirmationEntity](query, refl)
 }
-func EmailConfirmationActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func EmailConfirmationActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[EmailConfirmationEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[EmailConfirmationEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'EmailConfirmationEntity'", subErr)
 			return count, subErr
@@ -640,11 +640,11 @@ func EmailConfirmationActionWipeClean(query workspaces.QueryDSL) (int64, error) 
 	return count, err
 }
 func EmailConfirmationActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[EmailConfirmationEntity]) (
-	*workspaces.BulkRecordRequest[EmailConfirmationEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[EmailConfirmationEntity]) (
+	*fireback.BulkRecordRequest[EmailConfirmationEntity], *fireback.IError,
 ) {
 	result := []*EmailConfirmationEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := EmailConfirmationActions.Update(query, record)
@@ -659,7 +659,7 @@ func EmailConfirmationActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *EmailConfirmationEntity) Json() string {
 	if x != nil {
@@ -669,7 +669,7 @@ func (x *EmailConfirmationEntity) Json() string {
 	return ""
 }
 
-var EmailConfirmationEntityMeta = workspaces.TableMetaData{
+var EmailConfirmationEntityMeta = fireback.TableMetaData{
 	EntityName:    "EmailConfirmation",
 	ExportKey:     "email-confirmations",
 	TableNameInDb: "email-confirmation_entities",
@@ -679,23 +679,23 @@ var EmailConfirmationEntityMeta = workspaces.TableMetaData{
 }
 
 func EmailConfirmationActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[EmailConfirmationEntity](query, EmailConfirmationActions.Query, EmailConfirmationPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[EmailConfirmationEntity](query, EmailConfirmationActions.Query, EmailConfirmationPreloadRelations)
 }
 func EmailConfirmationActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[EmailConfirmationEntity](query, EmailConfirmationActions.Query, EmailConfirmationPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[EmailConfirmationEntity](query, EmailConfirmationActions.Query, EmailConfirmationPreloadRelations)
 }
 func EmailConfirmationActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content EmailConfirmationEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := EmailConfirmationActions.Create(&content, query)
@@ -744,7 +744,7 @@ var EmailConfirmationCommonCliFlags = []cli.Flag{
 		Usage:    `expiresAt (string)`,
 	},
 }
-var EmailConfirmationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var EmailConfirmationCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "status",
 		StructField: "Status",
@@ -831,16 +831,16 @@ var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 		})
 		entity := &EmailConfirmationEntity{}
-		workspaces.PopulateInteractively(entity, c, EmailConfirmationCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, EmailConfirmationCommonInteractiveCliFlags)
 		if entity, err := EmailConfirmationActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -850,8 +850,8 @@ var EmailConfirmationUpdateCmd cli.Command = cli.Command{
 	Flags:   EmailConfirmationCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
 		})
 		entity := CastEmailConfirmationFromCli(c)
 		if entity, err := EmailConfirmationActions.Update(query, entity); err != nil {
@@ -873,10 +873,10 @@ func CastEmailConfirmationFromCli(c *cli.Context) *EmailConfirmationEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("user-id") {
-		template.UserId = workspaces.NewStringAutoNull(c.String("user-id"))
+		template.UserId = fireback.NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("status") {
 		template.Status = c.String("status")
@@ -892,8 +892,8 @@ func CastEmailConfirmationFromCli(c *cli.Context) *EmailConfirmationEntity {
 	}
 	return template
 }
-func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
@@ -903,8 +903,8 @@ func EmailConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q wo
 	)
 }
 func EmailConfirmationSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		emailConfirmationSeedersFs,
@@ -913,8 +913,8 @@ func EmailConfirmationSyncSeeders() {
 	)
 }
 func EmailConfirmationImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		EmailConfirmationActions.Create,
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -922,19 +922,19 @@ func EmailConfirmationImportMocks() {
 		false,
 	)
 }
-func EmailConfirmationWriteQueryMock(ctx workspaces.MockQueryContext) {
+func EmailConfirmationWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := EmailConfirmationActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "EmailConfirmation", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "EmailConfirmation", result)
 	}
 }
-func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -946,7 +946,7 @@ func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *w
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := EmailConfirmationActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -973,8 +973,8 @@ var EmailConfirmationDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 			})
 			if c.Bool("batch") {
 				EmailConfirmationActionSeederMultiple(query, c.Int("count"))
@@ -997,7 +997,7 @@ var EmailConfirmationDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := EmailConfirmationActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1005,7 +1005,7 @@ var EmailConfirmationDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1018,7 +1018,7 @@ var EmailConfirmationDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1048,7 +1048,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of email-confirmations, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]EmailConfirmationEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1057,7 +1057,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(emailConfirmationSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(emailConfirmationSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1070,7 +1070,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				emailConfirmationSeedersFs,
@@ -1081,7 +1081,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1089,7 +1089,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				EmailConfirmationEntityStream,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				c.String("file"),
@@ -1103,7 +1103,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1113,12 +1113,12 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				EmailConfirmationActions.Create,
 				reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 				},
 				func() EmailConfirmationEntity {
 					v := CastEmailConfirmationFromCli(c)
@@ -1136,7 +1136,7 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EmailConfirmationUpdateCmd,
 	EmailConfirmationAskCmd,
 	EmailConfirmationCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		EmailConfirmationActions.Remove,
 	),
@@ -1144,7 +1144,7 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 
 func EmailConfirmationCliFn() cli.Command {
 	commands := append(EmailConfirmationImportExportCommands, EmailConfirmationCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, EmailConfirmationDevCommands...)
 	}
 	return cli.Command{
@@ -1161,14 +1161,14 @@ func EmailConfirmationCliFn() cli.Command {
 	}
 }
 
-var EMAIL_CONFIRMATION_ACTION_TABLE = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        EmailConfirmationActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			EmailConfirmationActions.Query,
 			security,
 			reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
@@ -1176,27 +1176,27 @@ var EMAIL_CONFIRMATION_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_QUERY = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/email-confirmations",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &EmailConfirmationEntityQs{}
-			workspaces.HttpQueryEntity(c, EmailConfirmationActions.Query, qs)
+			fireback.HttpQueryEntity(c, EmailConfirmationActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         EmailConfirmationActions.Query,
 	ResponseEntity: &[]EmailConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &EmailConfirmationEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			EmailConfirmationActions.Query,
 			security,
@@ -1207,138 +1207,138 @@ var EMAIL_CONFIRMATION_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, EmailConfirmationQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, EmailConfirmationQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var EMAIL_CONFIRMATION_ACTION_EXPORT = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/email-confirmations/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, EmailConfirmationActionExport)
+			fireback.HttpStreamFileChannel(c, EmailConfirmationActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         EmailConfirmationActionExport,
 	ResponseEntity: &[]EmailConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_GET_ONE = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/email-confirmation/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, EmailConfirmationActions.GetOne)
+			fireback.HttpGetEntity(c, EmailConfirmationActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         EmailConfirmationActions.GetOne,
 	ResponseEntity: &EmailConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_POST_ONE = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new emailConfirmation",
 	Flags:         EmailConfirmationCommonCliFlags,
 	Method:        "POST",
 	Url:           "/email-confirmation",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, EmailConfirmationActions.Create)
+			fireback.HttpPostEntity(c, EmailConfirmationActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, EmailConfirmationActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, EmailConfirmationActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         EmailConfirmationActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &EmailConfirmationEntity{},
 	ResponseEntity: &EmailConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_PATCH = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         EmailConfirmationCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/email-confirmation",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, EmailConfirmationActions.Update)
+			fireback.HttpUpdateEntity(c, EmailConfirmationActions.Update)
 		},
 	},
 	Action:         EmailConfirmationActions.Update,
 	RequestEntity:  &EmailConfirmationEntity{},
 	ResponseEntity: &EmailConfirmationEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/email-confirmations",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, EmailConfirmationActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, EmailConfirmationActionBulkUpdate)
 		},
 	},
 	Action:         EmailConfirmationActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[EmailConfirmationEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[EmailConfirmationEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[EmailConfirmationEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[EmailConfirmationEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_DELETE = workspaces.Module3Action{
+var EMAIL_CONFIRMATION_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/email-confirmation",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, EmailConfirmationActions.Remove)
+			fireback.HttpRemoveEntity(c, EmailConfirmationActions.Remove)
 		},
 	},
 	Action:         EmailConfirmationActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &EmailConfirmationEntity{},
 }
 
@@ -1346,10 +1346,10 @@ var EMAIL_CONFIRMATION_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on EmailConfirmationEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendEmailConfirmationRouter = func(r *[]workspaces.Module3Action) {}
+var AppendEmailConfirmationRouter = func(r *[]fireback.Module3Action) {}
 
-func GetEmailConfirmationModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetEmailConfirmationModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		EMAIL_CONFIRMATION_ACTION_QUERY,
 		EMAIL_CONFIRMATION_ACTION_EXPORT,
 		EMAIL_CONFIRMATION_ACTION_GET_ONE,
@@ -1363,32 +1363,32 @@ func GetEmailConfirmationModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_EMAIL_CONFIRMATION = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_CONFIRMATION = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.email-confirmation.*",
 	Name:        "Entire email confirmation actions (*)",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.email-confirmation.delete",
 	Name:        "Delete email confirmation",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_CONFIRMATION_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.email-confirmation.create",
 	Name:        "Create email confirmation",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.email-confirmation.update",
 	Name:        "Update email confirmation",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_CONFIRMATION_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.email-confirmation.query",
 	Name:        "Query email confirmation",
 	Description: "",
 }
-var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_EMAIL_CONFIRMATION_DELETE,
 	PERM_ROOT_EMAIL_CONFIRMATION_CREATE,
 	PERM_ROOT_EMAIL_CONFIRMATION_UPDATE,
@@ -1398,42 +1398,42 @@ var ALL_EMAIL_CONFIRMATION_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewEmailConfirmationCreatedEvent(
 	payload *EmailConfirmationEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "EmailConfirmationCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
 			},
 		},
 		CacheKey: "*abac.EmailConfirmationEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewEmailConfirmationUpdatedEvent(
 	payload *EmailConfirmationEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "EmailConfirmationUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_EMAIL_CONFIRMATION_QUERY,
 			},
 		},
 		CacheKey: "*abac.EmailConfirmationEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var EmailConfirmationEntityBundle = workspaces.EntityBundle{
+var EmailConfirmationEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_EMAIL_CONFIRMATION_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

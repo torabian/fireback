@@ -4,20 +4,20 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
 	ClassicSigninActionImp = ClassicSigninAction
 }
 
-func ClassicSigninAction(req *ClassicSigninActionReqDto, q workspaces.QueryDSL) (*ClassicSigninActionResDto, *workspaces.IError) {
+func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*ClassicSigninActionResDto, *fireback.IError) {
 
 	if err := ClassicSigninActionReqValidator(req); err != nil {
 		return nil, err
 	}
 
-	config, err2 := WorkspaceConfigActions.GetByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
+	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
 	if err2 != nil {
 		if err2.HttpCode != 404 {
 			return nil, err2
@@ -37,15 +37,15 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q workspaces.QueryDSL) 
 
 	if requiresSessionSecret {
 		if strings.TrimSpace(req.SessionSecret) == "" {
-			return nil, workspaces.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
 		}
 
 		// Here we need to do some comparison to make sure this is the correct session secret
 		var publicSession *PublicAuthenticationEntity = nil
-		workspaces.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
+		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
 
 		if strings.TrimSpace(req.SessionSecret) == "" {
-			return nil, workspaces.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
 		}
 	}
 
@@ -92,7 +92,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q workspaces.QueryDSL) 
 		}
 
 		if !totp.Validate(req.TotpCode, session.Passport.TotpSecret) {
-			return nil, workspaces.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
+			return nil, fireback.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
 		}
 	}
 
@@ -107,7 +107,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q workspaces.QueryDSL) 
 
 // Can be used to authenticate only using value and passport.
 // Do not expose this publicly, by passes recaptcha and all other securities.
-func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q workspaces.QueryDSL) (*ClassicSigninActionResDto, *workspaces.IError) {
+func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*ClassicSigninActionResDto, *fireback.IError) {
 
 	session := &UserSessionDto{}
 
@@ -119,19 +119,19 @@ func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q workspaces.Qu
 	}, nil
 }
 
-func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q workspaces.QueryDSL) *workspaces.IError {
+func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 	// Get the user workspaces as well
 	q.UserId = session.User.UniqueId
 	q.ResolveStrategy = "user"
 	workspacesItems, _, err := UserWorkspaceActions.Query(q)
 	if err != nil {
-		return workspaces.GormErrorToIError(err)
+		return fireback.GormErrorToIError(err)
 	}
 	session.UserWorkspaces = workspacesItems
 
 	// Authorize the session, put the token
 	if token, err := session.User.AuthorizeWithToken(q); err != nil {
-		return workspaces.CastToIError(err)
+		return fireback.CastToIError(err)
 	} else {
 		session.Token = token
 	}
@@ -143,7 +143,7 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q workspaces.Qu
 // This is an unsafe function and should not be exposed to outside.
 // If the password is nil, it means it would work without a password.
 // So make sure you have
-func fetchPureUserAndPassToSession(value string, password string, session *UserSessionDto, q workspaces.QueryDSL) *workspaces.IError {
+func fetchPureUserAndPassToSession(value string, password string, session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 
 	passportPassword, err := fetchUserAndPassToSession(value, session, q)
 
@@ -151,8 +151,8 @@ func fetchPureUserAndPassToSession(value string, password string, session *UserS
 		return err
 	}
 
-	if !workspaces.CheckPasswordHash(password, *passportPassword) {
-		return workspaces.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	if !fireback.CheckPasswordHash(password, *passportPassword) {
+		return fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 
 	return nil
@@ -160,7 +160,7 @@ func fetchPureUserAndPassToSession(value string, password string, session *UserS
 
 // Unsafe function, which reads a user passport and finds him and assigns to the
 // session. Just use in password less scenarios, such as oauth.
-func fetchUserAndPassToSession(value string, session *UserSessionDto, q workspaces.QueryDSL) (*string, *workspaces.IError) {
+func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback.QueryDSL) (*string, *fireback.IError) {
 	ClearPassportValue(&value)
 
 	var passportPassword = ""
@@ -173,24 +173,24 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q workspac
 	}
 
 	if session.User == nil {
-		return nil, workspaces.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 
 	return &passportPassword, nil
 }
 
-func UnsafeGetUserByPassportValue(value string, q workspaces.QueryDSL) (*PassportEntity, *UserEntity, *workspaces.IError) {
+func UnsafeGetUserByPassportValue(value string, q fireback.QueryDSL) (*PassportEntity, *UserEntity, *fireback.IError) {
 
 	// Check the passport if exists
 	var item PassportEntity
-	if err := workspaces.GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
+	if err := fireback.GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
 
-		return nil, nil, workspaces.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 
 	var user UserEntity
-	if err := workspaces.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.String}).First(&user).Error; err != nil {
-		return nil, nil, workspaces.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	if err := fireback.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.String}).First(&user).Error; err != nil {
+		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 
 	return &item, &user, nil

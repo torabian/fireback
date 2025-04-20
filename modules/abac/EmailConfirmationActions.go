@@ -1,16 +1,16 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func EmailConfirmationActionCreate(
-	dto *EmailConfirmationEntity, query workspaces.QueryDSL,
-) (*EmailConfirmationEntity, *workspaces.IError) {
+	dto *EmailConfirmationEntity, query fireback.QueryDSL,
+) (*EmailConfirmationEntity, *fireback.IError) {
 	return EmailConfirmationActionCreateFn(dto, query)
 }
 
 func EmailConfirmationActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *EmailConfirmationEntity,
-) (*EmailConfirmationEntity, *workspaces.IError) {
+) (*EmailConfirmationEntity, *fireback.IError) {
 	return EmailConfirmationActionUpdateFn(query, fields)
 }

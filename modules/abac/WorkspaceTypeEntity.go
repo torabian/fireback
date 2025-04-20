@@ -1,15 +1,15 @@
 package abac
 
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func WorkspaceTypeActionCreate(
-	dto *WorkspaceTypeEntity, query workspaces.QueryDSL,
-) (*WorkspaceTypeEntity, *workspaces.IError) {
+	dto *WorkspaceTypeEntity, query fireback.QueryDSL,
+) (*WorkspaceTypeEntity, *fireback.IError) {
 
 	if errors := ValidateTheWorkspaceTypeEntity(dto); len(errors) > 0 {
-		return nil, &workspaces.IError{
+		return nil, &fireback.IError{
 			Message:  WorkspaceTypeMessages.CannotCreateWorkspaceType,
 			HttpCode: 400,
 			Errors:   errors,
@@ -20,12 +20,12 @@ func WorkspaceTypeActionCreate(
 }
 
 func WorkspaceTypeActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *WorkspaceTypeEntity,
-) (*WorkspaceTypeEntity, *workspaces.IError) {
+) (*WorkspaceTypeEntity, *fireback.IError) {
 
 	if errors := ValidateTheWorkspaceTypeEntity(fields); len(errors) > 0 {
-		return nil, &workspaces.IError{
+		return nil, &fireback.IError{
 			Message:  WorkspaceTypeMessages.CannotModifyWorkspaceType,
 			HttpCode: 400,
 			Errors:   errors,
@@ -35,11 +35,11 @@ func WorkspaceTypeActionUpdate(
 	return WorkspaceTypeActionUpdateFn(query, fields)
 }
 
-func ValidateRoleAndItsExsitence(roleId workspaces.String) (*RoleEntity, []*workspaces.IErrorItem) {
-	items := []*workspaces.IErrorItem{}
+func ValidateRoleAndItsExsitence(roleId fireback.String) (*RoleEntity, []*fireback.IErrorItem) {
+	items := []*fireback.IErrorItem{}
 
 	if !roleId.Valid {
-		items = append(items, &workspaces.IErrorItem{
+		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNecessary,
 		})
@@ -47,15 +47,15 @@ func ValidateRoleAndItsExsitence(roleId workspaces.String) (*RoleEntity, []*work
 		return nil, items
 	}
 
-	if role, err := RoleActions.GetOne(workspaces.QueryDSL{UniqueId: roleId.String}); err != nil {
-		items = append(items, &workspaces.IErrorItem{
+	if role, err := RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId.String}); err != nil {
+		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
 		})
 		return nil, items
 	} else {
 		if role == nil {
-			items = append(items, &workspaces.IErrorItem{
+			items = append(items, &fireback.IErrorItem{
 				Location: "roleId",
 				Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
 			})
@@ -63,7 +63,7 @@ func ValidateRoleAndItsExsitence(roleId workspaces.String) (*RoleEntity, []*work
 			return nil, items
 		} else {
 			if len(role.Capabilities) == 0 {
-				items = append(items, &workspaces.IErrorItem{
+				items = append(items, &fireback.IErrorItem{
 					Location: "roleId",
 					Message:  &WorkspaceTypeMessages.RoleNeedsToHaveCapabilities,
 				})
@@ -78,15 +78,15 @@ func ValidateRoleAndItsExsitence(roleId workspaces.String) (*RoleEntity, []*work
 // Before write or update we need some extra validation for this.
 // It's important to check if the role actually exists, and has some previliges
 // before making it available
-func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*workspaces.IErrorItem {
-	items := []*workspaces.IErrorItem{}
+func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IErrorItem {
+	items := []*fireback.IErrorItem{}
 	role, roleErrors := ValidateRoleAndItsExsitence(fields.RoleId)
 	if len(roleErrors) != 0 {
 		return roleErrors
 	}
 
 	if !role.WorkspaceId.Valid || role.WorkspaceId.String != ROOT_VAR {
-		items = append(items, &workspaces.IErrorItem{
+		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.OnlyRootRoleIsAccepted,
 		})
@@ -97,7 +97,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*workspaces.I
 	return items
 }
 
-func WorkspaceTypeActionPublicQuery(query workspaces.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *workspaces.QueryResultMeta, error) {
+func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, error) {
 	// Make this API public, so the signup screen can get it.
 	// At this moment, we just move things back as are, but maybe later we need
 	// to add some limits on what kind of information is going out.
@@ -124,8 +124,8 @@ func WorkspaceTypeActionPublicQuery(query workspaces.QueryDSL) ([]*QueryWorkspac
 }
 
 func init() {
-	QueryWorkspaceTypesPubliclyActionImp = func(q workspaces.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *workspaces.QueryResultMeta, *workspaces.IError) {
+	QueryWorkspaceTypesPubliclyActionImp = func(q fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
 		res, qrm, err := WorkspaceTypeActionPublicQuery(q)
-		return res, qrm, workspaces.CastToIError(err)
+		return res, qrm, fireback.CastToIError(err)
 	}
 }

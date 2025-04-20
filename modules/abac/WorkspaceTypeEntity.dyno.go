@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/WorkspaceType"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/WorkspaceType"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,14 +32,14 @@ func ResetWorkspaceTypeSeeders(fs *embed.FS) {
 }
 
 type WorkspaceTypeEntityQs struct {
-	Title       workspaces.QueriableField `cli:"title" table:"workspace_type" column:"title" qs:"title"`
-	Description workspaces.QueriableField `cli:"description" table:"workspace_type" column:"description" qs:"description"`
-	Slug        workspaces.QueriableField `cli:"slug" table:"workspace_type" column:"slug" qs:"slug"`
-	Role        workspaces.QueriableField `cli:"role" table:"workspace_type" column:"role" qs:"role"`
+	Title       fireback.QueriableField `cli:"title" table:"workspace_type" column:"title" qs:"title"`
+	Description fireback.QueriableField `cli:"description" table:"workspace_type" column:"description" qs:"description"`
+	Slug        fireback.QueriableField `cli:"slug" table:"workspace_type" column:"slug" qs:"slug"`
+	Role        fireback.QueriableField `cli:"role" table:"workspace_type" column:"role" qs:"role"`
 }
 
 func (x *WorkspaceTypeEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var WorkspaceTypeQsFlags = []cli.Flag{
@@ -63,23 +63,23 @@ var WorkspaceTypeQsFlags = []cli.Flag{
 
 type WorkspaceTypeEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -89,11 +89,11 @@ type WorkspaceTypeEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -125,13 +125,13 @@ type WorkspaceTypeEntity struct {
 	Slug             string `json:"slug" xml:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"        `
 	// The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected
 	Role         *RoleEntity                    `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId       workspaces.String              `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
+	RoleId       fireback.String                `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
 	Translations []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
 	Children     []*WorkspaceTypeEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo     *WorkspaceTypeEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceTypeEntityStream(q workspaces.QueryDSL) (chan []*WorkspaceTypeEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceTypeEntityStream(q fireback.QueryDSL) (chan []*WorkspaceTypeEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*WorkspaceTypeEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -167,8 +167,8 @@ func (x *WorkspaceTypeEntityList) Json() string {
 	}
 	return ""
 }
-func (x *WorkspaceTypeEntityList) ToTree() *workspaces.TreeOperation[WorkspaceTypeEntity] {
-	return workspaces.NewTreeOperation(
+func (x *WorkspaceTypeEntityList) ToTree() *fireback.TreeOperation[WorkspaceTypeEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceTypeEntity) string {
 			if !t.ParentId.Valid {
@@ -185,15 +185,15 @@ func (x *WorkspaceTypeEntityList) ToTree() *workspaces.TreeOperation[WorkspaceTy
 var WorkspaceTypePreloadRelations []string = []string{}
 
 type workspaceTypeActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *workspaces.IError)
-	Create         func(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError)
-	Upsert         func(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *fireback.IError)
+	Create         func(dto *WorkspaceTypeEntity, query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError)
+	Upsert         func(dto *WorkspaceTypeEntity, query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceTypeEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*WorkspaceTypeEntity, query workspaces.QueryDSL) ([]*WorkspaceTypeEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*WorkspaceTypeEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*WorkspaceTypeEntity, query fireback.QueryDSL) ([]*WorkspaceTypeEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceTypeEntity, *fireback.QueryResultMeta, error)
 }
 
 var WorkspaceTypeActions workspaceTypeActionsSig = workspaceTypeActionsSig{
@@ -208,7 +208,7 @@ var WorkspaceTypeActions workspaceTypeActionsSig = workspaceTypeActionsSig{
 	Query:          WorkspaceTypeActionQueryFn,
 }
 
-func WorkspaceTypeActionUpsertFn(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeActionUpsertFn(dto *WorkspaceTypeEntity, query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -222,14 +222,14 @@ var WORKSPACE_TYPE_EVENTS = []string{
 }
 
 type WorkspaceTypeFieldMap struct {
-	Title       workspaces.TranslatedString `yaml:"title"`
-	Description workspaces.TranslatedString `yaml:"description"`
-	Slug        workspaces.TranslatedString `yaml:"slug"`
-	Role        workspaces.TranslatedString `yaml:"role"`
+	Title       fireback.TranslatedString `yaml:"title"`
+	Description fireback.TranslatedString `yaml:"description"`
+	Slug        fireback.TranslatedString `yaml:"slug"`
+	Role        fireback.TranslatedString `yaml:"role"`
 }
 
 var WorkspaceTypeEntityMetaConfig map[string]int64 = map[string]int64{}
-var WorkspaceTypeEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WorkspaceTypeEntity{}))
+var WorkspaceTypeEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&WorkspaceTypeEntity{}))
 
 type WorkspaceTypeEntityPolyglot struct {
 	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
@@ -238,18 +238,18 @@ type WorkspaceTypeEntityPolyglot struct {
 	Description string `yaml:"description,omitempty" xml:"description,omitempty" json:"description,omitempty"`
 }
 
-func entityWorkspaceTypeFormatter(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) {
+func entityWorkspaceTypeFormatter(dto *WorkspaceTypeEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceTypeActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func WorkspaceTypeActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -276,7 +276,7 @@ func WorkspaceTypeActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WorkspaceTypeActionSeeder(query workspaces.QueryDSL, count int) {
+func WorkspaceTypeActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -322,7 +322,7 @@ func WorkspaceTypeActionSeederInitFn() *WorkspaceTypeEntity {
 	entity := &WorkspaceTypeEntity{}
 	return entity
 }
-func WorkspaceTypeAssociationCreate(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) error {
+func WorkspaceTypeAssociationCreate(dto *WorkspaceTypeEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -330,17 +330,17 @@ func WorkspaceTypeAssociationCreate(dto *WorkspaceTypeEntity, query workspaces.Q
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func WorkspaceTypeRelationContentCreate(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) error {
+func WorkspaceTypeRelationContentCreate(dto *WorkspaceTypeEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceTypeRelationContentUpdate(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) error {
+func WorkspaceTypeRelationContentUpdate(dto *WorkspaceTypeEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceTypePolyglotUpdateHandler(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) {
+func WorkspaceTypePolyglotUpdateHandler(dto *WorkspaceTypeEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotUpdateHandler(dto, &WorkspaceTypeEntityPolyglot{}, query)
+	fireback.PolyglotUpdateHandler(dto, &WorkspaceTypeEntityPolyglot{}, query)
 }
 
 /**
@@ -348,8 +348,8 @@ func WorkspaceTypePolyglotUpdateHandler(dto *WorkspaceTypeEntity, query workspac
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func WorkspaceTypeValidator(dto *WorkspaceTypeEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func WorkspaceTypeValidator(dto *WorkspaceTypeEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -396,17 +396,17 @@ And here is the actual object signature:
 	},
 }
 
-func WorkspaceTypeEntityPreSanitize(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) {
+func WorkspaceTypeEntityPreSanitize(dto *WorkspaceTypeEntity, query fireback.QueryDSL) {
 }
-func WorkspaceTypeEntityBeforeCreateAppend(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) {
+func WorkspaceTypeEntityBeforeCreateAppend(dto *WorkspaceTypeEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	WorkspaceTypeRecursiveAddUniqueId(dto, query)
 }
-func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) {
+func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -418,7 +418,7 @@ func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query workspace
   at this moment.
 *
 */
-func WorkspaceTypeMultiInsertFn(dtos []*WorkspaceTypeEntity, query workspaces.QueryDSL) ([]*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeMultiInsertFn(dtos []*WorkspaceTypeEntity, query fireback.QueryDSL) ([]*WorkspaceTypeEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceTypeEntityPreSanitize(dtos[index], query)
@@ -426,19 +426,19 @@ func WorkspaceTypeMultiInsertFn(dtos []*WorkspaceTypeEntity, query workspaces.Qu
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func WorkspaceTypeActionBatchCreateFn(dtos []*WorkspaceTypeEntity, query workspaces.QueryDSL) ([]*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeActionBatchCreateFn(dtos []*WorkspaceTypeEntity, query fireback.QueryDSL) ([]*WorkspaceTypeEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceTypeEntity{}
 		for _, item := range dtos {
@@ -452,12 +452,12 @@ func WorkspaceTypeActionBatchCreateFn(dtos []*WorkspaceTypeEntity, query workspa
 	}
 	return dtos, nil
 }
-func WorkspaceTypeDeleteEntireChildren(query workspaces.QueryDSL, dto *WorkspaceTypeEntity) *workspaces.IError {
+func WorkspaceTypeDeleteEntireChildren(query fireback.QueryDSL, dto *WorkspaceTypeEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := WorkspaceTypeValidator(dto, false); iError != nil {
 		return nil, iError
@@ -471,14 +471,14 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query workspaces.Quer
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -486,35 +486,35 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query workspaces.Quer
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewWorkspaceTypeCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(WORKSPACE_TYPE_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&WorkspaceTypeEntity{}),
+			"entityKey": fireback.GetTypeString(&WorkspaceTypeEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func WorkspaceTypeActionGetOneFn(query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeActionGetOneFn(query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
-	item, err := workspaces.GetOneEntity[WorkspaceTypeEntity](query, refl)
+	item, err := fireback.GetOneEntity[WorkspaceTypeEntity](query, refl)
 	entityWorkspaceTypeFormatter(item, query)
 	return item, err
 }
-func WorkspaceTypeActionGetByWorkspaceFn(query workspaces.QueryDSL) (*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceTypeEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[WorkspaceTypeEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[WorkspaceTypeEntity](query, refl)
 	entityWorkspaceTypeFormatter(item, query)
 	return item, err
 }
-func WorkspaceTypeActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceTypeEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceTypeActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceTypeEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[WorkspaceTypeEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceTypeEntity](query, refl)
 	for _, item := range items {
 		entityWorkspaceTypeFormatter(item, query)
 	}
@@ -524,7 +524,7 @@ func WorkspaceTypeActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceTypeEnti
 var workspaceTypeMemoryItems []*WorkspaceTypeEntity = []*WorkspaceTypeEntity{}
 
 func WorkspaceTypeEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -554,7 +554,7 @@ func WorkspaceTypeMemJoin(items []uint) []*WorkspaceTypeEntity {
 	}
 	return res
 }
-func WorkspaceTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_TYPE_EVENT_UPDATED
 	WorkspaceTypeEntityPreSanitize(fields, query)
@@ -569,7 +569,7 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	WorkspaceTypeRelationContentUpdate(fields, query)
@@ -583,11 +583,11 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		Where(&WorkspaceTypeEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewWorkspaceTypeUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -599,9 +599,9 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	   })*/
 	return &itemRefetched, nil
 }
-func WorkspaceTypeActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *workspaces.IError) {
+func WorkspaceTypeActionUpdateFn(query fireback.QueryDSL, fields *WorkspaceTypeEntity) (*WorkspaceTypeEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WorkspaceTypeValidator(fields, true); iError != nil {
@@ -611,11 +611,11 @@ func WorkspaceTypeActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceTyp
 	// WorkspaceTypeRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *WorkspaceTypeEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = WorkspaceTypeUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -623,7 +623,7 @@ func WorkspaceTypeActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceTyp
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WorkspaceTypeUpdateExec(dbref, query, fields)
@@ -634,8 +634,8 @@ var WorkspaceTypeWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspacetypes ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
 			AllowOnRoot:    true,
 		})
 		count, _ := WorkspaceTypeActionWipeClean(query)
@@ -644,16 +644,16 @@ var WorkspaceTypeWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceTypeActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func WorkspaceTypeActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceTypeEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE}
-	return workspaces.RemoveEntity[WorkspaceTypeEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE}
+	return fireback.RemoveEntity[WorkspaceTypeEntity](query, refl)
 }
-func WorkspaceTypeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func WorkspaceTypeActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WorkspaceTypeEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[WorkspaceTypeEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'WorkspaceTypeEntity'", subErr)
 			return count, subErr
@@ -664,11 +664,11 @@ func WorkspaceTypeActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func WorkspaceTypeActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WorkspaceTypeEntity]) (
-	*workspaces.BulkRecordRequest[WorkspaceTypeEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[WorkspaceTypeEntity]) (
+	*fireback.BulkRecordRequest[WorkspaceTypeEntity], *fireback.IError,
 ) {
 	result := []*WorkspaceTypeEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := WorkspaceTypeActions.Update(query, record)
@@ -683,7 +683,7 @@ func WorkspaceTypeActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *WorkspaceTypeEntity) Json() string {
 	if x != nil {
@@ -693,7 +693,7 @@ func (x *WorkspaceTypeEntity) Json() string {
 	return ""
 }
 
-var WorkspaceTypeEntityMeta = workspaces.TableMetaData{
+var WorkspaceTypeEntityMeta = fireback.TableMetaData{
 	EntityName:    "WorkspaceType",
 	ExportKey:     "workspace-types",
 	TableNameInDb: "workspace-type_entities",
@@ -703,23 +703,23 @@ var WorkspaceTypeEntityMeta = workspaces.TableMetaData{
 }
 
 func WorkspaceTypeActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[WorkspaceTypeEntity](query, WorkspaceTypeActions.Query, WorkspaceTypePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[WorkspaceTypeEntity](query, WorkspaceTypeActions.Query, WorkspaceTypePreloadRelations)
 }
 func WorkspaceTypeActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[WorkspaceTypeEntity](query, WorkspaceTypeActions.Query, WorkspaceTypePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[WorkspaceTypeEntity](query, WorkspaceTypeActions.Query, WorkspaceTypePreloadRelations)
 }
 func WorkspaceTypeActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content WorkspaceTypeEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WorkspaceTypeActions.Create(&content, query)
@@ -763,7 +763,7 @@ var WorkspaceTypeCommonCliFlags = []cli.Flag{
 		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected (one)`,
 	},
 }
-var WorkspaceTypeCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var WorkspaceTypeCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "title",
 		StructField: "Title",
@@ -837,17 +837,17 @@ var WorkspaceTypeCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
 			AllowOnRoot:    true,
 		})
 		entity := &WorkspaceTypeEntity{}
-		workspaces.PopulateInteractively(entity, c, WorkspaceTypeCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, WorkspaceTypeCommonInteractiveCliFlags)
 		if entity, err := WorkspaceTypeActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -857,8 +857,8 @@ var WorkspaceTypeUpdateCmd cli.Command = cli.Command{
 	Flags:   WorkspaceTypeCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
 			AllowOnRoot:    true,
 		})
 		entity := CastWorkspaceTypeFromCli(c)
@@ -881,7 +881,7 @@ func CastWorkspaceTypeFromCli(c *cli.Context) *WorkspaceTypeEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("title") {
 		template.Title = c.String("title")
@@ -893,12 +893,12 @@ func CastWorkspaceTypeFromCli(c *cli.Context) *WorkspaceTypeEntity {
 		template.Slug = c.String("slug")
 	}
 	if c.IsSet("role-id") {
-		template.RoleId = workspaces.NewStringAutoNull(c.String("role-id"))
+		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
 	}
 	return template
 }
-func WorkspaceTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func WorkspaceTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		WorkspaceTypeActions.Create,
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
@@ -908,8 +908,8 @@ func WorkspaceTypeSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q worksp
 	)
 }
 func WorkspaceTypeSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		WorkspaceTypeActions.Create,
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		workspaceTypeSeedersFs,
@@ -918,8 +918,8 @@ func WorkspaceTypeSyncSeeders() {
 	)
 }
 func WorkspaceTypeImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		WorkspaceTypeActions.Create,
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -927,19 +927,19 @@ func WorkspaceTypeImportMocks() {
 		false,
 	)
 }
-func WorkspaceTypeWriteQueryMock(ctx workspaces.MockQueryContext) {
+func WorkspaceTypeWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := WorkspaceTypeActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "WorkspaceType", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "WorkspaceType", result)
 	}
 }
-func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -951,7 +951,7 @@ func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *works
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := WorkspaceTypeActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -976,7 +976,7 @@ var WorkspaceTypeDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := WorkspaceTypeActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1002,7 +1002,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of workspace-types, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]WorkspaceTypeEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1011,7 +1011,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(workspaceTypeSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(workspaceTypeSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1024,7 +1024,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceTypeActions.Create,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				workspaceTypeSeedersFs,
@@ -1035,7 +1035,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1043,7 +1043,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				WorkspaceTypeEntityStream,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				c.String("file"),
@@ -1057,7 +1057,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1067,12 +1067,12 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				WorkspaceTypeActions.Create,
 				reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
 					AllowOnRoot:    true,
 				},
 				func() WorkspaceTypeEntity {
@@ -1091,7 +1091,7 @@ var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
 	WorkspaceTypeUpdateCmd,
 	WorkspaceTypeAskCmd,
 	WorkspaceTypeCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		WorkspaceTypeActions.Remove,
 	),
@@ -1099,7 +1099,7 @@ var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceTypeCliFn() cli.Command {
 	commands := append(WorkspaceTypeImportExportCommands, WorkspaceTypeCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, WorkspaceTypeDevCommands...)
 	}
 	return cli.Command{
@@ -1116,14 +1116,14 @@ func WorkspaceTypeCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_TYPE_ACTION_TABLE = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        WorkspaceTypeActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			WorkspaceTypeActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
@@ -1131,28 +1131,28 @@ var WORKSPACE_TYPE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var WORKSPACE_TYPE_ACTION_QUERY = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-types",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &WorkspaceTypeEntityQs{}
-			workspaces.HttpQueryEntity(c, WorkspaceTypeActions.Query, qs)
+			fireback.HttpQueryEntity(c, WorkspaceTypeActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceTypeActions.Query,
 	ResponseEntity: &[]WorkspaceTypeEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &WorkspaceTypeEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			WorkspaceTypeActions.Query,
 			security,
@@ -1163,144 +1163,144 @@ var WORKSPACE_TYPE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, WorkspaceTypeQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, WorkspaceTypeQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_TYPE_ACTION_EXPORT = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-types/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, WorkspaceTypeActionExport)
+			fireback.HttpStreamFileChannel(c, WorkspaceTypeActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceTypeActionExport,
 	ResponseEntity: &[]WorkspaceTypeEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_GET_ONE = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-type/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_QUERY},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, WorkspaceTypeActions.GetOne)
+			fireback.HttpGetEntity(c, WorkspaceTypeActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         WorkspaceTypeActions.GetOne,
 	ResponseEntity: &WorkspaceTypeEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_POST_ONE = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceType",
 	Flags:         WorkspaceTypeCommonCliFlags,
 	Method:        "POST",
 	Url:           "/workspace-type",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_CREATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, WorkspaceTypeActions.Create)
+			fireback.HttpPostEntity(c, WorkspaceTypeActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, WorkspaceTypeActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, WorkspaceTypeActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         WorkspaceTypeActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceTypeEntity{},
 	ResponseEntity: &WorkspaceTypeEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_PATCH = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceTypeCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/workspace-type",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, WorkspaceTypeActions.Update)
+			fireback.HttpUpdateEntity(c, WorkspaceTypeActions.Update)
 		},
 	},
 	Action:         WorkspaceTypeActions.Update,
 	RequestEntity:  &WorkspaceTypeEntity{},
 	ResponseEntity: &WorkspaceTypeEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-types",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, WorkspaceTypeActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, WorkspaceTypeActionBulkUpdate)
 		},
 	},
 	Action:         WorkspaceTypeActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[WorkspaceTypeEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[WorkspaceTypeEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[WorkspaceTypeEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[WorkspaceTypeEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
 	},
 }
-var WORKSPACE_TYPE_ACTION_DELETE = workspaces.Module3Action{
+var WORKSPACE_TYPE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-type",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_TYPE_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, WorkspaceTypeActions.Remove)
+			fireback.HttpRemoveEntity(c, WorkspaceTypeActions.Remove)
 		},
 	},
 	Action:         WorkspaceTypeActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &WorkspaceTypeEntity{},
 }
 
@@ -1308,10 +1308,10 @@ var WORKSPACE_TYPE_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on WorkspaceTypeEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceTypeRouter = func(r *[]workspaces.Module3Action) {}
+var AppendWorkspaceTypeRouter = func(r *[]fireback.Module3Action) {}
 
-func GetWorkspaceTypeModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetWorkspaceTypeModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		WORKSPACE_TYPE_ACTION_QUERY,
 		WORKSPACE_TYPE_ACTION_EXPORT,
 		WORKSPACE_TYPE_ACTION_GET_ONE,
@@ -1325,32 +1325,32 @@ func GetWorkspaceTypeModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_WORKSPACE_TYPE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_TYPE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-type.*",
 	Name:        "Entire workspace type actions (*)",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_TYPE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_TYPE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-type.delete",
 	Name:        "Delete workspace type",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_TYPE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_TYPE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-type.create",
 	Name:        "Create workspace type",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_TYPE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_TYPE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-type.update",
 	Name:        "Update workspace type",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_TYPE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_TYPE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-type.query",
 	Name:        "Query workspace type",
 	Description: "",
 }
-var ALL_WORKSPACE_TYPE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_WORKSPACE_TYPE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_WORKSPACE_TYPE_DELETE,
 	PERM_ROOT_WORKSPACE_TYPE_CREATE,
 	PERM_ROOT_WORKSPACE_TYPE_UPDATE,
@@ -1373,27 +1373,27 @@ var WorkspaceTypeMessages = newWorkspaceTypeMessageCode()
 
 func newWorkspaceTypeMessageCode() *workspaceTypeMsgs {
 	return &workspaceTypeMsgs{
-		CannotCreateWorkspaceType: workspaces.ErrorItem{
+		CannotCreateWorkspaceType: fireback.ErrorItem{
 			"$":  "CannotCreateWorkspaceType",
 			"en": "You cannot create workspace type due to some validation errors.",
 		},
-		CannotModifyWorkspaceType: workspaces.ErrorItem{
+		CannotModifyWorkspaceType: fireback.ErrorItem{
 			"$":  "CannotModifyWorkspaceType",
 			"en": "You cannot modify workspace type due to some validation errors.",
 		},
-		OnlyRootRoleIsAccepted: workspaces.ErrorItem{
+		OnlyRootRoleIsAccepted: fireback.ErrorItem{
 			"$":  "OnlyRootRoleIsAccepted",
 			"en": "You can only select a role which is created or belong to 'root' workspace.",
 		},
-		RoleIsNecessary: workspaces.ErrorItem{
+		RoleIsNecessary: fireback.ErrorItem{
 			"$":  "RoleIsNecessary",
 			"en": "Role needs to be defined and exist.",
 		},
-		RoleIsNotAccessible: workspaces.ErrorItem{
+		RoleIsNotAccessible: fireback.ErrorItem{
 			"$":  "RoleIsNotAccessible",
 			"en": "Role is not accessible unfortunately. Make sure you the role chose exists.",
 		},
-		RoleNeedsToHaveCapabilities: workspaces.ErrorItem{
+		RoleNeedsToHaveCapabilities: fireback.ErrorItem{
 			"$":  "RoleNeedsToHaveCapabilities",
 			"en": "Role needs to have at least one capability before could be assigned.",
 		},
@@ -1401,23 +1401,23 @@ func newWorkspaceTypeMessageCode() *workspaceTypeMsgs {
 }
 
 type workspaceTypeMsgs struct {
-	CannotCreateWorkspaceType   workspaces.ErrorItem
-	CannotModifyWorkspaceType   workspaces.ErrorItem
-	OnlyRootRoleIsAccepted      workspaces.ErrorItem
-	RoleIsNecessary             workspaces.ErrorItem
-	RoleIsNotAccessible         workspaces.ErrorItem
-	RoleNeedsToHaveCapabilities workspaces.ErrorItem
+	CannotCreateWorkspaceType   fireback.ErrorItem
+	CannotModifyWorkspaceType   fireback.ErrorItem
+	OnlyRootRoleIsAccepted      fireback.ErrorItem
+	RoleIsNecessary             fireback.ErrorItem
+	RoleIsNotAccessible         fireback.ErrorItem
+	RoleNeedsToHaveCapabilities fireback.ErrorItem
 }
 
 func NewWorkspaceTypeCreatedEvent(
 	payload *WorkspaceTypeEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceTypeCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_TYPE_QUERY,
 			},
 			AllowOnRoot: true,
@@ -1425,18 +1425,18 @@ func NewWorkspaceTypeCreatedEvent(
 		CacheKey: "*abac.WorkspaceTypeEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewWorkspaceTypeUpdatedEvent(
 	payload *WorkspaceTypeEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceTypeUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_TYPE_QUERY,
 			},
 			AllowOnRoot: true,
@@ -1444,11 +1444,11 @@ func NewWorkspaceTypeUpdatedEvent(
 		CacheKey: "*abac.WorkspaceTypeEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var WorkspaceTypeEntityBundle = workspaces.EntityBundle{
+var WorkspaceTypeEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_TYPE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

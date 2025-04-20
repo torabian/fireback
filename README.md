@@ -150,4 +150,4 @@ In order to release a new fireback, follow these steps:
 - OVERVIEW.md
 - cmd/fireback/msi/Product.wxs
 - .github/workflows/fireback-build.yml
-- modules/workspaces/version.go
+- modules/fireback/version.go

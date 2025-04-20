@@ -8,7 +8,7 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"strings"
 )
@@ -16,10 +16,10 @@ import (
 func CastEmailOtpResponseFromCli(c *cli.Context) *EmailOtpResponseDto {
 	template := &EmailOtpResponseDto{}
 	if c.IsSet("request-id") {
-		template.RequestId = workspaces.NewStringAutoNull(c.String("request-id"))
+		template.RequestId = fireback.NewStringAutoNull(c.String("request-id"))
 	}
 	if c.IsSet("user-session-id") {
-		template.UserSessionId = workspaces.NewStringAutoNull(c.String("user-session-id"))
+		template.UserSessionId = fireback.NewStringAutoNull(c.String("user-session-id"))
 	}
 	return template
 }
@@ -54,9 +54,9 @@ var EmailOtpResponseDtoCommonCliFlagsOptional = []cli.Flag{
 
 type EmailOtpResponseDto struct {
 	Request       *PublicAuthenticationEntity `json:"request" xml:"request" yaml:"request"    gorm:"foreignKey:RequestId;references:UniqueId"      `
-	RequestId     workspaces.String           `json:"requestId" yaml:"requestId" xml:"requestId"  `
+	RequestId     fireback.String             `json:"requestId" yaml:"requestId" xml:"requestId"  `
 	UserSession   *UserSessionDto             `json:"userSession" xml:"userSession" yaml:"userSession"    gorm:"foreignKey:UserSessionId;references:UniqueId"      `
-	UserSessionId workspaces.String           `json:"userSessionId" yaml:"userSessionId" xml:"userSessionId"  `
+	UserSessionId fireback.String             `json:"userSessionId" yaml:"userSessionId" xml:"userSessionId"  `
 }
 type EmailOtpResponseDtoList struct {
 	Items []*EmailOtpResponseDto
@@ -85,7 +85,7 @@ func (x *EmailOtpResponseDto) Json() string {
 func (x *EmailOtpResponseDto) JsonPrint() {
 	fmt.Println(x.Json())
 	// Somehow to make the import always needed, makes no sense.
-	_ = workspaces.Body
+	_ = fireback.Body
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.

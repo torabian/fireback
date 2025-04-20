@@ -1,6 +1,6 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 /*
 This file holds in memory some temporary solution to tokens that need to be used upon redirection
@@ -14,7 +14,7 @@ type exchangeItem struct {
 var exchangePool map[string]exchangeItem = map[string]exchangeItem{}
 
 func PutTokenInExchangePool(token string) string {
-	uniqueId := workspaces.UUID()
+	uniqueId := fireback.UUID()
 
 	exchangePool[uniqueId] = exchangeItem{
 		token: token,
@@ -23,13 +23,13 @@ func PutTokenInExchangePool(token string) string {
 	return uniqueId
 }
 
-func GetTokenFromExchangePoolAction(query workspaces.QueryDSL) (*ExchangeKeyInformationDto, *workspaces.IError) {
+func GetTokenFromExchangePoolAction(query fireback.QueryDSL) (*ExchangeKeyInformationDto, *fireback.IError) {
 	item := exchangePool[query.UniqueId]
 	token := item.token
 	delete(exchangePool, query.UniqueId)
 
 	if token == "" {
-		return nil, workspaces.Create401Error(&AbacMessages.InvalidExchangeKey, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.InvalidExchangeKey, []string{})
 	}
 
 	return &ExchangeKeyInformationDto{Key: token}, nil
@@ -167,25 +167,25 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 
 	var item TokenEntity
 
-	if err := workspaces.GetDbRef().Preload("User").Where(workspaces.RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
+	if err := fireback.GetDbRef().Preload("User").Where(fireback.RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
 		return &UserEntity{}, err
 	}
 
-	user, _ := UserActions.GetOne(workspaces.QueryDSL{UniqueId: item.UserId.String})
+	user, _ := UserActions.GetOne(fireback.QueryDSL{UniqueId: item.UserId.String})
 	return user, nil
 }
 
 func UserActionCreate(
-	dto *UserEntity, query workspaces.QueryDSL,
-) (*UserEntity, *workspaces.IError) {
+	dto *UserEntity, query fireback.QueryDSL,
+) (*UserEntity, *fireback.IError) {
 	query.WorkspaceId = "root"
 	return UserActionCreateFn(dto, query)
 }
 
 func UserActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *UserEntity,
-) (*UserEntity, *workspaces.IError) {
+) (*UserEntity, *fireback.IError) {
 	return UserActionUpdateFn(query, fields)
 }
 

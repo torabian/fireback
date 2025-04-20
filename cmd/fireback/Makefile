@@ -6,19 +6,19 @@ deb:
 dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
-	../../app gen module3spec --out ../../modules/workspaces/module3-json-schema.json
+	../../app gen module3spec --out ../../modules/fireback/module3-json-schema.json
 
 # Ui2 also copies the fireback-manage, in case it has a different built required
 # make sure you change it here too.
 
 ui2:
-	cd ../../modules/workspaces/codegen/react-new && npm run self-service:build && cd - && \
-	rm -rf ../../modules/workspaces/codegen/selfservice && cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/selfservice && \
-	git checkout ../../modules/workspaces/codegen/selfservice/index.go 
-	cd ../../modules/workspaces/codegen/react-new && npm run manage:build && cd - && \
-	rm -rf ../../modules/workspaces/codegen/fireback-manage && \
-	cp -R ../../modules/workspaces/codegen/react-new/build ../../modules/workspaces/codegen/fireback-manage && \
-	git checkout ../../modules/workspaces/codegen/fireback-manage/index.go
+	cd ../../modules/fireback/codegen/react-new && npm run self-service:build && cd - && \
+	rm -rf ../../modules/fireback/codegen/selfservice && cp -R ../../modules/fireback/codegen/react-new/build ../../modules/fireback/codegen/selfservice && \
+	git checkout ../../modules/fireback/codegen/selfservice/index.go 
+	cd ../../modules/fireback/codegen/react-new && npm run manage:build && cd - && \
+	rm -rf ../../modules/fireback/codegen/fireback-manage && \
+	cp -R ../../modules/fireback/codegen/react-new/build ../../modules/fireback/codegen/fireback-manage && \
+	git checkout ../../modules/fireback/codegen/fireback-manage/index.go
 
 
 linux-arm64:

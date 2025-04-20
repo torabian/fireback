@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/PassportMethod"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PassportMethod"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,13 +32,13 @@ func ResetPassportMethodSeeders(fs *embed.FS) {
 }
 
 type PassportMethodEntityQs struct {
-	Type      workspaces.QueriableField `cli:"type" table:"passport_method" column:"type" qs:"type"`
-	Region    workspaces.QueriableField `cli:"region" table:"passport_method" column:"region" qs:"region"`
-	ClientKey workspaces.QueriableField `cli:"client-key" table:"passport_method" column:"client_key" qs:"clientKey"`
+	Type      fireback.QueriableField `cli:"type" table:"passport_method" column:"type" qs:"type"`
+	Region    fireback.QueriableField `cli:"region" table:"passport_method" column:"region" qs:"region"`
+	ClientKey fireback.QueriableField `cli:"client-key" table:"passport_method" column:"client_key" qs:"clientKey"`
 }
 
 func (x *PassportMethodEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var PassportMethodQsFlags = []cli.Flag{
@@ -58,23 +58,23 @@ var PassportMethodQsFlags = []cli.Flag{
 
 type PassportMethodEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -84,11 +84,11 @@ type PassportMethodEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -124,7 +124,7 @@ type PassportMethodEntity struct {
 	LinkedTo  *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PassportMethodEntityStream(q workspaces.QueryDSL) (chan []*PassportMethodEntity, *workspaces.QueryResultMeta, error) {
+func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*PassportMethodEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*PassportMethodEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -160,8 +160,8 @@ func (x *PassportMethodEntityList) Json() string {
 	}
 	return ""
 }
-func (x *PassportMethodEntityList) ToTree() *workspaces.TreeOperation[PassportMethodEntity] {
-	return workspaces.NewTreeOperation(
+func (x *PassportMethodEntityList) ToTree() *fireback.TreeOperation[PassportMethodEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *PassportMethodEntity) string {
 			if !t.ParentId.Valid {
@@ -178,15 +178,15 @@ func (x *PassportMethodEntityList) ToTree() *workspaces.TreeOperation[PassportMe
 var PassportMethodPreloadRelations []string = []string{}
 
 type passportMethodActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *PassportMethodEntity) (*PassportMethodEntity, *workspaces.IError)
-	Create         func(dto *PassportMethodEntity, query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError)
-	Upsert         func(dto *PassportMethodEntity, query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *PassportMethodEntity) (*PassportMethodEntity, *fireback.IError)
+	Create         func(dto *PassportMethodEntity, query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
+	Upsert         func(dto *PassportMethodEntity, query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
 	SeederInit     func() *PassportMethodEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*PassportMethodEntity, query workspaces.QueryDSL) ([]*PassportMethodEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*PassportMethodEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.QueryResultMeta, error)
 }
 
 var PassportMethodActions passportMethodActionsSig = passportMethodActionsSig{
@@ -201,7 +201,7 @@ var PassportMethodActions passportMethodActionsSig = passportMethodActionsSig{
 	Query:          PassportMethodActionQueryFn,
 }
 
-func PassportMethodActionUpsertFn(dto *PassportMethodEntity, query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodActionUpsertFn(dto *PassportMethodEntity, query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -215,26 +215,26 @@ var PASSPORT_METHOD_EVENTS = []string{
 }
 
 type PassportMethodFieldMap struct {
-	Type      workspaces.TranslatedString `yaml:"type"`
-	Region    workspaces.TranslatedString `yaml:"region"`
-	ClientKey workspaces.TranslatedString `yaml:"clientKey"`
+	Type      fireback.TranslatedString `yaml:"type"`
+	Region    fireback.TranslatedString `yaml:"region"`
+	ClientKey fireback.TranslatedString `yaml:"clientKey"`
 }
 
 var PassportMethodEntityMetaConfig map[string]int64 = map[string]int64{}
-var PassportMethodEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&PassportMethodEntity{}))
+var PassportMethodEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&PassportMethodEntity{}))
 
-func entityPassportMethodFormatter(dto *PassportMethodEntity, query workspaces.QueryDSL) {
+func entityPassportMethodFormatter(dto *PassportMethodEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PassportMethodActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func PassportMethodActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -261,7 +261,7 @@ func PassportMethodActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func PassportMethodActionSeeder(query workspaces.QueryDSL, count int) {
+func PassportMethodActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -287,7 +287,7 @@ func PassportMethodActionSeederInitFn() *PassportMethodEntity {
 	entity := &PassportMethodEntity{}
 	return entity
 }
-func PassportMethodAssociationCreate(dto *PassportMethodEntity, query workspaces.QueryDSL) error {
+func PassportMethodAssociationCreate(dto *PassportMethodEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -295,13 +295,13 @@ func PassportMethodAssociationCreate(dto *PassportMethodEntity, query workspaces
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func PassportMethodRelationContentCreate(dto *PassportMethodEntity, query workspaces.QueryDSL) error {
+func PassportMethodRelationContentCreate(dto *PassportMethodEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PassportMethodRelationContentUpdate(dto *PassportMethodEntity, query workspaces.QueryDSL) error {
+func PassportMethodRelationContentUpdate(dto *PassportMethodEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PassportMethodPolyglotUpdateHandler(dto *PassportMethodEntity, query workspaces.QueryDSL) {
+func PassportMethodPolyglotUpdateHandler(dto *PassportMethodEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -312,8 +312,8 @@ func PassportMethodPolyglotUpdateHandler(dto *PassportMethodEntity, query worksp
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func PassportMethodValidator(dto *PassportMethodEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func PassportMethodValidator(dto *PassportMethodEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -359,17 +359,17 @@ And here is the actual object signature:
 	},
 }
 
-func PassportMethodEntityPreSanitize(dto *PassportMethodEntity, query workspaces.QueryDSL) {
+func PassportMethodEntityPreSanitize(dto *PassportMethodEntity, query fireback.QueryDSL) {
 }
-func PassportMethodEntityBeforeCreateAppend(dto *PassportMethodEntity, query workspaces.QueryDSL) {
+func PassportMethodEntityBeforeCreateAppend(dto *PassportMethodEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	PassportMethodRecursiveAddUniqueId(dto, query)
 }
-func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query workspaces.QueryDSL) {
+func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -381,7 +381,7 @@ func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query workspa
   at this moment.
 *
 */
-func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query workspaces.QueryDSL) ([]*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PassportMethodEntityPreSanitize(dtos[index], query)
@@ -389,19 +389,19 @@ func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query workspaces.
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func PassportMethodActionBatchCreateFn(dtos []*PassportMethodEntity, query workspaces.QueryDSL) ([]*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodActionBatchCreateFn(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PassportMethodEntity{}
 		for _, item := range dtos {
@@ -415,12 +415,12 @@ func PassportMethodActionBatchCreateFn(dtos []*PassportMethodEntity, query works
 	}
 	return dtos, nil
 }
-func PassportMethodDeleteEntireChildren(query workspaces.QueryDSL, dto *PassportMethodEntity) *workspaces.IError {
+func PassportMethodDeleteEntireChildren(query fireback.QueryDSL, dto *PassportMethodEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func PassportMethodActionCreateFn(dto *PassportMethodEntity, query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodActionCreateFn(dto *PassportMethodEntity, query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := PassportMethodValidator(dto, false); iError != nil {
 		return nil, iError
@@ -434,14 +434,14 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query workspaces.Qu
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -449,35 +449,35 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query workspaces.Qu
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewPassportMethodCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(PASSPORT_METHOD_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&PassportMethodEntity{}),
+			"entityKey": fireback.GetTypeString(&PassportMethodEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func PassportMethodActionGetOneFn(query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodActionGetOneFn(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
-	item, err := workspaces.GetOneEntity[PassportMethodEntity](query, refl)
+	item, err := fireback.GetOneEntity[PassportMethodEntity](query, refl)
 	entityPassportMethodFormatter(item, query)
 	return item, err
 }
-func PassportMethodActionGetByWorkspaceFn(query workspaces.QueryDSL) (*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodActionGetByWorkspaceFn(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[PassportMethodEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[PassportMethodEntity](query, refl)
 	entityPassportMethodFormatter(item, query)
 	return item, err
 }
-func PassportMethodActionQueryFn(query workspaces.QueryDSL) ([]*PassportMethodEntity, *workspaces.QueryResultMeta, error) {
+func PassportMethodActionQueryFn(query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[PassportMethodEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[PassportMethodEntity](query, refl)
 	for _, item := range items {
 		entityPassportMethodFormatter(item, query)
 	}
@@ -487,7 +487,7 @@ func PassportMethodActionQueryFn(query workspaces.QueryDSL) ([]*PassportMethodEn
 var passportMethodMemoryItems []*PassportMethodEntity = []*PassportMethodEntity{}
 
 func PassportMethodEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -517,7 +517,7 @@ func PassportMethodMemJoin(items []uint) []*PassportMethodEntity {
 	}
 	return res
 }
-func PassportMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PASSPORT_METHOD_EVENT_UPDATED
 	PassportMethodEntityPreSanitize(fields, query)
@@ -532,7 +532,7 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields 
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	PassportMethodRelationContentUpdate(fields, query)
@@ -546,11 +546,11 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields 
 		Where(&PassportMethodEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewPassportMethodUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -562,9 +562,9 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields 
 	   })*/
 	return &itemRefetched, nil
 }
-func PassportMethodActionUpdateFn(query workspaces.QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *workspaces.IError) {
+func PassportMethodActionUpdateFn(query fireback.QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PassportMethodValidator(fields, true); iError != nil {
@@ -574,11 +574,11 @@ func PassportMethodActionUpdateFn(query workspaces.QueryDSL, fields *PassportMet
 	// PassportMethodRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *PassportMethodEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = PassportMethodUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -586,7 +586,7 @@ func PassportMethodActionUpdateFn(query workspaces.QueryDSL, fields *PassportMet
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return PassportMethodUpdateExec(dbref, query, fields)
@@ -597,8 +597,8 @@ var PassportMethodWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire passportmethods ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
@@ -608,16 +608,16 @@ var PassportMethodWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PassportMethodActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func PassportMethodActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE}
-	return workspaces.RemoveEntity[PassportMethodEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE}
+	return fireback.RemoveEntity[PassportMethodEntity](query, refl)
 }
-func PassportMethodActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func PassportMethodActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[PassportMethodEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[PassportMethodEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'PassportMethodEntity'", subErr)
 			return count, subErr
@@ -628,11 +628,11 @@ func PassportMethodActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func PassportMethodActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PassportMethodEntity]) (
-	*workspaces.BulkRecordRequest[PassportMethodEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[PassportMethodEntity]) (
+	*fireback.BulkRecordRequest[PassportMethodEntity], *fireback.IError,
 ) {
 	result := []*PassportMethodEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := PassportMethodActions.Update(query, record)
@@ -647,7 +647,7 @@ func PassportMethodActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *PassportMethodEntity) Json() string {
 	if x != nil {
@@ -657,7 +657,7 @@ func (x *PassportMethodEntity) Json() string {
 	return ""
 }
 
-var PassportMethodEntityMeta = workspaces.TableMetaData{
+var PassportMethodEntityMeta = fireback.TableMetaData{
 	EntityName:    "PassportMethod",
 	ExportKey:     "passport-methods",
 	TableNameInDb: "passport-method_entities",
@@ -667,23 +667,23 @@ var PassportMethodEntityMeta = workspaces.TableMetaData{
 }
 
 func PassportMethodActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[PassportMethodEntity](query, PassportMethodActions.Query, PassportMethodPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[PassportMethodEntity](query, PassportMethodActions.Query, PassportMethodPreloadRelations)
 }
 func PassportMethodActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[PassportMethodEntity](query, PassportMethodActions.Query, PassportMethodPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[PassportMethodEntity](query, PassportMethodActions.Query, PassportMethodPreloadRelations)
 }
 func PassportMethodActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content PassportMethodEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PassportMethodActions.Create(&content, query)
@@ -723,7 +723,7 @@ var PassportMethodCommonCliFlags = []cli.Flag{
 		Usage:    `Client key for those methods such as 'google' which require oauth client key (string)`,
 	},
 }
-var PassportMethodCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var PassportMethodCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "type",
 		StructField: "Type",
@@ -793,18 +793,18 @@ var PassportMethodCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
 		entity := &PassportMethodEntity{}
-		workspaces.PopulateInteractively(entity, c, PassportMethodCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, PassportMethodCommonInteractiveCliFlags)
 		if entity, err := PassportMethodActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -814,8 +814,8 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	Flags:   PassportMethodCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
@@ -839,7 +839,7 @@ func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("type") {
 		template.Type = c.String("type")
@@ -852,8 +852,8 @@ func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
 	}
 	return template
 }
-func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
@@ -863,8 +863,8 @@ func PassportMethodSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q works
 	)
 }
 func PassportMethodSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		passportMethodSeedersFs,
@@ -873,8 +873,8 @@ func PassportMethodSyncSeeders() {
 	)
 }
 func PassportMethodImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		PassportMethodActions.Create,
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -882,19 +882,19 @@ func PassportMethodImportMocks() {
 		false,
 	)
 }
-func PassportMethodWriteQueryMock(ctx workspaces.MockQueryContext) {
+func PassportMethodWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := PassportMethodActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "PassportMethod", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "PassportMethod", result)
 	}
 }
-func PassportMethodsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func PassportMethodsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -906,7 +906,7 @@ func PassportMethodsActionQueryString(keyword string, page int) ([]string, *work
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := PassportMethodActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -931,7 +931,7 @@ var PassportMethodDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := PassportMethodActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -957,7 +957,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of passport-methods, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]PassportMethodEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -966,7 +966,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(passportMethodSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(passportMethodSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -979,7 +979,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PassportMethodActions.Create,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 				passportMethodSeedersFs,
@@ -990,7 +990,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -998,7 +998,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				PassportMethodEntityStream,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 				c.String("file"),
@@ -1012,7 +1012,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1022,12 +1022,12 @@ var PassportMethodImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				PassportMethodActions.Create,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
 					ResolveStrategy: "workspace",
 					AllowOnRoot:     true,
 				},
@@ -1047,7 +1047,7 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 	PassportMethodUpdateCmd,
 	PassportMethodAskCmd,
 	PassportMethodCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
 		PassportMethodActions.Remove,
 	),
@@ -1055,7 +1055,7 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 
 func PassportMethodCliFn() cli.Command {
 	commands := append(PassportMethodImportExportCommands, PassportMethodCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, PassportMethodDevCommands...)
 	}
 	return cli.Command{
@@ -1073,14 +1073,14 @@ func PassportMethodCliFn() cli.Command {
 	}
 }
 
-var PASSPORT_METHOD_ACTION_TABLE = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PassportMethodActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			PassportMethodActions.Query,
 			security,
 			reflect.ValueOf(&PassportMethodEntity{}).Elem(),
@@ -1088,28 +1088,28 @@ var PASSPORT_METHOD_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PASSPORT_METHOD_ACTION_QUERY = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/passport-methods",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &PassportMethodEntityQs{}
-			workspaces.HttpQueryEntity(c, PassportMethodActions.Query, qs)
+			fireback.HttpQueryEntity(c, PassportMethodActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PassportMethodActions.Query,
 	ResponseEntity: &[]PassportMethodEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &PassportMethodEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			PassportMethodActions.Query,
 			security,
@@ -1120,148 +1120,148 @@ var PASSPORT_METHOD_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, PassportMethodQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, PassportMethodQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PASSPORT_METHOD_ACTION_EXPORT = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/passport-methods/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, PassportMethodActionExport)
+			fireback.HttpStreamFileChannel(c, PassportMethodActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PassportMethodActionExport,
 	ResponseEntity: &[]PassportMethodEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
 }
-var PASSPORT_METHOD_ACTION_GET_ONE = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/passport-method/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, PassportMethodActions.GetOne)
+			fireback.HttpGetEntity(c, PassportMethodActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         PassportMethodActions.GetOne,
 	ResponseEntity: &PassportMethodEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
 }
-var PASSPORT_METHOD_ACTION_POST_ONE = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new passportMethod",
 	Flags:         PassportMethodCommonCliFlags,
 	Method:        "POST",
 	Url:           "/passport-method",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, PassportMethodActions.Create)
+			fireback.HttpPostEntity(c, PassportMethodActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, PassportMethodActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, PassportMethodActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         PassportMethodActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PassportMethodEntity{},
 	ResponseEntity: &PassportMethodEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
 }
-var PASSPORT_METHOD_ACTION_PATCH = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PassportMethodCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/passport-method",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, PassportMethodActions.Update)
+			fireback.HttpUpdateEntity(c, PassportMethodActions.Update)
 		},
 	},
 	Action:         PassportMethodActions.Update,
 	RequestEntity:  &PassportMethodEntity{},
 	ResponseEntity: &PassportMethodEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
 }
-var PASSPORT_METHOD_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/passport-methods",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, PassportMethodActionBulkUpdate)
 		},
 	},
 	Action:         PassportMethodActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[PassportMethodEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[PassportMethodEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[PassportMethodEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[PassportMethodEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
 }
-var PASSPORT_METHOD_ACTION_DELETE = workspaces.Module3Action{
+var PASSPORT_METHOD_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/passport-method",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, PassportMethodActions.Remove)
+			fireback.HttpRemoveEntity(c, PassportMethodActions.Remove)
 		},
 	},
 	Action:         PassportMethodActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &PassportMethodEntity{},
 }
 
@@ -1269,10 +1269,10 @@ var PASSPORT_METHOD_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on PassportMethodEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPassportMethodRouter = func(r *[]workspaces.Module3Action) {}
+var AppendPassportMethodRouter = func(r *[]fireback.Module3Action) {}
 
-func GetPassportMethodModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetPassportMethodModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PASSPORT_METHOD_ACTION_QUERY,
 		PASSPORT_METHOD_ACTION_EXPORT,
 		PASSPORT_METHOD_ACTION_GET_ONE,
@@ -1286,32 +1286,32 @@ func GetPassportMethodModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PASSPORT_METHOD = workspaces.PermissionInfo{
+var PERM_ROOT_PASSPORT_METHOD = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.passport-method.*",
 	Name:        "Entire passport method actions (*)",
 	Description: "",
 }
-var PERM_ROOT_PASSPORT_METHOD_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PASSPORT_METHOD_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.passport-method.delete",
 	Name:        "Delete passport method",
 	Description: "",
 }
-var PERM_ROOT_PASSPORT_METHOD_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PASSPORT_METHOD_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.passport-method.create",
 	Name:        "Create passport method",
 	Description: "",
 }
-var PERM_ROOT_PASSPORT_METHOD_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PASSPORT_METHOD_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.passport-method.update",
 	Name:        "Update passport method",
 	Description: "",
 }
-var PERM_ROOT_PASSPORT_METHOD_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PASSPORT_METHOD_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.passport-method.query",
 	Name:        "Query passport method",
 	Description: "",
 }
-var ALL_PASSPORT_METHOD_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PASSPORT_METHOD_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PASSPORT_METHOD_DELETE,
 	PERM_ROOT_PASSPORT_METHOD_CREATE,
 	PERM_ROOT_PASSPORT_METHOD_UPDATE,
@@ -1348,13 +1348,13 @@ type xPassportMethodRegion struct {
 
 func NewPassportMethodCreatedEvent(
 	payload *PassportMethodEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PassportMethodCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PASSPORT_METHOD_QUERY,
 			},
 			ResolveStrategy: "workspace",
@@ -1362,18 +1362,18 @@ func NewPassportMethodCreatedEvent(
 		CacheKey: "*abac.PassportMethodEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewPassportMethodUpdatedEvent(
 	payload *PassportMethodEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PassportMethodUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PASSPORT_METHOD_QUERY,
 			},
 			ResolveStrategy: "workspace",
@@ -1381,11 +1381,11 @@ func NewPassportMethodUpdatedEvent(
 		CacheKey: "*abac.PassportMethodEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var PassportMethodEntityBundle = workspaces.EntityBundle{
+var PassportMethodEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PASSPORT_METHOD_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

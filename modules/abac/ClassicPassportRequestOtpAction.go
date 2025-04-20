@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/pquerna/otp/totp"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
@@ -12,7 +12,7 @@ func init() {
 	ClassicPassportRequestOtpActionImp = ClassicPassportRequestOtpAction
 }
 
-func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto, q workspaces.QueryDSL) (*ClassicPassportRequestOtpActionResDto, *workspaces.IError) {
+func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto, q fireback.QueryDSL) (*ClassicPassportRequestOtpActionResDto, *fireback.IError) {
 	if err := ClassicPassportRequestOtpActionReqValidator(req); err != nil {
 		return nil, err
 	}
@@ -20,17 +20,17 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	var secondsToUnblock int64 = 120
 
 	var olderEntity *PublicAuthenticationEntity = nil
-	workspaces.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Find(&olderEntity)
+	fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Find(&olderEntity)
 
 	if olderEntity != nil && time.Now().UnixNano() < olderEntity.BlockedUntil {
 		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
 		return &ClassicPassportRequestOtpActionResDto{
 			BlockedUntil:     olderEntity.BlockedUntil,
 			SecondsToUnblock: remaining,
-		}, workspaces.Create401Error(&AbacMessages.OtaRequestBlockedUntil, []string{})
+		}, fireback.Create401Error(&AbacMessages.OtaRequestBlockedUntil, []string{})
 	} else {
 		// Let's delete the record, to start the process fresh
-		workspaces.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&PublicAuthenticationEntity{})
+		fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&PublicAuthenticationEntity{})
 	}
 
 	passport, user, err := UnsafeGetUserByPassportValue(req.Value, q)
@@ -42,10 +42,10 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		}
 	}
 
-	uid := workspaces.UUID()
-	otp := workspaces.GenerateRandomKey(6)
+	uid := fireback.UUID()
+	otp := fireback.GenerateRandomKey(6)
 	url := "http://localhost:8888/reset-password?session=" + uid
-	secret := workspaces.UUID_Long() + "." + workspaces.UUID_Long()
+	secret := fireback.UUID_Long() + "." + fireback.UUID_Long()
 
 	item := &PublicAuthenticationEntity{
 		UniqueId:            uid,
@@ -53,9 +53,9 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		Otp:                 otp,
 		RecoveryAbsoluteUrl: url,
 		PassportValue:       req.Value,
-		WorkspaceId:         workspaces.NewString(ROOT_VAR),
+		WorkspaceId:         fireback.NewString(ROOT_VAR),
 		SessionSecret:       secret,
-		IsInCreationProcess: workspaces.NewBool(false),
+		IsInCreationProcess: fireback.NewBool(false),
 		Passport:            passport,
 		User:                user,
 	}
@@ -80,11 +80,11 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 	// we will store the entity with details, and after verifying, the account creation process starts
 	if passport == nil {
 
-		item.IsInCreationProcess = workspaces.NewBool(true)
+		item.IsInCreationProcess = fireback.NewBool(true)
 	}
 
-	if err := workspaces.GetDbRef().Create(item).Error; err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+	if err := fireback.GetDbRef().Create(item).Error; err != nil {
+		return nil, fireback.GormErrorToIError(err)
 	}
 
 	_, passportType := validatePassportType(req.Value)
@@ -94,11 +94,11 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		result := QuickGetOtpMessage(q, SMS_OTP)
 		body, err3 := result.CompileContent(map[string]string{"Otp": otp})
 		if err3 != nil {
-			return nil, workspaces.CastToIError(err3)
+			return nil, fireback.CastToIError(err3)
 		}
 
 		if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{req.Value}); err2 != nil {
-			return nil, workspaces.GormErrorToIError(err2)
+			return nil, fireback.GormErrorToIError(err2)
 		}
 
 	} else if passportType == PASSPORT_METHOD_EMAIL {
@@ -106,13 +106,13 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		var body = ""
 		var title = ""
 		if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
-			return nil, workspaces.CastToIError(err3)
+			return nil, fireback.CastToIError(err3)
 		} else {
 			body = body0
 		}
 
 		if title0, err3 := result.CompileTitle(map[string]string{"Otp": otp}); err3 != nil {
-			return nil, workspaces.CastToIError(err3)
+			return nil, fireback.CastToIError(err3)
 		} else {
 			title = title0
 		}
@@ -127,11 +127,11 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		}
 
 		if _, err2 := SendEmailUsingNotificationConfig(&msg, GENERAL_SENDER); err2 != nil {
-			return nil, workspaces.GormErrorToIError(err2)
+			return nil, fireback.GormErrorToIError(err2)
 		}
 
 	} else {
-		return nil, &workspaces.IError{Message: AbacMessages.OtpNotAvailableForThisType}
+		return nil, &fireback.IError{Message: AbacMessages.OtpNotAvailableForThisType}
 	}
 
 	return &ClassicPassportRequestOtpActionResDto{

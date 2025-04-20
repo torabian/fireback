@@ -1,30 +1,30 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 var PASSPORT_METHOD_EMAIL = "email"
 var PASSPORT_METHOD_PHONE = "phone"
 
-func GetUserByPassport2(value string) (*UserEntity, *PassportEntity, *workspaces.IError) {
+func GetUserByPassport2(value string) (*UserEntity, *PassportEntity, *fireback.IError) {
 	passport := &PassportEntity{}
-	err := workspaces.GetDbRef().Where(&PassportEntity{Value: value}).First(passport).Error
+	err := fireback.GetDbRef().Where(&PassportEntity{Value: value}).First(passport).Error
 
 	if err != nil {
-		return nil, nil, workspaces.GormErrorToIError(err)
+		return nil, nil, fireback.GormErrorToIError(err)
 	}
 
 	user := &UserEntity{}
-	workspaces.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
+	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
 
 	return user, passport, nil
 }
 
 func GetUserByPassport(value string) (*UserEntity, *PassportEntity, error) {
 	passport := &PassportEntity{}
-	workspaces.GetDbRef().Where(&PassportEntity{Value: value}).First(passport)
+	fireback.GetDbRef().Where(&PassportEntity{Value: value}).First(passport)
 
 	user := &UserEntity{}
-	workspaces.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
+	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
 
 	return user, passport, nil
 }

@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func (x *UserEntity) FullName() string {
@@ -91,9 +91,9 @@ func init() {
 		return &UserEntity{
 			FirstName:      getRandomName(firstNames),
 			LastName:       getRandomName(lastNames),
-			BirthDate:      workspaces.XDate((getRandomBirthDate())),
+			BirthDate:      fireback.XDate((getRandomBirthDate())),
 			Photo:          getRandomAvatarURL(),
-			Gender:         workspaces.NewInt(randomZeroOrOne()),
+			Gender:         fireback.NewInt(randomZeroOrOne()),
 			LastIpAddress:  randomPublicIP(),
 			PrimaryAddress: RandomUserPrimaryAddress(),
 		}
@@ -190,10 +190,10 @@ func RandomUserPrimaryAddress() *UserPrimaryAddress {
 	s := addresses[rand.Intn(len(addresses))]
 	return &UserPrimaryAddress{
 		AddressLine1:    (s.Address1),
-		AddressLine2:    workspaces.NewString(s.Address2),
-		City:            workspaces.NewString(s.City),
-		StateOrProvince: workspaces.NewString(s.State),
-		PostalCode:      workspaces.NewString(s.Postcode),
-		CountryCode:     workspaces.NewString(s.CountryCode),
+		AddressLine2:    fireback.NewString(s.Address2),
+		City:            fireback.NewString(s.City),
+		StateOrProvince: fireback.NewString(s.State),
+		PostalCode:      fireback.NewString(s.Postcode),
+		CountryCode:     fireback.NewString(s.CountryCode),
 	}
 }

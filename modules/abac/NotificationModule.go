@@ -1,13 +1,13 @@
 package abac
 
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
-func NotificationModuleSetup() *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func NotificationModuleSetup() *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 		Name: "abac",
 	}
 
@@ -17,7 +17,7 @@ func NotificationModuleSetup() *workspaces.ModuleProvider {
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	)
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetEmailProviderModule3Actions(),
 		GetEmailSenderModule3Actions(),
 		GetNotificationConfigModule3Actions(),

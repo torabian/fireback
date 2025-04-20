@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/TableViewSizing"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/TableViewSizing"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,12 +32,12 @@ func ResetTableViewSizingSeeders(fs *embed.FS) {
 }
 
 type TableViewSizingEntityQs struct {
-	TableName workspaces.QueriableField `cli:"table-name" table:"table_view_sizing" column:"table_name" qs:"tableName"`
-	Sizes     workspaces.QueriableField `cli:"sizes" table:"table_view_sizing" column:"sizes" qs:"sizes"`
+	TableName fireback.QueriableField `cli:"table-name" table:"table_view_sizing" column:"table_name" qs:"tableName"`
+	Sizes     fireback.QueriableField `cli:"sizes" table:"table_view_sizing" column:"sizes" qs:"sizes"`
 }
 
 func (x *TableViewSizingEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var TableViewSizingQsFlags = []cli.Flag{
@@ -53,23 +53,23 @@ var TableViewSizingQsFlags = []cli.Flag{
 
 type TableViewSizingEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -79,11 +79,11 @@ type TableViewSizingEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -116,7 +116,7 @@ type TableViewSizingEntity struct {
 	LinkedTo         *TableViewSizingEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func TableViewSizingEntityStream(q workspaces.QueryDSL) (chan []*TableViewSizingEntity, *workspaces.QueryResultMeta, error) {
+func TableViewSizingEntityStream(q fireback.QueryDSL) (chan []*TableViewSizingEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*TableViewSizingEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -152,8 +152,8 @@ func (x *TableViewSizingEntityList) Json() string {
 	}
 	return ""
 }
-func (x *TableViewSizingEntityList) ToTree() *workspaces.TreeOperation[TableViewSizingEntity] {
-	return workspaces.NewTreeOperation(
+func (x *TableViewSizingEntityList) ToTree() *fireback.TreeOperation[TableViewSizingEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *TableViewSizingEntity) string {
 			if !t.ParentId.Valid {
@@ -170,15 +170,15 @@ func (x *TableViewSizingEntityList) ToTree() *workspaces.TreeOperation[TableView
 var TableViewSizingPreloadRelations []string = []string{}
 
 type tableViewSizingActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *TableViewSizingEntity) (*TableViewSizingEntity, *workspaces.IError)
-	Create         func(dto *TableViewSizingEntity, query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError)
-	Upsert         func(dto *TableViewSizingEntity, query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *TableViewSizingEntity) (*TableViewSizingEntity, *fireback.IError)
+	Create         func(dto *TableViewSizingEntity, query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
+	Upsert         func(dto *TableViewSizingEntity, query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
 	SeederInit     func() *TableViewSizingEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*TableViewSizingEntity, query workspaces.QueryDSL) ([]*TableViewSizingEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*TableViewSizingEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.QueryResultMeta, error)
 }
 
 var TableViewSizingActions tableViewSizingActionsSig = tableViewSizingActionsSig{
@@ -193,7 +193,7 @@ var TableViewSizingActions tableViewSizingActionsSig = tableViewSizingActionsSig
 	Query:          TableViewSizingActionQueryFn,
 }
 
-func TableViewSizingActionUpsertFn(dto *TableViewSizingEntity, query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingActionUpsertFn(dto *TableViewSizingEntity, query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -207,25 +207,25 @@ var TABLE_VIEW_SIZING_EVENTS = []string{
 }
 
 type TableViewSizingFieldMap struct {
-	TableName workspaces.TranslatedString `yaml:"tableName"`
-	Sizes     workspaces.TranslatedString `yaml:"sizes"`
+	TableName fireback.TranslatedString `yaml:"tableName"`
+	Sizes     fireback.TranslatedString `yaml:"sizes"`
 }
 
 var TableViewSizingEntityMetaConfig map[string]int64 = map[string]int64{}
-var TableViewSizingEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&TableViewSizingEntity{}))
+var TableViewSizingEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&TableViewSizingEntity{}))
 
-func entityTableViewSizingFormatter(dto *TableViewSizingEntity, query workspaces.QueryDSL) {
+func entityTableViewSizingFormatter(dto *TableViewSizingEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func TableViewSizingActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func TableViewSizingActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -252,7 +252,7 @@ func TableViewSizingActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func TableViewSizingActionSeeder(query workspaces.QueryDSL, count int) {
+func TableViewSizingActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -278,7 +278,7 @@ func TableViewSizingActionSeederInitFn() *TableViewSizingEntity {
 	entity := &TableViewSizingEntity{}
 	return entity
 }
-func TableViewSizingAssociationCreate(dto *TableViewSizingEntity, query workspaces.QueryDSL) error {
+func TableViewSizingAssociationCreate(dto *TableViewSizingEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -286,13 +286,13 @@ func TableViewSizingAssociationCreate(dto *TableViewSizingEntity, query workspac
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func TableViewSizingRelationContentCreate(dto *TableViewSizingEntity, query workspaces.QueryDSL) error {
+func TableViewSizingRelationContentCreate(dto *TableViewSizingEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func TableViewSizingRelationContentUpdate(dto *TableViewSizingEntity, query workspaces.QueryDSL) error {
+func TableViewSizingRelationContentUpdate(dto *TableViewSizingEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func TableViewSizingPolyglotUpdateHandler(dto *TableViewSizingEntity, query workspaces.QueryDSL) {
+func TableViewSizingPolyglotUpdateHandler(dto *TableViewSizingEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -303,8 +303,8 @@ func TableViewSizingPolyglotUpdateHandler(dto *TableViewSizingEntity, query work
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func TableViewSizingValidator(dto *TableViewSizingEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func TableViewSizingValidator(dto *TableViewSizingEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -349,17 +349,17 @@ And here is the actual object signature:
 	},
 }
 
-func TableViewSizingEntityPreSanitize(dto *TableViewSizingEntity, query workspaces.QueryDSL) {
+func TableViewSizingEntityPreSanitize(dto *TableViewSizingEntity, query fireback.QueryDSL) {
 }
-func TableViewSizingEntityBeforeCreateAppend(dto *TableViewSizingEntity, query workspaces.QueryDSL) {
+func TableViewSizingEntityBeforeCreateAppend(dto *TableViewSizingEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	TableViewSizingRecursiveAddUniqueId(dto, query)
 }
-func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query workspaces.QueryDSL) {
+func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -371,7 +371,7 @@ func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query works
   at this moment.
 *
 */
-func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query workspaces.QueryDSL) ([]*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			TableViewSizingEntityPreSanitize(dtos[index], query)
@@ -379,19 +379,19 @@ func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query workspace
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func TableViewSizingActionBatchCreateFn(dtos []*TableViewSizingEntity, query workspaces.QueryDSL) ([]*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingActionBatchCreateFn(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*TableViewSizingEntity{}
 		for _, item := range dtos {
@@ -405,12 +405,12 @@ func TableViewSizingActionBatchCreateFn(dtos []*TableViewSizingEntity, query wor
 	}
 	return dtos, nil
 }
-func TableViewSizingDeleteEntireChildren(query workspaces.QueryDSL, dto *TableViewSizingEntity) *workspaces.IError {
+func TableViewSizingDeleteEntireChildren(query fireback.QueryDSL, dto *TableViewSizingEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := TableViewSizingValidator(dto, false); iError != nil {
 		return nil, iError
@@ -424,14 +424,14 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query workspaces.
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -439,35 +439,35 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query workspaces.
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewTableViewSizingCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(TABLE_VIEW_SIZING_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&TableViewSizingEntity{}),
+			"entityKey": fireback.GetTypeString(&TableViewSizingEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func TableViewSizingActionGetOneFn(query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingActionGetOneFn(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	item, err := workspaces.GetOneEntity[TableViewSizingEntity](query, refl)
+	item, err := fireback.GetOneEntity[TableViewSizingEntity](query, refl)
 	entityTableViewSizingFormatter(item, query)
 	return item, err
 }
-func TableViewSizingActionGetByWorkspaceFn(query workspaces.QueryDSL) (*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingActionGetByWorkspaceFn(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[TableViewSizingEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[TableViewSizingEntity](query, refl)
 	entityTableViewSizingFormatter(item, query)
 	return item, err
 }
-func TableViewSizingActionQueryFn(query workspaces.QueryDSL) ([]*TableViewSizingEntity, *workspaces.QueryResultMeta, error) {
+func TableViewSizingActionQueryFn(query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[TableViewSizingEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[TableViewSizingEntity](query, refl)
 	for _, item := range items {
 		entityTableViewSizingFormatter(item, query)
 	}
@@ -477,7 +477,7 @@ func TableViewSizingActionQueryFn(query workspaces.QueryDSL) ([]*TableViewSizing
 var tableViewSizingMemoryItems []*TableViewSizingEntity = []*TableViewSizingEntity{}
 
 func TableViewSizingEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -507,7 +507,7 @@ func TableViewSizingMemJoin(items []uint) []*TableViewSizingEntity {
 	}
 	return res
 }
-func TableViewSizingUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TABLE_VIEW_SIZING_EVENT_UPDATED
 	TableViewSizingEntityPreSanitize(fields, query)
@@ -522,7 +522,7 @@ func TableViewSizingUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	TableViewSizingRelationContentUpdate(fields, query)
@@ -536,11 +536,11 @@ func TableViewSizingUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		Where(&TableViewSizingEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewTableViewSizingUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -552,9 +552,9 @@ func TableViewSizingUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	   })*/
 	return &itemRefetched, nil
 }
-func TableViewSizingActionUpdateFn(query workspaces.QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *workspaces.IError) {
+func TableViewSizingActionUpdateFn(query fireback.QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := TableViewSizingValidator(fields, true); iError != nil {
@@ -564,11 +564,11 @@ func TableViewSizingActionUpdateFn(query workspaces.QueryDSL, fields *TableViewS
 	// TableViewSizingRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *TableViewSizingEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = TableViewSizingUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -576,7 +576,7 @@ func TableViewSizingActionUpdateFn(query workspaces.QueryDSL, fields *TableViewS
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return TableViewSizingUpdateExec(dbref, query, fields)
@@ -587,8 +587,8 @@ var TableViewSizingWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire tableviewsizings ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 		})
 		count, _ := TableViewSizingActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -596,16 +596,16 @@ var TableViewSizingWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TableViewSizingActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func TableViewSizingActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE}
-	return workspaces.RemoveEntity[TableViewSizingEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE}
+	return fireback.RemoveEntity[TableViewSizingEntity](query, refl)
 }
-func TableViewSizingActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func TableViewSizingActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[TableViewSizingEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[TableViewSizingEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'TableViewSizingEntity'", subErr)
 			return count, subErr
@@ -616,11 +616,11 @@ func TableViewSizingActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func TableViewSizingActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[TableViewSizingEntity]) (
-	*workspaces.BulkRecordRequest[TableViewSizingEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[TableViewSizingEntity]) (
+	*fireback.BulkRecordRequest[TableViewSizingEntity], *fireback.IError,
 ) {
 	result := []*TableViewSizingEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := TableViewSizingActions.Update(query, record)
@@ -635,7 +635,7 @@ func TableViewSizingActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *TableViewSizingEntity) Json() string {
 	if x != nil {
@@ -645,7 +645,7 @@ func (x *TableViewSizingEntity) Json() string {
 	return ""
 }
 
-var TableViewSizingEntityMeta = workspaces.TableMetaData{
+var TableViewSizingEntityMeta = fireback.TableMetaData{
 	EntityName:    "TableViewSizing",
 	ExportKey:     "table-view-sizings",
 	TableNameInDb: "table-view-sizing_entities",
@@ -655,23 +655,23 @@ var TableViewSizingEntityMeta = workspaces.TableMetaData{
 }
 
 func TableViewSizingActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[TableViewSizingEntity](query, TableViewSizingActions.Query, TableViewSizingPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[TableViewSizingEntity](query, TableViewSizingActions.Query, TableViewSizingPreloadRelations)
 }
 func TableViewSizingActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[TableViewSizingEntity](query, TableViewSizingActions.Query, TableViewSizingPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[TableViewSizingEntity](query, TableViewSizingActions.Query, TableViewSizingPreloadRelations)
 }
 func TableViewSizingActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content TableViewSizingEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := TableViewSizingActions.Create(&content, query)
@@ -705,7 +705,7 @@ var TableViewSizingCommonCliFlags = []cli.Flag{
 		Usage:    `sizes (string)`,
 	},
 }
-var TableViewSizingCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var TableViewSizingCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "tableName",
 		StructField: "TableName",
@@ -761,16 +761,16 @@ var TableViewSizingCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 		})
 		entity := &TableViewSizingEntity{}
-		workspaces.PopulateInteractively(entity, c, TableViewSizingCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, TableViewSizingCommonInteractiveCliFlags)
 		if entity, err := TableViewSizingActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -780,8 +780,8 @@ var TableViewSizingUpdateCmd cli.Command = cli.Command{
 	Flags:   TableViewSizingCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 		})
 		entity := CastTableViewSizingFromCli(c)
 		if entity, err := TableViewSizingActions.Update(query, entity); err != nil {
@@ -803,7 +803,7 @@ func CastTableViewSizingFromCli(c *cli.Context) *TableViewSizingEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("table-name") {
 		template.TableName = c.String("table-name")
@@ -813,8 +813,8 @@ func CastTableViewSizingFromCli(c *cli.Context) *TableViewSizingEntity {
 	}
 	return template
 }
-func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
@@ -824,8 +824,8 @@ func TableViewSizingSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q work
 	)
 }
 func TableViewSizingSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		tableViewSizingSeedersFs,
@@ -834,8 +834,8 @@ func TableViewSizingSyncSeeders() {
 	)
 }
 func TableViewSizingImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		TableViewSizingActions.Create,
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -843,19 +843,19 @@ func TableViewSizingImportMocks() {
 		false,
 	)
 }
-func TableViewSizingWriteQueryMock(ctx workspaces.MockQueryContext) {
+func TableViewSizingWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := TableViewSizingActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "TableViewSizing", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "TableViewSizing", result)
 	}
 }
-func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -867,7 +867,7 @@ func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *wor
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := TableViewSizingActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -894,8 +894,8 @@ var TableViewSizingDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 			})
 			if c.Bool("batch") {
 				TableViewSizingActionSeederMultiple(query, c.Int("count"))
@@ -918,7 +918,7 @@ var TableViewSizingDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := TableViewSizingActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -926,7 +926,7 @@ var TableViewSizingDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -939,7 +939,7 @@ var TableViewSizingDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -969,7 +969,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of table-view-sizings, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]TableViewSizingEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -978,7 +978,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(tableViewSizingSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(tableViewSizingSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -991,7 +991,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				tableViewSizingSeedersFs,
@@ -1002,7 +1002,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1010,7 +1010,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				TableViewSizingEntityStream,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				c.String("file"),
@@ -1024,7 +1024,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1034,12 +1034,12 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 				},
 				func() TableViewSizingEntity {
 					v := CastTableViewSizingFromCli(c)
@@ -1057,7 +1057,7 @@ var TableViewSizingCliCommands []cli.Command = []cli.Command{
 	TableViewSizingUpdateCmd,
 	TableViewSizingAskCmd,
 	TableViewSizingCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		TableViewSizingActions.Remove,
 	),
@@ -1065,7 +1065,7 @@ var TableViewSizingCliCommands []cli.Command = []cli.Command{
 
 func TableViewSizingCliFn() cli.Command {
 	commands := append(TableViewSizingImportExportCommands, TableViewSizingCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, TableViewSizingDevCommands...)
 	}
 	return cli.Command{
@@ -1083,14 +1083,14 @@ func TableViewSizingCliFn() cli.Command {
 	}
 }
 
-var TABLE_VIEW_SIZING_ACTION_TABLE = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        TableViewSizingActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			TableViewSizingActions.Query,
 			security,
 			reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
@@ -1098,27 +1098,27 @@ var TABLE_VIEW_SIZING_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_QUERY = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/table-view-sizings",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &TableViewSizingEntityQs{}
-			workspaces.HttpQueryEntity(c, TableViewSizingActions.Query, qs)
+			fireback.HttpQueryEntity(c, TableViewSizingActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         TableViewSizingActions.Query,
 	ResponseEntity: &[]TableViewSizingEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &TableViewSizingEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			TableViewSizingActions.Query,
 			security,
@@ -1129,138 +1129,138 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, TableViewSizingQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, TableViewSizingQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var TABLE_VIEW_SIZING_ACTION_EXPORT = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/table-view-sizings/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, TableViewSizingActionExport)
+			fireback.HttpStreamFileChannel(c, TableViewSizingActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         TableViewSizingActionExport,
 	ResponseEntity: &[]TableViewSizingEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_GET_ONE = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/table-view-sizing/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, TableViewSizingActions.GetOne)
+			fireback.HttpGetEntity(c, TableViewSizingActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         TableViewSizingActions.GetOne,
 	ResponseEntity: &TableViewSizingEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_POST_ONE = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new tableViewSizing",
 	Flags:         TableViewSizingCommonCliFlags,
 	Method:        "POST",
 	Url:           "/table-view-sizing",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, TableViewSizingActions.Create)
+			fireback.HttpPostEntity(c, TableViewSizingActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, TableViewSizingActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, TableViewSizingActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         TableViewSizingActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &TableViewSizingEntity{},
 	ResponseEntity: &TableViewSizingEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_PATCH = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         TableViewSizingCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/table-view-sizing",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, TableViewSizingActions.Update)
+			fireback.HttpUpdateEntity(c, TableViewSizingActions.Update)
 		},
 	},
 	Action:         TableViewSizingActions.Update,
 	RequestEntity:  &TableViewSizingEntity{},
 	ResponseEntity: &TableViewSizingEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/table-view-sizings",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, TableViewSizingActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, TableViewSizingActionBulkUpdate)
 		},
 	},
 	Action:         TableViewSizingActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[TableViewSizingEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[TableViewSizingEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[TableViewSizingEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[TableViewSizingEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_DELETE = workspaces.Module3Action{
+var TABLE_VIEW_SIZING_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/table-view-sizing",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, TableViewSizingActions.Remove)
+			fireback.HttpRemoveEntity(c, TableViewSizingActions.Remove)
 		},
 	},
 	Action:         TableViewSizingActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &TableViewSizingEntity{},
 }
 
@@ -1268,10 +1268,10 @@ var TABLE_VIEW_SIZING_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on TableViewSizingEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendTableViewSizingRouter = func(r *[]workspaces.Module3Action) {}
+var AppendTableViewSizingRouter = func(r *[]fireback.Module3Action) {}
 
-func GetTableViewSizingModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetTableViewSizingModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		TABLE_VIEW_SIZING_ACTION_QUERY,
 		TABLE_VIEW_SIZING_ACTION_EXPORT,
 		TABLE_VIEW_SIZING_ACTION_GET_ONE,
@@ -1285,32 +1285,32 @@ func GetTableViewSizingModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_TABLE_VIEW_SIZING = workspaces.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.*",
 	Name:        "Entire table view sizing actions (*)",
 	Description: "",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.delete",
 	Name:        "Delete table view sizing",
 	Description: "",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.create",
 	Name:        "Create table view sizing",
 	Description: "",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.update",
 	Name:        "Update table view sizing",
 	Description: "",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.query",
 	Name:        "Query table view sizing",
 	Description: "",
 }
-var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_TABLE_VIEW_SIZING_DELETE,
 	PERM_ROOT_TABLE_VIEW_SIZING_CREATE,
 	PERM_ROOT_TABLE_VIEW_SIZING_UPDATE,
@@ -1320,42 +1320,42 @@ var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewTableViewSizingCreatedEvent(
 	payload *TableViewSizingEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "TableViewSizingCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_TABLE_VIEW_SIZING_QUERY,
 			},
 		},
 		CacheKey: "*abac.TableViewSizingEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewTableViewSizingUpdatedEvent(
 	payload *TableViewSizingEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "TableViewSizingUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_TABLE_VIEW_SIZING_QUERY,
 			},
 		},
 		CacheKey: "*abac.TableViewSizingEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var TableViewSizingEntityBundle = workspaces.EntityBundle{
+var TableViewSizingEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_TABLE_VIEW_SIZING_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

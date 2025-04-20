@@ -5,7 +5,7 @@ package abac
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 import queries "github.com/torabian/fireback/modules/abac/queries"
 import "encoding/json"
 import "github.com/urfave/cli"
@@ -26,10 +26,10 @@ func AbacJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_ABAC_EVERYTHING = workspaces.PermissionInfo{
+var PERM_ROOT_ABAC_EVERYTHING = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.*",
 }
-var ALL_PERM_ABAC_MODULE = []workspaces.PermissionInfo{
+var ALL_PERM_ABAC_MODULE = []fireback.PermissionInfo{
 	PERM_ROOT_ABAC_EVERYTHING,
 }
 
@@ -92,208 +92,208 @@ var AbacMessages = newAbacMessageCode()
 
 func newAbacMessageCode() *abacMsgs {
 	return &abacMsgs{
-		ActionOnlyInRoot: workspaces.ErrorItem{
+		ActionOnlyInRoot: fireback.ErrorItem{
 			"$":  "ActionOnlyInRoot",
 			"en": "This action is only allowed when user belongs to root workspace, and root is selected",
 		},
-		AlreadyConfirmed: workspaces.ErrorItem{
+		AlreadyConfirmed: fireback.ErrorItem{
 			"$":  "AlreadyConfirmed",
 			"en": "Already confirmed",
 		},
-		BodyIsMissing: workspaces.ErrorItem{
+		BodyIsMissing: fireback.ErrorItem{
 			"$":  "BodyIsMissing",
 			"en": "Body content is not correct. You need a valid json.",
 		},
-		DataTypeDoesNotExistsInFireback: workspaces.ErrorItem{
+		DataTypeDoesNotExistsInFireback: fireback.ErrorItem{
 			"$":  "DataTypeDoesNotExistsInFireback",
 			"en": "This data type does not exist in fireback. %name %location",
 		},
-		EmailConfigurationIsNotAvailable: workspaces.ErrorItem{
+		EmailConfigurationIsNotAvailable: fireback.ErrorItem{
 			"$":  "EmailConfigurationIsNotAvailable",
 			"en": "Email configuration is not available",
 		},
-		EmailConfigurationMissing: workspaces.ErrorItem{
+		EmailConfigurationMissing: fireback.ErrorItem{
 			"$":  "EmailConfigurationMissing",
 			"en": "Email configuration is not available",
 		},
-		EmailIsNotConfigured: workspaces.ErrorItem{
+		EmailIsNotConfigured: fireback.ErrorItem{
 			"$":  "EmailIsNotConfigured",
 			"en": "Email server is not configured",
 		},
-		EmailIsNotValid: workspaces.ErrorItem{
+		EmailIsNotValid: fireback.ErrorItem{
 			"$":  "EmailIsNotValid",
 			"en": "The email address is not valid.",
 		},
-		EmailNotFound: workspaces.ErrorItem{
+		EmailNotFound: fireback.ErrorItem{
 			"$":  "EmailNotFound",
 			"en": "Email is not found",
 		},
-		FailedToDecodeGoogle: workspaces.ErrorItem{
+		FailedToDecodeGoogle: fireback.ErrorItem{
 			"$":  "FailedToDecodeGoogle",
 			"en": "Failed to decode the google token, it's not available at this moment.",
 		},
-		FieldInvalidEmail: workspaces.ErrorItem{
+		FieldInvalidEmail: fireback.ErrorItem{
 			"$":  "FieldInvalidEmail",
 			"en": "Invalid email address",
 		},
-		FieldOneOf: workspaces.ErrorItem{
+		FieldOneOf: fireback.ErrorItem{
 			"$":  "FieldOneOf",
 			"en": "The value you have provided needs to be one of these values: %s",
 		},
-		FieldRequired: workspaces.ErrorItem{
+		FieldRequired: fireback.ErrorItem{
 			"$":  "FieldRequired",
 			"en": "This field is required",
 		},
-		FileNotFound: workspaces.ErrorItem{
+		FileNotFound: fireback.ErrorItem{
 			"$":  "FileNotFound",
 			"en": "File not found",
 		},
-		GsmConfigurationIsNotAvailable: workspaces.ErrorItem{
+		GsmConfigurationIsNotAvailable: fireback.ErrorItem{
 			"$":  "GsmConfigurationIsNotAvailable",
 			"en": "GSM Services configuration is not available",
 		},
-		InvalidContent: workspaces.ErrorItem{
+		InvalidContent: fireback.ErrorItem{
 			"$":  "InvalidContent",
 			"en": "Body content is not correct. You need a valid json.",
 		},
-		InvalidExchangeKey: workspaces.ErrorItem{
+		InvalidExchangeKey: fireback.ErrorItem{
 			"$":  "InvalidExchangeKey",
 			"en": "Invalid exchange key",
 		},
-		InvalidToken: workspaces.ErrorItem{
+		InvalidToken: fireback.ErrorItem{
 			"$":  "InvalidToken",
 			"en": "Token provided is not valid.",
 		},
-		InvitationExpired: workspaces.ErrorItem{
+		InvitationExpired: fireback.ErrorItem{
 			"$":  "InvitationExpired",
 			"en": "Invitation has been expired.",
 		},
-		InvitationNotFound: workspaces.ErrorItem{
+		InvitationNotFound: fireback.ErrorItem{
 			"$":  "InvitationNotFound",
 			"en": "Invitation not found or expired.",
 		},
-		InviteToWorkspaceMailSenderMissing: workspaces.ErrorItem{
+		InviteToWorkspaceMailSenderMissing: fireback.ErrorItem{
 			"$":  "InviteToWorkspaceMailSenderMissing",
 			"en": "We cannot send the invitation via email address, because sender email is not available, or not configurated.",
 			"fa": "امکان ارسال دعوت نامه از طریق ایمیل وجود ندارد، چون مدیریت تنظیمات لازم برای ایمیل را انجام نداده یا آن را برای شما محدود کرده است.",
 		},
-		InvokeUrlMissing: workspaces.ErrorItem{
+		InvokeUrlMissing: fireback.ErrorItem{
 			"$":  "InvokeUrlMissing",
 			"en": "Invoking url is missing",
 		},
-		NotEnoughPermission: workspaces.ErrorItem{
+		NotEnoughPermission: fireback.ErrorItem{
 			"$":  "NotEnoughPermission",
 			"en": "You do not have enough permission for this section",
 		},
-		OtaRequestBlockedUntil: workspaces.ErrorItem{
+		OtaRequestBlockedUntil: fireback.ErrorItem{
 			"$":  "OtaRequestBlockedUntil",
 			"en": "Request is blocked until.",
 		},
-		OtpCodeInvalid: workspaces.ErrorItem{
+		OtpCodeInvalid: fireback.ErrorItem{
 			"$":  "OtpCodeInvalid",
 			"en": "Otp code is invalid",
 		},
-		OtpFailed: workspaces.ErrorItem{
+		OtpFailed: fireback.ErrorItem{
 			"$":  "OtpFailed",
 			"en": "At the moment we cannot send you one time password. Please contact the support.",
 		},
-		OtpNotAvailableForThisType: workspaces.ErrorItem{
+		OtpNotAvailableForThisType: fireback.ErrorItem{
 			"$":  "OtpNotAvailableForThisType",
 			"en": "This type of account does not have any otp method for authentication.",
 		},
-		PassportNotAvailable: workspaces.ErrorItem{
+		PassportNotAvailable: fireback.ErrorItem{
 			"$":  "PassportNotAvailable",
 			"en": "This passport is not available. Please check credentials and try again",
 		},
-		PassportNotFound: workspaces.ErrorItem{
+		PassportNotFound: fireback.ErrorItem{
 			"$":  "PassportNotFound",
 			"en": "This passport is not available. Please check credentials and try again",
 		},
-		PassportTotpNotConfirmed: workspaces.ErrorItem{
+		PassportTotpNotConfirmed: fireback.ErrorItem{
 			"$":  "PassportTotpNotConfirmed",
 			"en": "The totp code from app is correct, but we could not store it in your account. You might be asked to setup again later.",
 		},
-		PassportUserNotAvailable: workspaces.ErrorItem{
+		PassportUserNotAvailable: fireback.ErrorItem{
 			"$":  "PassportUserNotAvailable",
 			"en": "User with this passport is not available at this moment",
 		},
-		PasswordDidNotUpdated: workspaces.ErrorItem{
+		PasswordDidNotUpdated: fireback.ErrorItem{
 			"$":  "PasswordDidNotUpdated",
 			"en": "Password did not get updated for some unknown reason.",
 		},
-		PasswordDoesNotMeetTheSecurityRequirement: workspaces.ErrorItem{
+		PasswordDoesNotMeetTheSecurityRequirement: fireback.ErrorItem{
 			"$":  "PasswordDoesNotMeetTheSecurityRequirement",
 			"en": "Password choosen doesn't meet the security requirement.",
 		},
-		PasswordRequired: workspaces.ErrorItem{
+		PasswordRequired: fireback.ErrorItem{
 			"$":  "PasswordRequired",
 			"en": "Password is required",
 		},
-		PhoneNumberIsNotValid: workspaces.ErrorItem{
+		PhoneNumberIsNotValid: fireback.ErrorItem{
 			"$":  "PhoneNumberIsNotValid",
 			"en": "The phone number is not valid.",
 		},
-		ProvideTokenInAuthorization: workspaces.ErrorItem{
+		ProvideTokenInAuthorization: fireback.ErrorItem{
 			"$":  "ProvideTokenInAuthorization",
 			"en": "Request requires authroization, please make sure you are logged in, and have enough access level",
 			"fa": "شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید",
 		},
-		Recaptcha2Error: workspaces.ErrorItem{
+		Recaptcha2Error: fireback.ErrorItem{
 			"$":  "Recaptcha2Error",
 			"en": "Recaptcha is not correct. Try again to solve the recaptcha.",
 		},
-		Recaptcha2Needed: workspaces.ErrorItem{
+		Recaptcha2Needed: fireback.ErrorItem{
 			"$":  "Recaptcha2Needed",
 			"en": "You need to provide recaptcha2 for this api.",
 		},
-		ResetNotFound: workspaces.ErrorItem{
+		ResetNotFound: fireback.ErrorItem{
 			"$":  "ResetNotFound",
 			"en": "Reset not found",
 		},
-		SelectWorkspaceId: workspaces.ErrorItem{
+		SelectWorkspaceId: fireback.ErrorItem{
 			"$":  "SelectWorkspaceId",
 			"en": "You need to select a correct workspace-id in header section",
 			"fa": "شما باید تیم یا ورک اسپیس را در بخش هدر با فیلد workspace-id تعیین کنید",
 		},
-		SessionSecretIsNeeded: workspaces.ErrorItem{
+		SessionSecretIsNeeded: fireback.ErrorItem{
 			"$":  "SessionSecretIsNeeded",
 			"en": "Session secret is needed to continue creating a user. Use checkClassicPassport first with value, to get the required steps for account creation.",
 		},
-		SessionSecretIsNotAvailable: workspaces.ErrorItem{
+		SessionSecretIsNotAvailable: fireback.ErrorItem{
 			"$":  "SessionSecretIsNotAvailable",
 			"en": "Session secret is not available or expired. Try to use the checkClassicPassport flow again.",
 		},
-		SmsNotSent: workspaces.ErrorItem{
+		SmsNotSent: fireback.ErrorItem{
 			"$":  "SmsNotSent",
 			"en": "Sending text message has failed.",
 		},
-		TotpCodeIsNotValid: workspaces.ErrorItem{
+		TotpCodeIsNotValid: fireback.ErrorItem{
 			"$":  "TotpCodeIsNotValid",
 			"en": "The totp code from the app is incorrect. Double check and try again.",
 		},
-		TotpIsNotAvailableForThisPassport: workspaces.ErrorItem{
+		TotpIsNotAvailableForThisPassport: fireback.ErrorItem{
 			"$":  "TotpIsNotAvailableForThisPassport",
 			"en": "This passport doesn't have totp setup. Contact the administrator to set it up for you.",
 		},
-		UnsupportedOAuth: workspaces.ErrorItem{
+		UnsupportedOAuth: fireback.ErrorItem{
 			"$":  "UnsupportedOAuth",
 			"en": "OAuth service is not available or not supported yet.",
 		},
-		UserDoesNotExist: workspaces.ErrorItem{
+		UserDoesNotExist: fireback.ErrorItem{
 			"$":  "UserDoesNotExist",
 			"en": "User is not available.",
 		},
-		UserNotFoundOrDeleted: workspaces.ErrorItem{
+		UserNotFoundOrDeleted: fireback.ErrorItem{
 			"$":  "UserNotFoundOrDeleted",
 			"en": "User not found, your account might be deleted, or access level has been reduced.",
 			"fa": "کاربر پیدا نشد ممکن است اکانت حذف شده باشد یا سطح دسترسی آن کاهش پیدا کرده باشد",
 		},
-		UserWhichHasThisTokenDoesNotExist: workspaces.ErrorItem{
+		UserWhichHasThisTokenDoesNotExist: fireback.ErrorItem{
 			"$":  "UserWhichHasThisTokenDoesNotExist",
 			"en": "User which has this token does not exists",
 			"fa": "کاربری که با این دسترسی وارد شده بود وجود ندارد. لطفا دوباره به سیستم وارد شوید",
 		},
-		ValidationFailedOnSomeFields: workspaces.ErrorItem{
+		ValidationFailedOnSomeFields: fireback.ErrorItem{
 			"$":  "ValidationFailedOnSomeFields",
 			"en": "Validation has failed on some fields",
 		},
@@ -301,56 +301,56 @@ func newAbacMessageCode() *abacMsgs {
 }
 
 type abacMsgs struct {
-	ActionOnlyInRoot                          workspaces.ErrorItem
-	AlreadyConfirmed                          workspaces.ErrorItem
-	BodyIsMissing                             workspaces.ErrorItem
-	DataTypeDoesNotExistsInFireback           workspaces.ErrorItem
-	EmailConfigurationIsNotAvailable          workspaces.ErrorItem
-	EmailConfigurationMissing                 workspaces.ErrorItem
-	EmailIsNotConfigured                      workspaces.ErrorItem
-	EmailIsNotValid                           workspaces.ErrorItem
-	EmailNotFound                             workspaces.ErrorItem
-	FailedToDecodeGoogle                      workspaces.ErrorItem
-	FieldInvalidEmail                         workspaces.ErrorItem
-	FieldOneOf                                workspaces.ErrorItem
-	FieldRequired                             workspaces.ErrorItem
-	FileNotFound                              workspaces.ErrorItem
-	GsmConfigurationIsNotAvailable            workspaces.ErrorItem
-	InvalidContent                            workspaces.ErrorItem
-	InvalidExchangeKey                        workspaces.ErrorItem
-	InvalidToken                              workspaces.ErrorItem
-	InvitationExpired                         workspaces.ErrorItem
-	InvitationNotFound                        workspaces.ErrorItem
-	InviteToWorkspaceMailSenderMissing        workspaces.ErrorItem
-	InvokeUrlMissing                          workspaces.ErrorItem
-	NotEnoughPermission                       workspaces.ErrorItem
-	OtaRequestBlockedUntil                    workspaces.ErrorItem
-	OtpCodeInvalid                            workspaces.ErrorItem
-	OtpFailed                                 workspaces.ErrorItem
-	OtpNotAvailableForThisType                workspaces.ErrorItem
-	PassportNotAvailable                      workspaces.ErrorItem
-	PassportNotFound                          workspaces.ErrorItem
-	PassportTotpNotConfirmed                  workspaces.ErrorItem
-	PassportUserNotAvailable                  workspaces.ErrorItem
-	PasswordDidNotUpdated                     workspaces.ErrorItem
-	PasswordDoesNotMeetTheSecurityRequirement workspaces.ErrorItem
-	PasswordRequired                          workspaces.ErrorItem
-	PhoneNumberIsNotValid                     workspaces.ErrorItem
-	ProvideTokenInAuthorization               workspaces.ErrorItem
-	Recaptcha2Error                           workspaces.ErrorItem
-	Recaptcha2Needed                          workspaces.ErrorItem
-	ResetNotFound                             workspaces.ErrorItem
-	SelectWorkspaceId                         workspaces.ErrorItem
-	SessionSecretIsNeeded                     workspaces.ErrorItem
-	SessionSecretIsNotAvailable               workspaces.ErrorItem
-	SmsNotSent                                workspaces.ErrorItem
-	TotpCodeIsNotValid                        workspaces.ErrorItem
-	TotpIsNotAvailableForThisPassport         workspaces.ErrorItem
-	UnsupportedOAuth                          workspaces.ErrorItem
-	UserDoesNotExist                          workspaces.ErrorItem
-	UserNotFoundOrDeleted                     workspaces.ErrorItem
-	UserWhichHasThisTokenDoesNotExist         workspaces.ErrorItem
-	ValidationFailedOnSomeFields              workspaces.ErrorItem
+	ActionOnlyInRoot                          fireback.ErrorItem
+	AlreadyConfirmed                          fireback.ErrorItem
+	BodyIsMissing                             fireback.ErrorItem
+	DataTypeDoesNotExistsInFireback           fireback.ErrorItem
+	EmailConfigurationIsNotAvailable          fireback.ErrorItem
+	EmailConfigurationMissing                 fireback.ErrorItem
+	EmailIsNotConfigured                      fireback.ErrorItem
+	EmailIsNotValid                           fireback.ErrorItem
+	EmailNotFound                             fireback.ErrorItem
+	FailedToDecodeGoogle                      fireback.ErrorItem
+	FieldInvalidEmail                         fireback.ErrorItem
+	FieldOneOf                                fireback.ErrorItem
+	FieldRequired                             fireback.ErrorItem
+	FileNotFound                              fireback.ErrorItem
+	GsmConfigurationIsNotAvailable            fireback.ErrorItem
+	InvalidContent                            fireback.ErrorItem
+	InvalidExchangeKey                        fireback.ErrorItem
+	InvalidToken                              fireback.ErrorItem
+	InvitationExpired                         fireback.ErrorItem
+	InvitationNotFound                        fireback.ErrorItem
+	InviteToWorkspaceMailSenderMissing        fireback.ErrorItem
+	InvokeUrlMissing                          fireback.ErrorItem
+	NotEnoughPermission                       fireback.ErrorItem
+	OtaRequestBlockedUntil                    fireback.ErrorItem
+	OtpCodeInvalid                            fireback.ErrorItem
+	OtpFailed                                 fireback.ErrorItem
+	OtpNotAvailableForThisType                fireback.ErrorItem
+	PassportNotAvailable                      fireback.ErrorItem
+	PassportNotFound                          fireback.ErrorItem
+	PassportTotpNotConfirmed                  fireback.ErrorItem
+	PassportUserNotAvailable                  fireback.ErrorItem
+	PasswordDidNotUpdated                     fireback.ErrorItem
+	PasswordDoesNotMeetTheSecurityRequirement fireback.ErrorItem
+	PasswordRequired                          fireback.ErrorItem
+	PhoneNumberIsNotValid                     fireback.ErrorItem
+	ProvideTokenInAuthorization               fireback.ErrorItem
+	Recaptcha2Error                           fireback.ErrorItem
+	Recaptcha2Needed                          fireback.ErrorItem
+	ResetNotFound                             fireback.ErrorItem
+	SelectWorkspaceId                         fireback.ErrorItem
+	SessionSecretIsNeeded                     fireback.ErrorItem
+	SessionSecretIsNotAvailable               fireback.ErrorItem
+	SmsNotSent                                fireback.ErrorItem
+	TotpCodeIsNotValid                        fireback.ErrorItem
+	TotpIsNotAvailableForThisPassport         fireback.ErrorItem
+	UnsupportedOAuth                          fireback.ErrorItem
+	UserDoesNotExist                          fireback.ErrorItem
+	UserNotFoundOrDeleted                     fireback.ErrorItem
+	UserWhichHasThisTokenDoesNotExist         fireback.ErrorItem
+	ValidationFailedOnSomeFields              fireback.ErrorItem
 }
 
 // There are queries to be created
@@ -381,9 +381,9 @@ func (x *UserInvitationsQueryColumns) Json() string {
 	}
 	return ""
 }
-func UserInvitationsQuery(query workspaces.QueryDSL) ([]*UserInvitationsQueryColumns, *workspaces.QueryResultMeta, error) {
+func UserInvitationsQuery(query fireback.QueryDSL) ([]*UserInvitationsQueryColumns, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserInvitationsQueryColumns{})
-	items, meta, err := workspaces.ContextAwareVSqlOperation[UserInvitationsQueryColumns](
+	items, meta, err := fireback.ContextAwareVSqlOperation[UserInvitationsQueryColumns](
 		refl, &queries.QueriesFs, "UserInvitations.vsql", query,
 	)
 	return items, meta, err

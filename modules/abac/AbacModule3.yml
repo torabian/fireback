@@ -806,7 +806,7 @@ entities:
         type: one
         target: CapabilityEntity
         fields: []
-        module: workspaces
+        module: fireback
         description: 
           The permission which is required for the menu to be visible.
   - name: backupTableMeta
@@ -1215,7 +1215,7 @@ entities:
         type: many2many
         target: CapabilityEntity
         allowCreate: false
-        module: workspaces
+        module: fireback
   - name: workspaceConfig
     cliName: config
     permRewrite:
@@ -1689,7 +1689,7 @@ queries:
   - name: userInvitations
     description: 
       Gets the invitations necessary for the specific user, so he can reject or accept
-      them and join the workspaces.
+      them and join the fireback.
     columns:
       fields:
         - name: userId

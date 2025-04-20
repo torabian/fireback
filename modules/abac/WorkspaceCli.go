@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
@@ -22,20 +22,20 @@ var GetUserAccessScope cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := fireback.CommonCliQueryDSLBuilder(c)
 		query.UserId = c.String("id")
 		access, err := GetUserAccessLevels(query)
-		workspaces.HandleActionInCli(c, access, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, access, err, map[string]map[string]string{})
 
 		return nil
 	},
 }
 
-func PermissionInfoFromString(items []string) []workspaces.PermissionInfo {
-	res := []workspaces.PermissionInfo{}
+func PermissionInfoFromString(items []string) []fireback.PermissionInfo {
+	res := []fireback.PermissionInfo{}
 
 	for _, item := range items {
-		res = append(res, workspaces.PermissionInfo{
+		res = append(res, fireback.PermissionInfo{
 			CompleteKey: item,
 		})
 	}
@@ -62,16 +62,16 @@ var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		f := workspaces.CommonCliQueryDSLBuilder(c)
+		f := fireback.CommonCliQueryDSLBuilder(c)
 		f.UserId = c.String("id")
 		access, _ := GetUserAccessLevels(f)
 
-		query := workspaces.QueryDSL{
+		query := fireback.QueryDSL{
 			UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 			ActionRequires:         PermissionInfoFromString(strings.Split(c.String("capabilities"), ",")),
 		}
 
-		meets, missing := workspaces.MeetsAccessLevel(query, false)
+		meets, missing := fireback.MeetsAccessLevel(query, false)
 
 		if !meets {
 			fmt.Println("Not enough access level. Missing:")
@@ -114,7 +114,7 @@ var WorkspaceAsCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		appConfig := workspaces.GetConfig()
+		appConfig := fireback.GetConfig()
 		wid := c.String("wid")
 		token := c.String("token")
 		appConfig.CliWorkspace = wid
@@ -131,11 +131,11 @@ var ViewAuthorize cli.Command = cli.Command{
 	Usage: "Shows the authorization result for current user",
 
 	Action: func(c *cli.Context) error {
-		appConfig := workspaces.GetConfig()
+		appConfig := fireback.GetConfig()
 		fmt.Println("Workspace:", appConfig.CliWorkspace)
 		fmt.Println("Token:", appConfig.CliToken)
 
-		result, err := workspaces.CliAuth(nil)
+		result, err := fireback.CliAuth(nil)
 		if err != nil {
 			log.Fatalln(err)
 		} else {
@@ -163,7 +163,7 @@ var CliConfigCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		appConfig := workspaces.GetConfig()
+		appConfig := fireback.GetConfig()
 		if c.IsSet("lang") {
 			ws := c.String("lang")
 			appConfig.CliLanguage = ws

@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/RegionalContent"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/RegionalContent"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,15 +32,15 @@ func ResetRegionalContentSeeders(fs *embed.FS) {
 }
 
 type RegionalContentEntityQs struct {
-	Content    workspaces.QueriableField `cli:"content" table:"regional_content" column:"content" qs:"content"`
-	Region     workspaces.QueriableField `cli:"region" table:"regional_content" column:"region" qs:"region"`
-	Title      workspaces.QueriableField `cli:"title" table:"regional_content" column:"title" qs:"title"`
-	LanguageId workspaces.QueriableField `cli:"language-id" table:"regional_content" column:"language_id" qs:"languageId"`
-	KeyGroup   workspaces.QueriableField `cli:"key-group" table:"regional_content" column:"key_group" qs:"keyGroup"`
+	Content    fireback.QueriableField `cli:"content" table:"regional_content" column:"content" qs:"content"`
+	Region     fireback.QueriableField `cli:"region" table:"regional_content" column:"region" qs:"region"`
+	Title      fireback.QueriableField `cli:"title" table:"regional_content" column:"title" qs:"title"`
+	LanguageId fireback.QueriableField `cli:"language-id" table:"regional_content" column:"language_id" qs:"languageId"`
+	KeyGroup   fireback.QueriableField `cli:"key-group" table:"regional_content" column:"key_group" qs:"keyGroup"`
 }
 
 func (x *RegionalContentEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var RegionalContentQsFlags = []cli.Flag{
@@ -68,23 +68,23 @@ var RegionalContentQsFlags = []cli.Flag{
 
 type RegionalContentEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -94,11 +94,11 @@ type RegionalContentEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -135,7 +135,7 @@ type RegionalContentEntity struct {
 	LinkedTo         *RegionalContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func RegionalContentEntityStream(q workspaces.QueryDSL) (chan []*RegionalContentEntity, *workspaces.QueryResultMeta, error) {
+func RegionalContentEntityStream(q fireback.QueryDSL) (chan []*RegionalContentEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*RegionalContentEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -171,8 +171,8 @@ func (x *RegionalContentEntityList) Json() string {
 	}
 	return ""
 }
-func (x *RegionalContentEntityList) ToTree() *workspaces.TreeOperation[RegionalContentEntity] {
-	return workspaces.NewTreeOperation(
+func (x *RegionalContentEntityList) ToTree() *fireback.TreeOperation[RegionalContentEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *RegionalContentEntity) string {
 			if !t.ParentId.Valid {
@@ -189,15 +189,15 @@ func (x *RegionalContentEntityList) ToTree() *workspaces.TreeOperation[RegionalC
 var RegionalContentPreloadRelations []string = []string{}
 
 type regionalContentActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *RegionalContentEntity) (*RegionalContentEntity, *workspaces.IError)
-	Create         func(dto *RegionalContentEntity, query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError)
-	Upsert         func(dto *RegionalContentEntity, query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *RegionalContentEntity) (*RegionalContentEntity, *fireback.IError)
+	Create         func(dto *RegionalContentEntity, query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
+	Upsert         func(dto *RegionalContentEntity, query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
 	SeederInit     func() *RegionalContentEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*RegionalContentEntity, query workspaces.QueryDSL) ([]*RegionalContentEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*RegionalContentEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.QueryResultMeta, error)
 }
 
 var RegionalContentActions regionalContentActionsSig = regionalContentActionsSig{
@@ -212,7 +212,7 @@ var RegionalContentActions regionalContentActionsSig = regionalContentActionsSig
 	Query:          RegionalContentActionQueryFn,
 }
 
-func RegionalContentActionUpsertFn(dto *RegionalContentEntity, query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentActionUpsertFn(dto *RegionalContentEntity, query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -226,30 +226,30 @@ var REGIONAL_CONTENT_EVENTS = []string{
 }
 
 type RegionalContentFieldMap struct {
-	Content    workspaces.TranslatedString `yaml:"content"`
-	Region     workspaces.TranslatedString `yaml:"region"`
-	Title      workspaces.TranslatedString `yaml:"title"`
-	LanguageId workspaces.TranslatedString `yaml:"languageId"`
-	KeyGroup   workspaces.TranslatedString `yaml:"keyGroup"`
+	Content    fireback.TranslatedString `yaml:"content"`
+	Region     fireback.TranslatedString `yaml:"region"`
+	Title      fireback.TranslatedString `yaml:"title"`
+	LanguageId fireback.TranslatedString `yaml:"languageId"`
+	KeyGroup   fireback.TranslatedString `yaml:"keyGroup"`
 }
 
 var RegionalContentEntityMetaConfig map[string]int64 = map[string]int64{
 	"ContentExcerptSize": 100,
 }
-var RegionalContentEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&RegionalContentEntity{}))
+var RegionalContentEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&RegionalContentEntity{}))
 
-func entityRegionalContentFormatter(dto *RegionalContentEntity, query workspaces.QueryDSL) {
+func entityRegionalContentFormatter(dto *RegionalContentEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func RegionalContentActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func RegionalContentActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -276,7 +276,7 @@ func RegionalContentActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func RegionalContentActionSeeder(query workspaces.QueryDSL, count int) {
+func RegionalContentActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -302,7 +302,7 @@ func RegionalContentActionSeederInitFn() *RegionalContentEntity {
 	entity := &RegionalContentEntity{}
 	return entity
 }
-func RegionalContentAssociationCreate(dto *RegionalContentEntity, query workspaces.QueryDSL) error {
+func RegionalContentAssociationCreate(dto *RegionalContentEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -310,13 +310,13 @@ func RegionalContentAssociationCreate(dto *RegionalContentEntity, query workspac
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func RegionalContentRelationContentCreate(dto *RegionalContentEntity, query workspaces.QueryDSL) error {
+func RegionalContentRelationContentCreate(dto *RegionalContentEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func RegionalContentRelationContentUpdate(dto *RegionalContentEntity, query workspaces.QueryDSL) error {
+func RegionalContentRelationContentUpdate(dto *RegionalContentEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func RegionalContentPolyglotUpdateHandler(dto *RegionalContentEntity, query workspaces.QueryDSL) {
+func RegionalContentPolyglotUpdateHandler(dto *RegionalContentEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -327,8 +327,8 @@ func RegionalContentPolyglotUpdateHandler(dto *RegionalContentEntity, query work
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func RegionalContentValidator(dto *RegionalContentEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func RegionalContentValidator(dto *RegionalContentEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -376,31 +376,31 @@ And here is the actual object signature:
 	},
 }
 
-func RegionalContentEntityPreSanitize(dto *RegionalContentEntity, query workspaces.QueryDSL) {
+func RegionalContentEntityPreSanitize(dto *RegionalContentEntity, query fireback.QueryDSL) {
 	if dto.Content != "" {
 		Content := dto.Content
-		ContentExcerpt := workspaces.StripPolicy.Sanitize(dto.Content)
-		Content = workspaces.UgcPolicy.Sanitize(Content)
-		ContentExcerpt = workspaces.StripPolicy.Sanitize(ContentExcerpt)
+		ContentExcerpt := fireback.StripPolicy.Sanitize(dto.Content)
+		Content = fireback.UgcPolicy.Sanitize(Content)
+		ContentExcerpt = fireback.StripPolicy.Sanitize(ContentExcerpt)
 		ContentExcerptSize, ContentExcerptSizeExists := RegionalContentEntityMetaConfig["ContentExcerptSize"]
 		if ContentExcerptSizeExists {
-			ContentExcerpt = workspaces.PickFirstNWords(ContentExcerpt, int(ContentExcerptSize))
+			ContentExcerpt = fireback.PickFirstNWords(ContentExcerpt, int(ContentExcerptSize))
 		} else {
-			ContentExcerpt = workspaces.PickFirstNWords(ContentExcerpt, 30)
+			ContentExcerpt = fireback.PickFirstNWords(ContentExcerpt, 30)
 		}
 		dto.ContentExcerpt = &ContentExcerpt
 		dto.Content = Content
 	}
 }
-func RegionalContentEntityBeforeCreateAppend(dto *RegionalContentEntity, query workspaces.QueryDSL) {
+func RegionalContentEntityBeforeCreateAppend(dto *RegionalContentEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	RegionalContentRecursiveAddUniqueId(dto, query)
 }
-func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query workspaces.QueryDSL) {
+func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -412,7 +412,7 @@ func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query works
   at this moment.
 *
 */
-func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query workspaces.QueryDSL) ([]*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			RegionalContentEntityPreSanitize(dtos[index], query)
@@ -420,19 +420,19 @@ func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query workspace
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func RegionalContentActionBatchCreateFn(dtos []*RegionalContentEntity, query workspaces.QueryDSL) ([]*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentActionBatchCreateFn(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*RegionalContentEntity{}
 		for _, item := range dtos {
@@ -446,12 +446,12 @@ func RegionalContentActionBatchCreateFn(dtos []*RegionalContentEntity, query wor
 	}
 	return dtos, nil
 }
-func RegionalContentDeleteEntireChildren(query workspaces.QueryDSL, dto *RegionalContentEntity) *workspaces.IError {
+func RegionalContentDeleteEntireChildren(query fireback.QueryDSL, dto *RegionalContentEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func RegionalContentActionCreateFn(dto *RegionalContentEntity, query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentActionCreateFn(dto *RegionalContentEntity, query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := RegionalContentValidator(dto, false); iError != nil {
 		return nil, iError
@@ -465,14 +465,14 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query workspaces.
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -480,35 +480,35 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query workspaces.
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewRegionalContentCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(REGIONAL_CONTENT_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&RegionalContentEntity{}),
+			"entityKey": fireback.GetTypeString(&RegionalContentEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func RegionalContentActionGetOneFn(query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentActionGetOneFn(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
-	item, err := workspaces.GetOneEntity[RegionalContentEntity](query, refl)
+	item, err := fireback.GetOneEntity[RegionalContentEntity](query, refl)
 	entityRegionalContentFormatter(item, query)
 	return item, err
 }
-func RegionalContentActionGetByWorkspaceFn(query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentActionGetByWorkspaceFn(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[RegionalContentEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[RegionalContentEntity](query, refl)
 	entityRegionalContentFormatter(item, query)
 	return item, err
 }
-func RegionalContentActionQueryFn(query workspaces.QueryDSL) ([]*RegionalContentEntity, *workspaces.QueryResultMeta, error) {
+func RegionalContentActionQueryFn(query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[RegionalContentEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[RegionalContentEntity](query, refl)
 	for _, item := range items {
 		entityRegionalContentFormatter(item, query)
 	}
@@ -518,7 +518,7 @@ func RegionalContentActionQueryFn(query workspaces.QueryDSL) ([]*RegionalContent
 var regionalContentMemoryItems []*RegionalContentEntity = []*RegionalContentEntity{}
 
 func RegionalContentEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -548,7 +548,7 @@ func RegionalContentMemJoin(items []uint) []*RegionalContentEntity {
 	}
 	return res
 }
-func RegionalContentUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = REGIONAL_CONTENT_EVENT_UPDATED
 	RegionalContentEntityPreSanitize(fields, query)
@@ -563,7 +563,7 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	RegionalContentRelationContentUpdate(fields, query)
@@ -577,11 +577,11 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		Where(&RegionalContentEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewRegionalContentUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -593,9 +593,9 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	   })*/
 	return &itemRefetched, nil
 }
-func RegionalContentActionUpdateFn(query workspaces.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *workspaces.IError) {
+func RegionalContentActionUpdateFn(query fireback.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := RegionalContentValidator(fields, true); iError != nil {
@@ -605,11 +605,11 @@ func RegionalContentActionUpdateFn(query workspaces.QueryDSL, fields *RegionalCo
 	// RegionalContentRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *RegionalContentEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = RegionalContentUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -617,7 +617,7 @@ func RegionalContentActionUpdateFn(query workspaces.QueryDSL, fields *RegionalCo
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return RegionalContentUpdateExec(dbref, query, fields)
@@ -628,8 +628,8 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire regionalcontents ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
 			AllowOnRoot:    true,
 		})
 		count, _ := RegionalContentActionWipeClean(query)
@@ -638,16 +638,16 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func RegionalContentActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func RegionalContentActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}
-	return workspaces.RemoveEntity[RegionalContentEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}
+	return fireback.RemoveEntity[RegionalContentEntity](query, refl)
 }
-func RegionalContentActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func RegionalContentActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[RegionalContentEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[RegionalContentEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'RegionalContentEntity'", subErr)
 			return count, subErr
@@ -658,11 +658,11 @@ func RegionalContentActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func RegionalContentActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[RegionalContentEntity]) (
-	*workspaces.BulkRecordRequest[RegionalContentEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[RegionalContentEntity]) (
+	*fireback.BulkRecordRequest[RegionalContentEntity], *fireback.IError,
 ) {
 	result := []*RegionalContentEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := RegionalContentActions.Update(query, record)
@@ -677,7 +677,7 @@ func RegionalContentActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *RegionalContentEntity) Json() string {
 	if x != nil {
@@ -687,7 +687,7 @@ func (x *RegionalContentEntity) Json() string {
 	return ""
 }
 
-var RegionalContentEntityMeta = workspaces.TableMetaData{
+var RegionalContentEntityMeta = fireback.TableMetaData{
 	EntityName:    "RegionalContent",
 	ExportKey:     "regional-contents",
 	TableNameInDb: "regional-content_entities",
@@ -697,23 +697,23 @@ var RegionalContentEntityMeta = workspaces.TableMetaData{
 }
 
 func RegionalContentActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
 }
 func RegionalContentActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
 }
 func RegionalContentActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content RegionalContentEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := RegionalContentActions.Create(&content, query)
@@ -762,7 +762,7 @@ var RegionalContentCommonCliFlags = []cli.Flag{
 		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP' (enum)`,
 	},
 }
-var RegionalContentCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var RegionalContentCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "region",
 		StructField: "Region",
@@ -849,17 +849,17 @@ var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 			AllowOnRoot:    true,
 		})
 		entity := &RegionalContentEntity{}
-		workspaces.PopulateInteractively(entity, c, RegionalContentCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, RegionalContentCommonInteractiveCliFlags)
 		if entity, err := RegionalContentActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -869,8 +869,8 @@ var RegionalContentUpdateCmd cli.Command = cli.Command{
 	Flags:   RegionalContentCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
 			AllowOnRoot:    true,
 		})
 		entity := CastRegionalContentFromCli(c)
@@ -893,7 +893,7 @@ func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("content") {
 		template.Content = c.String("content")
@@ -912,8 +912,8 @@ func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
 	}
 	return template
 }
-func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
@@ -923,8 +923,8 @@ func RegionalContentSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q work
 	)
 }
 func RegionalContentSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		regionalContentSeedersFs,
@@ -933,8 +933,8 @@ func RegionalContentSyncSeeders() {
 	)
 }
 func RegionalContentImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		RegionalContentActions.Create,
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -942,19 +942,19 @@ func RegionalContentImportMocks() {
 		false,
 	)
 }
-func RegionalContentWriteQueryMock(ctx workspaces.MockQueryContext) {
+func RegionalContentWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := RegionalContentActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "RegionalContent", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "RegionalContent", result)
 	}
 }
-func RegionalContentsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func RegionalContentsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -966,7 +966,7 @@ func RegionalContentsActionQueryString(keyword string, page int) ([]string, *wor
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := RegionalContentActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -993,8 +993,8 @@ var RegionalContentDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
@@ -1018,7 +1018,7 @@ var RegionalContentDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := RegionalContentActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1026,7 +1026,7 @@ var RegionalContentDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1039,7 +1039,7 @@ var RegionalContentDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1069,7 +1069,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of regional-contents, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]RegionalContentEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1078,7 +1078,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(regionalContentSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(regionalContentSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1091,7 +1091,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				regionalContentSeedersFs,
@@ -1102,7 +1102,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1110,7 +1110,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				RegionalContentEntityStream,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				c.String("file"),
@@ -1124,7 +1124,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1134,12 +1134,12 @@ var RegionalContentImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 					AllowOnRoot:    true,
 				},
 				func() RegionalContentEntity {
@@ -1158,7 +1158,7 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 	RegionalContentUpdateCmd,
 	RegionalContentAskCmd,
 	RegionalContentCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		RegionalContentActions.Remove,
 	),
@@ -1166,7 +1166,7 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 
 func RegionalContentCliFn() cli.Command {
 	commands := append(RegionalContentImportExportCommands, RegionalContentCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, RegionalContentDevCommands...)
 	}
 	return cli.Command{
@@ -1184,14 +1184,14 @@ func RegionalContentCliFn() cli.Command {
 	}
 }
 
-var REGIONAL_CONTENT_ACTION_TABLE = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        RegionalContentActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			RegionalContentActions.Query,
 			security,
 			reflect.ValueOf(&RegionalContentEntity{}).Elem(),
@@ -1199,27 +1199,27 @@ var REGIONAL_CONTENT_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var REGIONAL_CONTENT_ACTION_QUERY = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/regional-contents",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &RegionalContentEntityQs{}
-			workspaces.HttpQueryEntity(c, RegionalContentActions.Query, qs)
+			fireback.HttpQueryEntity(c, RegionalContentActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         RegionalContentActions.Query,
 	ResponseEntity: &[]RegionalContentEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &RegionalContentEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			RegionalContentActions.Query,
 			security,
@@ -1230,142 +1230,142 @@ var REGIONAL_CONTENT_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, RegionalContentQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, RegionalContentQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var REGIONAL_CONTENT_ACTION_EXPORT = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/regional-contents/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, RegionalContentActionExport)
+			fireback.HttpStreamFileChannel(c, RegionalContentActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         RegionalContentActionExport,
 	ResponseEntity: &[]RegionalContentEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
 }
-var REGIONAL_CONTENT_ACTION_GET_ONE = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/regional-content/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, RegionalContentActions.GetOne)
+			fireback.HttpGetEntity(c, RegionalContentActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         RegionalContentActions.GetOne,
 	ResponseEntity: &RegionalContentEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
 }
-var REGIONAL_CONTENT_ACTION_POST_ONE = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new regionalContent",
 	Flags:         RegionalContentCommonCliFlags,
 	Method:        "POST",
 	Url:           "/regional-content",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, RegionalContentActions.Create)
+			fireback.HttpPostEntity(c, RegionalContentActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, RegionalContentActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, RegionalContentActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         RegionalContentActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &RegionalContentEntity{},
 	ResponseEntity: &RegionalContentEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
 }
-var REGIONAL_CONTENT_ACTION_PATCH = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         RegionalContentCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/regional-content",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, RegionalContentActions.Update)
+			fireback.HttpUpdateEntity(c, RegionalContentActions.Update)
 		},
 	},
 	Action:         RegionalContentActions.Update,
 	RequestEntity:  &RegionalContentEntity{},
 	ResponseEntity: &RegionalContentEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
 }
-var REGIONAL_CONTENT_ACTION_PATCH_BULK = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/regional-contents",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, RegionalContentActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, RegionalContentActionBulkUpdate)
 		},
 	},
 	Action:         RegionalContentActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[RegionalContentEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[RegionalContentEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[RegionalContentEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[RegionalContentEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
 }
-var REGIONAL_CONTENT_ACTION_DELETE = workspaces.Module3Action{
+var REGIONAL_CONTENT_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/regional-content",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, RegionalContentActions.Remove)
+			fireback.HttpRemoveEntity(c, RegionalContentActions.Remove)
 		},
 	},
 	Action:         RegionalContentActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &RegionalContentEntity{},
 }
 
@@ -1373,10 +1373,10 @@ var REGIONAL_CONTENT_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on RegionalContentEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendRegionalContentRouter = func(r *[]workspaces.Module3Action) {}
+var AppendRegionalContentRouter = func(r *[]fireback.Module3Action) {}
 
-func GetRegionalContentModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetRegionalContentModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		REGIONAL_CONTENT_ACTION_QUERY,
 		REGIONAL_CONTENT_ACTION_EXPORT,
 		REGIONAL_CONTENT_ACTION_GET_ONE,
@@ -1390,32 +1390,32 @@ func GetRegionalContentModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_REGIONAL_CONTENT = workspaces.PermissionInfo{
+var PERM_ROOT_REGIONAL_CONTENT = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.regional-content.*",
 	Name:        "Entire regional content actions (*)",
 	Description: "",
 }
-var PERM_ROOT_REGIONAL_CONTENT_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_REGIONAL_CONTENT_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.regional-content.delete",
 	Name:        "Delete regional content",
 	Description: "",
 }
-var PERM_ROOT_REGIONAL_CONTENT_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_REGIONAL_CONTENT_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.regional-content.create",
 	Name:        "Create regional content",
 	Description: "",
 }
-var PERM_ROOT_REGIONAL_CONTENT_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_REGIONAL_CONTENT_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.regional-content.update",
 	Name:        "Update regional content",
 	Description: "",
 }
-var PERM_ROOT_REGIONAL_CONTENT_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_REGIONAL_CONTENT_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.regional-content.query",
 	Name:        "Query regional content",
 	Description: "",
 }
-var ALL_REGIONAL_CONTENT_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_REGIONAL_CONTENT_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_REGIONAL_CONTENT_DELETE,
 	PERM_ROOT_REGIONAL_CONTENT_CREATE,
 	PERM_ROOT_REGIONAL_CONTENT_UPDATE,
@@ -1438,42 +1438,42 @@ type xRegionalContentKeyGroup struct {
 
 func NewRegionalContentCreatedEvent(
 	payload *RegionalContentEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "RegionalContentCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_REGIONAL_CONTENT_QUERY,
 			},
 		},
 		CacheKey: "*abac.RegionalContentEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewRegionalContentUpdatedEvent(
 	payload *RegionalContentEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "RegionalContentUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_REGIONAL_CONTENT_QUERY,
 			},
 		},
 		CacheKey: "*abac.RegionalContentEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var RegionalContentEntityBundle = workspaces.EntityBundle{
+var RegionalContentEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_REGIONAL_CONTENT_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

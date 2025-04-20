@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -63,7 +63,7 @@ Use the following code for single time authorization
 {{ .Otp }}
 `
 
-func QuickGetOtpMessage(q workspaces.QueryDSL, field RegionContentKey) *RegionalContentEntity {
+func QuickGetOtpMessage(q fireback.QueryDSL, field RegionContentKey) *RegionalContentEntity {
 	if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
 		LanguageId:       q.Language,
 		Region:           "any",
@@ -108,13 +108,13 @@ func (x *RegionalContentEntity) CompileTitle(data map[string]string) (string, er
 
 }
 
-func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
+func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError) {
 
 	key := string(dto.RegionContentKey)
 	var item RegionalContentEntity
 	condition := &RegionalContentEntity{LanguageId: dto.LanguageId, Region: dto.Region, KeyGroup: key}
 
-	if err := workspaces.GetRef(q).
+	if err := fireback.GetRef(q).
 		Debug().
 		Model(&RegionalContentEntity{}).
 		Where(condition).
@@ -126,15 +126,15 @@ func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q workspaces.Qu
 			condition.LanguageId = "en"
 			condition.Region = "any"
 
-			if err2 := workspaces.GetRef(q).
+			if err2 := fireback.GetRef(q).
 				Debug().
 				Model(&RegionalContentEntity{}).
 				Where(condition).
 				First(&item).Error; err2 != nil {
-				return nil, workspaces.GormErrorToIError(err2)
+				return nil, fireback.GormErrorToIError(err2)
 			}
 		} else {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 
@@ -165,14 +165,14 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		f := workspaces.CommonCliQueryDSLBuilder(c)
+		f := fireback.CommonCliQueryDSLBuilder(c)
 
 		result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
 			LanguageId:       c.String("lang"),
 			Region:           c.String("region"),
 			RegionContentKey: RegionContentKey(c.String(("key"))),
 		}, f)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 
 		return nil
 	},

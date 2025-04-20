@@ -8,7 +8,7 @@ import (
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 type EmailSenderCategory string
@@ -17,9 +17,9 @@ const (
 	GENERAL_SENDER EmailSenderCategory = "GENERAL_SENDER"
 )
 
-func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender EmailSenderCategory) (*SendEmailWithProviderActionResDto, *workspaces.IError) {
+func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender EmailSenderCategory) (*SendEmailWithProviderActionResDto, *fireback.IError) {
 
-	config, err := NotificationConfigActionGetOneByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 
 	if err != nil {
 		// If there are no configuration, skip returning error, we use some terminal stuff for development.
@@ -44,7 +44,7 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 		}
 
 		if err := SendMail(*content, config.GeneralEmailProvider); err != nil {
-			return nil, workspaces.CastToIError(err)
+			return nil, fireback.CastToIError(err)
 		} else {
 			return &SendEmailWithProviderActionResDto{}, nil
 		}
@@ -68,7 +68,7 @@ func SendMailViaSendGrid(message EmailMessageContent, apiKey string) (*rest.Resp
 	return res, nil
 }
 
-func getCurrentNotificationConfiguration(query workspaces.QueryDSL) (*NotificationConfigEntity, error) {
+func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*NotificationConfigEntity, error) {
 	query.Deep = true
 	items, _, err := NotificationConfigActions.Query(query)
 

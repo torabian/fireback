@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/EmailProvider"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/EmailProvider"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,12 +32,12 @@ func ResetEmailProviderSeeders(fs *embed.FS) {
 }
 
 type EmailProviderEntityQs struct {
-	Type   workspaces.QueriableField `cli:"type" table:"email_provider" column:"type" qs:"type"`
-	ApiKey workspaces.QueriableField `cli:"api-key" table:"email_provider" column:"api_key" qs:"apiKey"`
+	Type   fireback.QueriableField `cli:"type" table:"email_provider" column:"type" qs:"type"`
+	ApiKey fireback.QueriableField `cli:"api-key" table:"email_provider" column:"api_key" qs:"apiKey"`
 }
 
 func (x *EmailProviderEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var EmailProviderQsFlags = []cli.Flag{
@@ -53,23 +53,23 @@ var EmailProviderQsFlags = []cli.Flag{
 
 type EmailProviderEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -79,11 +79,11 @@ type EmailProviderEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -116,7 +116,7 @@ type EmailProviderEntity struct {
 	LinkedTo         *EmailProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func EmailProviderEntityStream(q workspaces.QueryDSL) (chan []*EmailProviderEntity, *workspaces.QueryResultMeta, error) {
+func EmailProviderEntityStream(q fireback.QueryDSL) (chan []*EmailProviderEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*EmailProviderEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -152,8 +152,8 @@ func (x *EmailProviderEntityList) Json() string {
 	}
 	return ""
 }
-func (x *EmailProviderEntityList) ToTree() *workspaces.TreeOperation[EmailProviderEntity] {
-	return workspaces.NewTreeOperation(
+func (x *EmailProviderEntityList) ToTree() *fireback.TreeOperation[EmailProviderEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *EmailProviderEntity) string {
 			if !t.ParentId.Valid {
@@ -170,15 +170,15 @@ func (x *EmailProviderEntityList) ToTree() *workspaces.TreeOperation[EmailProvid
 var EmailProviderPreloadRelations []string = []string{}
 
 type emailProviderActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *EmailProviderEntity) (*EmailProviderEntity, *workspaces.IError)
-	Create         func(dto *EmailProviderEntity, query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError)
-	Upsert         func(dto *EmailProviderEntity, query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *EmailProviderEntity) (*EmailProviderEntity, *fireback.IError)
+	Create         func(dto *EmailProviderEntity, query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
+	Upsert         func(dto *EmailProviderEntity, query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
 	SeederInit     func() *EmailProviderEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*EmailProviderEntity, query workspaces.QueryDSL) ([]*EmailProviderEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*EmailProviderEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*EmailProviderEntity, query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.QueryResultMeta, error)
 }
 
 var EmailProviderActions emailProviderActionsSig = emailProviderActionsSig{
@@ -193,7 +193,7 @@ var EmailProviderActions emailProviderActionsSig = emailProviderActionsSig{
 	Query:          EmailProviderActionQueryFn,
 }
 
-func EmailProviderActionUpsertFn(dto *EmailProviderEntity, query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderActionUpsertFn(dto *EmailProviderEntity, query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -207,25 +207,25 @@ var EMAIL_PROVIDER_EVENTS = []string{
 }
 
 type EmailProviderFieldMap struct {
-	Type   workspaces.TranslatedString `yaml:"type"`
-	ApiKey workspaces.TranslatedString `yaml:"apiKey"`
+	Type   fireback.TranslatedString `yaml:"type"`
+	ApiKey fireback.TranslatedString `yaml:"apiKey"`
 }
 
 var EmailProviderEntityMetaConfig map[string]int64 = map[string]int64{}
-var EmailProviderEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&EmailProviderEntity{}))
+var EmailProviderEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&EmailProviderEntity{}))
 
-func entityEmailProviderFormatter(dto *EmailProviderEntity, query workspaces.QueryDSL) {
+func entityEmailProviderFormatter(dto *EmailProviderEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func EmailProviderActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func EmailProviderActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -252,7 +252,7 @@ func EmailProviderActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func EmailProviderActionSeeder(query workspaces.QueryDSL, count int) {
+func EmailProviderActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -278,7 +278,7 @@ func EmailProviderActionSeederInitFn() *EmailProviderEntity {
 	entity := &EmailProviderEntity{}
 	return entity
 }
-func EmailProviderAssociationCreate(dto *EmailProviderEntity, query workspaces.QueryDSL) error {
+func EmailProviderAssociationCreate(dto *EmailProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -286,13 +286,13 @@ func EmailProviderAssociationCreate(dto *EmailProviderEntity, query workspaces.Q
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func EmailProviderRelationContentCreate(dto *EmailProviderEntity, query workspaces.QueryDSL) error {
+func EmailProviderRelationContentCreate(dto *EmailProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func EmailProviderRelationContentUpdate(dto *EmailProviderEntity, query workspaces.QueryDSL) error {
+func EmailProviderRelationContentUpdate(dto *EmailProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func EmailProviderPolyglotUpdateHandler(dto *EmailProviderEntity, query workspaces.QueryDSL) {
+func EmailProviderPolyglotUpdateHandler(dto *EmailProviderEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -303,8 +303,8 @@ func EmailProviderPolyglotUpdateHandler(dto *EmailProviderEntity, query workspac
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func EmailProviderValidator(dto *EmailProviderEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func EmailProviderValidator(dto *EmailProviderEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -349,17 +349,17 @@ And here is the actual object signature:
 	},
 }
 
-func EmailProviderEntityPreSanitize(dto *EmailProviderEntity, query workspaces.QueryDSL) {
+func EmailProviderEntityPreSanitize(dto *EmailProviderEntity, query fireback.QueryDSL) {
 }
-func EmailProviderEntityBeforeCreateAppend(dto *EmailProviderEntity, query workspaces.QueryDSL) {
+func EmailProviderEntityBeforeCreateAppend(dto *EmailProviderEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	EmailProviderRecursiveAddUniqueId(dto, query)
 }
-func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query workspaces.QueryDSL) {
+func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -371,7 +371,7 @@ func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query workspace
   at this moment.
 *
 */
-func EmailProviderMultiInsertFn(dtos []*EmailProviderEntity, query workspaces.QueryDSL) ([]*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderMultiInsertFn(dtos []*EmailProviderEntity, query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			EmailProviderEntityPreSanitize(dtos[index], query)
@@ -379,19 +379,19 @@ func EmailProviderMultiInsertFn(dtos []*EmailProviderEntity, query workspaces.Qu
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func EmailProviderActionBatchCreateFn(dtos []*EmailProviderEntity, query workspaces.QueryDSL) ([]*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderActionBatchCreateFn(dtos []*EmailProviderEntity, query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*EmailProviderEntity{}
 		for _, item := range dtos {
@@ -405,12 +405,12 @@ func EmailProviderActionBatchCreateFn(dtos []*EmailProviderEntity, query workspa
 	}
 	return dtos, nil
 }
-func EmailProviderDeleteEntireChildren(query workspaces.QueryDSL, dto *EmailProviderEntity) *workspaces.IError {
+func EmailProviderDeleteEntireChildren(query fireback.QueryDSL, dto *EmailProviderEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func EmailProviderActionCreateFn(dto *EmailProviderEntity, query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderActionCreateFn(dto *EmailProviderEntity, query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := EmailProviderValidator(dto, false); iError != nil {
 		return nil, iError
@@ -424,14 +424,14 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query workspaces.Quer
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -439,35 +439,35 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query workspaces.Quer
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewEmailProviderCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(EMAIL_PROVIDER_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&EmailProviderEntity{}),
+			"entityKey": fireback.GetTypeString(&EmailProviderEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func EmailProviderActionGetOneFn(query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderActionGetOneFn(query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
-	item, err := workspaces.GetOneEntity[EmailProviderEntity](query, refl)
+	item, err := fireback.GetOneEntity[EmailProviderEntity](query, refl)
 	entityEmailProviderFormatter(item, query)
 	return item, err
 }
-func EmailProviderActionGetByWorkspaceFn(query workspaces.QueryDSL) (*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderActionGetByWorkspaceFn(query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[EmailProviderEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[EmailProviderEntity](query, refl)
 	entityEmailProviderFormatter(item, query)
 	return item, err
 }
-func EmailProviderActionQueryFn(query workspaces.QueryDSL) ([]*EmailProviderEntity, *workspaces.QueryResultMeta, error) {
+func EmailProviderActionQueryFn(query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[EmailProviderEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[EmailProviderEntity](query, refl)
 	for _, item := range items {
 		entityEmailProviderFormatter(item, query)
 	}
@@ -477,7 +477,7 @@ func EmailProviderActionQueryFn(query workspaces.QueryDSL) ([]*EmailProviderEnti
 var emailProviderMemoryItems []*EmailProviderEntity = []*EmailProviderEntity{}
 
 func EmailProviderEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -507,7 +507,7 @@ func EmailProviderMemJoin(items []uint) []*EmailProviderEntity {
 	}
 	return res
 }
-func EmailProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = EMAIL_PROVIDER_EVENT_UPDATED
 	EmailProviderEntityPreSanitize(fields, query)
@@ -522,7 +522,7 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	EmailProviderRelationContentUpdate(fields, query)
@@ -536,11 +536,11 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		Where(&EmailProviderEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewEmailProviderUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -552,9 +552,9 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	   })*/
 	return &itemRefetched, nil
 }
-func EmailProviderActionUpdateFn(query workspaces.QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *workspaces.IError) {
+func EmailProviderActionUpdateFn(query fireback.QueryDSL, fields *EmailProviderEntity) (*EmailProviderEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := EmailProviderValidator(fields, true); iError != nil {
@@ -564,11 +564,11 @@ func EmailProviderActionUpdateFn(query workspaces.QueryDSL, fields *EmailProvide
 	// EmailProviderRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *EmailProviderEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = EmailProviderUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -576,7 +576,7 @@ func EmailProviderActionUpdateFn(query workspaces.QueryDSL, fields *EmailProvide
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return EmailProviderUpdateExec(dbref, query, fields)
@@ -587,8 +587,8 @@ var EmailProviderWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire emailproviders ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
 			AllowOnRoot:    true,
 		})
 		count, _ := EmailProviderActionWipeClean(query)
@@ -597,16 +597,16 @@ var EmailProviderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailProviderActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func EmailProviderActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE}
-	return workspaces.RemoveEntity[EmailProviderEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE}
+	return fireback.RemoveEntity[EmailProviderEntity](query, refl)
 }
-func EmailProviderActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func EmailProviderActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[EmailProviderEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[EmailProviderEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'EmailProviderEntity'", subErr)
 			return count, subErr
@@ -617,11 +617,11 @@ func EmailProviderActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func EmailProviderActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[EmailProviderEntity]) (
-	*workspaces.BulkRecordRequest[EmailProviderEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[EmailProviderEntity]) (
+	*fireback.BulkRecordRequest[EmailProviderEntity], *fireback.IError,
 ) {
 	result := []*EmailProviderEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := EmailProviderActions.Update(query, record)
@@ -636,7 +636,7 @@ func EmailProviderActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *EmailProviderEntity) Json() string {
 	if x != nil {
@@ -646,7 +646,7 @@ func (x *EmailProviderEntity) Json() string {
 	return ""
 }
 
-var EmailProviderEntityMeta = workspaces.TableMetaData{
+var EmailProviderEntityMeta = fireback.TableMetaData{
 	EntityName:    "EmailProvider",
 	ExportKey:     "email-providers",
 	TableNameInDb: "email-provider_entities",
@@ -656,23 +656,23 @@ var EmailProviderEntityMeta = workspaces.TableMetaData{
 }
 
 func EmailProviderActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[EmailProviderEntity](query, EmailProviderActions.Query, EmailProviderPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[EmailProviderEntity](query, EmailProviderActions.Query, EmailProviderPreloadRelations)
 }
 func EmailProviderActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[EmailProviderEntity](query, EmailProviderActions.Query, EmailProviderPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[EmailProviderEntity](query, EmailProviderActions.Query, EmailProviderPreloadRelations)
 }
 func EmailProviderActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content EmailProviderEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := EmailProviderActions.Create(&content, query)
@@ -706,7 +706,7 @@ var EmailProviderCommonCliFlags = []cli.Flag{
 		Usage:    `apiKey (string)`,
 	},
 }
-var EmailProviderCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var EmailProviderCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "type",
 		StructField: "Type",
@@ -762,17 +762,17 @@ var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 			AllowOnRoot:    true,
 		})
 		entity := &EmailProviderEntity{}
-		workspaces.PopulateInteractively(entity, c, EmailProviderCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, EmailProviderCommonInteractiveCliFlags)
 		if entity, err := EmailProviderActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -782,8 +782,8 @@ var EmailProviderUpdateCmd cli.Command = cli.Command{
 	Flags:   EmailProviderCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
 			AllowOnRoot:    true,
 		})
 		entity := CastEmailProviderFromCli(c)
@@ -806,7 +806,7 @@ func CastEmailProviderFromCli(c *cli.Context) *EmailProviderEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("type") {
 		template.Type = c.String("type")
@@ -816,8 +816,8 @@ func CastEmailProviderFromCli(c *cli.Context) *EmailProviderEntity {
 	}
 	return template
 }
-func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
@@ -827,8 +827,8 @@ func EmailProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q worksp
 	)
 }
 func EmailProviderSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		emailProviderSeedersFs,
@@ -837,8 +837,8 @@ func EmailProviderSyncSeeders() {
 	)
 }
 func EmailProviderImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		EmailProviderActions.Create,
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -846,19 +846,19 @@ func EmailProviderImportMocks() {
 		false,
 	)
 }
-func EmailProviderWriteQueryMock(ctx workspaces.MockQueryContext) {
+func EmailProviderWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := EmailProviderActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "EmailProvider", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "EmailProvider", result)
 	}
 }
-func EmailProvidersActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func EmailProvidersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -870,7 +870,7 @@ func EmailProvidersActionQueryString(keyword string, page int) ([]string, *works
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := EmailProviderActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -897,8 +897,8 @@ var EmailProviderDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
@@ -922,7 +922,7 @@ var EmailProviderDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := EmailProviderActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -930,7 +930,7 @@ var EmailProviderDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -943,7 +943,7 @@ var EmailProviderDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -973,7 +973,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of email-providers, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]EmailProviderEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -982,7 +982,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(emailProviderSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(emailProviderSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -995,7 +995,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				emailProviderSeedersFs,
@@ -1006,7 +1006,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1014,7 +1014,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				EmailProviderEntityStream,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				c.String("file"),
@@ -1028,7 +1028,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1038,12 +1038,12 @@ var EmailProviderImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 					AllowOnRoot:    true,
 				},
 				func() EmailProviderEntity {
@@ -1062,7 +1062,7 @@ var EmailProviderCliCommands []cli.Command = []cli.Command{
 	EmailProviderUpdateCmd,
 	EmailProviderAskCmd,
 	EmailProviderCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		EmailProviderActions.Remove,
 	),
@@ -1070,7 +1070,7 @@ var EmailProviderCliCommands []cli.Command = []cli.Command{
 
 func EmailProviderCliFn() cli.Command {
 	commands := append(EmailProviderImportExportCommands, EmailProviderCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, EmailProviderDevCommands...)
 	}
 	return cli.Command{
@@ -1087,14 +1087,14 @@ func EmailProviderCliFn() cli.Command {
 	}
 }
 
-var EMAIL_PROVIDER_ACTION_TABLE = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        EmailProviderActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			EmailProviderActions.Query,
 			security,
 			reflect.ValueOf(&EmailProviderEntity{}).Elem(),
@@ -1102,27 +1102,27 @@ var EMAIL_PROVIDER_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var EMAIL_PROVIDER_ACTION_QUERY = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/email-providers",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &EmailProviderEntityQs{}
-			workspaces.HttpQueryEntity(c, EmailProviderActions.Query, qs)
+			fireback.HttpQueryEntity(c, EmailProviderActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         EmailProviderActions.Query,
 	ResponseEntity: &[]EmailProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &EmailProviderEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			EmailProviderActions.Query,
 			security,
@@ -1133,142 +1133,142 @@ var EMAIL_PROVIDER_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, EmailProviderQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, EmailProviderQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var EMAIL_PROVIDER_ACTION_EXPORT = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/email-providers/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, EmailProviderActionExport)
+			fireback.HttpStreamFileChannel(c, EmailProviderActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         EmailProviderActionExport,
 	ResponseEntity: &[]EmailProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
 }
-var EMAIL_PROVIDER_ACTION_GET_ONE = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/email-provider/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, EmailProviderActions.GetOne)
+			fireback.HttpGetEntity(c, EmailProviderActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         EmailProviderActions.GetOne,
 	ResponseEntity: &EmailProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
 }
-var EMAIL_PROVIDER_ACTION_POST_ONE = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new emailProvider",
 	Flags:         EmailProviderCommonCliFlags,
 	Method:        "POST",
 	Url:           "/email-provider",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, EmailProviderActions.Create)
+			fireback.HttpPostEntity(c, EmailProviderActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, EmailProviderActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, EmailProviderActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         EmailProviderActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &EmailProviderEntity{},
 	ResponseEntity: &EmailProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
 }
-var EMAIL_PROVIDER_ACTION_PATCH = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         EmailProviderCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/email-provider",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, EmailProviderActions.Update)
+			fireback.HttpUpdateEntity(c, EmailProviderActions.Update)
 		},
 	},
 	Action:         EmailProviderActions.Update,
 	RequestEntity:  &EmailProviderEntity{},
 	ResponseEntity: &EmailProviderEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
 }
-var EMAIL_PROVIDER_ACTION_PATCH_BULK = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/email-providers",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, EmailProviderActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, EmailProviderActionBulkUpdate)
 		},
 	},
 	Action:         EmailProviderActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[EmailProviderEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[EmailProviderEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[EmailProviderEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[EmailProviderEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
 }
-var EMAIL_PROVIDER_ACTION_DELETE = workspaces.Module3Action{
+var EMAIL_PROVIDER_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/email-provider",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, EmailProviderActions.Remove)
+			fireback.HttpRemoveEntity(c, EmailProviderActions.Remove)
 		},
 	},
 	Action:         EmailProviderActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &EmailProviderEntity{},
 }
 
@@ -1276,10 +1276,10 @@ var EMAIL_PROVIDER_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on EmailProviderEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendEmailProviderRouter = func(r *[]workspaces.Module3Action) {}
+var AppendEmailProviderRouter = func(r *[]fireback.Module3Action) {}
 
-func GetEmailProviderModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetEmailProviderModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		EMAIL_PROVIDER_ACTION_QUERY,
 		EMAIL_PROVIDER_ACTION_EXPORT,
 		EMAIL_PROVIDER_ACTION_GET_ONE,
@@ -1293,32 +1293,32 @@ func GetEmailProviderModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_EMAIL_PROVIDER = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_PROVIDER = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.email-provider.*",
 	Name:        "Entire email provider actions (*)",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_PROVIDER_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_PROVIDER_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.email-provider.delete",
 	Name:        "Delete email provider",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_PROVIDER_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_PROVIDER_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.email-provider.create",
 	Name:        "Create email provider",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_PROVIDER_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_PROVIDER_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.email-provider.update",
 	Name:        "Update email provider",
 	Description: "",
 }
-var PERM_ROOT_EMAIL_PROVIDER_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_EMAIL_PROVIDER_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.email-provider.query",
 	Name:        "Query email provider",
 	Description: "",
 }
-var ALL_EMAIL_PROVIDER_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_EMAIL_PROVIDER_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_EMAIL_PROVIDER_DELETE,
 	PERM_ROOT_EMAIL_PROVIDER_CREATE,
 	PERM_ROOT_EMAIL_PROVIDER_UPDATE,
@@ -1341,42 +1341,42 @@ type xEmailProviderType struct {
 
 func NewEmailProviderCreatedEvent(
 	payload *EmailProviderEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "EmailProviderCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_EMAIL_PROVIDER_QUERY,
 			},
 		},
 		CacheKey: "*abac.EmailProviderEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewEmailProviderUpdatedEvent(
 	payload *EmailProviderEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "EmailProviderUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_EMAIL_PROVIDER_QUERY,
 			},
 		},
 		CacheKey: "*abac.EmailProviderEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var EmailProviderEntityBundle = workspaces.EntityBundle{
+var EmailProviderEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_EMAIL_PROVIDER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

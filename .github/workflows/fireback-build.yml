@@ -316,7 +316,7 @@ jobs:
         with:
           node-version: 18
       - name: Install the dependencies
-        run: cd modules/workspaces/codegen/react-new && npm i --force
+        run: cd modules/fireback/codegen/react-new && npm i --force
 
       - name: Package windows
         run: cd cmd/fireback && make wininstaller
@@ -326,7 +326,7 @@ jobs:
           name: artifacts-windows
           path: artifacts
 
-      ## Test the module builder ./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to /Users/ali/work/fireback --gof-module github.com/torabian/fireback
+      ## Test the module builder ./artifacts/fireback/f gen gof --def modules/fireback/WorkspaceModule3.yml --relative-to /Users/ali/work/fireback --gof-module github.com/torabian/fireback
       ## Changes might break them
 
       # - name: Build System Service
@@ -378,7 +378,7 @@ jobs:
         with:
           node-version: 18
       - name: Install the dependencies
-        run: cd modules/workspaces/codegen/react-new && npm i --force
+        run: cd modules/fireback/codegen/react-new && npm i --force
       - name: Build and package deb files
         run: cd cmd/fireback && make deb && make linux-zip
       - name: Windows zip
@@ -392,7 +392,7 @@ jobs:
       - name: Refresh the fireback dependencies
         run: make refresh
       - name: Clean ui installation logs
-        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/workspaces/codegen/react-new/yarn.lock
+        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock
 
       - name: 
           Refreshing golang modules should not make a commit.
@@ -442,11 +442,11 @@ jobs:
       - name: Test the react bed
         run: cd e2e/react-bed && npm i --force && npm run build
       - name: install dependencies for react-new
-        run: cd modules/workspaces/codegen/react-new  && yarn
+        run: cd modules/fireback/codegen/react-new  && yarn
       - name: regenerate SDKs
         run: make rebuild-sdks-ci
       - name: checkout yarn lock because it's unrelated
-        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/workspaces/codegen/react-new/yarn.lock
+        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock
       - name: 
           Check if the sdk generated is already committed to the codebase.
           Fireback changes should not be out of sync with react.js and react native
@@ -472,7 +472,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
  
       - run: |
-          cd modules/workspaces/codegen/react-new/src/modules/fireback && npm version --no-git-tag-version 1.2.2-${{ github.sha }} && npm publish --tag=latest --access public
+          cd modules/fireback/codegen/react-new/src/modules/fireback && npm version --no-git-tag-version 1.2.2-${{ github.sha }} && npm publish --tag=latest --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH }}
@@ -604,7 +604,7 @@ jobs:
         run: npx
 
       - name: Build front-end
-        run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.bundle.demo ./node_modules/.bin/craco build
+        run: cd modules/fireback/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.bundle.demo ./node_modules/.bin/craco build
       
       - name: Build Cordova Android App
         run: cd e2e/samples/fireback-capacitor && npm i --force && make rebuild
@@ -640,18 +640,18 @@ jobs:
 
       - name: Run Yarn Install
         run: |
-          cd modules/workspaces/codegen/react-native-new && npm i
+          cd modules/fireback/codegen/react-native-new && npm i
 
       - name: Build application
         run: |
-          cd modules/workspaces/codegen/react-native-new/android && \
+          cd modules/fireback/codegen/react-native-new/android && \
           ./gradlew assembleRelease
 
       - name: Upload application
         uses: actions/upload-artifact@master
         with:
           name: artifacts-android-react-native
-          path: modules/workspaces/codegen/react-native-new/android/app/build/outputs/apk/release
+          path: modules/fireback/codegen/react-native-new/android/app/build/outputs/apk/release
 
   fireback-react:
     if: ${{ inputs.fireback_react == true }}
@@ -669,10 +669,10 @@ jobs:
         name: Build the docs
 
       - name: Build the front-end
-        run: cd modules/workspaces/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
+        run: cd modules/fireback/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
 
       - name: Copy docs to front-end build
-        run: cp -R modules/workspaces/codegen/react-new/build docs/build/demo
+        run: cp -R modules/fireback/codegen/react-new/build docs/build/demo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -705,7 +705,7 @@ jobs:
           node-version: 18
       
       - name: Install the dependencies
-        run: cd modules/workspaces/codegen/react-new && npm i --force
+        run: cd modules/fireback/codegen/react-new && npm i --force
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
 

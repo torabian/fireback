@@ -15,7 +15,7 @@ import (
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/Preference"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/Preference"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -32,11 +32,11 @@ func ResetPreferenceSeeders(fs *embed.FS) {
 }
 
 type PreferenceEntityQs struct {
-	Timezone workspaces.QueriableField `cli:"timezone" table:"preference" column:"timezone" qs:"timezone"`
+	Timezone fireback.QueriableField `cli:"timezone" table:"preference" column:"timezone" qs:"timezone"`
 }
 
 func (x *PreferenceEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var PreferenceQsFlags = []cli.Flag{
@@ -48,23 +48,23 @@ var PreferenceQsFlags = []cli.Flag{
 
 type PreferenceEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -74,11 +74,11 @@ type PreferenceEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -110,7 +110,7 @@ type PreferenceEntity struct {
 	LinkedTo         *PreferenceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PreferenceEntityStream(q workspaces.QueryDSL) (chan []*PreferenceEntity, *workspaces.QueryResultMeta, error) {
+func PreferenceEntityStream(q fireback.QueryDSL) (chan []*PreferenceEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*PreferenceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -146,8 +146,8 @@ func (x *PreferenceEntityList) Json() string {
 	}
 	return ""
 }
-func (x *PreferenceEntityList) ToTree() *workspaces.TreeOperation[PreferenceEntity] {
-	return workspaces.NewTreeOperation(
+func (x *PreferenceEntityList) ToTree() *fireback.TreeOperation[PreferenceEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *PreferenceEntity) string {
 			if !t.ParentId.Valid {
@@ -164,15 +164,15 @@ func (x *PreferenceEntityList) ToTree() *workspaces.TreeOperation[PreferenceEnti
 var PreferencePreloadRelations []string = []string{}
 
 type preferenceActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *PreferenceEntity) (*PreferenceEntity, *workspaces.IError)
-	Create         func(dto *PreferenceEntity, query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError)
-	Upsert         func(dto *PreferenceEntity, query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *PreferenceEntity) (*PreferenceEntity, *fireback.IError)
+	Create         func(dto *PreferenceEntity, query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
+	Upsert         func(dto *PreferenceEntity, query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
 	SeederInit     func() *PreferenceEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*PreferenceEntity, query workspaces.QueryDSL) ([]*PreferenceEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*PreferenceEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*PreferenceEntity, query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.QueryResultMeta, error)
 }
 
 var PreferenceActions preferenceActionsSig = preferenceActionsSig{
@@ -187,7 +187,7 @@ var PreferenceActions preferenceActionsSig = preferenceActionsSig{
 	Query:          PreferenceActionQueryFn,
 }
 
-func PreferenceActionUpsertFn(dto *PreferenceEntity, query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError) {
+func PreferenceActionUpsertFn(dto *PreferenceEntity, query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -201,24 +201,24 @@ var PREFERENCE_EVENTS = []string{
 }
 
 type PreferenceFieldMap struct {
-	Timezone workspaces.TranslatedString `yaml:"timezone"`
+	Timezone fireback.TranslatedString `yaml:"timezone"`
 }
 
 var PreferenceEntityMetaConfig map[string]int64 = map[string]int64{}
-var PreferenceEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&PreferenceEntity{}))
+var PreferenceEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&PreferenceEntity{}))
 
-func entityPreferenceFormatter(dto *PreferenceEntity, query workspaces.QueryDSL) {
+func entityPreferenceFormatter(dto *PreferenceEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PreferenceActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func PreferenceActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -245,7 +245,7 @@ func PreferenceActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func PreferenceActionSeeder(query workspaces.QueryDSL, count int) {
+func PreferenceActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -271,7 +271,7 @@ func PreferenceActionSeederInitFn() *PreferenceEntity {
 	entity := &PreferenceEntity{}
 	return entity
 }
-func PreferenceAssociationCreate(dto *PreferenceEntity, query workspaces.QueryDSL) error {
+func PreferenceAssociationCreate(dto *PreferenceEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -279,13 +279,13 @@ func PreferenceAssociationCreate(dto *PreferenceEntity, query workspaces.QueryDS
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func PreferenceRelationContentCreate(dto *PreferenceEntity, query workspaces.QueryDSL) error {
+func PreferenceRelationContentCreate(dto *PreferenceEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PreferenceRelationContentUpdate(dto *PreferenceEntity, query workspaces.QueryDSL) error {
+func PreferenceRelationContentUpdate(dto *PreferenceEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PreferencePolyglotUpdateHandler(dto *PreferenceEntity, query workspaces.QueryDSL) {
+func PreferencePolyglotUpdateHandler(dto *PreferenceEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -296,8 +296,8 @@ func PreferencePolyglotUpdateHandler(dto *PreferenceEntity, query workspaces.Que
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func PreferenceValidator(dto *PreferenceEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func PreferenceValidator(dto *PreferenceEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -341,17 +341,17 @@ And here is the actual object signature:
 	},
 }
 
-func PreferenceEntityPreSanitize(dto *PreferenceEntity, query workspaces.QueryDSL) {
+func PreferenceEntityPreSanitize(dto *PreferenceEntity, query fireback.QueryDSL) {
 }
-func PreferenceEntityBeforeCreateAppend(dto *PreferenceEntity, query workspaces.QueryDSL) {
+func PreferenceEntityBeforeCreateAppend(dto *PreferenceEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	PreferenceRecursiveAddUniqueId(dto, query)
 }
-func PreferenceRecursiveAddUniqueId(dto *PreferenceEntity, query workspaces.QueryDSL) {
+func PreferenceRecursiveAddUniqueId(dto *PreferenceEntity, query fireback.QueryDSL) {
 }
 
 /*
@@ -363,7 +363,7 @@ func PreferenceRecursiveAddUniqueId(dto *PreferenceEntity, query workspaces.Quer
   at this moment.
 *
 */
-func PreferenceMultiInsertFn(dtos []*PreferenceEntity, query workspaces.QueryDSL) ([]*PreferenceEntity, *workspaces.IError) {
+func PreferenceMultiInsertFn(dtos []*PreferenceEntity, query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PreferenceEntityPreSanitize(dtos[index], query)
@@ -371,19 +371,19 @@ func PreferenceMultiInsertFn(dtos []*PreferenceEntity, query workspaces.QueryDSL
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func PreferenceActionBatchCreateFn(dtos []*PreferenceEntity, query workspaces.QueryDSL) ([]*PreferenceEntity, *workspaces.IError) {
+func PreferenceActionBatchCreateFn(dtos []*PreferenceEntity, query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PreferenceEntity{}
 		for _, item := range dtos {
@@ -397,12 +397,12 @@ func PreferenceActionBatchCreateFn(dtos []*PreferenceEntity, query workspaces.Qu
 	}
 	return dtos, nil
 }
-func PreferenceDeleteEntireChildren(query workspaces.QueryDSL, dto *PreferenceEntity) *workspaces.IError {
+func PreferenceDeleteEntireChildren(query fireback.QueryDSL, dto *PreferenceEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func PreferenceActionCreateFn(dto *PreferenceEntity, query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError) {
+func PreferenceActionCreateFn(dto *PreferenceEntity, query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := PreferenceValidator(dto, false); iError != nil {
 		return nil, iError
@@ -416,14 +416,14 @@ func PreferenceActionCreateFn(dto *PreferenceEntity, query workspaces.QueryDSL) 
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -431,35 +431,35 @@ func PreferenceActionCreateFn(dto *PreferenceEntity, query workspaces.QueryDSL) 
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewPreferenceCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(PREFERENCE_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&PreferenceEntity{}),
+			"entityKey": fireback.GetTypeString(&PreferenceEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func PreferenceActionGetOneFn(query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError) {
+func PreferenceActionGetOneFn(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
-	item, err := workspaces.GetOneEntity[PreferenceEntity](query, refl)
+	item, err := fireback.GetOneEntity[PreferenceEntity](query, refl)
 	entityPreferenceFormatter(item, query)
 	return item, err
 }
-func PreferenceActionGetByWorkspaceFn(query workspaces.QueryDSL) (*PreferenceEntity, *workspaces.IError) {
+func PreferenceActionGetByWorkspaceFn(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[PreferenceEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[PreferenceEntity](query, refl)
 	entityPreferenceFormatter(item, query)
 	return item, err
 }
-func PreferenceActionQueryFn(query workspaces.QueryDSL) ([]*PreferenceEntity, *workspaces.QueryResultMeta, error) {
+func PreferenceActionQueryFn(query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[PreferenceEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[PreferenceEntity](query, refl)
 	for _, item := range items {
 		entityPreferenceFormatter(item, query)
 	}
@@ -469,7 +469,7 @@ func PreferenceActionQueryFn(query workspaces.QueryDSL) ([]*PreferenceEntity, *w
 var preferenceMemoryItems []*PreferenceEntity = []*PreferenceEntity{}
 
 func PreferenceEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -499,7 +499,7 @@ func PreferenceMemJoin(items []uint) []*PreferenceEntity {
 	}
 	return res
 }
-func PreferenceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PreferenceEntity) (*PreferenceEntity, *workspaces.IError) {
+func PreferenceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PreferenceEntity) (*PreferenceEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PREFERENCE_EVENT_UPDATED
 	PreferenceEntityPreSanitize(fields, query)
@@ -514,7 +514,7 @@ func PreferenceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pre
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	PreferenceRelationContentUpdate(fields, query)
@@ -528,11 +528,11 @@ func PreferenceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pre
 		Where(&PreferenceEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewPreferenceUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -544,9 +544,9 @@ func PreferenceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pre
 	   })*/
 	return &itemRefetched, nil
 }
-func PreferenceActionUpdateFn(query workspaces.QueryDSL, fields *PreferenceEntity) (*PreferenceEntity, *workspaces.IError) {
+func PreferenceActionUpdateFn(query fireback.QueryDSL, fields *PreferenceEntity) (*PreferenceEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.FirebackMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PreferenceValidator(fields, true); iError != nil {
@@ -556,11 +556,11 @@ func PreferenceActionUpdateFn(query workspaces.QueryDSL, fields *PreferenceEntit
 	// PreferenceRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *PreferenceEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = PreferenceUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -568,7 +568,7 @@ func PreferenceActionUpdateFn(query workspaces.QueryDSL, fields *PreferenceEntit
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return PreferenceUpdateExec(dbref, query, fields)
@@ -579,8 +579,8 @@ var PreferenceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire preferences ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
 		})
 		count, _ := PreferenceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -588,16 +588,16 @@ var PreferenceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PreferenceActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func PreferenceActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}
-	return workspaces.RemoveEntity[PreferenceEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}
+	return fireback.RemoveEntity[PreferenceEntity](query, refl)
 }
-func PreferenceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func PreferenceActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[PreferenceEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[PreferenceEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'PreferenceEntity'", subErr)
 			return count, subErr
@@ -608,11 +608,11 @@ func PreferenceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func PreferenceActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PreferenceEntity]) (
-	*workspaces.BulkRecordRequest[PreferenceEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[PreferenceEntity]) (
+	*fireback.BulkRecordRequest[PreferenceEntity], *fireback.IError,
 ) {
 	result := []*PreferenceEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := PreferenceActions.Update(query, record)
@@ -627,7 +627,7 @@ func PreferenceActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *PreferenceEntity) Json() string {
 	if x != nil {
@@ -637,7 +637,7 @@ func (x *PreferenceEntity) Json() string {
 	return ""
 }
 
-var PreferenceEntityMeta = workspaces.TableMetaData{
+var PreferenceEntityMeta = fireback.TableMetaData{
 	EntityName:    "Preference",
 	ExportKey:     "preferences",
 	TableNameInDb: "preference_entities",
@@ -647,23 +647,23 @@ var PreferenceEntityMeta = workspaces.TableMetaData{
 }
 
 func PreferenceActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[PreferenceEntity](query, PreferenceActions.Query, PreferencePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[PreferenceEntity](query, PreferenceActions.Query, PreferencePreloadRelations)
 }
 func PreferenceActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[PreferenceEntity](query, PreferenceActions.Query, PreferencePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[PreferenceEntity](query, PreferenceActions.Query, PreferencePreloadRelations)
 }
 func PreferenceActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content PreferenceEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.FirebackMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PreferenceActions.Create(&content, query)
@@ -692,7 +692,7 @@ var PreferenceCommonCliFlags = []cli.Flag{
 		Usage:    `timezone (string)`,
 	},
 }
-var PreferenceCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var PreferenceCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "timezone",
 		StructField: "Timezone",
@@ -735,16 +735,16 @@ var PreferenceCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
 		})
 		entity := &PreferenceEntity{}
-		workspaces.PopulateInteractively(entity, c, PreferenceCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, PreferenceCommonInteractiveCliFlags)
 		if entity, err := PreferenceActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -754,8 +754,8 @@ var PreferenceUpdateCmd cli.Command = cli.Command{
 	Flags:   PreferenceCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
 		})
 		entity := CastPreferenceFromCli(c)
 		if entity, err := PreferenceActions.Update(query, entity); err != nil {
@@ -777,15 +777,15 @@ func CastPreferenceFromCli(c *cli.Context) *PreferenceEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("timezone") {
 		template.Timezone = c.String("timezone")
 	}
 	return template
 }
-func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
@@ -795,8 +795,8 @@ func PreferenceSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspace
 	)
 }
 func PreferenceSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		preferenceSeedersFs,
@@ -805,8 +805,8 @@ func PreferenceSyncSeeders() {
 	)
 }
 func PreferenceImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		PreferenceActions.Create,
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -814,19 +814,19 @@ func PreferenceImportMocks() {
 		false,
 	)
 }
-func PreferenceWriteQueryMock(ctx workspaces.MockQueryContext) {
+func PreferenceWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := PreferenceActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "Preference", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "Preference", result)
 	}
 }
-func PreferencesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func PreferencesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -838,7 +838,7 @@ func PreferencesActionQueryString(keyword string, page int) ([]string, *workspac
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := PreferenceActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -865,8 +865,8 @@ var PreferenceDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
 			})
 			if c.Bool("batch") {
 				PreferenceActionSeederMultiple(query, c.Int("count"))
@@ -889,7 +889,7 @@ var PreferenceDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := PreferenceActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -897,7 +897,7 @@ var PreferenceDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -910,7 +910,7 @@ var PreferenceDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -940,7 +940,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of preferences, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]PreferenceEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -949,7 +949,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(preferenceSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(preferenceSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -962,7 +962,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				preferenceSeedersFs,
@@ -973,7 +973,7 @@ var PreferenceImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -981,7 +981,7 @@ var PreferenceImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				PreferenceEntityStream,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				c.String("file"),
@@ -995,7 +995,7 @@ var PreferenceImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1005,12 +1005,12 @@ var PreferenceImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				PreferenceActions.Create,
 				reflect.ValueOf(&PreferenceEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
 				},
 				func() PreferenceEntity {
 					v := CastPreferenceFromCli(c)
@@ -1028,7 +1028,7 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 	PreferenceUpdateCmd,
 	PreferenceAskCmd,
 	PreferenceCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
 		PreferenceActions.Remove,
 	),
@@ -1036,7 +1036,7 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 
 func PreferenceCliFn() cli.Command {
 	commands := append(PreferenceImportExportCommands, PreferenceCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, PreferenceDevCommands...)
 	}
 	return cli.Command{
@@ -1053,14 +1053,14 @@ func PreferenceCliFn() cli.Command {
 	}
 }
 
-var PREFERENCE_ACTION_TABLE = workspaces.Module3Action{
+var PREFERENCE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PreferenceActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			PreferenceActions.Query,
 			security,
 			reflect.ValueOf(&PreferenceEntity{}).Elem(),
@@ -1068,27 +1068,27 @@ var PREFERENCE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PREFERENCE_ACTION_QUERY = workspaces.Module3Action{
+var PREFERENCE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/preferences",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &PreferenceEntityQs{}
-			workspaces.HttpQueryEntity(c, PreferenceActions.Query, qs)
+			fireback.HttpQueryEntity(c, PreferenceActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PreferenceActions.Query,
 	ResponseEntity: &[]PreferenceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &PreferenceEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			PreferenceActions.Query,
 			security,
@@ -1099,138 +1099,138 @@ var PREFERENCE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, PreferenceQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, PreferenceQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PREFERENCE_ACTION_EXPORT = workspaces.Module3Action{
+var PREFERENCE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/preferences/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, PreferenceActionExport)
+			fireback.HttpStreamFileChannel(c, PreferenceActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PreferenceActionExport,
 	ResponseEntity: &[]PreferenceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
 }
-var PREFERENCE_ACTION_GET_ONE = workspaces.Module3Action{
+var PREFERENCE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/preference/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, PreferenceActions.GetOne)
+			fireback.HttpGetEntity(c, PreferenceActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         PreferenceActions.GetOne,
 	ResponseEntity: &PreferenceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
 }
-var PREFERENCE_ACTION_POST_ONE = workspaces.Module3Action{
+var PREFERENCE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new preference",
 	Flags:         PreferenceCommonCliFlags,
 	Method:        "POST",
 	Url:           "/preference",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, PreferenceActions.Create)
+			fireback.HttpPostEntity(c, PreferenceActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, PreferenceActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, PreferenceActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         PreferenceActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PreferenceEntity{},
 	ResponseEntity: &PreferenceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
 }
-var PREFERENCE_ACTION_PATCH = workspaces.Module3Action{
+var PREFERENCE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PreferenceCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/preference",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, PreferenceActions.Update)
+			fireback.HttpUpdateEntity(c, PreferenceActions.Update)
 		},
 	},
 	Action:         PreferenceActions.Update,
 	RequestEntity:  &PreferenceEntity{},
 	ResponseEntity: &PreferenceEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
 }
-var PREFERENCE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PREFERENCE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/preferences",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, PreferenceActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, PreferenceActionBulkUpdate)
 		},
 	},
 	Action:         PreferenceActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[PreferenceEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[PreferenceEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[PreferenceEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[PreferenceEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
 	},
 }
-var PREFERENCE_ACTION_DELETE = workspaces.Module3Action{
+var PREFERENCE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/preference",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, PreferenceActions.Remove)
+			fireback.HttpRemoveEntity(c, PreferenceActions.Remove)
 		},
 	},
 	Action:         PreferenceActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &PreferenceEntity{},
 }
 
@@ -1238,10 +1238,10 @@ var PREFERENCE_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on PreferenceEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPreferenceRouter = func(r *[]workspaces.Module3Action) {}
+var AppendPreferenceRouter = func(r *[]fireback.Module3Action) {}
 
-func GetPreferenceModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetPreferenceModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PREFERENCE_ACTION_QUERY,
 		PREFERENCE_ACTION_EXPORT,
 		PREFERENCE_ACTION_GET_ONE,
@@ -1255,32 +1255,32 @@ func GetPreferenceModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PREFERENCE = workspaces.PermissionInfo{
+var PERM_ROOT_PREFERENCE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.preference.*",
 	Name:        "Entire preference actions (*)",
 	Description: "",
 }
-var PERM_ROOT_PREFERENCE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PREFERENCE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.preference.delete",
 	Name:        "Delete preference",
 	Description: "",
 }
-var PERM_ROOT_PREFERENCE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PREFERENCE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.preference.create",
 	Name:        "Create preference",
 	Description: "",
 }
-var PERM_ROOT_PREFERENCE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PREFERENCE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.preference.update",
 	Name:        "Update preference",
 	Description: "",
 }
-var PERM_ROOT_PREFERENCE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PREFERENCE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.preference.query",
 	Name:        "Query preference",
 	Description: "",
 }
-var ALL_PREFERENCE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PREFERENCE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PREFERENCE_DELETE,
 	PERM_ROOT_PREFERENCE_CREATE,
 	PERM_ROOT_PREFERENCE_UPDATE,
@@ -1290,42 +1290,42 @@ var ALL_PREFERENCE_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewPreferenceCreatedEvent(
 	payload *PreferenceEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PreferenceCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PREFERENCE_QUERY,
 			},
 		},
 		CacheKey: "*abac.PreferenceEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewPreferenceUpdatedEvent(
 	payload *PreferenceEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PreferenceUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PREFERENCE_QUERY,
 			},
 		},
 		CacheKey: "*abac.PreferenceEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var PreferenceEntityBundle = workspaces.EntityBundle{
+var PreferenceEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PREFERENCE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

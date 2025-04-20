@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 
 	medianasms "github.com/medianasms/go-rest-sdk"
@@ -42,7 +42,7 @@ var GsmProviderTestCmd cli.Command = cli.Command{
 	Action: func(c *cli.Context) error {
 		message := c.String("message")
 		result, err := GsmSendSMS(c.String("id"), message, []string{c.String("to")})
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 
 		return nil
 	},
@@ -53,15 +53,15 @@ func init() {
 }
 
 func GsmProviderActionCreate(
-	dto *GsmProviderEntity, query workspaces.QueryDSL,
-) (*GsmProviderEntity, *workspaces.IError) {
+	dto *GsmProviderEntity, query fireback.QueryDSL,
+) (*GsmProviderEntity, *fireback.IError) {
 	return GsmProviderActionCreateFn(dto, query)
 }
 
 func GsmProviderActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *GsmProviderEntity,
-) (*GsmProviderEntity, *workspaces.IError) {
+) (*GsmProviderEntity, *fireback.IError) {
 	return GsmProviderActionUpdateFn(query, fields)
 }
 
@@ -70,9 +70,9 @@ func GsmProviderActionUpdate(
 *   for example, getting sms template for otp in europe area
 **/
 
-func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *workspaces.IError) {
+func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
 
-	config, err := NotificationConfigActionGetOneByWorkspace(workspaces.QueryDSL{WorkspaceId: ROOT_VAR})
+	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
 		// If there are no configuration, skip returning error, we use some terminal stuff for development.
 		if err.HttpCode != 404 {
@@ -91,16 +91,16 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendS
 	return config.GeneralGsmProvider.SendSms(message, recp)
 }
 
-func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *workspaces.IError) {
+func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
 
-	if provider, err := GsmProviderActions.GetOne(workspaces.QueryDSL{UniqueId: providerId}); err != nil {
+	if provider, err := GsmProviderActions.GetOne(fireback.QueryDSL{UniqueId: providerId}); err != nil {
 		return nil, err
 	} else {
 		return provider.SendSms(message, recp)
 	}
 }
 
-func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *workspaces.IError) {
+func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
 
 	if x.Type == GsmProviderType.Url {
 		if j, err := GsmSendSMSByHttpCall(x, message, recp); err != nil {
@@ -123,14 +123,14 @@ func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsW
 	}
 
 	fmt.Println(x.Json())
-	return nil, workspaces.Create401Error(&AbacMessages.SmsNotSent, []string{})
+	return nil, fireback.Create401Error(&AbacMessages.SmsNotSent, []string{})
 }
 
-func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []string) (string, *workspaces.IError) {
+func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
 	fmt.Println("Sending sms using http call", provider.UniqueId)
 
 	if provider.InvokeUrl == "" {
-		return "", workspaces.Create401Error(&AbacMessages.InvokeUrlMissing, []string{})
+		return "", fireback.Create401Error(&AbacMessages.InvokeUrlMissing, []string{})
 	}
 
 	m, _ := json.MarshalIndent(recp, "", "  ")
@@ -152,23 +152,23 @@ func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []st
 
 	req, err := http.NewRequest(http.MethodPost, provider.InvokeUrl, bytes.NewBuffer([]byte(body)))
 	if err != nil {
-		return "", workspaces.GormErrorToIError(err)
+		return "", fireback.GormErrorToIError(err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", workspaces.GormErrorToIError(err)
+		return "", fireback.GormErrorToIError(err)
 	}
 
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", workspaces.GormErrorToIError(err)
+		return "", fireback.GormErrorToIError(err)
 	}
 
 	return string(resBody), nil
 }
 
-func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []string) (string, *workspaces.IError) {
+func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
 
 	fmt.Println("Sending sms using terminal by", provider.UniqueId)
 
@@ -179,7 +179,7 @@ func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []st
 
 }
 
-func GsmSendSMSByMediana(provider *GsmProviderEntity, message string, recp []string) (string, *workspaces.IError) {
+func GsmSendSMSByMediana(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
 
 	fmt.Println("Using mediana")
 	sms := medianasms.New(provider.ApiKey)
@@ -187,7 +187,7 @@ func GsmSendSMSByMediana(provider *GsmProviderEntity, message string, recp []str
 	bulkID, err := sms.Send(provider.MainSenderNumber,
 		recp, message)
 	if err != nil {
-		return "", workspaces.GormErrorToIError(err)
+		return "", fireback.GormErrorToIError(err)
 	}
 
 	return fmt.Sprintf("%v", bulkID), nil

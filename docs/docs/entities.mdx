@@ -37,12 +37,12 @@ definition, which might be similar to:
 
 ```
 
-func PaymentModuleSetup(cfg *PaymentModuleConfig) *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func PaymentModuleSetup(cfg *PaymentModuleConfig) *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 		Name:          "payment",
 		Definitions:   &Module3Definitions,
 		ActionsBundle: GetPaymentActionsBundle(),
-		EntityBundles: []workspaces.EntityBundle{
+		EntityBundles: []fireback.EntityBundle{
 			PaymentParameterEntityBundle,
 			TransactionEntityBundle,
 

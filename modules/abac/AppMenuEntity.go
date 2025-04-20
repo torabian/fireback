@@ -2,16 +2,16 @@ package abac
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
-var AppMenuTests = []workspaces.Test{
+var AppMenuTests = []fireback.Test{
 	{
 		Name: "Creation of app menu polyglot, and removing them",
-		Function: func(t *workspaces.TestContext) error {
+		Function: func(t *fireback.TestContext) error {
 
 			// 1. Create the app menu first
-			id := workspaces.UUID()
+			id := fireback.UUID()
 
 			label := "Warsaw"
 
@@ -48,7 +48,7 @@ var AppMenuTests = []workspaces.Test{
 			assert.Nil(t, err2, "There should be no error while updating the menu item")
 			assert.Equal(t, 3, len(menuUpdated1.Translations), "There has to be now 3 items")
 
-			affected, err3 := AppMenuActions.Remove(workspaces.QueryDSL{
+			affected, err3 := AppMenuActions.Remove(fireback.QueryDSL{
 				Query: "unique_id = " + menuUpdated1.UniqueId,
 			})
 
@@ -62,7 +62,7 @@ var AppMenuTests = []workspaces.Test{
 
 func init() {
 
-	AppMenuActions.CteQuery = func(query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.QueryResultMeta, error) {
+	AppMenuActions.CteQuery = func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error) {
 		result, qrm, err := AppMenuActionCteQueryFn(query)
 		return result, qrm, err
 	}

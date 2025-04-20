@@ -1,15 +1,15 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
 	QueryWorkspaceTypesPubliclyActionImp = QueryWorkspaceTypesPubliclyAction
 }
 func QueryWorkspaceTypesPubliclyAction(
-	q workspaces.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	q fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 ) {
 	// Implement the logic here.
 	return nil, nil, nil

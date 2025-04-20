@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -47,7 +47,7 @@ var CreateRootUser cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := fireback.CommonCliQueryDSLBuilder(c)
 
 		if c.NumFlags() == 0 {
 			// This is gonna be an interactive, there are no flags
@@ -70,9 +70,9 @@ var AuthorizeOsCmd cli.Command = cli.Command{
 	Usage: "Authorizes the user, as os owner. Useful for desktop offline apps or mobile apps",
 
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		result, err := PassportActionAuthorizeOs2(&workspaces.EmptyRequest{}, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		query := fireback.CommonCliQueryDSLBuilder(c)
+		result, err := PassportActionAuthorizeOs2(&fireback.EmptyRequest{}, query)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
@@ -102,7 +102,7 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 
-		f := workspaces.QueryDSL{
+		f := fireback.QueryDSL{
 			UserId: c.String("user-id"),
 		}
 
@@ -142,6 +142,6 @@ var PassportCli cli.Command = cli.Command{
 		OauthAuthenticateActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
-		workspaces.GetCommonQuery(PassportActions.Query),
-	}, workspaces.WorkspacesCustomActionsCli...),
+		fireback.GetCommonQuery(PassportActions.Query),
+	}, fireback.FirebackCustomActionsCli...),
 }
