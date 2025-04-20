@@ -151,3 +151,9 @@ In order to release a new fireback, follow these steps:
 - cmd/fireback/msi/Product.wxs
 - .github/workflows/fireback-build.yml
 - modules/fireback/version.go
+- make refresh && make rebuild-sdks
+
+  ## Archive has been removed.
+
+  The archive folder which had old codes for different purposes is removed in 7fe548ebbbbeaa3291b53e8cb5b21f2bc34d895b commit. Checkout that
+  if you needed.
