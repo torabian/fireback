@@ -68,7 +68,7 @@ var EmailConfirmationQsFlags = []cli.Flag{
 
 type EmailConfirmationEntity struct {
 	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
 	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
