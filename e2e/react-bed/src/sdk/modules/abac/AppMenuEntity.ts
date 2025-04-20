@@ -9,7 +9,7 @@
     } from "../../core/definitions"
     import {
         CapabilityEntity,
-    } from "../workspaces/CapabilityEntity"
+    } from "../fireback/CapabilityEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type AppMenuEntityKeys =
@@ -104,7 +104,7 @@ export class AppMenuEntity extends BaseEntity {
       "description": "The permission which is required for the menu to be visible.",
       "type": "one",
       "target": "CapabilityEntity",
-      "module": "workspaces",
+      "module": "fireback",
       "computedType": "CapabilityEntity",
       "gormMap": {}
     }

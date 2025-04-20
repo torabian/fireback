@@ -18,7 +18,7 @@ export class WorkspaceMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
     return {
       data: {
-        items: mdb.fireback.items(),
+        items: mdb.workspaces.items(),
       },
     };
   }
@@ -29,7 +29,7 @@ export class WorkspaceMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
     return {
       data: {
-        items: mdb.fireback.items(),
+        items: mdb.workspaces.items(),
       },
     };
   }

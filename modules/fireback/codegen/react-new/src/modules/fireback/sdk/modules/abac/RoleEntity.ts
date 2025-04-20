@@ -9,7 +9,7 @@
     } from "../../core/definitions"
     import {
         CapabilityEntity,
-    } from "../workspaces/CapabilityEntity"
+    } from "../fireback/CapabilityEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type RoleEntityKeys =
@@ -65,7 +65,7 @@ export class RoleEntity extends BaseEntity {
       "name": "capabilities",
       "type": "many2many",
       "target": "CapabilityEntity",
-      "module": "workspaces",
+      "module": "fireback",
       "computedType": "CapabilityEntity[]",
       "gormMap": {}
     }

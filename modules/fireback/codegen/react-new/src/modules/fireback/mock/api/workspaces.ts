@@ -13,9 +13,9 @@ export class WorkspaceMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
     return {
       data: {
-        items: mdb.fireback.items(ctx),
+        items: mdb.workspaces.items(ctx),
         itemsPerPage: ctx.itemsPerPage,
-        totalItems: mdb.fireback.total(),
+        totalItems: mdb.workspaces.total(),
       },
     };
   }
@@ -26,9 +26,9 @@ export class WorkspaceMockServer {
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
     return {
       data: {
-        items: mdb.fireback.items(ctx),
+        items: mdb.workspaces.items(ctx),
         itemsPerPage: ctx.itemsPerPage,
-        totalItems: mdb.fireback.total(),
+        totalItems: mdb.workspaces.total(),
       },
     };
   }
@@ -39,7 +39,7 @@ export class WorkspaceMockServer {
     ctx: Context
   ): Promise<IResponse<DeepPartial<WorkspaceEntity>>> {
     return {
-      data: mdb.fireback.getOne(ctx.paramValues[0]),
+      data: mdb.workspaces.getOne(ctx.paramValues[0]),
     };
   }
 
@@ -49,7 +49,7 @@ export class WorkspaceMockServer {
     ctx: Context
   ): Promise<IResponse<DeepPartial<WorkspaceEntity>>> {
     return {
-      data: mdb.fireback.patchOne(ctx.body),
+      data: mdb.workspaces.patchOne(ctx.body),
     };
   }
 
@@ -58,7 +58,7 @@ export class WorkspaceMockServer {
   async deleteWorkspace(
     ctx: Context
   ): Promise<IResponseList<DeepPartial<WorkspaceEntity>>> {
-    mdb.fireback.deletes(QueryToId(ctx.body.query));
+    mdb.workspaces.deletes(QueryToId(ctx.body.query));
 
     return {
       data: {},
@@ -70,7 +70,7 @@ export class WorkspaceMockServer {
   async postWorkspace(
     ctx: Context
   ): Promise<IResponse<DeepPartial<WorkspaceEntity>>> {
-    const entity = mdb.fireback.create(ctx.body as Partial<WorkspaceEntity>);
+    const entity = mdb.workspaces.create(ctx.body as Partial<WorkspaceEntity>);
 
     return {
       data: entity,
