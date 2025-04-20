@@ -292,6 +292,12 @@ type Module3EntityActionConfig struct {
 // queries based on the type
 type Module3Entity struct {
 
+	// Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels
+	Notifications []*Module3Notification `yaml:"notifications,omitempty" json:"notifications,omitempty" jsonschema:"description=Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels"`
+
+	// Events are internal changes that can be triggered by different sources
+	Events []*Module3Event `yaml:"events,omitempty" json:"events,omitempty" jsonschema:"description=Events are internal changes that can be triggered by different sources"`
+
 	// Modify the actions configuration, add headers, params and more to default generated actions and code
 	Rpc Module3EntityActionConfig `yaml:"rpc,omitempty" json:"rpc,omitempty" jsonschema:"Modify the actions configuration, add headers, params and more to default generated actions and code."`
 
@@ -372,6 +378,9 @@ type Module3Entity struct {
 	// The name of the golang function which will recieve entity pointer to make some modification
 	// upon query, get or other details.
 	PostFormatter string `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty" jsonschema:"description=The name of the golang function which will recieve entity pointer to make some modification upon query, get or other details."`
+
+	// Internal metadata for code generation.
+	RootModule *Module3 `yaml:"-" json:"-" jsonschema:"-"`
 }
 
 // Events are definitions of a low level occurence across the application,
@@ -386,6 +395,12 @@ type Module3Event struct {
 
 	// Payload of the event
 	Payload *Module3ActionBody `yaml:"payload,omitempty" json:"payload,omitempty" jsonschema:"description=Payload of the event"`
+
+	// Security model of the event, which determines who can see it
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Security model of the event, which determines who can see it"`
+
+	// Mechanism to trigger a cache refresh on clients
+	CacheKey string `yaml:"cacheKey,omitempty" json:"cacheKey,omitempty" jsonschema:"description=Mechanism to trigger a cache refresh on clients"`
 }
 
 // Events are definitions of a low level occurence across the application,
@@ -400,9 +415,6 @@ type Module3Notification struct {
 
 	// Payload of the notification
 	Payload *Module3ActionBody `yaml:"payload,omitempty" json:"payload,omitempty" jsonschema:"description=Payload of the notification"`
-
-	// List of permissions that is required for the notification
-	Permissions []string `yaml:"permissions,omitempty" json:"permissions,omitempty" jsonschema:"description=List of permissions that is required for the notification"`
 }
 
 // Represents a dto in an application. Can be used for variety of reasons,

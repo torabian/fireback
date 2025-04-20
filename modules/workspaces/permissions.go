@@ -26,8 +26,8 @@ func MeetsCheck(actionRequires []PermissionInfo, perms []string) bool {
 	return meets
 }
 
-func MeetsAccessLevel(query QueryDSL, rootOrSystem bool) (bool, []string) {
-	if rootOrSystem && (query.WorkspaceId != ROOT_VAR && query.WorkspaceId != "system") {
+func MeetsAccessLevel(query QueryDSL, onlyRoot bool) (bool, []string) {
+	if onlyRoot && (query.WorkspaceId != ROOT_VAR && query.WorkspaceId != "system") {
 		return false, []string{"SYSTEM_OR_ROOT_ALLOWED"}
 	}
 

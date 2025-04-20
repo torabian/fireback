@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -438,12 +438,20 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query workspaces.Quer
 	// 5. Create sub entities, objects or arrays, association to other entities
 	PublicJoinKeyAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(PUBLIC_JOIN_KEY_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&PublicJoinKeyEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewPublicJoinKeyCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(PUBLIC_JOIN_KEY_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&PublicJoinKeyEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func PublicJoinKeyActionGetOneFn(query workspaces.QueryDSL) (*PublicJoinKeyEntity, *workspaces.IError) {
@@ -531,11 +539,18 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewPublicJoinKeyUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func PublicJoinKeyActionUpdateFn(query workspaces.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *workspaces.IError) {
@@ -1285,6 +1300,44 @@ var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
 	PERM_ROOT_PUBLIC_JOIN_KEY,
 }
+
+func NewPublicJoinKeyCreatedEvent(
+	payload *PublicJoinKeyEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "PublicJoinKeyCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
+			},
+		},
+		CacheKey: "*abac.PublicJoinKeyEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewPublicJoinKeyUpdatedEvent(
+	payload *PublicJoinKeyEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "PublicJoinKeyUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_PUBLIC_JOIN_KEY_QUERY,
+			},
+		},
+		CacheKey: "PublicJoinKeyEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var PublicJoinKeyEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

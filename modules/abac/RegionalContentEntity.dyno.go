@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -478,12 +478,20 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query workspaces.
 	// 5. Create sub entities, objects or arrays, association to other entities
 	RegionalContentAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(REGIONAL_CONTENT_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&RegionalContentEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewRegionalContentCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(REGIONAL_CONTENT_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&RegionalContentEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func RegionalContentActionGetOneFn(query workspaces.QueryDSL) (*RegionalContentEntity, *workspaces.IError) {
@@ -571,11 +579,18 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewRegionalContentUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func RegionalContentActionUpdateFn(query workspaces.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *workspaces.IError) {
@@ -1419,6 +1434,43 @@ func newRegionalContentKeyGroup() *xRegionalContentKeyGroup {
 type xRegionalContentKeyGroup struct {
 	SMS_OTP   string
 	EMAIL_OTP string
+}
+
+func NewRegionalContentCreatedEvent(
+	payload *RegionalContentEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "RegionalContentCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_REGIONAL_CONTENT_QUERY,
+			},
+		},
+		CacheKey: "*abac.RegionalContentEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewRegionalContentUpdatedEvent(
+	payload *RegionalContentEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "RegionalContentUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_REGIONAL_CONTENT_QUERY,
+			},
+		},
+		CacheKey: "RegionalContentEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
 }
 
 var RegionalContentEntityBundle = workspaces.EntityBundle{

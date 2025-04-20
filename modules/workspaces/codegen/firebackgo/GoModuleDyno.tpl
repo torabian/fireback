@@ -3,8 +3,6 @@ package {{ .m.Name }}
 {{ define "remoteresponsetype" }} {{ if .Out }}*{{ if .Out.Dto}}  {{ .Out.Dto }} {{ end }} {{ if .Out.Entity}}  {{ .Out.Entity }} {{ end }} {{ if .Out.Fields}} {{ upper .Name }}RemoteResponse {{ end }} {{else }}[]byte{{ end }} {{ end }}
 {{ define "remoterequestbody" }} {{ if .In }} {{ if .In.Dto}} {{ .In.Dto }} {{ end }}{{ if .In.Entity}} {{ .In.Entity }} {{ end }}{{ if .In.Fields}} {{ upper .Name }}RemoteBody {{ end }}{{ end }}{{ end }}
 {{ define "querycolumns" }} {{ if .Columns }} {{ if .Columns.Dto}} {{ .Columns.Dto }} {{ end }}{{ if .Columns.Entity}} {{ .Columns.Entity }} {{ end }}{{ if .Columns.Fields}} {{ upper .Name }}QueryColumns {{ end }}{{ end }}{{ end }}
-{{ define "notificationPayload" }} {{ if .Payload }} {{ if .Payload.Dto}} {{ .Payload.Dto }} {{ end }}{{ if .Payload.Entity}} {{ .Payload.Entity }} {{ end }}{{ if .Payload.Fields}} {{ upper .Name }}Payload {{ end }}{{ end }}{{ end }}
-{{ define "eventPayload" }} {{ if .Payload }} {{ if .Payload.Dto}} {{ .Payload.Dto }} {{ end }}{{ if .Payload.Entity}} {{ .Payload.Entity }} {{ end }}{{ if .Payload.Fields}} {{ upper .Name }}Payload {{ end }}{{ end }}{{ end }}
 
 {{- define "taskrequestbody" -}}
   {{- if .In -}}
@@ -631,108 +629,7 @@ func (x *Config) Save(filepath string) error {
 	return {{ .wsprefix }}SaveEnvFile(x, filepath)
 }
 
-
 {{ end }}
-
-{{ define "notificationInformation" }}
-  {{ $notifications := index . 0 }}
-  {{ $wsprefix := index . 1 }}
-  
-  {{ range $notifications }}
-
-    {{ if .Payload }}
-      {{ if .Payload.Fields }}
-      type {{ upper .Name }}Payload struct {
-        {{ if .Payload.Fields }}
-          {{ template "definitionrow" (arr .Payload.Fields $wsprefix) }}
-        {{ end }}
-      }
-      func (x *{{ upper .Name }}Payload) Json() string {
-        if x != nil {
-          str, _ := json.MarshalIndent(x, "", "  ")
-          return (string(str))
-        }
-        return ""
-      }
-      {{ end }}
-    {{ end }}
-
-    func New{{ upper .Name }}Notification(
-      {{ if .Payload }}
-      payload *{{ template "notificationPayload" . }},
-      {{ end }}
-    ) (*{{ $wsprefix }}Notification, error) {
-      {{ if .Payload }}
-      payloadBytes, err := json.Marshal(payload)
-      if err != nil {
-        return nil, err
-      }
-      {{ end }}
-
-      return &{{ $wsprefix }}Notification{
-        Name: "{{ upper .Name }}",
-        {{ if .Payload }}
-        Payload: payloadBytes,
-        {{ end }}
-        Permissions: []string{
-          {{ range .Permissions}}
-          "{{.}}",
-          {{ end }}
-        },
-      }, nil
-    }
-
-  {{ end }}
-{{ end }}
-
-
-{{ template "notificationInformation" (arr .m.Notifications $.wsprefix) }}
-
-{{ define "eventInformation" }}
-  {{ $events := index . 0 }}
-  {{ $wsprefix := index . 1 }}
-  
-  {{ range $events }}
-
-    {{ if .Payload }}
-      {{ if .Payload.Fields }}
-      type {{ upper .Name }}Payload struct {
-        {{ if .Payload.Fields }}
-          {{ template "definitionrow" (arr .Payload.Fields $wsprefix) }}
-        {{ end }}
-      }
-      func (x *{{ upper .Name }}Payload) Json() string {
-        if x != nil {
-          str, _ := json.MarshalIndent(x, "", "  ")
-          return (string(str))
-        }
-        return ""
-      }
-      {{ end }}
-    {{ end }}
-
-    func New{{ upper .Name }}Event(
-      {{ if .Payload }}
-      payload *{{ template "eventPayload" . }},
-      {{ end }}
-    ) (*{{ $wsprefix }}Event, error) {
-      {{ if .Payload }}
-      payloadBytes, err := json.Marshal(payload)
-      if err != nil {
-        return nil, err
-      }
-      {{ end }}
-
-      return &{{ $wsprefix }}Event{
-        Name: "{{ upper .Name }}",
-        {{ if .Payload }}
-        Payload: payloadBytes,
-        {{ end }}
-      }, nil
-    }
-
-  {{ end }}
-{{ end }}
-
 
 {{ template "eventInformation" (arr .m.Events $.wsprefix) }}
+{{ template "notificationInformation" (arr .m.Notifications $.wsprefix) }}

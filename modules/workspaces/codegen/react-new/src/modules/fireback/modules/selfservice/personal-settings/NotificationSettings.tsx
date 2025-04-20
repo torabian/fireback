@@ -10,7 +10,6 @@ export function NotificationSettings({}: {}) {
     <PageSection title={"Notification settings"}>
       <p>Here you can manage your notifications</p>
       <ErrorsView error={error} />
-      <pre>{JSON.stringify({ isSubscribed, isSubscribing, error })}</pre>
       <button
         className="btn"
         disabled={isSubscribing || isSubscribed}

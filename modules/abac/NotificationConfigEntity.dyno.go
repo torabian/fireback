@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -646,12 +646,20 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query works
 	// 5. Create sub entities, objects or arrays, association to other entities
 	NotificationConfigAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(NOTIFICATION_CONFIG_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&NotificationConfigEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewNotificationConfigCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(NOTIFICATION_CONFIG_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&NotificationConfigEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func NotificationConfigActionGetOneFn(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
@@ -739,11 +747,18 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fie
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewNotificationConfigUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func NotificationConfigActionUpdateFn(query workspaces.QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *workspaces.IError) {
@@ -2086,6 +2101,44 @@ func NotificationConfigDistinctActionGetOne(
 		return &NotificationConfigEntity{}, nil
 	}
 	return entity, err
+}
+func NewNotificationConfigCreatedEvent(
+	payload *NotificationConfigEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "NotificationConfigCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_NOTIFICATION_CONFIG_QUERY,
+			},
+			ResolveStrategy: "workspace",
+		},
+		CacheKey: "*abac.NotificationConfigEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewNotificationConfigUpdatedEvent(
+	payload *NotificationConfigEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "NotificationConfigUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_NOTIFICATION_CONFIG_QUERY,
+			},
+			ResolveStrategy: "workspace",
+		},
+		CacheKey: "NotificationConfigEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
 }
 
 var NotificationConfigEntityBundle = workspaces.EntityBundle{

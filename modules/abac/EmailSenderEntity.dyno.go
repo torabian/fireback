@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -453,12 +453,20 @@ func EmailSenderActionCreateFn(dto *EmailSenderEntity, query workspaces.QueryDSL
 	// 5. Create sub entities, objects or arrays, association to other entities
 	EmailSenderAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(EMAIL_SENDER_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&EmailSenderEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewEmailSenderCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(EMAIL_SENDER_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&EmailSenderEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func EmailSenderActionGetOneFn(query workspaces.QueryDSL) (*EmailSenderEntity, *workspaces.IError) {
@@ -546,11 +554,18 @@ func EmailSenderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Em
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewEmailSenderUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func EmailSenderActionUpdateFn(query workspaces.QueryDSL, fields *EmailSenderEntity) (*EmailSenderEntity, *workspaces.IError) {
@@ -1368,6 +1383,44 @@ var ALL_EMAIL_SENDER_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_EMAIL_SENDER_QUERY,
 	PERM_ROOT_EMAIL_SENDER,
 }
+
+func NewEmailSenderCreatedEvent(
+	payload *EmailSenderEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "EmailSenderCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_EMAIL_SENDER_QUERY,
+			},
+		},
+		CacheKey: "*abac.EmailSenderEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewEmailSenderUpdatedEvent(
+	payload *EmailSenderEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "EmailSenderUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_EMAIL_SENDER_QUERY,
+			},
+		},
+		CacheKey: "EmailSenderEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var EmailSenderEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_EMAIL_SENDER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

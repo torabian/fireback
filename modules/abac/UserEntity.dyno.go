@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
@@ -21,6 +20,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
 	reflect "reflect"
 	"strings"
 )
@@ -547,12 +547,20 @@ func UserActionCreateFn(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity
 	// 5. Create sub entities, objects or arrays, association to other entities
 	UserAssociationCreate(dto, query)
 	// 6. Fire the event into system
-	event.MustFire(USER_EVENT_CREATED, event.M{
-		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&UserEntity{}),
-		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewUserCreatedEvent(dto, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Creating event has failed for %v", dto)
+	}
+	/*
+		event.MustFire(USER_EVENT_CREATED, event.M{
+			"entity":   dto,
+			"entityKey": workspaces.GetTypeString(&UserEntity{}),
+			"target":   "workspace",
+			"unqiueId": query.WorkspaceId,
+		})
+	*/
 	return dto, nil
 }
 func UserActionGetOneFn(query workspaces.QueryDSL) (*UserEntity, *workspaces.IError) {
@@ -640,11 +648,18 @@ func UserUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *UserEntit
 	if err != nil {
 		return nil, workspaces.GormErrorToIError(err)
 	}
-	event.MustFire(query.TriggerEventName, event.M{
-		"entity":   &item,
-		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
-	})
+	actionEvent, eventErr := NewUserUpdatedEvent(fields, &query)
+	if actionEvent != nil && eventErr == nil {
+		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+	} else {
+		log.Default().Panicln("Updating event has failed for %v", fields)
+	}
+	/*
+	   event.MustFire(query.TriggerEventName, event.M{
+	     "entity":   &item,
+	     "target":   "workspace",
+	     "unqiueId": query.WorkspaceId,
+	   })*/
 	return &itemRefetched, nil
 }
 func UserActionUpdateFn(query workspaces.QueryDSL, fields *UserEntity) (*UserEntity, *workspaces.IError) {
@@ -1618,6 +1633,67 @@ var ALL_USER_PERMISSIONS = []workspaces.PermissionInfo{
 	PERM_ROOT_USER_QUERY,
 	PERM_ROOT_USER,
 }
+
+type Googoli2EventPayload struct {
+	Entity string `json:"entity" xml:"entity" yaml:"entity"        `
+}
+
+func (x *Googoli2EventPayload) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+func NewGoogoli2Event(
+	payload *Googoli2EventPayload,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "Googoli2",
+		Payload: payload,
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewUserCreatedEvent(
+	payload *UserEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "UserCreated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_USER_QUERY,
+			},
+		},
+		CacheKey: "*abac.UserEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+func NewUserUpdatedEvent(
+	payload *UserEntity,
+	query *workspaces.QueryDSL,
+) (*workspaces.Event, error) {
+	event := &workspaces.Event{
+		Name:    "UserUpdated",
+		Payload: payload,
+		Security: &workspaces.SecurityModel{
+			ActionRequires: []workspaces.PermissionInfo{
+				PERM_ROOT_USER_QUERY,
+			},
+		},
+		CacheKey: "UserEntity",
+	}
+	// Apply the source of the event based on querydsl
+	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	return event, nil
+}
+
 var UserEntityBundle = workspaces.EntityBundle{
 	Permissions: ALL_USER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities

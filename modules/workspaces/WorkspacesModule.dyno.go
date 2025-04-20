@@ -174,6 +174,8 @@ type workspacesMsgs struct {
 type Config struct {
 	// If true, set's the environment behavior to production, and some functionality will be limited
 	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
+	// The address of the redis, which will be used to distribute the events
+	RedisEventsUrl string `envconfig:"REDIS_EVENTS_URL" description:"The address of the redis, which will be used to distribute the events"`
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
 	// VAPID Web push notification public key
@@ -254,6 +256,10 @@ func GetConfigCliFlags() []cli.Flag {
 		cli.BoolFlag{
 			Name:  "production",
 			Usage: "If true, set's the environment behavior to production, and some functionality will be limited",
+		},
+		cli.StringFlag{
+			Name:  "redis-events-url",
+			Usage: "The address of the redis, which will be used to distribute the events",
 		},
 		cli.StringFlag{
 			Name:  "table-prefix",
@@ -401,6 +407,9 @@ func CastConfigFromCli(config *Config, c *cli.Context) {
 	if c.IsSet("production") {
 		config.Production = c.Bool("production")
 	}
+	if c.IsSet("redis-events-url") {
+		config.RedisEventsUrl = c.String("redis-events-url")
+	}
 	if c.IsSet("table-prefix") {
 		config.TablePrefix = c.String("table-prefix")
 	}
@@ -525,6 +534,29 @@ func GetConfigCli() []cli.Command {
 					Action: func(c *cli.Context) error {
 						return ConfigSetBoolean(c, config.Production, func(value bool) {
 							config.Production = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "redis-events-url",
+			Usage: "The address of the redis, which will be used to distribute the events (string)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.RedisEventsUrl)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetString(c, config.RedisEventsUrl, func(value string) {
+							config.RedisEventsUrl = value
 							config.Save(".env")
 						})
 						return nil
@@ -1342,6 +1374,7 @@ func GetConfigCli() []cli.Command {
 
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{
+	RedisEventsUrl:          "127.0.0.1:6379",
 	TokenGenerationStrategy: "random",
 	WithTaskServer:          false,
 	DbName:                  ":memory:",

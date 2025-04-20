@@ -52,7 +52,7 @@ func WithAuthorizationPureDefault(context *workspaces.AuthContextDto) (*workspac
 
 	meets, missing := workspaces.MeetsAccessLevel(query, false)
 
-	if err != nil || !meets {
+	if !meets {
 		return nil, workspaces.Create401Error(&AbacMessages.NotEnoughPermission, missing)
 	}
 
