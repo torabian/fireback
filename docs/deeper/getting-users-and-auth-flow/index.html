@@ -5,7 +5,7 @@
 <meta name="generator" content="Docusaurus v3.6.3">
 <title data-rh="true">Getting users and auth flow | Fireback documentation</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://torabi.io/fireback/img/fireback-logo.png"><meta data-rh="true" name="twitter:image" content="https://torabi.io/fireback/img/fireback-logo.png"><meta data-rh="true" property="og:url" content="https://torabi.io/fireback/docs/deeper/getting-users-and-auth-flow"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Getting users and auth flow | Fireback documentation"><meta data-rh="true" name="description" content="In many designs or early products, often we see there are a signup and signin using email"><meta data-rh="true" property="og:description" content="In many designs or early products, often we see there are a signup and signin using email"><link data-rh="true" rel="icon" href="/fireback/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://torabi.io/fireback/docs/deeper/getting-users-and-auth-flow"><link data-rh="true" rel="alternate" href="https://torabi.io/fireback/docs/deeper/getting-users-and-auth-flow" hreflang="en"><link data-rh="true" rel="alternate" href="https://torabi.io/fireback/docs/deeper/getting-users-and-auth-flow" hreflang="x-default"><link rel="alternate" type="application/rss+xml" href="/fireback/blog/rss.xml" title="Fireback documentation RSS Feed">
 <link rel="alternate" type="application/atom+xml" href="/fireback/blog/atom.xml" title="Fireback documentation Atom Feed"><link rel="stylesheet" href="/fireback/assets/css/styles.c5391990.css">
-<script src="/fireback/assets/js/runtime~main.0172bac4.js" defer="defer"></script>
+<script src="/fireback/assets/js/runtime~main.87fd6bf3.js" defer="defer"></script>
 <script src="/fireback/assets/js/main.25966bbf.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -24,12 +24,12 @@ avoid that huge database and backend refactor in the future.</li>
 <li>User table, which holds information about a user in the system.</li>
 <li>Person table, which is holding the human or actual person info. From a logical perspective,
 a person information can be in a product, but they are not necessary a user of the software.</li>
-<li>Invites, a mechanism to add people into workspaces.</li>
+<li>Invites, a mechanism to add people into fireback.</li>
 </ul>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="root-workspace">Root workspace<a href="#root-workspace" class="hash-link" aria-label="Direct link to Root workspace" title="Direct link to Root workspace">​</a></h2>
 <p>By default, Fireback generates in every project a root workspace, but not a root user.</p>
 <p>Root workspace is having all features of the app, and it&#x27;s not necessarily only to manage other
-workspaces. They can see the content of the other workspaces, with some extra priviliges.</p>
+fireback. They can see the content of the other workspaces, with some extra priviliges.</p>
 <p>Logging into the root workspace uses the same api as any other types or users.
 The difference is users cannot join to the root workspace publicly, and it makes sense regardless.</p>
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="creating-account-publicly">Creating account publicly<a href="#creating-account-publicly" class="hash-link" aria-label="Direct link to Creating account publicly" title="Direct link to Creating account publicly">​</a></h2>
