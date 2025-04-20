@@ -78,7 +78,7 @@ For example from license module:
           - name: capability
             type: one
             target: CapabilityEntity
-            module: workspaces
+            module: fireback
             allowCreate: false
 ```
 

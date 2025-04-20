@@ -9,10 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -24,6 +20,9 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
 )
 
 var emailConfirmationSeedersFs = &seeders.ViewsFs
@@ -389,13 +388,11 @@ func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query f
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError) {

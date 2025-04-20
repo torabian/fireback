@@ -8,10 +8,9 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
+	"strings"
 )
 
 func CastEmailOtpResponseFromCli(c *cli.Context) *EmailOtpResponseDto {

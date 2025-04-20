@@ -806,7 +806,7 @@ entities:
         type: one
         target: CapabilityEntity
         fields: []
-        module: workspaces
+        module: fireback
         description: 
           The permission which is required for the menu to be visible.
   - name: backupTableMeta
@@ -1215,7 +1215,7 @@ entities:
         type: many2many
         target: CapabilityEntity
         allowCreate: false
-        module: workspaces
+        module: fireback
   - name: workspaceConfig
     cliName: config
     permRewrite:

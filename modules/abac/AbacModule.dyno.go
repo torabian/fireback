@@ -5,15 +5,14 @@ package abac
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
+import "github.com/torabian/fireback/modules/fireback"
+import queries "github.com/torabian/fireback/modules/abac/queries"
+import "encoding/json"
+import "github.com/urfave/cli"
+import "gopkg.in/yaml.v2"
+import "fmt"
 import (
-	"encoding/json"
-	"fmt"
 	"reflect"
-
-	queries "github.com/torabian/fireback/modules/abac/queries"
-	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
 )
 
 func AbacJson() string {
