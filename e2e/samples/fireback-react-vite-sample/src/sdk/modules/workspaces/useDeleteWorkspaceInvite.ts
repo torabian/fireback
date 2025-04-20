@@ -58,10 +58,10 @@ export function useDeleteWorkspaceInvite(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.WorkspaceInviteEntity",
+            "*fireback.WorkspaceInviteEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.WorkspaceInviteEntity");
+          queryClient?.invalidateQueries("*fireback.WorkspaceInviteEntity");
           resolve(response);
         },
         onError(error: any) {

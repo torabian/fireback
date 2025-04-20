@@ -70,7 +70,7 @@ export function usePatchRegionalContents(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<RegionalContentEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.RegionalContentEntity]",
+            "*fireback.BulkRecordRequest[fireback.RegionalContentEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

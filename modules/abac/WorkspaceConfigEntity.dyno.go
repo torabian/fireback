@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/WorkspaceConfig"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/WorkspaceConfig"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceConfigSeedersFs = &seeders.ViewsFs
@@ -32,20 +33,20 @@ func ResetWorkspaceConfigSeeders(fs *embed.FS) {
 }
 
 type WorkspaceConfigEntityQs struct {
-	EnableRecaptcha2       workspaces.QueriableField `cli:"enable-recaptcha2" table:"workspace_config" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
-	EnableOtp              workspaces.QueriableField `cli:"enable-otp" table:"workspace_config" column:"enable_otp" qs:"enableOtp"`
-	RequireOtpOnSignup     workspaces.QueriableField `cli:"require-otp-on-signup" table:"workspace_config" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
-	RequireOtpOnSignin     workspaces.QueriableField `cli:"require-otp-on-signin" table:"workspace_config" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
-	Recaptcha2ServerKey    workspaces.QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
-	Recaptcha2ClientKey    workspaces.QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
-	EnableTotp             workspaces.QueriableField `cli:"enable-totp" table:"workspace_config" column:"enable_totp" qs:"enableTotp"`
-	ForceTotp              workspaces.QueriableField `cli:"force-totp" table:"workspace_config" column:"force_totp" qs:"forceTotp"`
-	ForcePasswordOnPhone   workspaces.QueriableField `cli:"force-password-on-phone" table:"workspace_config" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
-	ForcePersonNameOnPhone workspaces.QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
+	EnableRecaptcha2       fireback.QueriableField `cli:"enable-recaptcha2" table:"workspace_config" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
+	EnableOtp              fireback.QueriableField `cli:"enable-otp" table:"workspace_config" column:"enable_otp" qs:"enableOtp"`
+	RequireOtpOnSignup     fireback.QueriableField `cli:"require-otp-on-signup" table:"workspace_config" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
+	RequireOtpOnSignin     fireback.QueriableField `cli:"require-otp-on-signin" table:"workspace_config" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
+	Recaptcha2ServerKey    fireback.QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey    fireback.QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
+	EnableTotp             fireback.QueriableField `cli:"enable-totp" table:"workspace_config" column:"enable_totp" qs:"enableTotp"`
+	ForceTotp              fireback.QueriableField `cli:"force-totp" table:"workspace_config" column:"force_totp" qs:"forceTotp"`
+	ForcePasswordOnPhone   fireback.QueriableField `cli:"force-password-on-phone" table:"workspace_config" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
+	ForcePersonNameOnPhone fireback.QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
 }
 
 func (x *WorkspaceConfigEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var WorkspaceConfigQsFlags = []cli.Flag{
@@ -96,20 +97,20 @@ type WorkspaceConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -119,11 +120,11 @@ type WorkspaceConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -151,30 +152,30 @@ type WorkspaceConfigEntity struct {
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	// Enables the recaptcha2 for authentication flow.
-	EnableRecaptcha2 workspaces.Bool `json:"enableRecaptcha2" xml:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
+	EnableRecaptcha2 fireback.Bool `json:"enableRecaptcha2" xml:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
 	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
-	EnableOtp workspaces.Bool `json:"enableOtp" xml:"enableOtp" yaml:"enableOtp"        `
+	EnableOtp fireback.Bool `json:"enableOtp" xml:"enableOtp" yaml:"enableOtp"        `
 	// Forces the user to have otp verification before can create an account. They can define their password still.
-	RequireOtpOnSignup workspaces.Bool `json:"requireOtpOnSignup" xml:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
+	RequireOtpOnSignup fireback.Bool `json:"requireOtpOnSignup" xml:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
 	// Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
-	RequireOtpOnSignin workspaces.Bool `json:"requireOtpOnSignin" xml:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
+	RequireOtpOnSignin fireback.Bool `json:"requireOtpOnSignin" xml:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
 	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
 	Recaptcha2ServerKey string `json:"recaptcha2ServerKey" xml:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
 	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
 	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 	// Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
-	EnableTotp workspaces.Bool `json:"enableTotp" xml:"enableTotp" yaml:"enableTotp"        `
+	EnableTotp fireback.Bool `json:"enableTotp" xml:"enableTotp" yaml:"enableTotp"        `
 	// Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
-	ForceTotp workspaces.Bool `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
+	ForceTotp fireback.Bool `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
 	// Forces users who want to create account using phone number to also set a password on their account
-	ForcePasswordOnPhone workspaces.Bool `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
+	ForcePasswordOnPhone fireback.Bool `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
 	// Forces the creation of account using phone number to ask for user firstname and lastname
-	ForcePersonNameOnPhone workspaces.Bool          `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
+	ForcePersonNameOnPhone fireback.Bool            `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
 	Children               []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo               *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceConfigEntityStream(q workspaces.QueryDSL) (chan []*WorkspaceConfigEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceConfigEntityStream(q fireback.QueryDSL) (chan []*WorkspaceConfigEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*WorkspaceConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -210,8 +211,8 @@ func (x *WorkspaceConfigEntityList) Json() string {
 	}
 	return ""
 }
-func (x *WorkspaceConfigEntityList) ToTree() *workspaces.TreeOperation[WorkspaceConfigEntity] {
-	return workspaces.NewTreeOperation(
+func (x *WorkspaceConfigEntityList) ToTree() *fireback.TreeOperation[WorkspaceConfigEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceConfigEntity) string {
 			if !t.ParentId.Valid {
@@ -228,15 +229,15 @@ func (x *WorkspaceConfigEntityList) ToTree() *workspaces.TreeOperation[Workspace
 var WorkspaceConfigPreloadRelations []string = []string{}
 
 type workspaceConfigActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *workspaces.IError)
-	Create         func(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError)
-	Upsert         func(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *fireback.IError)
+	Create         func(dto *WorkspaceConfigEntity, query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
+	Upsert         func(dto *WorkspaceConfigEntity, query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceConfigEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*WorkspaceConfigEntity, query workspaces.QueryDSL) ([]*WorkspaceConfigEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*WorkspaceConfigEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*WorkspaceConfigEntity, query fireback.QueryDSL) ([]*WorkspaceConfigEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceConfigEntity, *fireback.QueryResultMeta, error)
 }
 
 var WorkspaceConfigActions workspaceConfigActionsSig = workspaceConfigActionsSig{
@@ -251,7 +252,7 @@ var WorkspaceConfigActions workspaceConfigActionsSig = workspaceConfigActionsSig
 	Query:          WorkspaceConfigActionQueryFn,
 }
 
-func WorkspaceConfigActionUpsertFn(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigActionUpsertFn(dto *WorkspaceConfigEntity, query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -265,33 +266,33 @@ var WORKSPACE_CONFIG_EVENTS = []string{
 }
 
 type WorkspaceConfigFieldMap struct {
-	EnableRecaptcha2       workspaces.TranslatedString `yaml:"enableRecaptcha2"`
-	EnableOtp              workspaces.TranslatedString `yaml:"enableOtp"`
-	RequireOtpOnSignup     workspaces.TranslatedString `yaml:"requireOtpOnSignup"`
-	RequireOtpOnSignin     workspaces.TranslatedString `yaml:"requireOtpOnSignin"`
-	Recaptcha2ServerKey    workspaces.TranslatedString `yaml:"recaptcha2ServerKey"`
-	Recaptcha2ClientKey    workspaces.TranslatedString `yaml:"recaptcha2ClientKey"`
-	EnableTotp             workspaces.TranslatedString `yaml:"enableTotp"`
-	ForceTotp              workspaces.TranslatedString `yaml:"forceTotp"`
-	ForcePasswordOnPhone   workspaces.TranslatedString `yaml:"forcePasswordOnPhone"`
-	ForcePersonNameOnPhone workspaces.TranslatedString `yaml:"forcePersonNameOnPhone"`
+	EnableRecaptcha2       fireback.TranslatedString `yaml:"enableRecaptcha2"`
+	EnableOtp              fireback.TranslatedString `yaml:"enableOtp"`
+	RequireOtpOnSignup     fireback.TranslatedString `yaml:"requireOtpOnSignup"`
+	RequireOtpOnSignin     fireback.TranslatedString `yaml:"requireOtpOnSignin"`
+	Recaptcha2ServerKey    fireback.TranslatedString `yaml:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey    fireback.TranslatedString `yaml:"recaptcha2ClientKey"`
+	EnableTotp             fireback.TranslatedString `yaml:"enableTotp"`
+	ForceTotp              fireback.TranslatedString `yaml:"forceTotp"`
+	ForcePasswordOnPhone   fireback.TranslatedString `yaml:"forcePasswordOnPhone"`
+	ForcePersonNameOnPhone fireback.TranslatedString `yaml:"forcePersonNameOnPhone"`
 }
 
 var WorkspaceConfigEntityMetaConfig map[string]int64 = map[string]int64{}
-var WorkspaceConfigEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WorkspaceConfigEntity{}))
+var WorkspaceConfigEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&WorkspaceConfigEntity{}))
 
-func entityWorkspaceConfigFormatter(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) {
+func entityWorkspaceConfigFormatter(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceConfigActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func WorkspaceConfigActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -318,7 +319,7 @@ func WorkspaceConfigActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WorkspaceConfigActionSeeder(query workspaces.QueryDSL, count int) {
+func WorkspaceConfigActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -344,7 +345,7 @@ func WorkspaceConfigActionSeederInitFn() *WorkspaceConfigEntity {
 	entity := &WorkspaceConfigEntity{}
 	return entity
 }
-func WorkspaceConfigAssociationCreate(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) error {
+func WorkspaceConfigAssociationCreate(dto *WorkspaceConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -352,13 +353,13 @@ func WorkspaceConfigAssociationCreate(dto *WorkspaceConfigEntity, query workspac
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func WorkspaceConfigRelationContentCreate(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) error {
+func WorkspaceConfigRelationContentCreate(dto *WorkspaceConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceConfigRelationContentUpdate(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) error {
+func WorkspaceConfigRelationContentUpdate(dto *WorkspaceConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceConfigPolyglotUpdateHandler(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) {
+func WorkspaceConfigPolyglotUpdateHandler(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -369,8 +370,8 @@ func WorkspaceConfigPolyglotUpdateHandler(dto *WorkspaceConfigEntity, query work
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func WorkspaceConfigValidator(dto *WorkspaceConfigEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func WorkspaceConfigValidator(dto *WorkspaceConfigEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -423,29 +424,31 @@ And here is the actual object signature:
 	},
 }
 
-func WorkspaceConfigEntityPreSanitize(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) {
+func WorkspaceConfigEntityPreSanitize(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
 }
-func WorkspaceConfigEntityBeforeCreateAppend(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) {
+func WorkspaceConfigEntityBeforeCreateAppend(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	WorkspaceConfigRecursiveAddUniqueId(dto, query)
 }
-func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) {
+func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WorkspaceConfigMultiInsertFn(dtos []*WorkspaceConfigEntity, query workspaces.QueryDSL) ([]*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigMultiInsertFn(dtos []*WorkspaceConfigEntity, query fireback.QueryDSL) ([]*WorkspaceConfigEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceConfigEntityPreSanitize(dtos[index], query)
@@ -453,19 +456,19 @@ func WorkspaceConfigMultiInsertFn(dtos []*WorkspaceConfigEntity, query workspace
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func WorkspaceConfigActionBatchCreateFn(dtos []*WorkspaceConfigEntity, query workspaces.QueryDSL) ([]*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigActionBatchCreateFn(dtos []*WorkspaceConfigEntity, query fireback.QueryDSL) ([]*WorkspaceConfigEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceConfigEntity{}
 		for _, item := range dtos {
@@ -479,12 +482,12 @@ func WorkspaceConfigActionBatchCreateFn(dtos []*WorkspaceConfigEntity, query wor
 	}
 	return dtos, nil
 }
-func WorkspaceConfigDeleteEntireChildren(query workspaces.QueryDSL, dto *WorkspaceConfigEntity) *workspaces.IError {
+func WorkspaceConfigDeleteEntireChildren(query fireback.QueryDSL, dto *WorkspaceConfigEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := WorkspaceConfigValidator(dto, false); iError != nil {
 		return nil, iError
@@ -498,14 +501,14 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query workspaces.
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -513,35 +516,35 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query workspaces.
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewWorkspaceConfigCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(WORKSPACE_CONFIG_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&WorkspaceConfigEntity{}),
+			"entityKey": fireback.GetTypeString(&WorkspaceConfigEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func WorkspaceConfigActionGetOneFn(query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigActionGetOneFn(query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
-	item, err := workspaces.GetOneEntity[WorkspaceConfigEntity](query, refl)
+	item, err := fireback.GetOneEntity[WorkspaceConfigEntity](query, refl)
 	entityWorkspaceConfigFormatter(item, query)
 	return item, err
 }
-func WorkspaceConfigActionGetByWorkspaceFn(query workspaces.QueryDSL) (*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[WorkspaceConfigEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[WorkspaceConfigEntity](query, refl)
 	entityWorkspaceConfigFormatter(item, query)
 	return item, err
 }
-func WorkspaceConfigActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceConfigEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceConfigActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceConfigEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[WorkspaceConfigEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceConfigEntity](query, refl)
 	for _, item := range items {
 		entityWorkspaceConfigFormatter(item, query)
 	}
@@ -551,7 +554,7 @@ func WorkspaceConfigActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceConfig
 var workspaceConfigMemoryItems []*WorkspaceConfigEntity = []*WorkspaceConfigEntity{}
 
 func WorkspaceConfigEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -581,7 +584,7 @@ func WorkspaceConfigMemJoin(items []uint) []*WorkspaceConfigEntity {
 	}
 	return res
 }
-func WorkspaceConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_CONFIG_EVENT_UPDATED
 	WorkspaceConfigEntityPreSanitize(fields, query)
@@ -590,13 +593,13 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &WorkspaceConfigEntity{WorkspaceId: workspaces.NewString(query.WorkspaceId)}
+	cond2 := &WorkspaceConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	WorkspaceConfigRelationContentUpdate(fields, query)
@@ -610,11 +613,11 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		Where(&WorkspaceConfigEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewWorkspaceConfigUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -626,9 +629,9 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	   })*/
 	return &itemRefetched, nil
 }
-func WorkspaceConfigActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *workspaces.IError) {
+func WorkspaceConfigActionUpdateFn(query fireback.QueryDSL, fields *WorkspaceConfigEntity) (*WorkspaceConfigEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WorkspaceConfigValidator(fields, true); iError != nil {
@@ -638,11 +641,11 @@ func WorkspaceConfigActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceC
 	// WorkspaceConfigRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *WorkspaceConfigEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = WorkspaceConfigUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -650,7 +653,7 @@ func WorkspaceConfigActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceC
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WorkspaceConfigUpdateExec(dbref, query, fields)
@@ -661,8 +664,8 @@ var WorkspaceConfigWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspaceconfigs ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
@@ -672,16 +675,16 @@ var WorkspaceConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceConfigActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func WorkspaceConfigActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE}
-	return workspaces.RemoveEntity[WorkspaceConfigEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE}
+	return fireback.RemoveEntity[WorkspaceConfigEntity](query, refl)
 }
-func WorkspaceConfigActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func WorkspaceConfigActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WorkspaceConfigEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[WorkspaceConfigEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'WorkspaceConfigEntity'", subErr)
 			return count, subErr
@@ -692,11 +695,11 @@ func WorkspaceConfigActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func WorkspaceConfigActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WorkspaceConfigEntity]) (
-	*workspaces.BulkRecordRequest[WorkspaceConfigEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[WorkspaceConfigEntity]) (
+	*fireback.BulkRecordRequest[WorkspaceConfigEntity], *fireback.IError,
 ) {
 	result := []*WorkspaceConfigEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := WorkspaceConfigActions.Update(query, record)
@@ -711,7 +714,7 @@ func WorkspaceConfigActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *WorkspaceConfigEntity) Json() string {
 	if x != nil {
@@ -721,7 +724,7 @@ func (x *WorkspaceConfigEntity) Json() string {
 	return ""
 }
 
-var WorkspaceConfigEntityMeta = workspaces.TableMetaData{
+var WorkspaceConfigEntityMeta = fireback.TableMetaData{
 	EntityName:    "WorkspaceConfig",
 	ExportKey:     "workspace-configs",
 	TableNameInDb: "workspace-config_entities",
@@ -731,23 +734,23 @@ var WorkspaceConfigEntityMeta = workspaces.TableMetaData{
 }
 
 func WorkspaceConfigActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[WorkspaceConfigEntity](query, WorkspaceConfigActions.Query, WorkspaceConfigPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[WorkspaceConfigEntity](query, WorkspaceConfigActions.Query, WorkspaceConfigPreloadRelations)
 }
 func WorkspaceConfigActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[WorkspaceConfigEntity](query, WorkspaceConfigActions.Query, WorkspaceConfigPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[WorkspaceConfigEntity](query, WorkspaceConfigActions.Query, WorkspaceConfigPreloadRelations)
 }
 func WorkspaceConfigActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content WorkspaceConfigEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WorkspaceConfigActions.Create(&content, query)
@@ -821,7 +824,7 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool?)`,
 	},
 }
-var WorkspaceConfigCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var WorkspaceConfigCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "recaptcha2ServerKey",
 		StructField: "Recaptcha2ServerKey",
@@ -917,18 +920,18 @@ var WorkspaceConfigCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
 		entity := &WorkspaceConfigEntity{}
-		workspaces.PopulateInteractively(entity, c, WorkspaceConfigCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, WorkspaceConfigCommonInteractiveCliFlags)
 		if entity, err := WorkspaceConfigActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -938,8 +941,8 @@ var WorkspaceConfigUpdateCmd cli.Command = cli.Command{
 	Flags:   WorkspaceConfigCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
@@ -963,7 +966,7 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("recaptcha2-server-key") {
 		template.Recaptcha2ServerKey = c.String("recaptcha2-server-key")
@@ -973,8 +976,8 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 	}
 	return template
 }
-func WorkspaceConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func WorkspaceConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		WorkspaceConfigActions.Create,
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
@@ -984,8 +987,8 @@ func WorkspaceConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q work
 	)
 }
 func WorkspaceConfigSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		WorkspaceConfigActions.Create,
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		workspaceConfigSeedersFs,
@@ -994,8 +997,8 @@ func WorkspaceConfigSyncSeeders() {
 	)
 }
 func WorkspaceConfigImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		WorkspaceConfigActions.Create,
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1003,19 +1006,19 @@ func WorkspaceConfigImportMocks() {
 		false,
 	)
 }
-func WorkspaceConfigWriteQueryMock(ctx workspaces.MockQueryContext) {
+func WorkspaceConfigWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := WorkspaceConfigActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "WorkspaceConfig", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "WorkspaceConfig", result)
 	}
 }
-func WorkspaceConfigsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func WorkspaceConfigsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1027,7 +1030,7 @@ func WorkspaceConfigsActionQueryString(keyword string, page int) ([]string, *wor
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := WorkspaceConfigActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1054,8 +1057,8 @@ var WorkspaceConfigDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
 				ResolveStrategy: "workspace",
 				AllowOnRoot:     true,
 			})
@@ -1080,7 +1083,7 @@ var WorkspaceConfigDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := WorkspaceConfigActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1088,7 +1091,7 @@ var WorkspaceConfigDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1101,7 +1104,7 @@ var WorkspaceConfigDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceConfigActions.Create,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1131,7 +1134,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of workspace-configs, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]WorkspaceConfigEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1140,7 +1143,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(workspaceConfigSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(workspaceConfigSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1153,7 +1156,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceConfigActions.Create,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				workspaceConfigSeedersFs,
@@ -1164,7 +1167,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1172,7 +1175,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				WorkspaceConfigEntityStream,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				c.String("file"),
@@ -1186,7 +1189,7 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1196,12 +1199,12 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				WorkspaceConfigActions.Create,
 				reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
 					ResolveStrategy: "workspace",
 					AllowOnRoot:     true,
 				},
@@ -1221,7 +1224,7 @@ var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
 	WorkspaceConfigUpdateCmd,
 	WorkspaceConfigAskCmd,
 	WorkspaceConfigCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
 		WorkspaceConfigActions.Remove,
 	),
@@ -1229,7 +1232,7 @@ var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceConfigCliFn() cli.Command {
 	commands := append(WorkspaceConfigImportExportCommands, WorkspaceConfigCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, WorkspaceConfigDevCommands...)
 	}
 	return cli.Command{
@@ -1246,14 +1249,14 @@ func WorkspaceConfigCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_CONFIG_ACTION_TABLE = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        WorkspaceConfigActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			WorkspaceConfigActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
@@ -1261,29 +1264,29 @@ var WORKSPACE_CONFIG_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var WORKSPACE_CONFIG_ACTION_QUERY = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-configs",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &WorkspaceConfigEntityQs{}
-			workspaces.HttpQueryEntity(c, WorkspaceConfigActions.Query, qs)
+			fireback.HttpQueryEntity(c, WorkspaceConfigActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceConfigActions.Query,
 	ResponseEntity: &[]WorkspaceConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &WorkspaceConfigEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			WorkspaceConfigActions.Query,
 			security,
@@ -1294,193 +1297,193 @@ var WORKSPACE_CONFIG_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, WorkspaceConfigQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, WorkspaceConfigQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_CONFIG_ACTION_EXPORT = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-configs/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, WorkspaceConfigActionExport)
+			fireback.HttpStreamFileChannel(c, WorkspaceConfigActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceConfigActionExport,
 	ResponseEntity: &[]WorkspaceConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_GET_ONE = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-config/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, WorkspaceConfigActions.GetOne)
+			fireback.HttpGetEntity(c, WorkspaceConfigActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         WorkspaceConfigActions.GetOne,
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_POST_ONE = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceConfig",
 	Flags:         WorkspaceConfigCommonCliFlags,
 	Method:        "POST",
 	Url:           "/workspace-config",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_CREATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, WorkspaceConfigActions.Create)
+			fireback.HttpPostEntity(c, WorkspaceConfigActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, WorkspaceConfigActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, WorkspaceConfigActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         WorkspaceConfigActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_PATCH = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceConfigCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/workspace-config",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, WorkspaceConfigActions.Update)
+			fireback.HttpUpdateEntity(c, WorkspaceConfigActions.Update)
 		},
 	},
 	Action:         WorkspaceConfigActions.Update,
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_PATCH_BULK = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-configs",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, WorkspaceConfigActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, WorkspaceConfigActionBulkUpdate)
 		},
 	},
 	Action:         WorkspaceConfigActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[WorkspaceConfigEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[WorkspaceConfigEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[WorkspaceConfigEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[WorkspaceConfigEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_DELETE = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-config",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, WorkspaceConfigActions.Remove)
+			fireback.HttpRemoveEntity(c, WorkspaceConfigActions.Remove)
 		},
 	},
 	Action:         WorkspaceConfigActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &WorkspaceConfigEntity{},
 }
-var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-config/distinct",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, WorkspaceConfigDistinctActionUpdate)
+			fireback.HttpUpdateEntity(c, WorkspaceConfigDistinctActionUpdate)
 		},
 	},
 	Action:         WorkspaceConfigDistinctActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &WorkspaceConfigEntity{},
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
+var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-config/distinct",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, WorkspaceConfigDistinctActionGetOne)
+			fireback.HttpGetEntity(c, WorkspaceConfigDistinctActionGetOne)
 		},
 	},
 	Action:         WorkspaceConfigDistinctActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &WorkspaceConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
@@ -1489,10 +1492,10 @@ var WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
  *	Override this function on WorkspaceConfigEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceConfigRouter = func(r *[]workspaces.Module3Action) {}
+var AppendWorkspaceConfigRouter = func(r *[]fireback.Module3Action) {}
 
-func GetWorkspaceConfigModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetWorkspaceConfigModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		WORKSPACE_CONFIG_ACTION_QUERY,
 		WORKSPACE_CONFIG_ACTION_EXPORT,
 		WORKSPACE_CONFIG_ACTION_GET_ONE,
@@ -1508,42 +1511,42 @@ func GetWorkspaceConfigModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_WORKSPACE_CONFIG = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.*",
 	Name:        "Entire workspace config actions (*)",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.delete",
 	Name:        "Delete workspace config",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.create",
 	Name:        "Create workspace config",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.update",
 	Name:        "Update workspace config",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.query",
 	Name:        "Query workspace config",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.get-distinct-workspace",
 	Name:        "Get workspace config Distinct",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.update-distinct-workspace",
 	Name:        "Update workspace config Distinct",
 	Description: "",
 }
-var ALL_WORKSPACE_CONFIG_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_WORKSPACE_CONFIG_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_WORKSPACE_CONFIG_DELETE,
 	PERM_ROOT_WORKSPACE_CONFIG_CREATE,
 	PERM_ROOT_WORKSPACE_CONFIG_UPDATE,
@@ -1554,15 +1557,15 @@ var ALL_WORKSPACE_CONFIG_PERMISSIONS = []workspaces.PermissionInfo{
 }
 
 func WorkspaceConfigDistinctActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *WorkspaceConfigEntity,
-) (*WorkspaceConfigEntity, *workspaces.IError) {
+) (*WorkspaceConfigEntity, *fireback.IError) {
 	query.UniqueId = query.UserId
 	entity, err := WorkspaceConfigActions.GetByWorkspace(query)
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = workspaces.NewString(query.WorkspaceId)
+	fields.WorkspaceId = fireback.NewString(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return WorkspaceConfigActions.Create(fields, query)
 	} else {
@@ -1570,8 +1573,8 @@ func WorkspaceConfigDistinctActionUpdate(
 	}
 }
 func WorkspaceConfigDistinctActionGetOne(
-	query workspaces.QueryDSL,
-) (*WorkspaceConfigEntity, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*WorkspaceConfigEntity, *fireback.IError) {
 	// Get's by workspace
 	entity, err := WorkspaceConfigActions.GetByWorkspace(query)
 	if err != nil && err.HttpCode == 404 {
@@ -1581,13 +1584,13 @@ func WorkspaceConfigDistinctActionGetOne(
 }
 func NewWorkspaceConfigCreatedEvent(
 	payload *WorkspaceConfigEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceConfigCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_CONFIG_QUERY,
 			},
 			ResolveStrategy: "workspace",
@@ -1596,18 +1599,18 @@ func NewWorkspaceConfigCreatedEvent(
 		CacheKey: "*abac.WorkspaceConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewWorkspaceConfigUpdatedEvent(
 	payload *WorkspaceConfigEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceConfigUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_CONFIG_QUERY,
 			},
 			ResolveStrategy: "workspace",
@@ -1616,11 +1619,11 @@ func NewWorkspaceConfigUpdatedEvent(
 		CacheKey: "*abac.WorkspaceConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var WorkspaceConfigEntityBundle = workspaces.EntityBundle{
+var WorkspaceConfigEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_CONFIG_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

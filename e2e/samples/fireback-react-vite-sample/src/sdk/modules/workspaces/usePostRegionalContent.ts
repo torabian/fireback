@@ -70,7 +70,7 @@ export function usePostRegionalContent(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<RegionalContentEntity>) {
           queryClient?.setQueryData<IResponseList<RegionalContentEntity>>(
-            "*workspaces.RegionalContentEntity",
+            "*fireback.RegionalContentEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

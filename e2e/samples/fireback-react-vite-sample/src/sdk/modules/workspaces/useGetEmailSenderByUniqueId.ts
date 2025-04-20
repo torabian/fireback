@@ -71,16 +71,12 @@ export function useGetEmailSenderByUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery(
-    [options, query, "*workspaces.EmailSenderEntity"],
-    fn,
-    {
-      cacheTime: 1001,
-      retry: false,
-      keepPreviousData: true,
-      enabled,
-      ...((queryOptions as any) || {}),
-    }
-  );
+  const query$ = useQuery([options, query, "*fireback.EmailSenderEntity"], fn, {
+    cacheTime: 1001,
+    retry: false,
+    keepPreviousData: true,
+    enabled,
+    ...((queryOptions as any) || {}),
+  });
   return { query: query$ };
 }

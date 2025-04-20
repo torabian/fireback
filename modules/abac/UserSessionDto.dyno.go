@@ -8,15 +8,16 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
 	"strings"
+
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli"
 )
 
 func CastUserSessionFromCli(c *cli.Context) *UserSessionDto {
 	template := &UserSessionDto{}
 	if c.IsSet("passport-id") {
-		template.PassportId = workspaces.NewStringAutoNull(c.String("passport-id"))
+		template.PassportId = fireback.NewStringAutoNull(c.String("passport-id"))
 	}
 	if c.IsSet("token") {
 		template.Token = c.String("token")
@@ -28,16 +29,16 @@ func CastUserSessionFromCli(c *cli.Context) *UserSessionDto {
 		value := c.String("user-workspaces")
 		template.UserWorkspacesListId = strings.Split(value, ",")
 	} else {
-		template.UserWorkspacesListId = workspaces.CliInteractiveSearchAndSelect(
+		template.UserWorkspacesListId = fireback.CliInteractiveSearchAndSelect(
 			"Select UserWorkspaces",
 			UserWorkspacesActionQueryString,
 		)
 	}
 	if c.IsSet("user-id") {
-		template.UserId = workspaces.NewStringAutoNull(c.String("user-id"))
+		template.UserId = fireback.NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("user-id") {
-		template.UserId = workspaces.NewStringAutoNull(c.String("user-id"))
+		template.UserId = fireback.NewStringAutoNull(c.String("user-id"))
 	}
 	return template
 }
@@ -92,13 +93,13 @@ var UserSessionDtoCommonCliFlagsOptional = []cli.Flag{
 
 type UserSessionDto struct {
 	Passport             *PassportEntity        `json:"passport" xml:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
-	PassportId           workspaces.String      `json:"passportId" yaml:"passportId" xml:"passportId"  `
+	PassportId           fireback.String        `json:"passportId" yaml:"passportId" xml:"passportId"  `
 	Token                string                 `json:"token" xml:"token" yaml:"token"        `
 	ExchangeKey          string                 `json:"exchangeKey" xml:"exchangeKey" yaml:"exchangeKey"        `
 	UserWorkspaces       []*UserWorkspaceEntity `json:"userWorkspaces" xml:"userWorkspaces" yaml:"userWorkspaces"    gorm:"many2many:_userWorkspaces;foreignKey:UniqueId;references:UniqueId"      `
 	UserWorkspacesListId []string               `json:"userWorkspacesListId" yaml:"userWorkspacesListId" xml:"userWorkspacesListId" gorm:"-" sql:"-"`
 	User                 *UserEntity            `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	UserId               workspaces.String      `json:"userId" xml:"userId" yaml:"userId"        `
+	UserId               fireback.String        `json:"userId" xml:"userId" yaml:"userId"        `
 }
 type UserSessionDtoList struct {
 	Items []*UserSessionDto
@@ -127,7 +128,7 @@ func (x *UserSessionDto) Json() string {
 func (x *UserSessionDto) JsonPrint() {
 	fmt.Println(x.Json())
 	// Somehow to make the import always needed, makes no sense.
-	_ = workspaces.Body
+	_ = fireback.Body
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.

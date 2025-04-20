@@ -70,7 +70,7 @@ export function usePostAppMenu(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<AppMenuEntity>) {
           queryClient?.setQueryData<IResponseList<AppMenuEntity>>(
-            "*workspaces.AppMenuEntity",
+            "*fireback.AppMenuEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

@@ -70,7 +70,7 @@ export function usePostCapability(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<CapabilityEntity>) {
           queryClient?.setQueryData<IResponseList<CapabilityEntity>>(
-            "*workspaces.CapabilityEntity",
+            "*fireback.CapabilityEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

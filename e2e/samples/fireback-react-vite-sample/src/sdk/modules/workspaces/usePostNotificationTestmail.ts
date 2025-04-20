@@ -71,7 +71,7 @@ export function usePostNotificationTestmail(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<OkayResponseDto>) {
           queryClient?.setQueryData<IResponseList<OkayResponseDto>>(
-            "*workspaces.OkayResponseDto",
+            "*fireback.OkayResponseDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

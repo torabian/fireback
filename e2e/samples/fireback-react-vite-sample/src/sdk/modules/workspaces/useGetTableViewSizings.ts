@@ -53,7 +53,7 @@ export function useGetTableViewSizings({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<TableViewSizingEntity>, any>(
-    ["*workspaces.TableViewSizingEntity", computedOptions, query],
+    ["*fireback.TableViewSizingEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetTableViewSizings({
     keyExtractor: (item: TableViewSizingEntity) => item.uniqueId,
   };
 }
-useGetTableViewSizings.UKEY = "*workspaces.TableViewSizingEntity";
+useGetTableViewSizings.UKEY = "*fireback.TableViewSizingEntity";

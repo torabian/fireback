@@ -5,11 +5,14 @@ package currency
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/workspaces"
-import "encoding/json"
-import "github.com/urfave/cli"
-import "gopkg.in/yaml.v2"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
+)
 
 func CurrencyJson() string {
 	e := cli.BoolFlag{}
@@ -22,9 +25,9 @@ func CurrencyJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_CURRENCY_EVERYTHING = workspaces.PermissionInfo{
+var PERM_ROOT_CURRENCY_EVERYTHING = fireback.PermissionInfo{
 	CompleteKey: "root/currency/*",
 }
-var ALL_PERM_CURRENCY_MODULE = []workspaces.PermissionInfo{
+var ALL_PERM_CURRENCY_MODULE = []fireback.PermissionInfo{
 	PERM_ROOT_CURRENCY_EVERYTHING,
 }

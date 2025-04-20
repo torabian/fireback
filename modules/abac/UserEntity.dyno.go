@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/User"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/User"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var userSeedersFs = &seeders.ViewsFs
@@ -35,16 +36,16 @@ type UserPrimaryAddress struct {
 	// Street address, building number
 	AddressLine1 string `json:"addressLine1" xml:"addressLine1" yaml:"addressLine1"        `
 	// Apartment, suite, floor (optional)
-	AddressLine2 workspaces.String `json:"addressLine2" xml:"addressLine2" yaml:"addressLine2"        `
+	AddressLine2 fireback.String `json:"addressLine2" xml:"addressLine2" yaml:"addressLine2"        `
 	// City or locality
-	City workspaces.String `json:"city" xml:"city" yaml:"city"        `
+	City fireback.String `json:"city" xml:"city" yaml:"city"        `
 	// State, region, or province
-	StateOrProvince workspaces.String `json:"stateOrProvince" xml:"stateOrProvince" yaml:"stateOrProvince"        `
+	StateOrProvince fireback.String `json:"stateOrProvince" xml:"stateOrProvince" yaml:"stateOrProvince"        `
 	// ZIP or postal code
-	PostalCode workspaces.String `json:"postalCode" xml:"postalCode" yaml:"postalCode"        `
+	PostalCode fireback.String `json:"postalCode" xml:"postalCode" yaml:"postalCode"        `
 	// ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")
-	CountryCode workspaces.String `json:"countryCode" xml:"countryCode" yaml:"countryCode"        `
-	LinkedTo    *UserEntity       `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	CountryCode fireback.String `json:"countryCode" xml:"countryCode" yaml:"countryCode"        `
+	LinkedTo    *UserEntity     `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func (x *UserPrimaryAddress) RootObjectName() string {
@@ -52,26 +53,26 @@ func (x *UserPrimaryAddress) RootObjectName() string {
 }
 
 type UserEntityQs struct {
-	FirstName      workspaces.QueriableField `cli:"first-name" table:"user" column:"first_name" qs:"firstName"`
-	LastName       workspaces.QueriableField `cli:"last-name" table:"user" column:"last_name" qs:"lastName"`
-	Photo          workspaces.QueriableField `cli:"photo" table:"user" column:"photo" qs:"photo"`
-	Gender         workspaces.QueriableField `cli:"gender" table:"user" column:"gender" qs:"gender"`
-	Title          workspaces.QueriableField `cli:"title" table:"user" column:"title" qs:"title"`
-	BirthDate      workspaces.QueriableField `cli:"birth-date" table:"user" column:"birth_date" qs:"birthDate"`
-	Avatar         workspaces.QueriableField `cli:"avatar" table:"user" column:"avatar" qs:"avatar"`
-	LastIpAddress  workspaces.QueriableField `cli:"last-ip-address" table:"user" column:"last_ip_address" qs:"lastIpAddress"`
+	FirstName      fireback.QueriableField `cli:"first-name" table:"user" column:"first_name" qs:"firstName"`
+	LastName       fireback.QueriableField `cli:"last-name" table:"user" column:"last_name" qs:"lastName"`
+	Photo          fireback.QueriableField `cli:"photo" table:"user" column:"photo" qs:"photo"`
+	Gender         fireback.QueriableField `cli:"gender" table:"user" column:"gender" qs:"gender"`
+	Title          fireback.QueriableField `cli:"title" table:"user" column:"title" qs:"title"`
+	BirthDate      fireback.QueriableField `cli:"birth-date" table:"user" column:"birth_date" qs:"birthDate"`
+	Avatar         fireback.QueriableField `cli:"avatar" table:"user" column:"avatar" qs:"avatar"`
+	LastIpAddress  fireback.QueriableField `cli:"last-ip-address" table:"user" column:"last_ip_address" qs:"lastIpAddress"`
 	PrimaryAddress struct {
-		AddressLine1    workspaces.QueriableField `cli:"primary-address.address-line1" table:"user" column:"address_line1" qs:"addressLine1"`
-		AddressLine2    workspaces.QueriableField `cli:"primary-address.address-line2" table:"user" column:"address_line2" qs:"addressLine2"`
-		City            workspaces.QueriableField `cli:"primary-address.city" table:"user" column:"city" qs:"city"`
-		StateOrProvince workspaces.QueriableField `cli:"primary-address.state-or-province" table:"user" column:"state_or_province" qs:"stateOrProvince"`
-		PostalCode      workspaces.QueriableField `cli:"primary-address.postal-code" table:"user" column:"postal_code" qs:"postalCode"`
-		CountryCode     workspaces.QueriableField `cli:"primary-address.country-code" table:"user" column:"country_code" qs:"countryCode"`
+		AddressLine1    fireback.QueriableField `cli:"primary-address.address-line1" table:"user" column:"address_line1" qs:"addressLine1"`
+		AddressLine2    fireback.QueriableField `cli:"primary-address.address-line2" table:"user" column:"address_line2" qs:"addressLine2"`
+		City            fireback.QueriableField `cli:"primary-address.city" table:"user" column:"city" qs:"city"`
+		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" column:"state_or_province" qs:"stateOrProvince"`
+		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" column:"postal_code" qs:"postalCode"`
+		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" column:"country_code" qs:"countryCode"`
 	}
 }
 
 func (x *UserEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var UserQsFlags = []cli.Flag{
@@ -138,20 +139,20 @@ type UserEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -161,11 +162,11 @@ type UserEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -191,16 +192,16 @@ type UserEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string           `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	FirstName        string           `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName         string           `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
-	Photo            string           `json:"photo" xml:"photo" yaml:"photo"        `
-	Gender           workspaces.Int   `json:"gender" xml:"gender" yaml:"gender"        `
-	Title            string           `json:"title" xml:"title" yaml:"title"        `
-	BirthDate        workspaces.XDate `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
+	UpdatedFormatted string         `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	FirstName        string         `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName         string         `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
+	Photo            string         `json:"photo" xml:"photo" yaml:"photo"        `
+	Gender           fireback.Int   `json:"gender" xml:"gender" yaml:"gender"        `
+	Title            string         `json:"title" xml:"title" yaml:"title"        `
+	BirthDate        fireback.XDate `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
 	// Date range is a complex date storage
-	BirthDateDateInfo workspaces.XDateMetaData `json:"birthDateDateInfo" yaml:"birthDateDateInfo" xml:"birthDateDateInfo" sql:"-" gorm:"-"`
-	Avatar            string                   `json:"avatar" xml:"avatar" yaml:"avatar"        `
+	BirthDateDateInfo fireback.XDateMetaData `json:"birthDateDateInfo" yaml:"birthDateDateInfo" xml:"birthDateDateInfo" sql:"-" gorm:"-"`
+	Avatar            string                 `json:"avatar" xml:"avatar" yaml:"avatar"        `
 	// User last connecting ip address
 	LastIpAddress string `json:"lastIpAddress" xml:"lastIpAddress" yaml:"lastIpAddress"        `
 	// User primary address location. Can be useful for simple projects that a user is associated with a single address.
@@ -209,7 +210,7 @@ type UserEntity struct {
 	LinkedTo       *UserEntity         `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func UserEntityStream(q workspaces.QueryDSL) (chan []*UserEntity, *workspaces.QueryResultMeta, error) {
+func UserEntityStream(q fireback.QueryDSL) (chan []*UserEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*UserEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -245,8 +246,8 @@ func (x *UserEntityList) Json() string {
 	}
 	return ""
 }
-func (x *UserEntityList) ToTree() *workspaces.TreeOperation[UserEntity] {
-	return workspaces.NewTreeOperation(
+func (x *UserEntityList) ToTree() *fireback.TreeOperation[UserEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *UserEntity) string {
 			if !t.ParentId.Valid {
@@ -263,15 +264,15 @@ func (x *UserEntityList) ToTree() *workspaces.TreeOperation[UserEntity] {
 var UserPreloadRelations []string = []string{}
 
 type userActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *UserEntity) (*UserEntity, *workspaces.IError)
-	Create         func(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity, *workspaces.IError)
-	Upsert         func(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *UserEntity) (*UserEntity, *fireback.IError)
+	Create         func(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, *fireback.IError)
+	Upsert         func(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, *fireback.IError)
 	SeederInit     func() *UserEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*UserEntity, query workspaces.QueryDSL) ([]*UserEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*UserEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*UserEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*UserEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*UserEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*UserEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*UserEntity, *fireback.QueryResultMeta, error)
 }
 
 var UserActions userActionsSig = userActionsSig{
@@ -286,7 +287,7 @@ var UserActions userActionsSig = userActionsSig{
 	Query:          UserActionQueryFn,
 }
 
-func UserActionUpsertFn(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity, *workspaces.IError) {
+func UserActionUpsertFn(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -300,33 +301,33 @@ var USER_EVENTS = []string{
 }
 
 type UserFieldMap struct {
-	FirstName      workspaces.TranslatedString `yaml:"firstName"`
-	LastName       workspaces.TranslatedString `yaml:"lastName"`
-	Photo          workspaces.TranslatedString `yaml:"photo"`
-	Gender         workspaces.TranslatedString `yaml:"gender"`
-	Title          workspaces.TranslatedString `yaml:"title"`
-	BirthDate      workspaces.TranslatedString `yaml:"birthDate"`
-	Avatar         workspaces.TranslatedString `yaml:"avatar"`
-	LastIpAddress  workspaces.TranslatedString `yaml:"lastIpAddress"`
-	PrimaryAddress workspaces.TranslatedString `yaml:"primaryAddress"`
+	FirstName      fireback.TranslatedString `yaml:"firstName"`
+	LastName       fireback.TranslatedString `yaml:"lastName"`
+	Photo          fireback.TranslatedString `yaml:"photo"`
+	Gender         fireback.TranslatedString `yaml:"gender"`
+	Title          fireback.TranslatedString `yaml:"title"`
+	BirthDate      fireback.TranslatedString `yaml:"birthDate"`
+	Avatar         fireback.TranslatedString `yaml:"avatar"`
+	LastIpAddress  fireback.TranslatedString `yaml:"lastIpAddress"`
+	PrimaryAddress fireback.TranslatedString `yaml:"primaryAddress"`
 }
 
 var UserEntityMetaConfig map[string]int64 = map[string]int64{}
-var UserEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&UserEntity{}))
+var UserEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&UserEntity{}))
 
-func entityUserFormatter(dto *UserEntity, query workspaces.QueryDSL) {
+func entityUserFormatter(dto *UserEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	dto.BirthDateDateInfo = workspaces.ComputeXDateMetaData(&dto.BirthDate, query)
+	dto.BirthDateDateInfo = fireback.ComputeXDateMetaData(&dto.BirthDate, query)
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func UserActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func UserActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -353,7 +354,7 @@ func UserActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func UserActionSeeder(query workspaces.QueryDSL, count int) {
+func UserActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -381,7 +382,7 @@ func UserActionSeederInitFn() *UserEntity {
 	}
 	return entity
 }
-func UserAssociationCreate(dto *UserEntity, query workspaces.QueryDSL) error {
+func UserAssociationCreate(dto *UserEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -389,13 +390,13 @@ func UserAssociationCreate(dto *UserEntity, query workspaces.QueryDSL) error {
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func UserRelationContentCreate(dto *UserEntity, query workspaces.QueryDSL) error {
+func UserRelationContentCreate(dto *UserEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func UserRelationContentUpdate(dto *UserEntity, query workspaces.QueryDSL) error {
+func UserRelationContentUpdate(dto *UserEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func UserPolyglotUpdateHandler(dto *UserEntity, query workspaces.QueryDSL) {
+func UserPolyglotUpdateHandler(dto *UserEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -406,8 +407,8 @@ func UserPolyglotUpdateHandler(dto *UserEntity, query workspaces.QueryDSL) {
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func UserValidator(dto *UserEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func UserValidator(dto *UserEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -459,29 +460,31 @@ And here is the actual object signature:
 	},
 }
 
-func UserEntityPreSanitize(dto *UserEntity, query workspaces.QueryDSL) {
+func UserEntityPreSanitize(dto *UserEntity, query fireback.QueryDSL) {
 }
-func UserEntityBeforeCreateAppend(dto *UserEntity, query workspaces.QueryDSL) {
+func UserEntityBeforeCreateAppend(dto *UserEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	UserRecursiveAddUniqueId(dto, query)
 }
-func UserRecursiveAddUniqueId(dto *UserEntity, query workspaces.QueryDSL) {
+func UserRecursiveAddUniqueId(dto *UserEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func UserMultiInsertFn(dtos []*UserEntity, query workspaces.QueryDSL) ([]*UserEntity, *workspaces.IError) {
+func UserMultiInsertFn(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			UserEntityPreSanitize(dtos[index], query)
@@ -489,19 +492,19 @@ func UserMultiInsertFn(dtos []*UserEntity, query workspaces.QueryDSL) ([]*UserEn
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func UserActionBatchCreateFn(dtos []*UserEntity, query workspaces.QueryDSL) ([]*UserEntity, *workspaces.IError) {
+func UserActionBatchCreateFn(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*UserEntity{}
 		for _, item := range dtos {
@@ -515,12 +518,12 @@ func UserActionBatchCreateFn(dtos []*UserEntity, query workspaces.QueryDSL) ([]*
 	}
 	return dtos, nil
 }
-func UserDeleteEntireChildren(query workspaces.QueryDSL, dto *UserEntity) *workspaces.IError {
+func UserDeleteEntireChildren(query fireback.QueryDSL, dto *UserEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func UserActionCreateFn(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity, *workspaces.IError) {
+func UserActionCreateFn(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := UserValidator(dto, false); iError != nil {
 		return nil, iError
@@ -534,14 +537,14 @@ func UserActionCreateFn(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -549,35 +552,35 @@ func UserActionCreateFn(dto *UserEntity, query workspaces.QueryDSL) (*UserEntity
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewUserCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(USER_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&UserEntity{}),
+			"entityKey": fireback.GetTypeString(&UserEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func UserActionGetOneFn(query workspaces.QueryDSL) (*UserEntity, *workspaces.IError) {
+func UserActionGetOneFn(query fireback.QueryDSL) (*UserEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&UserEntity{})
-	item, err := workspaces.GetOneEntity[UserEntity](query, refl)
+	item, err := fireback.GetOneEntity[UserEntity](query, refl)
 	entityUserFormatter(item, query)
 	return item, err
 }
-func UserActionGetByWorkspaceFn(query workspaces.QueryDSL) (*UserEntity, *workspaces.IError) {
+func UserActionGetByWorkspaceFn(query fireback.QueryDSL) (*UserEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&UserEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[UserEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[UserEntity](query, refl)
 	entityUserFormatter(item, query)
 	return item, err
 }
-func UserActionQueryFn(query workspaces.QueryDSL) ([]*UserEntity, *workspaces.QueryResultMeta, error) {
+func UserActionQueryFn(query fireback.QueryDSL) ([]*UserEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&UserEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[UserEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[UserEntity](query, refl)
 	for _, item := range items {
 		entityUserFormatter(item, query)
 	}
@@ -587,7 +590,7 @@ func UserActionQueryFn(query workspaces.QueryDSL) ([]*UserEntity, *workspaces.Qu
 var userMemoryItems []*UserEntity = []*UserEntity{}
 
 func UserEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -617,7 +620,7 @@ func UserMemJoin(items []uint) []*UserEntity {
 	}
 	return res
 }
-func UserUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *UserEntity) (*UserEntity, *workspaces.IError) {
+func UserUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserEntity) (*UserEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = USER_EVENT_UPDATED
 	UserEntityPreSanitize(fields, query)
@@ -632,7 +635,7 @@ func UserUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *UserEntit
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	UserRelationContentUpdate(fields, query)
@@ -646,11 +649,11 @@ func UserUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *UserEntit
 		Where(&UserEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewUserUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -662,9 +665,9 @@ func UserUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *UserEntit
 	   })*/
 	return &itemRefetched, nil
 }
-func UserActionUpdateFn(query workspaces.QueryDSL, fields *UserEntity) (*UserEntity, *workspaces.IError) {
+func UserActionUpdateFn(query fireback.QueryDSL, fields *UserEntity) (*UserEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := UserValidator(fields, true); iError != nil {
@@ -674,11 +677,11 @@ func UserActionUpdateFn(query workspaces.QueryDSL, fields *UserEntity) (*UserEnt
 	// UserRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *UserEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = UserUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -686,7 +689,7 @@ func UserActionUpdateFn(query workspaces.QueryDSL, fields *UserEntity) (*UserEnt
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return UserUpdateExec(dbref, query, fields)
@@ -697,8 +700,8 @@ var UserWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire users ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE},
 			AllowOnRoot:    true,
 		})
 		count, _ := UserActionWipeClean(query)
@@ -707,16 +710,16 @@ var UserWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func UserActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func UserActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&UserEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_USER_DELETE}
-	return workspaces.RemoveEntity[UserEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_USER_DELETE}
+	return fireback.RemoveEntity[UserEntity](query, refl)
 }
-func UserActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func UserActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[UserEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[UserEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'UserEntity'", subErr)
 			return count, subErr
@@ -727,11 +730,11 @@ func UserActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func UserActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[UserEntity]) (
-	*workspaces.BulkRecordRequest[UserEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[UserEntity]) (
+	*fireback.BulkRecordRequest[UserEntity], *fireback.IError,
 ) {
 	result := []*UserEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := UserActions.Update(query, record)
@@ -746,7 +749,7 @@ func UserActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *UserEntity) Json() string {
 	if x != nil {
@@ -756,7 +759,7 @@ func (x *UserEntity) Json() string {
 	return ""
 }
 
-var UserEntityMeta = workspaces.TableMetaData{
+var UserEntityMeta = fireback.TableMetaData{
 	EntityName:    "User",
 	ExportKey:     "users",
 	TableNameInDb: "user_entities",
@@ -766,23 +769,23 @@ var UserEntityMeta = workspaces.TableMetaData{
 }
 
 func UserActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[UserEntity](query, UserActions.Query, UserPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[UserEntity](query, UserActions.Query, UserPreloadRelations)
 }
 func UserActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[UserEntity](query, UserActions.Query, UserPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[UserEntity](query, UserActions.Query, UserPreloadRelations)
 }
 func UserActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content UserEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := UserActions.Create(&content, query)
@@ -891,7 +894,7 @@ var UserCommonCliFlags = []cli.Flag{
 		Usage:    `ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\") (string?)`,
 	},
 }
-var UserCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var UserCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "firstName",
 		StructField: "FirstName",
@@ -1054,17 +1057,17 @@ var UserCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_CREATE},
 			AllowOnRoot:    true,
 		})
 		entity := &UserEntity{}
-		workspaces.PopulateInteractively(entity, c, UserCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, UserCommonInteractiveCliFlags)
 		if entity, err := UserActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -1074,8 +1077,8 @@ var UserUpdateCmd cli.Command = cli.Command{
 	Flags:   UserCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_UPDATE},
 			AllowOnRoot:    true,
 		})
 		entity := CastUserFromCli(c)
@@ -1098,7 +1101,7 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("first-name") {
 		template.FirstName = c.String("first-name")
@@ -1124,8 +1127,8 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 	}
 	return template
 }
-func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
@@ -1135,8 +1138,8 @@ func UserSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.Quer
 	)
 }
 func UserSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		userSeedersFs,
@@ -1145,8 +1148,8 @@ func UserSyncSeeders() {
 	)
 }
 func UserImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		UserActions.Create,
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1154,19 +1157,19 @@ func UserImportMocks() {
 		false,
 	)
 }
-func UserWriteQueryMock(ctx workspaces.MockQueryContext) {
+func UserWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := UserActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "User", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "User", result)
 	}
 }
-func UsersActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func UsersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1178,7 +1181,7 @@ func UsersActionQueryString(keyword string, page int) ([]string, *workspaces.Que
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := UserActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1205,8 +1208,8 @@ var UserDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_CREATE},
 				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
@@ -1230,7 +1233,7 @@ var UserDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := UserActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1238,7 +1241,7 @@ var UserDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1251,7 +1254,7 @@ var UserDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				UserActions.Create,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1281,7 +1284,7 @@ var UserImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of users, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]UserEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1290,7 +1293,7 @@ var UserImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(userSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(userSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1303,7 +1306,7 @@ var UserImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				UserActions.Create,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				userSeedersFs,
@@ -1314,7 +1317,7 @@ var UserImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1322,7 +1325,7 @@ var UserImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				UserEntityStream,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				c.String("file"),
@@ -1336,7 +1339,7 @@ var UserImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1346,12 +1349,12 @@ var UserImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				UserActions.Create,
 				reflect.ValueOf(&UserEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_CREATE},
 					AllowOnRoot:    true,
 				},
 				func() UserEntity {
@@ -1370,7 +1373,7 @@ var UserCliCommands []cli.Command = []cli.Command{
 	UserUpdateCmd,
 	UserAskCmd,
 	UserCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		UserActions.Remove,
 	),
@@ -1378,7 +1381,7 @@ var UserCliCommands []cli.Command = []cli.Command{
 
 func UserCliFn() cli.Command {
 	commands := append(UserImportExportCommands, UserCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, UserDevCommands...)
 	}
 	return cli.Command{
@@ -1395,14 +1398,14 @@ func UserCliFn() cli.Command {
 	}
 }
 
-var USER_ACTION_TABLE = workspaces.Module3Action{
+var USER_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        UserActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			UserActions.Query,
 			security,
 			reflect.ValueOf(&UserEntity{}).Elem(),
@@ -1410,27 +1413,27 @@ var USER_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var USER_ACTION_QUERY = workspaces.Module3Action{
+var USER_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/users",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &UserEntityQs{}
-			workspaces.HttpQueryEntity(c, UserActions.Query, qs)
+			fireback.HttpQueryEntity(c, UserActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         UserActions.Query,
 	ResponseEntity: &[]UserEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &UserEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			UserActions.Query,
 			security,
@@ -1441,142 +1444,142 @@ var USER_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, UserQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, UserQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var USER_ACTION_EXPORT = workspaces.Module3Action{
+var USER_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/users/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, UserActionExport)
+			fireback.HttpStreamFileChannel(c, UserActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         UserActionExport,
 	ResponseEntity: &[]UserEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
 }
-var USER_ACTION_GET_ONE = workspaces.Module3Action{
+var USER_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/user/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, UserActions.GetOne)
+			fireback.HttpGetEntity(c, UserActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         UserActions.GetOne,
 	ResponseEntity: &UserEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
 }
-var USER_ACTION_POST_ONE = workspaces.Module3Action{
+var USER_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new user",
 	Flags:         UserCommonCliFlags,
 	Method:        "POST",
 	Url:           "/user",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_CREATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, UserActions.Create)
+			fireback.HttpPostEntity(c, UserActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, UserActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, UserActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         UserActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &UserEntity{},
 	ResponseEntity: &UserEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
 }
-var USER_ACTION_PATCH = workspaces.Module3Action{
+var USER_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         UserCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/user",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, UserActions.Update)
+			fireback.HttpUpdateEntity(c, UserActions.Update)
 		},
 	},
 	Action:         UserActions.Update,
 	RequestEntity:  &UserEntity{},
 	ResponseEntity: &UserEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
 }
-var USER_ACTION_PATCH_BULK = workspaces.Module3Action{
+var USER_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/users",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, UserActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, UserActionBulkUpdate)
 		},
 	},
 	Action:         UserActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[UserEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[UserEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[UserEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[UserEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
 }
-var USER_ACTION_DELETE = workspaces.Module3Action{
+var USER_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/user",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_USER_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, UserActions.Remove)
+			fireback.HttpRemoveEntity(c, UserActions.Remove)
 		},
 	},
 	Action:         UserActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &UserEntity{},
 }
 
@@ -1584,10 +1587,10 @@ var USER_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on UserEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendUserRouter = func(r *[]workspaces.Module3Action) {}
+var AppendUserRouter = func(r *[]fireback.Module3Action) {}
 
-func GetUserModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetUserModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		USER_ACTION_QUERY,
 		USER_ACTION_EXPORT,
 		USER_ACTION_GET_ONE,
@@ -1601,32 +1604,32 @@ func GetUserModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_USER = workspaces.PermissionInfo{
+var PERM_ROOT_USER = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.user.*",
 	Name:        "Entire user actions (*)",
 	Description: "",
 }
-var PERM_ROOT_USER_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_USER_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.user.delete",
 	Name:        "Delete user",
 	Description: "",
 }
-var PERM_ROOT_USER_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_USER_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.user.create",
 	Name:        "Create user",
 	Description: "",
 }
-var PERM_ROOT_USER_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_USER_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.user.update",
 	Name:        "Update user",
 	Description: "",
 }
-var PERM_ROOT_USER_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_USER_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.user.query",
 	Name:        "Query user",
 	Description: "",
 }
-var ALL_USER_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_USER_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_USER_DELETE,
 	PERM_ROOT_USER_CREATE,
 	PERM_ROOT_USER_UPDATE,
@@ -1647,54 +1650,54 @@ func (x *Googoli2EventPayload) Json() string {
 }
 func NewGoogoli2Event(
 	payload *Googoli2EventPayload,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "Googoli2",
 		Payload: payload,
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewUserCreatedEvent(
 	payload *UserEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "UserCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_USER_QUERY,
 			},
 		},
 		CacheKey: "*abac.UserEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewUserUpdatedEvent(
 	payload *UserEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "UserUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_USER_QUERY,
 			},
 		},
 		CacheKey: "*abac.UserEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var UserEntityBundle = workspaces.EntityBundle{
+var UserEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_USER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

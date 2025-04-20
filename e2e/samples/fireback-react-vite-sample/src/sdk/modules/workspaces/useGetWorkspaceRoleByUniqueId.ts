@@ -72,7 +72,7 @@ export function useGetWorkspaceRoleByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.WorkspaceRoleEntity"],
+    [options, query, "*fireback.WorkspaceRoleEntity"],
     fn,
     {
       cacheTime: 1001,

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 // Supported OAuth providers
@@ -32,7 +32,7 @@ type TokenInfo struct {
 // OauthAuthenticateAction authenticates a user via OAuth
 func OauthAuthenticateAction(
 	req *OauthAuthenticateActionReqDto,
-	q workspaces.QueryDSL) (*OauthAuthenticateActionResDto, *workspaces.IError) {
+	q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
 
 	switch req.Service {
 	case ProviderGoogle:
@@ -40,11 +40,11 @@ func OauthAuthenticateAction(
 	case ProviderFacebook:
 		return authenticateWithFacebook(req.Token, q)
 	default:
-		return nil, workspaces.Create401Error(&AbacMessages.UnsupportedOAuth, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.UnsupportedOAuth, []string{})
 	}
 }
 
-func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q workspaces.QueryDSL) (*OauthAuthenticateActionResDto, *workspaces.IError) {
+func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
 
 	if err := validateValueFormat(info.Email); err != nil {
 		return nil, err
@@ -92,23 +92,23 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q work
 }
 
 // authenticateWithGoogle verifies the Google access token and returns user info
-func authenticateWithGoogle(accessToken string, q workspaces.QueryDSL) (*OauthAuthenticateActionResDto, *workspaces.IError) {
+func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
 	url := fmt.Sprintf("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=%s", accessToken)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		return nil, workspaces.Create401Error(&AbacMessages.InvalidToken, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.InvalidToken, []string{})
 	}
 	defer resp.Body.Close()
 
 	var tokenInfo TokenInfo
 	if err := json.NewDecoder(resp.Body).Decode(&tokenInfo); err != nil || tokenInfo.Email == "" {
-		return nil, workspaces.Create401Error(&AbacMessages.FailedToDecodeGoogle, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.FailedToDecodeGoogle, []string{})
 	}
 
 	return continueAuthenticationViaOAuthEmail(tokenInfo, ProviderGoogle, q)
 }
 
-func authenticateWithFacebook(accessToken string, q workspaces.QueryDSL) (*OauthAuthenticateActionResDto, *workspaces.IError) {
+func authenticateWithFacebook(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
 	// TODO: Implement Facebook token validation
 	return nil, nil
 }

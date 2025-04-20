@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoCountry"
 	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoCountry"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoCountrySeedersFs = &seeders.ViewsFs
@@ -99,7 +100,7 @@ type GeoCountryEntity struct {
 	LinkedTo         *GeoCountryEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func GeoCountryEntityStream(q workspaces.QueryDSL) (chan []*GeoCountryEntity, *workspaces.QueryResultMeta, error) {
+func GeoCountryEntityStream(q fireback.QueryDSL) (chan []*GeoCountryEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*GeoCountryEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -135,8 +136,8 @@ func (x *GeoCountryEntityList) Json() string {
 	}
 	return ""
 }
-func (x *GeoCountryEntityList) ToTree() *workspaces.TreeOperation[GeoCountryEntity] {
-	return workspaces.NewTreeOperation(
+func (x *GeoCountryEntityList) ToTree() *fireback.TreeOperation[GeoCountryEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *GeoCountryEntity) string {
 			if t.ParentId == nil {
@@ -161,14 +162,14 @@ var GEO_COUNTRY_EVENTS = []string{
 }
 
 type GeoCountryFieldMap struct {
-	Status       workspaces.TranslatedString `yaml:"status"`
-	Flag         workspaces.TranslatedString `yaml:"flag"`
-	CommonName   workspaces.TranslatedString `yaml:"commonName"`
-	OfficialName workspaces.TranslatedString `yaml:"officialName"`
+	Status       fireback.TranslatedString `yaml:"status"`
+	Flag         fireback.TranslatedString `yaml:"flag"`
+	CommonName   fireback.TranslatedString `yaml:"commonName"`
+	OfficialName fireback.TranslatedString `yaml:"officialName"`
 }
 
 var GeoCountryEntityMetaConfig map[string]int64 = map[string]int64{}
-var GeoCountryEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GeoCountryEntity{}))
+var GeoCountryEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&GeoCountryEntity{}))
 
 type GeoCountryEntityPolyglot struct {
 	LinkerId     string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
@@ -177,15 +178,15 @@ type GeoCountryEntityPolyglot struct {
 	OfficialName string `yaml:"officialName,omitempty" json:"officialName,omitempty"`
 }
 
-func entityGeoCountryFormatter(dto *GeoCountryEntity, query workspaces.QueryDSL) {
+func entityGeoCountryFormatter(dto *GeoCountryEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func GeoCountryMockEntity() *GeoCountryEntity {
@@ -203,7 +204,7 @@ func GeoCountryMockEntity() *GeoCountryEntity {
 	}
 	return entity
 }
-func GeoCountryActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func GeoCountryActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -230,7 +231,7 @@ func GeoCountryActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func GeoCountryActionSeeder(query workspaces.QueryDSL, count int) {
+func GeoCountryActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -283,7 +284,7 @@ func GeoCountryActionSeederInit() *GeoCountryEntity {
 	}
 	return entity
 }
-func GeoCountryAssociationCreate(dto *GeoCountryEntity, query workspaces.QueryDSL) error {
+func GeoCountryAssociationCreate(dto *GeoCountryEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -291,17 +292,17 @@ func GeoCountryAssociationCreate(dto *GeoCountryEntity, query workspaces.QueryDS
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func GeoCountryRelationContentCreate(dto *GeoCountryEntity, query workspaces.QueryDSL) error {
+func GeoCountryRelationContentCreate(dto *GeoCountryEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GeoCountryRelationContentUpdate(dto *GeoCountryEntity, query workspaces.QueryDSL) error {
+func GeoCountryRelationContentUpdate(dto *GeoCountryEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GeoCountryPolyglotCreateHandler(dto *GeoCountryEntity, query workspaces.QueryDSL) {
+func GeoCountryPolyglotCreateHandler(dto *GeoCountryEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &GeoCountryEntityPolyglot{}, query)
+	fireback.PolyglotCreateHandler(dto, &GeoCountryEntityPolyglot{}, query)
 }
 
 /**
@@ -309,8 +310,8 @@ func GeoCountryPolyglotCreateHandler(dto *GeoCountryEntity, query workspaces.Que
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func GeoCountryValidator(dto *GeoCountryEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func GeoCountryValidator(dto *GeoCountryEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -357,29 +358,31 @@ And here is the actual object signature:
 	},
 }
 
-func GeoCountryEntityPreSanitize(dto *GeoCountryEntity, query workspaces.QueryDSL) {
+func GeoCountryEntityPreSanitize(dto *GeoCountryEntity, query fireback.QueryDSL) {
 }
-func GeoCountryEntityBeforeCreateAppend(dto *GeoCountryEntity, query workspaces.QueryDSL) {
+func GeoCountryEntityBeforeCreateAppend(dto *GeoCountryEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	GeoCountryRecursiveAddUniqueId(dto, query)
 }
-func GeoCountryRecursiveAddUniqueId(dto *GeoCountryEntity, query workspaces.QueryDSL) {
+func GeoCountryRecursiveAddUniqueId(dto *GeoCountryEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func GeoCountryMultiInsert(dtos []*GeoCountryEntity, query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryMultiInsert(dtos []*GeoCountryEntity, query fireback.QueryDSL) ([]*GeoCountryEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			GeoCountryEntityPreSanitize(dtos[index], query)
@@ -387,19 +390,19 @@ func GeoCountryMultiInsert(dtos []*GeoCountryEntity, query workspaces.QueryDSL) 
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func GeoCountryActionBatchCreateFn(dtos []*GeoCountryEntity, query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryActionBatchCreateFn(dtos []*GeoCountryEntity, query fireback.QueryDSL) ([]*GeoCountryEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GeoCountryEntity{}
 		for _, item := range dtos {
@@ -413,12 +416,12 @@ func GeoCountryActionBatchCreateFn(dtos []*GeoCountryEntity, query workspaces.Qu
 	}
 	return dtos, nil
 }
-func GeoCountryDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoCountryEntity) *workspaces.IError {
+func GeoCountryDeleteEntireChildren(query fireback.QueryDSL, dto *GeoCountryEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func GeoCountryActionCreateFn(dto *GeoCountryEntity, query workspaces.QueryDSL) (*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryActionCreateFn(dto *GeoCountryEntity, query fireback.QueryDSL) (*GeoCountryEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := GeoCountryValidator(dto, false); iError != nil {
 		return nil, iError
@@ -434,14 +437,14 @@ func GeoCountryActionCreateFn(dto *GeoCountryEntity, query workspaces.QueryDSL) 
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -449,27 +452,27 @@ func GeoCountryActionCreateFn(dto *GeoCountryEntity, query workspaces.QueryDSL) 
 	// 6. Fire the event into system
 	event.MustFire(GEO_COUNTRY_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&GeoCountryEntity{}),
+		"entityKey": fireback.GetTypeString(&GeoCountryEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func GeoCountryActionGetOne(query workspaces.QueryDSL) (*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryActionGetOne(query fireback.QueryDSL) (*GeoCountryEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoCountryEntity{})
-	item, err := workspaces.GetOneEntity[GeoCountryEntity](query, refl)
+	item, err := fireback.GetOneEntity[GeoCountryEntity](query, refl)
 	entityGeoCountryFormatter(item, query)
 	return item, err
 }
-func GeoCountryActionGetByWorkspace(query workspaces.QueryDSL) (*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryActionGetByWorkspace(query fireback.QueryDSL) (*GeoCountryEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoCountryEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[GeoCountryEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[GeoCountryEntity](query, refl)
 	entityGeoCountryFormatter(item, query)
 	return item, err
 }
-func GeoCountryActionQuery(query workspaces.QueryDSL) ([]*GeoCountryEntity, *workspaces.QueryResultMeta, error) {
+func GeoCountryActionQuery(query fireback.QueryDSL) ([]*GeoCountryEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoCountryEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[GeoCountryEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[GeoCountryEntity](query, refl)
 	for _, item := range items {
 		entityGeoCountryFormatter(item, query)
 	}
@@ -479,7 +482,7 @@ func GeoCountryActionQuery(query workspaces.QueryDSL) ([]*GeoCountryEntity, *wor
 var geoCountryMemoryItems []*GeoCountryEntity = []*GeoCountryEntity{}
 
 func GeoCountryEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -509,7 +512,7 @@ func GeoCountryMemJoin(items []uint) []*GeoCountryEntity {
 	}
 	return res
 }
-func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCountryEntity) (*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GeoCountryEntity) (*GeoCountryEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = GEO_COUNTRY_EVENT_UPDATED
 	GeoCountryEntityPreSanitize(fields, query)
@@ -523,7 +526,7 @@ func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Geo
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	GeoCountryRelationContentUpdate(fields, query)
@@ -542,13 +545,13 @@ func GeoCountryUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Geo
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func GeoCountryActionUpdateFn(query workspaces.QueryDSL, fields *GeoCountryEntity) (*GeoCountryEntity, *workspaces.IError) {
+func GeoCountryActionUpdateFn(query fireback.QueryDSL, fields *GeoCountryEntity) (*GeoCountryEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GeoCountryValidator(fields, true); iError != nil {
@@ -558,11 +561,11 @@ func GeoCountryActionUpdateFn(query workspaces.QueryDSL, fields *GeoCountryEntit
 	// GeoCountryRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *GeoCountryEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = GeoCountryUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -570,7 +573,7 @@ func GeoCountryActionUpdateFn(query workspaces.QueryDSL, fields *GeoCountryEntit
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoCountryUpdateExec(dbref, query, fields)
@@ -581,8 +584,8 @@ var GeoCountryWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geocountries ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
 		})
 		count, _ := GeoCountryActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -590,16 +593,16 @@ var GeoCountryWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func GeoCountryActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func GeoCountryActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoCountryEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE}
-	return workspaces.RemoveEntity[GeoCountryEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE}
+	return fireback.RemoveEntity[GeoCountryEntity](query, refl)
 }
-func GeoCountryActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func GeoCountryActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GeoCountryEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[GeoCountryEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'GeoCountryEntity'", subErr)
 			return count, subErr
@@ -610,11 +613,11 @@ func GeoCountryActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func GeoCountryActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoCountryEntity]) (
-	*workspaces.BulkRecordRequest[GeoCountryEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[GeoCountryEntity]) (
+	*fireback.BulkRecordRequest[GeoCountryEntity], *fireback.IError,
 ) {
 	result := []*GeoCountryEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := GeoCountryActionUpdate(query, record)
@@ -629,7 +632,7 @@ func GeoCountryActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *GeoCountryEntity) Json() string {
 	if x != nil {
@@ -639,7 +642,7 @@ func (x *GeoCountryEntity) Json() string {
 	return ""
 }
 
-var GeoCountryEntityMeta = workspaces.TableMetaData{
+var GeoCountryEntityMeta = fireback.TableMetaData{
 	EntityName:    "GeoCountry",
 	ExportKey:     "geo-countries",
 	TableNameInDb: "fb_geo-country_entities",
@@ -649,23 +652,23 @@ var GeoCountryEntityMeta = workspaces.TableMetaData{
 }
 
 func GeoCountryActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[GeoCountryEntity](query, GeoCountryActionQuery, GeoCountryPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[GeoCountryEntity](query, GeoCountryActionQuery, GeoCountryPreloadRelations)
 }
 func GeoCountryActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[GeoCountryEntity](query, GeoCountryActionQuery, GeoCountryPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[GeoCountryEntity](query, GeoCountryActionQuery, GeoCountryPreloadRelations)
 }
 func GeoCountryActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content GeoCountryEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GeoCountryActionCreate(&content, query)
@@ -709,7 +712,7 @@ var GeoCountryCommonCliFlags = []cli.Flag{
 		Usage:    `officialName`,
 	},
 }
-var GeoCountryCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var GeoCountryCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "status",
 		StructField: "Status",
@@ -791,16 +794,16 @@ var GeoCountryCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
 		})
 		entity := &GeoCountryEntity{}
-		workspaces.PopulateInteractively(entity, c, GeoCountryCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, GeoCountryCommonInteractiveCliFlags)
 		if entity, err := GeoCountryActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -810,8 +813,8 @@ var GeoCountryUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoCountryCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 		})
 		entity := CastGeoCountryFromCli(c)
 		if entity, err := GeoCountryActionUpdate(query, entity); err != nil {
@@ -855,8 +858,8 @@ func CastGeoCountryFromCli(c *cli.Context) *GeoCountryEntity {
 	return template
 }
 func GeoCountrySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GeoCountryActionCreate,
 		reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 		fsRef,
@@ -865,8 +868,8 @@ func GeoCountrySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func GeoCountrySyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		GeoCountryActionCreate,
 		reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 		geoCountrySeedersFs,
@@ -875,8 +878,8 @@ func GeoCountrySyncSeeders() {
 	)
 }
 func GeoCountryImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GeoCountryActionCreate,
 		reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -884,19 +887,19 @@ func GeoCountryImportMocks() {
 		false,
 	)
 }
-func GeoCountryWriteQueryMock(ctx workspaces.MockQueryContext) {
+func GeoCountryWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := GeoCountryActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "GeoCountry", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "GeoCountry", result)
 	}
 }
-func GeoCountriesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func GeoCountriesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -908,7 +911,7 @@ func GeoCountriesActionQueryString(keyword string, page int) ([]string, *workspa
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := GeoCountryActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -934,8 +937,8 @@ var GeoCountryImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
 			})
 			if c.Bool("batch") {
 				GeoCountryActionSeederMultiple(query, c.Int("count"))
@@ -958,7 +961,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := GeoCountryActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -982,7 +985,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of geo-countries, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]GeoCountryEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -991,7 +994,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(geoCountrySeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(geoCountrySeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1004,7 +1007,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GeoCountryActionCreate,
 				reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 				geoCountrySeedersFs,
@@ -1016,7 +1019,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1029,7 +1032,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GeoCountryActionCreate,
 				reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1040,7 +1043,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1049,7 +1052,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					GeoCountryEntityStream,
 					reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 					c.String("file"),
@@ -1058,7 +1061,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 					GeoCountryPreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					GeoCountryActionQuery,
 					reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 					c.String("file"),
@@ -1074,7 +1077,7 @@ var GeoCountryImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1084,12 +1087,12 @@ var GeoCountryImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				GeoCountryActionCreate,
 				reflect.ValueOf(&GeoCountryEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
 				},
 				func() GeoCountryEntity {
 					v := CastGeoCountryFromCli(c)
@@ -1108,7 +1111,7 @@ var GeoCountryCliCommands []cli.Command = []cli.Command{
 	GeoCountryAskCmd,
 	GeoCountryCreateInteractiveCmd,
 	GeoCountryWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCountryEntity{}).Elem(), GeoCountryActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&GeoCountryEntity{}).Elem(), GeoCountryActionRemove),
 }
 
 func GeoCountryCliFn() cli.Command {
@@ -1127,14 +1130,14 @@ func GeoCountryCliFn() cli.Command {
 	}
 }
 
-var GEO_COUNTRY_ACTION_TABLE = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        GeoCountryActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			GeoCountryActionQuery,
 			security,
 			reflect.ValueOf(&GeoCountryEntity{}).Elem(),
@@ -1142,25 +1145,25 @@ var GEO_COUNTRY_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var GEO_COUNTRY_ACTION_QUERY = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-countries",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, GeoCountryActionQuery)
+			fireback.HttpQueryEntity(c, GeoCountryActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GeoCountryActionQuery,
 	ResponseEntity: &[]GeoCountryEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			GeoCountryActionQuery,
 			security,
@@ -1170,138 +1173,138 @@ var GEO_COUNTRY_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_COUNTRY_ACTION_EXPORT = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-countries/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, GeoCountryActionExport)
+			fireback.HttpStreamFileChannel(c, GeoCountryActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GeoCountryActionExport,
 	ResponseEntity: &[]GeoCountryEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_GET_ONE = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-country/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, GeoCountryActionGetOne)
+			fireback.HttpGetEntity(c, GeoCountryActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         GeoCountryActionGetOne,
 	ResponseEntity: &GeoCountryEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_POST_ONE = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoCountry",
 	Flags:         GeoCountryCommonCliFlags,
 	Method:        "POST",
 	Url:           "/geo-country",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, GeoCountryActionCreate)
+			fireback.HttpPostEntity(c, GeoCountryActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, GeoCountryActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, GeoCountryActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         GeoCountryActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoCountryEntity{},
 	ResponseEntity: &GeoCountryEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_PATCH = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoCountryCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/geo-country",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, GeoCountryActionUpdate)
+			fireback.HttpUpdateEntity(c, GeoCountryActionUpdate)
 		},
 	},
 	Action:         GeoCountryActionUpdate,
 	RequestEntity:  &GeoCountryEntity{},
 	ResponseEntity: &GeoCountryEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_PATCH_BULK = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-countries",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, GeoCountryActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, GeoCountryActionBulkUpdate)
 		},
 	},
 	Action:         GeoCountryActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[GeoCountryEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[GeoCountryEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[GeoCountryEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[GeoCountryEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoCountryEntity",
 	},
 }
-var GEO_COUNTRY_ACTION_DELETE = workspaces.Module3Action{
+var GEO_COUNTRY_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-country",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_COUNTRY_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, GeoCountryActionRemove)
+			fireback.HttpRemoveEntity(c, GeoCountryActionRemove)
 		},
 	},
 	Action:         GeoCountryActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &GeoCountryEntity{},
 }
 
@@ -1309,10 +1312,10 @@ var GEO_COUNTRY_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on GeoCountryEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoCountryRouter = func(r *[]workspaces.Module3Action) {}
+var AppendGeoCountryRouter = func(r *[]fireback.Module3Action) {}
 
-func GetGeoCountryModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetGeoCountryModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		GEO_COUNTRY_ACTION_QUERY,
 		GEO_COUNTRY_ACTION_EXPORT,
 		GEO_COUNTRY_ACTION_GET_ONE,
@@ -1326,34 +1329,34 @@ func GetGeoCountryModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_GEO_COUNTRY_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_COUNTRY_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-country/delete",
 	Name:        "Delete geo country",
 }
-var PERM_ROOT_GEO_COUNTRY_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_COUNTRY_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-country/create",
 	Name:        "Create geo country",
 }
-var PERM_ROOT_GEO_COUNTRY_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_COUNTRY_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-country/update",
 	Name:        "Update geo country",
 }
-var PERM_ROOT_GEO_COUNTRY_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_COUNTRY_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-country/query",
 	Name:        "Query geo country",
 }
-var PERM_ROOT_GEO_COUNTRY = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_COUNTRY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-country/*",
 	Name:        "Entire geo country actions (*)",
 }
-var ALL_GEO_COUNTRY_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_GEO_COUNTRY_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_GEO_COUNTRY_DELETE,
 	PERM_ROOT_GEO_COUNTRY_CREATE,
 	PERM_ROOT_GEO_COUNTRY_UPDATE,
 	PERM_ROOT_GEO_COUNTRY_QUERY,
 	PERM_ROOT_GEO_COUNTRY,
 }
-var GeoCountryEntityBundle = workspaces.EntityBundle{
+var GeoCountryEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_GEO_COUNTRY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

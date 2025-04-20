@@ -58,10 +58,10 @@ export function useDeletePublicJoinKey(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.PublicJoinKeyEntity",
+            "*fireback.PublicJoinKeyEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.PublicJoinKeyEntity");
+          queryClient?.invalidateQueries("*fireback.PublicJoinKeyEntity");
           resolve(response);
         },
         onError(error: any) {

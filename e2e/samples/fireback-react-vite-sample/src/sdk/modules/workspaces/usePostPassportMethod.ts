@@ -70,7 +70,7 @@ export function usePostPassportMethod(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<PassportMethodEntity>) {
           queryClient?.setQueryData<IResponseList<PassportMethodEntity>>(
-            "*workspaces.PassportMethodEntity",
+            "*fireback.PassportMethodEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

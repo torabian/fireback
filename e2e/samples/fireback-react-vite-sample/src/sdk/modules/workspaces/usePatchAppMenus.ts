@@ -70,7 +70,7 @@ export function usePatchAppMenus(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<AppMenuEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.AppMenuEntity]",
+            "*fireback.BulkRecordRequest[fireback.AppMenuEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

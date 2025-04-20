@@ -72,7 +72,7 @@ export function useGetEmailProviderByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.EmailProviderEntity"],
+    [options, query, "*fireback.EmailProviderEntity"],
     fn,
     {
       cacheTime: 1001,

@@ -69,9 +69,8 @@ export function usePatchAppMenu(props?: PatchProps) {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<AppMenuEntity>) {
-          queryClient?.setQueriesData(
-            "*workspaces.AppMenuEntity",
-            (data: any) => fnUpdater(data, response)
+          queryClient?.setQueriesData("*fireback.AppMenuEntity", (data: any) =>
+            fnUpdater(data, response)
           );
           resolve(response);
         },

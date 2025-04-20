@@ -65,7 +65,7 @@ export function useGetCapabilitiesTree({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.CapabilitiesResult"],
+    [options, query, "*fireback.CapabilitiesResult"],
     fn,
     {
       cacheTime: 1001,

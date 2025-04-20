@@ -3,7 +3,7 @@ package abac
 import (
 	"strings"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
@@ -11,14 +11,14 @@ func init() {
 	InviteToWorkspaceActionImp = InviteToWorkspaceAction
 }
 
-func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError) {
+func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError) {
 	if err := WorkspaceInviteValidator(req, false); err != nil {
 		return nil, err
 	}
 
 	_, roleErrors := ValidateRoleAndItsExsitence(req.RoleId)
 	if len(roleErrors) != 0 {
-		return nil, &workspaces.IError{
+		return nil, &fireback.IError{
 			Errors: roleErrors,
 		}
 	}
@@ -29,12 +29,12 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q workspaces.QueryDSL) 
 	}
 
 	var invite WorkspaceInviteEntity = *req
-	invite.WorkspaceId = workspaces.NewString(q.WorkspaceId)
-	invite.UniqueId = workspaces.UUID()
+	invite.WorkspaceId = fireback.NewString(q.WorkspaceId)
+	invite.UniqueId = fireback.UUID()
 	invite.TargetUserLocale = userLocale
 
-	if err := workspaces.GetRef(q).Create(&invite).Error; err != nil {
-		return &invite, workspaces.GormErrorToIError(err)
+	if err := fireback.GetRef(q).Create(&invite).Error; err != nil {
+		return &invite, fireback.GormErrorToIError(err)
 	}
 
 	if invite.Email != "" {
@@ -49,7 +49,7 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q workspaces.QueryDSL) 
 			ToNumber: invite.Phonenumber,
 			Body:     inviteBody,
 		}, q); err7 != nil {
-			return nil, workspaces.GormErrorToIError(err7)
+			return nil, fireback.GormErrorToIError(err7)
 		}
 	}
 

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -16,13 +19,11 @@ import (
 	metas "github.com/torabian/fireback/modules/commonprofile/metas"
 	mocks "github.com/torabian/fireback/modules/commonprofile/mocks/CommonProfile"
 	seeders "github.com/torabian/fireback/modules/commonprofile/seeders/CommonProfile"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var commonProfileSeedersFs = &seeders.ViewsFs
@@ -104,7 +105,7 @@ type CommonProfileEntity struct {
 	LinkedTo         *CommonProfileEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func CommonProfileEntityStream(q workspaces.QueryDSL) (chan []*CommonProfileEntity, *workspaces.QueryResultMeta, error) {
+func CommonProfileEntityStream(q fireback.QueryDSL) (chan []*CommonProfileEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*CommonProfileEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -140,8 +141,8 @@ func (x *CommonProfileEntityList) Json() string {
 	}
 	return ""
 }
-func (x *CommonProfileEntityList) ToTree() *workspaces.TreeOperation[CommonProfileEntity] {
-	return workspaces.NewTreeOperation(
+func (x *CommonProfileEntityList) ToTree() *fireback.TreeOperation[CommonProfileEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *CommonProfileEntity) string {
 			if t.ParentId == nil {
@@ -166,30 +167,30 @@ var COMMON_PROFILE_EVENTS = []string{
 }
 
 type CommonProfileFieldMap struct {
-	FirstName   workspaces.TranslatedString `yaml:"firstName"`
-	LastName    workspaces.TranslatedString `yaml:"lastName"`
-	PhoneNumber workspaces.TranslatedString `yaml:"phoneNumber"`
-	Email       workspaces.TranslatedString `yaml:"email"`
-	Company     workspaces.TranslatedString `yaml:"company"`
-	Street      workspaces.TranslatedString `yaml:"street"`
-	HouseNumber workspaces.TranslatedString `yaml:"houseNumber"`
-	ZipCode     workspaces.TranslatedString `yaml:"zipCode"`
-	City        workspaces.TranslatedString `yaml:"city"`
-	Gender      workspaces.TranslatedString `yaml:"gender"`
+	FirstName   fireback.TranslatedString `yaml:"firstName"`
+	LastName    fireback.TranslatedString `yaml:"lastName"`
+	PhoneNumber fireback.TranslatedString `yaml:"phoneNumber"`
+	Email       fireback.TranslatedString `yaml:"email"`
+	Company     fireback.TranslatedString `yaml:"company"`
+	Street      fireback.TranslatedString `yaml:"street"`
+	HouseNumber fireback.TranslatedString `yaml:"houseNumber"`
+	ZipCode     fireback.TranslatedString `yaml:"zipCode"`
+	City        fireback.TranslatedString `yaml:"city"`
+	Gender      fireback.TranslatedString `yaml:"gender"`
 }
 
 var CommonProfileEntityMetaConfig map[string]int64 = map[string]int64{}
-var CommonProfileEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&CommonProfileEntity{}))
+var CommonProfileEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&CommonProfileEntity{}))
 
-func entityCommonProfileFormatter(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+func entityCommonProfileFormatter(dto *CommonProfileEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func CommonProfileMockEntity() *CommonProfileEntity {
@@ -213,7 +214,7 @@ func CommonProfileMockEntity() *CommonProfileEntity {
 	}
 	return entity
 }
-func CommonProfileActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func CommonProfileActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -240,7 +241,7 @@ func CommonProfileActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func CommonProfileActionSeeder(query workspaces.QueryDSL, count int) {
+func CommonProfileActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -279,7 +280,7 @@ func CommonProfileActionSeederInit() *CommonProfileEntity {
 	}
 	return entity
 }
-func CommonProfileAssociationCreate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
+func CommonProfileAssociationCreate(dto *CommonProfileEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -287,13 +288,13 @@ func CommonProfileAssociationCreate(dto *CommonProfileEntity, query workspaces.Q
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func CommonProfileRelationContentCreate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
+func CommonProfileRelationContentCreate(dto *CommonProfileEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func CommonProfileRelationContentUpdate(dto *CommonProfileEntity, query workspaces.QueryDSL) error {
+func CommonProfileRelationContentUpdate(dto *CommonProfileEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func CommonProfilePolyglotCreateHandler(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+func CommonProfilePolyglotCreateHandler(dto *CommonProfileEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -304,8 +305,8 @@ func CommonProfilePolyglotCreateHandler(dto *CommonProfileEntity, query workspac
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func CommonProfileValidator(dto *CommonProfileEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func CommonProfileValidator(dto *CommonProfileEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -358,29 +359,31 @@ And here is the actual object signature:
 	},
 }
 
-func CommonProfileEntityPreSanitize(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+func CommonProfileEntityPreSanitize(dto *CommonProfileEntity, query fireback.QueryDSL) {
 }
-func CommonProfileEntityBeforeCreateAppend(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+func CommonProfileEntityBeforeCreateAppend(dto *CommonProfileEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	CommonProfileRecursiveAddUniqueId(dto, query)
 }
-func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query workspaces.QueryDSL) {
+func CommonProfileRecursiveAddUniqueId(dto *CommonProfileEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func CommonProfileMultiInsert(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileMultiInsert(dtos []*CommonProfileEntity, query fireback.QueryDSL) ([]*CommonProfileEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			CommonProfileEntityPreSanitize(dtos[index], query)
@@ -388,19 +391,19 @@ func CommonProfileMultiInsert(dtos []*CommonProfileEntity, query workspaces.Quer
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query fireback.QueryDSL) ([]*CommonProfileEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*CommonProfileEntity{}
 		for _, item := range dtos {
@@ -414,12 +417,12 @@ func CommonProfileActionBatchCreateFn(dtos []*CommonProfileEntity, query workspa
 	}
 	return dtos, nil
 }
-func CommonProfileDeleteEntireChildren(query workspaces.QueryDSL, dto *CommonProfileEntity) *workspaces.IError {
+func CommonProfileDeleteEntireChildren(query fireback.QueryDSL, dto *CommonProfileEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileActionCreateFn(dto *CommonProfileEntity, query fireback.QueryDSL) (*CommonProfileEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := CommonProfileValidator(dto, false); iError != nil {
 		return nil, iError
@@ -435,14 +438,14 @@ func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.Quer
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -450,27 +453,27 @@ func CommonProfileActionCreateFn(dto *CommonProfileEntity, query workspaces.Quer
 	// 6. Fire the event into system
 	event.MustFire(COMMON_PROFILE_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&CommonProfileEntity{}),
+		"entityKey": fireback.GetTypeString(&CommonProfileEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func CommonProfileActionGetOne(query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileActionGetOne(query fireback.QueryDSL) (*CommonProfileEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
-	item, err := workspaces.GetOneEntity[CommonProfileEntity](query, refl)
+	item, err := fireback.GetOneEntity[CommonProfileEntity](query, refl)
 	entityCommonProfileFormatter(item, query)
 	return item, err
 }
-func CommonProfileActionGetByWorkspace(query workspaces.QueryDSL) (*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileActionGetByWorkspace(query fireback.QueryDSL) (*CommonProfileEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[CommonProfileEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[CommonProfileEntity](query, refl)
 	entityCommonProfileFormatter(item, query)
 	return item, err
 }
-func CommonProfileActionQuery(query workspaces.QueryDSL) ([]*CommonProfileEntity, *workspaces.QueryResultMeta, error) {
+func CommonProfileActionQuery(query fireback.QueryDSL) ([]*CommonProfileEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[CommonProfileEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[CommonProfileEntity](query, refl)
 	for _, item := range items {
 		entityCommonProfileFormatter(item, query)
 	}
@@ -480,7 +483,7 @@ func CommonProfileActionQuery(query workspaces.QueryDSL) ([]*CommonProfileEntity
 var commonProfileMemoryItems []*CommonProfileEntity = []*CommonProfileEntity{}
 
 func CommonProfileEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -510,7 +513,7 @@ func CommonProfileMemJoin(items []uint) []*CommonProfileEntity {
 	}
 	return res
 }
-func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = COMMON_PROFILE_EVENT_UPDATED
 	CommonProfileEntityPreSanitize(fields, query)
@@ -524,7 +527,7 @@ func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	CommonProfileRelationContentUpdate(fields, query)
@@ -543,13 +546,13 @@ func CommonProfileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func CommonProfileActionUpdateFn(query workspaces.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *workspaces.IError) {
+func CommonProfileActionUpdateFn(query fireback.QueryDSL, fields *CommonProfileEntity) (*CommonProfileEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := CommonProfileValidator(fields, true); iError != nil {
@@ -559,11 +562,11 @@ func CommonProfileActionUpdateFn(query workspaces.QueryDSL, fields *CommonProfil
 	// CommonProfileRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *CommonProfileEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = CommonProfileUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -571,7 +574,7 @@ func CommonProfileActionUpdateFn(query workspaces.QueryDSL, fields *CommonProfil
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return CommonProfileUpdateExec(dbref, query, fields)
@@ -582,8 +585,8 @@ var CommonProfileWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire commonprofiles ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE},
 		})
 		count, _ := CommonProfileActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -591,16 +594,16 @@ var CommonProfileWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func CommonProfileActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func CommonProfileActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&CommonProfileEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE}
-	return workspaces.RemoveEntity[CommonProfileEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE}
+	return fireback.RemoveEntity[CommonProfileEntity](query, refl)
 }
-func CommonProfileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func CommonProfileActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[CommonProfileEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[CommonProfileEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'CommonProfileEntity'", subErr)
 			return count, subErr
@@ -611,11 +614,11 @@ func CommonProfileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func CommonProfileActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[CommonProfileEntity]) (
-	*workspaces.BulkRecordRequest[CommonProfileEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[CommonProfileEntity]) (
+	*fireback.BulkRecordRequest[CommonProfileEntity], *fireback.IError,
 ) {
 	result := []*CommonProfileEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := CommonProfileActionUpdate(query, record)
@@ -630,7 +633,7 @@ func CommonProfileActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *CommonProfileEntity) Json() string {
 	if x != nil {
@@ -640,7 +643,7 @@ func (x *CommonProfileEntity) Json() string {
 	return ""
 }
 
-var CommonProfileEntityMeta = workspaces.TableMetaData{
+var CommonProfileEntityMeta = fireback.TableMetaData{
 	EntityName:    "CommonProfile",
 	ExportKey:     "common-profiles",
 	TableNameInDb: "fb_common-profile_entities",
@@ -650,23 +653,23 @@ var CommonProfileEntityMeta = workspaces.TableMetaData{
 }
 
 func CommonProfileActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[CommonProfileEntity](query, CommonProfileActionQuery, CommonProfilePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[CommonProfileEntity](query, CommonProfileActionQuery, CommonProfilePreloadRelations)
 }
 func CommonProfileActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[CommonProfileEntity](query, CommonProfileActionQuery, CommonProfilePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[CommonProfileEntity](query, CommonProfileActionQuery, CommonProfilePreloadRelations)
 }
 func CommonProfileActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content CommonProfileEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := CommonProfileActionCreate(&content, query)
@@ -740,7 +743,7 @@ var CommonProfileCommonCliFlags = []cli.Flag{
 		Usage:    `gender`,
 	},
 }
-var CommonProfileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var CommonProfileCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "firstName",
 		StructField: "FirstName",
@@ -900,16 +903,16 @@ var CommonProfileCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
 		})
 		entity := &CommonProfileEntity{}
-		workspaces.PopulateInteractively(entity, c, CommonProfileCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, CommonProfileCommonInteractiveCliFlags)
 		if entity, err := CommonProfileActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -919,8 +922,8 @@ var CommonProfileUpdateCmd cli.Command = cli.Command{
 	Flags:   CommonProfileCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
 		})
 		entity := CastCommonProfileFromCli(c)
 		if entity, err := CommonProfileActionUpdate(query, entity); err != nil {
@@ -988,8 +991,8 @@ func CastCommonProfileFromCli(c *cli.Context) *CommonProfileEntity {
 	return template
 }
 func CommonProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		CommonProfileActionCreate,
 		reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 		fsRef,
@@ -998,8 +1001,8 @@ func CommonProfileSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func CommonProfileSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		CommonProfileActionCreate,
 		reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 		commonProfileSeedersFs,
@@ -1008,8 +1011,8 @@ func CommonProfileSyncSeeders() {
 	)
 }
 func CommonProfileImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		CommonProfileActionCreate,
 		reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1017,19 +1020,19 @@ func CommonProfileImportMocks() {
 		false,
 	)
 }
-func CommonProfileWriteQueryMock(ctx workspaces.MockQueryContext) {
+func CommonProfileWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := CommonProfileActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "CommonProfile", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "CommonProfile", result)
 	}
 }
-func CommonProfilesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func CommonProfilesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1041,7 +1044,7 @@ func CommonProfilesActionQueryString(keyword string, page int) ([]string, *works
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := CommonProfileActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1067,8 +1070,8 @@ var CommonProfileImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
 			})
 			if c.Bool("batch") {
 				CommonProfileActionSeederMultiple(query, c.Int("count"))
@@ -1091,7 +1094,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := CommonProfileActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1115,7 +1118,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of common-profiles, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]CommonProfileEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1124,7 +1127,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(commonProfileSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(commonProfileSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1137,7 +1140,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				CommonProfileActionCreate,
 				reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 				commonProfileSeedersFs,
@@ -1149,7 +1152,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1162,7 +1165,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				CommonProfileActionCreate,
 				reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1173,7 +1176,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1182,7 +1185,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					CommonProfileEntityStream,
 					reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 					c.String("file"),
@@ -1191,7 +1194,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 					CommonProfilePreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					CommonProfileActionQuery,
 					reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 					c.String("file"),
@@ -1207,7 +1210,7 @@ var CommonProfileImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1217,12 +1220,12 @@ var CommonProfileImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				CommonProfileActionCreate,
 				reflect.ValueOf(&CommonProfileEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
 				},
 				func() CommonProfileEntity {
 					v := CastCommonProfileFromCli(c)
@@ -1241,7 +1244,7 @@ var CommonProfileCliCommands []cli.Command = []cli.Command{
 	CommonProfileAskCmd,
 	CommonProfileCreateInteractiveCmd,
 	CommonProfileWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&CommonProfileEntity{}).Elem(), CommonProfileActionRemove),
 }
 
 func CommonProfileCliFn() cli.Command {
@@ -1260,14 +1263,14 @@ func CommonProfileCliFn() cli.Command {
 	}
 }
 
-var COMMON_PROFILE_ACTION_TABLE = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        CommonProfileActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			CommonProfileActionQuery,
 			security,
 			reflect.ValueOf(&CommonProfileEntity{}).Elem(),
@@ -1275,25 +1278,25 @@ var COMMON_PROFILE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var COMMON_PROFILE_ACTION_QUERY = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/common-profiles",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, CommonProfileActionQuery)
+			fireback.HttpQueryEntity(c, CommonProfileActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         CommonProfileActionQuery,
 	ResponseEntity: &[]CommonProfileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			CommonProfileActionQuery,
 			security,
@@ -1303,177 +1306,177 @@ var COMMON_PROFILE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var COMMON_PROFILE_ACTION_EXPORT = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/common-profiles/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, CommonProfileActionExport)
+			fireback.HttpStreamFileChannel(c, CommonProfileActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         CommonProfileActionExport,
 	ResponseEntity: &[]CommonProfileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_GET_ONE = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/common-profile/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, CommonProfileActionGetOne)
+			fireback.HttpGetEntity(c, CommonProfileActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         CommonProfileActionGetOne,
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_POST_ONE = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new commonProfile",
 	Flags:         CommonProfileCommonCliFlags,
 	Method:        "POST",
 	Url:           "/common-profile",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, CommonProfileActionCreate)
+			fireback.HttpPostEntity(c, CommonProfileActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, CommonProfileActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, CommonProfileActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         CommonProfileActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &CommonProfileEntity{},
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_PATCH = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         CommonProfileCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/common-profile",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, CommonProfileActionUpdate)
+			fireback.HttpUpdateEntity(c, CommonProfileActionUpdate)
 		},
 	},
 	Action:         CommonProfileActionUpdate,
 	RequestEntity:  &CommonProfileEntity{},
 	ResponseEntity: &CommonProfileEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/common-profiles",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, CommonProfileActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, CommonProfileActionBulkUpdate)
 		},
 	},
 	Action:         CommonProfileActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[CommonProfileEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[CommonProfileEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[CommonProfileEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[CommonProfileEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_DELETE = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/common-profile",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, CommonProfileActionRemove)
+			fireback.HttpRemoveEntity(c, CommonProfileActionRemove)
 		},
 	},
 	Action:         CommonProfileActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &CommonProfileEntity{},
 }
-var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/common-profile/distinct",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, CommonProfileDistinctActionUpdate)
+			fireback.HttpUpdateEntity(c, CommonProfileDistinctActionUpdate)
 		},
 	},
 	Action:         CommonProfileDistinctActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &CommonProfileEntity{},
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
-var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
+var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/common-profile/distinct",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, CommonProfileDistinctActionGetOne)
+			fireback.HttpGetEntity(c, CommonProfileDistinctActionGetOne)
 		},
 	},
 	Action:         CommonProfileDistinctActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &CommonProfileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CommonProfileEntity",
 	},
 }
@@ -1482,10 +1485,10 @@ var COMMON_PROFILE_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
  *	Override this function on CommonProfileEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendCommonProfileRouter = func(r *[]workspaces.Module3Action) {}
+var AppendCommonProfileRouter = func(r *[]fireback.Module3Action) {}
 
-func GetCommonProfileModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetCommonProfileModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		COMMON_PROFILE_ACTION_QUERY,
 		COMMON_PROFILE_ACTION_EXPORT,
 		COMMON_PROFILE_ACTION_GET_ONE,
@@ -1501,35 +1504,35 @@ func GetCommonProfileModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_COMMON_PROFILE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/delete",
 	Name:        "Delete common profile",
 }
-var PERM_ROOT_COMMON_PROFILE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/create",
 	Name:        "Create common profile",
 }
-var PERM_ROOT_COMMON_PROFILE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/update",
 	Name:        "Update common profile",
 }
-var PERM_ROOT_COMMON_PROFILE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/query",
 	Name:        "Query common profile",
 }
-var PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE_GET_DISTINCT_USER = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/get-distinct-user",
 	Name:        "Get common profile Distinct",
 }
-var PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE_UPDATE_DISTINCT_USER = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/update-distinct-user",
 	Name:        "Update common profile Distinct",
 }
-var PERM_ROOT_COMMON_PROFILE = workspaces.PermissionInfo{
+var PERM_ROOT_COMMON_PROFILE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/commonprofile/common-profile/*",
 	Name:        "Entire common profile actions (*)",
 }
-var ALL_COMMON_PROFILE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_COMMON_PROFILE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_COMMON_PROFILE_DELETE,
 	PERM_ROOT_COMMON_PROFILE_CREATE,
 	PERM_ROOT_COMMON_PROFILE_UPDATE,
@@ -1540,9 +1543,9 @@ var ALL_COMMON_PROFILE_PERMISSIONS = []workspaces.PermissionInfo{
 }
 
 func CommonProfileDistinctActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *CommonProfileEntity,
-) (*CommonProfileEntity, *workspaces.IError) {
+) (*CommonProfileEntity, *fireback.IError) {
 	query.UniqueId = query.UserId
 	entity, err := CommonProfileActionGetOne(query)
 	// It's distinct by user, then unique id and user needs to be equal
@@ -1555,8 +1558,8 @@ func CommonProfileDistinctActionUpdate(
 	}
 }
 func CommonProfileDistinctActionGetOne(
-	query workspaces.QueryDSL,
-) (*CommonProfileEntity, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*CommonProfileEntity, *fireback.IError) {
 	// This needs to be fixed for distinct by user or workspace/user
 	query.UniqueId = query.UserId
 	entity, err := CommonProfileActionGetOne(query)
@@ -1566,7 +1569,7 @@ func CommonProfileDistinctActionGetOne(
 	return entity, err
 }
 
-var CommonProfileEntityBundle = workspaces.EntityBundle{
+var CommonProfileEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_COMMON_PROFILE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

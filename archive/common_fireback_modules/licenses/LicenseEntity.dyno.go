@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/License"
 	seeders "github.com/torabian/fireback/modules/licenses/seeders/License"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var licenseSeedersFs = &seeders.ViewsFs
@@ -89,10 +90,10 @@ type LicensePermissions struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
-	CapabilityId     *string                      `json:"capabilityId" yaml:"capabilityId"`
-	LinkedTo         *LicenseEntity               `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Capability       *fireback.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
+	CapabilityId     *string                    `json:"capabilityId" yaml:"capabilityId"`
+	LinkedTo         *LicenseEntity             `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func (x *LicensePermissions) RootObjectName() string {
@@ -157,21 +158,21 @@ type LicenseEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted  string           `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name              *string          `json:"name" yaml:"name"        `
-	SignedLicense     *string          `json:"signedLicense" yaml:"signedLicense"        `
-	ValidityStartDate workspaces.XDate `json:"validityStartDate" yaml:"validityStartDate"        `
+	UpdatedFormatted  string         `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name              *string        `json:"name" yaml:"name"        `
+	SignedLicense     *string        `json:"signedLicense" yaml:"signedLicense"        `
+	ValidityStartDate fireback.XDate `json:"validityStartDate" yaml:"validityStartDate"        `
 	// Date range is a complex date storage
-	ValidityStartDateDateInfo workspaces.XDateMetaData `json:"validityStartDateDateInfo" yaml:"validityStartDateDateInfo" sql:"-" gorm:"-"`
-	ValidityEndDate           workspaces.XDate         `json:"validityEndDate" yaml:"validityEndDate"        `
+	ValidityStartDateDateInfo fireback.XDateMetaData `json:"validityStartDateDateInfo" yaml:"validityStartDateDateInfo" sql:"-" gorm:"-"`
+	ValidityEndDate           fireback.XDate         `json:"validityEndDate" yaml:"validityEndDate"        `
 	// Date range is a complex date storage
-	ValidityEndDateDateInfo workspaces.XDateMetaData `json:"validityEndDateDateInfo" yaml:"validityEndDateDateInfo" sql:"-" gorm:"-"`
-	Permissions             []*LicensePermissions    `json:"permissions" yaml:"permissions"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Children                []*LicenseEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
-	LinkedTo                *LicenseEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
+	ValidityEndDateDateInfo fireback.XDateMetaData `json:"validityEndDateDateInfo" yaml:"validityEndDateDateInfo" sql:"-" gorm:"-"`
+	Permissions             []*LicensePermissions  `json:"permissions" yaml:"permissions"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Children                []*LicenseEntity       `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" yaml:"children,omitempty"`
+	LinkedTo                *LicenseEntity         `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func LicenseEntityStream(q workspaces.QueryDSL) (chan []*LicenseEntity, *workspaces.QueryResultMeta, error) {
+func LicenseEntityStream(q fireback.QueryDSL) (chan []*LicenseEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*LicenseEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -207,8 +208,8 @@ func (x *LicenseEntityList) Json() string {
 	}
 	return ""
 }
-func (x *LicenseEntityList) ToTree() *workspaces.TreeOperation[LicenseEntity] {
-	return workspaces.NewTreeOperation(
+func (x *LicenseEntityList) ToTree() *fireback.TreeOperation[LicenseEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *LicenseEntity) string {
 			if t.ParentId == nil {
@@ -233,75 +234,75 @@ var LICENSE_EVENTS = []string{
 }
 
 type LicenseFieldMap struct {
-	Name              workspaces.TranslatedString `yaml:"name"`
-	SignedLicense     workspaces.TranslatedString `yaml:"signedLicense"`
-	ValidityStartDate workspaces.TranslatedString `yaml:"validityStartDate"`
-	ValidityEndDate   workspaces.TranslatedString `yaml:"validityEndDate"`
-	Permissions       workspaces.TranslatedString `yaml:"permissions"`
+	Name              fireback.TranslatedString `yaml:"name"`
+	SignedLicense     fireback.TranslatedString `yaml:"signedLicense"`
+	ValidityStartDate fireback.TranslatedString `yaml:"validityStartDate"`
+	ValidityEndDate   fireback.TranslatedString `yaml:"validityEndDate"`
+	Permissions       fireback.TranslatedString `yaml:"permissions"`
 }
 
 var LicenseEntityMetaConfig map[string]int64 = map[string]int64{}
-var LicenseEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&LicenseEntity{}))
+var LicenseEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&LicenseEntity{}))
 
 func LicensePermissionsActionCreate(
 	dto *LicensePermissions,
-	query workspaces.QueryDSL,
-) (*LicensePermissions, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*LicensePermissions, *fireback.IError) {
 	dto.LinkerId = &query.LinkerId
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	return dto, nil
 }
 func LicensePermissionsActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	dto *LicensePermissions,
-) (*LicensePermissions, *workspaces.IError) {
+) (*LicensePermissions, *fireback.IError) {
 	dto.LinkerId = &query.LinkerId
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.UpdateColumns(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	return dto, nil
 }
 func LicensePermissionsActionGetOne(
-	query workspaces.QueryDSL,
-) (*LicensePermissions, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*LicensePermissions, *fireback.IError) {
 	refl := reflect.ValueOf(&LicensePermissions{})
-	item, err := workspaces.GetOneEntity[LicensePermissions](query, refl)
+	item, err := fireback.GetOneEntity[LicensePermissions](query, refl)
 	return item, err
 }
-func entityLicenseFormatter(dto *LicenseEntity, query workspaces.QueryDSL) {
+func entityLicenseFormatter(dto *LicenseEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	dto.ValidityStartDateDateInfo = workspaces.ComputeXDateMetaData(&dto.ValidityStartDate, query)
-	dto.ValidityEndDateDateInfo = workspaces.ComputeXDateMetaData(&dto.ValidityEndDate, query)
+	dto.ValidityStartDateDateInfo = fireback.ComputeXDateMetaData(&dto.ValidityStartDate, query)
+	dto.ValidityEndDateDateInfo = fireback.ComputeXDateMetaData(&dto.ValidityEndDate, query)
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func LicenseMockEntity() *LicenseEntity {
@@ -317,7 +318,7 @@ func LicenseMockEntity() *LicenseEntity {
 	}
 	return entity
 }
-func LicenseActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func LicenseActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -344,7 +345,7 @@ func LicenseActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func LicenseActionSeeder(query workspaces.QueryDSL, count int) {
+func LicenseActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -376,7 +377,7 @@ func LicenseActionSeederInit() *LicenseEntity {
 	}
 	return entity
 }
-func LicenseAssociationCreate(dto *LicenseEntity, query workspaces.QueryDSL) error {
+func LicenseAssociationCreate(dto *LicenseEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -384,13 +385,13 @@ func LicenseAssociationCreate(dto *LicenseEntity, query workspaces.QueryDSL) err
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func LicenseRelationContentCreate(dto *LicenseEntity, query workspaces.QueryDSL) error {
+func LicenseRelationContentCreate(dto *LicenseEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func LicenseRelationContentUpdate(dto *LicenseEntity, query workspaces.QueryDSL) error {
+func LicenseRelationContentUpdate(dto *LicenseEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func LicensePolyglotCreateHandler(dto *LicenseEntity, query workspaces.QueryDSL) {
+func LicensePolyglotCreateHandler(dto *LicenseEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -401,10 +402,10 @@ func LicensePolyglotCreateHandler(dto *LicenseEntity, query workspaces.QueryDSL)
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func LicenseValidator(dto *LicenseEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func LicenseValidator(dto *LicenseEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	if dto != nil && dto.Permissions != nil {
-		workspaces.AppendSliceErrors(dto.Permissions, isPatch, "permissions", err)
+		fireback.AppendSliceErrors(dto.Permissions, isPatch, "permissions", err)
 	}
 	return err
 }
@@ -453,21 +454,21 @@ And here is the actual object signature:
 	},
 }
 
-func LicenseEntityPreSanitize(dto *LicenseEntity, query workspaces.QueryDSL) {
+func LicenseEntityPreSanitize(dto *LicenseEntity, query fireback.QueryDSL) {
 }
-func LicenseEntityBeforeCreateAppend(dto *LicenseEntity, query workspaces.QueryDSL) {
+func LicenseEntityBeforeCreateAppend(dto *LicenseEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	LicenseRecursiveAddUniqueId(dto, query)
 }
-func LicenseRecursiveAddUniqueId(dto *LicenseEntity, query workspaces.QueryDSL) {
+func LicenseRecursiveAddUniqueId(dto *LicenseEntity, query fireback.QueryDSL) {
 	if dto.Permissions != nil && len(dto.Permissions) > 0 {
 		for index0 := range dto.Permissions {
 			if dto.Permissions[index0].UniqueId == "" {
-				dto.Permissions[index0].UniqueId = workspaces.UUID()
+				dto.Permissions[index0].UniqueId = fireback.UUID()
 			}
 		}
 	}
@@ -475,14 +476,16 @@ func LicenseRecursiveAddUniqueId(dto *LicenseEntity, query workspaces.QueryDSL) 
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func LicenseMultiInsert(dtos []*LicenseEntity, query workspaces.QueryDSL) ([]*LicenseEntity, *workspaces.IError) {
+func LicenseMultiInsert(dtos []*LicenseEntity, query fireback.QueryDSL) ([]*LicenseEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			LicenseEntityPreSanitize(dtos[index], query)
@@ -490,19 +493,19 @@ func LicenseMultiInsert(dtos []*LicenseEntity, query workspaces.QueryDSL) ([]*Li
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func LicenseActionBatchCreateFn(dtos []*LicenseEntity, query workspaces.QueryDSL) ([]*LicenseEntity, *workspaces.IError) {
+func LicenseActionBatchCreateFn(dtos []*LicenseEntity, query fireback.QueryDSL) ([]*LicenseEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*LicenseEntity{}
 		for _, item := range dtos {
@@ -516,12 +519,12 @@ func LicenseActionBatchCreateFn(dtos []*LicenseEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil
 }
-func LicenseDeleteEntireChildren(query workspaces.QueryDSL, dto *LicenseEntity) *workspaces.IError {
+func LicenseDeleteEntireChildren(query fireback.QueryDSL, dto *LicenseEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func LicenseActionCreateFn(dto *LicenseEntity, query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
+func LicenseActionCreateFn(dto *LicenseEntity, query fireback.QueryDSL) (*LicenseEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := LicenseValidator(dto, false); iError != nil {
 		return nil, iError
@@ -537,14 +540,14 @@ func LicenseActionCreateFn(dto *LicenseEntity, query workspaces.QueryDSL) (*Lice
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -552,27 +555,27 @@ func LicenseActionCreateFn(dto *LicenseEntity, query workspaces.QueryDSL) (*Lice
 	// 6. Fire the event into system
 	event.MustFire(LICENSE_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&LicenseEntity{}),
+		"entityKey": fireback.GetTypeString(&LicenseEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func LicenseActionGetOne(query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
+func LicenseActionGetOne(query fireback.QueryDSL) (*LicenseEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&LicenseEntity{})
-	item, err := workspaces.GetOneEntity[LicenseEntity](query, refl)
+	item, err := fireback.GetOneEntity[LicenseEntity](query, refl)
 	entityLicenseFormatter(item, query)
 	return item, err
 }
-func LicenseActionGetByWorkspace(query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
+func LicenseActionGetByWorkspace(query fireback.QueryDSL) (*LicenseEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&LicenseEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[LicenseEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[LicenseEntity](query, refl)
 	entityLicenseFormatter(item, query)
 	return item, err
 }
-func LicenseActionQuery(query workspaces.QueryDSL) ([]*LicenseEntity, *workspaces.QueryResultMeta, error) {
+func LicenseActionQuery(query fireback.QueryDSL) ([]*LicenseEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&LicenseEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[LicenseEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[LicenseEntity](query, refl)
 	for _, item := range items {
 		entityLicenseFormatter(item, query)
 	}
@@ -582,7 +585,7 @@ func LicenseActionQuery(query workspaces.QueryDSL) ([]*LicenseEntity, *workspace
 var licenseMemoryItems []*LicenseEntity = []*LicenseEntity{}
 
 func LicenseEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -612,7 +615,7 @@ func LicenseMemJoin(items []uint) []*LicenseEntity {
 	}
 	return res
 }
-func LicenseUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *LicenseEntity) (*LicenseEntity, *workspaces.IError) {
+func LicenseUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *LicenseEntity) (*LicenseEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = LICENSE_EVENT_UPDATED
 	LicenseEntityPreSanitize(fields, query)
@@ -626,7 +629,7 @@ func LicenseUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Licens
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	LicenseRelationContentUpdate(fields, query)
@@ -641,7 +644,7 @@ func LicenseUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Licens
 			Where(&LicensePermissions{LinkerId: &linkerId}).
 			Delete(&LicensePermissions{})
 		for _, newItem := range fields.Permissions {
-			newItem.UniqueId = workspaces.UUID()
+			newItem.UniqueId = fireback.UUID()
 			newItem.LinkerId = &linkerId
 			dbref.Create(&newItem)
 		}
@@ -656,13 +659,13 @@ func LicenseUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Licens
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func LicenseActionUpdateFn(query workspaces.QueryDSL, fields *LicenseEntity) (*LicenseEntity, *workspaces.IError) {
+func LicenseActionUpdateFn(query fireback.QueryDSL, fields *LicenseEntity) (*LicenseEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := LicenseValidator(fields, true); iError != nil {
@@ -672,11 +675,11 @@ func LicenseActionUpdateFn(query workspaces.QueryDSL, fields *LicenseEntity) (*L
 	// LicenseRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *LicenseEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = LicenseUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -684,7 +687,7 @@ func LicenseActionUpdateFn(query workspaces.QueryDSL, fields *LicenseEntity) (*L
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return LicenseUpdateExec(dbref, query, fields)
@@ -695,8 +698,8 @@ var LicenseWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire licenses ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
 		})
 		count, _ := LicenseActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -704,16 +707,16 @@ var LicenseWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func LicenseActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func LicenseActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&LicenseEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE}
-	return workspaces.RemoveEntity[LicenseEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_LICENSE_DELETE}
+	return fireback.RemoveEntity[LicenseEntity](query, refl)
 }
-func LicenseActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func LicenseActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[LicensePermissions]()
+		subCount, subErr := fireback.WipeCleanEntity[LicensePermissions]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'LicensePermissions'", subErr)
 			return count, subErr
@@ -722,7 +725,7 @@ func LicenseActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 		}
 	}
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[LicenseEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[LicenseEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'LicenseEntity'", subErr)
 			return count, subErr
@@ -733,11 +736,11 @@ func LicenseActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func LicenseActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[LicenseEntity]) (
-	*workspaces.BulkRecordRequest[LicenseEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[LicenseEntity]) (
+	*fireback.BulkRecordRequest[LicenseEntity], *fireback.IError,
 ) {
 	result := []*LicenseEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := LicenseActionUpdate(query, record)
@@ -752,7 +755,7 @@ func LicenseActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *LicenseEntity) Json() string {
 	if x != nil {
@@ -762,7 +765,7 @@ func (x *LicenseEntity) Json() string {
 	return ""
 }
 
-var LicenseEntityMeta = workspaces.TableMetaData{
+var LicenseEntityMeta = fireback.TableMetaData{
 	EntityName:    "License",
 	ExportKey:     "licenses",
 	TableNameInDb: "fb_license_entities",
@@ -772,23 +775,23 @@ var LicenseEntityMeta = workspaces.TableMetaData{
 }
 
 func LicenseActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[LicenseEntity](query, LicenseActionQuery, LicensePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[LicenseEntity](query, LicenseActionQuery, LicensePreloadRelations)
 }
 func LicenseActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[LicenseEntity](query, LicenseActionQuery, LicensePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[LicenseEntity](query, LicenseActionQuery, LicensePreloadRelations)
 }
 func LicenseActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content LicenseEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := LicenseActionCreate(&content, query)
@@ -837,7 +840,7 @@ var LicenseCommonCliFlags = []cli.Flag{
 		Usage:    `permissions`,
 	},
 }
-var LicenseCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var LicenseCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -908,16 +911,16 @@ var LicenseCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 		})
 		entity := &LicenseEntity{}
-		workspaces.PopulateInteractively(entity, c, LicenseCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, LicenseCommonInteractiveCliFlags)
 		if entity, err := LicenseActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -927,8 +930,8 @@ var LicenseUpdateCmd cli.Command = cli.Command{
 	Flags:   LicenseCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 		})
 		entity := CastLicenseFromCli(c)
 		if entity, err := LicenseActionUpdate(query, entity); err != nil {
@@ -972,8 +975,8 @@ func CastLicenseFromCli(c *cli.Context) *LicenseEntity {
 	return template
 }
 func LicenseSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		LicenseActionCreate,
 		reflect.ValueOf(&LicenseEntity{}).Elem(),
 		fsRef,
@@ -982,8 +985,8 @@ func LicenseSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func LicenseSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		LicenseActionCreate,
 		reflect.ValueOf(&LicenseEntity{}).Elem(),
 		licenseSeedersFs,
@@ -992,8 +995,8 @@ func LicenseSyncSeeders() {
 	)
 }
 func LicenseImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		LicenseActionCreate,
 		reflect.ValueOf(&LicenseEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1001,19 +1004,19 @@ func LicenseImportMocks() {
 		false,
 	)
 }
-func LicenseWriteQueryMock(ctx workspaces.MockQueryContext) {
+func LicenseWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := LicenseActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "License", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "License", result)
 	}
 }
-func LicensesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func LicensesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1025,7 +1028,7 @@ func LicensesActionQueryString(keyword string, page int) ([]string, *workspaces.
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := LicenseActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1051,8 +1054,8 @@ var LicenseImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 			})
 			if c.Bool("batch") {
 				LicenseActionSeederMultiple(query, c.Int("count"))
@@ -1075,7 +1078,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := LicenseActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1099,7 +1102,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of licenses, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]LicenseEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1108,7 +1111,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(licenseSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(licenseSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1121,7 +1124,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				LicenseActionCreate,
 				reflect.ValueOf(&LicenseEntity{}).Elem(),
 				licenseSeedersFs,
@@ -1133,7 +1136,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1146,7 +1149,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				LicenseActionCreate,
 				reflect.ValueOf(&LicenseEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1157,7 +1160,7 @@ var LicenseImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1166,7 +1169,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					LicenseEntityStream,
 					reflect.ValueOf(&LicenseEntity{}).Elem(),
 					c.String("file"),
@@ -1175,7 +1178,7 @@ var LicenseImportExportCommands = []cli.Command{
 					LicensePreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					LicenseActionQuery,
 					reflect.ValueOf(&LicenseEntity{}).Elem(),
 					c.String("file"),
@@ -1191,7 +1194,7 @@ var LicenseImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1201,12 +1204,12 @@ var LicenseImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				LicenseActionCreate,
 				reflect.ValueOf(&LicenseEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 				},
 				func() LicenseEntity {
 					v := CastLicenseFromCli(c)
@@ -1225,7 +1228,7 @@ var LicenseCliCommands []cli.Command = []cli.Command{
 	LicenseAskCmd,
 	LicenseCreateInteractiveCmd,
 	LicenseWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&LicenseEntity{}).Elem(), LicenseActionRemove),
 }
 
 func LicenseCliFn() cli.Command {
@@ -1244,14 +1247,14 @@ func LicenseCliFn() cli.Command {
 	}
 }
 
-var LICENSE_ACTION_TABLE = workspaces.Module3Action{
+var LICENSE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        LicenseActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			LicenseActionQuery,
 			security,
 			reflect.ValueOf(&LicenseEntity{}).Elem(),
@@ -1259,25 +1262,25 @@ var LICENSE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var LICENSE_ACTION_QUERY = workspaces.Module3Action{
+var LICENSE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/licenses",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, LicenseActionQuery)
+			fireback.HttpQueryEntity(c, LicenseActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         LicenseActionQuery,
 	ResponseEntity: &[]LicenseEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			LicenseActionQuery,
 			security,
@@ -1287,205 +1290,205 @@ var LICENSE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var LICENSE_ACTION_EXPORT = workspaces.Module3Action{
+var LICENSE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/licenses/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, LicenseActionExport)
+			fireback.HttpStreamFileChannel(c, LicenseActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         LicenseActionExport,
 	ResponseEntity: &[]LicenseEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
 }
-var LICENSE_ACTION_GET_ONE = workspaces.Module3Action{
+var LICENSE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/license/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, LicenseActionGetOne)
+			fireback.HttpGetEntity(c, LicenseActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         LicenseActionGetOne,
 	ResponseEntity: &LicenseEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
 }
-var LICENSE_ACTION_POST_ONE = workspaces.Module3Action{
+var LICENSE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new license",
 	Flags:         LicenseCommonCliFlags,
 	Method:        "POST",
 	Url:           "/license",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, LicenseActionCreate)
+			fireback.HttpPostEntity(c, LicenseActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, LicenseActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, LicenseActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         LicenseActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &LicenseEntity{},
 	ResponseEntity: &LicenseEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
 }
-var LICENSE_ACTION_PATCH = workspaces.Module3Action{
+var LICENSE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         LicenseCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/license",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, LicenseActionUpdate)
+			fireback.HttpUpdateEntity(c, LicenseActionUpdate)
 		},
 	},
 	Action:         LicenseActionUpdate,
 	RequestEntity:  &LicenseEntity{},
 	ResponseEntity: &LicenseEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
 }
-var LICENSE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var LICENSE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/licenses",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, LicenseActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, LicenseActionBulkUpdate)
 		},
 	},
 	Action:         LicenseActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[LicenseEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[LicenseEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[LicenseEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[LicenseEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicenseEntity",
 	},
 }
-var LICENSE_ACTION_DELETE = workspaces.Module3Action{
+var LICENSE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/license",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, LicenseActionRemove)
+			fireback.HttpRemoveEntity(c, LicenseActionRemove)
 		},
 	},
 	Action:         LicenseActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &LicenseEntity{},
 }
-var LICENSE_PERMISSIONS_ACTION_PATCH = workspaces.Module3Action{
+var LICENSE_PERMISSIONS_ACTION_PATCH = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/license/:linkerId/permissions/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpUpdateEntity(c, LicensePermissionsActionUpdate)
+			fireback.HttpUpdateEntity(c, LicensePermissionsActionUpdate)
 		},
 	},
 	Action:         LicensePermissionsActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &LicensePermissions{},
 	ResponseEntity: &LicensePermissions{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensePermissions",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicensePermissions",
 	},
 }
-var LICENSE_PERMISSIONS_ACTION_GET = workspaces.Module3Action{
+var LICENSE_PERMISSIONS_ACTION_GET = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/license/permissions/:linkerId/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpGetEntity(c, LicensePermissionsActionGetOne)
+			fireback.HttpGetEntity(c, LicensePermissionsActionGetOne)
 		},
 	},
 	Action:         LicensePermissionsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &LicensePermissions{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensePermissions",
 	},
 }
-var LICENSE_PERMISSIONS_ACTION_POST = workspaces.Module3Action{
+var LICENSE_PERMISSIONS_ACTION_POST = fireback.Module3Action{
 	Method: "POST",
 	Url:    "/license/:linkerId/permissions",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpPostEntity(c, LicensePermissionsActionCreate)
+			fireback.HttpPostEntity(c, LicensePermissionsActionCreate)
 		},
 	},
 	Action:         LicensePermissionsActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &LicensePermissions{},
 	ResponseEntity: &LicensePermissions{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensePermissions",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicensePermissions",
 	},
 }
@@ -1494,10 +1497,10 @@ var LICENSE_PERMISSIONS_ACTION_POST = workspaces.Module3Action{
  *	Override this function on LicenseEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendLicenseRouter = func(r *[]workspaces.Module3Action) {}
+var AppendLicenseRouter = func(r *[]fireback.Module3Action) {}
 
-func GetLicenseModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetLicenseModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		LICENSE_ACTION_QUERY,
 		LICENSE_ACTION_EXPORT,
 		LICENSE_ACTION_GET_ONE,
@@ -1514,34 +1517,34 @@ func GetLicenseModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_LICENSE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/license/delete",
 	Name:        "Delete license",
 }
-var PERM_ROOT_LICENSE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/license/create",
 	Name:        "Create license",
 }
-var PERM_ROOT_LICENSE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/license/update",
 	Name:        "Update license",
 }
-var PERM_ROOT_LICENSE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/license/query",
 	Name:        "Query license",
 }
-var PERM_ROOT_LICENSE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/license/*",
 	Name:        "Entire license actions (*)",
 }
-var ALL_LICENSE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_LICENSE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_LICENSE_DELETE,
 	PERM_ROOT_LICENSE_CREATE,
 	PERM_ROOT_LICENSE_UPDATE,
 	PERM_ROOT_LICENSE_QUERY,
 	PERM_ROOT_LICENSE,
 }
-var LicenseEntityBundle = workspaces.EntityBundle{
+var LicenseEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_LICENSE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

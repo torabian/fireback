@@ -72,7 +72,7 @@ export function useGetNotificationConfigByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.NotificationConfigEntity"],
+    [options, query, "*fireback.NotificationConfigEntity"],
     fn,
     {
       cacheTime: 1001,

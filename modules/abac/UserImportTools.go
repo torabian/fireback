@@ -14,15 +14,15 @@ import (
 	"fmt"
 
 	"github.com/schollz/progressbar/v3"
-	"github.com/torabian/fireback/modules/workspaces"
-	seeders "github.com/torabian/fireback/modules/workspaces/mocks/User"
+	"github.com/torabian/fireback/modules/fireback"
+	seeders "github.com/torabian/fireback/modules/fireback/mocks/User"
 )
 
-func ImportFromFs(req *ImportUserActionReqDto, q workspaces.QueryDSL) (*OkayResponseDto, *workspaces.IError) {
+func ImportFromFs(req *ImportUserActionReqDto, q fireback.QueryDSL) (*OkayResponseDto, *fireback.IError) {
 
-	var content workspaces.ContentImport[UserImportDto]
-	if err := workspaces.ReadYamlFileEmbed[workspaces.ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
-		return nil, workspaces.Create401Error(&AbacMessages.FileNotFound, []string{})
+	var content fireback.ContentImport[UserImportDto]
+	if err := fireback.ReadYamlFileEmbed[fireback.ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
+		return nil, fireback.Create401Error(&AbacMessages.FileNotFound, []string{})
 	}
 	bar := progressbar.Default(int64(len(content.Items)))
 	for _, item := range content.Items {
@@ -57,7 +57,7 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 		UniqueId: "ux_" + dto.Passports[0].Value,
 	}
 
-	passwordHashed, _ := workspaces.HashPassword(dto.Passports[0].Password)
+	passwordHashed, _ := fireback.HashPassword(dto.Passports[0].Password)
 	method, _ := DetectSignupMechanismOverValue(dto.Passports[0].Value)
 
 	passport := &PassportEntity{
@@ -68,22 +68,22 @@ func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *Workspace
 	}
 
 	// For now, it's random. But make sure later we have the track of workspaces
-	wid := workspaces.UUID()
+	wid := fireback.UUID()
 	workspace := &WorkspaceEntity{
 
 		UniqueId:    wid,
-		WorkspaceId: workspaces.NewString(wid),
-		LinkerId:    workspaces.NewString(ROOT_VAR),
-		ParentId:    workspaces.NewString(ROOT_VAR),
-		TypeId:      workspaces.NewString(ROOT_VAR),
+		WorkspaceId: fireback.NewString(wid),
+		LinkerId:    fireback.NewString(ROOT_VAR),
+		ParentId:    fireback.NewString(ROOT_VAR),
+		TypeId:      fireback.NewString(ROOT_VAR),
 	}
 
 	role := &RoleEntity{
-		UniqueId: "ROLE_WORKSPACE_" + workspaces.UUID(),
+		UniqueId: "ROLE_WORKSPACE_" + fireback.UUID(),
 
-		WorkspaceId: workspaces.NewString(workspace.UniqueId),
-		Capabilities: []*workspaces.CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS, Visibility: workspaces.NewString("A")},
+		WorkspaceId: fireback.NewString(workspace.UniqueId),
+		Capabilities: []*fireback.CapabilityEntity{
+			{UniqueId: ROOT_ALL_ACCESS, Visibility: fireback.NewString("A")},
 		},
 	}
 

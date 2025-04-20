@@ -1,6 +1,6 @@
 package licenses
 
-// func LicenseActionFromActivationKey(dto *LicenseFromActivationKeyDto, query workspaces.QueryDSL) (*LicenseEntity, *workspaces.IError) {
+// func LicenseActionFromActivationKey(dto *LicenseFromActivationKeyDto, query fireback.QueryDSL) (*LicenseEntity, *fireback.IError) {
 
 // 	license := &LicenseEntity{}
 
@@ -15,7 +15,7 @@ package licenses
 // 	}
 
 // 	if ak.Used {
-// 		return nil, workspaces.CreateIErrorString("USED_ACTIVATION_KEY", []string{}, 403)
+// 		return nil, fireback.CreateIErrorString("USED_ACTIVATION_KEY", []string{}, 403)
 // 	}
 
 // 	license.Title = ak.Plan.Title
@@ -25,7 +25,7 @@ package licenses
 // 	license.UserId = query.UserId
 
 // 	data := &LicenseConfigurationFile{}
-// 	workspaces.ReadYamlFile("licenses/fireback.yml", data)
+// 	fireback.ReadYamlFile("licenses/fireback.yml", data)
 
 // 	doc := LicenseContent{
 // 		Email:             "user@domain.com",

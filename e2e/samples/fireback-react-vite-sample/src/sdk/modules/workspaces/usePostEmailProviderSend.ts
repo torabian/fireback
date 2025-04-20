@@ -75,7 +75,7 @@ export function usePostEmailProviderSend(props?: UseRemoteQuery) {
           queryClient?.setQueryData<
             IResponseList<SendEmailWithProviderActionResDto>
           >(
-            "*workspaces.SendEmailWithProviderActionResDto",
+            "*fireback.SendEmailWithProviderActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

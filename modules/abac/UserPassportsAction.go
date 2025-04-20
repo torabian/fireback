@@ -1,18 +1,18 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
 
 	UserPassportsActionImp = UserPassportsAction
 }
-func UserPassportsAction(q workspaces.QueryDSL) ([]*UserPassportsActionResDto, *workspaces.QueryResultMeta, *workspaces.IError) {
+func UserPassportsAction(q fireback.QueryDSL) ([]*UserPassportsActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
 
 	passports := []PassportEntity{}
-	err := workspaces.GetRef(q).Debug().Where(PassportEntity{UserId: workspaces.NewString(q.UserId)}).Find(&passports).Error
+	err := fireback.GetRef(q).Debug().Where(PassportEntity{UserId: fireback.NewString(q.UserId)}).Find(&passports).Error
 	if err != nil {
-		return nil, nil, workspaces.CastToIError(err)
+		return nil, nil, fireback.CastToIError(err)
 	}
 
 	result := []*UserPassportsActionResDto{}

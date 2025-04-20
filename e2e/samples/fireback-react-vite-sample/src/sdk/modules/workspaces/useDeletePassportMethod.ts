@@ -58,10 +58,10 @@ export function useDeletePassportMethod(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.PassportMethodEntity",
+            "*fireback.PassportMethodEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.PassportMethodEntity");
+          queryClient?.invalidateQueries("*fireback.PassportMethodEntity");
           resolve(response);
         },
         onError(error: any) {

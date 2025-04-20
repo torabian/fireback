@@ -75,7 +75,7 @@ export function usePostWorkspacePassportCheck(props?: UseRemoteQuery) {
           queryClient?.setQueryData<
             IResponseList<CheckClassicPassportActionResDto>
           >(
-            "*workspaces.CheckClassicPassportActionResDto",
+            "*fireback.CheckClassicPassportActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

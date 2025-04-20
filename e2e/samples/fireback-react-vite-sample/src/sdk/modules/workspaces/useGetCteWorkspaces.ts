@@ -53,7 +53,7 @@ export function useGetCteWorkspaces({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<WorkspaceEntity>, any>(
-    ["*workspaces.WorkspaceEntity", computedOptions, query],
+    ["*fireback.WorkspaceEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetCteWorkspaces({
     keyExtractor: (item: WorkspaceEntity) => item.uniqueId,
   };
 }
-useGetCteWorkspaces.UKEY = "*workspaces.WorkspaceEntity";
+useGetCteWorkspaces.UKEY = "*fireback.WorkspaceEntity";

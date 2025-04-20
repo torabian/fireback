@@ -70,7 +70,7 @@ export function usePatchTimezoneGroup(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<TimezoneGroupEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.TimezoneGroupEntity",
+            "*fireback.TimezoneGroupEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

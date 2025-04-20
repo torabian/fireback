@@ -1,11 +1,11 @@
-package workspaces
+package fireback
 
-import fibreackc "github.com/torabian/fireback/modules/workspaces/codegen/fireback-c"
+import fibreackc "github.com/torabian/fireback/modules/fireback/codegen/fireback-c"
 
 func CComputedField(field *Module3Field, isWorkspace bool) string {
 	prefix := ""
 	if !isWorkspace {
-		prefix = "workspaces."
+		prefix = "fireback."
 	}
 	switch field.Type {
 	case "string", "text", "html":

@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -16,13 +19,11 @@ import (
 	metas "github.com/torabian/fireback/modules/currency/metas"
 	mocks "github.com/torabian/fireback/modules/currency/mocks/Currency"
 	seeders "github.com/torabian/fireback/modules/currency/seeders/Currency"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var currencySeedersFs = &seeders.ViewsFs
@@ -102,7 +103,7 @@ type CurrencyEntity struct {
 	LinkedTo         *CurrencyEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func CurrencyEntityStream(q workspaces.QueryDSL) (chan []*CurrencyEntity, *workspaces.QueryResultMeta, error) {
+func CurrencyEntityStream(q fireback.QueryDSL) (chan []*CurrencyEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*CurrencyEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -138,8 +139,8 @@ func (x *CurrencyEntityList) Json() string {
 	}
 	return ""
 }
-func (x *CurrencyEntityList) ToTree() *workspaces.TreeOperation[CurrencyEntity] {
-	return workspaces.NewTreeOperation(
+func (x *CurrencyEntityList) ToTree() *fireback.TreeOperation[CurrencyEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *CurrencyEntity) string {
 			if t.ParentId == nil {
@@ -164,17 +165,17 @@ var CURRENCY_EVENTS = []string{
 }
 
 type CurrencyFieldMap struct {
-	Symbol        workspaces.TranslatedString `yaml:"symbol"`
-	Name          workspaces.TranslatedString `yaml:"name"`
-	SymbolNative  workspaces.TranslatedString `yaml:"symbolNative"`
-	DecimalDigits workspaces.TranslatedString `yaml:"decimalDigits"`
-	Rounding      workspaces.TranslatedString `yaml:"rounding"`
-	Code          workspaces.TranslatedString `yaml:"code"`
-	NamePlural    workspaces.TranslatedString `yaml:"namePlural"`
+	Symbol        fireback.TranslatedString `yaml:"symbol"`
+	Name          fireback.TranslatedString `yaml:"name"`
+	SymbolNative  fireback.TranslatedString `yaml:"symbolNative"`
+	DecimalDigits fireback.TranslatedString `yaml:"decimalDigits"`
+	Rounding      fireback.TranslatedString `yaml:"rounding"`
+	Code          fireback.TranslatedString `yaml:"code"`
+	NamePlural    fireback.TranslatedString `yaml:"namePlural"`
 }
 
 var CurrencyEntityMetaConfig map[string]int64 = map[string]int64{}
-var CurrencyEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&CurrencyEntity{}))
+var CurrencyEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&CurrencyEntity{}))
 
 type CurrencyEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
@@ -182,15 +183,15 @@ type CurrencyEntityPolyglot struct {
 	Name       string `yaml:"name,omitempty" json:"name,omitempty"`
 }
 
-func entityCurrencyFormatter(dto *CurrencyEntity, query workspaces.QueryDSL) {
+func entityCurrencyFormatter(dto *CurrencyEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func CurrencyMockEntity() *CurrencyEntity {
@@ -211,7 +212,7 @@ func CurrencyMockEntity() *CurrencyEntity {
 	}
 	return entity
 }
-func CurrencyActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func CurrencyActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -238,7 +239,7 @@ func CurrencyActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func CurrencyActionSeeder(query workspaces.QueryDSL, count int) {
+func CurrencyActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -282,7 +283,7 @@ func CurrencyActionSeederInit() *CurrencyEntity {
 	}
 	return entity
 }
-func CurrencyAssociationCreate(dto *CurrencyEntity, query workspaces.QueryDSL) error {
+func CurrencyAssociationCreate(dto *CurrencyEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -290,17 +291,17 @@ func CurrencyAssociationCreate(dto *CurrencyEntity, query workspaces.QueryDSL) e
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func CurrencyRelationContentCreate(dto *CurrencyEntity, query workspaces.QueryDSL) error {
+func CurrencyRelationContentCreate(dto *CurrencyEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func CurrencyRelationContentUpdate(dto *CurrencyEntity, query workspaces.QueryDSL) error {
+func CurrencyRelationContentUpdate(dto *CurrencyEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func CurrencyPolyglotCreateHandler(dto *CurrencyEntity, query workspaces.QueryDSL) {
+func CurrencyPolyglotCreateHandler(dto *CurrencyEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &CurrencyEntityPolyglot{}, query)
+	fireback.PolyglotCreateHandler(dto, &CurrencyEntityPolyglot{}, query)
 }
 
 /**
@@ -308,8 +309,8 @@ func CurrencyPolyglotCreateHandler(dto *CurrencyEntity, query workspaces.QueryDS
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func CurrencyValidator(dto *CurrencyEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func CurrencyValidator(dto *CurrencyEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -359,29 +360,31 @@ And here is the actual object signature:
 	},
 }
 
-func CurrencyEntityPreSanitize(dto *CurrencyEntity, query workspaces.QueryDSL) {
+func CurrencyEntityPreSanitize(dto *CurrencyEntity, query fireback.QueryDSL) {
 }
-func CurrencyEntityBeforeCreateAppend(dto *CurrencyEntity, query workspaces.QueryDSL) {
+func CurrencyEntityBeforeCreateAppend(dto *CurrencyEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	CurrencyRecursiveAddUniqueId(dto, query)
 }
-func CurrencyRecursiveAddUniqueId(dto *CurrencyEntity, query workspaces.QueryDSL) {
+func CurrencyRecursiveAddUniqueId(dto *CurrencyEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func CurrencyMultiInsert(dtos []*CurrencyEntity, query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.IError) {
+func CurrencyMultiInsert(dtos []*CurrencyEntity, query fireback.QueryDSL) ([]*CurrencyEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			CurrencyEntityPreSanitize(dtos[index], query)
@@ -389,19 +392,19 @@ func CurrencyMultiInsert(dtos []*CurrencyEntity, query workspaces.QueryDSL) ([]*
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func CurrencyActionBatchCreateFn(dtos []*CurrencyEntity, query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.IError) {
+func CurrencyActionBatchCreateFn(dtos []*CurrencyEntity, query fireback.QueryDSL) ([]*CurrencyEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*CurrencyEntity{}
 		for _, item := range dtos {
@@ -415,12 +418,12 @@ func CurrencyActionBatchCreateFn(dtos []*CurrencyEntity, query workspaces.QueryD
 	}
 	return dtos, nil
 }
-func CurrencyDeleteEntireChildren(query workspaces.QueryDSL, dto *CurrencyEntity) *workspaces.IError {
+func CurrencyDeleteEntireChildren(query fireback.QueryDSL, dto *CurrencyEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func CurrencyActionCreateFn(dto *CurrencyEntity, query workspaces.QueryDSL) (*CurrencyEntity, *workspaces.IError) {
+func CurrencyActionCreateFn(dto *CurrencyEntity, query fireback.QueryDSL) (*CurrencyEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := CurrencyValidator(dto, false); iError != nil {
 		return nil, iError
@@ -436,14 +439,14 @@ func CurrencyActionCreateFn(dto *CurrencyEntity, query workspaces.QueryDSL) (*Cu
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -451,27 +454,27 @@ func CurrencyActionCreateFn(dto *CurrencyEntity, query workspaces.QueryDSL) (*Cu
 	// 6. Fire the event into system
 	event.MustFire(CURRENCY_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&CurrencyEntity{}),
+		"entityKey": fireback.GetTypeString(&CurrencyEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func CurrencyActionGetOne(query workspaces.QueryDSL) (*CurrencyEntity, *workspaces.IError) {
+func CurrencyActionGetOne(query fireback.QueryDSL) (*CurrencyEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&CurrencyEntity{})
-	item, err := workspaces.GetOneEntity[CurrencyEntity](query, refl)
+	item, err := fireback.GetOneEntity[CurrencyEntity](query, refl)
 	entityCurrencyFormatter(item, query)
 	return item, err
 }
-func CurrencyActionGetByWorkspace(query workspaces.QueryDSL) (*CurrencyEntity, *workspaces.IError) {
+func CurrencyActionGetByWorkspace(query fireback.QueryDSL) (*CurrencyEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&CurrencyEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[CurrencyEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[CurrencyEntity](query, refl)
 	entityCurrencyFormatter(item, query)
 	return item, err
 }
-func CurrencyActionQuery(query workspaces.QueryDSL) ([]*CurrencyEntity, *workspaces.QueryResultMeta, error) {
+func CurrencyActionQuery(query fireback.QueryDSL) ([]*CurrencyEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&CurrencyEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[CurrencyEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[CurrencyEntity](query, refl)
 	for _, item := range items {
 		entityCurrencyFormatter(item, query)
 	}
@@ -481,7 +484,7 @@ func CurrencyActionQuery(query workspaces.QueryDSL) ([]*CurrencyEntity, *workspa
 var currencyMemoryItems []*CurrencyEntity = []*CurrencyEntity{}
 
 func CurrencyEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -511,7 +514,7 @@ func CurrencyMemJoin(items []uint) []*CurrencyEntity {
 	}
 	return res
 }
-func CurrencyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *CurrencyEntity) (*CurrencyEntity, *workspaces.IError) {
+func CurrencyUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *CurrencyEntity) (*CurrencyEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = CURRENCY_EVENT_UPDATED
 	CurrencyEntityPreSanitize(fields, query)
@@ -525,7 +528,7 @@ func CurrencyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Curre
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	CurrencyRelationContentUpdate(fields, query)
@@ -544,13 +547,13 @@ func CurrencyUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Curre
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func CurrencyActionUpdateFn(query workspaces.QueryDSL, fields *CurrencyEntity) (*CurrencyEntity, *workspaces.IError) {
+func CurrencyActionUpdateFn(query fireback.QueryDSL, fields *CurrencyEntity) (*CurrencyEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := CurrencyValidator(fields, true); iError != nil {
@@ -560,11 +563,11 @@ func CurrencyActionUpdateFn(query workspaces.QueryDSL, fields *CurrencyEntity) (
 	// CurrencyRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *CurrencyEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = CurrencyUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -572,7 +575,7 @@ func CurrencyActionUpdateFn(query workspaces.QueryDSL, fields *CurrencyEntity) (
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return CurrencyUpdateExec(dbref, query, fields)
@@ -583,8 +586,8 @@ var CurrencyWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire currencies ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
 		})
 		count, _ := CurrencyActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -592,16 +595,16 @@ var CurrencyWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func CurrencyActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func CurrencyActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&CurrencyEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE}
-	return workspaces.RemoveEntity[CurrencyEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_CURRENCY_DELETE}
+	return fireback.RemoveEntity[CurrencyEntity](query, refl)
 }
-func CurrencyActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func CurrencyActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[CurrencyEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[CurrencyEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'CurrencyEntity'", subErr)
 			return count, subErr
@@ -612,11 +615,11 @@ func CurrencyActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func CurrencyActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[CurrencyEntity]) (
-	*workspaces.BulkRecordRequest[CurrencyEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[CurrencyEntity]) (
+	*fireback.BulkRecordRequest[CurrencyEntity], *fireback.IError,
 ) {
 	result := []*CurrencyEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := CurrencyActionUpdate(query, record)
@@ -631,7 +634,7 @@ func CurrencyActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *CurrencyEntity) Json() string {
 	if x != nil {
@@ -641,7 +644,7 @@ func (x *CurrencyEntity) Json() string {
 	return ""
 }
 
-var CurrencyEntityMeta = workspaces.TableMetaData{
+var CurrencyEntityMeta = fireback.TableMetaData{
 	EntityName:    "Currency",
 	ExportKey:     "currencies",
 	TableNameInDb: "fb_currency_entities",
@@ -651,23 +654,23 @@ var CurrencyEntityMeta = workspaces.TableMetaData{
 }
 
 func CurrencyActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[CurrencyEntity](query, CurrencyActionQuery, CurrencyPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[CurrencyEntity](query, CurrencyActionQuery, CurrencyPreloadRelations)
 }
 func CurrencyActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[CurrencyEntity](query, CurrencyActionQuery, CurrencyPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[CurrencyEntity](query, CurrencyActionQuery, CurrencyPreloadRelations)
 }
 func CurrencyActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content CurrencyEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := CurrencyActionCreate(&content, query)
@@ -726,7 +729,7 @@ var CurrencyCommonCliFlags = []cli.Flag{
 		Usage:    `namePlural`,
 	},
 }
-var CurrencyCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var CurrencyCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "symbol",
 		StructField: "Symbol",
@@ -847,16 +850,16 @@ var CurrencyCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
 		})
 		entity := &CurrencyEntity{}
-		workspaces.PopulateInteractively(entity, c, CurrencyCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, CurrencyCommonInteractiveCliFlags)
 		if entity, err := CurrencyActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -866,8 +869,8 @@ var CurrencyUpdateCmd cli.Command = cli.Command{
 	Flags:   CurrencyCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
 		})
 		entity := CastCurrencyFromCli(c)
 		if entity, err := CurrencyActionUpdate(query, entity); err != nil {
@@ -923,8 +926,8 @@ func CastCurrencyFromCli(c *cli.Context) *CurrencyEntity {
 	return template
 }
 func CurrencySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		CurrencyActionCreate,
 		reflect.ValueOf(&CurrencyEntity{}).Elem(),
 		fsRef,
@@ -933,8 +936,8 @@ func CurrencySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func CurrencySyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		CurrencyActionCreate,
 		reflect.ValueOf(&CurrencyEntity{}).Elem(),
 		currencySeedersFs,
@@ -943,8 +946,8 @@ func CurrencySyncSeeders() {
 	)
 }
 func CurrencyImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		CurrencyActionCreate,
 		reflect.ValueOf(&CurrencyEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -952,19 +955,19 @@ func CurrencyImportMocks() {
 		false,
 	)
 }
-func CurrencyWriteQueryMock(ctx workspaces.MockQueryContext) {
+func CurrencyWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := CurrencyActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "Currency", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "Currency", result)
 	}
 }
-func CurrenciesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func CurrenciesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -976,7 +979,7 @@ func CurrenciesActionQueryString(keyword string, page int) ([]string, *workspace
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := CurrencyActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1002,8 +1005,8 @@ var CurrencyImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
 			})
 			if c.Bool("batch") {
 				CurrencyActionSeederMultiple(query, c.Int("count"))
@@ -1026,7 +1029,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := CurrencyActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1050,7 +1053,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of currencies, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]CurrencyEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1059,7 +1062,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(currencySeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(currencySeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1072,7 +1075,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				CurrencyActionCreate,
 				reflect.ValueOf(&CurrencyEntity{}).Elem(),
 				currencySeedersFs,
@@ -1084,7 +1087,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1097,7 +1100,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				CurrencyActionCreate,
 				reflect.ValueOf(&CurrencyEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1108,7 +1111,7 @@ var CurrencyImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1117,7 +1120,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					CurrencyEntityStream,
 					reflect.ValueOf(&CurrencyEntity{}).Elem(),
 					c.String("file"),
@@ -1126,7 +1129,7 @@ var CurrencyImportExportCommands = []cli.Command{
 					CurrencyPreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					CurrencyActionQuery,
 					reflect.ValueOf(&CurrencyEntity{}).Elem(),
 					c.String("file"),
@@ -1142,7 +1145,7 @@ var CurrencyImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1152,12 +1155,12 @@ var CurrencyImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				CurrencyActionCreate,
 				reflect.ValueOf(&CurrencyEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
 				},
 				func() CurrencyEntity {
 					v := CastCurrencyFromCli(c)
@@ -1176,7 +1179,7 @@ var CurrencyCliCommands []cli.Command = []cli.Command{
 	CurrencyAskCmd,
 	CurrencyCreateInteractiveCmd,
 	CurrencyWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&CurrencyEntity{}).Elem(), CurrencyActionRemove),
 }
 
 func CurrencyCliFn() cli.Command {
@@ -1196,14 +1199,14 @@ func CurrencyCliFn() cli.Command {
 	}
 }
 
-var CURRENCY_ACTION_TABLE = workspaces.Module3Action{
+var CURRENCY_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        CurrencyActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			CurrencyActionQuery,
 			security,
 			reflect.ValueOf(&CurrencyEntity{}).Elem(),
@@ -1211,25 +1214,25 @@ var CURRENCY_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var CURRENCY_ACTION_QUERY = workspaces.Module3Action{
+var CURRENCY_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/currencies",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, CurrencyActionQuery)
+			fireback.HttpQueryEntity(c, CurrencyActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         CurrencyActionQuery,
 	ResponseEntity: &[]CurrencyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			CurrencyActionQuery,
 			security,
@@ -1239,138 +1242,138 @@ var CURRENCY_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var CURRENCY_ACTION_EXPORT = workspaces.Module3Action{
+var CURRENCY_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/currencies/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, CurrencyActionExport)
+			fireback.HttpStreamFileChannel(c, CurrencyActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         CurrencyActionExport,
 	ResponseEntity: &[]CurrencyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_GET_ONE = workspaces.Module3Action{
+var CURRENCY_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/currency/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, CurrencyActionGetOne)
+			fireback.HttpGetEntity(c, CurrencyActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         CurrencyActionGetOne,
 	ResponseEntity: &CurrencyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_POST_ONE = workspaces.Module3Action{
+var CURRENCY_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new currency",
 	Flags:         CurrencyCommonCliFlags,
 	Method:        "POST",
 	Url:           "/currency",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, CurrencyActionCreate)
+			fireback.HttpPostEntity(c, CurrencyActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, CurrencyActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, CurrencyActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         CurrencyActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &CurrencyEntity{},
 	ResponseEntity: &CurrencyEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_PATCH = workspaces.Module3Action{
+var CURRENCY_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         CurrencyCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/currency",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, CurrencyActionUpdate)
+			fireback.HttpUpdateEntity(c, CurrencyActionUpdate)
 		},
 	},
 	Action:         CurrencyActionUpdate,
 	RequestEntity:  &CurrencyEntity{},
 	ResponseEntity: &CurrencyEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_PATCH_BULK = workspaces.Module3Action{
+var CURRENCY_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/currencies",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, CurrencyActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, CurrencyActionBulkUpdate)
 		},
 	},
 	Action:         CurrencyActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[CurrencyEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[CurrencyEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[CurrencyEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[CurrencyEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "CurrencyEntity",
 	},
 }
-var CURRENCY_ACTION_DELETE = workspaces.Module3Action{
+var CURRENCY_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/currency",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CURRENCY_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, CurrencyActionRemove)
+			fireback.HttpRemoveEntity(c, CurrencyActionRemove)
 		},
 	},
 	Action:         CurrencyActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &CurrencyEntity{},
 }
 
@@ -1378,10 +1381,10 @@ var CURRENCY_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on CurrencyEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendCurrencyRouter = func(r *[]workspaces.Module3Action) {}
+var AppendCurrencyRouter = func(r *[]fireback.Module3Action) {}
 
-func GetCurrencyModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetCurrencyModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		CURRENCY_ACTION_QUERY,
 		CURRENCY_ACTION_EXPORT,
 		CURRENCY_ACTION_GET_ONE,
@@ -1395,34 +1398,34 @@ func GetCurrencyModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_CURRENCY_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_CURRENCY_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/currency/currency/delete",
 	Name:        "Delete currency",
 }
-var PERM_ROOT_CURRENCY_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_CURRENCY_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/currency/currency/create",
 	Name:        "Create currency",
 }
-var PERM_ROOT_CURRENCY_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_CURRENCY_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/currency/currency/update",
 	Name:        "Update currency",
 }
-var PERM_ROOT_CURRENCY_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_CURRENCY_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/currency/currency/query",
 	Name:        "Query currency",
 }
-var PERM_ROOT_CURRENCY = workspaces.PermissionInfo{
+var PERM_ROOT_CURRENCY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/currency/currency/*",
 	Name:        "Entire currency actions (*)",
 }
-var ALL_CURRENCY_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_CURRENCY_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_CURRENCY_DELETE,
 	PERM_ROOT_CURRENCY_CREATE,
 	PERM_ROOT_CURRENCY_UPDATE,
 	PERM_ROOT_CURRENCY_QUERY,
 	PERM_ROOT_CURRENCY,
 }
-var CurrencyEntityBundle = workspaces.EntityBundle{
+var CurrencyEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_CURRENCY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

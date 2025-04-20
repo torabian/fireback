@@ -53,7 +53,7 @@ export function useGetRegionalContents({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<RegionalContentEntity>, any>(
-    ["*workspaces.RegionalContentEntity", computedOptions, query],
+    ["*fireback.RegionalContentEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetRegionalContents({
     keyExtractor: (item: RegionalContentEntity) => item.uniqueId,
   };
 }
-useGetRegionalContents.UKEY = "*workspaces.RegionalContentEntity";
+useGetRegionalContents.UKEY = "*fireback.RegionalContentEntity";

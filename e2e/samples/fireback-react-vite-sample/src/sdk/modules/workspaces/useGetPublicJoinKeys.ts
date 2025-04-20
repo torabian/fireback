@@ -53,7 +53,7 @@ export function useGetPublicJoinKeys({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<PublicJoinKeyEntity>, any>(
-    ["*workspaces.PublicJoinKeyEntity", computedOptions, query],
+    ["*fireback.PublicJoinKeyEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetPublicJoinKeys({
     keyExtractor: (item: PublicJoinKeyEntity) => item.uniqueId,
   };
 }
-useGetPublicJoinKeys.UKEY = "*workspaces.PublicJoinKeyEntity";
+useGetPublicJoinKeys.UKEY = "*fireback.PublicJoinKeyEntity";

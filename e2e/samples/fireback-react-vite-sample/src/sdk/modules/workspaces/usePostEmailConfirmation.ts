@@ -70,7 +70,7 @@ export function usePostEmailConfirmation(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<EmailConfirmationEntity>) {
           queryClient?.setQueryData<IResponseList<EmailConfirmationEntity>>(
-            "*workspaces.EmailConfirmationEntity",
+            "*fireback.EmailConfirmationEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

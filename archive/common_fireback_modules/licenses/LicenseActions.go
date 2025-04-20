@@ -1,16 +1,16 @@
 package licenses
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func LicenseActionCreate(
-	dto *LicenseEntity, query workspaces.QueryDSL,
-) (*LicenseEntity, *workspaces.IError) {
+	dto *LicenseEntity, query fireback.QueryDSL,
+) (*LicenseEntity, *fireback.IError) {
 	return LicenseActionCreateFn(dto, query)
 }
 
 func LicenseActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *LicenseEntity,
-) (*LicenseEntity, *workspaces.IError) {
+) (*LicenseEntity, *fireback.IError) {
 	return LicenseActionUpdateFn(query, fields)
 }

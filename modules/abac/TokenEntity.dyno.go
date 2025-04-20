@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/Token"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/Token"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var tokenSeedersFs = &seeders.ViewsFs
@@ -32,13 +33,13 @@ func ResetTokenSeeders(fs *embed.FS) {
 }
 
 type TokenEntityQs struct {
-	User       workspaces.QueriableField `cli:"user" table:"token" column:"user" qs:"user"`
-	Token      workspaces.QueriableField `cli:"token" table:"token" column:"token" qs:"token"`
-	ValidUntil workspaces.QueriableField `cli:"valid-until" table:"token" column:"valid_until" qs:"validUntil"`
+	User       fireback.QueriableField `cli:"user" table:"token" column:"user" qs:"user"`
+	Token      fireback.QueriableField `cli:"token" table:"token" column:"token" qs:"token"`
+	ValidUntil fireback.QueriableField `cli:"valid-until" table:"token" column:"valid_until" qs:"validUntil"`
 }
 
 func (x *TokenEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var TokenQsFlags = []cli.Flag{
@@ -61,20 +62,20 @@ type TokenEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -84,11 +85,11 @@ type TokenEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -114,15 +115,15 @@ type TokenEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User             *UserEntity           `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Token            string                `json:"token" xml:"token" yaml:"token"        `
-	ValidUntil       *workspaces.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
-	Children         []*TokenEntity        `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *TokenEntity          `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string              `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	User             *UserEntity         `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Token            string              `json:"token" xml:"token" yaml:"token"        `
+	ValidUntil       *fireback.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
+	Children         []*TokenEntity      `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo         *TokenEntity        `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func TokenEntityStream(q workspaces.QueryDSL) (chan []*TokenEntity, *workspaces.QueryResultMeta, error) {
+func TokenEntityStream(q fireback.QueryDSL) (chan []*TokenEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*TokenEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -158,8 +159,8 @@ func (x *TokenEntityList) Json() string {
 	}
 	return ""
 }
-func (x *TokenEntityList) ToTree() *workspaces.TreeOperation[TokenEntity] {
-	return workspaces.NewTreeOperation(
+func (x *TokenEntityList) ToTree() *fireback.TreeOperation[TokenEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *TokenEntity) string {
 			if !t.ParentId.Valid {
@@ -176,15 +177,15 @@ func (x *TokenEntityList) ToTree() *workspaces.TreeOperation[TokenEntity] {
 var TokenPreloadRelations []string = []string{}
 
 type tokenActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *TokenEntity) (*TokenEntity, *workspaces.IError)
-	Create         func(dto *TokenEntity, query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError)
-	Upsert         func(dto *TokenEntity, query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *TokenEntity) (*TokenEntity, *fireback.IError)
+	Create         func(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
+	Upsert         func(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
 	SeederInit     func() *TokenEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*TokenEntity, query workspaces.QueryDSL) ([]*TokenEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*TokenEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*TokenEntity, *fireback.QueryResultMeta, error)
 }
 
 var TokenActions tokenActionsSig = tokenActionsSig{
@@ -199,7 +200,7 @@ var TokenActions tokenActionsSig = tokenActionsSig{
 	Query:          TokenActionQueryFn,
 }
 
-func TokenActionUpsertFn(dto *TokenEntity, query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError) {
+func TokenActionUpsertFn(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -213,26 +214,26 @@ var TOKEN_EVENTS = []string{
 }
 
 type TokenFieldMap struct {
-	User       workspaces.TranslatedString `yaml:"user"`
-	Token      workspaces.TranslatedString `yaml:"token"`
-	ValidUntil workspaces.TranslatedString `yaml:"validUntil"`
+	User       fireback.TranslatedString `yaml:"user"`
+	Token      fireback.TranslatedString `yaml:"token"`
+	ValidUntil fireback.TranslatedString `yaml:"validUntil"`
 }
 
 var TokenEntityMetaConfig map[string]int64 = map[string]int64{}
-var TokenEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&TokenEntity{}))
+var TokenEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&TokenEntity{}))
 
-func entityTokenFormatter(dto *TokenEntity, query workspaces.QueryDSL) {
+func entityTokenFormatter(dto *TokenEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func TokenActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func TokenActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -259,7 +260,7 @@ func TokenActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func TokenActionSeeder(query workspaces.QueryDSL, count int) {
+func TokenActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -285,7 +286,7 @@ func TokenActionSeederInitFn() *TokenEntity {
 	entity := &TokenEntity{}
 	return entity
 }
-func TokenAssociationCreate(dto *TokenEntity, query workspaces.QueryDSL) error {
+func TokenAssociationCreate(dto *TokenEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -293,13 +294,13 @@ func TokenAssociationCreate(dto *TokenEntity, query workspaces.QueryDSL) error {
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func TokenRelationContentCreate(dto *TokenEntity, query workspaces.QueryDSL) error {
+func TokenRelationContentCreate(dto *TokenEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func TokenRelationContentUpdate(dto *TokenEntity, query workspaces.QueryDSL) error {
+func TokenRelationContentUpdate(dto *TokenEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func TokenPolyglotUpdateHandler(dto *TokenEntity, query workspaces.QueryDSL) {
+func TokenPolyglotUpdateHandler(dto *TokenEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -310,8 +311,8 @@ func TokenPolyglotUpdateHandler(dto *TokenEntity, query workspaces.QueryDSL) {
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func TokenValidator(dto *TokenEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func TokenValidator(dto *TokenEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -357,29 +358,31 @@ And here is the actual object signature:
 	},
 }
 
-func TokenEntityPreSanitize(dto *TokenEntity, query workspaces.QueryDSL) {
+func TokenEntityPreSanitize(dto *TokenEntity, query fireback.QueryDSL) {
 }
-func TokenEntityBeforeCreateAppend(dto *TokenEntity, query workspaces.QueryDSL) {
+func TokenEntityBeforeCreateAppend(dto *TokenEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	TokenRecursiveAddUniqueId(dto, query)
 }
-func TokenRecursiveAddUniqueId(dto *TokenEntity, query workspaces.QueryDSL) {
+func TokenRecursiveAddUniqueId(dto *TokenEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func TokenMultiInsertFn(dtos []*TokenEntity, query workspaces.QueryDSL) ([]*TokenEntity, *workspaces.IError) {
+func TokenMultiInsertFn(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			TokenEntityPreSanitize(dtos[index], query)
@@ -387,19 +390,19 @@ func TokenMultiInsertFn(dtos []*TokenEntity, query workspaces.QueryDSL) ([]*Toke
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func TokenActionBatchCreateFn(dtos []*TokenEntity, query workspaces.QueryDSL) ([]*TokenEntity, *workspaces.IError) {
+func TokenActionBatchCreateFn(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*TokenEntity{}
 		for _, item := range dtos {
@@ -413,12 +416,12 @@ func TokenActionBatchCreateFn(dtos []*TokenEntity, query workspaces.QueryDSL) ([
 	}
 	return dtos, nil
 }
-func TokenDeleteEntireChildren(query workspaces.QueryDSL, dto *TokenEntity) *workspaces.IError {
+func TokenDeleteEntireChildren(query fireback.QueryDSL, dto *TokenEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func TokenActionCreateFn(dto *TokenEntity, query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError) {
+func TokenActionCreateFn(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := TokenValidator(dto, false); iError != nil {
 		return nil, iError
@@ -432,14 +435,14 @@ func TokenActionCreateFn(dto *TokenEntity, query workspaces.QueryDSL) (*TokenEnt
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -447,35 +450,35 @@ func TokenActionCreateFn(dto *TokenEntity, query workspaces.QueryDSL) (*TokenEnt
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewTokenCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(TOKEN_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&TokenEntity{}),
+			"entityKey": fireback.GetTypeString(&TokenEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func TokenActionGetOneFn(query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError) {
+func TokenActionGetOneFn(query fireback.QueryDSL) (*TokenEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
-	item, err := workspaces.GetOneEntity[TokenEntity](query, refl)
+	item, err := fireback.GetOneEntity[TokenEntity](query, refl)
 	entityTokenFormatter(item, query)
 	return item, err
 }
-func TokenActionGetByWorkspaceFn(query workspaces.QueryDSL) (*TokenEntity, *workspaces.IError) {
+func TokenActionGetByWorkspaceFn(query fireback.QueryDSL) (*TokenEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[TokenEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[TokenEntity](query, refl)
 	entityTokenFormatter(item, query)
 	return item, err
 }
-func TokenActionQueryFn(query workspaces.QueryDSL) ([]*TokenEntity, *workspaces.QueryResultMeta, error) {
+func TokenActionQueryFn(query fireback.QueryDSL) ([]*TokenEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&TokenEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[TokenEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[TokenEntity](query, refl)
 	for _, item := range items {
 		entityTokenFormatter(item, query)
 	}
@@ -485,7 +488,7 @@ func TokenActionQueryFn(query workspaces.QueryDSL) ([]*TokenEntity, *workspaces.
 var tokenMemoryItems []*TokenEntity = []*TokenEntity{}
 
 func TokenEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -515,7 +518,7 @@ func TokenMemJoin(items []uint) []*TokenEntity {
 	}
 	return res
 }
-func TokenUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TokenEntity) (*TokenEntity, *workspaces.IError) {
+func TokenUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TokenEntity) (*TokenEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TOKEN_EVENT_UPDATED
 	TokenEntityPreSanitize(fields, query)
@@ -530,7 +533,7 @@ func TokenUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TokenEnt
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	TokenRelationContentUpdate(fields, query)
@@ -544,11 +547,11 @@ func TokenUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TokenEnt
 		Where(&TokenEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewTokenUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -560,9 +563,9 @@ func TokenUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *TokenEnt
 	   })*/
 	return &itemRefetched, nil
 }
-func TokenActionUpdateFn(query workspaces.QueryDSL, fields *TokenEntity) (*TokenEntity, *workspaces.IError) {
+func TokenActionUpdateFn(query fireback.QueryDSL, fields *TokenEntity) (*TokenEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := TokenValidator(fields, true); iError != nil {
@@ -572,11 +575,11 @@ func TokenActionUpdateFn(query workspaces.QueryDSL, fields *TokenEntity) (*Token
 	// TokenRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *TokenEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = TokenUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -584,7 +587,7 @@ func TokenActionUpdateFn(query workspaces.QueryDSL, fields *TokenEntity) (*Token
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return TokenUpdateExec(dbref, query, fields)
@@ -595,8 +598,8 @@ var TokenWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire tokens ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE},
 			AllowOnRoot:    true,
 		})
 		count, _ := TokenActionWipeClean(query)
@@ -605,16 +608,16 @@ var TokenWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TokenActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func TokenActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_TOKEN_DELETE}
-	return workspaces.RemoveEntity[TokenEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE}
+	return fireback.RemoveEntity[TokenEntity](query, refl)
 }
-func TokenActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func TokenActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[TokenEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[TokenEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'TokenEntity'", subErr)
 			return count, subErr
@@ -625,11 +628,11 @@ func TokenActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func TokenActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[TokenEntity]) (
-	*workspaces.BulkRecordRequest[TokenEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[TokenEntity]) (
+	*fireback.BulkRecordRequest[TokenEntity], *fireback.IError,
 ) {
 	result := []*TokenEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := TokenActions.Update(query, record)
@@ -644,7 +647,7 @@ func TokenActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *TokenEntity) Json() string {
 	if x != nil {
@@ -654,7 +657,7 @@ func (x *TokenEntity) Json() string {
 	return ""
 }
 
-var TokenEntityMeta = workspaces.TableMetaData{
+var TokenEntityMeta = fireback.TableMetaData{
 	EntityName:    "Token",
 	ExportKey:     "tokens",
 	TableNameInDb: "token_entities",
@@ -664,23 +667,23 @@ var TokenEntityMeta = workspaces.TableMetaData{
 }
 
 func TokenActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[TokenEntity](query, TokenActions.Query, TokenPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[TokenEntity](query, TokenActions.Query, TokenPreloadRelations)
 }
 func TokenActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[TokenEntity](query, TokenActions.Query, TokenPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[TokenEntity](query, TokenActions.Query, TokenPreloadRelations)
 }
 func TokenActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content TokenEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := TokenActions.Create(&content, query)
@@ -714,7 +717,7 @@ var TokenCommonCliFlags = []cli.Flag{
 		Usage:    `token (string)`,
 	},
 }
-var TokenCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var TokenCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "token",
 		StructField: "Token",
@@ -762,17 +765,17 @@ var TokenCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 			AllowOnRoot:    true,
 		})
 		entity := &TokenEntity{}
-		workspaces.PopulateInteractively(entity, c, TokenCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, TokenCommonInteractiveCliFlags)
 		if entity, err := TokenActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -782,8 +785,8 @@ var TokenUpdateCmd cli.Command = cli.Command{
 	Flags:   TokenCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
 			AllowOnRoot:    true,
 		})
 		entity := CastTokenFromCli(c)
@@ -806,18 +809,18 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("user-id") {
-		template.UserId = workspaces.NewStringAutoNull(c.String("user-id"))
+		template.UserId = fireback.NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("token") {
 		template.Token = c.String("token")
 	}
 	return template
 }
-func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
@@ -827,8 +830,8 @@ func TokenSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.Que
 	)
 }
 func TokenSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		tokenSeedersFs,
@@ -837,8 +840,8 @@ func TokenSyncSeeders() {
 	)
 }
 func TokenImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		TokenActions.Create,
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -846,19 +849,19 @@ func TokenImportMocks() {
 		false,
 	)
 }
-func TokenWriteQueryMock(ctx workspaces.MockQueryContext) {
+func TokenWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := TokenActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "Token", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "Token", result)
 	}
 }
-func TokensActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func TokensActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -870,7 +873,7 @@ func TokensActionQueryString(keyword string, page int) ([]string, *workspaces.Qu
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := TokenActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -897,8 +900,8 @@ var TokenDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 				AllowOnRoot:    true,
 			})
 			if c.Bool("batch") {
@@ -922,7 +925,7 @@ var TokenDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := TokenActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -930,7 +933,7 @@ var TokenDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -943,7 +946,7 @@ var TokenDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -973,7 +976,7 @@ var TokenImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of tokens, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]TokenEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -982,7 +985,7 @@ var TokenImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(tokenSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(tokenSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -995,7 +998,7 @@ var TokenImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				tokenSeedersFs,
@@ -1006,7 +1009,7 @@ var TokenImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1014,7 +1017,7 @@ var TokenImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				TokenEntityStream,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				c.String("file"),
@@ -1028,7 +1031,7 @@ var TokenImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1038,12 +1041,12 @@ var TokenImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				TokenActions.Create,
 				reflect.ValueOf(&TokenEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 					AllowOnRoot:    true,
 				},
 				func() TokenEntity {
@@ -1062,7 +1065,7 @@ var TokenCliCommands []cli.Command = []cli.Command{
 	TokenUpdateCmd,
 	TokenAskCmd,
 	TokenCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TokenEntity{}).Elem(),
 		TokenActions.Remove,
 	),
@@ -1070,7 +1073,7 @@ var TokenCliCommands []cli.Command = []cli.Command{
 
 func TokenCliFn() cli.Command {
 	commands := append(TokenImportExportCommands, TokenCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, TokenDevCommands...)
 	}
 	return cli.Command{
@@ -1087,14 +1090,14 @@ func TokenCliFn() cli.Command {
 	}
 }
 
-var TOKEN_ACTION_TABLE = workspaces.Module3Action{
+var TOKEN_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        TokenActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			TokenActions.Query,
 			security,
 			reflect.ValueOf(&TokenEntity{}).Elem(),
@@ -1102,27 +1105,27 @@ var TOKEN_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var TOKEN_ACTION_QUERY = workspaces.Module3Action{
+var TOKEN_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/tokens",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &TokenEntityQs{}
-			workspaces.HttpQueryEntity(c, TokenActions.Query, qs)
+			fireback.HttpQueryEntity(c, TokenActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         TokenActions.Query,
 	ResponseEntity: &[]TokenEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &TokenEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			TokenActions.Query,
 			security,
@@ -1133,142 +1136,142 @@ var TOKEN_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, TokenQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, TokenQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var TOKEN_ACTION_EXPORT = workspaces.Module3Action{
+var TOKEN_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/tokens/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, TokenActionExport)
+			fireback.HttpStreamFileChannel(c, TokenActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         TokenActionExport,
 	ResponseEntity: &[]TokenEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_GET_ONE = workspaces.Module3Action{
+var TOKEN_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/token/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, TokenActions.GetOne)
+			fireback.HttpGetEntity(c, TokenActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         TokenActions.GetOne,
 	ResponseEntity: &TokenEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_POST_ONE = workspaces.Module3Action{
+var TOKEN_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new token",
 	Flags:         TokenCommonCliFlags,
 	Method:        "POST",
 	Url:           "/token",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_CREATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, TokenActions.Create)
+			fireback.HttpPostEntity(c, TokenActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, TokenActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, TokenActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         TokenActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &TokenEntity{},
 	ResponseEntity: &TokenEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_PATCH = workspaces.Module3Action{
+var TOKEN_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         TokenCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/token",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, TokenActions.Update)
+			fireback.HttpUpdateEntity(c, TokenActions.Update)
 		},
 	},
 	Action:         TokenActions.Update,
 	RequestEntity:  &TokenEntity{},
 	ResponseEntity: &TokenEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_PATCH_BULK = workspaces.Module3Action{
+var TOKEN_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/tokens",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_UPDATE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, TokenActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, TokenActionBulkUpdate)
 		},
 	},
 	Action:         TokenActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[TokenEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[TokenEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[TokenEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[TokenEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_DELETE = workspaces.Module3Action{
+var TOKEN_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/token",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_TOKEN_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, TokenActions.Remove)
+			fireback.HttpRemoveEntity(c, TokenActions.Remove)
 		},
 	},
 	Action:         TokenActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &TokenEntity{},
 }
 
@@ -1276,10 +1279,10 @@ var TOKEN_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on TokenEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendTokenRouter = func(r *[]workspaces.Module3Action) {}
+var AppendTokenRouter = func(r *[]fireback.Module3Action) {}
 
-func GetTokenModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetTokenModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		TOKEN_ACTION_QUERY,
 		TOKEN_ACTION_EXPORT,
 		TOKEN_ACTION_GET_ONE,
@@ -1293,32 +1296,32 @@ func GetTokenModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_TOKEN = workspaces.PermissionInfo{
+var PERM_ROOT_TOKEN = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.token.*",
 	Name:        "Entire token actions (*)",
 	Description: "",
 }
-var PERM_ROOT_TOKEN_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_TOKEN_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.token.delete",
 	Name:        "Delete token",
 	Description: "",
 }
-var PERM_ROOT_TOKEN_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_TOKEN_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.token.create",
 	Name:        "Create token",
 	Description: "",
 }
-var PERM_ROOT_TOKEN_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_TOKEN_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.token.update",
 	Name:        "Update token",
 	Description: "",
 }
-var PERM_ROOT_TOKEN_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_TOKEN_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.token.query",
 	Name:        "Query token",
 	Description: "",
 }
-var ALL_TOKEN_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_TOKEN_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_TOKEN_DELETE,
 	PERM_ROOT_TOKEN_CREATE,
 	PERM_ROOT_TOKEN_UPDATE,
@@ -1328,42 +1331,42 @@ var ALL_TOKEN_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewTokenCreatedEvent(
 	payload *TokenEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "TokenCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_TOKEN_QUERY,
 			},
 		},
 		CacheKey: "*abac.TokenEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewTokenUpdatedEvent(
 	payload *TokenEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "TokenUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_TOKEN_QUERY,
 			},
 		},
 		CacheKey: "*abac.TokenEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var TokenEntityBundle = workspaces.EntityBundle{
+var TokenEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_TOKEN_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

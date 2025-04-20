@@ -70,7 +70,7 @@ export function usePatchPassportMethod(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<PassportMethodEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.PassportMethodEntity",
+            "*fireback.PassportMethodEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

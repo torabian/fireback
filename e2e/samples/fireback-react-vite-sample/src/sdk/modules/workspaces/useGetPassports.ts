@@ -53,7 +53,7 @@ export function useGetPassports({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<PassportEntity>, any>(
-    ["*workspaces.PassportEntity", computedOptions, query],
+    ["*fireback.PassportEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetPassports({
     keyExtractor: (item: PassportEntity) => item.uniqueId,
   };
 }
-useGetPassports.UKEY = "*workspaces.PassportEntity";
+useGetPassports.UKEY = "*fireback.PassportEntity";

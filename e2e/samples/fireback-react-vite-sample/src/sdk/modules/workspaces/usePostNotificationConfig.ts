@@ -70,7 +70,7 @@ export function usePostNotificationConfig(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<NotificationConfigEntity>) {
           queryClient?.setQueryData<IResponseList<NotificationConfigEntity>>(
-            "*workspaces.NotificationConfigEntity",
+            "*fireback.NotificationConfigEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

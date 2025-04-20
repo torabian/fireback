@@ -58,10 +58,10 @@ export function useDeleteGsmProvider(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.GsmProviderEntity",
+            "*fireback.GsmProviderEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.GsmProviderEntity");
+          queryClient?.invalidateQueries("*fireback.GsmProviderEntity");
           resolve(response);
         },
         onError(error: any) {

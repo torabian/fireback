@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac"
-	"github.com/torabian/fireback/modules/workspaces"
-	FBManage "github.com/torabian/fireback/modules/workspaces/codegen/fireback-manage"
-	FbSelfService "github.com/torabian/fireback/modules/workspaces/codegen/selfservice"
+	"github.com/torabian/fireback/modules/fireback"
+	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
+	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
 	"github.com/urfave/cli"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
-var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + workspaces.FIREBACK_VERSION
+var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + fireback.FIREBACK_VERSION
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
 // Fireback doesn't come with default ui in the cmd anymore.
@@ -21,10 +21,10 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 // //go:embed all:ui
 // var ui embed.FS
 
-var xapp = &workspaces.FirebackApp{
+var xapp = &fireback.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders: []workspaces.SearchProviderFn{
+	SearchProviders: []fireback.SearchProviderFn{
 		abac.QueryMenusReact,
 		abac.QueryRolesReact,
 	},
@@ -38,10 +38,10 @@ var xapp = &workspaces.FirebackApp{
 	RunSocket: func(e *gin.Engine) {
 		e.POST("/webrtc/offer", WebRTCOfferHandler)
 
-		workspaces.HandleSocket(e)
+		fireback.HandleSocket(e)
 	},
-	RunSearch: workspaces.InjectReactiveSearch,
-	PublicFolders: []workspaces.PublicFolderInfo{
+	RunSearch: fireback.InjectReactiveSearch,
+	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to
 		// Bootstrap those themes
@@ -55,15 +55,15 @@ var xapp = &workspaces.FirebackApp{
 		{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
 		{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
 	},
-	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
+	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
 
 	},
-	Modules: append([]*workspaces.ModuleProvider{
+	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
-		workspaces.FirebackModuleSetup(nil),
+		fireback.FirebackModuleSetup(nil),
 		{
 			CliHandlers: []cli.Command{
-				workspaces.NewProjectCli(),
+				fireback.NewProjectCli(),
 			},
 		},
 	}, abac.AbacCompleteModules()...),

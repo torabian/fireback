@@ -70,7 +70,7 @@ export function usePatchGsmProvider(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<GsmProviderEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.GsmProviderEntity",
+            "*fireback.GsmProviderEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

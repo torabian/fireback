@@ -70,7 +70,7 @@ export function usePostEmailSender(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<EmailSenderEntity>) {
           queryClient?.setQueryData<IResponseList<EmailSenderEntity>>(
-            "*workspaces.EmailSenderEntity",
+            "*fireback.EmailSenderEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

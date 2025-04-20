@@ -1,17 +1,17 @@
 package licenses
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func LicensableProductActionCreate(
-	dto *LicensableProductEntity, query workspaces.QueryDSL,
-) (*LicensableProductEntity, *workspaces.IError) {
+	dto *LicensableProductEntity, query fireback.QueryDSL,
+) (*LicensableProductEntity, *fireback.IError) {
 	return LicensableProductActionCreateFn(dto, query)
 }
 
 func LicensableProductActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *LicensableProductEntity,
-) (*LicensableProductEntity, *workspaces.IError) {
+) (*LicensableProductEntity, *fireback.IError) {
 	return LicensableProductActionUpdateFn(query, fields)
 }
 
@@ -19,14 +19,14 @@ func LicensableProductActionUpdate(
 *	This action generates the product publicly
 **/
 func ProductActionGenerate(
-	dto *LicensableProductEntity, query workspaces.QueryDSL,
-) (*LicensableProductEntity, *workspaces.IError) {
+	dto *LicensableProductEntity, query fireback.QueryDSL,
+) (*LicensableProductEntity, *fireback.IError) {
 
 	info, err := GenertePrivatePublicKeySet()
 
 	if err != nil {
 
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 
 	dto.PrivateKey = &info.PrivateKey

@@ -47,7 +47,7 @@ vscode-extension:
           node-version: 18
 
       - name: Install react-new dependencies since it contains the designer files
-        run: cd modules/workspaces/codegen/react-new && npm i --force
+        run: cd modules/fireback/codegen/react-new && npm i --force
         
       - name: Build
         run: cd clients/fireback-tools-vs-code-extension && npm i --force && npm run package

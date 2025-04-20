@@ -53,7 +53,7 @@ export function useGetAppMenus({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<AppMenuEntity>, any>(
-    ["*workspaces.AppMenuEntity", computedOptions, query],
+    ["*fireback.AppMenuEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetAppMenus({
     keyExtractor: (item: AppMenuEntity) => item.uniqueId,
   };
 }
-useGetAppMenus.UKEY = "*workspaces.AppMenuEntity";
+useGetAppMenus.UKEY = "*fireback.AppMenuEntity";

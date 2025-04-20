@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/LicensableProduct"
 	seeders "github.com/torabian/fireback/modules/licenses/seeders/LicensableProduct"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var licensableProductSeedersFs = &seeders.ViewsFs
@@ -98,7 +99,7 @@ type LicensableProductEntity struct {
 	LinkedTo         *LicensableProductEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func LicensableProductEntityStream(q workspaces.QueryDSL) (chan []*LicensableProductEntity, *workspaces.QueryResultMeta, error) {
+func LicensableProductEntityStream(q fireback.QueryDSL) (chan []*LicensableProductEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*LicensableProductEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -134,8 +135,8 @@ func (x *LicensableProductEntityList) Json() string {
 	}
 	return ""
 }
-func (x *LicensableProductEntityList) ToTree() *workspaces.TreeOperation[LicensableProductEntity] {
-	return workspaces.NewTreeOperation(
+func (x *LicensableProductEntityList) ToTree() *fireback.TreeOperation[LicensableProductEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *LicensableProductEntity) string {
 			if t.ParentId == nil {
@@ -160,13 +161,13 @@ var LICENSABLE_PRODUCT_EVENTS = []string{
 }
 
 type LicensableProductFieldMap struct {
-	Name       workspaces.TranslatedString `yaml:"name"`
-	PrivateKey workspaces.TranslatedString `yaml:"privateKey"`
-	PublicKey  workspaces.TranslatedString `yaml:"publicKey"`
+	Name       fireback.TranslatedString `yaml:"name"`
+	PrivateKey fireback.TranslatedString `yaml:"privateKey"`
+	PublicKey  fireback.TranslatedString `yaml:"publicKey"`
 }
 
 var LicensableProductEntityMetaConfig map[string]int64 = map[string]int64{}
-var LicensableProductEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&LicensableProductEntity{}))
+var LicensableProductEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&LicensableProductEntity{}))
 
 type LicensableProductEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
@@ -174,15 +175,15 @@ type LicensableProductEntityPolyglot struct {
 	Name       string `yaml:"name,omitempty" json:"name,omitempty"`
 }
 
-func entityLicensableProductFormatter(dto *LicensableProductEntity, query workspaces.QueryDSL) {
+func entityLicensableProductFormatter(dto *LicensableProductEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func LicensableProductMockEntity() *LicensableProductEntity {
@@ -199,7 +200,7 @@ func LicensableProductMockEntity() *LicensableProductEntity {
 	}
 	return entity
 }
-func LicensableProductActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func LicensableProductActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -226,7 +227,7 @@ func LicensableProductActionSeederMultiple(query workspaces.QueryDSL, count int)
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func LicensableProductActionSeeder(query workspaces.QueryDSL, count int) {
+func LicensableProductActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -268,7 +269,7 @@ func LicensableProductActionSeederInit() *LicensableProductEntity {
 	}
 	return entity
 }
-func LicensableProductAssociationCreate(dto *LicensableProductEntity, query workspaces.QueryDSL) error {
+func LicensableProductAssociationCreate(dto *LicensableProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -276,17 +277,17 @@ func LicensableProductAssociationCreate(dto *LicensableProductEntity, query work
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func LicensableProductRelationContentCreate(dto *LicensableProductEntity, query workspaces.QueryDSL) error {
+func LicensableProductRelationContentCreate(dto *LicensableProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func LicensableProductRelationContentUpdate(dto *LicensableProductEntity, query workspaces.QueryDSL) error {
+func LicensableProductRelationContentUpdate(dto *LicensableProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func LicensableProductPolyglotCreateHandler(dto *LicensableProductEntity, query workspaces.QueryDSL) {
+func LicensableProductPolyglotCreateHandler(dto *LicensableProductEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &LicensableProductEntityPolyglot{}, query)
+	fireback.PolyglotCreateHandler(dto, &LicensableProductEntityPolyglot{}, query)
 }
 
 /**
@@ -294,8 +295,8 @@ func LicensableProductPolyglotCreateHandler(dto *LicensableProductEntity, query 
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func LicensableProductValidator(dto *LicensableProductEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func LicensableProductValidator(dto *LicensableProductEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -341,29 +342,31 @@ And here is the actual object signature:
 	},
 }
 
-func LicensableProductEntityPreSanitize(dto *LicensableProductEntity, query workspaces.QueryDSL) {
+func LicensableProductEntityPreSanitize(dto *LicensableProductEntity, query fireback.QueryDSL) {
 }
-func LicensableProductEntityBeforeCreateAppend(dto *LicensableProductEntity, query workspaces.QueryDSL) {
+func LicensableProductEntityBeforeCreateAppend(dto *LicensableProductEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	LicensableProductRecursiveAddUniqueId(dto, query)
 }
-func LicensableProductRecursiveAddUniqueId(dto *LicensableProductEntity, query workspaces.QueryDSL) {
+func LicensableProductRecursiveAddUniqueId(dto *LicensableProductEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func LicensableProductMultiInsert(dtos []*LicensableProductEntity, query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductMultiInsert(dtos []*LicensableProductEntity, query fireback.QueryDSL) ([]*LicensableProductEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			LicensableProductEntityPreSanitize(dtos[index], query)
@@ -371,19 +374,19 @@ func LicensableProductMultiInsert(dtos []*LicensableProductEntity, query workspa
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func LicensableProductActionBatchCreateFn(dtos []*LicensableProductEntity, query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductActionBatchCreateFn(dtos []*LicensableProductEntity, query fireback.QueryDSL) ([]*LicensableProductEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*LicensableProductEntity{}
 		for _, item := range dtos {
@@ -397,12 +400,12 @@ func LicensableProductActionBatchCreateFn(dtos []*LicensableProductEntity, query
 	}
 	return dtos, nil
 }
-func LicensableProductDeleteEntireChildren(query workspaces.QueryDSL, dto *LicensableProductEntity) *workspaces.IError {
+func LicensableProductDeleteEntireChildren(query fireback.QueryDSL, dto *LicensableProductEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func LicensableProductActionCreateFn(dto *LicensableProductEntity, query workspaces.QueryDSL) (*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductActionCreateFn(dto *LicensableProductEntity, query fireback.QueryDSL) (*LicensableProductEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := LicensableProductValidator(dto, false); iError != nil {
 		return nil, iError
@@ -418,14 +421,14 @@ func LicensableProductActionCreateFn(dto *LicensableProductEntity, query workspa
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -433,27 +436,27 @@ func LicensableProductActionCreateFn(dto *LicensableProductEntity, query workspa
 	// 6. Fire the event into system
 	event.MustFire(LICENSABLE_PRODUCT_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&LicensableProductEntity{}),
+		"entityKey": fireback.GetTypeString(&LicensableProductEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func LicensableProductActionGetOne(query workspaces.QueryDSL) (*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductActionGetOne(query fireback.QueryDSL) (*LicensableProductEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&LicensableProductEntity{})
-	item, err := workspaces.GetOneEntity[LicensableProductEntity](query, refl)
+	item, err := fireback.GetOneEntity[LicensableProductEntity](query, refl)
 	entityLicensableProductFormatter(item, query)
 	return item, err
 }
-func LicensableProductActionGetByWorkspace(query workspaces.QueryDSL) (*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductActionGetByWorkspace(query fireback.QueryDSL) (*LicensableProductEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&LicensableProductEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[LicensableProductEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[LicensableProductEntity](query, refl)
 	entityLicensableProductFormatter(item, query)
 	return item, err
 }
-func LicensableProductActionQuery(query workspaces.QueryDSL) ([]*LicensableProductEntity, *workspaces.QueryResultMeta, error) {
+func LicensableProductActionQuery(query fireback.QueryDSL) ([]*LicensableProductEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&LicensableProductEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[LicensableProductEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[LicensableProductEntity](query, refl)
 	for _, item := range items {
 		entityLicensableProductFormatter(item, query)
 	}
@@ -463,7 +466,7 @@ func LicensableProductActionQuery(query workspaces.QueryDSL) ([]*LicensableProdu
 var licensableProductMemoryItems []*LicensableProductEntity = []*LicensableProductEntity{}
 
 func LicensableProductEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -493,7 +496,7 @@ func LicensableProductMemJoin(items []uint) []*LicensableProductEntity {
 	}
 	return res
 }
-func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = LICENSABLE_PRODUCT_EVENT_UPDATED
 	LicensableProductEntityPreSanitize(fields, query)
@@ -507,7 +510,7 @@ func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	LicensableProductRelationContentUpdate(fields, query)
@@ -526,13 +529,13 @@ func LicensableProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func LicensableProductActionUpdateFn(query workspaces.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *workspaces.IError) {
+func LicensableProductActionUpdateFn(query fireback.QueryDSL, fields *LicensableProductEntity) (*LicensableProductEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := LicensableProductValidator(fields, true); iError != nil {
@@ -542,11 +545,11 @@ func LicensableProductActionUpdateFn(query workspaces.QueryDSL, fields *Licensab
 	// LicensableProductRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *LicensableProductEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = LicensableProductUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -554,7 +557,7 @@ func LicensableProductActionUpdateFn(query workspaces.QueryDSL, fields *Licensab
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return LicensableProductUpdateExec(dbref, query, fields)
@@ -565,8 +568,8 @@ var LicensableProductWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire licensableproducts ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_DELETE},
 		})
 		count, _ := LicensableProductActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -574,16 +577,16 @@ var LicensableProductWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func LicensableProductActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func LicensableProductActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&LicensableProductEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_DELETE}
-	return workspaces.RemoveEntity[LicensableProductEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_DELETE}
+	return fireback.RemoveEntity[LicensableProductEntity](query, refl)
 }
-func LicensableProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func LicensableProductActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[LicensableProductEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[LicensableProductEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'LicensableProductEntity'", subErr)
 			return count, subErr
@@ -594,11 +597,11 @@ func LicensableProductActionWipeClean(query workspaces.QueryDSL) (int64, error) 
 	return count, err
 }
 func LicensableProductActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[LicensableProductEntity]) (
-	*workspaces.BulkRecordRequest[LicensableProductEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[LicensableProductEntity]) (
+	*fireback.BulkRecordRequest[LicensableProductEntity], *fireback.IError,
 ) {
 	result := []*LicensableProductEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := LicensableProductActionUpdate(query, record)
@@ -613,7 +616,7 @@ func LicensableProductActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *LicensableProductEntity) Json() string {
 	if x != nil {
@@ -623,7 +626,7 @@ func (x *LicensableProductEntity) Json() string {
 	return ""
 }
 
-var LicensableProductEntityMeta = workspaces.TableMetaData{
+var LicensableProductEntityMeta = fireback.TableMetaData{
 	EntityName:    "LicensableProduct",
 	ExportKey:     "licensable-products",
 	TableNameInDb: "fb_licensable-product_entities",
@@ -633,23 +636,23 @@ var LicensableProductEntityMeta = workspaces.TableMetaData{
 }
 
 func LicensableProductActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[LicensableProductEntity](query, LicensableProductActionQuery, LicensableProductPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[LicensableProductEntity](query, LicensableProductActionQuery, LicensableProductPreloadRelations)
 }
 func LicensableProductActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[LicensableProductEntity](query, LicensableProductActionQuery, LicensableProductPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[LicensableProductEntity](query, LicensableProductActionQuery, LicensableProductPreloadRelations)
 }
 func LicensableProductActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content LicensableProductEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := LicensableProductActionCreate(&content, query)
@@ -688,7 +691,7 @@ var LicensableProductCommonCliFlags = []cli.Flag{
 		Usage:    `publicKey`,
 	},
 }
-var LicensableProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var LicensableProductCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -757,16 +760,16 @@ var LicensableProductCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
 		})
 		entity := &LicensableProductEntity{}
-		workspaces.PopulateInteractively(entity, c, LicensableProductCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, LicensableProductCommonInteractiveCliFlags)
 		if entity, err := LicensableProductActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -776,8 +779,8 @@ var LicensableProductUpdateCmd cli.Command = cli.Command{
 	Flags:   LicensableProductCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_UPDATE},
 		})
 		entity := CastLicensableProductFromCli(c)
 		if entity, err := LicensableProductActionUpdate(query, entity); err != nil {
@@ -817,8 +820,8 @@ func CastLicensableProductFromCli(c *cli.Context) *LicensableProductEntity {
 	return template
 }
 func LicensableProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		LicensableProductActionCreate,
 		reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 		fsRef,
@@ -827,8 +830,8 @@ func LicensableProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func LicensableProductSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		LicensableProductActionCreate,
 		reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 		licensableProductSeedersFs,
@@ -837,8 +840,8 @@ func LicensableProductSyncSeeders() {
 	)
 }
 func LicensableProductImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		LicensableProductActionCreate,
 		reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -846,19 +849,19 @@ func LicensableProductImportMocks() {
 		false,
 	)
 }
-func LicensableProductWriteQueryMock(ctx workspaces.MockQueryContext) {
+func LicensableProductWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := LicensableProductActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "LicensableProduct", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "LicensableProduct", result)
 	}
 }
-func LicensableProductsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func LicensableProductsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -870,7 +873,7 @@ func LicensableProductsActionQueryString(keyword string, page int) ([]string, *w
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := LicensableProductActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -896,8 +899,8 @@ var LicensableProductImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
 			})
 			if c.Bool("batch") {
 				LicensableProductActionSeederMultiple(query, c.Int("count"))
@@ -920,7 +923,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := LicensableProductActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -944,7 +947,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of licensable-products, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]LicensableProductEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -953,7 +956,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(licensableProductSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(licensableProductSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -966,7 +969,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				LicensableProductActionCreate,
 				reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 				licensableProductSeedersFs,
@@ -978,7 +981,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -991,7 +994,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				LicensableProductActionCreate,
 				reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1002,7 +1005,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1011,7 +1014,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					LicensableProductEntityStream,
 					reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 					c.String("file"),
@@ -1020,7 +1023,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 					LicensableProductPreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					LicensableProductActionQuery,
 					reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 					c.String("file"),
@@ -1036,7 +1039,7 @@ var LicensableProductImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1046,12 +1049,12 @@ var LicensableProductImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				LicensableProductActionCreate,
 				reflect.ValueOf(&LicensableProductEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_LICENSABLE_PRODUCT_CREATE},
 				},
 				func() LicensableProductEntity {
 					v := CastLicensableProductFromCli(c)
@@ -1070,7 +1073,7 @@ var LicensableProductCliCommands []cli.Command = []cli.Command{
 	LicensableProductAskCmd,
 	LicensableProductCreateInteractiveCmd,
 	LicensableProductWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&LicensableProductEntity{}).Elem(), LicensableProductActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&LicensableProductEntity{}).Elem(), LicensableProductActionRemove),
 }
 
 func LicensableProductCliFn() cli.Command {
@@ -1089,14 +1092,14 @@ func LicensableProductCliFn() cli.Command {
 	}
 }
 
-var LICENSABLE_PRODUCT_ACTION_TABLE = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        LicensableProductActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			LicensableProductActionQuery,
 			security,
 			reflect.ValueOf(&LicensableProductEntity{}).Elem(),
@@ -1104,23 +1107,23 @@ var LICENSABLE_PRODUCT_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var LICENSABLE_PRODUCT_ACTION_QUERY = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_QUERY = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/licensable-products",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, LicensableProductActionQuery)
+			fireback.HttpQueryEntity(c, LicensableProductActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         LicensableProductActionQuery,
 	ResponseEntity: &[]LicensableProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			LicensableProductActionQuery,
 			security,
@@ -1130,126 +1133,126 @@ var LICENSABLE_PRODUCT_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var LICENSABLE_PRODUCT_ACTION_EXPORT = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_EXPORT = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/licensable-products/export",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, LicensableProductActionExport)
+			fireback.HttpStreamFileChannel(c, LicensableProductActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         LicensableProductActionExport,
 	ResponseEntity: &[]LicensableProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
 }
-var LICENSABLE_PRODUCT_ACTION_GET_ONE = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_GET_ONE = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/licensable-product/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, LicensableProductActionGetOne)
+			fireback.HttpGetEntity(c, LicensableProductActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         LicensableProductActionGetOne,
 	ResponseEntity: &LicensableProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
 }
-var LICENSABLE_PRODUCT_ACTION_POST_ONE = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new licensableProduct",
 	Flags:         LicensableProductCommonCliFlags,
 	Method:        "POST",
 	Url:           "/licensable-product",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, LicensableProductActionCreate)
+			fireback.HttpPostEntity(c, LicensableProductActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, LicensableProductActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, LicensableProductActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         LicensableProductActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &LicensableProductEntity{},
 	ResponseEntity: &LicensableProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
 }
-var LICENSABLE_PRODUCT_ACTION_PATCH = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         LicensableProductCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/licensable-product",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, LicensableProductActionUpdate)
+			fireback.HttpUpdateEntity(c, LicensableProductActionUpdate)
 		},
 	},
 	Action:         LicensableProductActionUpdate,
 	RequestEntity:  &LicensableProductEntity{},
 	ResponseEntity: &LicensableProductEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
 }
-var LICENSABLE_PRODUCT_ACTION_PATCH_BULK = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method:        "PATCH",
 	Url:           "/licensable-products",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, LicensableProductActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, LicensableProductActionBulkUpdate)
 		},
 	},
 	Action:         LicensableProductActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[LicensableProductEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[LicensableProductEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[LicensableProductEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[LicensableProductEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "LicensableProductEntity",
 	},
 }
-var LICENSABLE_PRODUCT_ACTION_DELETE = workspaces.Module3Action{
+var LICENSABLE_PRODUCT_ACTION_DELETE = fireback.Module3Action{
 	Method:        "DELETE",
 	Url:           "/licensable-product",
 	Format:        "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, LicensableProductActionRemove)
+			fireback.HttpRemoveEntity(c, LicensableProductActionRemove)
 		},
 	},
 	Action:         LicensableProductActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &LicensableProductEntity{},
 }
 
@@ -1257,10 +1260,10 @@ var LICENSABLE_PRODUCT_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on LicensableProductEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendLicensableProductRouter = func(r *[]workspaces.Module3Action) {}
+var AppendLicensableProductRouter = func(r *[]fireback.Module3Action) {}
 
-func GetLicensableProductModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetLicensableProductModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		LICENSABLE_PRODUCT_ACTION_QUERY,
 		LICENSABLE_PRODUCT_ACTION_EXPORT,
 		LICENSABLE_PRODUCT_ACTION_GET_ONE,
@@ -1274,34 +1277,34 @@ func GetLicensableProductModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_LICENSABLE_PRODUCT_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSABLE_PRODUCT_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/licensable-product/delete",
 	Name:        "Delete licensable product",
 }
-var PERM_ROOT_LICENSABLE_PRODUCT_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSABLE_PRODUCT_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/licensable-product/create",
 	Name:        "Create licensable product",
 }
-var PERM_ROOT_LICENSABLE_PRODUCT_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSABLE_PRODUCT_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/licensable-product/update",
 	Name:        "Update licensable product",
 }
-var PERM_ROOT_LICENSABLE_PRODUCT_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSABLE_PRODUCT_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/licensable-product/query",
 	Name:        "Query licensable product",
 }
-var PERM_ROOT_LICENSABLE_PRODUCT = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSABLE_PRODUCT = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/licensable-product/*",
 	Name:        "Entire licensable product actions (*)",
 }
-var ALL_LICENSABLE_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_LICENSABLE_PRODUCT_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_LICENSABLE_PRODUCT_DELETE,
 	PERM_ROOT_LICENSABLE_PRODUCT_CREATE,
 	PERM_ROOT_LICENSABLE_PRODUCT_UPDATE,
 	PERM_ROOT_LICENSABLE_PRODUCT_QUERY,
 	PERM_ROOT_LICENSABLE_PRODUCT,
 }
-var LicensableProductEntityBundle = workspaces.EntityBundle{
+var LicensableProductEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_LICENSABLE_PRODUCT_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

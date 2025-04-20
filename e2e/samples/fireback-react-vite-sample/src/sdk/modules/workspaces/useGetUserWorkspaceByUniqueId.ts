@@ -72,7 +72,7 @@ export function useGetUserWorkspaceByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.UserWorkspaceEntity"],
+    [options, query, "*fireback.UserWorkspaceEntity"],
     fn,
     {
       cacheTime: 1001,

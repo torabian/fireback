@@ -1,9 +1,9 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
-func PassportAppendEmailToUser(dto *ClassicAuthDto, query workspaces.QueryDSL) (*PassportEntity, *workspaces.IError) {
-	passwordHashed, _ := workspaces.HashPassword(dto.Password)
+func PassportAppendEmailToUser(dto *ClassicAuthDto, query fireback.QueryDSL) (*PassportEntity, *fireback.IError) {
+	passwordHashed, _ := fireback.HashPassword(dto.Password)
 
 	if iError := UserWithEmailAndPasswordValidator(dto, false); iError != nil {
 		return nil, iError

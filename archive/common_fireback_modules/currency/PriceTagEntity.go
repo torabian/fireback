@@ -1,13 +1,15 @@
 package currency
-import "github.com/torabian/fireback/modules/workspaces"
+
+import "github.com/torabian/fireback/modules/fireback"
+
 func PriceTagActionCreate(
-	dto *PriceTagEntity, query workspaces.QueryDSL,
-) (*PriceTagEntity, *workspaces.IError) {
+	dto *PriceTagEntity, query fireback.QueryDSL,
+) (*PriceTagEntity, *fireback.IError) {
 	return PriceTagActionCreateFn(dto, query)
 }
 func PriceTagActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *PriceTagEntity,
-) (*PriceTagEntity, *workspaces.IError) {
+) (*PriceTagEntity, *fireback.IError) {
 	return PriceTagActionUpdateFn(query, fields)
 }

@@ -58,10 +58,10 @@ export function useDeleteAppMenu(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.AppMenuEntity",
+            "*fireback.AppMenuEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.AppMenuEntity");
+          queryClient?.invalidateQueries("*fireback.AppMenuEntity");
           resolve(response);
         },
         onError(error: any) {

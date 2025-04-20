@@ -72,7 +72,7 @@ export function useGetEmailConfirmationByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.EmailConfirmationEntity"],
+    [options, query, "*fireback.EmailConfirmationEntity"],
     fn,
     {
       cacheTime: 1001,

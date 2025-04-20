@@ -71,7 +71,7 @@ export function useGetUserByUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery([options, query, "*workspaces.UserEntity"], fn, {
+  const query$ = useQuery([options, query, "*fireback.UserEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

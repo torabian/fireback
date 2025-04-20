@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoCity"
 	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoCity"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoCitySeedersFs = &seeders.ViewsFs
@@ -101,7 +102,7 @@ type GeoCityEntity struct {
 	LinkedTo         *GeoCityEntity     `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func GeoCityEntityStream(q workspaces.QueryDSL) (chan []*GeoCityEntity, *workspaces.QueryResultMeta, error) {
+func GeoCityEntityStream(q fireback.QueryDSL) (chan []*GeoCityEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*GeoCityEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -137,8 +138,8 @@ func (x *GeoCityEntityList) Json() string {
 	}
 	return ""
 }
-func (x *GeoCityEntityList) ToTree() *workspaces.TreeOperation[GeoCityEntity] {
-	return workspaces.NewTreeOperation(
+func (x *GeoCityEntityList) ToTree() *fireback.TreeOperation[GeoCityEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *GeoCityEntity) string {
 			if t.ParentId == nil {
@@ -163,24 +164,24 @@ var GEO_CITY_EVENTS = []string{
 }
 
 type GeoCityFieldMap struct {
-	Name     workspaces.TranslatedString `yaml:"name"`
-	Province workspaces.TranslatedString `yaml:"province"`
-	State    workspaces.TranslatedString `yaml:"state"`
-	Country  workspaces.TranslatedString `yaml:"country"`
+	Name     fireback.TranslatedString `yaml:"name"`
+	Province fireback.TranslatedString `yaml:"province"`
+	State    fireback.TranslatedString `yaml:"state"`
+	Country  fireback.TranslatedString `yaml:"country"`
 }
 
 var GeoCityEntityMetaConfig map[string]int64 = map[string]int64{}
-var GeoCityEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GeoCityEntity{}))
+var GeoCityEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&GeoCityEntity{}))
 
-func entityGeoCityFormatter(dto *GeoCityEntity, query workspaces.QueryDSL) {
+func entityGeoCityFormatter(dto *GeoCityEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func GeoCityMockEntity() *GeoCityEntity {
@@ -195,7 +196,7 @@ func GeoCityMockEntity() *GeoCityEntity {
 	}
 	return entity
 }
-func GeoCityActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func GeoCityActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -222,7 +223,7 @@ func GeoCityActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func GeoCityActionSeeder(query workspaces.QueryDSL, count int) {
+func GeoCityActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -252,7 +253,7 @@ func GeoCityActionSeederInit() *GeoCityEntity {
 	}
 	return entity
 }
-func GeoCityAssociationCreate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
+func GeoCityAssociationCreate(dto *GeoCityEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -260,13 +261,13 @@ func GeoCityAssociationCreate(dto *GeoCityEntity, query workspaces.QueryDSL) err
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func GeoCityRelationContentCreate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
+func GeoCityRelationContentCreate(dto *GeoCityEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GeoCityRelationContentUpdate(dto *GeoCityEntity, query workspaces.QueryDSL) error {
+func GeoCityRelationContentUpdate(dto *GeoCityEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GeoCityPolyglotCreateHandler(dto *GeoCityEntity, query workspaces.QueryDSL) {
+func GeoCityPolyglotCreateHandler(dto *GeoCityEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -277,8 +278,8 @@ func GeoCityPolyglotCreateHandler(dto *GeoCityEntity, query workspaces.QueryDSL)
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func GeoCityValidator(dto *GeoCityEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func GeoCityValidator(dto *GeoCityEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -325,29 +326,31 @@ And here is the actual object signature:
 	},
 }
 
-func GeoCityEntityPreSanitize(dto *GeoCityEntity, query workspaces.QueryDSL) {
+func GeoCityEntityPreSanitize(dto *GeoCityEntity, query fireback.QueryDSL) {
 }
-func GeoCityEntityBeforeCreateAppend(dto *GeoCityEntity, query workspaces.QueryDSL) {
+func GeoCityEntityBeforeCreateAppend(dto *GeoCityEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	GeoCityRecursiveAddUniqueId(dto, query)
 }
-func GeoCityRecursiveAddUniqueId(dto *GeoCityEntity, query workspaces.QueryDSL) {
+func GeoCityRecursiveAddUniqueId(dto *GeoCityEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func GeoCityMultiInsert(dtos []*GeoCityEntity, query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.IError) {
+func GeoCityMultiInsert(dtos []*GeoCityEntity, query fireback.QueryDSL) ([]*GeoCityEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			GeoCityEntityPreSanitize(dtos[index], query)
@@ -355,19 +358,19 @@ func GeoCityMultiInsert(dtos []*GeoCityEntity, query workspaces.QueryDSL) ([]*Ge
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func GeoCityActionBatchCreateFn(dtos []*GeoCityEntity, query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.IError) {
+func GeoCityActionBatchCreateFn(dtos []*GeoCityEntity, query fireback.QueryDSL) ([]*GeoCityEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GeoCityEntity{}
 		for _, item := range dtos {
@@ -381,12 +384,12 @@ func GeoCityActionBatchCreateFn(dtos []*GeoCityEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil
 }
-func GeoCityDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoCityEntity) *workspaces.IError {
+func GeoCityDeleteEntireChildren(query fireback.QueryDSL, dto *GeoCityEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
+func GeoCityActionCreateFn(dto *GeoCityEntity, query fireback.QueryDSL) (*GeoCityEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := GeoCityValidator(dto, false); iError != nil {
 		return nil, iError
@@ -402,14 +405,14 @@ func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoC
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -417,27 +420,27 @@ func GeoCityActionCreateFn(dto *GeoCityEntity, query workspaces.QueryDSL) (*GeoC
 	// 6. Fire the event into system
 	event.MustFire(GEO_CITY_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&GeoCityEntity{}),
+		"entityKey": fireback.GetTypeString(&GeoCityEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func GeoCityActionGetOne(query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
+func GeoCityActionGetOne(query fireback.QueryDSL) (*GeoCityEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoCityEntity{})
-	item, err := workspaces.GetOneEntity[GeoCityEntity](query, refl)
+	item, err := fireback.GetOneEntity[GeoCityEntity](query, refl)
 	entityGeoCityFormatter(item, query)
 	return item, err
 }
-func GeoCityActionGetByWorkspace(query workspaces.QueryDSL) (*GeoCityEntity, *workspaces.IError) {
+func GeoCityActionGetByWorkspace(query fireback.QueryDSL) (*GeoCityEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoCityEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[GeoCityEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[GeoCityEntity](query, refl)
 	entityGeoCityFormatter(item, query)
 	return item, err
 }
-func GeoCityActionQuery(query workspaces.QueryDSL) ([]*GeoCityEntity, *workspaces.QueryResultMeta, error) {
+func GeoCityActionQuery(query fireback.QueryDSL) ([]*GeoCityEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoCityEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[GeoCityEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[GeoCityEntity](query, refl)
 	for _, item := range items {
 		entityGeoCityFormatter(item, query)
 	}
@@ -447,7 +450,7 @@ func GeoCityActionQuery(query workspaces.QueryDSL) ([]*GeoCityEntity, *workspace
 var geoCityMemoryItems []*GeoCityEntity = []*GeoCityEntity{}
 
 func GeoCityEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -477,7 +480,7 @@ func GeoCityMemJoin(items []uint) []*GeoCityEntity {
 	}
 	return res
 }
-func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
+func GeoCityUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = GEO_CITY_EVENT_UPDATED
 	GeoCityEntityPreSanitize(fields, query)
@@ -491,7 +494,7 @@ func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCit
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	GeoCityRelationContentUpdate(fields, query)
@@ -510,13 +513,13 @@ func GeoCityUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoCit
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func GeoCityActionUpdateFn(query workspaces.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *workspaces.IError) {
+func GeoCityActionUpdateFn(query fireback.QueryDSL, fields *GeoCityEntity) (*GeoCityEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GeoCityValidator(fields, true); iError != nil {
@@ -526,11 +529,11 @@ func GeoCityActionUpdateFn(query workspaces.QueryDSL, fields *GeoCityEntity) (*G
 	// GeoCityRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *GeoCityEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = GeoCityUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -538,7 +541,7 @@ func GeoCityActionUpdateFn(query workspaces.QueryDSL, fields *GeoCityEntity) (*G
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoCityUpdateExec(dbref, query, fields)
@@ -549,8 +552,8 @@ var GeoCityWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geocities ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
 		})
 		count, _ := GeoCityActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -558,16 +561,16 @@ var GeoCityWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func GeoCityActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func GeoCityActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoCityEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE}
-	return workspaces.RemoveEntity[GeoCityEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE}
+	return fireback.RemoveEntity[GeoCityEntity](query, refl)
 }
-func GeoCityActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func GeoCityActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GeoCityEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[GeoCityEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'GeoCityEntity'", subErr)
 			return count, subErr
@@ -578,11 +581,11 @@ func GeoCityActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func GeoCityActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoCityEntity]) (
-	*workspaces.BulkRecordRequest[GeoCityEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[GeoCityEntity]) (
+	*fireback.BulkRecordRequest[GeoCityEntity], *fireback.IError,
 ) {
 	result := []*GeoCityEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := GeoCityActionUpdate(query, record)
@@ -597,7 +600,7 @@ func GeoCityActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *GeoCityEntity) Json() string {
 	if x != nil {
@@ -607,7 +610,7 @@ func (x *GeoCityEntity) Json() string {
 	return ""
 }
 
-var GeoCityEntityMeta = workspaces.TableMetaData{
+var GeoCityEntityMeta = fireback.TableMetaData{
 	EntityName:    "GeoCity",
 	ExportKey:     "geo-cities",
 	TableNameInDb: "fb_geo-city_entities",
@@ -617,23 +620,23 @@ var GeoCityEntityMeta = workspaces.TableMetaData{
 }
 
 func GeoCityActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[GeoCityEntity](query, GeoCityActionQuery, GeoCityPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[GeoCityEntity](query, GeoCityActionQuery, GeoCityPreloadRelations)
 }
 func GeoCityActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[GeoCityEntity](query, GeoCityActionQuery, GeoCityPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[GeoCityEntity](query, GeoCityActionQuery, GeoCityPreloadRelations)
 }
 func GeoCityActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content GeoCityEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GeoCityActionCreate(&content, query)
@@ -677,7 +680,7 @@ var GeoCityCommonCliFlags = []cli.Flag{
 		Usage:    `country`,
 	},
 }
-var GeoCityCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var GeoCityCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -735,16 +738,16 @@ var GeoCityCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
 		})
 		entity := &GeoCityEntity{}
-		workspaces.PopulateInteractively(entity, c, GeoCityCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, GeoCityCommonInteractiveCliFlags)
 		if entity, err := GeoCityActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -754,8 +757,8 @@ var GeoCityUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoCityCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 		})
 		entity := CastGeoCityFromCli(c)
 		if entity, err := GeoCityActionUpdate(query, entity); err != nil {
@@ -799,8 +802,8 @@ func CastGeoCityFromCli(c *cli.Context) *GeoCityEntity {
 	return template
 }
 func GeoCitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GeoCityActionCreate,
 		reflect.ValueOf(&GeoCityEntity{}).Elem(),
 		fsRef,
@@ -809,8 +812,8 @@ func GeoCitySyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func GeoCitySyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		GeoCityActionCreate,
 		reflect.ValueOf(&GeoCityEntity{}).Elem(),
 		geoCitySeedersFs,
@@ -819,8 +822,8 @@ func GeoCitySyncSeeders() {
 	)
 }
 func GeoCityImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GeoCityActionCreate,
 		reflect.ValueOf(&GeoCityEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -828,19 +831,19 @@ func GeoCityImportMocks() {
 		false,
 	)
 }
-func GeoCityWriteQueryMock(ctx workspaces.MockQueryContext) {
+func GeoCityWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := GeoCityActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "GeoCity", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "GeoCity", result)
 	}
 }
-func GeoCitiesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func GeoCitiesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -852,7 +855,7 @@ func GeoCitiesActionQueryString(keyword string, page int) ([]string, *workspaces
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := GeoCityActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -878,8 +881,8 @@ var GeoCityImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
 			})
 			if c.Bool("batch") {
 				GeoCityActionSeederMultiple(query, c.Int("count"))
@@ -902,7 +905,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := GeoCityActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -926,7 +929,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of geo-cities, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]GeoCityEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -935,7 +938,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(geoCitySeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(geoCitySeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -948,7 +951,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GeoCityActionCreate,
 				reflect.ValueOf(&GeoCityEntity{}).Elem(),
 				geoCitySeedersFs,
@@ -960,7 +963,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -973,7 +976,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GeoCityActionCreate,
 				reflect.ValueOf(&GeoCityEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -984,7 +987,7 @@ var GeoCityImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -993,7 +996,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					GeoCityEntityStream,
 					reflect.ValueOf(&GeoCityEntity{}).Elem(),
 					c.String("file"),
@@ -1002,7 +1005,7 @@ var GeoCityImportExportCommands = []cli.Command{
 					GeoCityPreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					GeoCityActionQuery,
 					reflect.ValueOf(&GeoCityEntity{}).Elem(),
 					c.String("file"),
@@ -1018,7 +1021,7 @@ var GeoCityImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1028,12 +1031,12 @@ var GeoCityImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				GeoCityActionCreate,
 				reflect.ValueOf(&GeoCityEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
 				},
 				func() GeoCityEntity {
 					v := CastGeoCityFromCli(c)
@@ -1052,7 +1055,7 @@ var GeoCityCliCommands []cli.Command = []cli.Command{
 	GeoCityAskCmd,
 	GeoCityCreateInteractiveCmd,
 	GeoCityWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&GeoCityEntity{}).Elem(), GeoCityActionRemove),
 }
 
 func GeoCityCliFn() cli.Command {
@@ -1071,14 +1074,14 @@ func GeoCityCliFn() cli.Command {
 	}
 }
 
-var GEO_CITY_ACTION_TABLE = workspaces.Module3Action{
+var GEO_CITY_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        GeoCityActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			GeoCityActionQuery,
 			security,
 			reflect.ValueOf(&GeoCityEntity{}).Elem(),
@@ -1086,25 +1089,25 @@ var GEO_CITY_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var GEO_CITY_ACTION_QUERY = workspaces.Module3Action{
+var GEO_CITY_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-cities",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, GeoCityActionQuery)
+			fireback.HttpQueryEntity(c, GeoCityActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GeoCityActionQuery,
 	ResponseEntity: &[]GeoCityEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			GeoCityActionQuery,
 			security,
@@ -1114,138 +1117,138 @@ var GEO_CITY_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_CITY_ACTION_EXPORT = workspaces.Module3Action{
+var GEO_CITY_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-cities/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, GeoCityActionExport)
+			fireback.HttpStreamFileChannel(c, GeoCityActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GeoCityActionExport,
 	ResponseEntity: &[]GeoCityEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_GET_ONE = workspaces.Module3Action{
+var GEO_CITY_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-city/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, GeoCityActionGetOne)
+			fireback.HttpGetEntity(c, GeoCityActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         GeoCityActionGetOne,
 	ResponseEntity: &GeoCityEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_POST_ONE = workspaces.Module3Action{
+var GEO_CITY_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoCity",
 	Flags:         GeoCityCommonCliFlags,
 	Method:        "POST",
 	Url:           "/geo-city",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, GeoCityActionCreate)
+			fireback.HttpPostEntity(c, GeoCityActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, GeoCityActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, GeoCityActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         GeoCityActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoCityEntity{},
 	ResponseEntity: &GeoCityEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_PATCH = workspaces.Module3Action{
+var GEO_CITY_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoCityCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/geo-city",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, GeoCityActionUpdate)
+			fireback.HttpUpdateEntity(c, GeoCityActionUpdate)
 		},
 	},
 	Action:         GeoCityActionUpdate,
 	RequestEntity:  &GeoCityEntity{},
 	ResponseEntity: &GeoCityEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_PATCH_BULK = workspaces.Module3Action{
+var GEO_CITY_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-cities",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, GeoCityActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, GeoCityActionBulkUpdate)
 		},
 	},
 	Action:         GeoCityActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[GeoCityEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[GeoCityEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[GeoCityEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[GeoCityEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoCityEntity",
 	},
 }
-var GEO_CITY_ACTION_DELETE = workspaces.Module3Action{
+var GEO_CITY_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-city",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_CITY_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, GeoCityActionRemove)
+			fireback.HttpRemoveEntity(c, GeoCityActionRemove)
 		},
 	},
 	Action:         GeoCityActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &GeoCityEntity{},
 }
 
@@ -1253,10 +1256,10 @@ var GEO_CITY_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on GeoCityEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoCityRouter = func(r *[]workspaces.Module3Action) {}
+var AppendGeoCityRouter = func(r *[]fireback.Module3Action) {}
 
-func GetGeoCityModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetGeoCityModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		GEO_CITY_ACTION_QUERY,
 		GEO_CITY_ACTION_EXPORT,
 		GEO_CITY_ACTION_GET_ONE,
@@ -1270,34 +1273,34 @@ func GetGeoCityModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_GEO_CITY_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_CITY_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-city/delete",
 	Name:        "Delete geo city",
 }
-var PERM_ROOT_GEO_CITY_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_CITY_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-city/create",
 	Name:        "Create geo city",
 }
-var PERM_ROOT_GEO_CITY_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_CITY_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-city/update",
 	Name:        "Update geo city",
 }
-var PERM_ROOT_GEO_CITY_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_CITY_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-city/query",
 	Name:        "Query geo city",
 }
-var PERM_ROOT_GEO_CITY = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_CITY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-city/*",
 	Name:        "Entire geo city actions (*)",
 }
-var ALL_GEO_CITY_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_GEO_CITY_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_GEO_CITY_DELETE,
 	PERM_ROOT_GEO_CITY_CREATE,
 	PERM_ROOT_GEO_CITY_UPDATE,
 	PERM_ROOT_GEO_CITY_QUERY,
 	PERM_ROOT_GEO_CITY,
 }
-var GeoCityEntityBundle = workspaces.EntityBundle{
+var GeoCityEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_GEO_CITY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

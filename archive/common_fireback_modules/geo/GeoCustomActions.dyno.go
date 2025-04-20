@@ -6,13 +6,13 @@ package geo
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
-func GeoCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{}
+func GeoCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{}
 	return routes
 }
 
@@ -20,7 +20,7 @@ var GeoCustomActionsCli = []cli.Command{}
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var GeoCliActionsBundle = &workspaces.CliActionsBundle{
+var GeoCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "geo",
 	Usage: `Geo location tools, and data set, cities, and provinces2`,
 	// Here we will include entities actions, as well as module level actions
@@ -34,8 +34,8 @@ var GeoCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetGeoActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetGeoActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   GeoCustomActions(),
 		CliAction: GeoCliActionsBundle,
 	}

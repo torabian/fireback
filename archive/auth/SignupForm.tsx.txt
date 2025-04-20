@@ -7,7 +7,7 @@ import { FormikProps } from "formik";
 
 import Link from "../../components/link/Link";
 
-import { ClassicSignupActionReqDto } from "../../sdk/modules/workspaces/WorkspacesActionsDto";
+import { ClassicSignupActionReqDto } from "../../sdk/modules/fireback/WorkspacesActionsDto";
 import { AuthLoader } from "./AuthLoader";
 import { UserProfileCard } from "./UserProfileCard";
 

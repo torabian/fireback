@@ -5,11 +5,14 @@ package licenses
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/workspaces"
-import "encoding/json"
-import "github.com/urfave/cli"
-import "gopkg.in/yaml.v2"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
+)
 
 func LicensesJson() string {
 	e := cli.BoolFlag{}
@@ -22,10 +25,10 @@ func LicensesJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_LICENSES_EVERYTHING = workspaces.PermissionInfo{
+var PERM_ROOT_LICENSES_EVERYTHING = fireback.PermissionInfo{
 	CompleteKey: "root/licenses/*",
 }
-var ALL_PERM_LICENSES_MODULE = []workspaces.PermissionInfo{
+var ALL_PERM_LICENSES_MODULE = []fireback.PermissionInfo{
 	PERM_ROOT_LICENSES_EVERYTHING,
 }
 
@@ -39,7 +42,7 @@ var LicensesMessages = newLicensesMessageCode()
 
 func newLicensesMessageCode() *licensesMsgs {
 	return &licensesMsgs{
-		PrivateKeyIsMissing: workspaces.ErrorItem{
+		PrivateKeyIsMissing: fireback.ErrorItem{
 			"$":  "PrivateKeyIsMissing",
 			"en": "Private key is missing",
 		},
@@ -47,5 +50,5 @@ func newLicensesMessageCode() *licensesMsgs {
 }
 
 type licensesMsgs struct {
-	PrivateKeyIsMissing workspaces.ErrorItem
+	PrivateKeyIsMissing fireback.ErrorItem
 }

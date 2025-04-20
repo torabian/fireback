@@ -70,7 +70,7 @@ export function usePatchPublicJoinKey(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<PublicJoinKeyEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.PublicJoinKeyEntity",
+            "*fireback.PublicJoinKeyEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

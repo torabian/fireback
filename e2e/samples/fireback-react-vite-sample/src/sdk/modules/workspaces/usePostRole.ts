@@ -70,7 +70,7 @@ export function usePostRole(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<RoleEntity>) {
           queryClient?.setQueryData<IResponseList<RoleEntity>>(
-            "*workspaces.RoleEntity",
+            "*fireback.RoleEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

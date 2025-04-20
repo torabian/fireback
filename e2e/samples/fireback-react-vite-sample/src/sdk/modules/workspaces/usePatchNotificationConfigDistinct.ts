@@ -70,7 +70,7 @@ export function usePatchNotificationConfigDistinct(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<NotificationConfigEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.NotificationConfigEntity",
+            "*fireback.NotificationConfigEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

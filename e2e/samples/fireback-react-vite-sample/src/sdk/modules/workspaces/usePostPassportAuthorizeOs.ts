@@ -71,7 +71,7 @@ export function usePostPassportAuthorizeOs(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<UserSessionDto>) {
           queryClient?.setQueryData<IResponseList<UserSessionDto>>(
-            "*workspaces.UserSessionDto",
+            "*fireback.UserSessionDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

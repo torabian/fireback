@@ -8,55 +8,55 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 var ROOT_VAR = "root"
 
 // Bare minimum handler
 
-type WithAuthorizationPureImpl func(context *workspaces.AuthContextDto) (*workspaces.AuthResultDto, *workspaces.IError)
+type WithAuthorizationPureImpl func(context *fireback.AuthContextDto) (*fireback.AuthResultDto, *fireback.IError)
 
 // Default authorization compute function for Fireback ABAC.
 // You can get inspired by this function and make the authorization
-func WithAuthorizationPureDefault(context *workspaces.AuthContextDto) (*workspaces.AuthResultDto, *workspaces.IError) {
-	result := &workspaces.AuthResultDto{}
+func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.AuthResultDto, *fireback.IError) {
+	result := &fireback.AuthResultDto{}
 
 	// workspaceId := context.WorkspaceId
 	token := context.Token
 
 	if token == "" {
-		return nil, workspaces.Create401Error(&AbacMessages.ProvideTokenInAuthorization, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.ProvideTokenInAuthorization, []string{})
 	}
 
 	user, err := GetUserFromToken(token)
 
 	if err != nil {
-		return nil, workspaces.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
 	}
 
 	if user == nil {
-		return nil, workspaces.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
 	}
 
-	access, accessError := GetUserAccessLevels(workspaces.QueryDSL{UserId: user.UniqueId})
+	access, accessError := GetUserAccessLevels(fireback.QueryDSL{UserId: user.UniqueId})
 
 	if accessError != nil {
 		return nil, accessError
 	}
 
-	query := workspaces.QueryDSL{
+	query := fireback.QueryDSL{
 		UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 		ActionRequires:         context.Capabilities,
 	}
 
-	meets, missing := workspaces.MeetsAccessLevel(query, false)
+	meets, missing := fireback.MeetsAccessLevel(query, false)
 
 	if !meets {
-		return nil, workspaces.Create401Error(&AbacMessages.NotEnoughPermission, missing)
+		return nil, fireback.Create401Error(&AbacMessages.NotEnoughPermission, missing)
 	}
 
-	result.UserId = workspaces.NewString(user.UniqueId)
+	result.UserId = fireback.NewString(user.UniqueId)
 
 	result.UserAccessPerWorkspace = access.UserAccessPerWorkspace
 	result.SqlContext = GetSqlContext(access.UserAccessPerWorkspace, context.WorkspaceId, context.AllowCascade)
@@ -70,7 +70,7 @@ func WithAuthorizationPureDefault(context *workspaces.AuthContextDto) (*workspac
 	// Fix this allow only on root.
 	if context.Security != nil && context.Security.AllowOnRoot {
 		if context.WorkspaceId != ROOT_VAR {
-			return nil, &workspaces.IError{
+			return nil, &fireback.IError{
 				HttpCode: 400,
 				Message:  AbacMessages.ActionOnlyInRoot,
 			}
@@ -98,10 +98,10 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 		wi := r.Header.Get("Workspace-id")
 		tk := r.Header.Get("authorization")
 
-		context := &workspaces.AuthContextDto{
+		context := &fireback.AuthContextDto{
 			WorkspaceId:  wi,
 			Token:        tk,
-			Capabilities: []workspaces.PermissionInfo{},
+			Capabilities: []fireback.PermissionInfo{},
 		}
 
 		_, err := WithAuthorizationPureDefault(context)
@@ -115,13 +115,13 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 	})
 }
 
-func WithAuthorization(securityModel *workspaces.SecurityModel) gin.HandlerFunc {
+func WithAuthorization(securityModel *fireback.SecurityModel) gin.HandlerFunc {
 	return WithAuthorizationFn(securityModel)
 }
 
 var USER_SYSTEM = "system"
 
-func WithSocketAuthorization(securityModel *workspaces.SecurityModel) gin.HandlerFunc {
+func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
@@ -146,7 +146,7 @@ func WithSocketAuthorization(securityModel *workspaces.SecurityModel) gin.Handle
 			uniqueId = wsURLParam["uniqueId"][0]
 		}
 
-		context := &workspaces.AuthContextDto{
+		context := &fireback.AuthContextDto{
 			WorkspaceId:  workspaceId,
 			Token:        token,
 			Capabilities: securityModel.ActionRequires,
@@ -169,16 +169,16 @@ func WithSocketAuthorization(securityModel *workspaces.SecurityModel) gin.Handle
 	}
 }
 
-func WithAuthorizationFn(securityModel *workspaces.SecurityModel) gin.HandlerFunc {
+func WithAuthorizationFn(securityModel *fireback.SecurityModel) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
-		q := workspaces.ExtractQueryDslFromGinContext(c)
+		q := fireback.ExtractQueryDslFromGinContext(c)
 		wi := c.GetHeader("Workspace-id")
 		ri := c.GetHeader("Role-id")
 		tk := c.GetHeader("Authorization")
 
-		context := &workspaces.AuthContextDto{
+		context := &fireback.AuthContextDto{
 			WorkspaceId:  wi,
 			Token:        tk,
 			Capabilities: securityModel.ActionRequires,
@@ -206,7 +206,7 @@ func WithAuthorizationFn(securityModel *workspaces.SecurityModel) gin.HandlerFun
 
 // It would convert the current selected role_id and workspace_id into a sql
 // with given permissions to make the queries do not need check that again
-func GetSqlContext(x *workspaces.UserAccessPerWorkspaceDto, activeWorkspaceId string, allowCascade bool) string {
+func GetSqlContext(x *fireback.UserAccessPerWorkspaceDto, activeWorkspaceId string, allowCascade bool) string {
 	conditions := []string{
 
 		// Visibility A means that the content is accessible across the entire project.

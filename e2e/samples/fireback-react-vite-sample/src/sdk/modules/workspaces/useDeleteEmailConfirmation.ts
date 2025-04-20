@@ -58,10 +58,10 @@ export function useDeleteEmailConfirmation(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.EmailConfirmationEntity",
+            "*fireback.EmailConfirmationEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.EmailConfirmationEntity");
+          queryClient?.invalidateQueries("*fireback.EmailConfirmationEntity");
           resolve(response);
         },
         onError(error: any) {

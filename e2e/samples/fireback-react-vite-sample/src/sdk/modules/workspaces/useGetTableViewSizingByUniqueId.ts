@@ -72,7 +72,7 @@ export function useGetTableViewSizingByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.TableViewSizingEntity"],
+    [options, query, "*fireback.TableViewSizingEntity"],
     fn,
     {
       cacheTime: 1001,

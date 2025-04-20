@@ -57,7 +57,7 @@ export function useGetUserPassports({
     any,
     IResponseList<UserPassportsActionResDto>,
     any
-  >(["*workspaces.UserPassportsActionResDto", computedOptions, query], fn, {
+  >(["*fireback.UserPassportsActionResDto", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
@@ -72,4 +72,4 @@ export function useGetUserPassports({
     keyExtractor: (item: UserPassportsActionResDto) => item.uniqueId,
   };
 }
-useGetUserPassports.UKEY = "*workspaces.UserPassportsActionResDto";
+useGetUserPassports.UKEY = "*fireback.UserPassportsActionResDto";

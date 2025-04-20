@@ -55,7 +55,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "designer": "cd ../../modules/workspaces/codegen/react-new && npm run designer:build && cd - && rm -rf out && mkdir out && cp -R ../../modules/workspaces/codegen/react-new/build/* out && npm run compile",
+    "designer": "cd ../../modules/fireback/codegen/react-new && npm run designer:build && cd - && rm -rf out && mkdir out && cp -R ../../modules/fireback/codegen/react-new/build/* out && npm run compile",
     "compile": "tsc -p ./",
     "package": "npm run designer && npm run compile && mkdir -p ../../artifacts/fireback-vscode && vsce package -o ../../artifacts/fireback-vscode/fireback-tools.vsix",
     "watch": "tsc -watch -p ./",

@@ -72,7 +72,7 @@ export function useGetBackupTableMetaByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.BackupTableMetaEntity"],
+    [options, query, "*fireback.BackupTableMetaEntity"],
     fn,
     {
       cacheTime: 1001,

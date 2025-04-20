@@ -6,13 +6,13 @@ package tags
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
-func TagsCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{}
+func TagsCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{}
 	return routes
 }
 
@@ -20,7 +20,7 @@ var TagsCustomActionsCli = []cli.Command{}
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var TagsCliActionsBundle = &workspaces.CliActionsBundle{
+var TagsCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "tags",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
@@ -29,8 +29,8 @@ var TagsCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetTagsActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetTagsActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   TagsCustomActions(),
 		CliAction: TagsCliActionsBundle,
 	}

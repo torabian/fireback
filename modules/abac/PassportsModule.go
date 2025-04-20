@@ -2,13 +2,13 @@ package abac
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
-func PassportsModuleSetup() *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func PassportsModuleSetup() *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 
 		// it must write on the workspaces instead
 		Name: "abac",
@@ -19,7 +19,7 @@ func PassportsModuleSetup() *workspaces.ModuleProvider {
 			var result *UserSessionDto
 			if result != nil {
 
-				workspaces.WriteMockDataToFile(lang, "", "UserSessionDto", gin.H{
+				fireback.WriteMockDataToFile(lang, "", "UserSessionDto", gin.H{
 					"data": gin.H{
 						"user":     result.User,
 						"passport": result.Passport,
@@ -39,7 +39,7 @@ func PassportsModuleSetup() *workspaces.ModuleProvider {
 		ALL_USER_PERMISSIONS,
 	)
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetPassportMethodModule3Actions(),
 		GetPassportModule3Actions(),
 		GetPublicJoinKeyModule3Actions(),

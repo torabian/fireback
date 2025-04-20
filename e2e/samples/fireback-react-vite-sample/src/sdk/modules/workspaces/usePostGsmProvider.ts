@@ -70,7 +70,7 @@ export function usePostGsmProvider(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<GsmProviderEntity>) {
           queryClient?.setQueryData<IResponseList<GsmProviderEntity>>(
-            "*workspaces.GsmProviderEntity",
+            "*fireback.GsmProviderEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

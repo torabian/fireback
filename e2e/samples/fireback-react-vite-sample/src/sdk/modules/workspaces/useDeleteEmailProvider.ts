@@ -58,10 +58,10 @@ export function useDeleteEmailProvider(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.EmailProviderEntity",
+            "*fireback.EmailProviderEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.EmailProviderEntity");
+          queryClient?.invalidateQueries("*fireback.EmailProviderEntity");
           resolve(response);
         },
         onError(error: any) {

@@ -7,7 +7,7 @@ package abac
  */
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
@@ -26,8 +26,8 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
-var AcceptInviteSecurityModel = &workspaces.SecurityModel{
-	ActionRequires:  []workspaces.PermissionInfo{},
+var AcceptInviteSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
 }
 
@@ -48,8 +48,8 @@ var AcceptInviteCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func AcceptInviteActionReqValidator(dto *AcceptInviteActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func AcceptInviteActionReqValidator(dto *AcceptInviteActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastAcceptInviteFromCli(c *cli.Context) *AcceptInviteActionReqDto {
@@ -62,18 +62,18 @@ func CastAcceptInviteFromCli(c *cli.Context) *AcceptInviteActionReqDto {
 
 type acceptInviteActionImpSig func(
 	req *AcceptInviteActionReqDto,
-	q workspaces.QueryDSL) (string,
-	*workspaces.IError,
+	q fireback.QueryDSL) (string,
+	*fireback.IError,
 )
 
 var AcceptInviteActionImp acceptInviteActionImpSig
 
 func AcceptInviteActionFn(
 	req *AcceptInviteActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	string,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if AcceptInviteActionImp == nil {
 		return "", nil
@@ -86,13 +86,13 @@ var AcceptInviteActionCmd cli.Command = cli.Command{
 	Usage: `Use it when user accepts an invitation, and it will complete the joining process`,
 	Flags: AcceptInviteCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, AcceptInviteSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, AcceptInviteSecurityModel)
 		dto := CastAcceptInviteFromCli(c)
 		result, err := AcceptInviteActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var OauthAuthenticateSecurityModel *workspaces.SecurityModel = nil
+var OauthAuthenticateSecurityModel *fireback.SecurityModel = nil
 
 type OauthAuthenticateActionReqDto struct {
 	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
@@ -118,8 +118,8 @@ var OauthAuthenticateCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func OauthAuthenticateActionReqValidator(dto *OauthAuthenticateActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func OauthAuthenticateActionReqValidator(dto *OauthAuthenticateActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastOauthAuthenticateFromCli(c *cli.Context) *OauthAuthenticateActionReqDto {
@@ -134,8 +134,8 @@ func CastOauthAuthenticateFromCli(c *cli.Context) *OauthAuthenticateActionReqDto
 }
 
 type OauthAuthenticateActionResDto struct {
-	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
+	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// The next possible action which is suggested.
 	Next []string `json:"next" xml:"next" yaml:"next"        `
 }
@@ -146,18 +146,18 @@ func (x *OauthAuthenticateActionResDto) RootObjectName() string {
 
 type oauthAuthenticateActionImpSig func(
 	req *OauthAuthenticateActionReqDto,
-	q workspaces.QueryDSL) (*OauthAuthenticateActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*OauthAuthenticateActionResDto,
+	*fireback.IError,
 )
 
 var OauthAuthenticateActionImp oauthAuthenticateActionImpSig
 
 func OauthAuthenticateActionFn(
 	req *OauthAuthenticateActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*OauthAuthenticateActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if OauthAuthenticateActionImp == nil {
 		return nil, nil
@@ -170,14 +170,14 @@ var OauthAuthenticateActionCmd cli.Command = cli.Command{
 	Usage: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
 	Flags: OauthAuthenticateCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, OauthAuthenticateSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OauthAuthenticateSecurityModel)
 		dto := CastOauthAuthenticateFromCli(c)
 		result, err := OauthAuthenticateActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var UserPassportsSecurityModel = &workspaces.SecurityModel{
-	ActionRequires:  []workspaces.PermissionInfo{},
+var UserPassportsSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
 }
 
@@ -197,19 +197,19 @@ func (x *UserPassportsActionResDto) RootObjectName() string {
 }
 
 type userPassportsActionImpSig func(
-	q workspaces.QueryDSL) ([]*UserPassportsActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	q fireback.QueryDSL) ([]*UserPassportsActionResDto,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 )
 
 var UserPassportsActionImp userPassportsActionImpSig
 
 func UserPassportsActionFn(
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	[]*UserPassportsActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 ) {
 	if UserPassportsActionImp == nil {
 		return nil, nil, nil
@@ -220,15 +220,15 @@ func UserPassportsActionFn(
 var UserPassportsActionCmd cli.Command = cli.Command{
 	Name:  "user-passports",
 	Usage: `Returns list of passports belongs to an specific user.`,
-	Flags: workspaces.CommonQueryFlags,
+	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, UserPassportsSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserPassportsSecurityModel)
 		result, _, err := UserPassportsActionFn(query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ChangePasswordSecurityModel = &workspaces.SecurityModel{
-	ActionRequires:  []workspaces.PermissionInfo{},
+var ChangePasswordSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
 }
 
@@ -256,8 +256,8 @@ var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ChangePasswordActionReqValidator(dto *ChangePasswordActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ChangePasswordActionReqValidator(dto *ChangePasswordActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastChangePasswordFromCli(c *cli.Context) *ChangePasswordActionReqDto {
@@ -273,18 +273,18 @@ func CastChangePasswordFromCli(c *cli.Context) *ChangePasswordActionReqDto {
 
 type changePasswordActionImpSig func(
 	req *ChangePasswordActionReqDto,
-	q workspaces.QueryDSL) (string,
-	*workspaces.IError,
+	q fireback.QueryDSL) (string,
+	*fireback.IError,
 )
 
 var ChangePasswordActionImp changePasswordActionImpSig
 
 func ChangePasswordActionFn(
 	req *ChangePasswordActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	string,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ChangePasswordActionImp == nil {
 		return "", nil
@@ -297,31 +297,31 @@ var ChangePasswordActionCmd cli.Command = cli.Command{
 	Usage: `Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.`,
 	Flags: ChangePasswordCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
 		dto := CastChangePasswordFromCli(c)
 		result, err := ChangePasswordActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var UserInvitationsSecurityModel = &workspaces.SecurityModel{
-	ActionRequires:  []workspaces.PermissionInfo{},
+var UserInvitationsSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
 }
 
 type userInvitationsActionImpSig func(
-	q workspaces.QueryDSL) ([]*UserInvitationsQueryColumns,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	q fireback.QueryDSL) ([]*UserInvitationsQueryColumns,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 )
 
 var UserInvitationsActionImp userInvitationsActionImpSig
 
 func UserInvitationsActionFn(
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	[]*UserInvitationsQueryColumns,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 ) {
 	if UserInvitationsActionImp == nil {
 		return nil, nil, nil
@@ -332,14 +332,14 @@ func UserInvitationsActionFn(
 var UserInvitationsActionCmd cli.Command = cli.Command{
 	Name:  "user-invitations",
 	Usage: `Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.`,
-	Flags: workspaces.CommonQueryFlags,
+	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
 		result, _, err := UserInvitationsActionFn(query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ConfirmClassicPassportTotpSecurityModel *workspaces.SecurityModel = nil
+var ConfirmClassicPassportTotpSecurityModel *fireback.SecurityModel = nil
 
 type ConfirmClassicPassportTotpActionReqDto struct {
 	// Passport value, email or phone number which is already successfully registered.
@@ -372,8 +372,8 @@ var ConfirmClassicPassportTotpCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ConfirmClassicPassportTotpActionReqValidator(dto *ConfirmClassicPassportTotpActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ConfirmClassicPassportTotpActionReqValidator(dto *ConfirmClassicPassportTotpActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastConfirmClassicPassportTotpFromCli(c *cli.Context) *ConfirmClassicPassportTotpActionReqDto {
@@ -391,8 +391,8 @@ func CastConfirmClassicPassportTotpFromCli(c *cli.Context) *ConfirmClassicPasspo
 }
 
 type ConfirmClassicPassportTotpActionResDto struct {
-	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
+	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 }
 
 func (x *ConfirmClassicPassportTotpActionResDto) RootObjectName() string {
@@ -401,18 +401,18 @@ func (x *ConfirmClassicPassportTotpActionResDto) RootObjectName() string {
 
 type confirmClassicPassportTotpActionImpSig func(
 	req *ConfirmClassicPassportTotpActionReqDto,
-	q workspaces.QueryDSL) (*ConfirmClassicPassportTotpActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*ConfirmClassicPassportTotpActionResDto,
+	*fireback.IError,
 )
 
 var ConfirmClassicPassportTotpActionImp confirmClassicPassportTotpActionImpSig
 
 func ConfirmClassicPassportTotpActionFn(
 	req *ConfirmClassicPassportTotpActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*ConfirmClassicPassportTotpActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ConfirmClassicPassportTotpActionImp == nil {
 		return nil, nil
@@ -425,13 +425,13 @@ var ConfirmClassicPassportTotpActionCmd cli.Command = cli.Command{
 	Usage: `When user requires to setup the totp for an specifc passport, they can use this endpoint to confirm it.`,
 	Flags: ConfirmClassicPassportTotpCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ConfirmClassicPassportTotpSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ConfirmClassicPassportTotpSecurityModel)
 		dto := CastConfirmClassicPassportTotpFromCli(c)
 		result, err := ConfirmClassicPassportTotpActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var CheckPassportMethodsSecurityModel *workspaces.SecurityModel = nil
+var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
 
 type CheckPassportMethodsActionResDto struct {
 	Email                bool   `json:"email" xml:"email" yaml:"email"        `
@@ -447,17 +447,17 @@ func (x *CheckPassportMethodsActionResDto) RootObjectName() string {
 }
 
 type checkPassportMethodsActionImpSig func(
-	q workspaces.QueryDSL) (*CheckPassportMethodsActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*CheckPassportMethodsActionResDto,
+	*fireback.IError,
 )
 
 var CheckPassportMethodsActionImp checkPassportMethodsActionImpSig
 
 func CheckPassportMethodsActionFn(
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*CheckPassportMethodsActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if CheckPassportMethodsActionImp == nil {
 		return nil, nil
@@ -469,12 +469,12 @@ var CheckPassportMethodsActionCmd cli.Command = cli.Command{
 	Name:  "check-passport-methods",
 	Usage: `Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)`,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
 		result, err := CheckPassportMethodsActionFn(query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var QueryWorkspaceTypesPubliclySecurityModel *workspaces.SecurityModel = nil
+var QueryWorkspaceTypesPubliclySecurityModel *fireback.SecurityModel = nil
 
 type QueryWorkspaceTypesPubliclyActionResDto struct {
 	Title       string `json:"title" xml:"title" yaml:"title"        `
@@ -488,19 +488,19 @@ func (x *QueryWorkspaceTypesPubliclyActionResDto) RootObjectName() string {
 }
 
 type queryWorkspaceTypesPubliclyActionImpSig func(
-	q workspaces.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	q fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 )
 
 var QueryWorkspaceTypesPubliclyActionImp queryWorkspaceTypesPubliclyActionImpSig
 
 func QueryWorkspaceTypesPubliclyActionFn(
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	[]*QueryWorkspaceTypesPubliclyActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 ) {
 	if QueryWorkspaceTypesPubliclyActionImp == nil {
 		return nil, nil, nil
@@ -511,15 +511,15 @@ func QueryWorkspaceTypesPubliclyActionFn(
 var QueryWorkspaceTypesPubliclyActionCmd cli.Command = cli.Command{
 	Name:  "public-types",
 	Usage: `Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.`,
-	Flags: workspaces.CommonQueryFlags,
+	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPubliclySecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPubliclySecurityModel)
 		result, _, err := QueryWorkspaceTypesPubliclyActionFn(query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var QueryUserRoleWorkspacesSecurityModel = &workspaces.SecurityModel{
-	ActionRequires:  []workspaces.PermissionInfo{},
+var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
 }
 
@@ -536,19 +536,19 @@ func (x *QueryUserRoleWorkspacesActionResDto) RootObjectName() string {
 }
 
 type queryUserRoleWorkspacesActionImpSig func(
-	q workspaces.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	q fireback.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 )
 
 var QueryUserRoleWorkspacesActionImp queryUserRoleWorkspacesActionImpSig
 
 func QueryUserRoleWorkspacesActionFn(
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	[]*QueryUserRoleWorkspacesActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 ) {
 	if QueryUserRoleWorkspacesActionImp == nil {
 		return nil, nil, nil
@@ -559,26 +559,26 @@ func QueryUserRoleWorkspacesActionFn(
 var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
 	Name:  "urw",
 	Usage: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
-	Flags: workspaces.CommonQueryFlags,
+	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
 		result, _, err := QueryUserRoleWorkspacesActionFn(query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ReactiveSearchSecurityModel *workspaces.SecurityModel = nil
-var ReactiveSearchActionImp = workspaces.DefaultEmptyReactiveAction
+var ReactiveSearchSecurityModel *fireback.SecurityModel = nil
+var ReactiveSearchActionImp = fireback.DefaultEmptyReactiveAction
 
 // Reactive action does not have that
 var ReactiveSearchActionCmd cli.Command = cli.Command{
 	Name:  "reactive-search",
 	Usage: `Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.`,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ReactiveSearchSecurityModel)
-		workspaces.CliReactivePipeHandler(query, ReactiveSearchActionImp)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ReactiveSearchSecurityModel)
+		fireback.CliReactivePipeHandler(query, ReactiveSearchActionImp)
 	},
 }
-var ImportUserSecurityModel *workspaces.SecurityModel = nil
+var ImportUserSecurityModel *fireback.SecurityModel = nil
 
 type ImportUserActionReqDto struct {
 	Path string `json:"path" xml:"path" yaml:"path"        `
@@ -596,8 +596,8 @@ var ImportUserCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ImportUserActionReqValidator(dto *ImportUserActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ImportUserActionReqValidator(dto *ImportUserActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastImportUserFromCli(c *cli.Context) *ImportUserActionReqDto {
@@ -610,18 +610,18 @@ func CastImportUserFromCli(c *cli.Context) *ImportUserActionReqDto {
 
 type importUserActionImpSig func(
 	req *ImportUserActionReqDto,
-	q workspaces.QueryDSL) (*OkayResponseDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*OkayResponseDto,
+	*fireback.IError,
 )
 
 var ImportUserActionImp importUserActionImpSig
 
 func ImportUserActionFn(
 	req *ImportUserActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*OkayResponseDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ImportUserActionImp == nil {
 		return nil, nil
@@ -634,13 +634,13 @@ var ImportUserActionCmd cli.Command = cli.Command{
 	Usage: `Imports users, and creates their passports, and all details`,
 	Flags: ImportUserCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ImportUserSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ImportUserSecurityModel)
 		dto := CastImportUserFromCli(c)
 		result, err := ImportUserActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var SendEmailSecurityModel *workspaces.SecurityModel = nil
+var SendEmailSecurityModel *fireback.SecurityModel = nil
 
 type SendEmailActionReqDto struct {
 	ToAddress string `json:"toAddress" xml:"toAddress" yaml:"toAddress"  validate:"required"        `
@@ -664,8 +664,8 @@ var SendEmailCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func SendEmailActionReqValidator(dto *SendEmailActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func SendEmailActionReqValidator(dto *SendEmailActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastSendEmailFromCli(c *cli.Context) *SendEmailActionReqDto {
@@ -689,18 +689,18 @@ func (x *SendEmailActionResDto) RootObjectName() string {
 
 type sendEmailActionImpSig func(
 	req *SendEmailActionReqDto,
-	q workspaces.QueryDSL) (*SendEmailActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*SendEmailActionResDto,
+	*fireback.IError,
 )
 
 var SendEmailActionImp sendEmailActionImpSig
 
 func SendEmailActionFn(
 	req *SendEmailActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*SendEmailActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if SendEmailActionImp == nil {
 		return nil, nil
@@ -713,17 +713,17 @@ var SendEmailActionCmd cli.Command = cli.Command{
 	Usage: `Send a email using default root notification configuration`,
 	Flags: SendEmailCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
 		dto := CastSendEmailFromCli(c)
 		result, err := SendEmailActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var SendEmailWithProviderSecurityModel *workspaces.SecurityModel = nil
+var SendEmailWithProviderSecurityModel *fireback.SecurityModel = nil
 
 type SendEmailWithProviderActionReqDto struct {
 	EmailProvider   *EmailProviderEntity `json:"emailProvider" xml:"emailProvider" yaml:"emailProvider"    gorm:"foreignKey:EmailProviderId;references:UniqueId"      `
-	EmailProviderId workspaces.String    `json:"emailProviderId" yaml:"emailProviderId" xml:"emailProviderId"  `
+	EmailProviderId fireback.String      `json:"emailProviderId" yaml:"emailProviderId" xml:"emailProviderId"  `
 	ToAddress       string               `json:"toAddress" xml:"toAddress" yaml:"toAddress"  validate:"required"        `
 	Body            string               `json:"body" xml:"body" yaml:"body"  validate:"required"        `
 }
@@ -750,14 +750,14 @@ var SendEmailWithProviderCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func SendEmailWithProviderActionReqValidator(dto *SendEmailWithProviderActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func SendEmailWithProviderActionReqValidator(dto *SendEmailWithProviderActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastSendEmailWithProviderFromCli(c *cli.Context) *SendEmailWithProviderActionReqDto {
 	template := &SendEmailWithProviderActionReqDto{}
 	if c.IsSet("email-provider-id") {
-		template.EmailProviderId = workspaces.NewStringAutoNull(c.String("email-provider-id"))
+		template.EmailProviderId = fireback.NewStringAutoNull(c.String("email-provider-id"))
 	}
 	if c.IsSet("to-address") {
 		template.ToAddress = c.String("to-address")
@@ -778,18 +778,18 @@ func (x *SendEmailWithProviderActionResDto) RootObjectName() string {
 
 type sendEmailWithProviderActionImpSig func(
 	req *SendEmailWithProviderActionReqDto,
-	q workspaces.QueryDSL) (*SendEmailWithProviderActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*SendEmailWithProviderActionResDto,
+	*fireback.IError,
 )
 
 var SendEmailWithProviderActionImp sendEmailWithProviderActionImpSig
 
 func SendEmailWithProviderActionFn(
 	req *SendEmailWithProviderActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*SendEmailWithProviderActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if SendEmailWithProviderActionImp == nil {
 		return nil, nil
@@ -802,28 +802,28 @@ var SendEmailWithProviderActionCmd cli.Command = cli.Command{
 	Usage: `Send a text message using an specific gsm provider`,
 	Flags: SendEmailWithProviderCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
 		dto := CastSendEmailWithProviderFromCli(c)
 		result, err := SendEmailWithProviderActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var InviteToWorkspaceSecurityModel *workspaces.SecurityModel = nil
+var InviteToWorkspaceSecurityModel *fireback.SecurityModel = nil
 
 type inviteToWorkspaceActionImpSig func(
 	req *WorkspaceInviteEntity,
-	q workspaces.QueryDSL) (*WorkspaceInviteEntity,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*WorkspaceInviteEntity,
+	*fireback.IError,
 )
 
 var InviteToWorkspaceActionImp inviteToWorkspaceActionImpSig
 
 func InviteToWorkspaceActionFn(
 	req *WorkspaceInviteEntity,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*WorkspaceInviteEntity,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if InviteToWorkspaceActionImp == nil {
 		return nil, nil
@@ -836,13 +836,13 @@ var InviteToWorkspaceActionCmd cli.Command = cli.Command{
 	Usage: `Invite a new person (either a user, with passport or without passport)`,
 	Flags: WorkspaceInviteCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
 		dto := CastWorkspaceInviteFromCli(c)
 		result, err := InviteToWorkspaceActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var GsmSendSmsSecurityModel *workspaces.SecurityModel = nil
+var GsmSendSmsSecurityModel *fireback.SecurityModel = nil
 
 type GsmSendSmsActionReqDto struct {
 	ToNumber string `json:"toNumber" xml:"toNumber" yaml:"toNumber"  validate:"required"        `
@@ -866,8 +866,8 @@ var GsmSendSmsCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func GsmSendSmsActionReqValidator(dto *GsmSendSmsActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func GsmSendSmsActionReqValidator(dto *GsmSendSmsActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastGsmSendSmsFromCli(c *cli.Context) *GsmSendSmsActionReqDto {
@@ -891,18 +891,18 @@ func (x *GsmSendSmsActionResDto) RootObjectName() string {
 
 type gsmSendSmsActionImpSig func(
 	req *GsmSendSmsActionReqDto,
-	q workspaces.QueryDSL) (*GsmSendSmsActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*GsmSendSmsActionResDto,
+	*fireback.IError,
 )
 
 var GsmSendSmsActionImp gsmSendSmsActionImpSig
 
 func GsmSendSmsActionFn(
 	req *GsmSendSmsActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*GsmSendSmsActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if GsmSendSmsActionImp == nil {
 		return nil, nil
@@ -915,17 +915,17 @@ var GsmSendSmsActionCmd cli.Command = cli.Command{
 	Usage: `Send a text message using default root notification configuration`,
 	Flags: GsmSendSmsCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
 		dto := CastGsmSendSmsFromCli(c)
 		result, err := GsmSendSmsActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var GsmSendSmsWithProviderSecurityModel *workspaces.SecurityModel = nil
+var GsmSendSmsWithProviderSecurityModel *fireback.SecurityModel = nil
 
 type GsmSendSmsWithProviderActionReqDto struct {
 	GsmProvider   *GsmProviderEntity `json:"gsmProvider" xml:"gsmProvider" yaml:"gsmProvider"    gorm:"foreignKey:GsmProviderId;references:UniqueId"      `
-	GsmProviderId workspaces.String  `json:"gsmProviderId" yaml:"gsmProviderId" xml:"gsmProviderId"  `
+	GsmProviderId fireback.String    `json:"gsmProviderId" yaml:"gsmProviderId" xml:"gsmProviderId"  `
 	ToNumber      string             `json:"toNumber" xml:"toNumber" yaml:"toNumber"  validate:"required"        `
 	Body          string             `json:"body" xml:"body" yaml:"body"  validate:"required"        `
 }
@@ -952,14 +952,14 @@ var GsmSendSmsWithProviderCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func GsmSendSmsWithProviderActionReqValidator(dto *GsmSendSmsWithProviderActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func GsmSendSmsWithProviderActionReqValidator(dto *GsmSendSmsWithProviderActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastGsmSendSmsWithProviderFromCli(c *cli.Context) *GsmSendSmsWithProviderActionReqDto {
 	template := &GsmSendSmsWithProviderActionReqDto{}
 	if c.IsSet("gsm-provider-id") {
-		template.GsmProviderId = workspaces.NewStringAutoNull(c.String("gsm-provider-id"))
+		template.GsmProviderId = fireback.NewStringAutoNull(c.String("gsm-provider-id"))
 	}
 	if c.IsSet("to-number") {
 		template.ToNumber = c.String("to-number")
@@ -980,18 +980,18 @@ func (x *GsmSendSmsWithProviderActionResDto) RootObjectName() string {
 
 type gsmSendSmsWithProviderActionImpSig func(
 	req *GsmSendSmsWithProviderActionReqDto,
-	q workspaces.QueryDSL) (*GsmSendSmsWithProviderActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*GsmSendSmsWithProviderActionResDto,
+	*fireback.IError,
 )
 
 var GsmSendSmsWithProviderActionImp gsmSendSmsWithProviderActionImpSig
 
 func GsmSendSmsWithProviderActionFn(
 	req *GsmSendSmsWithProviderActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*GsmSendSmsWithProviderActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if GsmSendSmsWithProviderActionImp == nil {
 		return nil, nil
@@ -1004,13 +1004,13 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 	Usage: `Send a text message using an specific gsm provider`,
 	Flags: GsmSendSmsWithProviderCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
 		dto := CastGsmSendSmsWithProviderFromCli(c)
 		result, err := GsmSendSmsWithProviderActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicSigninSecurityModel *workspaces.SecurityModel = nil
+var ClassicSigninSecurityModel *fireback.SecurityModel = nil
 
 type ClassicSigninActionReqDto struct {
 	Value    string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
@@ -1048,8 +1048,8 @@ var ClassicSigninCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ClassicSigninActionReqValidator(dto *ClassicSigninActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ClassicSigninActionReqValidator(dto *ClassicSigninActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastClassicSigninFromCli(c *cli.Context) *ClassicSigninActionReqDto {
@@ -1070,8 +1070,8 @@ func CastClassicSigninFromCli(c *cli.Context) *ClassicSigninActionReqDto {
 }
 
 type ClassicSigninActionResDto struct {
-	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
+	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// The next possible action which is suggested.
 	Next []string `json:"next" xml:"next" yaml:"next"        `
 	// In case the account doesn't have totp, but enforced by installation, this value will contain the link
@@ -1086,18 +1086,18 @@ func (x *ClassicSigninActionResDto) RootObjectName() string {
 
 type classicSigninActionImpSig func(
 	req *ClassicSigninActionReqDto,
-	q workspaces.QueryDSL) (*ClassicSigninActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*ClassicSigninActionResDto,
+	*fireback.IError,
 )
 
 var ClassicSigninActionImp classicSigninActionImpSig
 
 func ClassicSigninActionFn(
 	req *ClassicSigninActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*ClassicSigninActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ClassicSigninActionImp == nil {
 		return nil, nil
@@ -1110,25 +1110,25 @@ var ClassicSigninActionCmd cli.Command = cli.Command{
 	Usage: `Signin publicly to and account using class passports (email, password)`,
 	Flags: ClassicSigninCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
 		dto := CastClassicSigninFromCli(c)
 		result, err := ClassicSigninActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicSignupSecurityModel *workspaces.SecurityModel = nil
+var ClassicSignupSecurityModel *fireback.SecurityModel = nil
 
 type ClassicSignupActionReqDto struct {
 	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
 	// Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup.
-	SessionSecret   string            `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
-	Type            string            `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	Password        string            `json:"password" xml:"password" yaml:"password"  validate:"required"        `
-	FirstName       string            `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName        string            `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
-	InviteId        workspaces.String `json:"inviteId" xml:"inviteId" yaml:"inviteId"        `
-	PublicJoinKeyId workspaces.String `json:"publicJoinKeyId" xml:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
-	WorkspaceTypeId workspaces.String `json:"workspaceTypeId" xml:"workspaceTypeId" yaml:"workspaceTypeId"  validate:"required"        `
+	SessionSecret   string          `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
+	Type            string          `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	Password        string          `json:"password" xml:"password" yaml:"password"  validate:"required"        `
+	FirstName       string          `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName        string          `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
+	InviteId        fireback.String `json:"inviteId" xml:"inviteId" yaml:"inviteId"        `
+	PublicJoinKeyId fireback.String `json:"publicJoinKeyId" xml:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
+	WorkspaceTypeId fireback.String `json:"workspaceTypeId" xml:"workspaceTypeId" yaml:"workspaceTypeId"  validate:"required"        `
 }
 
 func (x *ClassicSignupActionReqDto) RootObjectName() string {
@@ -1183,8 +1183,8 @@ var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ClassicSignupActionReqValidator(dto *ClassicSignupActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ClassicSignupActionReqValidator(dto *ClassicSignupActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastClassicSignupFromCli(c *cli.Context) *ClassicSignupActionReqDto {
@@ -1208,21 +1208,21 @@ func CastClassicSignupFromCli(c *cli.Context) *ClassicSignupActionReqDto {
 		template.LastName = c.String("last-name")
 	}
 	if c.IsSet("invite-id") {
-		template.InviteId = workspaces.NewStringAutoNull(c.String("invite-id"))
+		template.InviteId = fireback.NewStringAutoNull(c.String("invite-id"))
 	}
 	if c.IsSet("public-join-key-id") {
-		template.PublicJoinKeyId = workspaces.NewStringAutoNull(c.String("public-join-key-id"))
+		template.PublicJoinKeyId = fireback.NewStringAutoNull(c.String("public-join-key-id"))
 	}
 	if c.IsSet("workspace-type-id") {
-		template.WorkspaceTypeId = workspaces.NewStringAutoNull(c.String("workspace-type-id"))
+		template.WorkspaceTypeId = fireback.NewStringAutoNull(c.String("workspace-type-id"))
 	}
 	return template
 }
 
 type ClassicSignupActionResDto struct {
 	// Returns the user session in case that signup is completely successful.
-	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
+	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// If time based otp is available, we add it response to make it easier for ui.
 	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
 	// Returns true and session will be empty if, the totp is required by the installation. In such scenario, you need to forward user to setup totp screen.
@@ -1237,18 +1237,18 @@ func (x *ClassicSignupActionResDto) RootObjectName() string {
 
 type classicSignupActionImpSig func(
 	req *ClassicSignupActionReqDto,
-	q workspaces.QueryDSL) (*ClassicSignupActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*ClassicSignupActionResDto,
+	*fireback.IError,
 )
 
 var ClassicSignupActionImp classicSignupActionImpSig
 
 func ClassicSignupActionFn(
 	req *ClassicSignupActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*ClassicSignupActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ClassicSignupActionImp == nil {
 		return nil, nil
@@ -1261,18 +1261,18 @@ var ClassicSignupActionCmd cli.Command = cli.Command{
 	Usage: `Signup a user into system via public access (aka website visitors) using either email or phone number.`,
 	Flags: ClassicSignupCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
 		dto := CastClassicSignupFromCli(c)
 		result, err := ClassicSignupActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var CreateWorkspaceSecurityModel *workspaces.SecurityModel = nil
+var CreateWorkspaceSecurityModel *fireback.SecurityModel = nil
 
 type CreateWorkspaceActionReqDto struct {
-	Name        string            `json:"name" xml:"name" yaml:"name"        `
-	Workspace   *WorkspaceEntity  `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	WorkspaceId workspaces.String `json:"workspaceId" xml:"workspaceId" yaml:"workspaceId"        `
+	Name        string           `json:"name" xml:"name" yaml:"name"        `
+	Workspace   *WorkspaceEntity `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
+	WorkspaceId fireback.String  `json:"workspaceId" xml:"workspaceId" yaml:"workspaceId"        `
 }
 
 func (x *CreateWorkspaceActionReqDto) RootObjectName() string {
@@ -1297,8 +1297,8 @@ var CreateWorkspaceCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func CreateWorkspaceActionReqValidator(dto *CreateWorkspaceActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func CreateWorkspaceActionReqValidator(dto *CreateWorkspaceActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastCreateWorkspaceFromCli(c *cli.Context) *CreateWorkspaceActionReqDto {
@@ -1307,28 +1307,28 @@ func CastCreateWorkspaceFromCli(c *cli.Context) *CreateWorkspaceActionReqDto {
 		template.Name = c.String("name")
 	}
 	if c.IsSet("workspace-id") {
-		template.WorkspaceId = workspaces.NewStringAutoNull(c.String("workspace-id"))
+		template.WorkspaceId = fireback.NewStringAutoNull(c.String("workspace-id"))
 	}
 	if c.IsSet("workspace-id") {
-		template.WorkspaceId = workspaces.NewStringAutoNull(c.String("workspace-id"))
+		template.WorkspaceId = fireback.NewStringAutoNull(c.String("workspace-id"))
 	}
 	return template
 }
 
 type createWorkspaceActionImpSig func(
 	req *CreateWorkspaceActionReqDto,
-	q workspaces.QueryDSL) (*WorkspaceEntity,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*WorkspaceEntity,
+	*fireback.IError,
 )
 
 var CreateWorkspaceActionImp createWorkspaceActionImpSig
 
 func CreateWorkspaceActionFn(
 	req *CreateWorkspaceActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*WorkspaceEntity,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if CreateWorkspaceActionImp == nil {
 		return nil, nil
@@ -1341,13 +1341,13 @@ var CreateWorkspaceActionCmd cli.Command = cli.Command{
 	Usage: ``,
 	Flags: CreateWorkspaceCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
 		dto := CastCreateWorkspaceFromCli(c)
 		result, err := CreateWorkspaceActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var CheckClassicPassportSecurityModel *workspaces.SecurityModel = nil
+var CheckClassicPassportSecurityModel *fireback.SecurityModel = nil
 
 type CheckClassicPassportActionReqDto struct {
 	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
@@ -1372,8 +1372,8 @@ var CheckClassicPassportCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func CheckClassicPassportActionReqValidator(dto *CheckClassicPassportActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func CheckClassicPassportActionReqValidator(dto *CheckClassicPassportActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastCheckClassicPassportFromCli(c *cli.Context) *CheckClassicPassportActionReqDto {
@@ -1402,18 +1402,18 @@ func (x *CheckClassicPassportActionResDto) RootObjectName() string {
 
 type checkClassicPassportActionImpSig func(
 	req *CheckClassicPassportActionReqDto,
-	q workspaces.QueryDSL) (*CheckClassicPassportActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*CheckClassicPassportActionResDto,
+	*fireback.IError,
 )
 
 var CheckClassicPassportActionImp checkClassicPassportActionImpSig
 
 func CheckClassicPassportActionFn(
 	req *CheckClassicPassportActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*CheckClassicPassportActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if CheckClassicPassportActionImp == nil {
 		return nil, nil
@@ -1426,13 +1426,13 @@ var CheckClassicPassportActionCmd cli.Command = cli.Command{
 	Usage: `Checks if a classic passport (email, phone) exists or not, used in multi step authentication`,
 	Flags: CheckClassicPassportCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, CheckClassicPassportSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckClassicPassportSecurityModel)
 		dto := CastCheckClassicPassportFromCli(c)
 		result, err := CheckClassicPassportActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicPassportOtpSecurityModel *workspaces.SecurityModel = nil
+var ClassicPassportOtpSecurityModel *fireback.SecurityModel = nil
 
 type ClassicPassportOtpActionReqDto struct {
 	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
@@ -1456,8 +1456,8 @@ var ClassicPassportOtpCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ClassicPassportOtpActionReqValidator(dto *ClassicPassportOtpActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ClassicPassportOtpActionReqValidator(dto *ClassicPassportOtpActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastClassicPassportOtpFromCli(c *cli.Context) *ClassicPassportOtpActionReqDto {
@@ -1472,8 +1472,8 @@ func CastClassicPassportOtpFromCli(c *cli.Context) *ClassicPassportOtpActionReqD
 }
 
 type ClassicPassportOtpActionResDto struct {
-	Session   *UserSessionDto   `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId workspaces.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
+	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
+	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
 	// If time based otp is available, we add it response to make it easier for ui.
 	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
 	// The session secret will be used to call complete user registeration api.
@@ -1488,18 +1488,18 @@ func (x *ClassicPassportOtpActionResDto) RootObjectName() string {
 
 type classicPassportOtpActionImpSig func(
 	req *ClassicPassportOtpActionReqDto,
-	q workspaces.QueryDSL) (*ClassicPassportOtpActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*ClassicPassportOtpActionResDto,
+	*fireback.IError,
 )
 
 var ClassicPassportOtpActionImp classicPassportOtpActionImpSig
 
 func ClassicPassportOtpActionFn(
 	req *ClassicPassportOtpActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*ClassicPassportOtpActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ClassicPassportOtpActionImp == nil {
 		return nil, nil
@@ -1512,13 +1512,13 @@ var ClassicPassportOtpActionCmd cli.Command = cli.Command{
 	Usage: `Authenticate the user publicly for classic methods using communication service, such as sms, call, or email. You need to call classicPassportRequestOtp beforehand to send a otp code, and then validate it with this API. Also checkClassicPassport action might already sent the otp, so make sure you don't send it twice.`,
 	Flags: ClassicPassportOtpCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportOtpSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportOtpSecurityModel)
 		dto := CastClassicPassportOtpFromCli(c)
 		result, err := ClassicPassportOtpActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicPassportRequestOtpSecurityModel *workspaces.SecurityModel = nil
+var ClassicPassportRequestOtpSecurityModel *fireback.SecurityModel = nil
 
 type ClassicPassportRequestOtpActionReqDto struct {
 	// Passport value (email, phone number) which would be recieving the otp code.
@@ -1537,8 +1537,8 @@ var ClassicPassportRequestOtpCommonCliFlagsOptional = []cli.Flag{
 	},
 }
 
-func ClassicPassportRequestOtpActionReqValidator(dto *ClassicPassportRequestOtpActionReqDto) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, false)
+func ClassicPassportRequestOtpActionReqValidator(dto *ClassicPassportRequestOtpActionReqDto) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
 func CastClassicPassportRequestOtpFromCli(c *cli.Context) *ClassicPassportRequestOtpActionReqDto {
@@ -1563,18 +1563,18 @@ func (x *ClassicPassportRequestOtpActionResDto) RootObjectName() string {
 
 type classicPassportRequestOtpActionImpSig func(
 	req *ClassicPassportRequestOtpActionReqDto,
-	q workspaces.QueryDSL) (*ClassicPassportRequestOtpActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*ClassicPassportRequestOtpActionResDto,
+	*fireback.IError,
 )
 
 var ClassicPassportRequestOtpActionImp classicPassportRequestOtpActionImpSig
 
 func ClassicPassportRequestOtpActionFn(
 	req *ClassicPassportRequestOtpActionReqDto,
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*ClassicPassportRequestOtpActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if ClassicPassportRequestOtpActionImp == nil {
 		return nil, nil
@@ -1587,15 +1587,15 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	Usage: `Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.`,
 	Flags: ClassicPassportRequestOtpCommonCliFlagsOptional,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportRequestOtpSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportRequestOtpSecurityModel)
 		dto := CastClassicPassportRequestOtpFromCli(c)
 		result, err := ClassicPassportRequestOtpActionFn(dto, query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
-func AbacCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func AbacCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		{
 			Method:        "POST",
 			Url:           "/user/invitation/accept",
@@ -1605,17 +1605,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, AcceptInviteActionFn)
+					fireback.HttpPostEntity(c, AcceptInviteActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         AcceptInviteActionFn,
 			ResponseEntity: string(""),
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "",
 			},
 			RequestEntity: &AcceptInviteActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "AcceptInviteActionReqDto",
 			},
 		},
@@ -1628,17 +1628,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, OauthAuthenticateActionFn)
+					fireback.HttpPostEntity(c, OauthAuthenticateActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         OauthAuthenticateActionFn,
 			ResponseEntity: &OauthAuthenticateActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "OauthAuthenticateActionResDto",
 			},
 			RequestEntity: &OauthAuthenticateActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "OauthAuthenticateActionReqDto",
 			},
 		},
@@ -1651,13 +1651,13 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					workspaces.HttpQueryEntity2(c, UserPassportsActionFn)
+					fireback.HttpQueryEntity2(c, UserPassportsActionFn)
 				},
 			},
 			Format:         "QUERY",
 			Action:         UserPassportsActionFn,
 			ResponseEntity: &UserPassportsActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "UserPassportsActionResDto",
 			},
 		},
@@ -1670,17 +1670,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ChangePasswordActionFn)
+					fireback.HttpPostEntity(c, ChangePasswordActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ChangePasswordActionFn,
 			ResponseEntity: string(""),
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "",
 			},
 			RequestEntity: &ChangePasswordActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ChangePasswordActionReqDto",
 			},
 		},
@@ -1693,13 +1693,13 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					workspaces.HttpQueryEntity2(c, UserInvitationsActionFn)
+					fireback.HttpQueryEntity2(c, UserInvitationsActionFn)
 				},
 			},
 			Format:         "QUERY",
 			Action:         UserInvitationsActionFn,
 			ResponseEntity: &UserInvitationsQueryColumns{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "UserInvitationsQueryColumns",
 			},
 		},
@@ -1712,17 +1712,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ConfirmClassicPassportTotpActionFn)
+					fireback.HttpPostEntity(c, ConfirmClassicPassportTotpActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ConfirmClassicPassportTotpActionFn,
 			ResponseEntity: &ConfirmClassicPassportTotpActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "ConfirmClassicPassportTotpActionResDto",
 			},
 			RequestEntity: &ConfirmClassicPassportTotpActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ConfirmClassicPassportTotpActionReqDto",
 			},
 		},
@@ -1735,13 +1735,13 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// GET_ONE - get
-					workspaces.HttpGetEntity(c, CheckPassportMethodsActionFn)
+					fireback.HttpGetEntity(c, CheckPassportMethodsActionFn)
 				},
 			},
 			Format:         "GET_ONE",
 			Action:         CheckPassportMethodsActionFn,
 			ResponseEntity: &CheckPassportMethodsActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "CheckPassportMethodsActionResDto",
 			},
 		},
@@ -1754,13 +1754,13 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					workspaces.HttpQueryEntity2(c, QueryWorkspaceTypesPubliclyActionFn)
+					fireback.HttpQueryEntity2(c, QueryWorkspaceTypesPubliclyActionFn)
 				},
 			},
 			Format:         "QUERY",
 			Action:         QueryWorkspaceTypesPubliclyActionFn,
 			ResponseEntity: &QueryWorkspaceTypesPubliclyActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "QueryWorkspaceTypesPubliclyActionResDto",
 			},
 		},
@@ -1773,13 +1773,13 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					workspaces.HttpQueryEntity2(c, QueryUserRoleWorkspacesActionFn)
+					fireback.HttpQueryEntity2(c, QueryUserRoleWorkspacesActionFn)
 				},
 			},
 			Format:         "QUERY",
 			Action:         QueryUserRoleWorkspacesActionFn,
 			ResponseEntity: &QueryUserRoleWorkspacesActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "QueryUserRoleWorkspacesActionResDto",
 			},
 		},
@@ -1790,11 +1790,11 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Name:          "reactiveSearch",
 			Description:   "Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.",
 			Handlers: []gin.HandlerFunc{
-				workspaces.ReactiveSocketHandler(ReactiveSearchActionImp),
+				fireback.ReactiveSocketHandler(ReactiveSearchActionImp),
 			},
 			Format:         "REACTIVE",
 			ResponseEntity: string(""),
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "",
 			},
 		},
@@ -1807,17 +1807,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ImportUserActionFn)
+					fireback.HttpPostEntity(c, ImportUserActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ImportUserActionFn,
 			ResponseEntity: &OkayResponseDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "OkayResponseDto",
 			},
 			RequestEntity: &ImportUserActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ImportUserActionReqDto",
 			},
 		},
@@ -1830,17 +1830,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, SendEmailActionFn)
+					fireback.HttpPostEntity(c, SendEmailActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         SendEmailActionFn,
 			ResponseEntity: &SendEmailActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "SendEmailActionResDto",
 			},
 			RequestEntity: &SendEmailActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "SendEmailActionReqDto",
 			},
 		},
@@ -1853,17 +1853,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, SendEmailWithProviderActionFn)
+					fireback.HttpPostEntity(c, SendEmailWithProviderActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         SendEmailWithProviderActionFn,
 			ResponseEntity: &SendEmailWithProviderActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "SendEmailWithProviderActionResDto",
 			},
 			RequestEntity: &SendEmailWithProviderActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "SendEmailWithProviderActionReqDto",
 			},
 		},
@@ -1876,17 +1876,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, InviteToWorkspaceActionFn)
+					fireback.HttpPostEntity(c, InviteToWorkspaceActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         InviteToWorkspaceActionFn,
 			ResponseEntity: &WorkspaceInviteEntity{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "WorkspaceInviteEntity",
 			},
 			RequestEntity: &WorkspaceInviteEntity{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "WorkspaceInviteEntity",
 			},
 		},
@@ -1899,17 +1899,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, GsmSendSmsActionFn)
+					fireback.HttpPostEntity(c, GsmSendSmsActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         GsmSendSmsActionFn,
 			ResponseEntity: &GsmSendSmsActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "GsmSendSmsActionResDto",
 			},
 			RequestEntity: &GsmSendSmsActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "GsmSendSmsActionReqDto",
 			},
 		},
@@ -1922,17 +1922,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, GsmSendSmsWithProviderActionFn)
+					fireback.HttpPostEntity(c, GsmSendSmsWithProviderActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         GsmSendSmsWithProviderActionFn,
 			ResponseEntity: &GsmSendSmsWithProviderActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "GsmSendSmsWithProviderActionResDto",
 			},
 			RequestEntity: &GsmSendSmsWithProviderActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "GsmSendSmsWithProviderActionReqDto",
 			},
 		},
@@ -1945,17 +1945,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ClassicSigninActionFn)
+					fireback.HttpPostEntity(c, ClassicSigninActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ClassicSigninActionFn,
 			ResponseEntity: &ClassicSigninActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "ClassicSigninActionResDto",
 			},
 			RequestEntity: &ClassicSigninActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ClassicSigninActionReqDto",
 			},
 		},
@@ -1968,17 +1968,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ClassicSignupActionFn)
+					fireback.HttpPostEntity(c, ClassicSignupActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ClassicSignupActionFn,
 			ResponseEntity: &ClassicSignupActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "ClassicSignupActionResDto",
 			},
 			RequestEntity: &ClassicSignupActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ClassicSignupActionReqDto",
 			},
 		},
@@ -1991,17 +1991,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, CreateWorkspaceActionFn)
+					fireback.HttpPostEntity(c, CreateWorkspaceActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         CreateWorkspaceActionFn,
 			ResponseEntity: &WorkspaceEntity{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "WorkspaceEntity",
 			},
 			RequestEntity: &CreateWorkspaceActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "CreateWorkspaceActionReqDto",
 			},
 		},
@@ -2014,17 +2014,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, CheckClassicPassportActionFn)
+					fireback.HttpPostEntity(c, CheckClassicPassportActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         CheckClassicPassportActionFn,
 			ResponseEntity: &CheckClassicPassportActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "CheckClassicPassportActionResDto",
 			},
 			RequestEntity: &CheckClassicPassportActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "CheckClassicPassportActionReqDto",
 			},
 		},
@@ -2037,17 +2037,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ClassicPassportOtpActionFn)
+					fireback.HttpPostEntity(c, ClassicPassportOtpActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ClassicPassportOtpActionFn,
 			ResponseEntity: &ClassicPassportOtpActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "ClassicPassportOtpActionResDto",
 			},
 			RequestEntity: &ClassicPassportOtpActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ClassicPassportOtpActionReqDto",
 			},
 		},
@@ -2060,17 +2060,17 @@ func AbacCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - post
-					workspaces.HttpPostEntity(c, ClassicPassportRequestOtpActionFn)
+					fireback.HttpPostEntity(c, ClassicPassportRequestOtpActionFn)
 				},
 			},
 			Format:         "POST_ONE",
 			Action:         ClassicPassportRequestOtpActionFn,
 			ResponseEntity: &ClassicPassportRequestOtpActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "ClassicPassportRequestOtpActionResDto",
 			},
 			RequestEntity: &ClassicPassportRequestOtpActionReqDto{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Entity: "ClassicPassportRequestOtpActionReqDto",
 			},
 		},
@@ -2105,7 +2105,7 @@ var AbacCustomActionsCli = []cli.Command{
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var AbacCliActionsBundle = &workspaces.CliActionsBundle{
+var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "abac",
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
@@ -2163,8 +2163,8 @@ var AbacCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetAbacActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetAbacActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   AbacCustomActions(),
 		CliAction: AbacCliActionsBundle,
 	}

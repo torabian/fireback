@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -12,20 +12,20 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-func AppMenuWriteQueryCteMock(ctx workspaces.MockQueryContext) {
+func AppMenuWriteQueryCteMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := AppMenuActions.CteQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "AppMenu", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
 }
 
-func workspaceModuleCore(module *workspaces.ModuleProvider) {
+func workspaceModuleCore(module *fireback.ModuleProvider) {
 
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
@@ -77,7 +77,7 @@ func workspaceModuleCore(module *workspaces.ModuleProvider) {
 		for _, item := range items2 {
 
 			if err := dbref.Debug().AutoMigrate(item); err != nil {
-				fmt.Println("Migrating entity issue:", workspaces.GetInterfaceName(item))
+				fmt.Println("Migrating entity issue:", fireback.GetInterfaceName(item))
 				return err
 			}
 		}
@@ -94,8 +94,8 @@ type MicroserviceSetupConfig struct {
 }
 
 // Inject this into any project as a complete solution
-func AbacCompleteModules() []*workspaces.ModuleProvider {
-	return []*workspaces.ModuleProvider{
+func AbacCompleteModules() []*fireback.ModuleProvider {
+	return []*fireback.ModuleProvider{
 		WorkspaceModuleSetup(),
 		DriveModuleSetup(),
 		NotificationModuleSetup(),
@@ -103,14 +103,14 @@ func AbacCompleteModules() []*workspaces.ModuleProvider {
 	}
 }
 
-func WorkspaceModuleSetup() *workspaces.ModuleProvider {
+func WorkspaceModuleSetup() *fireback.ModuleProvider {
 
 	// Default Fireback authorization. You can Override this on microservices
-	workspaces.WithAuthorizationPure = WithAuthorizationPureDefault
-	workspaces.WithAuthorizationFn = WithAuthorizationFn
-	workspaces.WithSocketAuthorization = WithSocketAuthorization
+	fireback.WithAuthorizationPure = WithAuthorizationPureDefault
+	fireback.WithAuthorizationFn = WithAuthorizationFn
+	fireback.WithSocketAuthorization = WithSocketAuthorization
 
-	module := &workspaces.ModuleProvider{
+	module := &fireback.ModuleProvider{
 		Name:        "abac",
 		Definitions: &Module3Definitions,
 		OnEnvInit:   OnInitEnvHook,
@@ -124,12 +124,12 @@ func WorkspaceModuleSetup() *workspaces.ModuleProvider {
 		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
 	})
 
-	module.ProvideTests(workspaces.UserTests,
-		[]workspaces.Test{
-			workspaces.TestNewModuleProjectGen,
+	module.ProvideTests(fireback.UserTests,
+		[]fireback.Test{
+			fireback.TestNewModuleProjectGen,
 		},
 		AppMenuTests,
-		workspaces.IntelisenseTest,
+		fireback.IntelisenseTest,
 	)
 
 	module.ProvideSeederImportHandler(func() {
@@ -145,7 +145,7 @@ func WorkspaceModuleSetup() *workspaces.ModuleProvider {
 		// GsmProviderImportMocks()
 	})
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetUserModule3Actions(),
 		GetWorkspaceModule3Actions(),
 		GetRoleModule3Actions(),

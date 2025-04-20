@@ -70,7 +70,7 @@ export function usePatchEmailProvider(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<EmailProviderEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.EmailProviderEntity",
+            "*fireback.EmailProviderEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

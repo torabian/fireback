@@ -1,15 +1,15 @@
 package licenses
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 
-	AppendActivationKeyRouter = func(r *[]workspaces.Module3Action) {
+	AppendActivationKeyRouter = func(r *[]fireback.Module3Action) {
 		/*
 		 *   Implement the http routes here, with your new actions created
 		 *   This file won't be updated, your code stays in this file.
 		 */
 
-		// r.DELETE("/activationKey/:uniqueId", workspaces.WithAuthorization([]string{PERM_ROOT_ACTIVATIONKEY_DELETE}), HttpRemoveActivationKey)
+		// r.DELETE("/activationKey/:uniqueId", fireback.WithAuthorization([]string{PERM_ROOT_ACTIVATIONKEY_DELETE}), HttpRemoveActivationKey)
 	}
 }

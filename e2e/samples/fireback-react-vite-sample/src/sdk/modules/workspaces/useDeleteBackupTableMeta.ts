@@ -58,10 +58,10 @@ export function useDeleteBackupTableMeta(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.BackupTableMetaEntity",
+            "*fireback.BackupTableMetaEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.BackupTableMetaEntity");
+          queryClient?.invalidateQueries("*fireback.BackupTableMetaEntity");
           resolve(response);
         },
         onError(error: any) {

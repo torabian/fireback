@@ -70,7 +70,7 @@ export function usePatchFiles(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.FileEntity]",
+            "*fireback.BulkRecordRequest[fireback.FileEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

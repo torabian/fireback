@@ -9,22 +9,23 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/currency"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/licenses/metas"
 	mocks "github.com/torabian/fireback/modules/licenses/mocks/ProductPlan"
 	seeders "github.com/torabian/fireback/modules/licenses/seeders/ProductPlan"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
-import "github.com/torabian/fireback/modules/currency"
 
 var productPlanSeedersFs = &seeders.ViewsFs
 
@@ -90,10 +91,10 @@ type ProductPlanPermissions struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                       `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Capability       *workspaces.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
-	CapabilityId     *string                      `json:"capabilityId" yaml:"capabilityId"`
-	LinkedTo         *ProductPlanEntity           `yaml:"-" gorm:"-" json:"-" sql:"-"`
+	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Capability       *fireback.CapabilityEntity `json:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
+	CapabilityId     *string                    `json:"capabilityId" yaml:"capabilityId"`
+	LinkedTo         *ProductPlanEntity         `yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
 func (x *ProductPlanPermissions) RootObjectName() string {
@@ -171,7 +172,7 @@ type ProductPlanEntity struct {
 	LinkedTo         *ProductPlanEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func ProductPlanEntityStream(q workspaces.QueryDSL) (chan []*ProductPlanEntity, *workspaces.QueryResultMeta, error) {
+func ProductPlanEntityStream(q fireback.QueryDSL) (chan []*ProductPlanEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*ProductPlanEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -207,8 +208,8 @@ func (x *ProductPlanEntityList) Json() string {
 	}
 	return ""
 }
-func (x *ProductPlanEntityList) ToTree() *workspaces.TreeOperation[ProductPlanEntity] {
-	return workspaces.NewTreeOperation(
+func (x *ProductPlanEntityList) ToTree() *fireback.TreeOperation[ProductPlanEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *ProductPlanEntity) string {
 			if t.ParentId == nil {
@@ -233,15 +234,15 @@ var PRODUCT_PLAN_EVENTS = []string{
 }
 
 type ProductPlanFieldMap struct {
-	Name        workspaces.TranslatedString `yaml:"name"`
-	Duration    workspaces.TranslatedString `yaml:"duration"`
-	Product     workspaces.TranslatedString `yaml:"product"`
-	PriceTag    workspaces.TranslatedString `yaml:"priceTag"`
-	Permissions workspaces.TranslatedString `yaml:"permissions"`
+	Name        fireback.TranslatedString `yaml:"name"`
+	Duration    fireback.TranslatedString `yaml:"duration"`
+	Product     fireback.TranslatedString `yaml:"product"`
+	PriceTag    fireback.TranslatedString `yaml:"priceTag"`
+	Permissions fireback.TranslatedString `yaml:"permissions"`
 }
 
 var ProductPlanEntityMetaConfig map[string]int64 = map[string]int64{}
-var ProductPlanEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&ProductPlanEntity{}))
+var ProductPlanEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&ProductPlanEntity{}))
 
 type ProductPlanEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
@@ -251,61 +252,61 @@ type ProductPlanEntityPolyglot struct {
 
 func ProductPlanPermissionsActionCreate(
 	dto *ProductPlanPermissions,
-	query workspaces.QueryDSL,
-) (*ProductPlanPermissions, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*ProductPlanPermissions, *fireback.IError) {
 	dto.LinkerId = &query.LinkerId
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	return dto, nil
 }
 func ProductPlanPermissionsActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	dto *ProductPlanPermissions,
-) (*ProductPlanPermissions, *workspaces.IError) {
+) (*ProductPlanPermissions, *fireback.IError) {
 	dto.LinkerId = &query.LinkerId
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.UpdateColumns(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	return dto, nil
 }
 func ProductPlanPermissionsActionGetOne(
-	query workspaces.QueryDSL,
-) (*ProductPlanPermissions, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*ProductPlanPermissions, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductPlanPermissions{})
-	item, err := workspaces.GetOneEntity[ProductPlanPermissions](query, refl)
+	item, err := fireback.GetOneEntity[ProductPlanPermissions](query, refl)
 	return item, err
 }
-func entityProductPlanFormatter(dto *ProductPlanEntity, query workspaces.QueryDSL) {
+func entityProductPlanFormatter(dto *ProductPlanEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func ProductPlanMockEntity() *ProductPlanEntity {
@@ -321,7 +322,7 @@ func ProductPlanMockEntity() *ProductPlanEntity {
 	}
 	return entity
 }
-func ProductPlanActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func ProductPlanActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -348,7 +349,7 @@ func ProductPlanActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func ProductPlanActionSeeder(query workspaces.QueryDSL, count int) {
+func ProductPlanActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -389,7 +390,7 @@ func ProductPlanActionSeederInit() *ProductPlanEntity {
 	}
 	return entity
 }
-func ProductPlanAssociationCreate(dto *ProductPlanEntity, query workspaces.QueryDSL) error {
+func ProductPlanAssociationCreate(dto *ProductPlanEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -397,17 +398,17 @@ func ProductPlanAssociationCreate(dto *ProductPlanEntity, query workspaces.Query
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func ProductPlanRelationContentCreate(dto *ProductPlanEntity, query workspaces.QueryDSL) error {
+func ProductPlanRelationContentCreate(dto *ProductPlanEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func ProductPlanRelationContentUpdate(dto *ProductPlanEntity, query workspaces.QueryDSL) error {
+func ProductPlanRelationContentUpdate(dto *ProductPlanEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func ProductPlanPolyglotCreateHandler(dto *ProductPlanEntity, query workspaces.QueryDSL) {
+func ProductPlanPolyglotCreateHandler(dto *ProductPlanEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &ProductPlanEntityPolyglot{}, query)
+	fireback.PolyglotCreateHandler(dto, &ProductPlanEntityPolyglot{}, query)
 }
 
 /**
@@ -415,10 +416,10 @@ func ProductPlanPolyglotCreateHandler(dto *ProductPlanEntity, query workspaces.Q
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func ProductPlanValidator(dto *ProductPlanEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func ProductPlanValidator(dto *ProductPlanEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	if dto != nil && dto.Permissions != nil {
-		workspaces.AppendSliceErrors(dto.Permissions, isPatch, "permissions", err)
+		fireback.AppendSliceErrors(dto.Permissions, isPatch, "permissions", err)
 	}
 	return err
 }
@@ -467,21 +468,21 @@ And here is the actual object signature:
 	},
 }
 
-func ProductPlanEntityPreSanitize(dto *ProductPlanEntity, query workspaces.QueryDSL) {
+func ProductPlanEntityPreSanitize(dto *ProductPlanEntity, query fireback.QueryDSL) {
 }
-func ProductPlanEntityBeforeCreateAppend(dto *ProductPlanEntity, query workspaces.QueryDSL) {
+func ProductPlanEntityBeforeCreateAppend(dto *ProductPlanEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	ProductPlanRecursiveAddUniqueId(dto, query)
 }
-func ProductPlanRecursiveAddUniqueId(dto *ProductPlanEntity, query workspaces.QueryDSL) {
+func ProductPlanRecursiveAddUniqueId(dto *ProductPlanEntity, query fireback.QueryDSL) {
 	if dto.Permissions != nil && len(dto.Permissions) > 0 {
 		for index0 := range dto.Permissions {
 			if dto.Permissions[index0].UniqueId == "" {
-				dto.Permissions[index0].UniqueId = workspaces.UUID()
+				dto.Permissions[index0].UniqueId = fireback.UUID()
 			}
 		}
 	}
@@ -489,14 +490,16 @@ func ProductPlanRecursiveAddUniqueId(dto *ProductPlanEntity, query workspaces.Qu
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func ProductPlanMultiInsert(dtos []*ProductPlanEntity, query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanMultiInsert(dtos []*ProductPlanEntity, query fireback.QueryDSL) ([]*ProductPlanEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			ProductPlanEntityPreSanitize(dtos[index], query)
@@ -504,19 +507,19 @@ func ProductPlanMultiInsert(dtos []*ProductPlanEntity, query workspaces.QueryDSL
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func ProductPlanActionBatchCreateFn(dtos []*ProductPlanEntity, query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanActionBatchCreateFn(dtos []*ProductPlanEntity, query fireback.QueryDSL) ([]*ProductPlanEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*ProductPlanEntity{}
 		for _, item := range dtos {
@@ -530,12 +533,12 @@ func ProductPlanActionBatchCreateFn(dtos []*ProductPlanEntity, query workspaces.
 	}
 	return dtos, nil
 }
-func ProductPlanDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductPlanEntity) *workspaces.IError {
+func ProductPlanDeleteEntireChildren(query fireback.QueryDSL, dto *ProductPlanEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func ProductPlanActionCreateFn(dto *ProductPlanEntity, query workspaces.QueryDSL) (*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanActionCreateFn(dto *ProductPlanEntity, query fireback.QueryDSL) (*ProductPlanEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := ProductPlanValidator(dto, false); iError != nil {
 		return nil, iError
@@ -551,14 +554,14 @@ func ProductPlanActionCreateFn(dto *ProductPlanEntity, query workspaces.QueryDSL
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -566,27 +569,27 @@ func ProductPlanActionCreateFn(dto *ProductPlanEntity, query workspaces.QueryDSL
 	// 6. Fire the event into system
 	event.MustFire(PRODUCT_PLAN_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&ProductPlanEntity{}),
+		"entityKey": fireback.GetTypeString(&ProductPlanEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func ProductPlanActionGetOne(query workspaces.QueryDSL) (*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanActionGetOne(query fireback.QueryDSL) (*ProductPlanEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductPlanEntity{})
-	item, err := workspaces.GetOneEntity[ProductPlanEntity](query, refl)
+	item, err := fireback.GetOneEntity[ProductPlanEntity](query, refl)
 	entityProductPlanFormatter(item, query)
 	return item, err
 }
-func ProductPlanActionGetByWorkspace(query workspaces.QueryDSL) (*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanActionGetByWorkspace(query fireback.QueryDSL) (*ProductPlanEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductPlanEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[ProductPlanEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[ProductPlanEntity](query, refl)
 	entityProductPlanFormatter(item, query)
 	return item, err
 }
-func ProductPlanActionQuery(query workspaces.QueryDSL) ([]*ProductPlanEntity, *workspaces.QueryResultMeta, error) {
+func ProductPlanActionQuery(query fireback.QueryDSL) ([]*ProductPlanEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&ProductPlanEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[ProductPlanEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[ProductPlanEntity](query, refl)
 	for _, item := range items {
 		entityProductPlanFormatter(item, query)
 	}
@@ -596,7 +599,7 @@ func ProductPlanActionQuery(query workspaces.QueryDSL) ([]*ProductPlanEntity, *w
 var productPlanMemoryItems []*ProductPlanEntity = []*ProductPlanEntity{}
 
 func ProductPlanEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -626,7 +629,7 @@ func ProductPlanMemJoin(items []uint) []*ProductPlanEntity {
 	}
 	return res
 }
-func ProductPlanUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductPlanEntity) (*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ProductPlanEntity) (*ProductPlanEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PRODUCT_PLAN_EVENT_UPDATED
 	ProductPlanEntityPreSanitize(fields, query)
@@ -640,7 +643,7 @@ func ProductPlanUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pr
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	ProductPlanRelationContentUpdate(fields, query)
@@ -655,7 +658,7 @@ func ProductPlanUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pr
 			Where(&ProductPlanPermissions{LinkerId: &linkerId}).
 			Delete(&ProductPlanPermissions{})
 		for _, newItem := range fields.Permissions {
-			newItem.UniqueId = workspaces.UUID()
+			newItem.UniqueId = fireback.UUID()
 			newItem.LinkerId = &linkerId
 			dbref.Create(&newItem)
 		}
@@ -670,13 +673,13 @@ func ProductPlanUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Pr
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func ProductPlanActionUpdateFn(query workspaces.QueryDSL, fields *ProductPlanEntity) (*ProductPlanEntity, *workspaces.IError) {
+func ProductPlanActionUpdateFn(query fireback.QueryDSL, fields *ProductPlanEntity) (*ProductPlanEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := ProductPlanValidator(fields, true); iError != nil {
@@ -686,11 +689,11 @@ func ProductPlanActionUpdateFn(query workspaces.QueryDSL, fields *ProductPlanEnt
 	// ProductPlanRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *ProductPlanEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = ProductPlanUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -698,7 +701,7 @@ func ProductPlanActionUpdateFn(query workspaces.QueryDSL, fields *ProductPlanEnt
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return ProductPlanUpdateExec(dbref, query, fields)
@@ -709,8 +712,8 @@ var ProductPlanWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire productplans ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_DELETE},
 		})
 		count, _ := ProductPlanActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -718,16 +721,16 @@ var ProductPlanWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func ProductPlanActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func ProductPlanActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductPlanEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_DELETE}
-	return workspaces.RemoveEntity[ProductPlanEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_DELETE}
+	return fireback.RemoveEntity[ProductPlanEntity](query, refl)
 }
-func ProductPlanActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func ProductPlanActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[ProductPlanPermissions]()
+		subCount, subErr := fireback.WipeCleanEntity[ProductPlanPermissions]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'ProductPlanPermissions'", subErr)
 			return count, subErr
@@ -736,7 +739,7 @@ func ProductPlanActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 		}
 	}
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[ProductPlanEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[ProductPlanEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'ProductPlanEntity'", subErr)
 			return count, subErr
@@ -747,11 +750,11 @@ func ProductPlanActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func ProductPlanActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[ProductPlanEntity]) (
-	*workspaces.BulkRecordRequest[ProductPlanEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[ProductPlanEntity]) (
+	*fireback.BulkRecordRequest[ProductPlanEntity], *fireback.IError,
 ) {
 	result := []*ProductPlanEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := ProductPlanActionUpdate(query, record)
@@ -766,7 +769,7 @@ func ProductPlanActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *ProductPlanEntity) Json() string {
 	if x != nil {
@@ -776,7 +779,7 @@ func (x *ProductPlanEntity) Json() string {
 	return ""
 }
 
-var ProductPlanEntityMeta = workspaces.TableMetaData{
+var ProductPlanEntityMeta = fireback.TableMetaData{
 	EntityName:    "ProductPlan",
 	ExportKey:     "product-plans",
 	TableNameInDb: "fb_product-plan_entities",
@@ -786,23 +789,23 @@ var ProductPlanEntityMeta = workspaces.TableMetaData{
 }
 
 func ProductPlanActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[ProductPlanEntity](query, ProductPlanActionQuery, ProductPlanPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[ProductPlanEntity](query, ProductPlanActionQuery, ProductPlanPreloadRelations)
 }
 func ProductPlanActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[ProductPlanEntity](query, ProductPlanActionQuery, ProductPlanPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[ProductPlanEntity](query, ProductPlanActionQuery, ProductPlanPreloadRelations)
 }
 func ProductPlanActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content ProductPlanEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := ProductPlanActionCreate(&content, query)
@@ -851,7 +854,7 @@ var ProductPlanCommonCliFlags = []cli.Flag{
 		Usage:    `permissions`,
 	},
 }
-var ProductPlanCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var ProductPlanCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -922,16 +925,16 @@ var ProductPlanCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
 		})
 		entity := &ProductPlanEntity{}
-		workspaces.PopulateInteractively(entity, c, ProductPlanCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, ProductPlanCommonInteractiveCliFlags)
 		if entity, err := ProductPlanActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -941,8 +944,8 @@ var ProductPlanUpdateCmd cli.Command = cli.Command{
 	Flags:   ProductPlanCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_UPDATE},
 		})
 		entity := CastProductPlanFromCli(c)
 		if entity, err := ProductPlanActionUpdate(query, entity); err != nil {
@@ -986,8 +989,8 @@ func CastProductPlanFromCli(c *cli.Context) *ProductPlanEntity {
 	return template
 }
 func ProductPlanSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		ProductPlanActionCreate,
 		reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 		fsRef,
@@ -996,8 +999,8 @@ func ProductPlanSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func ProductPlanSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		ProductPlanActionCreate,
 		reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 		productPlanSeedersFs,
@@ -1006,8 +1009,8 @@ func ProductPlanSyncSeeders() {
 	)
 }
 func ProductPlanImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		ProductPlanActionCreate,
 		reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1015,19 +1018,19 @@ func ProductPlanImportMocks() {
 		false,
 	)
 }
-func ProductPlanWriteQueryMock(ctx workspaces.MockQueryContext) {
+func ProductPlanWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := ProductPlanActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "ProductPlan", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "ProductPlan", result)
 	}
 }
-func ProductPlansActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func ProductPlansActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1039,7 +1042,7 @@ func ProductPlansActionQueryString(keyword string, page int) ([]string, *workspa
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := ProductPlanActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1065,8 +1068,8 @@ var ProductPlanImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
 			})
 			if c.Bool("batch") {
 				ProductPlanActionSeederMultiple(query, c.Int("count"))
@@ -1089,7 +1092,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := ProductPlanActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1113,7 +1116,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of product-plans, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]ProductPlanEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1122,7 +1125,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(productPlanSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(productPlanSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1135,7 +1138,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				ProductPlanActionCreate,
 				reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 				productPlanSeedersFs,
@@ -1147,7 +1150,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1160,7 +1163,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				ProductPlanActionCreate,
 				reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1171,7 +1174,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1180,7 +1183,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					ProductPlanEntityStream,
 					reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 					c.String("file"),
@@ -1189,7 +1192,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 					ProductPlanPreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					ProductPlanActionQuery,
 					reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 					c.String("file"),
@@ -1205,7 +1208,7 @@ var ProductPlanImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1215,12 +1218,12 @@ var ProductPlanImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				ProductPlanActionCreate,
 				reflect.ValueOf(&ProductPlanEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_PLAN_CREATE},
 				},
 				func() ProductPlanEntity {
 					v := CastProductPlanFromCli(c)
@@ -1239,7 +1242,7 @@ var ProductPlanCliCommands []cli.Command = []cli.Command{
 	ProductPlanAskCmd,
 	ProductPlanCreateInteractiveCmd,
 	ProductPlanWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&ProductPlanEntity{}).Elem(), ProductPlanActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&ProductPlanEntity{}).Elem(), ProductPlanActionRemove),
 }
 
 func ProductPlanCliFn() cli.Command {
@@ -1258,14 +1261,14 @@ func ProductPlanCliFn() cli.Command {
 	}
 }
 
-var PRODUCT_PLAN_ACTION_TABLE = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        ProductPlanActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			ProductPlanActionQuery,
 			security,
 			reflect.ValueOf(&ProductPlanEntity{}).Elem(),
@@ -1273,23 +1276,23 @@ var PRODUCT_PLAN_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_QUERY = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plans",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, ProductPlanActionQuery)
+			fireback.HttpQueryEntity(c, ProductPlanActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         ProductPlanActionQuery,
 	ResponseEntity: &[]ProductPlanEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			ProductPlanActionQuery,
 			security,
@@ -1299,187 +1302,187 @@ var PRODUCT_PLAN_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PRODUCT_PLAN_ACTION_EXPORT = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_EXPORT = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plans/export",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, ProductPlanActionExport)
+			fireback.HttpStreamFileChannel(c, ProductPlanActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         ProductPlanActionExport,
 	ResponseEntity: &[]ProductPlanEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_GET_ONE = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_GET_ONE = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plan/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, ProductPlanActionGetOne)
+			fireback.HttpGetEntity(c, ProductPlanActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         ProductPlanActionGetOne,
 	ResponseEntity: &ProductPlanEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_POST_ONE = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new productPlan",
 	Flags:         ProductPlanCommonCliFlags,
 	Method:        "POST",
 	Url:           "/product-plan",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, ProductPlanActionCreate)
+			fireback.HttpPostEntity(c, ProductPlanActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, ProductPlanActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, ProductPlanActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         ProductPlanActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &ProductPlanEntity{},
 	ResponseEntity: &ProductPlanEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_PATCH = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         ProductPlanCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/product-plan",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, ProductPlanActionUpdate)
+			fireback.HttpUpdateEntity(c, ProductPlanActionUpdate)
 		},
 	},
 	Action:         ProductPlanActionUpdate,
 	RequestEntity:  &ProductPlanEntity{},
 	ResponseEntity: &ProductPlanEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method:        "PATCH",
 	Url:           "/product-plans",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, ProductPlanActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, ProductPlanActionBulkUpdate)
 		},
 	},
 	Action:         ProductPlanActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[ProductPlanEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[ProductPlanEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[ProductPlanEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[ProductPlanEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductPlanEntity",
 	},
 }
-var PRODUCT_PLAN_ACTION_DELETE = workspaces.Module3Action{
+var PRODUCT_PLAN_ACTION_DELETE = fireback.Module3Action{
 	Method:        "DELETE",
 	Url:           "/product-plan",
 	Format:        "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, ProductPlanActionRemove)
+			fireback.HttpRemoveEntity(c, ProductPlanActionRemove)
 		},
 	},
 	Action:         ProductPlanActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &ProductPlanEntity{},
 }
-var PRODUCT_PLAN_PERMISSIONS_ACTION_PATCH = workspaces.Module3Action{
+var PRODUCT_PLAN_PERMISSIONS_ACTION_PATCH = fireback.Module3Action{
 	Method:        "PATCH",
 	Url:           "/product-plan/:linkerId/permissions/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpUpdateEntity(c, ProductPlanPermissionsActionUpdate)
+			fireback.HttpUpdateEntity(c, ProductPlanPermissionsActionUpdate)
 		},
 	},
 	Action:         ProductPlanPermissionsActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &ProductPlanPermissions{},
 	ResponseEntity: &ProductPlanPermissions{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
 }
-var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = workspaces.Module3Action{
+var PRODUCT_PLAN_PERMISSIONS_ACTION_GET = fireback.Module3Action{
 	Method:        "GET",
 	Url:           "/product-plan/permissions/:linkerId/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpGetEntity(c, ProductPlanPermissionsActionGetOne)
+			fireback.HttpGetEntity(c, ProductPlanPermissionsActionGetOne)
 		},
 	},
 	Action:         ProductPlanPermissionsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &ProductPlanPermissions{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
 }
-var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module3Action{
+var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = fireback.Module3Action{
 	Method:        "POST",
 	Url:           "/product-plan/:linkerId/permissions",
-	SecurityModel: &workspaces.SecurityModel{},
+	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpPostEntity(c, ProductPlanPermissionsActionCreate)
+			fireback.HttpPostEntity(c, ProductPlanPermissionsActionCreate)
 		},
 	},
 	Action:         ProductPlanPermissionsActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &ProductPlanPermissions{},
 	ResponseEntity: &ProductPlanPermissions{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductPlanPermissions",
 	},
 }
@@ -1488,10 +1491,10 @@ var PRODUCT_PLAN_PERMISSIONS_ACTION_POST = workspaces.Module3Action{
  *	Override this function on ProductPlanEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendProductPlanRouter = func(r *[]workspaces.Module3Action) {}
+var AppendProductPlanRouter = func(r *[]fireback.Module3Action) {}
 
-func GetProductPlanModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetProductPlanModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PRODUCT_PLAN_ACTION_QUERY,
 		PRODUCT_PLAN_ACTION_EXPORT,
 		PRODUCT_PLAN_ACTION_GET_ONE,
@@ -1508,34 +1511,34 @@ func GetProductPlanModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PRODUCT_PLAN_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_PLAN_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/product-plan/delete",
 	Name:        "Delete product plan",
 }
-var PERM_ROOT_PRODUCT_PLAN_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_PLAN_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/product-plan/create",
 	Name:        "Create product plan",
 }
-var PERM_ROOT_PRODUCT_PLAN_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_PLAN_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/product-plan/update",
 	Name:        "Update product plan",
 }
-var PERM_ROOT_PRODUCT_PLAN_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_PLAN_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/product-plan/query",
 	Name:        "Query product plan",
 }
-var PERM_ROOT_PRODUCT_PLAN = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_PLAN = fireback.PermissionInfo{
 	CompleteKey: "root/modules/licenses/product-plan/*",
 	Name:        "Entire product plan actions (*)",
 }
-var ALL_PRODUCT_PLAN_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PRODUCT_PLAN_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PRODUCT_PLAN_DELETE,
 	PERM_ROOT_PRODUCT_PLAN_CREATE,
 	PERM_ROOT_PRODUCT_PLAN_UPDATE,
 	PERM_ROOT_PRODUCT_PLAN_QUERY,
 	PERM_ROOT_PRODUCT_PLAN,
 }
-var ProductPlanEntityBundle = workspaces.EntityBundle{
+var ProductPlanEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PRODUCT_PLAN_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

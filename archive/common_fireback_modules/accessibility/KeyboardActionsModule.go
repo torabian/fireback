@@ -3,7 +3,7 @@ package accessibility
 import (
 	"embed"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -11,8 +11,8 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-func AccessibilityModuleSetup() *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func AccessibilityModuleSetup() *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 		Name:        "accessibility",
 		Definitions: &Module3Definitions,
 	}
@@ -22,7 +22,7 @@ func AccessibilityModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvideMockWriterHandler(func(languages []string) {
-		KeyboardShortcutWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
+		KeyboardShortcutWriteQueryMock(fireback.MockQueryContext{Languages: languages})
 	})
 
 	module.ProvideCliHandlers([]cli.Command{
@@ -31,7 +31,7 @@ func AccessibilityModuleSetup() *workspaces.ModuleProvider {
 
 	module.ProvidePermissionHandler(ALL_KEYBOARD_SHORTCUT_PERMISSIONS)
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetKeyboardShortcutModule3Actions(),
 	}
 

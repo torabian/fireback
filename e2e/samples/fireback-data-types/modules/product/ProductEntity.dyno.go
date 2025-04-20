@@ -9,6 +9,9 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
@@ -16,13 +19,11 @@ import (
 	metas "github.com/torabian/fireback/fireback-data-types/modules/product/metas"
 	mocks "github.com/torabian/fireback/fireback-data-types/modules/product/mocks/Product"
 	seeders "github.com/torabian/fireback/fireback-data-types/modules/product/seeders/Product"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var productSeedersFs = &seeders.ViewsFs
@@ -32,18 +33,18 @@ func ResetProductSeeders(fs *embed.FS) {
 }
 
 type ProductEntityQs struct {
-	Name                  workspaces.QueriableField `cli:"name" table:"product" column:"name" qs:"name"`
-	Sku                   workspaces.QueriableField `cli:"sku" table:"product" column:"sku" qs:"sku"`
-	Rating                workspaces.QueriableField `cli:"rating" table:"product" column:"rating" qs:"rating"`
-	Price                 workspaces.QueriableField `cli:"price" table:"product" column:"price" qs:"price"`
-	Weight                workspaces.QueriableField `cli:"weight" table:"product" column:"weight" qs:"weight"`
-	ProductMarketDuration workspaces.QueriableField `cli:"product-market-duration" table:"product" column:"product_market_duration" qs:"productMarketDuration"`
-	IsFeatured            workspaces.QueriableField `cli:"is-featured" table:"product" column:"is_featured" qs:"isFeatured"`
-	Available             workspaces.QueriableField `cli:"available" table:"product" column:"available" qs:"available"`
+	Name                  fireback.QueriableField `cli:"name" table:"product" column:"name" qs:"name"`
+	Sku                   fireback.QueriableField `cli:"sku" table:"product" column:"sku" qs:"sku"`
+	Rating                fireback.QueriableField `cli:"rating" table:"product" column:"rating" qs:"rating"`
+	Price                 fireback.QueriableField `cli:"price" table:"product" column:"price" qs:"price"`
+	Weight                fireback.QueriableField `cli:"weight" table:"product" column:"weight" qs:"weight"`
+	ProductMarketDuration fireback.QueriableField `cli:"product-market-duration" table:"product" column:"product_market_duration" qs:"productMarketDuration"`
+	IsFeatured            fireback.QueriableField `cli:"is-featured" table:"product" column:"is_featured" qs:"isFeatured"`
+	Available             fireback.QueriableField `cli:"available" table:"product" column:"available" qs:"available"`
 }
 
 func (x *ProductEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var ProductQsFlags = []cli.Flag{
@@ -86,20 +87,20 @@ type ProductEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -109,11 +110,11 @@ type ProductEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -143,23 +144,23 @@ type ProductEntity struct {
 	// Name of the product
 	Name string `json:"name" xml:"name" yaml:"name"        `
 	// Stock keeping unit (optional)
-	Sku workspaces.String `json:"sku" xml:"sku" yaml:"sku"        `
+	Sku fireback.String `json:"sku" xml:"sku" yaml:"sku"        `
 	// Average rating of the product (optional)
-	Rating workspaces.Float64 `json:"rating" xml:"rating" yaml:"rating"        `
+	Rating fireback.Float64 `json:"rating" xml:"rating" yaml:"rating"        `
 	// Price of the product
 	Price float64 `json:"price" xml:"price" yaml:"price"        `
 	// Weight of the product in kilograms (optional)
-	Weight                workspaces.Float32  `json:"weight" xml:"weight" yaml:"weight"        `
-	ProductMarketDuration workspaces.Duration `json:"productMarketDuration" xml:"productMarketDuration" yaml:"productMarketDuration"        `
+	Weight                fireback.Float32  `json:"weight" xml:"weight" yaml:"weight"        `
+	ProductMarketDuration fireback.Duration `json:"productMarketDuration" xml:"productMarketDuration" yaml:"productMarketDuration"        `
 	// Whether the product is featured (optional)
-	IsFeatured workspaces.Bool `json:"isFeatured" xml:"isFeatured" yaml:"isFeatured"        `
+	IsFeatured fireback.Bool `json:"isFeatured" xml:"isFeatured" yaml:"isFeatured"        `
 	// Is the product available?
 	Available bool             `json:"available" xml:"available" yaml:"available"        `
 	Children  []*ProductEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo  *ProductEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func ProductEntityStream(q workspaces.QueryDSL) (chan []*ProductEntity, *workspaces.QueryResultMeta, error) {
+func ProductEntityStream(q fireback.QueryDSL) (chan []*ProductEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*ProductEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -195,8 +196,8 @@ func (x *ProductEntityList) Json() string {
 	}
 	return ""
 }
-func (x *ProductEntityList) ToTree() *workspaces.TreeOperation[ProductEntity] {
-	return workspaces.NewTreeOperation(
+func (x *ProductEntityList) ToTree() *fireback.TreeOperation[ProductEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *ProductEntity) string {
 			if !t.ParentId.Valid {
@@ -213,15 +214,15 @@ func (x *ProductEntityList) ToTree() *workspaces.TreeOperation[ProductEntity] {
 var ProductPreloadRelations []string = []string{}
 
 type productActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *ProductEntity) (*ProductEntity, *workspaces.IError)
-	Create         func(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError)
-	Upsert         func(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *ProductEntity) (*ProductEntity, *fireback.IError)
+	Create         func(dto *ProductEntity, query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
+	Upsert         func(dto *ProductEntity, query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
 	SeederInit     func() *ProductEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*ProductEntity, *fireback.QueryResultMeta, error)
 }
 
 var ProductActions productActionsSig = productActionsSig{
@@ -236,7 +237,7 @@ var ProductActions productActionsSig = productActionsSig{
 	Query:          ProductActionQueryFn,
 }
 
-func ProductActionUpsertFn(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
+func ProductActionUpsertFn(dto *ProductEntity, query fireback.QueryDSL) (*ProductEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -250,31 +251,31 @@ var PRODUCT_EVENTS = []string{
 }
 
 type ProductFieldMap struct {
-	Name                  workspaces.TranslatedString `yaml:"name"`
-	Sku                   workspaces.TranslatedString `yaml:"sku"`
-	Rating                workspaces.TranslatedString `yaml:"rating"`
-	Price                 workspaces.TranslatedString `yaml:"price"`
-	Weight                workspaces.TranslatedString `yaml:"weight"`
-	ProductMarketDuration workspaces.TranslatedString `yaml:"productMarketDuration"`
-	IsFeatured            workspaces.TranslatedString `yaml:"isFeatured"`
-	Available             workspaces.TranslatedString `yaml:"available"`
+	Name                  fireback.TranslatedString `yaml:"name"`
+	Sku                   fireback.TranslatedString `yaml:"sku"`
+	Rating                fireback.TranslatedString `yaml:"rating"`
+	Price                 fireback.TranslatedString `yaml:"price"`
+	Weight                fireback.TranslatedString `yaml:"weight"`
+	ProductMarketDuration fireback.TranslatedString `yaml:"productMarketDuration"`
+	IsFeatured            fireback.TranslatedString `yaml:"isFeatured"`
+	Available             fireback.TranslatedString `yaml:"available"`
 }
 
 var ProductEntityMetaConfig map[string]int64 = map[string]int64{}
-var ProductEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&ProductEntity{}))
+var ProductEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&ProductEntity{}))
 
-func entityProductFormatter(dto *ProductEntity, query workspaces.QueryDSL) {
+func entityProductFormatter(dto *ProductEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func ProductActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func ProductActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -301,7 +302,7 @@ func ProductActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func ProductActionSeeder(query workspaces.QueryDSL, count int) {
+func ProductActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -327,7 +328,7 @@ func ProductActionSeederInitFn() *ProductEntity {
 	entity := &ProductEntity{}
 	return entity
 }
-func ProductAssociationCreate(dto *ProductEntity, query workspaces.QueryDSL) error {
+func ProductAssociationCreate(dto *ProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -335,13 +336,13 @@ func ProductAssociationCreate(dto *ProductEntity, query workspaces.QueryDSL) err
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func ProductRelationContentCreate(dto *ProductEntity, query workspaces.QueryDSL) error {
+func ProductRelationContentCreate(dto *ProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func ProductRelationContentUpdate(dto *ProductEntity, query workspaces.QueryDSL) error {
+func ProductRelationContentUpdate(dto *ProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func ProductPolyglotUpdateHandler(dto *ProductEntity, query workspaces.QueryDSL) {
+func ProductPolyglotUpdateHandler(dto *ProductEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -352,8 +353,8 @@ func ProductPolyglotUpdateHandler(dto *ProductEntity, query workspaces.QueryDSL)
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func ProductValidator(dto *ProductEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func ProductValidator(dto *ProductEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -404,29 +405,31 @@ And here is the actual object signature:
 	},
 }
 
-func ProductEntityPreSanitize(dto *ProductEntity, query workspaces.QueryDSL) {
+func ProductEntityPreSanitize(dto *ProductEntity, query fireback.QueryDSL) {
 }
-func ProductEntityBeforeCreateAppend(dto *ProductEntity, query workspaces.QueryDSL) {
+func ProductEntityBeforeCreateAppend(dto *ProductEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	ProductRecursiveAddUniqueId(dto, query)
 }
-func ProductRecursiveAddUniqueId(dto *ProductEntity, query workspaces.QueryDSL) {
+func ProductRecursiveAddUniqueId(dto *ProductEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func ProductMultiInsertFn(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.IError) {
+func ProductMultiInsertFn(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			ProductEntityPreSanitize(dtos[index], query)
@@ -434,19 +437,19 @@ func ProductMultiInsertFn(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func ProductActionBatchCreateFn(dtos []*ProductEntity, query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.IError) {
+func ProductActionBatchCreateFn(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*ProductEntity{}
 		for _, item := range dtos {
@@ -460,12 +463,12 @@ func ProductActionBatchCreateFn(dtos []*ProductEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil
 }
-func ProductDeleteEntireChildren(query workspaces.QueryDSL, dto *ProductEntity) *workspaces.IError {
+func ProductDeleteEntireChildren(query fireback.QueryDSL, dto *ProductEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
+func ProductActionCreateFn(dto *ProductEntity, query fireback.QueryDSL) (*ProductEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := ProductValidator(dto, false); iError != nil {
 		return nil, iError
@@ -479,14 +482,14 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -494,27 +497,27 @@ func ProductActionCreateFn(dto *ProductEntity, query workspaces.QueryDSL) (*Prod
 	// 6. Fire the event into system
 	event.MustFire(PRODUCT_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&ProductEntity{}),
+		"entityKey": fireback.GetTypeString(&ProductEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func ProductActionGetOneFn(query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
+func ProductActionGetOneFn(query fireback.QueryDSL) (*ProductEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
-	item, err := workspaces.GetOneEntity[ProductEntity](query, refl)
+	item, err := fireback.GetOneEntity[ProductEntity](query, refl)
 	entityProductFormatter(item, query)
 	return item, err
 }
-func ProductActionGetByWorkspaceFn(query workspaces.QueryDSL) (*ProductEntity, *workspaces.IError) {
+func ProductActionGetByWorkspaceFn(query fireback.QueryDSL) (*ProductEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[ProductEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[ProductEntity](query, refl)
 	entityProductFormatter(item, query)
 	return item, err
 }
-func ProductActionQueryFn(query workspaces.QueryDSL) ([]*ProductEntity, *workspaces.QueryResultMeta, error) {
+func ProductActionQueryFn(query fireback.QueryDSL) ([]*ProductEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&ProductEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[ProductEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[ProductEntity](query, refl)
 	for _, item := range items {
 		entityProductFormatter(item, query)
 	}
@@ -524,7 +527,7 @@ func ProductActionQueryFn(query workspaces.QueryDSL) ([]*ProductEntity, *workspa
 var productMemoryItems []*ProductEntity = []*ProductEntity{}
 
 func ProductEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -554,7 +557,7 @@ func ProductMemJoin(items []uint) []*ProductEntity {
 	}
 	return res
 }
-func ProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *ProductEntity) (*ProductEntity, *workspaces.IError) {
+func ProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ProductEntity) (*ProductEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PRODUCT_EVENT_UPDATED
 	ProductEntityPreSanitize(fields, query)
@@ -569,7 +572,7 @@ func ProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Produc
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	ProductRelationContentUpdate(fields, query)
@@ -583,7 +586,7 @@ func ProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Produc
 		Where(&ProductEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
@@ -592,9 +595,9 @@ func ProductUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Produc
 	})
 	return &itemRefetched, nil
 }
-func ProductActionUpdateFn(query workspaces.QueryDSL, fields *ProductEntity) (*ProductEntity, *workspaces.IError) {
+func ProductActionUpdateFn(query fireback.QueryDSL, fields *ProductEntity) (*ProductEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := ProductValidator(fields, true); iError != nil {
@@ -604,11 +607,11 @@ func ProductActionUpdateFn(query workspaces.QueryDSL, fields *ProductEntity) (*P
 	// ProductRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *ProductEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = ProductUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -616,7 +619,7 @@ func ProductActionUpdateFn(query workspaces.QueryDSL, fields *ProductEntity) (*P
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return ProductUpdateExec(dbref, query, fields)
@@ -627,8 +630,8 @@ var ProductWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire products ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
 		})
 		count, _ := ProductActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -636,16 +639,16 @@ var ProductWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func ProductActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func ProductActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE}
-	return workspaces.RemoveEntity[ProductEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PRODUCT_DELETE}
+	return fireback.RemoveEntity[ProductEntity](query, refl)
 }
-func ProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func ProductActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[ProductEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[ProductEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'ProductEntity'", subErr)
 			return count, subErr
@@ -656,11 +659,11 @@ func ProductActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func ProductActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[ProductEntity]) (
-	*workspaces.BulkRecordRequest[ProductEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[ProductEntity]) (
+	*fireback.BulkRecordRequest[ProductEntity], *fireback.IError,
 ) {
 	result := []*ProductEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := ProductActions.Update(query, record)
@@ -675,7 +678,7 @@ func ProductActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *ProductEntity) Json() string {
 	if x != nil {
@@ -685,7 +688,7 @@ func (x *ProductEntity) Json() string {
 	return ""
 }
 
-var ProductEntityMeta = workspaces.TableMetaData{
+var ProductEntityMeta = fireback.TableMetaData{
 	EntityName:    "Product",
 	ExportKey:     "products",
 	TableNameInDb: "product_entities",
@@ -695,23 +698,23 @@ var ProductEntityMeta = workspaces.TableMetaData{
 }
 
 func ProductActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[ProductEntity](query, ProductActions.Query, ProductPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[ProductEntity](query, ProductActions.Query, ProductPreloadRelations)
 }
 func ProductActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[ProductEntity](query, ProductActions.Query, ProductPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[ProductEntity](query, ProductActions.Query, ProductPreloadRelations)
 }
 func ProductActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content ProductEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := ProductActions.Create(&content, query)
@@ -775,7 +778,7 @@ var ProductCommonCliFlags = []cli.Flag{
 		Usage:    `Is the product available? (bool)`,
 	},
 }
-var ProductCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var ProductCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -877,16 +880,16 @@ var ProductCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 		})
 		entity := &ProductEntity{}
-		workspaces.PopulateInteractively(entity, c, ProductCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, ProductCommonInteractiveCliFlags)
 		if entity, err := ProductActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -896,8 +899,8 @@ var ProductUpdateCmd cli.Command = cli.Command{
 	Flags:   ProductCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
 		})
 		entity := CastProductFromCli(c)
 		if entity, err := ProductActions.Update(query, entity); err != nil {
@@ -919,20 +922,20 @@ func CastProductFromCli(c *cli.Context) *ProductEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("name") {
 		template.Name = c.String("name")
 	}
 	if c.IsSet("sku") {
-		template.Sku = workspaces.NewStringAutoNull(c.String("sku"))
+		template.Sku = fireback.NewStringAutoNull(c.String("sku"))
 	}
 	if c.IsSet("price") {
 		value := c.Float64("price")
 		template.Price = value
 	}
 	if c.IsSet("product-market-duration") {
-		template.ProductMarketDuration = workspaces.NewDurationAutoNull(c.String("product-market-duration"))
+		template.ProductMarketDuration = fireback.NewDurationAutoNull(c.String("product-market-duration"))
 	}
 	if c.IsSet("available") {
 		value := c.Bool("available")
@@ -940,8 +943,8 @@ func CastProductFromCli(c *cli.Context) *ProductEntity {
 	}
 	return template
 }
-func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		ProductActions.Create,
 		reflect.ValueOf(&ProductEntity{}).Elem(),
@@ -951,8 +954,8 @@ func ProductSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.Q
 	)
 }
 func ProductSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		ProductActions.Create,
 		reflect.ValueOf(&ProductEntity{}).Elem(),
 		productSeedersFs,
@@ -961,8 +964,8 @@ func ProductSyncSeeders() {
 	)
 }
 func ProductImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		ProductActions.Create,
 		reflect.ValueOf(&ProductEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -970,19 +973,19 @@ func ProductImportMocks() {
 		false,
 	)
 }
-func ProductWriteQueryMock(ctx workspaces.MockQueryContext) {
+func ProductWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := ProductActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "Product", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "Product", result)
 	}
 }
-func ProductsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func ProductsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -994,7 +997,7 @@ func ProductsActionQueryString(keyword string, page int) ([]string, *workspaces.
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := ProductActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1021,8 +1024,8 @@ var ProductDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 			})
 			if c.Bool("batch") {
 				ProductActionSeederMultiple(query, c.Int("count"))
@@ -1045,7 +1048,7 @@ var ProductDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := ProductActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1053,7 +1056,7 @@ var ProductDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1066,7 +1069,7 @@ var ProductDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1096,7 +1099,7 @@ var ProductImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of products, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]ProductEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1105,7 +1108,7 @@ var ProductImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(productSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(productSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1118,7 +1121,7 @@ var ProductImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				productSeedersFs,
@@ -1129,7 +1132,7 @@ var ProductImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1137,7 +1140,7 @@ var ProductImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				ProductEntityStream,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				c.String("file"),
@@ -1151,7 +1154,7 @@ var ProductImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1161,12 +1164,12 @@ var ProductImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 				},
 				func() ProductEntity {
 					v := CastProductFromCli(c)
@@ -1184,7 +1187,7 @@ var ProductCliCommands []cli.Command = []cli.Command{
 	ProductUpdateCmd,
 	ProductAskCmd,
 	ProductCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&ProductEntity{}).Elem(),
 		ProductActions.Remove,
 	),
@@ -1192,7 +1195,7 @@ var ProductCliCommands []cli.Command = []cli.Command{
 
 func ProductCliFn() cli.Command {
 	commands := append(ProductImportExportCommands, ProductCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, ProductDevCommands...)
 	}
 	return cli.Command{
@@ -1209,14 +1212,14 @@ func ProductCliFn() cli.Command {
 	}
 }
 
-var PRODUCT_ACTION_TABLE = workspaces.Module3Action{
+var PRODUCT_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        ProductActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			ProductActions.Query,
 			security,
 			reflect.ValueOf(&ProductEntity{}).Elem(),
@@ -1224,27 +1227,27 @@ var PRODUCT_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PRODUCT_ACTION_QUERY = workspaces.Module3Action{
+var PRODUCT_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/products",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &ProductEntityQs{}
-			workspaces.HttpQueryEntity(c, ProductActions.Query, qs)
+			fireback.HttpQueryEntity(c, ProductActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         ProductActions.Query,
 	ResponseEntity: &[]ProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &ProductEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			ProductActions.Query,
 			security,
@@ -1255,138 +1258,138 @@ var PRODUCT_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, ProductQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, ProductQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PRODUCT_ACTION_EXPORT = workspaces.Module3Action{
+var PRODUCT_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/products/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, ProductActionExport)
+			fireback.HttpStreamFileChannel(c, ProductActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         ProductActionExport,
 	ResponseEntity: &[]ProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
 }
-var PRODUCT_ACTION_GET_ONE = workspaces.Module3Action{
+var PRODUCT_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/product/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, ProductActions.GetOne)
+			fireback.HttpGetEntity(c, ProductActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         ProductActions.GetOne,
 	ResponseEntity: &ProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
 }
-var PRODUCT_ACTION_POST_ONE = workspaces.Module3Action{
+var PRODUCT_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new product",
 	Flags:         ProductCommonCliFlags,
 	Method:        "POST",
 	Url:           "/product",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, ProductActions.Create)
+			fireback.HttpPostEntity(c, ProductActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, ProductActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, ProductActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         ProductActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &ProductEntity{},
 	ResponseEntity: &ProductEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
 }
-var PRODUCT_ACTION_PATCH = workspaces.Module3Action{
+var PRODUCT_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         ProductCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/product",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, ProductActions.Update)
+			fireback.HttpUpdateEntity(c, ProductActions.Update)
 		},
 	},
 	Action:         ProductActions.Update,
 	RequestEntity:  &ProductEntity{},
 	ResponseEntity: &ProductEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
 }
-var PRODUCT_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PRODUCT_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/products",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, ProductActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, ProductActionBulkUpdate)
 		},
 	},
 	Action:         ProductActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[ProductEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[ProductEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[ProductEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[ProductEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
 }
-var PRODUCT_ACTION_DELETE = workspaces.Module3Action{
+var PRODUCT_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/product",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, ProductActions.Remove)
+			fireback.HttpRemoveEntity(c, ProductActions.Remove)
 		},
 	},
 	Action:         ProductActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &ProductEntity{},
 }
 
@@ -1394,10 +1397,10 @@ var PRODUCT_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on ProductEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendProductRouter = func(r *[]workspaces.Module3Action) {}
+var AppendProductRouter = func(r *[]fireback.Module3Action) {}
 
-func GetProductModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetProductModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PRODUCT_ACTION_QUERY,
 		PRODUCT_ACTION_EXPORT,
 		PRODUCT_ACTION_GET_ONE,
@@ -1411,39 +1414,39 @@ func GetProductModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PRODUCT = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT = fireback.PermissionInfo{
 	CompleteKey: "root.modules.product.product.*",
 	Name:        "Entire product actions (*)",
 	Description: "",
 }
-var PERM_ROOT_PRODUCT_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.product.product.delete",
 	Name:        "Delete product",
 	Description: "",
 }
-var PERM_ROOT_PRODUCT_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.product.product.create",
 	Name:        "Create product",
 	Description: "",
 }
-var PERM_ROOT_PRODUCT_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.product.product.update",
 	Name:        "Update product",
 	Description: "",
 }
-var PERM_ROOT_PRODUCT_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PRODUCT_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.product.product.query",
 	Name:        "Query product",
 	Description: "",
 }
-var ALL_PRODUCT_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PRODUCT_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PRODUCT_DELETE,
 	PERM_ROOT_PRODUCT_CREATE,
 	PERM_ROOT_PRODUCT_UPDATE,
 	PERM_ROOT_PRODUCT_QUERY,
 	PERM_ROOT_PRODUCT,
 }
-var ProductEntityBundle = workspaces.EntityBundle{
+var ProductEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PRODUCT_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/GsmProvider"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/GsmProvider"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var gsmProviderSeedersFs = &seeders.ViewsFs
@@ -32,15 +33,15 @@ func ResetGsmProviderSeeders(fs *embed.FS) {
 }
 
 type GsmProviderEntityQs struct {
-	ApiKey           workspaces.QueriableField `cli:"api-key" table:"gsm_provider" column:"api_key" qs:"apiKey"`
-	MainSenderNumber workspaces.QueriableField `cli:"main-sender-number" table:"gsm_provider" column:"main_sender_number" qs:"mainSenderNumber"`
-	Type             workspaces.QueriableField `cli:"type" table:"gsm_provider" column:"type" qs:"type"`
-	InvokeUrl        workspaces.QueriableField `cli:"invoke-url" table:"gsm_provider" column:"invoke_url" qs:"invokeUrl"`
-	InvokeBody       workspaces.QueriableField `cli:"invoke-body" table:"gsm_provider" column:"invoke_body" qs:"invokeBody"`
+	ApiKey           fireback.QueriableField `cli:"api-key" table:"gsm_provider" column:"api_key" qs:"apiKey"`
+	MainSenderNumber fireback.QueriableField `cli:"main-sender-number" table:"gsm_provider" column:"main_sender_number" qs:"mainSenderNumber"`
+	Type             fireback.QueriableField `cli:"type" table:"gsm_provider" column:"type" qs:"type"`
+	InvokeUrl        fireback.QueriableField `cli:"invoke-url" table:"gsm_provider" column:"invoke_url" qs:"invokeUrl"`
+	InvokeBody       fireback.QueriableField `cli:"invoke-body" table:"gsm_provider" column:"invoke_body" qs:"invokeBody"`
 }
 
 func (x *GsmProviderEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var GsmProviderQsFlags = []cli.Flag{
@@ -71,20 +72,20 @@ type GsmProviderEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -94,11 +95,11 @@ type GsmProviderEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -134,7 +135,7 @@ type GsmProviderEntity struct {
 	LinkedTo         *GsmProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func GsmProviderEntityStream(q workspaces.QueryDSL) (chan []*GsmProviderEntity, *workspaces.QueryResultMeta, error) {
+func GsmProviderEntityStream(q fireback.QueryDSL) (chan []*GsmProviderEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*GsmProviderEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -170,8 +171,8 @@ func (x *GsmProviderEntityList) Json() string {
 	}
 	return ""
 }
-func (x *GsmProviderEntityList) ToTree() *workspaces.TreeOperation[GsmProviderEntity] {
-	return workspaces.NewTreeOperation(
+func (x *GsmProviderEntityList) ToTree() *fireback.TreeOperation[GsmProviderEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *GsmProviderEntity) string {
 			if !t.ParentId.Valid {
@@ -188,15 +189,15 @@ func (x *GsmProviderEntityList) ToTree() *workspaces.TreeOperation[GsmProviderEn
 var GsmProviderPreloadRelations []string = []string{}
 
 type gsmProviderActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *GsmProviderEntity) (*GsmProviderEntity, *workspaces.IError)
-	Create         func(dto *GsmProviderEntity, query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError)
-	Upsert         func(dto *GsmProviderEntity, query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *GsmProviderEntity) (*GsmProviderEntity, *fireback.IError)
+	Create         func(dto *GsmProviderEntity, query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
+	Upsert         func(dto *GsmProviderEntity, query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
 	SeederInit     func() *GsmProviderEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*GsmProviderEntity, query workspaces.QueryDSL) ([]*GsmProviderEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*GsmProviderEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*GsmProviderEntity, query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.QueryResultMeta, error)
 }
 
 var GsmProviderActions gsmProviderActionsSig = gsmProviderActionsSig{
@@ -211,7 +212,7 @@ var GsmProviderActions gsmProviderActionsSig = gsmProviderActionsSig{
 	Query:          GsmProviderActionQueryFn,
 }
 
-func GsmProviderActionUpsertFn(dto *GsmProviderEntity, query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderActionUpsertFn(dto *GsmProviderEntity, query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -225,28 +226,28 @@ var GSM_PROVIDER_EVENTS = []string{
 }
 
 type GsmProviderFieldMap struct {
-	ApiKey           workspaces.TranslatedString `yaml:"apiKey"`
-	MainSenderNumber workspaces.TranslatedString `yaml:"mainSenderNumber"`
-	Type             workspaces.TranslatedString `yaml:"type"`
-	InvokeUrl        workspaces.TranslatedString `yaml:"invokeUrl"`
-	InvokeBody       workspaces.TranslatedString `yaml:"invokeBody"`
+	ApiKey           fireback.TranslatedString `yaml:"apiKey"`
+	MainSenderNumber fireback.TranslatedString `yaml:"mainSenderNumber"`
+	Type             fireback.TranslatedString `yaml:"type"`
+	InvokeUrl        fireback.TranslatedString `yaml:"invokeUrl"`
+	InvokeBody       fireback.TranslatedString `yaml:"invokeBody"`
 }
 
 var GsmProviderEntityMetaConfig map[string]int64 = map[string]int64{}
-var GsmProviderEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GsmProviderEntity{}))
+var GsmProviderEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&GsmProviderEntity{}))
 
-func entityGsmProviderFormatter(dto *GsmProviderEntity, query workspaces.QueryDSL) {
+func entityGsmProviderFormatter(dto *GsmProviderEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func GsmProviderActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func GsmProviderActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -273,7 +274,7 @@ func GsmProviderActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func GsmProviderActionSeeder(query workspaces.QueryDSL, count int) {
+func GsmProviderActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -299,7 +300,7 @@ func GsmProviderActionSeederInitFn() *GsmProviderEntity {
 	entity := &GsmProviderEntity{}
 	return entity
 }
-func GsmProviderAssociationCreate(dto *GsmProviderEntity, query workspaces.QueryDSL) error {
+func GsmProviderAssociationCreate(dto *GsmProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -307,13 +308,13 @@ func GsmProviderAssociationCreate(dto *GsmProviderEntity, query workspaces.Query
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func GsmProviderRelationContentCreate(dto *GsmProviderEntity, query workspaces.QueryDSL) error {
+func GsmProviderRelationContentCreate(dto *GsmProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GsmProviderRelationContentUpdate(dto *GsmProviderEntity, query workspaces.QueryDSL) error {
+func GsmProviderRelationContentUpdate(dto *GsmProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GsmProviderPolyglotUpdateHandler(dto *GsmProviderEntity, query workspaces.QueryDSL) {
+func GsmProviderPolyglotUpdateHandler(dto *GsmProviderEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -324,8 +325,8 @@ func GsmProviderPolyglotUpdateHandler(dto *GsmProviderEntity, query workspaces.Q
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func GsmProviderValidator(dto *GsmProviderEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func GsmProviderValidator(dto *GsmProviderEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -373,29 +374,31 @@ And here is the actual object signature:
 	},
 }
 
-func GsmProviderEntityPreSanitize(dto *GsmProviderEntity, query workspaces.QueryDSL) {
+func GsmProviderEntityPreSanitize(dto *GsmProviderEntity, query fireback.QueryDSL) {
 }
-func GsmProviderEntityBeforeCreateAppend(dto *GsmProviderEntity, query workspaces.QueryDSL) {
+func GsmProviderEntityBeforeCreateAppend(dto *GsmProviderEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	GsmProviderRecursiveAddUniqueId(dto, query)
 }
-func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query workspaces.QueryDSL) {
+func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func GsmProviderMultiInsertFn(dtos []*GsmProviderEntity, query workspaces.QueryDSL) ([]*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderMultiInsertFn(dtos []*GsmProviderEntity, query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			GsmProviderEntityPreSanitize(dtos[index], query)
@@ -403,19 +406,19 @@ func GsmProviderMultiInsertFn(dtos []*GsmProviderEntity, query workspaces.QueryD
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func GsmProviderActionBatchCreateFn(dtos []*GsmProviderEntity, query workspaces.QueryDSL) ([]*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderActionBatchCreateFn(dtos []*GsmProviderEntity, query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GsmProviderEntity{}
 		for _, item := range dtos {
@@ -429,12 +432,12 @@ func GsmProviderActionBatchCreateFn(dtos []*GsmProviderEntity, query workspaces.
 	}
 	return dtos, nil
 }
-func GsmProviderDeleteEntireChildren(query workspaces.QueryDSL, dto *GsmProviderEntity) *workspaces.IError {
+func GsmProviderDeleteEntireChildren(query fireback.QueryDSL, dto *GsmProviderEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func GsmProviderActionCreateFn(dto *GsmProviderEntity, query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderActionCreateFn(dto *GsmProviderEntity, query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := GsmProviderValidator(dto, false); iError != nil {
 		return nil, iError
@@ -448,14 +451,14 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query workspaces.QueryDSL
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -463,35 +466,35 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query workspaces.QueryDSL
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewGsmProviderCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(GSM_PROVIDER_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&GsmProviderEntity{}),
+			"entityKey": fireback.GetTypeString(&GsmProviderEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func GsmProviderActionGetOneFn(query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderActionGetOneFn(query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
-	item, err := workspaces.GetOneEntity[GsmProviderEntity](query, refl)
+	item, err := fireback.GetOneEntity[GsmProviderEntity](query, refl)
 	entityGsmProviderFormatter(item, query)
 	return item, err
 }
-func GsmProviderActionGetByWorkspaceFn(query workspaces.QueryDSL) (*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderActionGetByWorkspaceFn(query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[GsmProviderEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[GsmProviderEntity](query, refl)
 	entityGsmProviderFormatter(item, query)
 	return item, err
 }
-func GsmProviderActionQueryFn(query workspaces.QueryDSL) ([]*GsmProviderEntity, *workspaces.QueryResultMeta, error) {
+func GsmProviderActionQueryFn(query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[GsmProviderEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[GsmProviderEntity](query, refl)
 	for _, item := range items {
 		entityGsmProviderFormatter(item, query)
 	}
@@ -501,7 +504,7 @@ func GsmProviderActionQueryFn(query workspaces.QueryDSL) ([]*GsmProviderEntity, 
 var gsmProviderMemoryItems []*GsmProviderEntity = []*GsmProviderEntity{}
 
 func GsmProviderEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -531,7 +534,7 @@ func GsmProviderMemJoin(items []uint) []*GsmProviderEntity {
 	}
 	return res
 }
-func GsmProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = GSM_PROVIDER_EVENT_UPDATED
 	GsmProviderEntityPreSanitize(fields, query)
@@ -546,7 +549,7 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Gs
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	GsmProviderRelationContentUpdate(fields, query)
@@ -560,11 +563,11 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Gs
 		Where(&GsmProviderEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewGsmProviderUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -576,9 +579,9 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Gs
 	   })*/
 	return &itemRefetched, nil
 }
-func GsmProviderActionUpdateFn(query workspaces.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *workspaces.IError) {
+func GsmProviderActionUpdateFn(query fireback.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GsmProviderValidator(fields, true); iError != nil {
@@ -588,11 +591,11 @@ func GsmProviderActionUpdateFn(query workspaces.QueryDSL, fields *GsmProviderEnt
 	// GsmProviderRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *GsmProviderEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = GsmProviderUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -600,7 +603,7 @@ func GsmProviderActionUpdateFn(query workspaces.QueryDSL, fields *GsmProviderEnt
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GsmProviderUpdateExec(dbref, query, fields)
@@ -611,8 +614,8 @@ var GsmProviderWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire gsmproviders ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
 		})
 		count, _ := GsmProviderActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -620,16 +623,16 @@ var GsmProviderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func GsmProviderActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func GsmProviderActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}
-	return workspaces.RemoveEntity[GsmProviderEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}
+	return fireback.RemoveEntity[GsmProviderEntity](query, refl)
 }
-func GsmProviderActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func GsmProviderActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GsmProviderEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[GsmProviderEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'GsmProviderEntity'", subErr)
 			return count, subErr
@@ -640,11 +643,11 @@ func GsmProviderActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func GsmProviderActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GsmProviderEntity]) (
-	*workspaces.BulkRecordRequest[GsmProviderEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[GsmProviderEntity]) (
+	*fireback.BulkRecordRequest[GsmProviderEntity], *fireback.IError,
 ) {
 	result := []*GsmProviderEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := GsmProviderActions.Update(query, record)
@@ -659,7 +662,7 @@ func GsmProviderActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *GsmProviderEntity) Json() string {
 	if x != nil {
@@ -669,7 +672,7 @@ func (x *GsmProviderEntity) Json() string {
 	return ""
 }
 
-var GsmProviderEntityMeta = workspaces.TableMetaData{
+var GsmProviderEntityMeta = fireback.TableMetaData{
 	EntityName:    "GsmProvider",
 	ExportKey:     "gsm-providers",
 	TableNameInDb: "gsm-provider_entities",
@@ -679,23 +682,23 @@ var GsmProviderEntityMeta = workspaces.TableMetaData{
 }
 
 func GsmProviderActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[GsmProviderEntity](query, GsmProviderActions.Query, GsmProviderPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[GsmProviderEntity](query, GsmProviderActions.Query, GsmProviderPreloadRelations)
 }
 func GsmProviderActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[GsmProviderEntity](query, GsmProviderActions.Query, GsmProviderPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[GsmProviderEntity](query, GsmProviderActions.Query, GsmProviderPreloadRelations)
 }
 func GsmProviderActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content GsmProviderEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GsmProviderActions.Create(&content, query)
@@ -744,7 +747,7 @@ var GsmProviderCommonCliFlags = []cli.Flag{
 		Usage:    `invokeBody (string)`,
 	},
 }
-var GsmProviderCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var GsmProviderCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "apiKey",
 		StructField: "ApiKey",
@@ -839,16 +842,16 @@ var GsmProviderCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 		})
 		entity := &GsmProviderEntity{}
-		workspaces.PopulateInteractively(entity, c, GsmProviderCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, GsmProviderCommonInteractiveCliFlags)
 		if entity, err := GsmProviderActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -858,8 +861,8 @@ var GsmProviderUpdateCmd cli.Command = cli.Command{
 	Flags:   GsmProviderCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
 		})
 		entity := CastGsmProviderFromCli(c)
 		if entity, err := GsmProviderActions.Update(query, entity); err != nil {
@@ -881,7 +884,7 @@ func CastGsmProviderFromCli(c *cli.Context) *GsmProviderEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("api-key") {
 		template.ApiKey = c.String("api-key")
@@ -900,8 +903,8 @@ func CastGsmProviderFromCli(c *cli.Context) *GsmProviderEntity {
 	}
 	return template
 }
-func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
@@ -911,8 +914,8 @@ func GsmProviderSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspac
 	)
 }
 func GsmProviderSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		gsmProviderSeedersFs,
@@ -921,8 +924,8 @@ func GsmProviderSyncSeeders() {
 	)
 }
 func GsmProviderImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GsmProviderActions.Create,
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -930,19 +933,19 @@ func GsmProviderImportMocks() {
 		false,
 	)
 }
-func GsmProviderWriteQueryMock(ctx workspaces.MockQueryContext) {
+func GsmProviderWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := GsmProviderActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "GsmProvider", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "GsmProvider", result)
 	}
 }
-func GsmProvidersActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func GsmProvidersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -954,7 +957,7 @@ func GsmProvidersActionQueryString(keyword string, page int) ([]string, *workspa
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := GsmProviderActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -981,8 +984,8 @@ var GsmProviderDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 			})
 			if c.Bool("batch") {
 				GsmProviderActionSeederMultiple(query, c.Int("count"))
@@ -1005,7 +1008,7 @@ var GsmProviderDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := GsmProviderActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1013,7 +1016,7 @@ var GsmProviderDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1026,7 +1029,7 @@ var GsmProviderDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1056,7 +1059,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of gsm-providers, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]GsmProviderEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1065,7 +1068,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(gsmProviderSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(gsmProviderSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1078,7 +1081,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				gsmProviderSeedersFs,
@@ -1089,7 +1092,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1097,7 +1100,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				GsmProviderEntityStream,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				c.String("file"),
@@ -1111,7 +1114,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1121,12 +1124,12 @@ var GsmProviderImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				GsmProviderActions.Create,
 				reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 				},
 				func() GsmProviderEntity {
 					v := CastGsmProviderFromCli(c)
@@ -1144,7 +1147,7 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 	GsmProviderUpdateCmd,
 	GsmProviderAskCmd,
 	GsmProviderCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		GsmProviderActions.Remove,
 	),
@@ -1152,7 +1155,7 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 
 func GsmProviderCliFn() cli.Command {
 	commands := append(GsmProviderImportExportCommands, GsmProviderCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, GsmProviderDevCommands...)
 	}
 	return cli.Command{
@@ -1169,14 +1172,14 @@ func GsmProviderCliFn() cli.Command {
 	}
 }
 
-var GSM_PROVIDER_ACTION_TABLE = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        GsmProviderActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			GsmProviderActions.Query,
 			security,
 			reflect.ValueOf(&GsmProviderEntity{}).Elem(),
@@ -1184,27 +1187,27 @@ var GSM_PROVIDER_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var GSM_PROVIDER_ACTION_QUERY = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/gsm-providers",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &GsmProviderEntityQs{}
-			workspaces.HttpQueryEntity(c, GsmProviderActions.Query, qs)
+			fireback.HttpQueryEntity(c, GsmProviderActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GsmProviderActions.Query,
 	ResponseEntity: &[]GsmProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &GsmProviderEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			GsmProviderActions.Query,
 			security,
@@ -1215,138 +1218,138 @@ var GSM_PROVIDER_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, GsmProviderQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, GsmProviderQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GSM_PROVIDER_ACTION_EXPORT = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/gsm-providers/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, GsmProviderActionExport)
+			fireback.HttpStreamFileChannel(c, GsmProviderActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GsmProviderActionExport,
 	ResponseEntity: &[]GsmProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_GET_ONE = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/gsm-provider/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, GsmProviderActions.GetOne)
+			fireback.HttpGetEntity(c, GsmProviderActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         GsmProviderActions.GetOne,
 	ResponseEntity: &GsmProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_POST_ONE = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new gsmProvider",
 	Flags:         GsmProviderCommonCliFlags,
 	Method:        "POST",
 	Url:           "/gsm-provider",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, GsmProviderActions.Create)
+			fireback.HttpPostEntity(c, GsmProviderActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, GsmProviderActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, GsmProviderActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         GsmProviderActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &GsmProviderEntity{},
 	ResponseEntity: &GsmProviderEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_PATCH = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GsmProviderCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/gsm-provider",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, GsmProviderActions.Update)
+			fireback.HttpUpdateEntity(c, GsmProviderActions.Update)
 		},
 	},
 	Action:         GsmProviderActions.Update,
 	RequestEntity:  &GsmProviderEntity{},
 	ResponseEntity: &GsmProviderEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_PATCH_BULK = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/gsm-providers",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, GsmProviderActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, GsmProviderActionBulkUpdate)
 		},
 	},
 	Action:         GsmProviderActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[GsmProviderEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[GsmProviderEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[GsmProviderEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[GsmProviderEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_DELETE = workspaces.Module3Action{
+var GSM_PROVIDER_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/gsm-provider",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, GsmProviderActions.Remove)
+			fireback.HttpRemoveEntity(c, GsmProviderActions.Remove)
 		},
 	},
 	Action:         GsmProviderActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &GsmProviderEntity{},
 }
 
@@ -1354,10 +1357,10 @@ var GSM_PROVIDER_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on GsmProviderEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGsmProviderRouter = func(r *[]workspaces.Module3Action) {}
+var AppendGsmProviderRouter = func(r *[]fireback.Module3Action) {}
 
-func GetGsmProviderModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetGsmProviderModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		GSM_PROVIDER_ACTION_QUERY,
 		GSM_PROVIDER_ACTION_EXPORT,
 		GSM_PROVIDER_ACTION_GET_ONE,
@@ -1371,32 +1374,32 @@ func GetGsmProviderModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_GSM_PROVIDER = workspaces.PermissionInfo{
+var PERM_ROOT_GSM_PROVIDER = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.gsm-provider.*",
 	Name:        "Entire gsm provider actions (*)",
 	Description: "",
 }
-var PERM_ROOT_GSM_PROVIDER_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_GSM_PROVIDER_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.gsm-provider.delete",
 	Name:        "Delete gsm provider",
 	Description: "",
 }
-var PERM_ROOT_GSM_PROVIDER_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_GSM_PROVIDER_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.gsm-provider.create",
 	Name:        "Create gsm provider",
 	Description: "",
 }
-var PERM_ROOT_GSM_PROVIDER_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_GSM_PROVIDER_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.gsm-provider.update",
 	Name:        "Update gsm provider",
 	Description: "",
 }
-var PERM_ROOT_GSM_PROVIDER_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_GSM_PROVIDER_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.gsm-provider.query",
 	Name:        "Query gsm provider",
 	Description: "",
 }
-var ALL_GSM_PROVIDER_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_GSM_PROVIDER_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_GSM_PROVIDER_DELETE,
 	PERM_ROOT_GSM_PROVIDER_CREATE,
 	PERM_ROOT_GSM_PROVIDER_UPDATE,
@@ -1421,42 +1424,42 @@ type xGsmProviderType struct {
 
 func NewGsmProviderCreatedEvent(
 	payload *GsmProviderEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "GsmProviderCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_GSM_PROVIDER_QUERY,
 			},
 		},
 		CacheKey: "*abac.GsmProviderEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewGsmProviderUpdatedEvent(
 	payload *GsmProviderEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "GsmProviderUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_GSM_PROVIDER_QUERY,
 			},
 		},
 		CacheKey: "*abac.GsmProviderEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var GsmProviderEntityBundle = workspaces.EntityBundle{
+var GsmProviderEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_GSM_PROVIDER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

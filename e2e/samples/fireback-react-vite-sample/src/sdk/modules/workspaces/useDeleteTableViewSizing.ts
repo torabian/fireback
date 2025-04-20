@@ -58,10 +58,10 @@ export function useDeleteTableViewSizing(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.TableViewSizingEntity",
+            "*fireback.TableViewSizingEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.TableViewSizingEntity");
+          queryClient?.invalidateQueries("*fireback.TableViewSizingEntity");
           resolve(response);
         },
         onError(error: any) {

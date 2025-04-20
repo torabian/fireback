@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/geo/metas"
 	mocks "github.com/torabian/fireback/modules/geo/mocks/GeoProvince"
 	seeders "github.com/torabian/fireback/modules/geo/seeders/GeoProvince"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var geoProvinceSeedersFs = &seeders.ViewsFs
@@ -98,7 +99,7 @@ type GeoProvinceEntity struct {
 	LinkedTo         *GeoProvinceEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func GeoProvinceEntityStream(q workspaces.QueryDSL) (chan []*GeoProvinceEntity, *workspaces.QueryResultMeta, error) {
+func GeoProvinceEntityStream(q fireback.QueryDSL) (chan []*GeoProvinceEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*GeoProvinceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -134,8 +135,8 @@ func (x *GeoProvinceEntityList) Json() string {
 	}
 	return ""
 }
-func (x *GeoProvinceEntityList) ToTree() *workspaces.TreeOperation[GeoProvinceEntity] {
-	return workspaces.NewTreeOperation(
+func (x *GeoProvinceEntityList) ToTree() *fireback.TreeOperation[GeoProvinceEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *GeoProvinceEntity) string {
 			if t.ParentId == nil {
@@ -160,12 +161,12 @@ var GEO_PROVINCE_EVENTS = []string{
 }
 
 type GeoProvinceFieldMap struct {
-	Name    workspaces.TranslatedString `yaml:"name"`
-	Country workspaces.TranslatedString `yaml:"country"`
+	Name    fireback.TranslatedString `yaml:"name"`
+	Country fireback.TranslatedString `yaml:"country"`
 }
 
 var GeoProvinceEntityMetaConfig map[string]int64 = map[string]int64{}
-var GeoProvinceEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&GeoProvinceEntity{}))
+var GeoProvinceEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&GeoProvinceEntity{}))
 
 type GeoProvinceEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
@@ -173,15 +174,15 @@ type GeoProvinceEntityPolyglot struct {
 	Name       string `yaml:"name,omitempty" json:"name,omitempty"`
 }
 
-func entityGeoProvinceFormatter(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
+func entityGeoProvinceFormatter(dto *GeoProvinceEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func GeoProvinceMockEntity() *GeoProvinceEntity {
@@ -196,7 +197,7 @@ func GeoProvinceMockEntity() *GeoProvinceEntity {
 	}
 	return entity
 }
-func GeoProvinceActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func GeoProvinceActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -223,7 +224,7 @@ func GeoProvinceActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func GeoProvinceActionSeeder(query workspaces.QueryDSL, count int) {
+func GeoProvinceActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -263,7 +264,7 @@ func GeoProvinceActionSeederInit() *GeoProvinceEntity {
 	}
 	return entity
 }
-func GeoProvinceAssociationCreate(dto *GeoProvinceEntity, query workspaces.QueryDSL) error {
+func GeoProvinceAssociationCreate(dto *GeoProvinceEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -271,17 +272,17 @@ func GeoProvinceAssociationCreate(dto *GeoProvinceEntity, query workspaces.Query
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func GeoProvinceRelationContentCreate(dto *GeoProvinceEntity, query workspaces.QueryDSL) error {
+func GeoProvinceRelationContentCreate(dto *GeoProvinceEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GeoProvinceRelationContentUpdate(dto *GeoProvinceEntity, query workspaces.QueryDSL) error {
+func GeoProvinceRelationContentUpdate(dto *GeoProvinceEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func GeoProvincePolyglotCreateHandler(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
+func GeoProvincePolyglotCreateHandler(dto *GeoProvinceEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &GeoProvinceEntityPolyglot{}, query)
+	fireback.PolyglotCreateHandler(dto, &GeoProvinceEntityPolyglot{}, query)
 }
 
 /**
@@ -289,8 +290,8 @@ func GeoProvincePolyglotCreateHandler(dto *GeoProvinceEntity, query workspaces.Q
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func GeoProvinceValidator(dto *GeoProvinceEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func GeoProvinceValidator(dto *GeoProvinceEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -335,29 +336,31 @@ And here is the actual object signature:
 	},
 }
 
-func GeoProvinceEntityPreSanitize(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
+func GeoProvinceEntityPreSanitize(dto *GeoProvinceEntity, query fireback.QueryDSL) {
 }
-func GeoProvinceEntityBeforeCreateAppend(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
+func GeoProvinceEntityBeforeCreateAppend(dto *GeoProvinceEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	GeoProvinceRecursiveAddUniqueId(dto, query)
 }
-func GeoProvinceRecursiveAddUniqueId(dto *GeoProvinceEntity, query workspaces.QueryDSL) {
+func GeoProvinceRecursiveAddUniqueId(dto *GeoProvinceEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func GeoProvinceMultiInsert(dtos []*GeoProvinceEntity, query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceMultiInsert(dtos []*GeoProvinceEntity, query fireback.QueryDSL) ([]*GeoProvinceEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			GeoProvinceEntityPreSanitize(dtos[index], query)
@@ -365,19 +368,19 @@ func GeoProvinceMultiInsert(dtos []*GeoProvinceEntity, query workspaces.QueryDSL
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func GeoProvinceActionBatchCreateFn(dtos []*GeoProvinceEntity, query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceActionBatchCreateFn(dtos []*GeoProvinceEntity, query fireback.QueryDSL) ([]*GeoProvinceEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*GeoProvinceEntity{}
 		for _, item := range dtos {
@@ -391,12 +394,12 @@ func GeoProvinceActionBatchCreateFn(dtos []*GeoProvinceEntity, query workspaces.
 	}
 	return dtos, nil
 }
-func GeoProvinceDeleteEntireChildren(query workspaces.QueryDSL, dto *GeoProvinceEntity) *workspaces.IError {
+func GeoProvinceDeleteEntireChildren(query fireback.QueryDSL, dto *GeoProvinceEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query workspaces.QueryDSL) (*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query fireback.QueryDSL) (*GeoProvinceEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := GeoProvinceValidator(dto, false); iError != nil {
 		return nil, iError
@@ -412,14 +415,14 @@ func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query workspaces.QueryDSL
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -427,27 +430,27 @@ func GeoProvinceActionCreateFn(dto *GeoProvinceEntity, query workspaces.QueryDSL
 	// 6. Fire the event into system
 	event.MustFire(GEO_PROVINCE_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&GeoProvinceEntity{}),
+		"entityKey": fireback.GetTypeString(&GeoProvinceEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func GeoProvinceActionGetOne(query workspaces.QueryDSL) (*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceActionGetOne(query fireback.QueryDSL) (*GeoProvinceEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoProvinceEntity{})
-	item, err := workspaces.GetOneEntity[GeoProvinceEntity](query, refl)
+	item, err := fireback.GetOneEntity[GeoProvinceEntity](query, refl)
 	entityGeoProvinceFormatter(item, query)
 	return item, err
 }
-func GeoProvinceActionGetByWorkspace(query workspaces.QueryDSL) (*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceActionGetByWorkspace(query fireback.QueryDSL) (*GeoProvinceEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoProvinceEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[GeoProvinceEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[GeoProvinceEntity](query, refl)
 	entityGeoProvinceFormatter(item, query)
 	return item, err
 }
-func GeoProvinceActionQuery(query workspaces.QueryDSL) ([]*GeoProvinceEntity, *workspaces.QueryResultMeta, error) {
+func GeoProvinceActionQuery(query fireback.QueryDSL) ([]*GeoProvinceEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&GeoProvinceEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[GeoProvinceEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[GeoProvinceEntity](query, refl)
 	for _, item := range items {
 		entityGeoProvinceFormatter(item, query)
 	}
@@ -457,7 +460,7 @@ func GeoProvinceActionQuery(query workspaces.QueryDSL) ([]*GeoProvinceEntity, *w
 var geoProvinceMemoryItems []*GeoProvinceEntity = []*GeoProvinceEntity{}
 
 func GeoProvinceEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -487,7 +490,7 @@ func GeoProvinceMemJoin(items []uint) []*GeoProvinceEntity {
 	}
 	return res
 }
-func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *GeoProvinceEntity) (*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GeoProvinceEntity) (*GeoProvinceEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = GEO_PROVINCE_EVENT_UPDATED
 	GeoProvinceEntityPreSanitize(fields, query)
@@ -501,7 +504,7 @@ func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Ge
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	GeoProvinceRelationContentUpdate(fields, query)
@@ -520,13 +523,13 @@ func GeoProvinceUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Ge
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func GeoProvinceActionUpdateFn(query workspaces.QueryDSL, fields *GeoProvinceEntity) (*GeoProvinceEntity, *workspaces.IError) {
+func GeoProvinceActionUpdateFn(query fireback.QueryDSL, fields *GeoProvinceEntity) (*GeoProvinceEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := GeoProvinceValidator(fields, true); iError != nil {
@@ -536,11 +539,11 @@ func GeoProvinceActionUpdateFn(query workspaces.QueryDSL, fields *GeoProvinceEnt
 	// GeoProvinceRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *GeoProvinceEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = GeoProvinceUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -548,7 +551,7 @@ func GeoProvinceActionUpdateFn(query workspaces.QueryDSL, fields *GeoProvinceEnt
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return GeoProvinceUpdateExec(dbref, query, fields)
@@ -559,8 +562,8 @@ var GeoProvinceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire geoprovinces ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
 		})
 		count, _ := GeoProvinceActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -568,16 +571,16 @@ var GeoProvinceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func GeoProvinceActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func GeoProvinceActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&GeoProvinceEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE}
-	return workspaces.RemoveEntity[GeoProvinceEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE}
+	return fireback.RemoveEntity[GeoProvinceEntity](query, refl)
 }
-func GeoProvinceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func GeoProvinceActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[GeoProvinceEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[GeoProvinceEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'GeoProvinceEntity'", subErr)
 			return count, subErr
@@ -588,11 +591,11 @@ func GeoProvinceActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func GeoProvinceActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[GeoProvinceEntity]) (
-	*workspaces.BulkRecordRequest[GeoProvinceEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[GeoProvinceEntity]) (
+	*fireback.BulkRecordRequest[GeoProvinceEntity], *fireback.IError,
 ) {
 	result := []*GeoProvinceEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := GeoProvinceActionUpdate(query, record)
@@ -607,7 +610,7 @@ func GeoProvinceActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *GeoProvinceEntity) Json() string {
 	if x != nil {
@@ -617,7 +620,7 @@ func (x *GeoProvinceEntity) Json() string {
 	return ""
 }
 
-var GeoProvinceEntityMeta = workspaces.TableMetaData{
+var GeoProvinceEntityMeta = fireback.TableMetaData{
 	EntityName:    "GeoProvince",
 	ExportKey:     "geo-provinces",
 	TableNameInDb: "fb_geo-province_entities",
@@ -627,23 +630,23 @@ var GeoProvinceEntityMeta = workspaces.TableMetaData{
 }
 
 func GeoProvinceActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[GeoProvinceEntity](query, GeoProvinceActionQuery, GeoProvincePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[GeoProvinceEntity](query, GeoProvinceActionQuery, GeoProvincePreloadRelations)
 }
 func GeoProvinceActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[GeoProvinceEntity](query, GeoProvinceActionQuery, GeoProvincePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[GeoProvinceEntity](query, GeoProvinceActionQuery, GeoProvincePreloadRelations)
 }
 func GeoProvinceActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content GeoProvinceEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := GeoProvinceActionCreate(&content, query)
@@ -677,7 +680,7 @@ var GeoProvinceCommonCliFlags = []cli.Flag{
 		Usage:    `country`,
 	},
 }
-var GeoProvinceCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var GeoProvinceCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -725,16 +728,16 @@ var GeoProvinceCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
 		})
 		entity := &GeoProvinceEntity{}
-		workspaces.PopulateInteractively(entity, c, GeoProvinceCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, GeoProvinceCommonInteractiveCliFlags)
 		if entity, err := GeoProvinceActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -744,8 +747,8 @@ var GeoProvinceUpdateCmd cli.Command = cli.Command{
 	Flags:   GeoProvinceCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 		})
 		entity := CastGeoProvinceFromCli(c)
 		if entity, err := GeoProvinceActionUpdate(query, entity); err != nil {
@@ -781,8 +784,8 @@ func CastGeoProvinceFromCli(c *cli.Context) *GeoProvinceEntity {
 	return template
 }
 func GeoProvinceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GeoProvinceActionCreate,
 		reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 		fsRef,
@@ -791,8 +794,8 @@ func GeoProvinceSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func GeoProvinceSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		GeoProvinceActionCreate,
 		reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 		geoProvinceSeedersFs,
@@ -801,8 +804,8 @@ func GeoProvinceSyncSeeders() {
 	)
 }
 func GeoProvinceImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		GeoProvinceActionCreate,
 		reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -810,19 +813,19 @@ func GeoProvinceImportMocks() {
 		false,
 	)
 }
-func GeoProvinceWriteQueryMock(ctx workspaces.MockQueryContext) {
+func GeoProvinceWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := GeoProvinceActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "GeoProvince", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "GeoProvince", result)
 	}
 }
-func GeoProvincesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func GeoProvincesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -834,7 +837,7 @@ func GeoProvincesActionQueryString(keyword string, page int) ([]string, *workspa
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := GeoProvinceActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -860,8 +863,8 @@ var GeoProvinceImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
 			})
 			if c.Bool("batch") {
 				GeoProvinceActionSeederMultiple(query, c.Int("count"))
@@ -884,7 +887,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := GeoProvinceActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -908,7 +911,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of geo-provinces, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]GeoProvinceEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -917,7 +920,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(geoProvinceSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(geoProvinceSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -930,7 +933,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GeoProvinceActionCreate,
 				reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 				geoProvinceSeedersFs,
@@ -942,7 +945,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -955,7 +958,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				GeoProvinceActionCreate,
 				reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -966,7 +969,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -975,7 +978,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					GeoProvinceEntityStream,
 					reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 					c.String("file"),
@@ -984,7 +987,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 					GeoProvincePreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					GeoProvinceActionQuery,
 					reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 					c.String("file"),
@@ -1000,7 +1003,7 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1010,12 +1013,12 @@ var GeoProvinceImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				GeoProvinceActionCreate,
 				reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
 				},
 				func() GeoProvinceEntity {
 					v := CastGeoProvinceFromCli(c)
@@ -1034,7 +1037,7 @@ var GeoProvinceCliCommands []cli.Command = []cli.Command{
 	GeoProvinceAskCmd,
 	GeoProvinceCreateInteractiveCmd,
 	GeoProvinceWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&GeoProvinceEntity{}).Elem(), GeoProvinceActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&GeoProvinceEntity{}).Elem(), GeoProvinceActionRemove),
 }
 
 func GeoProvinceCliFn() cli.Command {
@@ -1053,14 +1056,14 @@ func GeoProvinceCliFn() cli.Command {
 	}
 }
 
-var GEO_PROVINCE_ACTION_TABLE = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        GeoProvinceActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			GeoProvinceActionQuery,
 			security,
 			reflect.ValueOf(&GeoProvinceEntity{}).Elem(),
@@ -1068,25 +1071,25 @@ var GEO_PROVINCE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var GEO_PROVINCE_ACTION_QUERY = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-provinces",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, GeoProvinceActionQuery)
+			fireback.HttpQueryEntity(c, GeoProvinceActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GeoProvinceActionQuery,
 	ResponseEntity: &[]GeoProvinceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			GeoProvinceActionQuery,
 			security,
@@ -1096,138 +1099,138 @@ var GEO_PROVINCE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var GEO_PROVINCE_ACTION_EXPORT = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-provinces/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, GeoProvinceActionExport)
+			fireback.HttpStreamFileChannel(c, GeoProvinceActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         GeoProvinceActionExport,
 	ResponseEntity: &[]GeoProvinceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_GET_ONE = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/geo-province/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, GeoProvinceActionGetOne)
+			fireback.HttpGetEntity(c, GeoProvinceActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         GeoProvinceActionGetOne,
 	ResponseEntity: &GeoProvinceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_POST_ONE = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new geoProvince",
 	Flags:         GeoProvinceCommonCliFlags,
 	Method:        "POST",
 	Url:           "/geo-province",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, GeoProvinceActionCreate)
+			fireback.HttpPostEntity(c, GeoProvinceActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, GeoProvinceActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, GeoProvinceActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         GeoProvinceActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &GeoProvinceEntity{},
 	ResponseEntity: &GeoProvinceEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_PATCH = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         GeoProvinceCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/geo-province",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, GeoProvinceActionUpdate)
+			fireback.HttpUpdateEntity(c, GeoProvinceActionUpdate)
 		},
 	},
 	Action:         GeoProvinceActionUpdate,
 	RequestEntity:  &GeoProvinceEntity{},
 	ResponseEntity: &GeoProvinceEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/geo-provinces",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, GeoProvinceActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, GeoProvinceActionBulkUpdate)
 		},
 	},
 	Action:         GeoProvinceActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[GeoProvinceEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[GeoProvinceEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[GeoProvinceEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[GeoProvinceEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "GeoProvinceEntity",
 	},
 }
-var GEO_PROVINCE_ACTION_DELETE = workspaces.Module3Action{
+var GEO_PROVINCE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/geo-province",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GEO_PROVINCE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, GeoProvinceActionRemove)
+			fireback.HttpRemoveEntity(c, GeoProvinceActionRemove)
 		},
 	},
 	Action:         GeoProvinceActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &GeoProvinceEntity{},
 }
 
@@ -1235,10 +1238,10 @@ var GEO_PROVINCE_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on GeoProvinceEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendGeoProvinceRouter = func(r *[]workspaces.Module3Action) {}
+var AppendGeoProvinceRouter = func(r *[]fireback.Module3Action) {}
 
-func GetGeoProvinceModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetGeoProvinceModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		GEO_PROVINCE_ACTION_QUERY,
 		GEO_PROVINCE_ACTION_EXPORT,
 		GEO_PROVINCE_ACTION_GET_ONE,
@@ -1252,34 +1255,34 @@ func GetGeoProvinceModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_GEO_PROVINCE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_PROVINCE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-province/delete",
 	Name:        "Delete geo province",
 }
-var PERM_ROOT_GEO_PROVINCE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_PROVINCE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-province/create",
 	Name:        "Create geo province",
 }
-var PERM_ROOT_GEO_PROVINCE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_PROVINCE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-province/update",
 	Name:        "Update geo province",
 }
-var PERM_ROOT_GEO_PROVINCE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_PROVINCE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-province/query",
 	Name:        "Query geo province",
 }
-var PERM_ROOT_GEO_PROVINCE = workspaces.PermissionInfo{
+var PERM_ROOT_GEO_PROVINCE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/geo/geo-province/*",
 	Name:        "Entire geo province actions (*)",
 }
-var ALL_GEO_PROVINCE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_GEO_PROVINCE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_GEO_PROVINCE_DELETE,
 	PERM_ROOT_GEO_PROVINCE_CREATE,
 	PERM_ROOT_GEO_PROVINCE_UPDATE,
 	PERM_ROOT_GEO_PROVINCE_QUERY,
 	PERM_ROOT_GEO_PROVINCE,
 }
-var GeoProvinceEntityBundle = workspaces.EntityBundle{
+var GeoProvinceEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_GEO_PROVINCE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

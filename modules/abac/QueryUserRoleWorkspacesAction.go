@@ -3,7 +3,7 @@ package abac
 import (
 	"sort"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
@@ -12,9 +12,9 @@ func init() {
 }
 
 func QueryUserRoleWorkspacesAction(
-	q workspaces.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
-	*workspaces.QueryResultMeta,
-	*workspaces.IError,
+	q fireback.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
+	*fireback.QueryResultMeta,
+	*fireback.IError,
 ) {
 
 	items := []*QueryUserRoleWorkspacesActionResDto{}

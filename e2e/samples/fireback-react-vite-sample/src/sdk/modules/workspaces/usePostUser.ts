@@ -70,7 +70,7 @@ export function usePostUser(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<UserEntity>) {
           queryClient?.setQueryData<IResponseList<UserEntity>>(
-            "*workspaces.UserEntity",
+            "*fireback.UserEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

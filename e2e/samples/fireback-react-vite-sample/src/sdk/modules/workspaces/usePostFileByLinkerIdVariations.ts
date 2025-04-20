@@ -77,7 +77,7 @@ export function usePostFileByLinkerIdVariations(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileVariations>) {
           queryClient?.setQueryData<IResponseList<FileVariations>>(
-            "*workspaces.FileVariations",
+            "*fireback.FileVariations",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

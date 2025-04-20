@@ -72,7 +72,7 @@ export function useGetTimezoneGroupByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.TimezoneGroupEntity"],
+    [options, query, "*fireback.TimezoneGroupEntity"],
     fn,
     {
       cacheTime: 1001,

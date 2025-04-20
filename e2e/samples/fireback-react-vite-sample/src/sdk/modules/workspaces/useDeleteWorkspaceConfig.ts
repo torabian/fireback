@@ -58,10 +58,10 @@ export function useDeleteWorkspaceConfig(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.WorkspaceConfigEntity",
+            "*fireback.WorkspaceConfigEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.WorkspaceConfigEntity");
+          queryClient?.invalidateQueries("*fireback.WorkspaceConfigEntity");
           resolve(response);
         },
         onError(error: any) {

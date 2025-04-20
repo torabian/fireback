@@ -75,7 +75,7 @@ export function usePostPassportTotpConfirm(props?: UseRemoteQuery) {
           queryClient?.setQueryData<
             IResponseList<ConfirmClassicPassportTotpActionResDto>
           >(
-            "*workspaces.ConfirmClassicPassportTotpActionResDto",
+            "*fireback.ConfirmClassicPassportTotpActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

@@ -71,7 +71,7 @@ export function useGetRoleByUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery([options, query, "*workspaces.RoleEntity"], fn, {
+  const query$ = useQuery([options, query, "*fireback.RoleEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

@@ -70,7 +70,7 @@ export function usePostPublicJoinKey(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<PublicJoinKeyEntity>) {
           queryClient?.setQueryData<IResponseList<PublicJoinKeyEntity>>(
-            "*workspaces.PublicJoinKeyEntity",
+            "*fireback.PublicJoinKeyEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

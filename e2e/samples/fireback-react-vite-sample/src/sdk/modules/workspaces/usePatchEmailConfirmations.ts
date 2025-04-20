@@ -70,7 +70,7 @@ export function usePatchEmailConfirmations(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<EmailConfirmationEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.EmailConfirmationEntity]",
+            "*fireback.BulkRecordRequest[fireback.EmailConfirmationEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

@@ -78,7 +78,7 @@ export function useGetFileVariationsByLinkerIdAndUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery([options, query, "*workspaces.FileVariations"], fn, {
+  const query$ = useQuery([options, query, "*fireback.FileVariations"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

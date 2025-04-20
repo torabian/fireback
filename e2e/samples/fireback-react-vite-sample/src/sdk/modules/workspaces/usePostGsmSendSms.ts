@@ -73,7 +73,7 @@ export function usePostGsmSendSms(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<GsmSendSmsActionResDto>) {
           queryClient?.setQueryData<IResponseList<GsmSendSmsActionResDto>>(
-            "*workspaces.GsmSendSmsActionResDto",
+            "*fireback.GsmSendSmsActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

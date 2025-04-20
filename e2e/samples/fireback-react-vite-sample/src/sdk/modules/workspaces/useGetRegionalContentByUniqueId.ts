@@ -72,7 +72,7 @@ export function useGetRegionalContentByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.RegionalContentEntity"],
+    [options, query, "*fireback.RegionalContentEntity"],
     fn,
     {
       cacheTime: 1001,

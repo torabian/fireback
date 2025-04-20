@@ -2,19 +2,19 @@ package licenses
 
 import (
 	currency "github.com/torabian/fireback/modules/currency"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func ProductPlanActionCreate(
-	dto *ProductPlanEntity, query workspaces.QueryDSL,
-) (*ProductPlanEntity, *workspaces.IError) {
+	dto *ProductPlanEntity, query fireback.QueryDSL,
+) (*ProductPlanEntity, *fireback.IError) {
 	return ProductPlanActionCreateFn(dto, query)
 }
 
 func ProductPlanActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *ProductPlanEntity,
-) (*ProductPlanEntity, *workspaces.IError) {
+) (*ProductPlanEntity, *fireback.IError) {
 
 	// Added extra logic, probably should move to fireback
 	if fields.PriceTag != nil {

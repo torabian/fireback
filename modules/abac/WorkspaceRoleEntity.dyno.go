@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/WorkspaceRole"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/WorkspaceRole"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceRoleSeedersFs = &seeders.ViewsFs
@@ -32,12 +33,12 @@ func ResetWorkspaceRoleSeeders(fs *embed.FS) {
 }
 
 type WorkspaceRoleEntityQs struct {
-	UserWorkspace workspaces.QueriableField `cli:"user-workspace" table:"workspace_role" column:"user_workspace" qs:"userWorkspace"`
-	Role          workspaces.QueriableField `cli:"role" table:"workspace_role" column:"role" qs:"role"`
+	UserWorkspace fireback.QueriableField `cli:"user-workspace" table:"workspace_role" column:"user_workspace" qs:"userWorkspace"`
+	Role          fireback.QueriableField `cli:"role" table:"workspace_role" column:"role" qs:"role"`
 }
 
 func (x *WorkspaceRoleEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var WorkspaceRoleQsFlags = []cli.Flag{
@@ -56,20 +57,20 @@ type WorkspaceRoleEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -79,11 +80,11 @@ type WorkspaceRoleEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -111,14 +112,14 @@ type WorkspaceRoleEntity struct {
 	// possible factors.
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	UserWorkspace    *UserWorkspaceEntity   `json:"userWorkspace" xml:"userWorkspace" yaml:"userWorkspace"    gorm:"foreignKey:UserWorkspaceId;references:UniqueId"      `
-	UserWorkspaceId  workspaces.String      `json:"userWorkspaceId" yaml:"userWorkspaceId" xml:"userWorkspaceId"   gorm:"index:workspacerole_idx,unique" `
+	UserWorkspaceId  fireback.String        `json:"userWorkspaceId" yaml:"userWorkspaceId" xml:"userWorkspaceId"   gorm:"index:workspacerole_idx,unique" `
 	Role             *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           workspaces.String      `json:"roleId" yaml:"roleId" xml:"roleId"   gorm:"index:workspacerole_idx,unique" `
+	RoleId           fireback.String        `json:"roleId" yaml:"roleId" xml:"roleId"   gorm:"index:workspacerole_idx,unique" `
 	Children         []*WorkspaceRoleEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo         *WorkspaceRoleEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceRoleEntityStream(q workspaces.QueryDSL) (chan []*WorkspaceRoleEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceRoleEntityStream(q fireback.QueryDSL) (chan []*WorkspaceRoleEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*WorkspaceRoleEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -154,8 +155,8 @@ func (x *WorkspaceRoleEntityList) Json() string {
 	}
 	return ""
 }
-func (x *WorkspaceRoleEntityList) ToTree() *workspaces.TreeOperation[WorkspaceRoleEntity] {
-	return workspaces.NewTreeOperation(
+func (x *WorkspaceRoleEntityList) ToTree() *fireback.TreeOperation[WorkspaceRoleEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceRoleEntity) string {
 			if !t.ParentId.Valid {
@@ -172,15 +173,15 @@ func (x *WorkspaceRoleEntityList) ToTree() *workspaces.TreeOperation[WorkspaceRo
 var WorkspaceRolePreloadRelations []string = []string{}
 
 type workspaceRoleActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *workspaces.IError)
-	Create         func(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError)
-	Upsert         func(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *fireback.IError)
+	Create         func(dto *WorkspaceRoleEntity, query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
+	Upsert         func(dto *WorkspaceRoleEntity, query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceRoleEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*WorkspaceRoleEntity, query workspaces.QueryDSL) ([]*WorkspaceRoleEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*WorkspaceRoleEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*WorkspaceRoleEntity, query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.QueryResultMeta, error)
 }
 
 var WorkspaceRoleActions workspaceRoleActionsSig = workspaceRoleActionsSig{
@@ -195,7 +196,7 @@ var WorkspaceRoleActions workspaceRoleActionsSig = workspaceRoleActionsSig{
 	Query:          WorkspaceRoleActionQueryFn,
 }
 
-func WorkspaceRoleActionUpsertFn(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleActionUpsertFn(dto *WorkspaceRoleEntity, query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -209,25 +210,25 @@ var WORKSPACE_ROLE_EVENTS = []string{
 }
 
 type WorkspaceRoleFieldMap struct {
-	UserWorkspace workspaces.TranslatedString `yaml:"userWorkspace"`
-	Role          workspaces.TranslatedString `yaml:"role"`
+	UserWorkspace fireback.TranslatedString `yaml:"userWorkspace"`
+	Role          fireback.TranslatedString `yaml:"role"`
 }
 
 var WorkspaceRoleEntityMetaConfig map[string]int64 = map[string]int64{}
-var WorkspaceRoleEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WorkspaceRoleEntity{}))
+var WorkspaceRoleEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&WorkspaceRoleEntity{}))
 
-func entityWorkspaceRoleFormatter(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) {
+func entityWorkspaceRoleFormatter(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceRoleActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func WorkspaceRoleActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -254,7 +255,7 @@ func WorkspaceRoleActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WorkspaceRoleActionSeeder(query workspaces.QueryDSL, count int) {
+func WorkspaceRoleActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -280,7 +281,7 @@ func WorkspaceRoleActionSeederInitFn() *WorkspaceRoleEntity {
 	entity := &WorkspaceRoleEntity{}
 	return entity
 }
-func WorkspaceRoleAssociationCreate(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) error {
+func WorkspaceRoleAssociationCreate(dto *WorkspaceRoleEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -288,13 +289,13 @@ func WorkspaceRoleAssociationCreate(dto *WorkspaceRoleEntity, query workspaces.Q
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func WorkspaceRoleRelationContentCreate(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) error {
+func WorkspaceRoleRelationContentCreate(dto *WorkspaceRoleEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceRoleRelationContentUpdate(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) error {
+func WorkspaceRoleRelationContentUpdate(dto *WorkspaceRoleEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceRolePolyglotUpdateHandler(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) {
+func WorkspaceRolePolyglotUpdateHandler(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -305,8 +306,8 @@ func WorkspaceRolePolyglotUpdateHandler(dto *WorkspaceRoleEntity, query workspac
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func WorkspaceRoleValidator(dto *WorkspaceRoleEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func WorkspaceRoleValidator(dto *WorkspaceRoleEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -351,29 +352,31 @@ And here is the actual object signature:
 	},
 }
 
-func WorkspaceRoleEntityPreSanitize(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) {
+func WorkspaceRoleEntityPreSanitize(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
 }
-func WorkspaceRoleEntityBeforeCreateAppend(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) {
+func WorkspaceRoleEntityBeforeCreateAppend(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	WorkspaceRoleRecursiveAddUniqueId(dto, query)
 }
-func WorkspaceRoleRecursiveAddUniqueId(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) {
+func WorkspaceRoleRecursiveAddUniqueId(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WorkspaceRoleMultiInsertFn(dtos []*WorkspaceRoleEntity, query workspaces.QueryDSL) ([]*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleMultiInsertFn(dtos []*WorkspaceRoleEntity, query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceRoleEntityPreSanitize(dtos[index], query)
@@ -381,19 +384,19 @@ func WorkspaceRoleMultiInsertFn(dtos []*WorkspaceRoleEntity, query workspaces.Qu
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func WorkspaceRoleActionBatchCreateFn(dtos []*WorkspaceRoleEntity, query workspaces.QueryDSL) ([]*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleActionBatchCreateFn(dtos []*WorkspaceRoleEntity, query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceRoleEntity{}
 		for _, item := range dtos {
@@ -407,12 +410,12 @@ func WorkspaceRoleActionBatchCreateFn(dtos []*WorkspaceRoleEntity, query workspa
 	}
 	return dtos, nil
 }
-func WorkspaceRoleDeleteEntireChildren(query workspaces.QueryDSL, dto *WorkspaceRoleEntity) *workspaces.IError {
+func WorkspaceRoleDeleteEntireChildren(query fireback.QueryDSL, dto *WorkspaceRoleEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := WorkspaceRoleValidator(dto, false); iError != nil {
 		return nil, iError
@@ -426,14 +429,14 @@ func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query workspaces.Quer
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -441,35 +444,35 @@ func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query workspaces.Quer
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewWorkspaceRoleCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(WORKSPACE_ROLE_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&WorkspaceRoleEntity{}),
+			"entityKey": fireback.GetTypeString(&WorkspaceRoleEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func WorkspaceRoleActionGetOneFn(query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleActionGetOneFn(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
-	item, err := workspaces.GetOneEntity[WorkspaceRoleEntity](query, refl)
+	item, err := fireback.GetOneEntity[WorkspaceRoleEntity](query, refl)
 	entityWorkspaceRoleFormatter(item, query)
 	return item, err
 }
-func WorkspaceRoleActionGetByWorkspaceFn(query workspaces.QueryDSL) (*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[WorkspaceRoleEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[WorkspaceRoleEntity](query, refl)
 	entityWorkspaceRoleFormatter(item, query)
 	return item, err
 }
-func WorkspaceRoleActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceRoleEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceRoleActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[WorkspaceRoleEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceRoleEntity](query, refl)
 	for _, item := range items {
 		entityWorkspaceRoleFormatter(item, query)
 	}
@@ -479,7 +482,7 @@ func WorkspaceRoleActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceRoleEnti
 var workspaceRoleMemoryItems []*WorkspaceRoleEntity = []*WorkspaceRoleEntity{}
 
 func WorkspaceRoleEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -509,7 +512,7 @@ func WorkspaceRoleMemJoin(items []uint) []*WorkspaceRoleEntity {
 	}
 	return res
 }
-func WorkspaceRoleUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_ROLE_EVENT_UPDATED
 	WorkspaceRoleEntityPreSanitize(fields, query)
@@ -524,7 +527,7 @@ func WorkspaceRoleUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	WorkspaceRoleRelationContentUpdate(fields, query)
@@ -538,11 +541,11 @@ func WorkspaceRoleUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 		Where(&WorkspaceRoleEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewWorkspaceRoleUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -554,9 +557,9 @@ func WorkspaceRoleUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *
 	   })*/
 	return &itemRefetched, nil
 }
-func WorkspaceRoleActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *workspaces.IError) {
+func WorkspaceRoleActionUpdateFn(query fireback.QueryDSL, fields *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WorkspaceRoleValidator(fields, true); iError != nil {
@@ -566,11 +569,11 @@ func WorkspaceRoleActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceRol
 	// WorkspaceRoleRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *WorkspaceRoleEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = WorkspaceRoleUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -578,7 +581,7 @@ func WorkspaceRoleActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceRol
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WorkspaceRoleUpdateExec(dbref, query, fields)
@@ -589,8 +592,8 @@ var WorkspaceRoleWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspaceroles ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
 		})
 		count, _ := WorkspaceRoleActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -598,16 +601,16 @@ var WorkspaceRoleWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceRoleActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func WorkspaceRoleActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}
-	return workspaces.RemoveEntity[WorkspaceRoleEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}
+	return fireback.RemoveEntity[WorkspaceRoleEntity](query, refl)
 }
-func WorkspaceRoleActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func WorkspaceRoleActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WorkspaceRoleEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[WorkspaceRoleEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'WorkspaceRoleEntity'", subErr)
 			return count, subErr
@@ -618,11 +621,11 @@ func WorkspaceRoleActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func WorkspaceRoleActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WorkspaceRoleEntity]) (
-	*workspaces.BulkRecordRequest[WorkspaceRoleEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[WorkspaceRoleEntity]) (
+	*fireback.BulkRecordRequest[WorkspaceRoleEntity], *fireback.IError,
 ) {
 	result := []*WorkspaceRoleEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := WorkspaceRoleActions.Update(query, record)
@@ -637,7 +640,7 @@ func WorkspaceRoleActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *WorkspaceRoleEntity) Json() string {
 	if x != nil {
@@ -647,7 +650,7 @@ func (x *WorkspaceRoleEntity) Json() string {
 	return ""
 }
 
-var WorkspaceRoleEntityMeta = workspaces.TableMetaData{
+var WorkspaceRoleEntityMeta = fireback.TableMetaData{
 	EntityName:    "WorkspaceRole",
 	ExportKey:     "workspace-roles",
 	TableNameInDb: "workspace-role_entities",
@@ -657,23 +660,23 @@ var WorkspaceRoleEntityMeta = workspaces.TableMetaData{
 }
 
 func WorkspaceRoleActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[WorkspaceRoleEntity](query, WorkspaceRoleActions.Query, WorkspaceRolePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[WorkspaceRoleEntity](query, WorkspaceRoleActions.Query, WorkspaceRolePreloadRelations)
 }
 func WorkspaceRoleActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[WorkspaceRoleEntity](query, WorkspaceRoleActions.Query, WorkspaceRolePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[WorkspaceRoleEntity](query, WorkspaceRoleActions.Query, WorkspaceRolePreloadRelations)
 }
 func WorkspaceRoleActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content WorkspaceRoleEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WorkspaceRoleActions.Create(&content, query)
@@ -707,7 +710,7 @@ var WorkspaceRoleCommonCliFlags = []cli.Flag{
 		Usage:    `role (one)`,
 	},
 }
-var WorkspaceRoleCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{}
+var WorkspaceRoleCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{}
 var WorkspaceRoleCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "wid",
@@ -746,16 +749,16 @@ var WorkspaceRoleCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
 		})
 		entity := &WorkspaceRoleEntity{}
-		workspaces.PopulateInteractively(entity, c, WorkspaceRoleCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, WorkspaceRoleCommonInteractiveCliFlags)
 		if entity, err := WorkspaceRoleActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -765,8 +768,8 @@ var WorkspaceRoleUpdateCmd cli.Command = cli.Command{
 	Flags:   WorkspaceRoleCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
 		})
 		entity := CastWorkspaceRoleFromCli(c)
 		if entity, err := WorkspaceRoleActions.Update(query, entity); err != nil {
@@ -788,18 +791,18 @@ func CastWorkspaceRoleFromCli(c *cli.Context) *WorkspaceRoleEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("user-workspace-id") {
-		template.UserWorkspaceId = workspaces.NewStringAutoNull(c.String("user-workspace-id"))
+		template.UserWorkspaceId = fireback.NewStringAutoNull(c.String("user-workspace-id"))
 	}
 	if c.IsSet("role-id") {
-		template.RoleId = workspaces.NewStringAutoNull(c.String("role-id"))
+		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
 	}
 	return template
 }
-func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
@@ -809,8 +812,8 @@ func WorkspaceRoleSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q worksp
 	)
 }
 func WorkspaceRoleSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		workspaceRoleSeedersFs,
@@ -819,8 +822,8 @@ func WorkspaceRoleSyncSeeders() {
 	)
 }
 func WorkspaceRoleImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		WorkspaceRoleActions.Create,
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -828,19 +831,19 @@ func WorkspaceRoleImportMocks() {
 		false,
 	)
 }
-func WorkspaceRoleWriteQueryMock(ctx workspaces.MockQueryContext) {
+func WorkspaceRoleWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := WorkspaceRoleActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "WorkspaceRole", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "WorkspaceRole", result)
 	}
 }
-func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -852,7 +855,7 @@ func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *works
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := WorkspaceRoleActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -879,8 +882,8 @@ var WorkspaceRoleDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
 			})
 			if c.Bool("batch") {
 				WorkspaceRoleActionSeederMultiple(query, c.Int("count"))
@@ -903,7 +906,7 @@ var WorkspaceRoleDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := WorkspaceRoleActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -911,7 +914,7 @@ var WorkspaceRoleDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -924,7 +927,7 @@ var WorkspaceRoleDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -954,7 +957,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of workspace-roles, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]WorkspaceRoleEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -963,7 +966,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(workspaceRoleSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(workspaceRoleSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -976,7 +979,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				workspaceRoleSeedersFs,
@@ -987,7 +990,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -995,7 +998,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				WorkspaceRoleEntityStream,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				c.String("file"),
@@ -1009,7 +1012,7 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1019,12 +1022,12 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				WorkspaceRoleActions.Create,
 				reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
 				},
 				func() WorkspaceRoleEntity {
 					v := CastWorkspaceRoleFromCli(c)
@@ -1042,7 +1045,7 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 	WorkspaceRoleUpdateCmd,
 	WorkspaceRoleAskCmd,
 	WorkspaceRoleCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
 		WorkspaceRoleActions.Remove,
 	),
@@ -1050,7 +1053,7 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceRoleCliFn() cli.Command {
 	commands := append(WorkspaceRoleImportExportCommands, WorkspaceRoleCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, WorkspaceRoleDevCommands...)
 	}
 	return cli.Command{
@@ -1068,14 +1071,14 @@ func WorkspaceRoleCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_ROLE_ACTION_TABLE = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        WorkspaceRoleActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			WorkspaceRoleActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
@@ -1083,27 +1086,27 @@ var WORKSPACE_ROLE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var WORKSPACE_ROLE_ACTION_QUERY = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-roles",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &WorkspaceRoleEntityQs{}
-			workspaces.HttpQueryEntity(c, WorkspaceRoleActions.Query, qs)
+			fireback.HttpQueryEntity(c, WorkspaceRoleActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceRoleActions.Query,
 	ResponseEntity: &[]WorkspaceRoleEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &WorkspaceRoleEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			WorkspaceRoleActions.Query,
 			security,
@@ -1114,138 +1117,138 @@ var WORKSPACE_ROLE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, WorkspaceRoleQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, WorkspaceRoleQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_ROLE_ACTION_EXPORT = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-roles/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, WorkspaceRoleActionExport)
+			fireback.HttpStreamFileChannel(c, WorkspaceRoleActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceRoleActionExport,
 	ResponseEntity: &[]WorkspaceRoleEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
 }
-var WORKSPACE_ROLE_ACTION_GET_ONE = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-role/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, WorkspaceRoleActions.GetOne)
+			fireback.HttpGetEntity(c, WorkspaceRoleActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         WorkspaceRoleActions.GetOne,
 	ResponseEntity: &WorkspaceRoleEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
 }
-var WORKSPACE_ROLE_ACTION_POST_ONE = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceRole",
 	Flags:         WorkspaceRoleCommonCliFlags,
 	Method:        "POST",
 	Url:           "/workspace-role",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, WorkspaceRoleActions.Create)
+			fireback.HttpPostEntity(c, WorkspaceRoleActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, WorkspaceRoleActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, WorkspaceRoleActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         WorkspaceRoleActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceRoleEntity{},
 	ResponseEntity: &WorkspaceRoleEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
 }
-var WORKSPACE_ROLE_ACTION_PATCH = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceRoleCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/workspace-role",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, WorkspaceRoleActions.Update)
+			fireback.HttpUpdateEntity(c, WorkspaceRoleActions.Update)
 		},
 	},
 	Action:         WorkspaceRoleActions.Update,
 	RequestEntity:  &WorkspaceRoleEntity{},
 	ResponseEntity: &WorkspaceRoleEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
 }
-var WORKSPACE_ROLE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-roles",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, WorkspaceRoleActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, WorkspaceRoleActionBulkUpdate)
 		},
 	},
 	Action:         WorkspaceRoleActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[WorkspaceRoleEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[WorkspaceRoleEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[WorkspaceRoleEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[WorkspaceRoleEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
 }
-var WORKSPACE_ROLE_ACTION_DELETE = workspaces.Module3Action{
+var WORKSPACE_ROLE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-role",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, WorkspaceRoleActions.Remove)
+			fireback.HttpRemoveEntity(c, WorkspaceRoleActions.Remove)
 		},
 	},
 	Action:         WorkspaceRoleActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &WorkspaceRoleEntity{},
 }
 
@@ -1253,10 +1256,10 @@ var WORKSPACE_ROLE_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on WorkspaceRoleEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceRoleRouter = func(r *[]workspaces.Module3Action) {}
+var AppendWorkspaceRoleRouter = func(r *[]fireback.Module3Action) {}
 
-func GetWorkspaceRoleModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetWorkspaceRoleModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		WORKSPACE_ROLE_ACTION_QUERY,
 		WORKSPACE_ROLE_ACTION_EXPORT,
 		WORKSPACE_ROLE_ACTION_GET_ONE,
@@ -1270,32 +1273,32 @@ func GetWorkspaceRoleModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_WORKSPACE_ROLE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_ROLE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-role.*",
 	Name:        "Entire workspace role actions (*)",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_ROLE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_ROLE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-role.delete",
 	Name:        "Delete workspace role",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_ROLE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_ROLE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-role.create",
 	Name:        "Create workspace role",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_ROLE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_ROLE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-role.update",
 	Name:        "Update workspace role",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_ROLE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_ROLE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-role.query",
 	Name:        "Query workspace role",
 	Description: "",
 }
-var ALL_WORKSPACE_ROLE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_WORKSPACE_ROLE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_WORKSPACE_ROLE_DELETE,
 	PERM_ROOT_WORKSPACE_ROLE_CREATE,
 	PERM_ROOT_WORKSPACE_ROLE_UPDATE,
@@ -1305,42 +1308,42 @@ var ALL_WORKSPACE_ROLE_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewWorkspaceRoleCreatedEvent(
 	payload *WorkspaceRoleEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceRoleCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_ROLE_QUERY,
 			},
 		},
 		CacheKey: "*abac.WorkspaceRoleEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewWorkspaceRoleUpdatedEvent(
 	payload *WorkspaceRoleEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceRoleUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_ROLE_QUERY,
 			},
 		},
 		CacheKey: "*abac.WorkspaceRoleEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var WorkspaceRoleEntityBundle = workspaces.EntityBundle{
+var WorkspaceRoleEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_ROLE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

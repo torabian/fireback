@@ -1,6 +1,6 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
@@ -8,8 +8,8 @@ func init() {
 }
 func SendEmailAction(
 	req *SendEmailActionReqDto,
-	q workspaces.QueryDSL) (*SendEmailActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*SendEmailActionResDto,
+	*fireback.IError,
 ) {
 	// Implement the logic here.
 	return nil, nil

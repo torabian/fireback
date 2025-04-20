@@ -70,7 +70,7 @@ export function usePostTimezoneGroup(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<TimezoneGroupEntity>) {
           queryClient?.setQueryData<IResponseList<TimezoneGroupEntity>>(
-            "*workspaces.TimezoneGroupEntity",
+            "*fireback.TimezoneGroupEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

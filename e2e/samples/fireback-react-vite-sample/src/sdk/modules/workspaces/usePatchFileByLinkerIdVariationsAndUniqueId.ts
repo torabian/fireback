@@ -85,9 +85,8 @@ export function usePatchFileByLinkerIdVariationsAndUniqueId(
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileVariations>) {
-          queryClient?.setQueriesData(
-            "*workspaces.FileVariations",
-            (data: any) => fnUpdater(data, response)
+          queryClient?.setQueriesData("*fireback.FileVariations", (data: any) =>
+            fnUpdater(data, response)
           );
           resolve(response);
         },

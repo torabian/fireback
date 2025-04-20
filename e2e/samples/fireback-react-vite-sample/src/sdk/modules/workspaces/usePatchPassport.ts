@@ -69,9 +69,8 @@ export function usePatchPassport(props?: PatchProps) {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<PassportEntity>) {
-          queryClient?.setQueriesData(
-            "*workspaces.PassportEntity",
-            (data: any) => fnUpdater(data, response)
+          queryClient?.setQueriesData("*fireback.PassportEntity", (data: any) =>
+            fnUpdater(data, response)
           );
           resolve(response);
         },

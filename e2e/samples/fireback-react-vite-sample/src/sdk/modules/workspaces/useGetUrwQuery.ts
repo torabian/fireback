@@ -58,7 +58,7 @@ export function useGetUrwQuery({
     IResponseList<QueryUserRoleWorkspacesActionResDto>,
     any
   >(
-    ["*workspaces.QueryUserRoleWorkspacesActionResDto", computedOptions, query],
+    ["*fireback.QueryUserRoleWorkspacesActionResDto", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -76,4 +76,4 @@ export function useGetUrwQuery({
     keyExtractor: (item: QueryUserRoleWorkspacesActionResDto) => item.uniqueId,
   };
 }
-useGetUrwQuery.UKEY = "*workspaces.QueryUserRoleWorkspacesActionResDto";
+useGetUrwQuery.UKEY = "*fireback.QueryUserRoleWorkspacesActionResDto";

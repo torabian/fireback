@@ -72,7 +72,7 @@ export function useGetWorkspaceInviteByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.WorkspaceInviteEntity"],
+    [options, query, "*fireback.WorkspaceInviteEntity"],
     fn,
     {
       cacheTime: 1001,

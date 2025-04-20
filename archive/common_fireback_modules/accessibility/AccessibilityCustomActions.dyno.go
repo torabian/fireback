@@ -6,13 +6,13 @@ package accessibility
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
-func AccessibilityCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{}
+func AccessibilityCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{}
 	return routes
 }
 
@@ -20,7 +20,7 @@ var AccessibilityCustomActionsCli = []cli.Command{}
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var AccessibilityCliActionsBundle = &workspaces.CliActionsBundle{
+var AccessibilityCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "accessibility",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
@@ -29,8 +29,8 @@ var AccessibilityCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetAccessibilityActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetAccessibilityActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   AccessibilityCustomActions(),
 		CliAction: AccessibilityCliActionsBundle,
 	}

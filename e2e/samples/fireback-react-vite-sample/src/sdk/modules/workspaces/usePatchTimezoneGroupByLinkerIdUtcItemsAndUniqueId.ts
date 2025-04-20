@@ -86,7 +86,7 @@ export function usePatchTimezoneGroupByLinkerIdUtcItemsAndUniqueId(
       mutation.mutate(values, {
         onSuccess(response: IResponse<TimezoneGroupUtcItems>) {
           queryClient?.setQueriesData(
-            "*workspaces.TimezoneGroupUtcItems",
+            "*fireback.TimezoneGroupUtcItems",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

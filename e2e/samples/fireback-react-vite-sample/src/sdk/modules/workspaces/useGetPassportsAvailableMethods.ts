@@ -65,7 +65,7 @@ export function useGetPassportsAvailableMethods({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.CheckPassportMethodsActionResDto"],
+    [options, query, "*fireback.CheckPassportMethodsActionResDto"],
     fn,
     {
       cacheTime: 1001,

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -13,8 +13,8 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-func LicensesModuleSetup() *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func LicensesModuleSetup() *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 		Name:        "licenses",
 		Definitions: &Module3Definitions,
 	}
@@ -27,7 +27,7 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 		ProductPlanImportMocks()
 
 		// Generate keys based on all plans, these are not activated
-		f := workspaces.QueryDSL{Deep: true, ItemsPerPage: 100, StartIndex: 0, WorkspaceId: "system"}
+		f := fireback.QueryDSL{Deep: true, ItemsPerPage: 100, StartIndex: 0, WorkspaceId: "system"}
 		items, count, _ := ProductPlanActionQuery(f)
 		fmt.Println("Product plans count:", count, items)
 		for _, productPlan := range items {
@@ -42,7 +42,7 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 				Email:     &Email,
 				Owner:     &Owner,
 				MachineId: &MachineId,
-			}, workspaces.QueryDSL{UserId: "system", WorkspaceId: "system", UniqueId: productPlan.UniqueId}); err == nil {
+			}, fireback.QueryDSL{UserId: "system", WorkspaceId: "system", UniqueId: productPlan.UniqueId}); err == nil {
 				fmt.Println(license.SignedLicense)
 			} else {
 				log.Fatalln(err)
@@ -52,13 +52,13 @@ func LicensesModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvideMockWriterHandler(func(languages []string) {
-		LicensableProductWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
-		ProductPlanWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
-		ActivationKeyWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
-		LicenseWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
+		LicensableProductWriteQueryMock(fireback.MockQueryContext{Languages: languages})
+		ProductPlanWriteQueryMock(fireback.MockQueryContext{Languages: languages})
+		ActivationKeyWriteQueryMock(fireback.MockQueryContext{Languages: languages})
+		LicenseWriteQueryMock(fireback.MockQueryContext{Languages: languages})
 	})
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetActivationKeyModule3Actions(),
 		GetProductPlanModule3Actions(),
 		GetLicensableProductModule3Actions(),

@@ -8,9 +8,10 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/torabian/fireback/modules/workspaces"
-	"github.com/urfave/cli"
 	"strings"
+
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli"
 )
 
 func CastExchangeKeyInformationFromCli(c *cli.Context) *ExchangeKeyInformationDto {
@@ -83,7 +84,7 @@ func (x *ExchangeKeyInformationDto) Json() string {
 func (x *ExchangeKeyInformationDto) JsonPrint() {
 	fmt.Println(x.Json())
 	// Somehow to make the import always needed, makes no sense.
-	_ = workspaces.Body
+	_ = fireback.Body
 }
 
 // This is an experimental way to create new dtos, with exluding the pointers as helper.

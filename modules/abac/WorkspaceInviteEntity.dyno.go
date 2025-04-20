@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/WorkspaceInvite"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/WorkspaceInvite"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var workspaceInviteSeedersFs = &seeders.ViewsFs
@@ -32,21 +33,21 @@ func ResetWorkspaceInviteSeeders(fs *embed.FS) {
 }
 
 type WorkspaceInviteEntityQs struct {
-	PublicKey         workspaces.QueriableField `cli:"public-key" table:"workspace_invite" column:"public_key" qs:"publicKey"`
-	CoverLetter       workspaces.QueriableField `cli:"cover-letter" table:"workspace_invite" column:"cover_letter" qs:"coverLetter"`
-	TargetUserLocale  workspaces.QueriableField `cli:"target-user-locale" table:"workspace_invite" column:"target_user_locale" qs:"targetUserLocale"`
-	Email             workspaces.QueriableField `cli:"email" table:"workspace_invite" column:"email" qs:"email"`
-	Phonenumber       workspaces.QueriableField `cli:"phonenumber" table:"workspace_invite" column:"phonenumber" qs:"phonenumber"`
-	Workspace         workspaces.QueriableField `cli:"workspace" table:"workspace_invite" column:"workspace" qs:"workspace"`
-	FirstName         workspaces.QueriableField `cli:"first-name" table:"workspace_invite" column:"first_name" qs:"firstName"`
-	LastName          workspaces.QueriableField `cli:"last-name" table:"workspace_invite" column:"last_name" qs:"lastName"`
-	ForceEmailAddress workspaces.QueriableField `cli:"force-email-address" table:"workspace_invite" column:"force_email_address" qs:"forceEmailAddress"`
-	ForcePhoneNumber  workspaces.QueriableField `cli:"force-phone-number" table:"workspace_invite" column:"force_phone_number" qs:"forcePhoneNumber"`
-	Role              workspaces.QueriableField `cli:"role" table:"workspace_invite" column:"role" qs:"role"`
+	PublicKey         fireback.QueriableField `cli:"public-key" table:"workspace_invite" column:"public_key" qs:"publicKey"`
+	CoverLetter       fireback.QueriableField `cli:"cover-letter" table:"workspace_invite" column:"cover_letter" qs:"coverLetter"`
+	TargetUserLocale  fireback.QueriableField `cli:"target-user-locale" table:"workspace_invite" column:"target_user_locale" qs:"targetUserLocale"`
+	Email             fireback.QueriableField `cli:"email" table:"workspace_invite" column:"email" qs:"email"`
+	Phonenumber       fireback.QueriableField `cli:"phonenumber" table:"workspace_invite" column:"phonenumber" qs:"phonenumber"`
+	Workspace         fireback.QueriableField `cli:"workspace" table:"workspace_invite" column:"workspace" qs:"workspace"`
+	FirstName         fireback.QueriableField `cli:"first-name" table:"workspace_invite" column:"first_name" qs:"firstName"`
+	LastName          fireback.QueriableField `cli:"last-name" table:"workspace_invite" column:"last_name" qs:"lastName"`
+	ForceEmailAddress fireback.QueriableField `cli:"force-email-address" table:"workspace_invite" column:"force_email_address" qs:"forceEmailAddress"`
+	ForcePhoneNumber  fireback.QueriableField `cli:"force-phone-number" table:"workspace_invite" column:"force_phone_number" qs:"forcePhoneNumber"`
+	Role              fireback.QueriableField `cli:"role" table:"workspace_invite" column:"role" qs:"role"`
 }
 
 func (x *WorkspaceInviteEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var WorkspaceInviteQsFlags = []cli.Flag{
@@ -101,20 +102,20 @@ type WorkspaceInviteEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -124,11 +125,11 @@ type WorkspaceInviteEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -172,17 +173,17 @@ type WorkspaceInviteEntity struct {
 	// Last name of the person which is invited.
 	LastName string `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
 	// If forced, the email address cannot be changed by the user which has been invited.
-	ForceEmailAddress workspaces.Bool `json:"forceEmailAddress" xml:"forceEmailAddress" yaml:"forceEmailAddress"        `
+	ForceEmailAddress fireback.Bool `json:"forceEmailAddress" xml:"forceEmailAddress" yaml:"forceEmailAddress"        `
 	// If forced, user cannot change the phone number and needs to complete signup.
-	ForcePhoneNumber workspaces.Bool `json:"forcePhoneNumber" xml:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
+	ForcePhoneNumber fireback.Bool `json:"forcePhoneNumber" xml:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
 	// The role which invitee get if they accept the request.
 	Role     *RoleEntity              `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId   workspaces.String        `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
+	RoleId   fireback.String          `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
 	Children []*WorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceInviteEntityStream(q workspaces.QueryDSL) (chan []*WorkspaceInviteEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*WorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*WorkspaceInviteEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -218,8 +219,8 @@ func (x *WorkspaceInviteEntityList) Json() string {
 	}
 	return ""
 }
-func (x *WorkspaceInviteEntityList) ToTree() *workspaces.TreeOperation[WorkspaceInviteEntity] {
-	return workspaces.NewTreeOperation(
+func (x *WorkspaceInviteEntityList) ToTree() *fireback.TreeOperation[WorkspaceInviteEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceInviteEntity) string {
 			if !t.ParentId.Valid {
@@ -236,15 +237,15 @@ func (x *WorkspaceInviteEntityList) ToTree() *workspaces.TreeOperation[Workspace
 var WorkspaceInvitePreloadRelations []string = []string{}
 
 type workspaceInviteActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *workspaces.IError)
-	Create         func(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError)
-	Upsert         func(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *fireback.IError)
+	Create         func(dto *WorkspaceInviteEntity, query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
+	Upsert         func(dto *WorkspaceInviteEntity, query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceInviteEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*WorkspaceInviteEntity, query workspaces.QueryDSL) ([]*WorkspaceInviteEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*WorkspaceInviteEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*WorkspaceInviteEntity, query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.QueryResultMeta, error)
 }
 
 var WorkspaceInviteActions workspaceInviteActionsSig = workspaceInviteActionsSig{
@@ -259,7 +260,7 @@ var WorkspaceInviteActions workspaceInviteActionsSig = workspaceInviteActionsSig
 	Query:          WorkspaceInviteActionQueryFn,
 }
 
-func WorkspaceInviteActionUpsertFn(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteActionUpsertFn(dto *WorkspaceInviteEntity, query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -273,34 +274,34 @@ var WORKSPACE_INVITE_EVENTS = []string{
 }
 
 type WorkspaceInviteFieldMap struct {
-	PublicKey         workspaces.TranslatedString `yaml:"publicKey"`
-	CoverLetter       workspaces.TranslatedString `yaml:"coverLetter"`
-	TargetUserLocale  workspaces.TranslatedString `yaml:"targetUserLocale"`
-	Email             workspaces.TranslatedString `yaml:"email"`
-	Phonenumber       workspaces.TranslatedString `yaml:"phonenumber"`
-	Workspace         workspaces.TranslatedString `yaml:"workspace"`
-	FirstName         workspaces.TranslatedString `yaml:"firstName"`
-	LastName          workspaces.TranslatedString `yaml:"lastName"`
-	ForceEmailAddress workspaces.TranslatedString `yaml:"forceEmailAddress"`
-	ForcePhoneNumber  workspaces.TranslatedString `yaml:"forcePhoneNumber"`
-	Role              workspaces.TranslatedString `yaml:"role"`
+	PublicKey         fireback.TranslatedString `yaml:"publicKey"`
+	CoverLetter       fireback.TranslatedString `yaml:"coverLetter"`
+	TargetUserLocale  fireback.TranslatedString `yaml:"targetUserLocale"`
+	Email             fireback.TranslatedString `yaml:"email"`
+	Phonenumber       fireback.TranslatedString `yaml:"phonenumber"`
+	Workspace         fireback.TranslatedString `yaml:"workspace"`
+	FirstName         fireback.TranslatedString `yaml:"firstName"`
+	LastName          fireback.TranslatedString `yaml:"lastName"`
+	ForceEmailAddress fireback.TranslatedString `yaml:"forceEmailAddress"`
+	ForcePhoneNumber  fireback.TranslatedString `yaml:"forcePhoneNumber"`
+	Role              fireback.TranslatedString `yaml:"role"`
 }
 
 var WorkspaceInviteEntityMetaConfig map[string]int64 = map[string]int64{}
-var WorkspaceInviteEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WorkspaceInviteEntity{}))
+var WorkspaceInviteEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&WorkspaceInviteEntity{}))
 
-func entityWorkspaceInviteFormatter(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) {
+func entityWorkspaceInviteFormatter(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func WorkspaceInviteActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func WorkspaceInviteActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -327,7 +328,7 @@ func WorkspaceInviteActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WorkspaceInviteActionSeeder(query workspaces.QueryDSL, count int) {
+func WorkspaceInviteActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -353,7 +354,7 @@ func WorkspaceInviteActionSeederInitFn() *WorkspaceInviteEntity {
 	entity := &WorkspaceInviteEntity{}
 	return entity
 }
-func WorkspaceInviteAssociationCreate(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) error {
+func WorkspaceInviteAssociationCreate(dto *WorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -361,13 +362,13 @@ func WorkspaceInviteAssociationCreate(dto *WorkspaceInviteEntity, query workspac
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func WorkspaceInviteRelationContentCreate(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) error {
+func WorkspaceInviteRelationContentCreate(dto *WorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceInviteRelationContentUpdate(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) error {
+func WorkspaceInviteRelationContentUpdate(dto *WorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WorkspaceInvitePolyglotUpdateHandler(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) {
+func WorkspaceInvitePolyglotUpdateHandler(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -378,8 +379,8 @@ func WorkspaceInvitePolyglotUpdateHandler(dto *WorkspaceInviteEntity, query work
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func WorkspaceInviteValidator(dto *WorkspaceInviteEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func WorkspaceInviteValidator(dto *WorkspaceInviteEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -433,29 +434,31 @@ And here is the actual object signature:
 	},
 }
 
-func WorkspaceInviteEntityPreSanitize(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) {
+func WorkspaceInviteEntityPreSanitize(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
 }
-func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) {
+func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	WorkspaceInviteRecursiveAddUniqueId(dto, query)
 }
-func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) {
+func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WorkspaceInviteMultiInsertFn(dtos []*WorkspaceInviteEntity, query workspaces.QueryDSL) ([]*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteMultiInsertFn(dtos []*WorkspaceInviteEntity, query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WorkspaceInviteEntityPreSanitize(dtos[index], query)
@@ -463,19 +466,19 @@ func WorkspaceInviteMultiInsertFn(dtos []*WorkspaceInviteEntity, query workspace
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query workspaces.QueryDSL) ([]*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WorkspaceInviteEntity{}
 		for _, item := range dtos {
@@ -489,12 +492,12 @@ func WorkspaceInviteActionBatchCreateFn(dtos []*WorkspaceInviteEntity, query wor
 	}
 	return dtos, nil
 }
-func WorkspaceInviteDeleteEntireChildren(query workspaces.QueryDSL, dto *WorkspaceInviteEntity) *workspaces.IError {
+func WorkspaceInviteDeleteEntireChildren(query fireback.QueryDSL, dto *WorkspaceInviteEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := WorkspaceInviteValidator(dto, false); iError != nil {
 		return nil, iError
@@ -508,14 +511,14 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query workspaces.
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -523,35 +526,35 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query workspaces.
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewWorkspaceInviteCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(WORKSPACE_INVITE_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&WorkspaceInviteEntity{}),
+			"entityKey": fireback.GetTypeString(&WorkspaceInviteEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func WorkspaceInviteActionGetOneFn(query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteActionGetOneFn(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	item, err := workspaces.GetOneEntity[WorkspaceInviteEntity](query, refl)
+	item, err := fireback.GetOneEntity[WorkspaceInviteEntity](query, refl)
 	entityWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func WorkspaceInviteActionGetByWorkspaceFn(query workspaces.QueryDSL) (*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[WorkspaceInviteEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[WorkspaceInviteEntity](query, refl)
 	entityWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func WorkspaceInviteActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceInviteEntity, *workspaces.QueryResultMeta, error) {
+func WorkspaceInviteActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
 	for _, item := range items {
 		entityWorkspaceInviteFormatter(item, query)
 	}
@@ -561,7 +564,7 @@ func WorkspaceInviteActionQueryFn(query workspaces.QueryDSL) ([]*WorkspaceInvite
 var workspaceInviteMemoryItems []*WorkspaceInviteEntity = []*WorkspaceInviteEntity{}
 
 func WorkspaceInviteEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -591,7 +594,7 @@ func WorkspaceInviteMemJoin(items []uint) []*WorkspaceInviteEntity {
 	}
 	return res
 }
-func WorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_INVITE_EVENT_UPDATED
 	WorkspaceInviteEntityPreSanitize(fields, query)
@@ -606,7 +609,7 @@ func WorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	WorkspaceInviteRelationContentUpdate(fields, query)
@@ -620,11 +623,11 @@ func WorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 		Where(&WorkspaceInviteEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewWorkspaceInviteUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -636,9 +639,9 @@ func WorkspaceInviteUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields
 	   })*/
 	return &itemRefetched, nil
 }
-func WorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *workspaces.IError) {
+func WorkspaceInviteActionUpdateFn(query fireback.QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WorkspaceInviteValidator(fields, true); iError != nil {
@@ -648,11 +651,11 @@ func WorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceI
 	// WorkspaceInviteRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *WorkspaceInviteEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = WorkspaceInviteUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -660,7 +663,7 @@ func WorkspaceInviteActionUpdateFn(query workspaces.QueryDSL, fields *WorkspaceI
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WorkspaceInviteUpdateExec(dbref, query, fields)
@@ -671,8 +674,8 @@ var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspaceinvites ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
 		})
 		count, _ := WorkspaceInviteActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -680,16 +683,16 @@ var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceInviteActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func WorkspaceInviteActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}
-	return workspaces.RemoveEntity[WorkspaceInviteEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}
+	return fireback.RemoveEntity[WorkspaceInviteEntity](query, refl)
 }
-func WorkspaceInviteActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func WorkspaceInviteActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WorkspaceInviteEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[WorkspaceInviteEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'WorkspaceInviteEntity'", subErr)
 			return count, subErr
@@ -700,11 +703,11 @@ func WorkspaceInviteActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func WorkspaceInviteActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WorkspaceInviteEntity]) (
-	*workspaces.BulkRecordRequest[WorkspaceInviteEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[WorkspaceInviteEntity]) (
+	*fireback.BulkRecordRequest[WorkspaceInviteEntity], *fireback.IError,
 ) {
 	result := []*WorkspaceInviteEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := WorkspaceInviteActions.Update(query, record)
@@ -719,7 +722,7 @@ func WorkspaceInviteActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *WorkspaceInviteEntity) Json() string {
 	if x != nil {
@@ -729,7 +732,7 @@ func (x *WorkspaceInviteEntity) Json() string {
 	return ""
 }
 
-var WorkspaceInviteEntityMeta = workspaces.TableMetaData{
+var WorkspaceInviteEntityMeta = fireback.TableMetaData{
 	EntityName:    "WorkspaceInvite",
 	ExportKey:     "workspace-invites",
 	TableNameInDb: "workspace-invite_entities",
@@ -739,23 +742,23 @@ var WorkspaceInviteEntityMeta = workspaces.TableMetaData{
 }
 
 func WorkspaceInviteActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[WorkspaceInviteEntity](query, WorkspaceInviteActions.Query, WorkspaceInvitePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[WorkspaceInviteEntity](query, WorkspaceInviteActions.Query, WorkspaceInvitePreloadRelations)
 }
 func WorkspaceInviteActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[WorkspaceInviteEntity](query, WorkspaceInviteActions.Query, WorkspaceInvitePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[WorkspaceInviteEntity](query, WorkspaceInviteActions.Query, WorkspaceInvitePreloadRelations)
 }
 func WorkspaceInviteActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content WorkspaceInviteEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WorkspaceInviteActions.Create(&content, query)
@@ -834,7 +837,7 @@ var WorkspaceInviteCommonCliFlags = []cli.Flag{
 		Usage:    `The role which invitee get if they accept the request. (one)`,
 	},
 }
-var WorkspaceInviteCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var WorkspaceInviteCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "publicKey",
 		StructField: "PublicKey",
@@ -975,16 +978,16 @@ var WorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 		})
 		entity := &WorkspaceInviteEntity{}
-		workspaces.PopulateInteractively(entity, c, WorkspaceInviteCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, WorkspaceInviteCommonInteractiveCliFlags)
 		if entity, err := WorkspaceInviteActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -994,8 +997,8 @@ var WorkspaceInviteUpdateCmd cli.Command = cli.Command{
 	Flags:   WorkspaceInviteCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
 		})
 		entity := CastWorkspaceInviteFromCli(c)
 		if entity, err := WorkspaceInviteActions.Update(query, entity); err != nil {
@@ -1017,7 +1020,7 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("public-key") {
 		template.PublicKey = c.String("public-key")
@@ -1035,7 +1038,7 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 		template.Phonenumber = c.String("phonenumber")
 	}
 	if c.IsSet("workspace-id") {
-		template.WorkspaceId = workspaces.NewStringAutoNull(c.String("workspace-id"))
+		template.WorkspaceId = fireback.NewStringAutoNull(c.String("workspace-id"))
 	}
 	if c.IsSet("first-name") {
 		template.FirstName = c.String("first-name")
@@ -1044,12 +1047,12 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 		template.LastName = c.String("last-name")
 	}
 	if c.IsSet("role-id") {
-		template.RoleId = workspaces.NewStringAutoNull(c.String("role-id"))
+		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
 	}
 	return template
 }
-func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
@@ -1059,8 +1062,8 @@ func WorkspaceInviteSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q work
 	)
 }
 func WorkspaceInviteSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		workspaceInviteSeedersFs,
@@ -1069,8 +1072,8 @@ func WorkspaceInviteSyncSeeders() {
 	)
 }
 func WorkspaceInviteImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		WorkspaceInviteActions.Create,
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1078,19 +1081,19 @@ func WorkspaceInviteImportMocks() {
 		false,
 	)
 }
-func WorkspaceInviteWriteQueryMock(ctx workspaces.MockQueryContext) {
+func WorkspaceInviteWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := WorkspaceInviteActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "WorkspaceInvite", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "WorkspaceInvite", result)
 	}
 }
-func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1102,7 +1105,7 @@ func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *wor
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := WorkspaceInviteActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1129,8 +1132,8 @@ var WorkspaceInviteDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 			})
 			if c.Bool("batch") {
 				WorkspaceInviteActionSeederMultiple(query, c.Int("count"))
@@ -1153,7 +1156,7 @@ var WorkspaceInviteDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := WorkspaceInviteActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1161,7 +1164,7 @@ var WorkspaceInviteDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1174,7 +1177,7 @@ var WorkspaceInviteDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1204,7 +1207,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of workspace-invites, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]WorkspaceInviteEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1213,7 +1216,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(workspaceInviteSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(workspaceInviteSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1226,7 +1229,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				workspaceInviteSeedersFs,
@@ -1237,7 +1240,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1245,7 +1248,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				WorkspaceInviteEntityStream,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
@@ -1259,7 +1262,7 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1269,12 +1272,12 @@ var WorkspaceInviteImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				WorkspaceInviteActions.Create,
 				reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 				},
 				func() WorkspaceInviteEntity {
 					v := CastWorkspaceInviteFromCli(c)
@@ -1292,7 +1295,7 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	WorkspaceInviteUpdateCmd,
 	WorkspaceInviteAskCmd,
 	WorkspaceInviteCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
 		WorkspaceInviteActions.Remove,
 	),
@@ -1300,7 +1303,7 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 
 func WorkspaceInviteCliFn() cli.Command {
 	commands := append(WorkspaceInviteImportExportCommands, WorkspaceInviteCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, WorkspaceInviteDevCommands...)
 	}
 	return cli.Command{
@@ -1318,14 +1321,14 @@ func WorkspaceInviteCliFn() cli.Command {
 	}
 }
 
-var WORKSPACE_INVITE_ACTION_TABLE = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        WorkspaceInviteActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			WorkspaceInviteActions.Query,
 			security,
 			reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
@@ -1333,27 +1336,27 @@ var WORKSPACE_INVITE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var WORKSPACE_INVITE_ACTION_QUERY = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-invites",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &WorkspaceInviteEntityQs{}
-			workspaces.HttpQueryEntity(c, WorkspaceInviteActions.Query, qs)
+			fireback.HttpQueryEntity(c, WorkspaceInviteActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceInviteActions.Query,
 	ResponseEntity: &[]WorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &WorkspaceInviteEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			WorkspaceInviteActions.Query,
 			security,
@@ -1364,138 +1367,138 @@ var WORKSPACE_INVITE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, WorkspaceInviteQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, WorkspaceInviteQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WORKSPACE_INVITE_ACTION_EXPORT = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-invites/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, WorkspaceInviteActionExport)
+			fireback.HttpStreamFileChannel(c, WorkspaceInviteActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WorkspaceInviteActionExport,
 	ResponseEntity: &[]WorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_GET_ONE = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/workspace-invite/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, WorkspaceInviteActions.GetOne)
+			fireback.HttpGetEntity(c, WorkspaceInviteActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         WorkspaceInviteActions.GetOne,
 	ResponseEntity: &WorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_POST_ONE = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new workspaceInvite",
 	Flags:         WorkspaceInviteCommonCliFlags,
 	Method:        "POST",
 	Url:           "/workspace-invite",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, WorkspaceInviteActions.Create)
+			fireback.HttpPostEntity(c, WorkspaceInviteActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, WorkspaceInviteActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, WorkspaceInviteActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         WorkspaceInviteActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &WorkspaceInviteEntity{},
 	ResponseEntity: &WorkspaceInviteEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_PATCH = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WorkspaceInviteCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/workspace-invite",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, WorkspaceInviteActions.Update)
+			fireback.HttpUpdateEntity(c, WorkspaceInviteActions.Update)
 		},
 	},
 	Action:         WorkspaceInviteActions.Update,
 	RequestEntity:  &WorkspaceInviteEntity{},
 	ResponseEntity: &WorkspaceInviteEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/workspace-invites",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, WorkspaceInviteActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, WorkspaceInviteActionBulkUpdate)
 		},
 	},
 	Action:         WorkspaceInviteActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[WorkspaceInviteEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[WorkspaceInviteEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[WorkspaceInviteEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[WorkspaceInviteEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_DELETE = workspaces.Module3Action{
+var WORKSPACE_INVITE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/workspace-invite",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, WorkspaceInviteActions.Remove)
+			fireback.HttpRemoveEntity(c, WorkspaceInviteActions.Remove)
 		},
 	},
 	Action:         WorkspaceInviteActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &WorkspaceInviteEntity{},
 }
 
@@ -1503,10 +1506,10 @@ var WORKSPACE_INVITE_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on WorkspaceInviteEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWorkspaceInviteRouter = func(r *[]workspaces.Module3Action) {}
+var AppendWorkspaceInviteRouter = func(r *[]fireback.Module3Action) {}
 
-func GetWorkspaceInviteModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetWorkspaceInviteModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		WORKSPACE_INVITE_ACTION_QUERY,
 		WORKSPACE_INVITE_ACTION_EXPORT,
 		WORKSPACE_INVITE_ACTION_GET_ONE,
@@ -1520,32 +1523,32 @@ func GetWorkspaceInviteModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_WORKSPACE_INVITE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_INVITE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.workspace-invite.*",
 	Name:        "Entire workspace invite actions (*)",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_INVITE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_INVITE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.workspace-invite.delete",
 	Name:        "Delete workspace invite",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_INVITE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_INVITE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.workspace-invite.create",
 	Name:        "Create workspace invite",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_INVITE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_INVITE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.workspace-invite.update",
 	Name:        "Update workspace invite",
 	Description: "",
 }
-var PERM_ROOT_WORKSPACE_INVITE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_WORKSPACE_INVITE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.workspace-invite.query",
 	Name:        "Query workspace invite",
 	Description: "",
 }
-var ALL_WORKSPACE_INVITE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_WORKSPACE_INVITE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_WORKSPACE_INVITE_DELETE,
 	PERM_ROOT_WORKSPACE_INVITE_CREATE,
 	PERM_ROOT_WORKSPACE_INVITE_UPDATE,
@@ -1555,42 +1558,42 @@ var ALL_WORKSPACE_INVITE_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewWorkspaceInviteCreatedEvent(
 	payload *WorkspaceInviteEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceInviteCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_INVITE_QUERY,
 			},
 		},
 		CacheKey: "*abac.WorkspaceInviteEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewWorkspaceInviteUpdatedEvent(
 	payload *WorkspaceInviteEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "WorkspaceInviteUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_WORKSPACE_INVITE_QUERY,
 			},
 		},
 		CacheKey: "*abac.WorkspaceInviteEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var WorkspaceInviteEntityBundle = workspaces.EntityBundle{
+var WorkspaceInviteEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_INVITE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

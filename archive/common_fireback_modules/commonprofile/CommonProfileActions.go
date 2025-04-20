@@ -1,16 +1,16 @@
 package commonprofile
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func CommonProfileActionCreate(
-	dto *CommonProfileEntity, query workspaces.QueryDSL,
-) (*CommonProfileEntity, *workspaces.IError) {
+	dto *CommonProfileEntity, query fireback.QueryDSL,
+) (*CommonProfileEntity, *fireback.IError) {
 	return CommonProfileActionCreateFn(dto, query)
 }
 
 func CommonProfileActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *CommonProfileEntity,
-) (*CommonProfileEntity, *workspaces.IError) {
+) (*CommonProfileEntity, *fireback.IError) {
 	return CommonProfileActionUpdateFn(query, fields)
 }

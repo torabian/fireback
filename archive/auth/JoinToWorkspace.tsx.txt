@@ -8,15 +8,15 @@ import { PageSection } from "../../components/page-section/PageSection";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 
-import { useGetWorkspaceInviteByUniqueId } from "../../sdk/modules/workspaces/useGetWorkspaceInviteByUniqueId";
+import { useGetWorkspaceInviteByUniqueId } from "../../sdk/modules/fireback/useGetWorkspaceInviteByUniqueId";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useRememberingLoginForm } from "./AuthHooks";
 import { Signup } from "./SignupManager";
-import { usePostPassportsSignupClassic } from "../../sdk/modules/workspaces/usePostPassportsSignupClassic";
-import { EmailAccountSigninDto } from "../../sdk/modules/workspaces/EmailAccountSigninDto";
-import { WorkspaceInviteEntity } from "../../sdk/modules/workspaces/WorkspaceInviteEntity";
+import { usePostPassportsSignupClassic } from "../../sdk/modules/fireback/usePostPassportsSignupClassic";
+import { EmailAccountSigninDto } from "../../sdk/modules/fireback/EmailAccountSigninDto";
+import { WorkspaceInviteEntity } from "../../sdk/modules/fireback/WorkspaceInviteEntity";
 import { IResponse } from "../../sdk/core/http-tools";
-import { UserSessionDto } from "../../sdk/modules/workspaces/UserSessionDto";
+import { UserSessionDto } from "../../sdk/modules/fireback/UserSessionDto";
 
 const initialValues: Partial<EmailAccountSigninDto> = {
   email: "",

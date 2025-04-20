@@ -5,17 +5,17 @@ import (
 	"log"
 	"strings"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
-func GetWorkspaceNotificationConfig(workspaceId string) (*NotificationConfigEntity, *workspaces.IError) {
+func GetWorkspaceNotificationConfig(workspaceId string) (*NotificationConfigEntity, *fireback.IError) {
 
 	var item NotificationConfigEntity
 
-	err := workspaces.GetDbRef().Where(workspaces.RealEscape("workspace_id = ?", workspaceId)).First(&item).Error
+	err := fireback.GetDbRef().Where(fireback.RealEscape("workspace_id = ?", workspaceId)).First(&item).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 
 	return &item, nil
@@ -27,7 +27,7 @@ var NotificationModuleAuditCmd cli.Command = cli.Command{
 	Usage: "Runs several tests, and checks if the notification module has been configurated correctly",
 	Action: func(c *cli.Context) error {
 
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := fireback.CommonCliQueryDSLBuilder(c)
 		fmt.Println("Workspace:", query.WorkspaceId)
 
 		fmt.Println("1. Check if there is a configuration for email senders, and main email templates")
@@ -64,8 +64,8 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 
 	Action: func(c *cli.Context) error {
 
-		query := workspaces.CommonCliQueryDSLBuilder(c)
-		items, count, err := EmailSenderActions.Query(workspaces.QueryDSL{ItemsPerPage: 20})
+		query := fireback.CommonCliQueryDSLBuilder(c)
+		items, count, err := EmailSenderActions.Query(fireback.QueryDSL{ItemsPerPage: 20})
 
 		if err != nil {
 			log.Fatalln(err.Error())
@@ -79,21 +79,21 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 
 		senderId := ""
 		if count.TotalItems <= 20 {
-			senderId = workspaces.AskForSelect("Select the sender, which test mail will be sent on their behalf", senders)
+			senderId = fireback.AskForSelect("Select the sender, which test mail will be sent on their behalf", senders)
 			index := strings.Index(senderId, ">>>")
 			senderId = strings.Trim(senderId[0:index], " ")
 		} else {
-			senderId = workspaces.AskForInput("Too many workspaces, enter the unique id", "")
+			senderId = fireback.AskForInput("Too many workspaces, enter the unique id", "")
 		}
 
 		if senderId == "" {
 			log.Fatalln("A valid sender is required first, create at least a no-reply email address")
 		}
 
-		var toName string = workspaces.AskForInput("Reciepent name: (eg. Ali Torabi)", "Ali Torabi")
-		var toEmail string = workspaces.AskForInput("Reciepent email address:", "ali-torabian@outlook.com")
-		var subject string = workspaces.AskForInput("Subject", "Testing mail server")
-		var content string = workspaces.AskForInput("Content", "This is a test, to see if our mail server is actually working")
+		var toName string = fireback.AskForInput("Reciepent name: (eg. Ali Torabi)", "Ali Torabi")
+		var toEmail string = fireback.AskForInput("Reciepent email address:", "ali-torabian@outlook.com")
+		var subject string = fireback.AskForInput("Subject", "Testing mail server")
+		var content string = fireback.AskForInput("Content", "This is a test, to see if our mail server is actually working")
 
 		_, err = NotificationTestMailAction(&TestMailDto{
 			SenderId: senderId,

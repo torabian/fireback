@@ -69,7 +69,7 @@ export function usePatchRole(props?: PatchProps) {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<RoleEntity>) {
-          queryClient?.setQueriesData("*workspaces.RoleEntity", (data: any) =>
+          queryClient?.setQueriesData("*fireback.RoleEntity", (data: any) =>
             fnUpdater(data, response)
           );
           resolve(response);

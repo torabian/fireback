@@ -70,7 +70,7 @@ export function usePostTableViewSizing(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<TableViewSizingEntity>) {
           queryClient?.setQueryData<IResponseList<TableViewSizingEntity>>(
-            "*workspaces.TableViewSizingEntity",
+            "*fireback.TableViewSizingEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

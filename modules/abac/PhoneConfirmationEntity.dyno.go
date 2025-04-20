@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/PhoneConfirmation"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PhoneConfirmation"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var phoneConfirmationSeedersFs = &seeders.ViewsFs
@@ -32,15 +33,15 @@ func ResetPhoneConfirmationSeeders(fs *embed.FS) {
 }
 
 type PhoneConfirmationEntityQs struct {
-	User        workspaces.QueriableField `cli:"user" table:"phone_confirmation" column:"user" qs:"user"`
-	Status      workspaces.QueriableField `cli:"status" table:"phone_confirmation" column:"status" qs:"status"`
-	PhoneNumber workspaces.QueriableField `cli:"phone-number" table:"phone_confirmation" column:"phone_number" qs:"phoneNumber"`
-	Key         workspaces.QueriableField `cli:"key" table:"phone_confirmation" column:"key" qs:"key"`
-	ExpiresAt   workspaces.QueriableField `cli:"expires-at" table:"phone_confirmation" column:"expires_at" qs:"expiresAt"`
+	User        fireback.QueriableField `cli:"user" table:"phone_confirmation" column:"user" qs:"user"`
+	Status      fireback.QueriableField `cli:"status" table:"phone_confirmation" column:"status" qs:"status"`
+	PhoneNumber fireback.QueriableField `cli:"phone-number" table:"phone_confirmation" column:"phone_number" qs:"phoneNumber"`
+	Key         fireback.QueriableField `cli:"key" table:"phone_confirmation" column:"key" qs:"key"`
+	ExpiresAt   fireback.QueriableField `cli:"expires-at" table:"phone_confirmation" column:"expires_at" qs:"expiresAt"`
 }
 
 func (x *PhoneConfirmationEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var PhoneConfirmationQsFlags = []cli.Flag{
@@ -71,20 +72,20 @@ type PhoneConfirmationEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -94,11 +95,11 @@ type PhoneConfirmationEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -134,7 +135,7 @@ type PhoneConfirmationEntity struct {
 	LinkedTo         *PhoneConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PhoneConfirmationEntityStream(q workspaces.QueryDSL) (chan []*PhoneConfirmationEntity, *workspaces.QueryResultMeta, error) {
+func PhoneConfirmationEntityStream(q fireback.QueryDSL) (chan []*PhoneConfirmationEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*PhoneConfirmationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -170,8 +171,8 @@ func (x *PhoneConfirmationEntityList) Json() string {
 	}
 	return ""
 }
-func (x *PhoneConfirmationEntityList) ToTree() *workspaces.TreeOperation[PhoneConfirmationEntity] {
-	return workspaces.NewTreeOperation(
+func (x *PhoneConfirmationEntityList) ToTree() *fireback.TreeOperation[PhoneConfirmationEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *PhoneConfirmationEntity) string {
 			if !t.ParentId.Valid {
@@ -188,15 +189,15 @@ func (x *PhoneConfirmationEntityList) ToTree() *workspaces.TreeOperation[PhoneCo
 var PhoneConfirmationPreloadRelations []string = []string{}
 
 type phoneConfirmationActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *workspaces.IError)
-	Create         func(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError)
-	Upsert         func(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *fireback.IError)
+	Create         func(dto *PhoneConfirmationEntity, query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
+	Upsert         func(dto *PhoneConfirmationEntity, query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
 	SeederInit     func() *PhoneConfirmationEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*PhoneConfirmationEntity, query workspaces.QueryDSL) ([]*PhoneConfirmationEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*PhoneConfirmationEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*PhoneConfirmationEntity, query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.QueryResultMeta, error)
 }
 
 var PhoneConfirmationActions phoneConfirmationActionsSig = phoneConfirmationActionsSig{
@@ -211,7 +212,7 @@ var PhoneConfirmationActions phoneConfirmationActionsSig = phoneConfirmationActi
 	Query:          PhoneConfirmationActionQueryFn,
 }
 
-func PhoneConfirmationActionUpsertFn(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationActionUpsertFn(dto *PhoneConfirmationEntity, query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -225,28 +226,28 @@ var PHONE_CONFIRMATION_EVENTS = []string{
 }
 
 type PhoneConfirmationFieldMap struct {
-	User        workspaces.TranslatedString `yaml:"user"`
-	Status      workspaces.TranslatedString `yaml:"status"`
-	PhoneNumber workspaces.TranslatedString `yaml:"phoneNumber"`
-	Key         workspaces.TranslatedString `yaml:"key"`
-	ExpiresAt   workspaces.TranslatedString `yaml:"expiresAt"`
+	User        fireback.TranslatedString `yaml:"user"`
+	Status      fireback.TranslatedString `yaml:"status"`
+	PhoneNumber fireback.TranslatedString `yaml:"phoneNumber"`
+	Key         fireback.TranslatedString `yaml:"key"`
+	ExpiresAt   fireback.TranslatedString `yaml:"expiresAt"`
 }
 
 var PhoneConfirmationEntityMetaConfig map[string]int64 = map[string]int64{}
-var PhoneConfirmationEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&PhoneConfirmationEntity{}))
+var PhoneConfirmationEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&PhoneConfirmationEntity{}))
 
-func entityPhoneConfirmationFormatter(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) {
+func entityPhoneConfirmationFormatter(dto *PhoneConfirmationEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func PhoneConfirmationActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func PhoneConfirmationActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -273,7 +274,7 @@ func PhoneConfirmationActionSeederMultiple(query workspaces.QueryDSL, count int)
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func PhoneConfirmationActionSeeder(query workspaces.QueryDSL, count int) {
+func PhoneConfirmationActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -299,7 +300,7 @@ func PhoneConfirmationActionSeederInitFn() *PhoneConfirmationEntity {
 	entity := &PhoneConfirmationEntity{}
 	return entity
 }
-func PhoneConfirmationAssociationCreate(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) error {
+func PhoneConfirmationAssociationCreate(dto *PhoneConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -307,13 +308,13 @@ func PhoneConfirmationAssociationCreate(dto *PhoneConfirmationEntity, query work
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func PhoneConfirmationRelationContentCreate(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) error {
+func PhoneConfirmationRelationContentCreate(dto *PhoneConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PhoneConfirmationRelationContentUpdate(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) error {
+func PhoneConfirmationRelationContentUpdate(dto *PhoneConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func PhoneConfirmationPolyglotUpdateHandler(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) {
+func PhoneConfirmationPolyglotUpdateHandler(dto *PhoneConfirmationEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -324,8 +325,8 @@ func PhoneConfirmationPolyglotUpdateHandler(dto *PhoneConfirmationEntity, query 
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func PhoneConfirmationValidator(dto *PhoneConfirmationEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func PhoneConfirmationValidator(dto *PhoneConfirmationEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -373,29 +374,31 @@ And here is the actual object signature:
 	},
 }
 
-func PhoneConfirmationEntityPreSanitize(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) {
+func PhoneConfirmationEntityPreSanitize(dto *PhoneConfirmationEntity, query fireback.QueryDSL) {
 }
-func PhoneConfirmationEntityBeforeCreateAppend(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) {
+func PhoneConfirmationEntityBeforeCreateAppend(dto *PhoneConfirmationEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	PhoneConfirmationRecursiveAddUniqueId(dto, query)
 }
-func PhoneConfirmationRecursiveAddUniqueId(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) {
+func PhoneConfirmationRecursiveAddUniqueId(dto *PhoneConfirmationEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func PhoneConfirmationMultiInsertFn(dtos []*PhoneConfirmationEntity, query workspaces.QueryDSL) ([]*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationMultiInsertFn(dtos []*PhoneConfirmationEntity, query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			PhoneConfirmationEntityPreSanitize(dtos[index], query)
@@ -403,19 +406,19 @@ func PhoneConfirmationMultiInsertFn(dtos []*PhoneConfirmationEntity, query works
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func PhoneConfirmationActionBatchCreateFn(dtos []*PhoneConfirmationEntity, query workspaces.QueryDSL) ([]*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationActionBatchCreateFn(dtos []*PhoneConfirmationEntity, query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*PhoneConfirmationEntity{}
 		for _, item := range dtos {
@@ -429,12 +432,12 @@ func PhoneConfirmationActionBatchCreateFn(dtos []*PhoneConfirmationEntity, query
 	}
 	return dtos, nil
 }
-func PhoneConfirmationDeleteEntireChildren(query workspaces.QueryDSL, dto *PhoneConfirmationEntity) *workspaces.IError {
+func PhoneConfirmationDeleteEntireChildren(query fireback.QueryDSL, dto *PhoneConfirmationEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := PhoneConfirmationValidator(dto, false); iError != nil {
 		return nil, iError
@@ -448,14 +451,14 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query workspa
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -463,35 +466,35 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query workspa
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewPhoneConfirmationCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(PHONE_CONFIRMATION_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&PhoneConfirmationEntity{}),
+			"entityKey": fireback.GetTypeString(&PhoneConfirmationEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func PhoneConfirmationActionGetOneFn(query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationActionGetOneFn(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
-	item, err := workspaces.GetOneEntity[PhoneConfirmationEntity](query, refl)
+	item, err := fireback.GetOneEntity[PhoneConfirmationEntity](query, refl)
 	entityPhoneConfirmationFormatter(item, query)
 	return item, err
 }
-func PhoneConfirmationActionGetByWorkspaceFn(query workspaces.QueryDSL) (*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationActionGetByWorkspaceFn(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[PhoneConfirmationEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[PhoneConfirmationEntity](query, refl)
 	entityPhoneConfirmationFormatter(item, query)
 	return item, err
 }
-func PhoneConfirmationActionQueryFn(query workspaces.QueryDSL) ([]*PhoneConfirmationEntity, *workspaces.QueryResultMeta, error) {
+func PhoneConfirmationActionQueryFn(query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[PhoneConfirmationEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[PhoneConfirmationEntity](query, refl)
 	for _, item := range items {
 		entityPhoneConfirmationFormatter(item, query)
 	}
@@ -501,7 +504,7 @@ func PhoneConfirmationActionQueryFn(query workspaces.QueryDSL) ([]*PhoneConfirma
 var phoneConfirmationMemoryItems []*PhoneConfirmationEntity = []*PhoneConfirmationEntity{}
 
 func PhoneConfirmationEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -531,7 +534,7 @@ func PhoneConfirmationMemJoin(items []uint) []*PhoneConfirmationEntity {
 	}
 	return res
 }
-func PhoneConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PHONE_CONFIRMATION_EVENT_UPDATED
 	PhoneConfirmationEntityPreSanitize(fields, query)
@@ -546,7 +549,7 @@ func PhoneConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	PhoneConfirmationRelationContentUpdate(fields, query)
@@ -560,11 +563,11 @@ func PhoneConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 		Where(&PhoneConfirmationEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewPhoneConfirmationUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -576,9 +579,9 @@ func PhoneConfirmationUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fiel
 	   })*/
 	return &itemRefetched, nil
 }
-func PhoneConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *workspaces.IError) {
+func PhoneConfirmationActionUpdateFn(query fireback.QueryDSL, fields *PhoneConfirmationEntity) (*PhoneConfirmationEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := PhoneConfirmationValidator(fields, true); iError != nil {
@@ -588,11 +591,11 @@ func PhoneConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *PhoneCon
 	// PhoneConfirmationRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *PhoneConfirmationEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = PhoneConfirmationUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -600,7 +603,7 @@ func PhoneConfirmationActionUpdateFn(query workspaces.QueryDSL, fields *PhoneCon
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return PhoneConfirmationUpdateExec(dbref, query, fields)
@@ -611,8 +614,8 @@ var PhoneConfirmationWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire phoneconfirmations ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
 		})
 		count, _ := PhoneConfirmationActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -620,16 +623,16 @@ var PhoneConfirmationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PhoneConfirmationActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func PhoneConfirmationActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}
-	return workspaces.RemoveEntity[PhoneConfirmationEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}
+	return fireback.RemoveEntity[PhoneConfirmationEntity](query, refl)
 }
-func PhoneConfirmationActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func PhoneConfirmationActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[PhoneConfirmationEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[PhoneConfirmationEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'PhoneConfirmationEntity'", subErr)
 			return count, subErr
@@ -640,11 +643,11 @@ func PhoneConfirmationActionWipeClean(query workspaces.QueryDSL) (int64, error) 
 	return count, err
 }
 func PhoneConfirmationActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[PhoneConfirmationEntity]) (
-	*workspaces.BulkRecordRequest[PhoneConfirmationEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[PhoneConfirmationEntity]) (
+	*fireback.BulkRecordRequest[PhoneConfirmationEntity], *fireback.IError,
 ) {
 	result := []*PhoneConfirmationEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := PhoneConfirmationActions.Update(query, record)
@@ -659,7 +662,7 @@ func PhoneConfirmationActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *PhoneConfirmationEntity) Json() string {
 	if x != nil {
@@ -669,7 +672,7 @@ func (x *PhoneConfirmationEntity) Json() string {
 	return ""
 }
 
-var PhoneConfirmationEntityMeta = workspaces.TableMetaData{
+var PhoneConfirmationEntityMeta = fireback.TableMetaData{
 	EntityName:    "PhoneConfirmation",
 	ExportKey:     "phone-confirmations",
 	TableNameInDb: "phone-confirmation_entities",
@@ -679,23 +682,23 @@ var PhoneConfirmationEntityMeta = workspaces.TableMetaData{
 }
 
 func PhoneConfirmationActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[PhoneConfirmationEntity](query, PhoneConfirmationActions.Query, PhoneConfirmationPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[PhoneConfirmationEntity](query, PhoneConfirmationActions.Query, PhoneConfirmationPreloadRelations)
 }
 func PhoneConfirmationActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[PhoneConfirmationEntity](query, PhoneConfirmationActions.Query, PhoneConfirmationPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[PhoneConfirmationEntity](query, PhoneConfirmationActions.Query, PhoneConfirmationPreloadRelations)
 }
 func PhoneConfirmationActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content PhoneConfirmationEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := PhoneConfirmationActions.Create(&content, query)
@@ -744,7 +747,7 @@ var PhoneConfirmationCommonCliFlags = []cli.Flag{
 		Usage:    `expiresAt (string)`,
 	},
 }
-var PhoneConfirmationCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var PhoneConfirmationCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "status",
 		StructField: "Status",
@@ -831,16 +834,16 @@ var PhoneConfirmationCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
 		})
 		entity := &PhoneConfirmationEntity{}
-		workspaces.PopulateInteractively(entity, c, PhoneConfirmationCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, PhoneConfirmationCommonInteractiveCliFlags)
 		if entity, err := PhoneConfirmationActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -850,8 +853,8 @@ var PhoneConfirmationUpdateCmd cli.Command = cli.Command{
 	Flags:   PhoneConfirmationCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
 		})
 		entity := CastPhoneConfirmationFromCli(c)
 		if entity, err := PhoneConfirmationActions.Update(query, entity); err != nil {
@@ -873,10 +876,10 @@ func CastPhoneConfirmationFromCli(c *cli.Context) *PhoneConfirmationEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("user-id") {
-		template.UserId = workspaces.NewStringAutoNull(c.String("user-id"))
+		template.UserId = fireback.NewStringAutoNull(c.String("user-id"))
 	}
 	if c.IsSet("status") {
 		template.Status = c.String("status")
@@ -892,8 +895,8 @@ func CastPhoneConfirmationFromCli(c *cli.Context) *PhoneConfirmationEntity {
 	}
 	return template
 }
-func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
@@ -903,8 +906,8 @@ func PhoneConfirmationSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q wo
 	)
 }
 func PhoneConfirmationSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		phoneConfirmationSeedersFs,
@@ -913,8 +916,8 @@ func PhoneConfirmationSyncSeeders() {
 	)
 }
 func PhoneConfirmationImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		PhoneConfirmationActions.Create,
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -922,19 +925,19 @@ func PhoneConfirmationImportMocks() {
 		false,
 	)
 }
-func PhoneConfirmationWriteQueryMock(ctx workspaces.MockQueryContext) {
+func PhoneConfirmationWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := PhoneConfirmationActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "PhoneConfirmation", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "PhoneConfirmation", result)
 	}
 }
-func PhoneConfirmationsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func PhoneConfirmationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -946,7 +949,7 @@ func PhoneConfirmationsActionQueryString(keyword string, page int) ([]string, *w
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := PhoneConfirmationActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -973,8 +976,8 @@ var PhoneConfirmationDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
 			})
 			if c.Bool("batch") {
 				PhoneConfirmationActionSeederMultiple(query, c.Int("count"))
@@ -997,7 +1000,7 @@ var PhoneConfirmationDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := PhoneConfirmationActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1005,7 +1008,7 @@ var PhoneConfirmationDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1018,7 +1021,7 @@ var PhoneConfirmationDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PhoneConfirmationActions.Create,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1048,7 +1051,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of phone-confirmations, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]PhoneConfirmationEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1057,7 +1060,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(phoneConfirmationSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(phoneConfirmationSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1070,7 +1073,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				PhoneConfirmationActions.Create,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				phoneConfirmationSeedersFs,
@@ -1081,7 +1084,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1089,7 +1092,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				PhoneConfirmationEntityStream,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				c.String("file"),
@@ -1103,7 +1106,7 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1113,12 +1116,12 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				PhoneConfirmationActions.Create,
 				reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
 				},
 				func() PhoneConfirmationEntity {
 					v := CastPhoneConfirmationFromCli(c)
@@ -1136,7 +1139,7 @@ var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
 	PhoneConfirmationUpdateCmd,
 	PhoneConfirmationAskCmd,
 	PhoneConfirmationCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
 		PhoneConfirmationActions.Remove,
 	),
@@ -1144,7 +1147,7 @@ var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
 
 func PhoneConfirmationCliFn() cli.Command {
 	commands := append(PhoneConfirmationImportExportCommands, PhoneConfirmationCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, PhoneConfirmationDevCommands...)
 	}
 	return cli.Command{
@@ -1161,14 +1164,14 @@ func PhoneConfirmationCliFn() cli.Command {
 	}
 }
 
-var PHONE_CONFIRMATION_ACTION_TABLE = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PhoneConfirmationActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			PhoneConfirmationActions.Query,
 			security,
 			reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
@@ -1176,27 +1179,27 @@ var PHONE_CONFIRMATION_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var PHONE_CONFIRMATION_ACTION_QUERY = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/phone-confirmations",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &PhoneConfirmationEntityQs{}
-			workspaces.HttpQueryEntity(c, PhoneConfirmationActions.Query, qs)
+			fireback.HttpQueryEntity(c, PhoneConfirmationActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PhoneConfirmationActions.Query,
 	ResponseEntity: &[]PhoneConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &PhoneConfirmationEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			PhoneConfirmationActions.Query,
 			security,
@@ -1207,138 +1210,138 @@ var PHONE_CONFIRMATION_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, PhoneConfirmationQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, PhoneConfirmationQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var PHONE_CONFIRMATION_ACTION_EXPORT = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/phone-confirmations/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, PhoneConfirmationActionExport)
+			fireback.HttpStreamFileChannel(c, PhoneConfirmationActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         PhoneConfirmationActionExport,
 	ResponseEntity: &[]PhoneConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
 }
-var PHONE_CONFIRMATION_ACTION_GET_ONE = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/phone-confirmation/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, PhoneConfirmationActions.GetOne)
+			fireback.HttpGetEntity(c, PhoneConfirmationActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         PhoneConfirmationActions.GetOne,
 	ResponseEntity: &PhoneConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
 }
-var PHONE_CONFIRMATION_ACTION_POST_ONE = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new phoneConfirmation",
 	Flags:         PhoneConfirmationCommonCliFlags,
 	Method:        "POST",
 	Url:           "/phone-confirmation",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, PhoneConfirmationActions.Create)
+			fireback.HttpPostEntity(c, PhoneConfirmationActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, PhoneConfirmationActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, PhoneConfirmationActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         PhoneConfirmationActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &PhoneConfirmationEntity{},
 	ResponseEntity: &PhoneConfirmationEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
 }
-var PHONE_CONFIRMATION_ACTION_PATCH = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         PhoneConfirmationCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/phone-confirmation",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, PhoneConfirmationActions.Update)
+			fireback.HttpUpdateEntity(c, PhoneConfirmationActions.Update)
 		},
 	},
 	Action:         PhoneConfirmationActions.Update,
 	RequestEntity:  &PhoneConfirmationEntity{},
 	ResponseEntity: &PhoneConfirmationEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
 }
-var PHONE_CONFIRMATION_ACTION_PATCH_BULK = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/phone-confirmations",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, PhoneConfirmationActionBulkUpdate)
 		},
 	},
 	Action:         PhoneConfirmationActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[PhoneConfirmationEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[PhoneConfirmationEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[PhoneConfirmationEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[PhoneConfirmationEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
 }
-var PHONE_CONFIRMATION_ACTION_DELETE = workspaces.Module3Action{
+var PHONE_CONFIRMATION_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/phone-confirmation",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, PhoneConfirmationActions.Remove)
+			fireback.HttpRemoveEntity(c, PhoneConfirmationActions.Remove)
 		},
 	},
 	Action:         PhoneConfirmationActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &PhoneConfirmationEntity{},
 }
 
@@ -1346,10 +1349,10 @@ var PHONE_CONFIRMATION_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on PhoneConfirmationEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendPhoneConfirmationRouter = func(r *[]workspaces.Module3Action) {}
+var AppendPhoneConfirmationRouter = func(r *[]fireback.Module3Action) {}
 
-func GetPhoneConfirmationModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetPhoneConfirmationModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		PHONE_CONFIRMATION_ACTION_QUERY,
 		PHONE_CONFIRMATION_ACTION_EXPORT,
 		PHONE_CONFIRMATION_ACTION_GET_ONE,
@@ -1363,32 +1366,32 @@ func GetPhoneConfirmationModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_PHONE_CONFIRMATION = workspaces.PermissionInfo{
+var PERM_ROOT_PHONE_CONFIRMATION = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.phone-confirmation.*",
 	Name:        "Entire phone confirmation actions (*)",
 	Description: "",
 }
-var PERM_ROOT_PHONE_CONFIRMATION_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_PHONE_CONFIRMATION_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.phone-confirmation.delete",
 	Name:        "Delete phone confirmation",
 	Description: "",
 }
-var PERM_ROOT_PHONE_CONFIRMATION_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_PHONE_CONFIRMATION_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.phone-confirmation.create",
 	Name:        "Create phone confirmation",
 	Description: "",
 }
-var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_PHONE_CONFIRMATION_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.phone-confirmation.update",
 	Name:        "Update phone confirmation",
 	Description: "",
 }
-var PERM_ROOT_PHONE_CONFIRMATION_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_PHONE_CONFIRMATION_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.phone-confirmation.query",
 	Name:        "Query phone confirmation",
 	Description: "",
 }
-var ALL_PHONE_CONFIRMATION_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_PHONE_CONFIRMATION_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_PHONE_CONFIRMATION_DELETE,
 	PERM_ROOT_PHONE_CONFIRMATION_CREATE,
 	PERM_ROOT_PHONE_CONFIRMATION_UPDATE,
@@ -1398,42 +1401,42 @@ var ALL_PHONE_CONFIRMATION_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewPhoneConfirmationCreatedEvent(
 	payload *PhoneConfirmationEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PhoneConfirmationCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PHONE_CONFIRMATION_QUERY,
 			},
 		},
 		CacheKey: "*abac.PhoneConfirmationEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewPhoneConfirmationUpdatedEvent(
 	payload *PhoneConfirmationEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "PhoneConfirmationUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_PHONE_CONFIRMATION_QUERY,
 			},
 		},
 		CacheKey: "*abac.PhoneConfirmationEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var PhoneConfirmationEntityBundle = workspaces.EntityBundle{
+var PhoneConfirmationEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PHONE_CONFIRMATION_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

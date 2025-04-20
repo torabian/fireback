@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/hyperboloide/lk"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 type LicenseContentPermission struct {
@@ -96,7 +96,7 @@ func ValidateLicense() bool {
 
 	invalidLicenseMessage := "Your app is not licensed, you need to activate your fireback by visiting https://pixelplux.com/en/fireback/license\n\nLimitation applies to your instance."
 	data := &LicenseConfigurationFile{}
-	workspaces.ReadYamlFile("fireback-license.yml", data)
+	fireback.ReadYamlFile("fireback-license.yml", data)
 
 	// A previously generated license b32 encoded. In real life you should read it from a file...
 	// const licenseB32 = "FT7YOAYBAEDUY2LDMVXHGZIB76EAAAIDAECEIYLUMEAQUAABAFJAD74EAAAQCUYB76CAAAAABL7YGBIBAL7YMAAAAD73H74IAFEHWITFNVQWS3BCHIRHIZLTORAGK6DBNVYGYZJOMNXW2IRMEJSW4ZBCHIRDEMBRHAWTCMBNGI3FIMJSHIYTSORTGMXDOMBZG43TIMJYHAVTAMR2GAYCE7IBGEBAPXB37ROJCUOYBVG4LAL3MSNKJKPGIKNT564PYK5X542NH62V7TAUEYHGLEOPZHRBAPH7M4SC55OHAEYQEXMKGG3JPO6BSHTDF3T5H6T42VUD7YAJ3TY5AP5MDE5QW4ZYWMSAPEK24HZOUXQ3LJ5YY34XYPVXBUAA===="
@@ -105,7 +105,7 @@ func ValidateLicense() bool {
 	// the public key b32 encoded from the private key using: lkgen pub my_private_key_file`.
 	// It should be hardcoded somewhere in your app.
 	// const publicKeyBase32 = "ARIVIK3FHZ72ERWX6FQ6Z3SIGHPSMCDBRCONFKQRWSDIUMEEESQULEKQ7J7MZVFZMJDFO6B46237GOZETQ4M2NE32C3UUNOV5EUVE3OIV72F5LQRZ6DFMM6UJPELARG7RLJWKQRATUWD5YT46Q2TKQMPPGIA===="
-	publicKeyBase32 := workspaces.UNIQUE_APP_PUBLIC_KEY
+	publicKeyBase32 := fireback.UNIQUE_APP_PUBLIC_KEY
 	c := color.New(color.FgRed).Add(color.Underline)
 	// Unmarshal the public key.
 	publicKey, err := lk.PublicKeyFromB32String(publicKeyBase32)
@@ -142,7 +142,7 @@ func ValidateLicense() bool {
 
 	// Now you just have to check that the end date is after time.Now() then you can continue!
 
-	if workspaces.UNIQUE_MACHINE_ID != result.MachineId {
+	if fireback.UNIQUE_MACHINE_ID != result.MachineId {
 		c.Println("License issued for a different machine with id", result.MachineId)
 		return false
 	}

@@ -72,7 +72,7 @@ export function useGetPassportMethodByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.PassportMethodEntity"],
+    [options, query, "*fireback.PassportMethodEntity"],
     fn,
     {
       cacheTime: 1001,

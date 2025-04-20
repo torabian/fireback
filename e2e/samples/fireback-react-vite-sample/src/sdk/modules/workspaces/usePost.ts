@@ -70,7 +70,7 @@ export function usePost(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<ImportRequestDto>) {
           queryClient?.setQueryData<IResponseList<ImportRequestDto>>(
-            "*workspaces.ImportRequestDto",
+            "*fireback.ImportRequestDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

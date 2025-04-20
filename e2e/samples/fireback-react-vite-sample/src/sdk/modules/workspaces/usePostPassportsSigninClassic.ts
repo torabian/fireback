@@ -73,7 +73,7 @@ export function usePostPassportsSigninClassic(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<ClassicSigninActionResDto>) {
           queryClient?.setQueryData<IResponseList<ClassicSigninActionResDto>>(
-            "*workspaces.ClassicSigninActionResDto",
+            "*fireback.ClassicSigninActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

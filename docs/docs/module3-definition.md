@@ -10,7 +10,7 @@ on the fireback library version, but in the other hand we have tried to make it 
 generated code is usuable without fireback, or in other words make it more explicit.
 
 The thing is, the Fireback itself, is written with Fireback. Fireback original and important codebase is in
-`modules/workspaces` folder, which is Generated from `modules/workspaces/WorkspaceModule3.yml`
+`modules/fireback` folder, which is Generated from `modules/fireback/WorkspaceModule3.yml`
 
 It took a long time before Fireback reaches to a stability that could be rewritten by itself.
 

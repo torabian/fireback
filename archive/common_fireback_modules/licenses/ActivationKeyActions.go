@@ -4,19 +4,19 @@ import (
 	"fmt"
 
 	"github.com/schollz/progressbar/v3"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func ActivationKeyActionCreate(
-	dto *ActivationKeyEntity, query workspaces.QueryDSL,
-) (*ActivationKeyEntity, *workspaces.IError) {
+	dto *ActivationKeyEntity, query fireback.QueryDSL,
+) (*ActivationKeyEntity, *fireback.IError) {
 	return ActivationKeyActionCreateFn(dto, query)
 }
 
 func ActivationKeyActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *ActivationKeyEntity,
-) (*ActivationKeyEntity, *workspaces.IError) {
+) (*ActivationKeyEntity, *fireback.IError) {
 	return ActivationKeyActionUpdateFn(query, fields)
 }
 
@@ -24,7 +24,7 @@ func ActivationKeyActionUpdate(
 *	Generates activation key, which could be used while activating the software
 * 	Useful when you want to distribute key on paper in the shops for example
 **/
-func LicenseActionSeederActivationKey(query workspaces.QueryDSL, series string, count int, length int, planId string) {
+func LicenseActionSeederActivationKey(query fireback.QueryDSL, series string, count int, length int, planId string) {
 
 	successInsert := 0
 	failureInsert := 0
@@ -32,13 +32,13 @@ func LicenseActionSeederActivationKey(query workspaces.QueryDSL, series string, 
 	bar := progressbar.Default(int64(count))
 
 	if series == "" {
-		series = workspaces.UUID()
+		series = fireback.UUID()
 	}
 
 	for i := 1; i <= count; i++ {
 		used := int64(0)
 		entity := &ActivationKeyEntity{
-			UniqueId: workspaces.GenerateRandomKey(length),
+			UniqueId: fireback.GenerateRandomKey(length),
 			Series:   &series,
 			Used:     &used,
 			PlanId:   &planId,

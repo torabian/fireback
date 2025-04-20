@@ -53,7 +53,7 @@ export function useGetRolesExport({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<RoleEntity>, any>(
-    ["*workspaces.RoleEntity", computedOptions, query],
+    ["*fireback.RoleEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetRolesExport({
     keyExtractor: (item: RoleEntity) => item.uniqueId,
   };
 }
-useGetRolesExport.UKEY = "*workspaces.RoleEntity";
+useGetRolesExport.UKEY = "*fireback.RoleEntity";

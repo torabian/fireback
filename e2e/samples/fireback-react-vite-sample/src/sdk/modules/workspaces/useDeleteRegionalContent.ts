@@ -58,10 +58,10 @@ export function useDeleteRegionalContent(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.RegionalContentEntity",
+            "*fireback.RegionalContentEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.RegionalContentEntity");
+          queryClient?.invalidateQueries("*fireback.RegionalContentEntity");
           resolve(response);
         },
         onError(error: any) {

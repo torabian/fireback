@@ -72,7 +72,7 @@ export function useGetPublicJoinKeyByUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.PublicJoinKeyEntity"],
+    [options, query, "*fireback.PublicJoinKeyEntity"],
     fn,
     {
       cacheTime: 1001,

@@ -59,7 +59,7 @@ export function useGetWorkspacePublicTypes({
     any
   >(
     [
-      "*workspaces.QueryWorkspaceTypesPubliclyActionResDto",
+      "*fireback.QueryWorkspaceTypesPubliclyActionResDto",
       computedOptions,
       query,
     ],
@@ -82,4 +82,4 @@ export function useGetWorkspacePublicTypes({
   };
 }
 useGetWorkspacePublicTypes.UKEY =
-  "*workspaces.QueryWorkspaceTypesPubliclyActionResDto";
+  "*fireback.QueryWorkspaceTypesPubliclyActionResDto";

@@ -53,7 +53,7 @@ export function useGetWorkspaceTypesExport({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<WorkspaceTypeEntity>, any>(
-    ["*workspaces.WorkspaceTypeEntity", computedOptions, query],
+    ["*fireback.WorkspaceTypeEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetWorkspaceTypesExport({
     keyExtractor: (item: WorkspaceTypeEntity) => item.uniqueId,
   };
 }
-useGetWorkspaceTypesExport.UKEY = "*workspaces.WorkspaceTypeEntity";
+useGetWorkspaceTypesExport.UKEY = "*fireback.WorkspaceTypeEntity";

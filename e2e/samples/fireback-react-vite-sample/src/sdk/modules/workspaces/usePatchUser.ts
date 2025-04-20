@@ -69,7 +69,7 @@ export function usePatchUser(props?: PatchProps) {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<UserEntity>) {
-          queryClient?.setQueriesData("*workspaces.UserEntity", (data: any) =>
+          queryClient?.setQueriesData("*fireback.UserEntity", (data: any) =>
             fnUpdater(data, response)
           );
           resolve(response);

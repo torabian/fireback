@@ -79,7 +79,7 @@ export function useGetTimezoneGroupUtcItemsByLinkerIdAndUniqueId({
     enabled = false;
   }
   const query$ = useQuery(
-    [options, query, "*workspaces.TimezoneGroupUtcItems"],
+    [options, query, "*fireback.TimezoneGroupUtcItems"],
     fn,
     {
       cacheTime: 1001,

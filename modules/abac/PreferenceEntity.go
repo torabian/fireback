@@ -1,16 +1,16 @@
 package abac
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func PreferenceActionCreate(
-	dto *PreferenceEntity, query workspaces.QueryDSL,
-) (*PreferenceEntity, *workspaces.IError) {
+	dto *PreferenceEntity, query fireback.QueryDSL,
+) (*PreferenceEntity, *fireback.IError) {
 	return PreferenceActionCreateFn(dto, query)
 }
 
 func PreferenceActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *PreferenceEntity,
-) (*PreferenceEntity, *workspaces.IError) {
+) (*PreferenceEntity, *fireback.IError) {
 	return PreferenceActionUpdateFn(query, fields)
 }

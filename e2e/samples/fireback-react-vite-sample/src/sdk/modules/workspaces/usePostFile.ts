@@ -70,7 +70,7 @@ export function usePostFile(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileEntity>) {
           queryClient?.setQueryData<IResponseList<FileEntity>>(
-            "*workspaces.FileEntity",
+            "*fireback.FileEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

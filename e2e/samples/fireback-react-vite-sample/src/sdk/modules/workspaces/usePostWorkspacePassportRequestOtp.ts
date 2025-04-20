@@ -75,7 +75,7 @@ export function usePostWorkspacePassportRequestOtp(props?: UseRemoteQuery) {
           queryClient?.setQueryData<
             IResponseList<ClassicPassportRequestOtpActionResDto>
           >(
-            "*workspaces.ClassicPassportRequestOtpActionResDto",
+            "*fireback.ClassicPassportRequestOtpActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

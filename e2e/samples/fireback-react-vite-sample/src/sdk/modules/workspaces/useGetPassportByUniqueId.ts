@@ -71,7 +71,7 @@ export function useGetPassportByUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery([options, query, "*workspaces.PassportEntity"], fn, {
+  const query$ = useQuery([options, query, "*fireback.PassportEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

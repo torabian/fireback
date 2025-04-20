@@ -36,9 +36,9 @@ sql prior to execuation.
 In the Module.dyno.go file, you'll see a golang generated code as well as `Sample.vsql` file.
 
 ```go
-func SampleQuery(query workspaces.QueryDSL) ([]*SampleQueryColumns, *workspaces.QueryResultMeta, error) {
+func SampleQuery(query fireback.QueryDSL) ([]*SampleQueryColumns, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&SampleQueryColumns{})
-	items, meta, err := workspaces.ContextAwareVSqlOperation[SampleQueryColumns](
+	items, meta, err := fireback.ContextAwareVSqlOperation[SampleQueryColumns](
 		refl, &queries.QueriesFs, "Sample.vsql", query,
 	)
 	return items, meta, err

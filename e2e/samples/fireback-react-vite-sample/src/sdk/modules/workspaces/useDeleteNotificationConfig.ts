@@ -58,12 +58,10 @@ export function useDeleteNotificationConfig(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.NotificationConfigEntity",
+            "*fireback.NotificationConfigEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries(
-            "*workspaces.NotificationConfigEntity"
-          );
+          queryClient?.invalidateQueries("*fireback.NotificationConfigEntity");
           resolve(response);
         },
         onError(error: any) {

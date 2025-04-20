@@ -53,7 +53,7 @@ export function useGetWorkspaceInvites({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<WorkspaceInviteEntity>, any>(
-    ["*workspaces.WorkspaceInviteEntity", computedOptions, query],
+    ["*fireback.WorkspaceInviteEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetWorkspaceInvites({
     keyExtractor: (item: WorkspaceInviteEntity) => item.uniqueId,
   };
 }
-useGetWorkspaceInvites.UKEY = "*workspaces.WorkspaceInviteEntity";
+useGetWorkspaceInvites.UKEY = "*fireback.WorkspaceInviteEntity";

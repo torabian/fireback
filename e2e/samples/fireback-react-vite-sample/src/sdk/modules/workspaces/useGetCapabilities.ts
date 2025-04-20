@@ -53,7 +53,7 @@ export function useGetCapabilities({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<CapabilityEntity>, any>(
-    ["*workspaces.CapabilityEntity", computedOptions, query],
+    ["*fireback.CapabilityEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetCapabilities({
     keyExtractor: (item: CapabilityEntity) => item.uniqueId,
   };
 }
-useGetCapabilities.UKEY = "*workspaces.CapabilityEntity";
+useGetCapabilities.UKEY = "*fireback.CapabilityEntity";

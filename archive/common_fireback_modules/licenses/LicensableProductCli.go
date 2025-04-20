@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
@@ -27,7 +27,7 @@ var LicensableProductGenerateCmd cli.Command = cli.Command{
 	Flags:   LicensableProductCommonCliFlagsOptional,
 	Usage:   "Create a new product with given name from user, and fills private/public key automatically",
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := fireback.CommonCliQueryDSLBuilder(c)
 		entity := CastLicensableProductFromCli(c)
 
 		if entity, err := ProductActionGenerate(entity, query); err != nil {

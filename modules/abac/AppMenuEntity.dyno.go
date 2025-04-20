@@ -8,23 +8,26 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	queries "github.com/torabian/fireback/modules/abac/queries"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"strings"
+
 	//queries github.com/torabian/fireback - modules/abac"
 	"embed"
+	reflect "reflect"
+
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/AppMenu"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
-	reflect "reflect"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
@@ -34,15 +37,15 @@ func ResetAppMenuSeeders(fs *embed.FS) {
 }
 
 type AppMenuEntityQs struct {
-	Label         workspaces.QueriableField `cli:"label" table:"app_menu" column:"label" qs:"label"`
-	Href          workspaces.QueriableField `cli:"href" table:"app_menu" column:"href" qs:"href"`
-	Icon          workspaces.QueriableField `cli:"icon" table:"app_menu" column:"icon" qs:"icon"`
-	ActiveMatcher workspaces.QueriableField `cli:"active-matcher" table:"app_menu" column:"active_matcher" qs:"activeMatcher"`
-	Capability    workspaces.QueriableField `cli:"capability" table:"app_menu" column:"capability" qs:"capability"`
+	Label         fireback.QueriableField `cli:"label" table:"app_menu" column:"label" qs:"label"`
+	Href          fireback.QueriableField `cli:"href" table:"app_menu" column:"href" qs:"href"`
+	Icon          fireback.QueriableField `cli:"icon" table:"app_menu" column:"icon" qs:"icon"`
+	ActiveMatcher fireback.QueriableField `cli:"active-matcher" table:"app_menu" column:"active_matcher" qs:"activeMatcher"`
+	Capability    fireback.QueriableField `cli:"capability" table:"app_menu" column:"capability" qs:"capability"`
 }
 
 func (x *AppMenuEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var AppMenuQsFlags = []cli.Flag{
@@ -73,20 +76,20 @@ type AppMenuEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -96,11 +99,11 @@ type AppMenuEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -136,14 +139,14 @@ type AppMenuEntity struct {
 	// Custom window location url matchers, for inner screens.
 	ActiveMatcher string `json:"activeMatcher" xml:"activeMatcher" yaml:"activeMatcher"        `
 	// The permission which is required for the menu to be visible.
-	Capability   *workspaces.CapabilityEntity `json:"capability" xml:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
-	CapabilityId workspaces.String            `json:"capabilityId" yaml:"capabilityId" xml:"capabilityId"  `
-	Translations []*AppMenuEntityPolyglot     `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children     []*AppMenuEntity             `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo     *AppMenuEntity               `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	Capability   *fireback.CapabilityEntity `json:"capability" xml:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
+	CapabilityId fireback.String            `json:"capabilityId" yaml:"capabilityId" xml:"capabilityId"  `
+	Translations []*AppMenuEntityPolyglot   `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*AppMenuEntity           `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *AppMenuEntity             `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func AppMenuEntityStream(q workspaces.QueryDSL) (chan []*AppMenuEntity, *workspaces.QueryResultMeta, error) {
+func AppMenuEntityStream(q fireback.QueryDSL) (chan []*AppMenuEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*AppMenuEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -179,8 +182,8 @@ func (x *AppMenuEntityList) Json() string {
 	}
 	return ""
 }
-func (x *AppMenuEntityList) ToTree() *workspaces.TreeOperation[AppMenuEntity] {
-	return workspaces.NewTreeOperation(
+func (x *AppMenuEntityList) ToTree() *fireback.TreeOperation[AppMenuEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *AppMenuEntity) string {
 			if !t.ParentId.Valid {
@@ -197,16 +200,16 @@ func (x *AppMenuEntityList) ToTree() *workspaces.TreeOperation[AppMenuEntity] {
 var AppMenuPreloadRelations []string = []string{}
 
 type appMenuActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *AppMenuEntity) (*AppMenuEntity, *workspaces.IError)
-	Create         func(dto *AppMenuEntity, query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError)
-	Upsert         func(dto *AppMenuEntity, query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *AppMenuEntity) (*AppMenuEntity, *fireback.IError)
+	Create         func(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
+	Upsert         func(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
 	SeederInit     func() *AppMenuEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*AppMenuEntity, query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.QueryResultMeta, error)
-	CteQuery       func(query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error)
+	CteQuery       func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error)
 }
 
 var AppMenuActions appMenuActionsSig = appMenuActionsSig{
@@ -222,7 +225,7 @@ var AppMenuActions appMenuActionsSig = appMenuActionsSig{
 	CteQuery:       AppMenuActionCteQueryFn,
 }
 
-func AppMenuActionUpsertFn(dto *AppMenuEntity, query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError) {
+func AppMenuActionUpsertFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -236,15 +239,15 @@ var APP_MENU_EVENTS = []string{
 }
 
 type AppMenuFieldMap struct {
-	Label         workspaces.TranslatedString `yaml:"label"`
-	Href          workspaces.TranslatedString `yaml:"href"`
-	Icon          workspaces.TranslatedString `yaml:"icon"`
-	ActiveMatcher workspaces.TranslatedString `yaml:"activeMatcher"`
-	Capability    workspaces.TranslatedString `yaml:"capability"`
+	Label         fireback.TranslatedString `yaml:"label"`
+	Href          fireback.TranslatedString `yaml:"href"`
+	Icon          fireback.TranslatedString `yaml:"icon"`
+	ActiveMatcher fireback.TranslatedString `yaml:"activeMatcher"`
+	Capability    fireback.TranslatedString `yaml:"capability"`
 }
 
 var AppMenuEntityMetaConfig map[string]int64 = map[string]int64{}
-var AppMenuEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&AppMenuEntity{}))
+var AppMenuEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&AppMenuEntity{}))
 
 type AppMenuEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
@@ -252,18 +255,18 @@ type AppMenuEntityPolyglot struct {
 	Label      string `yaml:"label,omitempty" xml:"label,omitempty" json:"label,omitempty"`
 }
 
-func entityAppMenuFormatter(dto *AppMenuEntity, query workspaces.QueryDSL) {
+func entityAppMenuFormatter(dto *AppMenuEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func AppMenuActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func AppMenuActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -290,7 +293,7 @@ func AppMenuActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func AppMenuActionSeeder(query workspaces.QueryDSL, count int) {
+func AppMenuActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -326,7 +329,7 @@ func AppMenuActionSeederInitFn() *AppMenuEntity {
 	entity := &AppMenuEntity{}
 	return entity
 }
-func AppMenuAssociationCreate(dto *AppMenuEntity, query workspaces.QueryDSL) error {
+func AppMenuAssociationCreate(dto *AppMenuEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -334,17 +337,17 @@ func AppMenuAssociationCreate(dto *AppMenuEntity, query workspaces.QueryDSL) err
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func AppMenuRelationContentCreate(dto *AppMenuEntity, query workspaces.QueryDSL) error {
+func AppMenuRelationContentCreate(dto *AppMenuEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func AppMenuRelationContentUpdate(dto *AppMenuEntity, query workspaces.QueryDSL) error {
+func AppMenuRelationContentUpdate(dto *AppMenuEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func AppMenuPolyglotUpdateHandler(dto *AppMenuEntity, query workspaces.QueryDSL) {
+func AppMenuPolyglotUpdateHandler(dto *AppMenuEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotUpdateHandler(dto, &AppMenuEntityPolyglot{}, query)
+	fireback.PolyglotUpdateHandler(dto, &AppMenuEntityPolyglot{}, query)
 }
 
 /**
@@ -352,8 +355,8 @@ func AppMenuPolyglotUpdateHandler(dto *AppMenuEntity, query workspaces.QueryDSL)
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func AppMenuValidator(dto *AppMenuEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func AppMenuValidator(dto *AppMenuEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -401,29 +404,31 @@ And here is the actual object signature:
 	},
 }
 
-func AppMenuEntityPreSanitize(dto *AppMenuEntity, query workspaces.QueryDSL) {
+func AppMenuEntityPreSanitize(dto *AppMenuEntity, query fireback.QueryDSL) {
 }
-func AppMenuEntityBeforeCreateAppend(dto *AppMenuEntity, query workspaces.QueryDSL) {
+func AppMenuEntityBeforeCreateAppend(dto *AppMenuEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	AppMenuRecursiveAddUniqueId(dto, query)
 }
-func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query workspaces.QueryDSL) {
+func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.IError) {
+func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			AppMenuEntityPreSanitize(dtos[index], query)
@@ -431,19 +436,19 @@ func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query workspaces.QueryDSL) ([]*
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.IError) {
+func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*AppMenuEntity{}
 		for _, item := range dtos {
@@ -457,12 +462,12 @@ func AppMenuActionBatchCreateFn(dtos []*AppMenuEntity, query workspaces.QueryDSL
 	}
 	return dtos, nil
 }
-func AppMenuDeleteEntireChildren(query workspaces.QueryDSL, dto *AppMenuEntity) *workspaces.IError {
+func AppMenuDeleteEntireChildren(query fireback.QueryDSL, dto *AppMenuEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func AppMenuActionCreateFn(dto *AppMenuEntity, query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError) {
+func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := AppMenuValidator(dto, false); iError != nil {
 		return nil, iError
@@ -476,14 +481,14 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query workspaces.QueryDSL) (*AppM
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -491,35 +496,35 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query workspaces.QueryDSL) (*AppM
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewAppMenuCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(APP_MENU_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&AppMenuEntity{}),
+			"entityKey": fireback.GetTypeString(&AppMenuEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func AppMenuActionGetOneFn(query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError) {
+func AppMenuActionGetOneFn(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
-	item, err := workspaces.GetOneEntity[AppMenuEntity](query, refl)
+	item, err := fireback.GetOneEntity[AppMenuEntity](query, refl)
 	entityAppMenuFormatter(item, query)
 	return item, err
 }
-func AppMenuActionGetByWorkspaceFn(query workspaces.QueryDSL) (*AppMenuEntity, *workspaces.IError) {
+func AppMenuActionGetByWorkspaceFn(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[AppMenuEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[AppMenuEntity](query, refl)
 	entityAppMenuFormatter(item, query)
 	return item, err
 }
-func AppMenuActionQueryFn(query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.QueryResultMeta, error) {
+func AppMenuActionQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[AppMenuEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[AppMenuEntity](query, refl)
 	for _, item := range items {
 		entityAppMenuFormatter(item, query)
 	}
@@ -529,7 +534,7 @@ func AppMenuActionQueryFn(query workspaces.QueryDSL) ([]*AppMenuEntity, *workspa
 var appMenuMemoryItems []*AppMenuEntity = []*AppMenuEntity{}
 
 func AppMenuEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -581,15 +586,15 @@ func (dto *AppMenuEntity) Add(nodes ...*AppMenuEntity) bool {
 	}
 	return dto.Size() == size+len(nodes)
 }
-func AppMenuActionCommonPivotQuery(query workspaces.QueryDSL) ([]*workspaces.PivotResult, *workspaces.QueryResultMeta, error) {
-	items, meta, err := workspaces.UnsafeQuerySqlFromFs[workspaces.PivotResult](
+func AppMenuActionCommonPivotQuery(query fireback.QueryDSL) ([]*fireback.PivotResult, *fireback.QueryResultMeta, error) {
+	items, meta, err := fireback.UnsafeQuerySqlFromFs[fireback.PivotResult](
 		&queries.QueriesFs, "AppMenuCommonPivot.sqlite.dyno", query,
 	)
 	return items, meta, err
 }
-func AppMenuActionCteQueryFn(query workspaces.QueryDSL) ([]*AppMenuEntity, *workspaces.QueryResultMeta, error) {
+func AppMenuActionCteQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
-	items, meta, err := workspaces.ContextAwareVSqlOperation[AppMenuEntity](
+	items, meta, err := fireback.ContextAwareVSqlOperation[AppMenuEntity](
 		refl, &queries.QueriesFs, "AppMenuCte.vsql", query,
 	)
 	for _, item := range items {
@@ -605,7 +610,7 @@ func AppMenuActionCteQueryFn(query workspaces.QueryDSL) ([]*AppMenuEntity, *work
 	}
 	return tree, meta, err
 }
-func AppMenuUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *workspaces.IError) {
+func AppMenuUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = APP_MENU_EVENT_UPDATED
 	AppMenuEntityPreSanitize(fields, query)
@@ -620,7 +625,7 @@ func AppMenuUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *AppMen
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	AppMenuRelationContentUpdate(fields, query)
@@ -634,11 +639,11 @@ func AppMenuUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *AppMen
 		Where(&AppMenuEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewAppMenuUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -650,9 +655,9 @@ func AppMenuUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *AppMen
 	   })*/
 	return &itemRefetched, nil
 }
-func AppMenuActionUpdateFn(query workspaces.QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *workspaces.IError) {
+func AppMenuActionUpdateFn(query fireback.QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := AppMenuValidator(fields, true); iError != nil {
@@ -662,11 +667,11 @@ func AppMenuActionUpdateFn(query workspaces.QueryDSL, fields *AppMenuEntity) (*A
 	// AppMenuRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *AppMenuEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = AppMenuUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -674,7 +679,7 @@ func AppMenuActionUpdateFn(query workspaces.QueryDSL, fields *AppMenuEntity) (*A
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return AppMenuUpdateExec(dbref, query, fields)
@@ -685,8 +690,8 @@ var AppMenuWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire appmenus ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
 		})
 		count, _ := AppMenuActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -694,16 +699,16 @@ var AppMenuWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func AppMenuActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func AppMenuActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}
-	return workspaces.RemoveEntity[AppMenuEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}
+	return fireback.RemoveEntity[AppMenuEntity](query, refl)
 }
-func AppMenuActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func AppMenuActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[AppMenuEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[AppMenuEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'AppMenuEntity'", subErr)
 			return count, subErr
@@ -714,11 +719,11 @@ func AppMenuActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func AppMenuActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[AppMenuEntity]) (
-	*workspaces.BulkRecordRequest[AppMenuEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[AppMenuEntity]) (
+	*fireback.BulkRecordRequest[AppMenuEntity], *fireback.IError,
 ) {
 	result := []*AppMenuEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := AppMenuActions.Update(query, record)
@@ -733,7 +738,7 @@ func AppMenuActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *AppMenuEntity) Json() string {
 	if x != nil {
@@ -743,7 +748,7 @@ func (x *AppMenuEntity) Json() string {
 	return ""
 }
 
-var AppMenuEntityMeta = workspaces.TableMetaData{
+var AppMenuEntityMeta = fireback.TableMetaData{
 	EntityName:    "AppMenu",
 	ExportKey:     "app-menus",
 	TableNameInDb: "app-menu_entities",
@@ -753,23 +758,23 @@ var AppMenuEntityMeta = workspaces.TableMetaData{
 }
 
 func AppMenuActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[AppMenuEntity](query, AppMenuActions.Query, AppMenuPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[AppMenuEntity](query, AppMenuActions.Query, AppMenuPreloadRelations)
 }
 func AppMenuActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[AppMenuEntity](query, AppMenuActions.Query, AppMenuPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[AppMenuEntity](query, AppMenuActions.Query, AppMenuPreloadRelations)
 }
 func AppMenuActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content AppMenuEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := AppMenuActions.Create(&content, query)
@@ -818,7 +823,7 @@ var AppMenuCommonCliFlags = []cli.Flag{
 		Usage:    `The permission which is required for the menu to be visible. (one)`,
 	},
 }
-var AppMenuCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var AppMenuCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "label",
 		StructField: "Label",
@@ -905,16 +910,16 @@ var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
 		})
 		entity := &AppMenuEntity{}
-		workspaces.PopulateInteractively(entity, c, AppMenuCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, AppMenuCommonInteractiveCliFlags)
 		if entity, err := AppMenuActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -924,8 +929,8 @@ var AppMenuUpdateCmd cli.Command = cli.Command{
 	Flags:   AppMenuCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
 		})
 		entity := CastAppMenuFromCli(c)
 		if entity, err := AppMenuActions.Update(query, entity); err != nil {
@@ -947,7 +952,7 @@ func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("label") {
 		template.Label = c.String("label")
@@ -962,12 +967,12 @@ func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
 		template.ActiveMatcher = c.String("active-matcher")
 	}
 	if c.IsSet("capability-id") {
-		template.CapabilityId = workspaces.NewStringAutoNull(c.String("capability-id"))
+		template.CapabilityId = fireback.NewStringAutoNull(c.String("capability-id"))
 	}
 	return template
 }
-func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
@@ -977,8 +982,8 @@ func AppMenuSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.Q
 	)
 }
 func AppMenuSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		appMenuSeedersFs,
@@ -987,8 +992,8 @@ func AppMenuSyncSeeders() {
 	)
 }
 func AppMenuImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		AppMenuActions.Create,
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -996,19 +1001,19 @@ func AppMenuImportMocks() {
 		false,
 	)
 }
-func AppMenuWriteQueryMock(ctx workspaces.MockQueryContext) {
+func AppMenuWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := AppMenuActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "AppMenu", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
 }
-func AppMenusActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func AppMenusActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1020,7 +1025,7 @@ func AppMenusActionQueryString(keyword string, page int) ([]string, *workspaces.
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := AppMenuActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1047,8 +1052,8 @@ var AppMenuDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
 			})
 			if c.Bool("batch") {
 				AppMenuActionSeederMultiple(query, c.Int("count"))
@@ -1071,7 +1076,7 @@ var AppMenuDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := AppMenuActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1079,7 +1084,7 @@ var AppMenuDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1092,7 +1097,7 @@ var AppMenuDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1122,7 +1127,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of app-menus, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]AppMenuEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1131,7 +1136,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(appMenuSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(appMenuSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1144,7 +1149,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				appMenuSeedersFs,
@@ -1155,7 +1160,7 @@ var AppMenuImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1163,7 +1168,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				AppMenuEntityStream,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				c.String("file"),
@@ -1177,7 +1182,7 @@ var AppMenuImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1187,12 +1192,12 @@ var AppMenuImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
 				},
 				func() AppMenuEntity {
 					v := CastAppMenuFromCli(c)
@@ -1210,17 +1215,17 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 	AppMenuUpdateCmd,
 	AppMenuAskCmd,
 	AppMenuCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		AppMenuActions.Remove,
 	),
-	workspaces.GetCommonCteQuery(AppMenuActions.CteQuery),
-	workspaces.GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
+	fireback.GetCommonCteQuery(AppMenuActions.CteQuery),
+	fireback.GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
 }
 
 func AppMenuCliFn() cli.Command {
 	commands := append(AppMenuImportExportCommands, AppMenuCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, AppMenuDevCommands...)
 	}
 	return cli.Command{
@@ -1237,14 +1242,14 @@ func AppMenuCliFn() cli.Command {
 	}
 }
 
-var APP_MENU_ACTION_TABLE = workspaces.Module3Action{
+var APP_MENU_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        AppMenuActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			AppMenuActions.Query,
 			security,
 			reflect.ValueOf(&AppMenuEntity{}).Elem(),
@@ -1252,27 +1257,27 @@ var APP_MENU_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var APP_MENU_ACTION_QUERY = workspaces.Module3Action{
+var APP_MENU_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/app-menus",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &AppMenuEntityQs{}
-			workspaces.HttpQueryEntity(c, AppMenuActions.Query, qs)
+			fireback.HttpQueryEntity(c, AppMenuActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         AppMenuActions.Query,
 	ResponseEntity: &[]AppMenuEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &AppMenuEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			AppMenuActions.Query,
 			security,
@@ -1283,157 +1288,157 @@ var APP_MENU_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, AppMenuQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, AppMenuQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var APP_MENU_ACTION_QUERY_CTE = workspaces.Module3Action{
+var APP_MENU_ACTION_QUERY_CTE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/cte-app-menus",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &AppMenuEntityQs{}
-			workspaces.HttpQueryEntity(c, AppMenuActions.CteQuery, qs)
+			fireback.HttpQueryEntity(c, AppMenuActions.CteQuery, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         AppMenuActions.CteQuery,
 	ResponseEntity: &[]AppMenuEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_EXPORT = workspaces.Module3Action{
+var APP_MENU_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/app-menus/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, AppMenuActionExport)
+			fireback.HttpStreamFileChannel(c, AppMenuActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         AppMenuActionExport,
 	ResponseEntity: &[]AppMenuEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_GET_ONE = workspaces.Module3Action{
+var APP_MENU_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/app-menu/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, AppMenuActions.GetOne)
+			fireback.HttpGetEntity(c, AppMenuActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         AppMenuActions.GetOne,
 	ResponseEntity: &AppMenuEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_POST_ONE = workspaces.Module3Action{
+var APP_MENU_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new appMenu",
 	Flags:         AppMenuCommonCliFlags,
 	Method:        "POST",
 	Url:           "/app-menu",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, AppMenuActions.Create)
+			fireback.HttpPostEntity(c, AppMenuActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, AppMenuActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, AppMenuActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         AppMenuActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &AppMenuEntity{},
 	ResponseEntity: &AppMenuEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_PATCH = workspaces.Module3Action{
+var APP_MENU_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         AppMenuCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/app-menu",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, AppMenuActions.Update)
+			fireback.HttpUpdateEntity(c, AppMenuActions.Update)
 		},
 	},
 	Action:         AppMenuActions.Update,
 	RequestEntity:  &AppMenuEntity{},
 	ResponseEntity: &AppMenuEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_PATCH_BULK = workspaces.Module3Action{
+var APP_MENU_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/app-menus",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, AppMenuActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, AppMenuActionBulkUpdate)
 		},
 	},
 	Action:         AppMenuActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[AppMenuEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[AppMenuEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[AppMenuEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[AppMenuEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_DELETE = workspaces.Module3Action{
+var APP_MENU_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/app-menu",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, AppMenuActions.Remove)
+			fireback.HttpRemoveEntity(c, AppMenuActions.Remove)
 		},
 	},
 	Action:         AppMenuActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &AppMenuEntity{},
 }
 
@@ -1441,10 +1446,10 @@ var APP_MENU_ACTION_DELETE = workspaces.Module3Action{
  *	Override this function on AppMenuEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendAppMenuRouter = func(r *[]workspaces.Module3Action) {}
+var AppendAppMenuRouter = func(r *[]fireback.Module3Action) {}
 
-func GetAppMenuModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetAppMenuModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		APP_MENU_ACTION_QUERY_CTE,
 		APP_MENU_ACTION_QUERY,
 		APP_MENU_ACTION_EXPORT,
@@ -1459,32 +1464,32 @@ func GetAppMenuModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_APP_MENU = workspaces.PermissionInfo{
+var PERM_ROOT_APP_MENU = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.app-menu.*",
 	Name:        "Entire app menu actions (*)",
 	Description: "",
 }
-var PERM_ROOT_APP_MENU_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_APP_MENU_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.app-menu.delete",
 	Name:        "Delete app menu",
 	Description: "",
 }
-var PERM_ROOT_APP_MENU_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_APP_MENU_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.app-menu.create",
 	Name:        "Create app menu",
 	Description: "",
 }
-var PERM_ROOT_APP_MENU_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_APP_MENU_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.app-menu.update",
 	Name:        "Update app menu",
 	Description: "",
 }
-var PERM_ROOT_APP_MENU_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_APP_MENU_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.modules.abac.app-menu.query",
 	Name:        "Query app menu",
 	Description: "",
 }
-var ALL_APP_MENU_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_APP_MENU_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_APP_MENU_DELETE,
 	PERM_ROOT_APP_MENU_CREATE,
 	PERM_ROOT_APP_MENU_UPDATE,
@@ -1494,42 +1499,42 @@ var ALL_APP_MENU_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewAppMenuCreatedEvent(
 	payload *AppMenuEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "AppMenuCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_APP_MENU_QUERY,
 			},
 		},
 		CacheKey: "*abac.AppMenuEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewAppMenuUpdatedEvent(
 	payload *AppMenuEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "AppMenuUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_APP_MENU_QUERY,
 			},
 		},
 		CacheKey: "*abac.AppMenuEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var AppMenuEntityBundle = workspaces.EntityBundle{
+var AppMenuEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_APP_MENU_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

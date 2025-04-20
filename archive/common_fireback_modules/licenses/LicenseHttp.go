@@ -2,18 +2,18 @@ package licenses
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func HttpActivateLicenseFromPlanId(c *gin.Context) {
-	workspaces.HttpPostEntity(c, LicenseActionFromPlanId)
+	fireback.HttpPostEntity(c, LicenseActionFromPlanId)
 }
 
 func init() {
 
-	AppendLicenseRouter = func(r *[]workspaces.Module3Action) {
+	AppendLicenseRouter = func(r *[]fireback.Module3Action) {
 
-		*r = append(*r, workspaces.Module3Action{
+		*r = append(*r, fireback.Module3Action{
 			Method: "POST",
 			Url:    "/license/from-plan/:uniqueId",
 			Handlers: []gin.HandlerFunc{
@@ -21,10 +21,10 @@ func init() {
 			},
 			RequestEntity:  &LicenseFromPlanIdDto{},
 			ResponseEntity: &LicenseEntity{},
-			In: &workspaces.Module3ActionBody{
+			In: &fireback.Module3ActionBody{
 				Dto: "LicenseFromPlanIdDto",
 			},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Dto: "LicenseEntity",
 			},
 		})

@@ -71,7 +71,7 @@ export function useGetAppMenuByUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery([options, query, "*workspaces.AppMenuEntity"], fn, {
+  const query$ = useQuery([options, query, "*fireback.AppMenuEntity"], fn, {
     cacheTime: 1001,
     retry: false,
     keepPreviousData: true,

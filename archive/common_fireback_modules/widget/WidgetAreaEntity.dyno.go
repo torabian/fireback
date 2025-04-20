@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gookit/event"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/widget/metas"
 	mocks "github.com/torabian/fireback/modules/widget/mocks/WidgetArea"
 	seeders "github.com/torabian/fireback/modules/widget/seeders/WidgetArea"
-	"github.com/torabian/fireback/modules/workspaces"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	reflect "reflect"
-	"strings"
 )
 
 var widgetAreaSeedersFs = &seeders.ViewsFs
@@ -172,7 +173,7 @@ type WidgetAreaEntity struct {
 	LinkedTo         *WidgetAreaEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func WidgetAreaEntityStream(q workspaces.QueryDSL) (chan []*WidgetAreaEntity, *workspaces.QueryResultMeta, error) {
+func WidgetAreaEntityStream(q fireback.QueryDSL) (chan []*WidgetAreaEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*WidgetAreaEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -208,8 +209,8 @@ func (x *WidgetAreaEntityList) Json() string {
 	}
 	return ""
 }
-func (x *WidgetAreaEntityList) ToTree() *workspaces.TreeOperation[WidgetAreaEntity] {
-	return workspaces.NewTreeOperation(
+func (x *WidgetAreaEntityList) ToTree() *fireback.TreeOperation[WidgetAreaEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WidgetAreaEntity) string {
 			if t.ParentId == nil {
@@ -234,13 +235,13 @@ var WIDGET_AREA_EVENTS = []string{
 }
 
 type WidgetAreaFieldMap struct {
-	Name    workspaces.TranslatedString `yaml:"name"`
-	Layouts workspaces.TranslatedString `yaml:"layouts"`
-	Widgets workspaces.TranslatedString `yaml:"widgets"`
+	Name    fireback.TranslatedString `yaml:"name"`
+	Layouts fireback.TranslatedString `yaml:"layouts"`
+	Widgets fireback.TranslatedString `yaml:"widgets"`
 }
 
 var WidgetAreaEntityMetaConfig map[string]int64 = map[string]int64{}
-var WidgetAreaEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&WidgetAreaEntity{}))
+var WidgetAreaEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&WidgetAreaEntity{}))
 
 type WidgetAreaEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty"`
@@ -250,61 +251,61 @@ type WidgetAreaEntityPolyglot struct {
 
 func WidgetAreaWidgetsActionCreate(
 	dto *WidgetAreaWidgets,
-	query workspaces.QueryDSL,
-) (*WidgetAreaWidgets, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*WidgetAreaWidgets, *fireback.IError) {
 	dto.LinkerId = &query.LinkerId
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	return dto, nil
 }
 func WidgetAreaWidgetsActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	dto *WidgetAreaWidgets,
-) (*WidgetAreaWidgets, *workspaces.IError) {
+) (*WidgetAreaWidgets, *fireback.IError) {
 	dto.LinkerId = &query.LinkerId
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.UpdateColumns(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	return dto, nil
 }
 func WidgetAreaWidgetsActionGetOne(
-	query workspaces.QueryDSL,
-) (*WidgetAreaWidgets, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*WidgetAreaWidgets, *fireback.IError) {
 	refl := reflect.ValueOf(&WidgetAreaWidgets{})
-	item, err := workspaces.GetOneEntity[WidgetAreaWidgets](query, refl)
+	item, err := fireback.GetOneEntity[WidgetAreaWidgets](query, refl)
 	return item, err
 }
-func entityWidgetAreaFormatter(dto *WidgetAreaEntity, query workspaces.QueryDSL) {
+func entityWidgetAreaFormatter(dto *WidgetAreaEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func WidgetAreaMockEntity() *WidgetAreaEntity {
@@ -320,7 +321,7 @@ func WidgetAreaMockEntity() *WidgetAreaEntity {
 	}
 	return entity
 }
-func WidgetAreaActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func WidgetAreaActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -347,7 +348,7 @@ func WidgetAreaActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func WidgetAreaActionSeeder(query workspaces.QueryDSL, count int) {
+func WidgetAreaActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -389,7 +390,7 @@ func WidgetAreaActionSeederInit() *WidgetAreaEntity {
 	}
 	return entity
 }
-func WidgetAreaAssociationCreate(dto *WidgetAreaEntity, query workspaces.QueryDSL) error {
+func WidgetAreaAssociationCreate(dto *WidgetAreaEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -397,17 +398,17 @@ func WidgetAreaAssociationCreate(dto *WidgetAreaEntity, query workspaces.QueryDS
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func WidgetAreaRelationContentCreate(dto *WidgetAreaEntity, query workspaces.QueryDSL) error {
+func WidgetAreaRelationContentCreate(dto *WidgetAreaEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WidgetAreaRelationContentUpdate(dto *WidgetAreaEntity, query workspaces.QueryDSL) error {
+func WidgetAreaRelationContentUpdate(dto *WidgetAreaEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func WidgetAreaPolyglotCreateHandler(dto *WidgetAreaEntity, query workspaces.QueryDSL) {
+func WidgetAreaPolyglotCreateHandler(dto *WidgetAreaEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	workspaces.PolyglotCreateHandler(dto, &WidgetAreaEntityPolyglot{}, query)
+	fireback.PolyglotCreateHandler(dto, &WidgetAreaEntityPolyglot{}, query)
 }
 
 /**
@@ -415,10 +416,10 @@ func WidgetAreaPolyglotCreateHandler(dto *WidgetAreaEntity, query workspaces.Que
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func WidgetAreaValidator(dto *WidgetAreaEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func WidgetAreaValidator(dto *WidgetAreaEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	if dto != nil && dto.Widgets != nil {
-		workspaces.AppendSliceErrors(dto.Widgets, isPatch, "widgets", err)
+		fireback.AppendSliceErrors(dto.Widgets, isPatch, "widgets", err)
 	}
 	return err
 }
@@ -465,21 +466,21 @@ And here is the actual object signature:
 	},
 }
 
-func WidgetAreaEntityPreSanitize(dto *WidgetAreaEntity, query workspaces.QueryDSL) {
+func WidgetAreaEntityPreSanitize(dto *WidgetAreaEntity, query fireback.QueryDSL) {
 }
-func WidgetAreaEntityBeforeCreateAppend(dto *WidgetAreaEntity, query workspaces.QueryDSL) {
+func WidgetAreaEntityBeforeCreateAppend(dto *WidgetAreaEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	dto.WorkspaceId = &query.WorkspaceId
 	dto.UserId = &query.UserId
 	WidgetAreaRecursiveAddUniqueId(dto, query)
 }
-func WidgetAreaRecursiveAddUniqueId(dto *WidgetAreaEntity, query workspaces.QueryDSL) {
+func WidgetAreaRecursiveAddUniqueId(dto *WidgetAreaEntity, query fireback.QueryDSL) {
 	if dto.Widgets != nil && len(dto.Widgets) > 0 {
 		for index0 := range dto.Widgets {
 			if dto.Widgets[index0].UniqueId == "" {
-				dto.Widgets[index0].UniqueId = workspaces.UUID()
+				dto.Widgets[index0].UniqueId = fireback.UUID()
 			}
 		}
 	}
@@ -487,14 +488,16 @@ func WidgetAreaRecursiveAddUniqueId(dto *WidgetAreaEntity, query workspaces.Quer
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func WidgetAreaMultiInsert(dtos []*WidgetAreaEntity, query workspaces.QueryDSL) ([]*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaMultiInsert(dtos []*WidgetAreaEntity, query fireback.QueryDSL) ([]*WidgetAreaEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			WidgetAreaEntityPreSanitize(dtos[index], query)
@@ -502,19 +505,19 @@ func WidgetAreaMultiInsert(dtos []*WidgetAreaEntity, query workspaces.QueryDSL) 
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func WidgetAreaActionBatchCreateFn(dtos []*WidgetAreaEntity, query workspaces.QueryDSL) ([]*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaActionBatchCreateFn(dtos []*WidgetAreaEntity, query fireback.QueryDSL) ([]*WidgetAreaEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*WidgetAreaEntity{}
 		for _, item := range dtos {
@@ -528,12 +531,12 @@ func WidgetAreaActionBatchCreateFn(dtos []*WidgetAreaEntity, query workspaces.Qu
 	}
 	return dtos, nil
 }
-func WidgetAreaDeleteEntireChildren(query workspaces.QueryDSL, dto *WidgetAreaEntity) *workspaces.IError {
+func WidgetAreaDeleteEntireChildren(query fireback.QueryDSL, dto *WidgetAreaEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query workspaces.QueryDSL) (*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query fireback.QueryDSL) (*WidgetAreaEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := WidgetAreaValidator(dto, false); iError != nil {
 		return nil, iError
@@ -549,14 +552,14 @@ func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query workspaces.QueryDSL) 
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return dto, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -564,27 +567,27 @@ func WidgetAreaActionCreateFn(dto *WidgetAreaEntity, query workspaces.QueryDSL) 
 	// 6. Fire the event into system
 	event.MustFire(WIDGET_AREA_EVENT_CREATED, event.M{
 		"entity":    dto,
-		"entityKey": workspaces.GetTypeString(&WidgetAreaEntity{}),
+		"entityKey": fireback.GetTypeString(&WidgetAreaEntity{}),
 		"target":    "workspace",
 		"unqiueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
-func WidgetAreaActionGetOne(query workspaces.QueryDSL) (*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaActionGetOne(query fireback.QueryDSL) (*WidgetAreaEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WidgetAreaEntity{})
-	item, err := workspaces.GetOneEntity[WidgetAreaEntity](query, refl)
+	item, err := fireback.GetOneEntity[WidgetAreaEntity](query, refl)
 	entityWidgetAreaFormatter(item, query)
 	return item, err
 }
-func WidgetAreaActionGetByWorkspace(query workspaces.QueryDSL) (*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaActionGetByWorkspace(query fireback.QueryDSL) (*WidgetAreaEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&WidgetAreaEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[WidgetAreaEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[WidgetAreaEntity](query, refl)
 	entityWidgetAreaFormatter(item, query)
 	return item, err
 }
-func WidgetAreaActionQuery(query workspaces.QueryDSL) ([]*WidgetAreaEntity, *workspaces.QueryResultMeta, error) {
+func WidgetAreaActionQuery(query fireback.QueryDSL) ([]*WidgetAreaEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&WidgetAreaEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[WidgetAreaEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[WidgetAreaEntity](query, refl)
 	for _, item := range items {
 		entityWidgetAreaFormatter(item, query)
 	}
@@ -594,7 +597,7 @@ func WidgetAreaActionQuery(query workspaces.QueryDSL) ([]*WidgetAreaEntity, *wor
 var widgetAreaMemoryItems []*WidgetAreaEntity = []*WidgetAreaEntity{}
 
 func WidgetAreaEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -624,7 +627,7 @@ func WidgetAreaMemJoin(items []uint) []*WidgetAreaEntity {
 	}
 	return res
 }
-func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *WidgetAreaEntity) (*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WidgetAreaEntity) (*WidgetAreaEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WIDGET_AREA_EVENT_UPDATED
 	WidgetAreaEntityPreSanitize(fields, query)
@@ -638,7 +641,7 @@ func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Wid
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	WidgetAreaRelationContentUpdate(fields, query)
@@ -653,7 +656,7 @@ func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Wid
 			Where(&WidgetAreaWidgets{LinkerId: &linkerId}).
 			Delete(&WidgetAreaWidgets{})
 		for _, newItem := range fields.Widgets {
-			newItem.UniqueId = workspaces.UUID()
+			newItem.UniqueId = fireback.UUID()
 			newItem.LinkerId = &linkerId
 			dbref.Create(&newItem)
 		}
@@ -668,13 +671,13 @@ func WidgetAreaUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *Wid
 		"unqiueId": query.WorkspaceId,
 	})
 	if err != nil {
-		return &item, workspaces.GormErrorToIError(err)
+		return &item, fireback.GormErrorToIError(err)
 	}
 	return &item, nil
 }
-func WidgetAreaActionUpdateFn(query workspaces.QueryDSL, fields *WidgetAreaEntity) (*WidgetAreaEntity, *workspaces.IError) {
+func WidgetAreaActionUpdateFn(query fireback.QueryDSL, fields *WidgetAreaEntity) (*WidgetAreaEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := WidgetAreaValidator(fields, true); iError != nil {
@@ -684,11 +687,11 @@ func WidgetAreaActionUpdateFn(query workspaces.QueryDSL, fields *WidgetAreaEntit
 	// WidgetAreaRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *WidgetAreaEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = WidgetAreaUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -696,7 +699,7 @@ func WidgetAreaActionUpdateFn(query workspaces.QueryDSL, fields *WidgetAreaEntit
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return WidgetAreaUpdateExec(dbref, query, fields)
@@ -707,8 +710,8 @@ var WidgetAreaWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire widgetareas ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
 		})
 		count, _ := WidgetAreaActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -716,16 +719,16 @@ var WidgetAreaWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WidgetAreaActionRemove(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func WidgetAreaActionRemove(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&WidgetAreaEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE}
-	return workspaces.RemoveEntity[WidgetAreaEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE}
+	return fireback.RemoveEntity[WidgetAreaEntity](query, refl)
 }
-func WidgetAreaActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func WidgetAreaActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WidgetAreaWidgets]()
+		subCount, subErr := fireback.WipeCleanEntity[WidgetAreaWidgets]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'WidgetAreaWidgets'", subErr)
 			return count, subErr
@@ -734,7 +737,7 @@ func WidgetAreaActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 		}
 	}
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[WidgetAreaEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[WidgetAreaEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'WidgetAreaEntity'", subErr)
 			return count, subErr
@@ -745,11 +748,11 @@ func WidgetAreaActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func WidgetAreaActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[WidgetAreaEntity]) (
-	*workspaces.BulkRecordRequest[WidgetAreaEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[WidgetAreaEntity]) (
+	*fireback.BulkRecordRequest[WidgetAreaEntity], *fireback.IError,
 ) {
 	result := []*WidgetAreaEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := WidgetAreaActionUpdate(query, record)
@@ -764,7 +767,7 @@ func WidgetAreaActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *WidgetAreaEntity) Json() string {
 	if x != nil {
@@ -774,7 +777,7 @@ func (x *WidgetAreaEntity) Json() string {
 	return ""
 }
 
-var WidgetAreaEntityMeta = workspaces.TableMetaData{
+var WidgetAreaEntityMeta = fireback.TableMetaData{
 	EntityName:    "WidgetArea",
 	ExportKey:     "widget-areas",
 	TableNameInDb: "fb_widget-area_entities",
@@ -784,23 +787,23 @@ var WidgetAreaEntityMeta = workspaces.TableMetaData{
 }
 
 func WidgetAreaActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[WidgetAreaEntity](query, WidgetAreaActionQuery, WidgetAreaPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[WidgetAreaEntity](query, WidgetAreaActionQuery, WidgetAreaPreloadRelations)
 }
 func WidgetAreaActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[WidgetAreaEntity](query, WidgetAreaActionQuery, WidgetAreaPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[WidgetAreaEntity](query, WidgetAreaActionQuery, WidgetAreaPreloadRelations)
 }
 func WidgetAreaActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content WidgetAreaEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := WidgetAreaActionCreate(&content, query)
@@ -839,7 +842,7 @@ var WidgetAreaCommonCliFlags = []cli.Flag{
 		Usage:    `widgets`,
 	},
 }
-var WidgetAreaCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var WidgetAreaCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -900,16 +903,16 @@ var WidgetAreaCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 		})
 		entity := &WidgetAreaEntity{}
-		workspaces.PopulateInteractively(entity, c, WidgetAreaCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, WidgetAreaCommonInteractiveCliFlags)
 		if entity, err := WidgetAreaActionCreate(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -919,8 +922,8 @@ var WidgetAreaUpdateCmd cli.Command = cli.Command{
 	Flags:   WidgetAreaCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 		})
 		entity := CastWidgetAreaFromCli(c)
 		if entity, err := WidgetAreaActionUpdate(query, entity); err != nil {
@@ -956,8 +959,8 @@ func CastWidgetAreaFromCli(c *cli.Context) *WidgetAreaEntity {
 	return template
 }
 func WidgetAreaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		WidgetAreaActionCreate,
 		reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 		fsRef,
@@ -966,8 +969,8 @@ func WidgetAreaSyncSeederFromFs(fsRef *embed.FS, fileNames []string) {
 	)
 }
 func WidgetAreaSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		WidgetAreaActionCreate,
 		reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 		widgetAreaSeedersFs,
@@ -976,8 +979,8 @@ func WidgetAreaSyncSeeders() {
 	)
 }
 func WidgetAreaImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		WidgetAreaActionCreate,
 		reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -985,19 +988,19 @@ func WidgetAreaImportMocks() {
 		false,
 	)
 }
-func WidgetAreaWriteQueryMock(ctx workspaces.MockQueryContext) {
+func WidgetAreaWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := WidgetAreaActionQuery(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "WidgetArea", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "WidgetArea", result)
 	}
 }
-func WidgetAreasActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func WidgetAreasActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1009,7 +1012,7 @@ func WidgetAreasActionQueryString(keyword string, page int) ([]string, *workspac
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := WidgetAreaActionQuery(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1035,8 +1038,8 @@ var WidgetAreaImportExportCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 			})
 			if c.Bool("batch") {
 				WidgetAreaActionSeederMultiple(query, c.Int("count"))
@@ -1059,7 +1062,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := WidgetAreaActionSeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1083,7 +1086,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of widget-areas, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]WidgetAreaEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1092,7 +1095,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(widgetAreaSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(widgetAreaSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1105,7 +1108,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WidgetAreaActionCreate,
 				reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 				widgetAreaSeedersFs,
@@ -1117,7 +1120,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1130,7 +1133,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				WidgetAreaActionCreate,
 				reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1141,7 +1144,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1150,7 +1153,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
 			if strings.Contains(c.String("file"), ".csv") {
-				workspaces.CommonCliExportCmd2(c,
+				fireback.CommonCliExportCmd2(c,
 					WidgetAreaEntityStream,
 					reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 					c.String("file"),
@@ -1159,7 +1162,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 					WidgetAreaPreloadRelations,
 				)
 			} else {
-				workspaces.CommonCliExportCmd(c,
+				fireback.CommonCliExportCmd(c,
 					WidgetAreaActionQuery,
 					reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 					c.String("file"),
@@ -1175,7 +1178,7 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1185,12 +1188,12 @@ var WidgetAreaImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				WidgetAreaActionCreate,
 				reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 				},
 				func() WidgetAreaEntity {
 					v := CastWidgetAreaFromCli(c)
@@ -1209,7 +1212,7 @@ var WidgetAreaCliCommands []cli.Command = []cli.Command{
 	WidgetAreaAskCmd,
 	WidgetAreaCreateInteractiveCmd,
 	WidgetAreaWipeCmd,
-	workspaces.GetCommonRemoveQuery(reflect.ValueOf(&WidgetAreaEntity{}).Elem(), WidgetAreaActionRemove),
+	fireback.GetCommonRemoveQuery(reflect.ValueOf(&WidgetAreaEntity{}).Elem(), WidgetAreaActionRemove),
 }
 
 func WidgetAreaCliFn() cli.Command {
@@ -1228,14 +1231,14 @@ func WidgetAreaCliFn() cli.Command {
 	}
 }
 
-var WIDGET_AREA_ACTION_TABLE = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        WidgetAreaActionQuery,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			WidgetAreaActionQuery,
 			security,
 			reflect.ValueOf(&WidgetAreaEntity{}).Elem(),
@@ -1243,25 +1246,25 @@ var WIDGET_AREA_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var WIDGET_AREA_ACTION_QUERY = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/widget-areas",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpQueryEntity(c, WidgetAreaActionQuery)
+			fireback.HttpQueryEntity(c, WidgetAreaActionQuery)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WidgetAreaActionQuery,
 	ResponseEntity: &[]WidgetAreaEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliQueryCmd2(
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliQueryCmd2(
 			c,
 			WidgetAreaActionQuery,
 			security,
@@ -1271,205 +1274,205 @@ var WIDGET_AREA_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var WIDGET_AREA_ACTION_EXPORT = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/widget-areas/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, WidgetAreaActionExport)
+			fireback.HttpStreamFileChannel(c, WidgetAreaActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         WidgetAreaActionExport,
 	ResponseEntity: &[]WidgetAreaEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_GET_ONE = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/widget-area/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, WidgetAreaActionGetOne)
+			fireback.HttpGetEntity(c, WidgetAreaActionGetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         WidgetAreaActionGetOne,
 	ResponseEntity: &WidgetAreaEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_POST_ONE = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new widgetArea",
 	Flags:         WidgetAreaCommonCliFlags,
 	Method:        "POST",
 	Url:           "/widget-area",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, WidgetAreaActionCreate)
+			fireback.HttpPostEntity(c, WidgetAreaActionCreate)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, WidgetAreaActionCreate, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, WidgetAreaActionCreate, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         WidgetAreaActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &WidgetAreaEntity{},
 	ResponseEntity: &WidgetAreaEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_PATCH = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         WidgetAreaCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/widget-area",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, WidgetAreaActionUpdate)
+			fireback.HttpUpdateEntity(c, WidgetAreaActionUpdate)
 		},
 	},
 	Action:         WidgetAreaActionUpdate,
 	RequestEntity:  &WidgetAreaEntity{},
 	ResponseEntity: &WidgetAreaEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_PATCH_BULK = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/widget-areas",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, WidgetAreaActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, WidgetAreaActionBulkUpdate)
 		},
 	},
 	Action:         WidgetAreaActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[WidgetAreaEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[WidgetAreaEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[WidgetAreaEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[WidgetAreaEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaEntity",
 	},
 }
-var WIDGET_AREA_ACTION_DELETE = workspaces.Module3Action{
+var WIDGET_AREA_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/widget-area",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, WidgetAreaActionRemove)
+			fireback.HttpRemoveEntity(c, WidgetAreaActionRemove)
 		},
 	},
 	Action:         WidgetAreaActionRemove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &WidgetAreaEntity{},
 }
-var WIDGET_AREA_WIDGETS_ACTION_PATCH = workspaces.Module3Action{
+var WIDGET_AREA_WIDGETS_ACTION_PATCH = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/widget-area/:linkerId/widgets/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpUpdateEntity(c, WidgetAreaWidgetsActionUpdate)
+			fireback.HttpUpdateEntity(c, WidgetAreaWidgetsActionUpdate)
 		},
 	},
 	Action:         WidgetAreaWidgetsActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &WidgetAreaWidgets{},
 	ResponseEntity: &WidgetAreaWidgets{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
 }
-var WIDGET_AREA_WIDGETS_ACTION_GET = workspaces.Module3Action{
+var WIDGET_AREA_WIDGETS_ACTION_GET = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/widget-area/widgets/:linkerId/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpGetEntity(c, WidgetAreaWidgetsActionGetOne)
+			fireback.HttpGetEntity(c, WidgetAreaWidgetsActionGetOne)
 		},
 	},
 	Action:         WidgetAreaWidgetsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &WidgetAreaWidgets{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
 }
-var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module3Action{
+var WIDGET_AREA_WIDGETS_ACTION_POST = fireback.Module3Action{
 	Method: "POST",
 	Url:    "/widget-area/:linkerId/widgets",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WIDGET_AREA_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpPostEntity(c, WidgetAreaWidgetsActionCreate)
+			fireback.HttpPostEntity(c, WidgetAreaWidgetsActionCreate)
 		},
 	},
 	Action:         WidgetAreaWidgetsActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &WidgetAreaWidgets{},
 	ResponseEntity: &WidgetAreaWidgets{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "WidgetAreaWidgets",
 	},
 }
@@ -1478,10 +1481,10 @@ var WIDGET_AREA_WIDGETS_ACTION_POST = workspaces.Module3Action{
  *	Override this function on WidgetAreaEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendWidgetAreaRouter = func(r *[]workspaces.Module3Action) {}
+var AppendWidgetAreaRouter = func(r *[]fireback.Module3Action) {}
 
-func GetWidgetAreaModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetWidgetAreaModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		WIDGET_AREA_ACTION_QUERY,
 		WIDGET_AREA_ACTION_EXPORT,
 		WIDGET_AREA_ACTION_GET_ONE,
@@ -1498,34 +1501,34 @@ func GetWidgetAreaModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_WIDGET_AREA_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_WIDGET_AREA_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/widget/widget-area/delete",
 	Name:        "Delete widget area",
 }
-var PERM_ROOT_WIDGET_AREA_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_WIDGET_AREA_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/widget/widget-area/create",
 	Name:        "Create widget area",
 }
-var PERM_ROOT_WIDGET_AREA_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_WIDGET_AREA_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root/modules/widget/widget-area/update",
 	Name:        "Update widget area",
 }
-var PERM_ROOT_WIDGET_AREA_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_WIDGET_AREA_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root/modules/widget/widget-area/query",
 	Name:        "Query widget area",
 }
-var PERM_ROOT_WIDGET_AREA = workspaces.PermissionInfo{
+var PERM_ROOT_WIDGET_AREA = fireback.PermissionInfo{
 	CompleteKey: "root/modules/widget/widget-area/*",
 	Name:        "Entire widget area actions (*)",
 }
-var ALL_WIDGET_AREA_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_WIDGET_AREA_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_WIDGET_AREA_DELETE,
 	PERM_ROOT_WIDGET_AREA_CREATE,
 	PERM_ROOT_WIDGET_AREA_UPDATE,
 	PERM_ROOT_WIDGET_AREA_QUERY,
 	PERM_ROOT_WIDGET_AREA,
 }
-var WidgetAreaEntityBundle = workspaces.EntityBundle{
+var WidgetAreaEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WIDGET_AREA_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

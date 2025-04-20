@@ -1,16 +1,16 @@
 package accessibility
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func KeyboardShortcutActionCreate(
-	dto *KeyboardShortcutEntity, query workspaces.QueryDSL,
-) (*KeyboardShortcutEntity, *workspaces.IError) {
+	dto *KeyboardShortcutEntity, query fireback.QueryDSL,
+) (*KeyboardShortcutEntity, *fireback.IError) {
 	return KeyboardShortcutActionCreateFn(dto, query)
 }
 
 func KeyboardShortcutActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *KeyboardShortcutEntity,
-) (*KeyboardShortcutEntity, *workspaces.IError) {
+) (*KeyboardShortcutEntity, *fireback.IError) {
 	return KeyboardShortcutActionUpdateFn(query, fields)
 }

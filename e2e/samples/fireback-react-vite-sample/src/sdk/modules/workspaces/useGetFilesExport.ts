@@ -53,7 +53,7 @@ export function useGetFilesExport({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<FileEntity>, any>(
-    ["*workspaces.FileEntity", computedOptions, query],
+    ["*fireback.FileEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetFilesExport({
     keyExtractor: (item: FileEntity) => item.uniqueId,
   };
 }
-useGetFilesExport.UKEY = "*workspaces.FileEntity";
+useGetFilesExport.UKEY = "*fireback.FileEntity";

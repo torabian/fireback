@@ -58,10 +58,10 @@ export function useDeleteCapability(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.CapabilityEntity",
+            "*fireback.CapabilityEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.CapabilityEntity");
+          queryClient?.invalidateQueries("*fireback.CapabilityEntity");
           resolve(response);
         },
         onError(error: any) {

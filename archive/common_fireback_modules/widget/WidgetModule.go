@@ -3,7 +3,7 @@ package widget
 import (
 	"embed"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -11,8 +11,8 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-func WidgetModuleSetup() *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func WidgetModuleSetup() *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 		Name:        "widget",
 		Definitions: &Module3Definitions,
 	}
@@ -23,8 +23,8 @@ func WidgetModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvideMockWriterHandler(func(languages []string) {
-		WidgetAreaWriteQueryMock(workspaces.MockQueryContext{Languages: languages, WithPreloads: []string{"Widgets.Widget"}})
-		WidgetWriteQueryMock(workspaces.MockQueryContext{Languages: languages})
+		WidgetAreaWriteQueryMock(fireback.MockQueryContext{Languages: languages, WithPreloads: []string{"Widgets.Widget"}})
+		WidgetWriteQueryMock(fireback.MockQueryContext{Languages: languages})
 	})
 
 	module.ProvidePermissionHandler(
@@ -32,12 +32,12 @@ func WidgetModuleSetup() *workspaces.ModuleProvider {
 		ALL_WIDGET_PERMISSIONS,
 	)
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetWidgetAreaModule3Actions(),
 		GetWidgetModule3Actions(),
 	}
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetWidgetAreaModule3Actions(),
 		GetWidgetModule3Actions(),
 	}

@@ -70,7 +70,7 @@ export function usePatchWorkspaceInvites(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<WorkspaceInviteEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.WorkspaceInviteEntity]",
+            "*fireback.BulkRecordRequest[fireback.WorkspaceInviteEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

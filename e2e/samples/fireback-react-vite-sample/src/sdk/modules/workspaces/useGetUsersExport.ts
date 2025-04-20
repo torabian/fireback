@@ -53,7 +53,7 @@ export function useGetUsersExport({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<UserEntity>, any>(
-    ["*workspaces.UserEntity", computedOptions, query],
+    ["*fireback.UserEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetUsersExport({
     keyExtractor: (item: UserEntity) => item.uniqueId,
   };
 }
-useGetUsersExport.UKEY = "*workspaces.UserEntity";
+useGetUsersExport.UKEY = "*fireback.UserEntity";

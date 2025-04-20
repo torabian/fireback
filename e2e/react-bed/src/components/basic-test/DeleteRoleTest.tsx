@@ -1,5 +1,5 @@
 import { useDeleteRole } from "../../sdk/modules/abac/useDeleteRole";
-import { useGetCapabilities } from "../../sdk/modules/workspaces/useGetCapabilities";
+import { useGetCapabilities } from "../../sdk/modules/fireback/useGetCapabilities";
 
 export function DeleteRoleTest() {
   const { submit } = useDeleteRole();

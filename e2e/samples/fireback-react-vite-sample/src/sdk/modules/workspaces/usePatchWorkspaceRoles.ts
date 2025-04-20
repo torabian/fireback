@@ -70,7 +70,7 @@ export function usePatchWorkspaceRoles(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<WorkspaceRoleEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.WorkspaceRoleEntity]",
+            "*fireback.BulkRecordRequest[fireback.WorkspaceRoleEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

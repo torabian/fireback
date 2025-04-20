@@ -77,7 +77,7 @@ export function usePostTimezoneGroupByLinkerIdUtcItems(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<TimezoneGroupUtcItems>) {
           queryClient?.setQueryData<IResponseList<TimezoneGroupUtcItems>>(
-            "*workspaces.TimezoneGroupUtcItems",
+            "*fireback.TimezoneGroupUtcItems",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

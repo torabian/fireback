@@ -69,7 +69,7 @@ export function usePatchFile(props?: PatchProps) {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<FileEntity>) {
-          queryClient?.setQueriesData("*workspaces.FileEntity", (data: any) =>
+          queryClient?.setQueriesData("*fireback.FileEntity", (data: any) =>
             fnUpdater(data, response)
           );
           resolve(response);

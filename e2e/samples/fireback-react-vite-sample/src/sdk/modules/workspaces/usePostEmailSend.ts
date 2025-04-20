@@ -73,7 +73,7 @@ export function usePostEmailSend(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<SendEmailActionResDto>) {
           queryClient?.setQueryData<IResponseList<SendEmailActionResDto>>(
-            "*workspaces.SendEmailActionResDto",
+            "*fireback.SendEmailActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

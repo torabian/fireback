@@ -70,7 +70,7 @@ export function usePatchWorkspaceConfigDistinct(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<WorkspaceConfigEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.WorkspaceConfigEntity",
+            "*fireback.WorkspaceConfigEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

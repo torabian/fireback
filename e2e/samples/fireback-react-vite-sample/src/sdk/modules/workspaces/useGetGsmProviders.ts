@@ -53,7 +53,7 @@ export function useGetGsmProviders({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<GsmProviderEntity>, any>(
-    ["*workspaces.GsmProviderEntity", computedOptions, query],
+    ["*fireback.GsmProviderEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetGsmProviders({
     keyExtractor: (item: GsmProviderEntity) => item.uniqueId,
   };
 }
-useGetGsmProviders.UKEY = "*workspaces.GsmProviderEntity";
+useGetGsmProviders.UKEY = "*fireback.GsmProviderEntity";

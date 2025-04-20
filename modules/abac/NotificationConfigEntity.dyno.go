@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/NotificationConfig"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/NotificationConfig"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var notificationConfigSeedersFs = &seeders.ViewsFs
@@ -32,37 +33,37 @@ func ResetNotificationConfigSeeders(fs *embed.FS) {
 }
 
 type NotificationConfigEntityQs struct {
-	CascadeToSubWorkspaces                 workspaces.QueriableField `cli:"cascade-to-sub-workspaces" table:"notification_config" column:"cascade_to_sub_workspaces" qs:"cascadeToSubWorkspaces"`
-	ForcedCascadeEmailProvider             workspaces.QueriableField `cli:"forced-cascade-email-provider" table:"notification_config" column:"forced_cascade_email_provider" qs:"forcedCascadeEmailProvider"`
-	GeneralEmailProvider                   workspaces.QueriableField `cli:"general-email-provider" table:"notification_config" column:"general_email_provider" qs:"generalEmailProvider"`
-	GeneralGsmProvider                     workspaces.QueriableField `cli:"general-gsm-provider" table:"notification_config" column:"general_gsm_provider" qs:"generalGsmProvider"`
-	InviteToWorkspaceContent               workspaces.QueriableField `cli:"invite-to-workspace-content" table:"notification_config" column:"invite_to_workspace_content" qs:"inviteToWorkspaceContent"`
-	InviteToWorkspaceContentExcerpt        workspaces.QueriableField `cli:"invite-to-workspace-content-excerpt" table:"notification_config" column:"invite_to_workspace_content_excerpt" qs:"inviteToWorkspaceContentExcerpt"`
-	InviteToWorkspaceContentDefault        workspaces.QueriableField `cli:"invite-to-workspace-content-default" table:"notification_config" column:"invite_to_workspace_content_default" qs:"inviteToWorkspaceContentDefault"`
-	InviteToWorkspaceContentDefaultExcerpt workspaces.QueriableField `cli:"invite-to-workspace-content-default-excerpt" table:"notification_config" column:"invite_to_workspace_content_default_excerpt" qs:"inviteToWorkspaceContentDefaultExcerpt"`
-	InviteToWorkspaceTitle                 workspaces.QueriableField `cli:"invite-to-workspace-title" table:"notification_config" column:"invite_to_workspace_title" qs:"inviteToWorkspaceTitle"`
-	InviteToWorkspaceTitleDefault          workspaces.QueriableField `cli:"invite-to-workspace-title-default" table:"notification_config" column:"invite_to_workspace_title_default" qs:"inviteToWorkspaceTitleDefault"`
-	InviteToWorkspaceSender                workspaces.QueriableField `cli:"invite-to-workspace-sender" table:"notification_config" column:"invite_to_workspace_sender" qs:"inviteToWorkspaceSender"`
-	AccountCenterEmailSender               workspaces.QueriableField `cli:"account-center-email-sender" table:"notification_config" column:"account_center_email_sender" qs:"accountCenterEmailSender"`
-	ForgetPasswordContent                  workspaces.QueriableField `cli:"forget-password-content" table:"notification_config" column:"forget_password_content" qs:"forgetPasswordContent"`
-	ForgetPasswordContentExcerpt           workspaces.QueriableField `cli:"forget-password-content-excerpt" table:"notification_config" column:"forget_password_content_excerpt" qs:"forgetPasswordContentExcerpt"`
-	ForgetPasswordContentDefault           workspaces.QueriableField `cli:"forget-password-content-default" table:"notification_config" column:"forget_password_content_default" qs:"forgetPasswordContentDefault"`
-	ForgetPasswordContentDefaultExcerpt    workspaces.QueriableField `cli:"forget-password-content-default-excerpt" table:"notification_config" column:"forget_password_content_default_excerpt" qs:"forgetPasswordContentDefaultExcerpt"`
-	ForgetPasswordTitle                    workspaces.QueriableField `cli:"forget-password-title" table:"notification_config" column:"forget_password_title" qs:"forgetPasswordTitle"`
-	ForgetPasswordTitleDefault             workspaces.QueriableField `cli:"forget-password-title-default" table:"notification_config" column:"forget_password_title_default" qs:"forgetPasswordTitleDefault"`
-	ForgetPasswordSender                   workspaces.QueriableField `cli:"forget-password-sender" table:"notification_config" column:"forget_password_sender" qs:"forgetPasswordSender"`
-	AcceptLanguage                         workspaces.QueriableField `cli:"accept-language" table:"notification_config" column:"accept_language" qs:"acceptLanguage"`
-	ConfirmEmailSender                     workspaces.QueriableField `cli:"confirm-email-sender" table:"notification_config" column:"confirm_email_sender" qs:"confirmEmailSender"`
-	ConfirmEmailContent                    workspaces.QueriableField `cli:"confirm-email-content" table:"notification_config" column:"confirm_email_content" qs:"confirmEmailContent"`
-	ConfirmEmailContentExcerpt             workspaces.QueriableField `cli:"confirm-email-content-excerpt" table:"notification_config" column:"confirm_email_content_excerpt" qs:"confirmEmailContentExcerpt"`
-	ConfirmEmailContentDefault             workspaces.QueriableField `cli:"confirm-email-content-default" table:"notification_config" column:"confirm_email_content_default" qs:"confirmEmailContentDefault"`
-	ConfirmEmailContentDefaultExcerpt      workspaces.QueriableField `cli:"confirm-email-content-default-excerpt" table:"notification_config" column:"confirm_email_content_default_excerpt" qs:"confirmEmailContentDefaultExcerpt"`
-	ConfirmEmailTitle                      workspaces.QueriableField `cli:"confirm-email-title" table:"notification_config" column:"confirm_email_title" qs:"confirmEmailTitle"`
-	ConfirmEmailTitleDefault               workspaces.QueriableField `cli:"confirm-email-title-default" table:"notification_config" column:"confirm_email_title_default" qs:"confirmEmailTitleDefault"`
+	CascadeToSubWorkspaces                 fireback.QueriableField `cli:"cascade-to-sub-workspaces" table:"notification_config" column:"cascade_to_sub_workspaces" qs:"cascadeToSubWorkspaces"`
+	ForcedCascadeEmailProvider             fireback.QueriableField `cli:"forced-cascade-email-provider" table:"notification_config" column:"forced_cascade_email_provider" qs:"forcedCascadeEmailProvider"`
+	GeneralEmailProvider                   fireback.QueriableField `cli:"general-email-provider" table:"notification_config" column:"general_email_provider" qs:"generalEmailProvider"`
+	GeneralGsmProvider                     fireback.QueriableField `cli:"general-gsm-provider" table:"notification_config" column:"general_gsm_provider" qs:"generalGsmProvider"`
+	InviteToWorkspaceContent               fireback.QueriableField `cli:"invite-to-workspace-content" table:"notification_config" column:"invite_to_workspace_content" qs:"inviteToWorkspaceContent"`
+	InviteToWorkspaceContentExcerpt        fireback.QueriableField `cli:"invite-to-workspace-content-excerpt" table:"notification_config" column:"invite_to_workspace_content_excerpt" qs:"inviteToWorkspaceContentExcerpt"`
+	InviteToWorkspaceContentDefault        fireback.QueriableField `cli:"invite-to-workspace-content-default" table:"notification_config" column:"invite_to_workspace_content_default" qs:"inviteToWorkspaceContentDefault"`
+	InviteToWorkspaceContentDefaultExcerpt fireback.QueriableField `cli:"invite-to-workspace-content-default-excerpt" table:"notification_config" column:"invite_to_workspace_content_default_excerpt" qs:"inviteToWorkspaceContentDefaultExcerpt"`
+	InviteToWorkspaceTitle                 fireback.QueriableField `cli:"invite-to-workspace-title" table:"notification_config" column:"invite_to_workspace_title" qs:"inviteToWorkspaceTitle"`
+	InviteToWorkspaceTitleDefault          fireback.QueriableField `cli:"invite-to-workspace-title-default" table:"notification_config" column:"invite_to_workspace_title_default" qs:"inviteToWorkspaceTitleDefault"`
+	InviteToWorkspaceSender                fireback.QueriableField `cli:"invite-to-workspace-sender" table:"notification_config" column:"invite_to_workspace_sender" qs:"inviteToWorkspaceSender"`
+	AccountCenterEmailSender               fireback.QueriableField `cli:"account-center-email-sender" table:"notification_config" column:"account_center_email_sender" qs:"accountCenterEmailSender"`
+	ForgetPasswordContent                  fireback.QueriableField `cli:"forget-password-content" table:"notification_config" column:"forget_password_content" qs:"forgetPasswordContent"`
+	ForgetPasswordContentExcerpt           fireback.QueriableField `cli:"forget-password-content-excerpt" table:"notification_config" column:"forget_password_content_excerpt" qs:"forgetPasswordContentExcerpt"`
+	ForgetPasswordContentDefault           fireback.QueriableField `cli:"forget-password-content-default" table:"notification_config" column:"forget_password_content_default" qs:"forgetPasswordContentDefault"`
+	ForgetPasswordContentDefaultExcerpt    fireback.QueriableField `cli:"forget-password-content-default-excerpt" table:"notification_config" column:"forget_password_content_default_excerpt" qs:"forgetPasswordContentDefaultExcerpt"`
+	ForgetPasswordTitle                    fireback.QueriableField `cli:"forget-password-title" table:"notification_config" column:"forget_password_title" qs:"forgetPasswordTitle"`
+	ForgetPasswordTitleDefault             fireback.QueriableField `cli:"forget-password-title-default" table:"notification_config" column:"forget_password_title_default" qs:"forgetPasswordTitleDefault"`
+	ForgetPasswordSender                   fireback.QueriableField `cli:"forget-password-sender" table:"notification_config" column:"forget_password_sender" qs:"forgetPasswordSender"`
+	AcceptLanguage                         fireback.QueriableField `cli:"accept-language" table:"notification_config" column:"accept_language" qs:"acceptLanguage"`
+	ConfirmEmailSender                     fireback.QueriableField `cli:"confirm-email-sender" table:"notification_config" column:"confirm_email_sender" qs:"confirmEmailSender"`
+	ConfirmEmailContent                    fireback.QueriableField `cli:"confirm-email-content" table:"notification_config" column:"confirm_email_content" qs:"confirmEmailContent"`
+	ConfirmEmailContentExcerpt             fireback.QueriableField `cli:"confirm-email-content-excerpt" table:"notification_config" column:"confirm_email_content_excerpt" qs:"confirmEmailContentExcerpt"`
+	ConfirmEmailContentDefault             fireback.QueriableField `cli:"confirm-email-content-default" table:"notification_config" column:"confirm_email_content_default" qs:"confirmEmailContentDefault"`
+	ConfirmEmailContentDefaultExcerpt      fireback.QueriableField `cli:"confirm-email-content-default-excerpt" table:"notification_config" column:"confirm_email_content_default_excerpt" qs:"confirmEmailContentDefaultExcerpt"`
+	ConfirmEmailTitle                      fireback.QueriableField `cli:"confirm-email-title" table:"notification_config" column:"confirm_email_title" qs:"confirmEmailTitle"`
+	ConfirmEmailTitleDefault               fireback.QueriableField `cli:"confirm-email-title-default" table:"notification_config" column:"confirm_email_title_default" qs:"confirmEmailTitleDefault"`
 }
 
 func (x *NotificationConfigEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var NotificationConfigQsFlags = []cli.Flag{
@@ -181,20 +182,20 @@ type NotificationConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -204,11 +205,11 @@ type NotificationConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -238,9 +239,9 @@ type NotificationConfigEntity struct {
 	CascadeToSubWorkspaces                 bool                        `json:"cascadeToSubWorkspaces" xml:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
 	ForcedCascadeEmailProvider             bool                        `json:"forcedCascadeEmailProvider" xml:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
 	GeneralEmailProvider                   *EmailProviderEntity        `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
-	GeneralEmailProviderId                 workspaces.String           `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
+	GeneralEmailProviderId                 fireback.String             `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
 	GeneralGsmProvider                     *GsmProviderEntity          `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
-	GeneralGsmProviderId                   workspaces.String           `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
+	GeneralGsmProviderId                   fireback.String             `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
 	InviteToWorkspaceContent               string                      `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
 	InviteToWorkspaceContentExcerpt        string                      `json:"inviteToWorkspaceContentExcerpt" xml:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
 	InviteToWorkspaceContentDefault        string                      `json:"inviteToWorkspaceContentDefault" xml:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
@@ -248,9 +249,9 @@ type NotificationConfigEntity struct {
 	InviteToWorkspaceTitle                 string                      `json:"inviteToWorkspaceTitle" xml:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
 	InviteToWorkspaceTitleDefault          string                      `json:"inviteToWorkspaceTitleDefault" xml:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
 	InviteToWorkspaceSender                *EmailSenderEntity          `json:"inviteToWorkspaceSender" xml:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"      `
-	InviteToWorkspaceSenderId              workspaces.String           `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId" xml:"inviteToWorkspaceSenderId"  `
+	InviteToWorkspaceSenderId              fireback.String             `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId" xml:"inviteToWorkspaceSenderId"  `
 	AccountCenterEmailSender               *EmailSenderEntity          `json:"accountCenterEmailSender" xml:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"      `
-	AccountCenterEmailSenderId             workspaces.String           `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId" xml:"accountCenterEmailSenderId"  `
+	AccountCenterEmailSenderId             fireback.String             `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId" xml:"accountCenterEmailSenderId"  `
 	ForgetPasswordContent                  string                      `json:"forgetPasswordContent" xml:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
 	ForgetPasswordContentExcerpt           string                      `json:"forgetPasswordContentExcerpt" xml:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
 	ForgetPasswordContentDefault           string                      `json:"forgetPasswordContentDefault" xml:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
@@ -258,11 +259,11 @@ type NotificationConfigEntity struct {
 	ForgetPasswordTitle                    string                      `json:"forgetPasswordTitle" xml:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
 	ForgetPasswordTitleDefault             string                      `json:"forgetPasswordTitleDefault" xml:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
 	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" xml:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
-	ForgetPasswordSenderId                 workspaces.String           `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
+	ForgetPasswordSenderId                 fireback.String             `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
 	AcceptLanguage                         string                      `json:"acceptLanguage" xml:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"      `
 	AcceptLanguageExcerpt                  *string                     `json:"acceptLanguageExcerpt" yaml:"acceptLanguageExcerpt" xml:"acceptLanguageExcerpt"`
 	ConfirmEmailSender                     *EmailSenderEntity          `json:"confirmEmailSender" xml:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"      `
-	ConfirmEmailSenderId                   workspaces.String           `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
+	ConfirmEmailSenderId                   fireback.String             `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
 	ConfirmEmailContent                    string                      `json:"confirmEmailContent" xml:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
 	ConfirmEmailContentExcerpt             string                      `json:"confirmEmailContentExcerpt" xml:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
 	ConfirmEmailContentDefault             string                      `json:"confirmEmailContentDefault" xml:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
@@ -273,7 +274,7 @@ type NotificationConfigEntity struct {
 	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func NotificationConfigEntityStream(q workspaces.QueryDSL) (chan []*NotificationConfigEntity, *workspaces.QueryResultMeta, error) {
+func NotificationConfigEntityStream(q fireback.QueryDSL) (chan []*NotificationConfigEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*NotificationConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -309,8 +310,8 @@ func (x *NotificationConfigEntityList) Json() string {
 	}
 	return ""
 }
-func (x *NotificationConfigEntityList) ToTree() *workspaces.TreeOperation[NotificationConfigEntity] {
-	return workspaces.NewTreeOperation(
+func (x *NotificationConfigEntityList) ToTree() *fireback.TreeOperation[NotificationConfigEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *NotificationConfigEntity) string {
 			if !t.ParentId.Valid {
@@ -327,15 +328,15 @@ func (x *NotificationConfigEntityList) ToTree() *workspaces.TreeOperation[Notifi
 var NotificationConfigPreloadRelations []string = []string{}
 
 type notificationConfigActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *NotificationConfigEntity) (*NotificationConfigEntity, *workspaces.IError)
-	Create         func(dto *NotificationConfigEntity, query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError)
-	Upsert         func(dto *NotificationConfigEntity, query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *NotificationConfigEntity) (*NotificationConfigEntity, *fireback.IError)
+	Create         func(dto *NotificationConfigEntity, query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
+	Upsert         func(dto *NotificationConfigEntity, query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
 	SeederInit     func() *NotificationConfigEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*NotificationConfigEntity, query workspaces.QueryDSL) ([]*NotificationConfigEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*NotificationConfigEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*NotificationConfigEntity, query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.QueryResultMeta, error)
 }
 
 var NotificationConfigActions notificationConfigActionsSig = notificationConfigActionsSig{
@@ -350,7 +351,7 @@ var NotificationConfigActions notificationConfigActionsSig = notificationConfigA
 	Query:          NotificationConfigActionQueryFn,
 }
 
-func NotificationConfigActionUpsertFn(dto *NotificationConfigEntity, query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigActionUpsertFn(dto *NotificationConfigEntity, query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -364,52 +365,52 @@ var NOTIFICATION_CONFIG_EVENTS = []string{
 }
 
 type NotificationConfigFieldMap struct {
-	CascadeToSubWorkspaces                 workspaces.TranslatedString `yaml:"cascadeToSubWorkspaces"`
-	ForcedCascadeEmailProvider             workspaces.TranslatedString `yaml:"forcedCascadeEmailProvider"`
-	GeneralEmailProvider                   workspaces.TranslatedString `yaml:"generalEmailProvider"`
-	GeneralGsmProvider                     workspaces.TranslatedString `yaml:"generalGsmProvider"`
-	InviteToWorkspaceContent               workspaces.TranslatedString `yaml:"inviteToWorkspaceContent"`
-	InviteToWorkspaceContentExcerpt        workspaces.TranslatedString `yaml:"inviteToWorkspaceContentExcerpt"`
-	InviteToWorkspaceContentDefault        workspaces.TranslatedString `yaml:"inviteToWorkspaceContentDefault"`
-	InviteToWorkspaceContentDefaultExcerpt workspaces.TranslatedString `yaml:"inviteToWorkspaceContentDefaultExcerpt"`
-	InviteToWorkspaceTitle                 workspaces.TranslatedString `yaml:"inviteToWorkspaceTitle"`
-	InviteToWorkspaceTitleDefault          workspaces.TranslatedString `yaml:"inviteToWorkspaceTitleDefault"`
-	InviteToWorkspaceSender                workspaces.TranslatedString `yaml:"inviteToWorkspaceSender"`
-	AccountCenterEmailSender               workspaces.TranslatedString `yaml:"accountCenterEmailSender"`
-	ForgetPasswordContent                  workspaces.TranslatedString `yaml:"forgetPasswordContent"`
-	ForgetPasswordContentExcerpt           workspaces.TranslatedString `yaml:"forgetPasswordContentExcerpt"`
-	ForgetPasswordContentDefault           workspaces.TranslatedString `yaml:"forgetPasswordContentDefault"`
-	ForgetPasswordContentDefaultExcerpt    workspaces.TranslatedString `yaml:"forgetPasswordContentDefaultExcerpt"`
-	ForgetPasswordTitle                    workspaces.TranslatedString `yaml:"forgetPasswordTitle"`
-	ForgetPasswordTitleDefault             workspaces.TranslatedString `yaml:"forgetPasswordTitleDefault"`
-	ForgetPasswordSender                   workspaces.TranslatedString `yaml:"forgetPasswordSender"`
-	AcceptLanguage                         workspaces.TranslatedString `yaml:"acceptLanguage"`
-	ConfirmEmailSender                     workspaces.TranslatedString `yaml:"confirmEmailSender"`
-	ConfirmEmailContent                    workspaces.TranslatedString `yaml:"confirmEmailContent"`
-	ConfirmEmailContentExcerpt             workspaces.TranslatedString `yaml:"confirmEmailContentExcerpt"`
-	ConfirmEmailContentDefault             workspaces.TranslatedString `yaml:"confirmEmailContentDefault"`
-	ConfirmEmailContentDefaultExcerpt      workspaces.TranslatedString `yaml:"confirmEmailContentDefaultExcerpt"`
-	ConfirmEmailTitle                      workspaces.TranslatedString `yaml:"confirmEmailTitle"`
-	ConfirmEmailTitleDefault               workspaces.TranslatedString `yaml:"confirmEmailTitleDefault"`
+	CascadeToSubWorkspaces                 fireback.TranslatedString `yaml:"cascadeToSubWorkspaces"`
+	ForcedCascadeEmailProvider             fireback.TranslatedString `yaml:"forcedCascadeEmailProvider"`
+	GeneralEmailProvider                   fireback.TranslatedString `yaml:"generalEmailProvider"`
+	GeneralGsmProvider                     fireback.TranslatedString `yaml:"generalGsmProvider"`
+	InviteToWorkspaceContent               fireback.TranslatedString `yaml:"inviteToWorkspaceContent"`
+	InviteToWorkspaceContentExcerpt        fireback.TranslatedString `yaml:"inviteToWorkspaceContentExcerpt"`
+	InviteToWorkspaceContentDefault        fireback.TranslatedString `yaml:"inviteToWorkspaceContentDefault"`
+	InviteToWorkspaceContentDefaultExcerpt fireback.TranslatedString `yaml:"inviteToWorkspaceContentDefaultExcerpt"`
+	InviteToWorkspaceTitle                 fireback.TranslatedString `yaml:"inviteToWorkspaceTitle"`
+	InviteToWorkspaceTitleDefault          fireback.TranslatedString `yaml:"inviteToWorkspaceTitleDefault"`
+	InviteToWorkspaceSender                fireback.TranslatedString `yaml:"inviteToWorkspaceSender"`
+	AccountCenterEmailSender               fireback.TranslatedString `yaml:"accountCenterEmailSender"`
+	ForgetPasswordContent                  fireback.TranslatedString `yaml:"forgetPasswordContent"`
+	ForgetPasswordContentExcerpt           fireback.TranslatedString `yaml:"forgetPasswordContentExcerpt"`
+	ForgetPasswordContentDefault           fireback.TranslatedString `yaml:"forgetPasswordContentDefault"`
+	ForgetPasswordContentDefaultExcerpt    fireback.TranslatedString `yaml:"forgetPasswordContentDefaultExcerpt"`
+	ForgetPasswordTitle                    fireback.TranslatedString `yaml:"forgetPasswordTitle"`
+	ForgetPasswordTitleDefault             fireback.TranslatedString `yaml:"forgetPasswordTitleDefault"`
+	ForgetPasswordSender                   fireback.TranslatedString `yaml:"forgetPasswordSender"`
+	AcceptLanguage                         fireback.TranslatedString `yaml:"acceptLanguage"`
+	ConfirmEmailSender                     fireback.TranslatedString `yaml:"confirmEmailSender"`
+	ConfirmEmailContent                    fireback.TranslatedString `yaml:"confirmEmailContent"`
+	ConfirmEmailContentExcerpt             fireback.TranslatedString `yaml:"confirmEmailContentExcerpt"`
+	ConfirmEmailContentDefault             fireback.TranslatedString `yaml:"confirmEmailContentDefault"`
+	ConfirmEmailContentDefaultExcerpt      fireback.TranslatedString `yaml:"confirmEmailContentDefaultExcerpt"`
+	ConfirmEmailTitle                      fireback.TranslatedString `yaml:"confirmEmailTitle"`
+	ConfirmEmailTitleDefault               fireback.TranslatedString `yaml:"confirmEmailTitleDefault"`
 }
 
 var NotificationConfigEntityMetaConfig map[string]int64 = map[string]int64{
 	"AcceptLanguageExcerptSize": 100,
 }
-var NotificationConfigEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&NotificationConfigEntity{}))
+var NotificationConfigEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&NotificationConfigEntity{}))
 
-func entityNotificationConfigFormatter(dto *NotificationConfigEntity, query workspaces.QueryDSL) {
+func entityNotificationConfigFormatter(dto *NotificationConfigEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func NotificationConfigActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func NotificationConfigActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -436,7 +437,7 @@ func NotificationConfigActionSeederMultiple(query workspaces.QueryDSL, count int
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func NotificationConfigActionSeeder(query workspaces.QueryDSL, count int) {
+func NotificationConfigActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -462,7 +463,7 @@ func NotificationConfigActionSeederInitFn() *NotificationConfigEntity {
 	entity := &NotificationConfigEntity{}
 	return entity
 }
-func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query workspaces.QueryDSL) error {
+func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -470,13 +471,13 @@ func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query wo
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func NotificationConfigRelationContentCreate(dto *NotificationConfigEntity, query workspaces.QueryDSL) error {
+func NotificationConfigRelationContentCreate(dto *NotificationConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func NotificationConfigRelationContentUpdate(dto *NotificationConfigEntity, query workspaces.QueryDSL) error {
+func NotificationConfigRelationContentUpdate(dto *NotificationConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func NotificationConfigPolyglotUpdateHandler(dto *NotificationConfigEntity, query workspaces.QueryDSL) {
+func NotificationConfigPolyglotUpdateHandler(dto *NotificationConfigEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -487,8 +488,8 @@ func NotificationConfigPolyglotUpdateHandler(dto *NotificationConfigEntity, quer
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func NotificationConfigValidator(dto *NotificationConfigEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func NotificationConfigValidator(dto *NotificationConfigEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	return err
 }
 
@@ -558,29 +559,31 @@ And here is the actual object signature:
 	},
 }
 
-func NotificationConfigEntityPreSanitize(dto *NotificationConfigEntity, query workspaces.QueryDSL) {
+func NotificationConfigEntityPreSanitize(dto *NotificationConfigEntity, query fireback.QueryDSL) {
 }
-func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query workspaces.QueryDSL) {
+func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	NotificationConfigRecursiveAddUniqueId(dto, query)
 }
-func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query workspaces.QueryDSL) {
+func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query fireback.QueryDSL) {
 }
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func NotificationConfigMultiInsertFn(dtos []*NotificationConfigEntity, query workspaces.QueryDSL) ([]*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigMultiInsertFn(dtos []*NotificationConfigEntity, query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			NotificationConfigEntityPreSanitize(dtos[index], query)
@@ -588,19 +591,19 @@ func NotificationConfigMultiInsertFn(dtos []*NotificationConfigEntity, query wor
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, query workspaces.QueryDSL) ([]*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*NotificationConfigEntity{}
 		for _, item := range dtos {
@@ -614,12 +617,12 @@ func NotificationConfigActionBatchCreateFn(dtos []*NotificationConfigEntity, que
 	}
 	return dtos, nil
 }
-func NotificationConfigDeleteEntireChildren(query workspaces.QueryDSL, dto *NotificationConfigEntity) *workspaces.IError {
+func NotificationConfigDeleteEntireChildren(query fireback.QueryDSL, dto *NotificationConfigEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := NotificationConfigValidator(dto, false); iError != nil {
 		return nil, iError
@@ -633,14 +636,14 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query works
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -648,35 +651,35 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query works
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewNotificationConfigCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(NOTIFICATION_CONFIG_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&NotificationConfigEntity{}),
+			"entityKey": fireback.GetTypeString(&NotificationConfigEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func NotificationConfigActionGetOneFn(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigActionGetOneFn(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	item, err := workspaces.GetOneEntity[NotificationConfigEntity](query, refl)
+	item, err := fireback.GetOneEntity[NotificationConfigEntity](query, refl)
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
-func NotificationConfigActionGetByWorkspaceFn(query workspaces.QueryDSL) (*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigActionGetByWorkspaceFn(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[NotificationConfigEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[NotificationConfigEntity](query, refl)
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
-func NotificationConfigActionQueryFn(query workspaces.QueryDSL) ([]*NotificationConfigEntity, *workspaces.QueryResultMeta, error) {
+func NotificationConfigActionQueryFn(query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[NotificationConfigEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[NotificationConfigEntity](query, refl)
 	for _, item := range items {
 		entityNotificationConfigFormatter(item, query)
 	}
@@ -686,7 +689,7 @@ func NotificationConfigActionQueryFn(query workspaces.QueryDSL) ([]*Notification
 var notificationConfigMemoryItems []*NotificationConfigEntity = []*NotificationConfigEntity{}
 
 func NotificationConfigEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -716,7 +719,7 @@ func NotificationConfigMemJoin(items []uint) []*NotificationConfigEntity {
 	}
 	return res
 }
-func NotificationConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = NOTIFICATION_CONFIG_EVENT_UPDATED
 	NotificationConfigEntityPreSanitize(fields, query)
@@ -725,13 +728,13 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fie
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &NotificationConfigEntity{WorkspaceId: workspaces.NewString(query.WorkspaceId)}
+	cond2 := &NotificationConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	NotificationConfigRelationContentUpdate(fields, query)
@@ -745,11 +748,11 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fie
 		Where(&NotificationConfigEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewNotificationConfigUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -761,9 +764,9 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fie
 	   })*/
 	return &itemRefetched, nil
 }
-func NotificationConfigActionUpdateFn(query workspaces.QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *workspaces.IError) {
+func NotificationConfigActionUpdateFn(query fireback.QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := NotificationConfigValidator(fields, true); iError != nil {
@@ -773,11 +776,11 @@ func NotificationConfigActionUpdateFn(query workspaces.QueryDSL, fields *Notific
 	// NotificationConfigRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *NotificationConfigEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = NotificationConfigUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -785,7 +788,7 @@ func NotificationConfigActionUpdateFn(query workspaces.QueryDSL, fields *Notific
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return NotificationConfigUpdateExec(dbref, query, fields)
@@ -796,8 +799,8 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire notificationconfigs ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
@@ -807,16 +810,16 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func NotificationConfigActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func NotificationConfigActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
-	return workspaces.RemoveEntity[NotificationConfigEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
+	return fireback.RemoveEntity[NotificationConfigEntity](query, refl)
 }
-func NotificationConfigActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func NotificationConfigActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[NotificationConfigEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[NotificationConfigEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'NotificationConfigEntity'", subErr)
 			return count, subErr
@@ -827,11 +830,11 @@ func NotificationConfigActionWipeClean(query workspaces.QueryDSL) (int64, error)
 	return count, err
 }
 func NotificationConfigActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[NotificationConfigEntity]) (
-	*workspaces.BulkRecordRequest[NotificationConfigEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[NotificationConfigEntity]) (
+	*fireback.BulkRecordRequest[NotificationConfigEntity], *fireback.IError,
 ) {
 	result := []*NotificationConfigEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := NotificationConfigActions.Update(query, record)
@@ -846,7 +849,7 @@ func NotificationConfigActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *NotificationConfigEntity) Json() string {
 	if x != nil {
@@ -856,7 +859,7 @@ func (x *NotificationConfigEntity) Json() string {
 	return ""
 }
 
-var NotificationConfigEntityMeta = workspaces.TableMetaData{
+var NotificationConfigEntityMeta = fireback.TableMetaData{
 	EntityName:    "NotificationConfig",
 	ExportKey:     "notification-configs",
 	TableNameInDb: "notification-config_entities",
@@ -866,23 +869,23 @@ var NotificationConfigEntityMeta = workspaces.TableMetaData{
 }
 
 func NotificationConfigActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[NotificationConfigEntity](query, NotificationConfigActions.Query, NotificationConfigPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[NotificationConfigEntity](query, NotificationConfigActions.Query, NotificationConfigPreloadRelations)
 }
 func NotificationConfigActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[NotificationConfigEntity](query, NotificationConfigActions.Query, NotificationConfigPreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[NotificationConfigEntity](query, NotificationConfigActions.Query, NotificationConfigPreloadRelations)
 }
 func NotificationConfigActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content NotificationConfigEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := NotificationConfigActions.Create(&content, query)
@@ -1041,7 +1044,7 @@ var NotificationConfigCommonCliFlags = []cli.Flag{
 		Usage:    `confirmEmailTitleDefault (string)`,
 	},
 }
-var NotificationConfigCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var NotificationConfigCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "cascadeToSubWorkspaces",
 		StructField: "CascadeToSubWorkspaces",
@@ -1366,18 +1369,18 @@ var NotificationConfigCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
 		entity := &NotificationConfigEntity{}
-		workspaces.PopulateInteractively(entity, c, NotificationConfigCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, NotificationConfigCommonInteractiveCliFlags)
 		if entity, err := NotificationConfigActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -1387,8 +1390,8 @@ var NotificationConfigUpdateCmd cli.Command = cli.Command{
 	Flags:   NotificationConfigCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
 			ResolveStrategy: "workspace",
 			AllowOnRoot:     true,
 		})
@@ -1412,7 +1415,7 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("cascade-to-sub-workspaces") {
 		value := c.Bool("cascade-to-sub-workspaces")
@@ -1423,10 +1426,10 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 		template.ForcedCascadeEmailProvider = value
 	}
 	if c.IsSet("general-email-provider-id") {
-		template.GeneralEmailProviderId = workspaces.NewStringAutoNull(c.String("general-email-provider-id"))
+		template.GeneralEmailProviderId = fireback.NewStringAutoNull(c.String("general-email-provider-id"))
 	}
 	if c.IsSet("general-gsm-provider-id") {
-		template.GeneralGsmProviderId = workspaces.NewStringAutoNull(c.String("general-gsm-provider-id"))
+		template.GeneralGsmProviderId = fireback.NewStringAutoNull(c.String("general-gsm-provider-id"))
 	}
 	if c.IsSet("invite-to-workspace-content") {
 		template.InviteToWorkspaceContent = c.String("invite-to-workspace-content")
@@ -1447,10 +1450,10 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 		template.InviteToWorkspaceTitleDefault = c.String("invite-to-workspace-title-default")
 	}
 	if c.IsSet("invite-to-workspace-sender-id") {
-		template.InviteToWorkspaceSenderId = workspaces.NewStringAutoNull(c.String("invite-to-workspace-sender-id"))
+		template.InviteToWorkspaceSenderId = fireback.NewStringAutoNull(c.String("invite-to-workspace-sender-id"))
 	}
 	if c.IsSet("account-center-email-sender-id") {
-		template.AccountCenterEmailSenderId = workspaces.NewStringAutoNull(c.String("account-center-email-sender-id"))
+		template.AccountCenterEmailSenderId = fireback.NewStringAutoNull(c.String("account-center-email-sender-id"))
 	}
 	if c.IsSet("forget-password-content") {
 		template.ForgetPasswordContent = c.String("forget-password-content")
@@ -1471,13 +1474,13 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 		template.ForgetPasswordTitleDefault = c.String("forget-password-title-default")
 	}
 	if c.IsSet("forget-password-sender-id") {
-		template.ForgetPasswordSenderId = workspaces.NewStringAutoNull(c.String("forget-password-sender-id"))
+		template.ForgetPasswordSenderId = fireback.NewStringAutoNull(c.String("forget-password-sender-id"))
 	}
 	if c.IsSet("accept-language") {
 		template.AcceptLanguage = c.String("accept-language")
 	}
 	if c.IsSet("confirm-email-sender-id") {
-		template.ConfirmEmailSenderId = workspaces.NewStringAutoNull(c.String("confirm-email-sender-id"))
+		template.ConfirmEmailSenderId = fireback.NewStringAutoNull(c.String("confirm-email-sender-id"))
 	}
 	if c.IsSet("confirm-email-content") {
 		template.ConfirmEmailContent = c.String("confirm-email-content")
@@ -1499,8 +1502,8 @@ func CastNotificationConfigFromCli(c *cli.Context) *NotificationConfigEntity {
 	}
 	return template
 }
-func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
@@ -1510,8 +1513,8 @@ func NotificationConfigSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q w
 	)
 }
 func NotificationConfigSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		notificationConfigSeedersFs,
@@ -1520,8 +1523,8 @@ func NotificationConfigSyncSeeders() {
 	)
 }
 func NotificationConfigImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		NotificationConfigActions.Create,
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1529,19 +1532,19 @@ func NotificationConfigImportMocks() {
 		false,
 	)
 }
-func NotificationConfigWriteQueryMock(ctx workspaces.MockQueryContext) {
+func NotificationConfigWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := NotificationConfigActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "NotificationConfig", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "NotificationConfig", result)
 	}
 }
-func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1553,7 +1556,7 @@ func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := NotificationConfigActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1580,8 +1583,8 @@ var NotificationConfigDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 				ResolveStrategy: "workspace",
 				AllowOnRoot:     true,
 			})
@@ -1606,7 +1609,7 @@ var NotificationConfigDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := NotificationConfigActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1614,7 +1617,7 @@ var NotificationConfigDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1627,7 +1630,7 @@ var NotificationConfigDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1657,7 +1660,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of notification-configs, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]NotificationConfigEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1666,7 +1669,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(notificationConfigSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(notificationConfigSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1679,7 +1682,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				notificationConfigSeedersFs,
@@ -1690,7 +1693,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1698,7 +1701,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				NotificationConfigEntityStream,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				c.String("file"),
@@ -1712,7 +1715,7 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1722,12 +1725,12 @@ var NotificationConfigImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				NotificationConfigActions.Create,
 				reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 					ResolveStrategy: "workspace",
 					AllowOnRoot:     true,
 				},
@@ -1747,7 +1750,7 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 	NotificationConfigUpdateCmd,
 	NotificationConfigAskCmd,
 	NotificationConfigCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
 		NotificationConfigActions.Remove,
 	),
@@ -1755,7 +1758,7 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 
 func NotificationConfigCliFn() cli.Command {
 	commands := append(NotificationConfigImportExportCommands, NotificationConfigCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, NotificationConfigDevCommands...)
 	}
 	return cli.Command{
@@ -1773,14 +1776,14 @@ func NotificationConfigCliFn() cli.Command {
 	}
 }
 
-var NOTIFICATION_CONFIG_ACTION_TABLE = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        NotificationConfigActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			NotificationConfigActions.Query,
 			security,
 			reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
@@ -1788,28 +1791,28 @@ var NOTIFICATION_CONFIG_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_QUERY = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/notification-configs",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &NotificationConfigEntityQs{}
-			workspaces.HttpQueryEntity(c, NotificationConfigActions.Query, qs)
+			fireback.HttpQueryEntity(c, NotificationConfigActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         NotificationConfigActions.Query,
 	ResponseEntity: &[]NotificationConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &NotificationConfigEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			NotificationConfigActions.Query,
 			security,
@@ -1820,190 +1823,190 @@ var NOTIFICATION_CONFIG_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, NotificationConfigQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, NotificationConfigQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var NOTIFICATION_CONFIG_ACTION_EXPORT = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/notification-configs/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, NotificationConfigActionExport)
+			fireback.HttpStreamFileChannel(c, NotificationConfigActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         NotificationConfigActionExport,
 	ResponseEntity: &[]NotificationConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_GET_ONE = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/notification-config/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, NotificationConfigActions.GetOne)
+			fireback.HttpGetEntity(c, NotificationConfigActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         NotificationConfigActions.GetOne,
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_POST_ONE = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new notificationConfig",
 	Flags:         NotificationConfigCommonCliFlags,
 	Method:        "POST",
 	Url:           "/notification-config",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_CREATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, NotificationConfigActions.Create)
+			fireback.HttpPostEntity(c, NotificationConfigActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, NotificationConfigActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, NotificationConfigActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         NotificationConfigActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_PATCH = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         NotificationConfigCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/notification-config",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, NotificationConfigActions.Update)
+			fireback.HttpUpdateEntity(c, NotificationConfigActions.Update)
 		},
 	},
 	Action:         NotificationConfigActions.Update,
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/notification-configs",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, NotificationConfigActionBulkUpdate)
 		},
 	},
 	Action:         NotificationConfigActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[NotificationConfigEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[NotificationConfigEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[NotificationConfigEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[NotificationConfigEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_DELETE = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/notification-config",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, NotificationConfigActions.Remove)
+			fireback.HttpRemoveEntity(c, NotificationConfigActions.Remove)
 		},
 	},
 	Action:         NotificationConfigActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &NotificationConfigEntity{},
 }
-var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/notification-config/distinct",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
+			fireback.HttpUpdateEntity(c, NotificationConfigDistinctActionUpdate)
 		},
 	},
 	Action:         NotificationConfigDistinctActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &NotificationConfigEntity{},
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
+var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/notification-config/distinct",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires:  []workspaces.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE},
 		ResolveStrategy: "workspace",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, NotificationConfigDistinctActionGetOne)
+			fireback.HttpGetEntity(c, NotificationConfigDistinctActionGetOne)
 		},
 	},
 	Action:         NotificationConfigDistinctActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &NotificationConfigEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
 }
@@ -2012,10 +2015,10 @@ var NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE = workspaces.Module3Action{
  *	Override this function on NotificationConfigEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendNotificationConfigRouter = func(r *[]workspaces.Module3Action) {}
+var AppendNotificationConfigRouter = func(r *[]fireback.Module3Action) {}
 
-func GetNotificationConfigModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetNotificationConfigModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		NOTIFICATION_CONFIG_ACTION_QUERY,
 		NOTIFICATION_CONFIG_ACTION_EXPORT,
 		NOTIFICATION_CONFIG_ACTION_GET_ONE,
@@ -2031,42 +2034,42 @@ func GetNotificationConfigModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_NOTIFICATION_CONFIG = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.*",
 	Name:        "Entire notification config actions (*)",
 	Description: "",
 }
-var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.delete",
 	Name:        "Delete notification config",
 	Description: "",
 }
-var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.create",
 	Name:        "Create notification config",
 	Description: "",
 }
-var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.update",
 	Name:        "Update notification config",
 	Description: "",
 }
-var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.query",
 	Name:        "Query notification config",
 	Description: "",
 }
-var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG_GET_DISTINCT_WORKSPACE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.get-distinct-workspace",
 	Name:        "Get notification config Distinct",
 	Description: "",
 }
-var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = workspaces.PermissionInfo{
+var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE_DISTINCT_WORKSPACE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.notification-config.update-distinct-workspace",
 	Name:        "Update notification config Distinct",
 	Description: "",
 }
-var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_NOTIFICATION_CONFIG_DELETE,
 	PERM_ROOT_NOTIFICATION_CONFIG_CREATE,
 	PERM_ROOT_NOTIFICATION_CONFIG_UPDATE,
@@ -2077,15 +2080,15 @@ var ALL_NOTIFICATION_CONFIG_PERMISSIONS = []workspaces.PermissionInfo{
 }
 
 func NotificationConfigDistinctActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *NotificationConfigEntity,
-) (*NotificationConfigEntity, *workspaces.IError) {
+) (*NotificationConfigEntity, *fireback.IError) {
 	query.UniqueId = query.UserId
 	entity, err := NotificationConfigActions.GetByWorkspace(query)
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = workspaces.NewString(query.WorkspaceId)
+	fields.WorkspaceId = fireback.NewString(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return NotificationConfigActions.Create(fields, query)
 	} else {
@@ -2093,8 +2096,8 @@ func NotificationConfigDistinctActionUpdate(
 	}
 }
 func NotificationConfigDistinctActionGetOne(
-	query workspaces.QueryDSL,
-) (*NotificationConfigEntity, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*NotificationConfigEntity, *fireback.IError) {
 	// Get's by workspace
 	entity, err := NotificationConfigActions.GetByWorkspace(query)
 	if err != nil && err.HttpCode == 404 {
@@ -2104,13 +2107,13 @@ func NotificationConfigDistinctActionGetOne(
 }
 func NewNotificationConfigCreatedEvent(
 	payload *NotificationConfigEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "NotificationConfigCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_NOTIFICATION_CONFIG_QUERY,
 			},
 			ResolveStrategy: "workspace",
@@ -2118,18 +2121,18 @@ func NewNotificationConfigCreatedEvent(
 		CacheKey: "*abac.NotificationConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewNotificationConfigUpdatedEvent(
 	payload *NotificationConfigEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "NotificationConfigUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_NOTIFICATION_CONFIG_QUERY,
 			},
 			ResolveStrategy: "workspace",
@@ -2137,11 +2140,11 @@ func NewNotificationConfigUpdatedEvent(
 		CacheKey: "*abac.NotificationConfigEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var NotificationConfigEntityBundle = workspaces.EntityBundle{
+var NotificationConfigEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

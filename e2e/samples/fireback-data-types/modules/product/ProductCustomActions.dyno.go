@@ -7,12 +7,12 @@ package product
  */
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
-var GetProductsCountSecurityModel *workspaces.SecurityModel = nil
+var GetProductsCountSecurityModel *fireback.SecurityModel = nil
 
 type GetProductsCountActionResDto struct {
 	TotalProduct int `json:"totalProduct" xml:"totalProduct" yaml:"totalProduct"        `
@@ -23,17 +23,17 @@ func (x *GetProductsCountActionResDto) RootObjectName() string {
 }
 
 type getProductsCountActionImpSig func(
-	q workspaces.QueryDSL) (*GetProductsCountActionResDto,
-	*workspaces.IError,
+	q fireback.QueryDSL) (*GetProductsCountActionResDto,
+	*fireback.IError,
 )
 
 var GetProductsCountActionImp getProductsCountActionImpSig
 
 func GetProductsCountActionFn(
-	q workspaces.QueryDSL,
+	q fireback.QueryDSL,
 ) (
 	*GetProductsCountActionResDto,
-	*workspaces.IError,
+	*fireback.IError,
 ) {
 	if GetProductsCountActionImp == nil {
 		return nil, nil
@@ -45,14 +45,14 @@ var GetProductsCountActionCmd cli.Command = cli.Command{
 	Name:  "get-products-count",
 	Usage: ``,
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, GetProductsCountSecurityModel)
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GetProductsCountSecurityModel)
 		result, err := GetProductsCountActionFn(query)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
-func ProductCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func ProductCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		{
 			Method:        "GET",
 			Url:           "/products/count",
@@ -62,13 +62,13 @@ func ProductCustomActions() []workspaces.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// GET_ONE - get
-					workspaces.HttpGetEntity(c, GetProductsCountActionFn)
+					fireback.HttpGetEntity(c, GetProductsCountActionFn)
 				},
 			},
 			Format:         "GET_ONE",
 			Action:         GetProductsCountActionFn,
 			ResponseEntity: &GetProductsCountActionResDto{},
-			Out: &workspaces.Module3ActionBody{
+			Out: &fireback.Module3ActionBody{
 				Entity: "GetProductsCountActionResDto",
 			},
 		},
@@ -82,7 +82,7 @@ var ProductCustomActionsCli = []cli.Command{
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var ProductCliActionsBundle = &workspaces.CliActionsBundle{
+var ProductCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "product",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
@@ -92,8 +92,8 @@ var ProductCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetProductActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetProductActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   ProductCustomActions(),
 		CliAction: ProductCliActionsBundle,
 	}

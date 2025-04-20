@@ -1,7 +1,7 @@
 package licenses
 
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
@@ -37,7 +37,7 @@ var CreateBulkActivationKeyCmd cli.Command = cli.Command{
 	},
 	Usage: "Generate a list of new activation codes, to be distributed, or printed on paper",
 	Action: func(c *cli.Context) error {
-		f := workspaces.QueryDSL{}
+		f := fireback.QueryDSL{}
 
 		LicenseActionSeederActivationKey(f, c.String("series"), c.Int("count"), c.Int("length"), c.String("plan-id"))
 

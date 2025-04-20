@@ -1,16 +1,16 @@
 package widget
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func WidgetAreaActionCreate(
-	dto *WidgetAreaEntity, query workspaces.QueryDSL,
-) (*WidgetAreaEntity, *workspaces.IError) {
+	dto *WidgetAreaEntity, query fireback.QueryDSL,
+) (*WidgetAreaEntity, *fireback.IError) {
 	return WidgetAreaActionCreateFn(dto, query)
 }
 
 func WidgetAreaActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *WidgetAreaEntity,
-) (*WidgetAreaEntity, *workspaces.IError) {
+) (*WidgetAreaEntity, *fireback.IError) {
 	return WidgetAreaActionUpdateFn(query, fields)
 }

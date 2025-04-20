@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 /**
@@ -12,7 +12,7 @@ import (
 *	Usually, this makes sense for desktop/mobile apps which are having a light or complete
 *	Version of the backend installed on them. Make sure this is not accessbile on the web version or cloud version.
 **/
-func PassportActionAuthorizeOs2(dto *workspaces.EmptyRequest, query workspaces.QueryDSL) (*UserSessionDto, *workspaces.IError) {
+func PassportActionAuthorizeOs2(dto *fireback.EmptyRequest, query fireback.QueryDSL) (*UserSessionDto, *fireback.IError) {
 	return SigninWithOsUser2(query)
 }
 
@@ -22,10 +22,10 @@ func PassportActionAuthorizeOs2(dto *workspaces.EmptyRequest, query workspaces.Q
 // Before creating each token, we are looking for existing token in the database
 // and if it exists and is still valid for that specific user,
 // we skip generating new one.
-func (x *UserEntity) AuthorizeWithToken(q workspaces.QueryDSL) (string, error) {
-	appConfig := workspaces.GetConfig()
+func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
+	appConfig := fireback.GetConfig()
 
-	ref := workspaces.GetRef(q)
+	ref := fireback.GetRef(q)
 
 	// generating token based on random hash, or jwt here can be decided.
 	var tokenString string
@@ -37,12 +37,12 @@ func (x *UserEntity) AuthorizeWithToken(q workspaces.QueryDSL) (string, error) {
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		if jwttoken, err := token.SignedString([]byte(appConfig.JwtSecretKey)); err != nil {
-			tokenString = workspaces.GenerateSecureToken(32)
+			tokenString = fireback.GenerateSecureToken(32)
 		} else {
 			tokenString = jwttoken
 		}
 	} else {
-		tokenString = workspaces.GenerateSecureToken(32)
+		tokenString = fireback.GenerateSecureToken(32)
 
 	}
 
@@ -68,13 +68,13 @@ func (x *UserEntity) AuthorizeWithToken(q workspaces.QueryDSL) (string, error) {
 		}
 	}
 
-	until := workspaces.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
+	until := fireback.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{
-		UniqueId:    workspaces.UUID(),
-		UserId:      workspaces.NewString(x.UniqueId),
+		UniqueId:    fireback.UUID(),
+		UserId:      fireback.NewString(x.UniqueId),
 		Token:       tokenString,
 		ValidUntil:  until,
-		WorkspaceId: workspaces.NewString(ROOT_VAR),
+		WorkspaceId: fireback.NewString(ROOT_VAR),
 	}
 	if err3 := ref.Create(token).Error; err3 != nil {
 		return "", err3

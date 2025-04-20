@@ -7,7 +7,7 @@ Tasks, are an important aspect of many projects, they can be cronjobs, or trigge
 by an event. Fireback supports such features both internally and connecting with external
 services such as SQS.
 
-Fireback generates the tasks on module level, and they are registered across the `*workspaces.FirebackApp`
+Fireback generates the tasks on module level, and they are registered across the `*fireback.FirebackApp`
 and accessible through the hole app. The reason is, the task server is single per app, 
 and it won't be started by each module independently.
 
@@ -44,19 +44,19 @@ This will generated set of codes in `MediaModule.dyno.go`:
 
 ```go
 type LicensesTasksContext struct {
-	PostProcessVideo func(body *PostProcessVideoTaskParams, tx *workspaces.TaskCtx) error
+	PostProcessVideo func(body *PostProcessVideoTaskParams, tx *fireback.TaskCtx) error
 }
 
-func (x *LicensesTasksContext) GetTasks() []*workspaces.TaskAction {
-	return []*workspaces.TaskAction{
+func (x *LicensesTasksContext) GetTasks() []*fireback.TaskAction {
+	return []*fireback.TaskAction{
 		{
 			Name: "PostProcessVideo",
-			HandlerFunc: func(ctx *workspaces.TaskCtx, content []byte) error {
+			HandlerFunc: func(ctx *fireback.TaskCtx, content []byte) error {
 				var body *PostProcessVideoTaskParams
 				if err := json.Unmarshal(content, &body); err != nil {
 					return err
 				}
-				return x.PostProcessVideo(body, &workspaces.TaskCtx{})
+				return x.PostProcessVideo(body, &fireback.TaskCtx{})
 			},
             ....
 ```
@@ -69,10 +69,10 @@ Tasks are **not** being automatically included via modules. You need to go to yo
 a context, and pass them to the Module:
 
 ```go
-func MediaModuleSetup(cfg *MediaModuleConfig) *workspaces.ModuleProvider {
+func MediaModuleSetup(cfg *MediaModuleConfig) *fireback.ModuleProvider {
 	// Create the context
 	ctx := MediaTasksContext{}
-	module := &workspaces.ModuleProvider{
+	module := &fireback.ModuleProvider{
 		Name: "media",
         Definitions: &Module3Definitions,
 
@@ -142,7 +142,7 @@ if err != nil {
     fmt.Println("Error on enqueue task PostProcessVideo: %w", err)
     return err
 }
-result, err2 := workspaces.EnqueueTask(task)
+result, err2 := fireback.EnqueueTask(task)
 if err2 == nil {
     fmt.Println("task is in queue, id: %s", result.ID)
     return nil
@@ -169,7 +169,7 @@ This would add the cron to generated code:
 ```go
 ...
     Flags: PostProcessVideo2CommonCliFlagsOptional,
-    Triggers: []*workspaces.Module3Trigger{
+    Triggers: []*fireback.Module3Trigger{
         {
             Cron: "* * * * *",
         },

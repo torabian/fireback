@@ -70,7 +70,7 @@ export function usePostBackupTableMeta(props?: UseRemoteQuery) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<BackupTableMetaEntity>) {
           queryClient?.setQueryData<IResponseList<BackupTableMetaEntity>>(
-            "*workspaces.BackupTableMetaEntity",
+            "*fireback.BackupTableMetaEntity",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

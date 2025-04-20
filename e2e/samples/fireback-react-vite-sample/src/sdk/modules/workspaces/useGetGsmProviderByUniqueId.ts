@@ -71,16 +71,12 @@ export function useGetGsmProviderByUniqueId({
   } else if (!hasKey && !unauthorized) {
     enabled = false;
   }
-  const query$ = useQuery(
-    [options, query, "*workspaces.GsmProviderEntity"],
-    fn,
-    {
-      cacheTime: 1001,
-      retry: false,
-      keepPreviousData: true,
-      enabled,
-      ...((queryOptions as any) || {}),
-    }
-  );
+  const query$ = useQuery([options, query, "*fireback.GsmProviderEntity"], fn, {
+    cacheTime: 1001,
+    retry: false,
+    keepPreviousData: true,
+    enabled,
+    ...((queryOptions as any) || {}),
+  });
   return { query: query$ };
 }

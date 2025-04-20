@@ -70,7 +70,7 @@ export function usePatchTableViewSizing(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<TableViewSizingEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.TableViewSizingEntity",
+            "*fireback.TableViewSizingEntity",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
@@ -53,7 +53,7 @@ var GenerateLicenseCmd cli.Command = cli.Command{
 			MachineId: &MachineId,
 		}
 
-		query := workspaces.CommonCliQueryDSLBuilder(c)
+		query := fireback.CommonCliQueryDSLBuilder(c)
 		query.UniqueId = c.String("planId")
 		query.WorkspaceId = c.String("workspace-id")
 		query.UserId = c.String("user-id")
@@ -86,7 +86,7 @@ var LicenseFromActivationKeyCmd cli.Command = cli.Command{
 	},
 	Usage: "Creates a new license, by getting information from activation key, and mark that key as used",
 	Action: func(c *cli.Context) {
-		// f := workspaces.CommonCliQueryDSLBuilder(c)
+		// f := fireback.CommonCliQueryDSLBuilder(c)
 
 		// license := LicenseFromActivationKeyDto{}
 

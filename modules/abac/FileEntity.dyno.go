@@ -9,20 +9,21 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/File"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/File"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
 )
 
 var fileSeedersFs = &seeders.ViewsFs
@@ -36,20 +37,20 @@ type FileVariations struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -59,11 +60,11 @@ type FileVariations struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -99,16 +100,16 @@ func (x *FileVariations) RootObjectName() string {
 }
 
 type FileEntityQs struct {
-	Name        workspaces.QueriableField `cli:"name" table:"file" column:"name" qs:"name"`
-	DiskPath    workspaces.QueriableField `cli:"disk-path" table:"file" column:"disk_path" qs:"diskPath"`
-	Size        workspaces.QueriableField `cli:"size" table:"file" column:"size" qs:"size"`
-	VirtualPath workspaces.QueriableField `cli:"virtual-path" table:"file" column:"virtual_path" qs:"virtualPath"`
-	Type        workspaces.QueriableField `cli:"type" table:"file" column:"type" qs:"type"`
-	Variations  workspaces.QueriableField `cli:"variations" table:"file" column:"variations" qs:"variations"`
+	Name        fireback.QueriableField `cli:"name" table:"file" column:"name" qs:"name"`
+	DiskPath    fireback.QueriableField `cli:"disk-path" table:"file" column:"disk_path" qs:"diskPath"`
+	Size        fireback.QueriableField `cli:"size" table:"file" column:"size" qs:"size"`
+	VirtualPath fireback.QueriableField `cli:"virtual-path" table:"file" column:"virtual_path" qs:"virtualPath"`
+	Type        fireback.QueriableField `cli:"type" table:"file" column:"type" qs:"type"`
+	Variations  fireback.QueriableField `cli:"variations" table:"file" column:"variations" qs:"variations"`
 }
 
 func (x *FileEntityQs) GetQuery() string {
-	return workspaces.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
 var FileQsFlags = []cli.Flag{
@@ -143,20 +144,20 @@ type FileEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in workspaces/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility workspaces.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId workspaces.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId workspaces.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId workspaces.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -166,11 +167,11 @@ type FileEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId workspaces.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank workspaces.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -207,7 +208,7 @@ type FileEntity struct {
 	LinkedTo         *FileEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func FileEntityStream(q workspaces.QueryDSL) (chan []*FileEntity, *workspaces.QueryResultMeta, error) {
+func FileEntityStream(q fireback.QueryDSL) (chan []*FileEntity, *fireback.QueryResultMeta, error) {
 	cn := make(chan []*FileEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -243,8 +244,8 @@ func (x *FileEntityList) Json() string {
 	}
 	return ""
 }
-func (x *FileEntityList) ToTree() *workspaces.TreeOperation[FileEntity] {
-	return workspaces.NewTreeOperation(
+func (x *FileEntityList) ToTree() *fireback.TreeOperation[FileEntity] {
+	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *FileEntity) string {
 			if !t.ParentId.Valid {
@@ -261,15 +262,15 @@ func (x *FileEntityList) ToTree() *workspaces.TreeOperation[FileEntity] {
 var FilePreloadRelations []string = []string{}
 
 type fileActionsSig struct {
-	Update         func(query workspaces.QueryDSL, dto *FileEntity) (*FileEntity, *workspaces.IError)
-	Create         func(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity, *workspaces.IError)
-	Upsert         func(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity, *workspaces.IError)
+	Update         func(query fireback.QueryDSL, dto *FileEntity) (*FileEntity, *fireback.IError)
+	Create         func(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, *fireback.IError)
+	Upsert         func(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, *fireback.IError)
 	SeederInit     func() *FileEntity
-	Remove         func(query workspaces.QueryDSL) (int64, *workspaces.IError)
-	MultiInsert    func(dtos []*FileEntity, query workspaces.QueryDSL) ([]*FileEntity, *workspaces.IError)
-	GetOne         func(query workspaces.QueryDSL) (*FileEntity, *workspaces.IError)
-	GetByWorkspace func(query workspaces.QueryDSL) (*FileEntity, *workspaces.IError)
-	Query          func(query workspaces.QueryDSL) ([]*FileEntity, *workspaces.QueryResultMeta, error)
+	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	MultiInsert    func(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError)
+	GetOne         func(query fireback.QueryDSL) (*FileEntity, *fireback.IError)
+	GetByWorkspace func(query fireback.QueryDSL) (*FileEntity, *fireback.IError)
+	Query          func(query fireback.QueryDSL) ([]*FileEntity, *fireback.QueryResultMeta, error)
 }
 
 var FileActions fileActionsSig = fileActionsSig{
@@ -284,7 +285,7 @@ var FileActions fileActionsSig = fileActionsSig{
 	Query:          FileActionQueryFn,
 }
 
-func FileActionUpsertFn(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity, *workspaces.IError) {
+func FileActionUpsertFn(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, *fireback.IError) {
 	return nil, nil
 }
 
@@ -298,77 +299,77 @@ var FILE_EVENTS = []string{
 }
 
 type FileFieldMap struct {
-	Name        workspaces.TranslatedString `yaml:"name"`
-	DiskPath    workspaces.TranslatedString `yaml:"diskPath"`
-	Size        workspaces.TranslatedString `yaml:"size"`
-	VirtualPath workspaces.TranslatedString `yaml:"virtualPath"`
-	Type        workspaces.TranslatedString `yaml:"type"`
-	Variations  workspaces.TranslatedString `yaml:"variations"`
+	Name        fireback.TranslatedString `yaml:"name"`
+	DiskPath    fireback.TranslatedString `yaml:"diskPath"`
+	Size        fireback.TranslatedString `yaml:"size"`
+	VirtualPath fireback.TranslatedString `yaml:"virtualPath"`
+	Type        fireback.TranslatedString `yaml:"type"`
+	Variations  fireback.TranslatedString `yaml:"variations"`
 }
 
 var FileEntityMetaConfig map[string]int64 = map[string]int64{}
-var FileEntityJsonSchema = workspaces.ExtractEntityFields(reflect.ValueOf(&FileEntity{}))
+var FileEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&FileEntity{}))
 
 func FileVariationsActionCreate(
 	dto *FileVariations,
-	query workspaces.QueryDSL,
-) (*FileVariations, *workspaces.IError) {
-	dto.LinkerId = workspaces.NewString(query.LinkerId)
+	query fireback.QueryDSL,
+) (*FileVariations, *fireback.IError) {
+	dto.LinkerId = fireback.NewString(query.LinkerId)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	return dto, nil
 }
 func FileVariationsActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	dto *FileVariations,
-) (*FileVariations, *workspaces.IError) {
-	dto.LinkerId = workspaces.NewString(query.LinkerId)
+) (*FileVariations, *fireback.IError) {
+	dto.LinkerId = fireback.NewString(query.LinkerId)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.UpdateColumns(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	return dto, nil
 }
 func FileVariationsActionGetOne(
-	query workspaces.QueryDSL,
-) (*FileVariations, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*FileVariations, *fireback.IError) {
 	refl := reflect.ValueOf(&FileVariations{})
-	item, err := workspaces.GetOneEntity[FileVariations](query, refl)
+	item, err := fireback.GetOneEntity[FileVariations](query, refl)
 	return item, err
 }
-func entityFileFormatter(dto *FileEntity, query workspaces.QueryDSL) {
+func entityFileFormatter(dto *FileEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
 	if dto.Created > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Created, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
 	}
 	if dto.Updated > 0 {
-		dto.CreatedFormatted = workspaces.FormatDateBasedOnQuery(dto.Updated, query)
+		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
-func FileActionSeederMultiple(query workspaces.QueryDSL, count int) {
+func FileActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	batchSize := 100
@@ -395,7 +396,7 @@ func FileActionSeederMultiple(query workspaces.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func FileActionSeeder(query workspaces.QueryDSL, count int) {
+func FileActionSeeder(query fireback.QueryDSL, count int) {
 	successInsert := 0
 	failureInsert := 0
 	bar := progressbar.Default(int64(count))
@@ -423,7 +424,7 @@ func FileActionSeederInitFn() *FileEntity {
 	}
 	return entity
 }
-func FileAssociationCreate(dto *FileEntity, query workspaces.QueryDSL) error {
+func FileAssociationCreate(dto *FileEntity, query fireback.QueryDSL) error {
 	return nil
 }
 
@@ -431,13 +432,13 @@ func FileAssociationCreate(dto *FileEntity, query workspaces.QueryDSL) error {
 * These kind of content are coming from another entity, which is indepndent module
 * If we want to create them, we need to do it before. This is not association.
 **/
-func FileRelationContentCreate(dto *FileEntity, query workspaces.QueryDSL) error {
+func FileRelationContentCreate(dto *FileEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func FileRelationContentUpdate(dto *FileEntity, query workspaces.QueryDSL) error {
+func FileRelationContentUpdate(dto *FileEntity, query fireback.QueryDSL) error {
 	return nil
 }
-func FilePolyglotUpdateHandler(dto *FileEntity, query workspaces.QueryDSL) {
+func FilePolyglotUpdateHandler(dto *FileEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
@@ -448,10 +449,10 @@ func FilePolyglotUpdateHandler(dto *FileEntity, query workspaces.QueryDSL) {
  * in your entity, it will automatically work here. For slices inside entity, make sure you add
  * extra line of AppendSliceErrors, otherwise they won't be detected
  */
-func FileValidator(dto *FileEntity, isPatch bool) *workspaces.IError {
-	err := workspaces.CommonStructValidatorPointer(dto, isPatch)
+func FileValidator(dto *FileEntity, isPatch bool) *fireback.IError {
+	err := fireback.CommonStructValidatorPointer(dto, isPatch)
 	if dto != nil && dto.Variations != nil {
-		workspaces.AppendSliceErrors(dto.Variations, isPatch, "variations", err)
+		fireback.AppendSliceErrors(dto.Variations, isPatch, "variations", err)
 	}
 	return err
 }
@@ -501,21 +502,21 @@ And here is the actual object signature:
 	},
 }
 
-func FileEntityPreSanitize(dto *FileEntity, query workspaces.QueryDSL) {
+func FileEntityPreSanitize(dto *FileEntity, query fireback.QueryDSL) {
 }
-func FileEntityBeforeCreateAppend(dto *FileEntity, query workspaces.QueryDSL) {
+func FileEntityBeforeCreateAppend(dto *FileEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
-		dto.UniqueId = workspaces.UUID()
+		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = workspaces.NewString(query.WorkspaceId)
-	dto.UserId = workspaces.NewString(query.UserId)
+	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	dto.UserId = fireback.NewString(query.UserId)
 	FileRecursiveAddUniqueId(dto, query)
 }
-func FileRecursiveAddUniqueId(dto *FileEntity, query workspaces.QueryDSL) {
+func FileRecursiveAddUniqueId(dto *FileEntity, query fireback.QueryDSL) {
 	if dto.Variations != nil && len(dto.Variations) > 0 {
 		for index0 := range dto.Variations {
 			if dto.Variations[index0].UniqueId == "" {
-				dto.Variations[index0].UniqueId = workspaces.UUID()
+				dto.Variations[index0].UniqueId = fireback.UUID()
 			}
 		}
 	}
@@ -523,14 +524,16 @@ func FileRecursiveAddUniqueId(dto *FileEntity, query workspaces.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
-func FileMultiInsertFn(dtos []*FileEntity, query workspaces.QueryDSL) ([]*FileEntity, *workspaces.IError) {
+func FileMultiInsertFn(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
 			FileEntityPreSanitize(dtos[index], query)
@@ -538,19 +541,19 @@ func FileMultiInsertFn(dtos []*FileEntity, query workspaces.QueryDSL) ([]*FileEn
 		}
 		var dbref *gorm.DB = nil
 		if query.Tx == nil {
-			dbref = workspaces.GetDbRef()
+			dbref = fireback.GetDbRef()
 		} else {
 			dbref = query.Tx
 		}
 		query.Tx = dbref
 		err := dbref.Create(&dtos).Error
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 	}
 	return dtos, nil
 }
-func FileActionBatchCreateFn(dtos []*FileEntity, query workspaces.QueryDSL) ([]*FileEntity, *workspaces.IError) {
+func FileActionBatchCreateFn(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError) {
 	if dtos != nil && len(dtos) > 0 {
 		items := []*FileEntity{}
 		for _, item := range dtos {
@@ -564,12 +567,12 @@ func FileActionBatchCreateFn(dtos []*FileEntity, query workspaces.QueryDSL) ([]*
 	}
 	return dtos, nil
 }
-func FileDeleteEntireChildren(query workspaces.QueryDSL, dto *FileEntity) *workspaces.IError {
+func FileDeleteEntireChildren(query fireback.QueryDSL, dto *FileEntity) *fireback.IError {
 	// intentionally removed this. It's hard to implement it, and probably wrong without
 	// proper on delete cascade
 	return nil
 }
-func FileActionCreateFn(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity, *workspaces.IError) {
+func FileActionCreateFn(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, *fireback.IError) {
 	// 1. Validate always
 	if iError := FileValidator(dto, false); iError != nil {
 		return nil, iError
@@ -583,14 +586,14 @@ func FileActionCreateFn(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 	} else {
 		dbref = query.Tx
 	}
 	query.Tx = dbref
 	err := dbref.Create(&dto).Error
 	if err != nil {
-		err := workspaces.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
 		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
@@ -598,35 +601,35 @@ func FileActionCreateFn(dto *FileEntity, query workspaces.QueryDSL) (*FileEntity
 	// 6. Fire the event into system
 	actionEvent, eventErr := NewFileCreatedEvent(dto, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Creating event has failed for %v", dto)
 	}
 	/*
 		event.MustFire(FILE_EVENT_CREATED, event.M{
 			"entity":   dto,
-			"entityKey": workspaces.GetTypeString(&FileEntity{}),
+			"entityKey": fireback.GetTypeString(&FileEntity{}),
 			"target":   "workspace",
 			"unqiueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
 }
-func FileActionGetOneFn(query workspaces.QueryDSL) (*FileEntity, *workspaces.IError) {
+func FileActionGetOneFn(query fireback.QueryDSL) (*FileEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&FileEntity{})
-	item, err := workspaces.GetOneEntity[FileEntity](query, refl)
+	item, err := fireback.GetOneEntity[FileEntity](query, refl)
 	entityFileFormatter(item, query)
 	return item, err
 }
-func FileActionGetByWorkspaceFn(query workspaces.QueryDSL) (*FileEntity, *workspaces.IError) {
+func FileActionGetByWorkspaceFn(query fireback.QueryDSL) (*FileEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&FileEntity{})
-	item, err := workspaces.GetOneByWorkspaceEntity[FileEntity](query, refl)
+	item, err := fireback.GetOneByWorkspaceEntity[FileEntity](query, refl)
 	entityFileFormatter(item, query)
 	return item, err
 }
-func FileActionQueryFn(query workspaces.QueryDSL) ([]*FileEntity, *workspaces.QueryResultMeta, error) {
+func FileActionQueryFn(query fireback.QueryDSL) ([]*FileEntity, *fireback.QueryResultMeta, error) {
 	refl := reflect.ValueOf(&FileEntity{})
-	items, meta, err := workspaces.QueryEntitiesPointer[FileEntity](query, refl)
+	items, meta, err := fireback.QueryEntitiesPointer[FileEntity](query, refl)
 	for _, item := range items {
 		entityFileFormatter(item, query)
 	}
@@ -636,7 +639,7 @@ func FileActionQueryFn(query workspaces.QueryDSL) ([]*FileEntity, *workspaces.Qu
 var fileMemoryItems []*FileEntity = []*FileEntity{}
 
 func FileEntityIntoMemory() {
-	q := workspaces.QueryDSL{
+	q := fireback.QueryDSL{
 		ItemsPerPage: 500,
 		StartIndex:   0,
 	}
@@ -666,7 +669,7 @@ func FileMemJoin(items []uint) []*FileEntity {
 	}
 	return res
 }
-func FileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *FileEntity) (*FileEntity, *workspaces.IError) {
+func FileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *FileEntity) (*FileEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = FILE_EVENT_UPDATED
 	FileEntityPreSanitize(fields, query)
@@ -681,7 +684,7 @@ func FileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *FileEntit
 		FirstOrCreate(&item)
 	err := q.UpdateColumns(fields).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
 	FileRelationContentUpdate(fields, query)
@@ -693,11 +696,11 @@ func FileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *FileEntit
 	if fields.Variations != nil {
 		linkerId := uniqueId
 		dbref.
-			Where(&FileVariations{LinkerId: workspaces.NewString(linkerId)}).
+			Where(&FileVariations{LinkerId: fireback.NewString(linkerId)}).
 			Delete(&FileVariations{})
 		for _, newItem := range fields.Variations {
-			newItem.UniqueId = workspaces.UUID()
-			newItem.LinkerId = workspaces.NewString(linkerId)
+			newItem.UniqueId = fireback.UUID()
+			newItem.LinkerId = fireback.NewString(linkerId)
 			dbref.Create(&newItem)
 		}
 	}
@@ -706,11 +709,11 @@ func FileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *FileEntit
 		Where(&FileEntity{UniqueId: uniqueId}).
 		First(&itemRefetched).Error
 	if err != nil {
-		return nil, workspaces.GormErrorToIError(err)
+		return nil, fireback.GormErrorToIError(err)
 	}
 	actionEvent, eventErr := NewFileUpdatedEvent(fields, &query)
 	if actionEvent != nil && eventErr == nil {
-		workspaces.GetEventBusInstance().FireEvent(query, *actionEvent)
+		fireback.GetEventBusInstance().FireEvent(query, *actionEvent)
 	} else {
 		log.Default().Panicln("Updating event has failed for %v", fields)
 	}
@@ -722,9 +725,9 @@ func FileUpdateExec(dbref *gorm.DB, query workspaces.QueryDSL, fields *FileEntit
 	   })*/
 	return &itemRefetched, nil
 }
-func FileActionUpdateFn(query workspaces.QueryDSL, fields *FileEntity) (*FileEntity, *workspaces.IError) {
+func FileActionUpdateFn(query fireback.QueryDSL, fields *FileEntity) (*FileEntity, *fireback.IError) {
 	if fields == nil {
-		return nil, workspaces.Create401Error(&workspaces.WorkspacesMessages.BodyIsMissing, []string{})
+		return nil, fireback.Create401Error(&fireback.WorkspacesMessages.BodyIsMissing, []string{})
 	}
 	// 1. Validate always
 	if iError := FileValidator(fields, true); iError != nil {
@@ -734,11 +737,11 @@ func FileActionUpdateFn(query workspaces.QueryDSL, fields *FileEntity) (*FileEnt
 	// FileRecursiveAddUniqueId(fields, query)
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
-		dbref = workspaces.GetDbRef()
+		dbref = fireback.GetDbRef()
 		var item *FileEntity
 		vf := dbref.Transaction(func(tx *gorm.DB) error {
 			dbref = tx
-			var err *workspaces.IError
+			var err *fireback.IError
 			item, err = FileUpdateExec(dbref, query, fields)
 			if err == nil {
 				return nil
@@ -746,7 +749,7 @@ func FileActionUpdateFn(query workspaces.QueryDSL, fields *FileEntity) (*FileEnt
 				return err
 			}
 		})
-		return item, workspaces.CastToIError(vf)
+		return item, fireback.CastToIError(vf)
 	} else {
 		dbref = query.Tx
 		return FileUpdateExec(dbref, query, fields)
@@ -757,8 +760,8 @@ var FileWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire files ",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_DELETE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_DELETE},
 		})
 		count, _ := FileActionWipeClean(query)
 		fmt.Println("Removed", count, "of entities")
@@ -766,16 +769,16 @@ var FileWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func FileActionRemoveFn(query workspaces.QueryDSL) (int64, *workspaces.IError) {
+func FileActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
 	refl := reflect.ValueOf(&FileEntity{})
-	query.ActionRequires = []workspaces.PermissionInfo{PERM_ROOT_FILE_DELETE}
-	return workspaces.RemoveEntity[FileEntity](query, refl)
+	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_FILE_DELETE}
+	return fireback.RemoveEntity[FileEntity](query, refl)
 }
-func FileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
+func FileActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[FileVariations]()
+		subCount, subErr := fireback.WipeCleanEntity[FileVariations]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'FileVariations'", subErr)
 			return count, subErr
@@ -784,7 +787,7 @@ func FileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 		}
 	}
 	{
-		subCount, subErr := workspaces.WipeCleanEntity[FileEntity]()
+		subCount, subErr := fireback.WipeCleanEntity[FileEntity]()
 		if subErr != nil {
 			fmt.Println("Error while wiping 'FileEntity'", subErr)
 			return count, subErr
@@ -795,11 +798,11 @@ func FileActionWipeClean(query workspaces.QueryDSL) (int64, error) {
 	return count, err
 }
 func FileActionBulkUpdate(
-	query workspaces.QueryDSL, dto *workspaces.BulkRecordRequest[FileEntity]) (
-	*workspaces.BulkRecordRequest[FileEntity], *workspaces.IError,
+	query fireback.QueryDSL, dto *fireback.BulkRecordRequest[FileEntity]) (
+	*fireback.BulkRecordRequest[FileEntity], *fireback.IError,
 ) {
 	result := []*FileEntity{}
-	err := workspaces.GetDbRef().Transaction(func(tx *gorm.DB) error {
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 		query.Tx = tx
 		for _, record := range dto.Records {
 			item, err := FileActions.Update(query, record)
@@ -814,7 +817,7 @@ func FileActionBulkUpdate(
 	if err == nil {
 		return dto, nil
 	}
-	return nil, err.(*workspaces.IError)
+	return nil, err.(*fireback.IError)
 }
 func (x *FileEntity) Json() string {
 	if x != nil {
@@ -824,7 +827,7 @@ func (x *FileEntity) Json() string {
 	return ""
 }
 
-var FileEntityMeta = workspaces.TableMetaData{
+var FileEntityMeta = fireback.TableMetaData{
 	EntityName:    "File",
 	ExportKey:     "files",
 	TableNameInDb: "file_entities",
@@ -834,23 +837,23 @@ var FileEntityMeta = workspaces.TableMetaData{
 }
 
 func FileActionExport(
-	query workspaces.QueryDSL,
-) (chan []byte, *workspaces.IError) {
-	return workspaces.YamlExporterChannel[FileEntity](query, FileActions.Query, FilePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []byte, *fireback.IError) {
+	return fireback.YamlExporterChannel[FileEntity](query, FileActions.Query, FilePreloadRelations)
 }
 func FileActionExportT(
-	query workspaces.QueryDSL,
-) (chan []interface{}, *workspaces.IError) {
-	return workspaces.YamlExporterChannelT[FileEntity](query, FileActions.Query, FilePreloadRelations)
+	query fireback.QueryDSL,
+) (chan []interface{}, *fireback.IError) {
+	return fireback.YamlExporterChannelT[FileEntity](query, FileActions.Query, FilePreloadRelations)
 }
 func FileActionImport(
-	dto interface{}, query workspaces.QueryDSL,
-) *workspaces.IError {
+	dto interface{}, query fireback.QueryDSL,
+) *fireback.IError {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	var content FileEntity
 	cx, err2 := json.Marshal(dto)
 	if err2 != nil {
-		return workspaces.Create401Error(&workspaces.WorkspacesMessages.InvalidContent, []string{})
+		return fireback.Create401Error(&fireback.WorkspacesMessages.InvalidContent, []string{})
 	}
 	json.Unmarshal(cx, &content)
 	_, err := FileActions.Create(&content, query)
@@ -904,7 +907,7 @@ var FileCommonCliFlags = []cli.Flag{
 		Usage:    `variations (array)`,
 	},
 }
-var FileCommonInteractiveCliFlags = []workspaces.CliInteractiveFlag{
+var FileCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
 		Name:        "name",
 		StructField: "Name",
@@ -1004,16 +1007,16 @@ var FileCreateInteractiveCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_CREATE},
 		})
 		entity := &FileEntity{}
-		workspaces.PopulateInteractively(entity, c, FileCommonInteractiveCliFlags)
+		fireback.PopulateInteractively(entity, c, FileCommonInteractiveCliFlags)
 		if entity, err := FileActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
 			f, _ := yaml.Marshal(entity)
-			fmt.Println(workspaces.FormatYamlKeys(string(f)))
+			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
 	},
 }
@@ -1023,8 +1026,8 @@ var FileUpdateCmd cli.Command = cli.Command{
 	Flags:   FileCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
 	Action: func(c *cli.Context) error {
-		query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_UPDATE},
 		})
 		entity := CastFileFromCli(c)
 		if entity, err := FileActions.Update(query, entity); err != nil {
@@ -1046,7 +1049,7 @@ func CastFileFromCli(c *cli.Context) *FileEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = workspaces.NewStringAutoNull(c.String("pid"))
+		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("name") {
 		template.Name = c.String("name")
@@ -1066,8 +1069,8 @@ func CastFileFromCli(c *cli.Context) *FileEntity {
 	}
 	return template
 }
-func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.QueryDSL) {
-	workspaces.SeederFromFSImport(
+func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q fireback.QueryDSL) {
+	fireback.SeederFromFSImport(
 		q,
 		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
@@ -1077,8 +1080,8 @@ func FileSyncSeederFromFs(fsRef *embed.FS, fileNames []string, q workspaces.Quer
 	)
 }
 func FileSyncSeeders() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{WorkspaceId: workspaces.USER_SYSTEM},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		fileSeedersFs,
@@ -1087,8 +1090,8 @@ func FileSyncSeeders() {
 	)
 }
 func FileImportMocks() {
-	workspaces.SeederFromFSImport(
-		workspaces.QueryDSL{},
+	fireback.SeederFromFSImport(
+		fireback.QueryDSL{},
 		FileActions.Create,
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		&mocks.ViewsFs,
@@ -1096,19 +1099,19 @@ func FileImportMocks() {
 		false,
 	)
 }
-func FileWriteQueryMock(ctx workspaces.MockQueryContext) {
+func FileWriteQueryMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
 		itemsPerPage := 9999
 		if ctx.ItemsPerPage > 0 {
 			itemsPerPage = ctx.ItemsPerPage
 		}
-		f := workspaces.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
+		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
 		items, count, _ := FileActions.Query(f)
-		result := workspaces.QueryEntitySuccessResult(f, items, count)
-		workspaces.WriteMockDataToFile(lang, "", "File", result)
+		result := fireback.QueryEntitySuccessResult(f, items, count)
+		fireback.WriteMockDataToFile(lang, "", "File", result)
 	}
 }
-func FilesActionQueryString(keyword string, page int) ([]string, *workspaces.QueryResultMeta, error) {
+func FilesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1120,7 +1123,7 @@ func FilesActionQueryString(keyword string, page int) ([]string, *workspaces.Que
 		// }
 		return label
 	}
-	query := workspaces.QueryStringCastCli(searchFields, keyword, page)
+	query := fireback.QueryStringCastCli(searchFields, keyword, page)
 	items, meta, err := FileActions.Query(query)
 	stringItems := []string{}
 	for _, item := range items {
@@ -1147,8 +1150,8 @@ var FileDevCommands = []cli.Command{
 			},
 		},
 		Action: func(c *cli.Context) error {
-			query := workspaces.CommonCliQueryDSLBuilderAuthorize(c, &workspaces.SecurityModel{
-				ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
+				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_CREATE},
 			})
 			if c.Bool("batch") {
 				FileActionSeederMultiple(query, c.Int("count"))
@@ -1171,7 +1174,7 @@ var FileDevCommands = []cli.Command{
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
 		Action: func(c *cli.Context) error {
 			seed := FileActions.SeederInit()
-			workspaces.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
+			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
@@ -1179,7 +1182,7 @@ var FileDevCommands = []cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1192,7 +1195,7 @@ var FileDevCommands = []cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				&mocks.ViewsFs,
@@ -1222,7 +1225,7 @@ var FileImportExportCommands = []cli.Command{
 		Usage: "Reads a yaml file containing an array of files, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
 			data := &[]FileEntity{}
-			workspaces.ReadYamlFile(c.String("file"), data)
+			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
 			return nil
 		},
@@ -1231,7 +1234,7 @@ var FileImportExportCommands = []cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(c *cli.Context) error {
-			if entity, err := workspaces.GetSeederFilenames(fileSeedersFs, ""); err != nil {
+			if entity, err := fireback.GetSeederFilenames(fileSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
 				f, _ := json.MarshalIndent(entity, "", "  ")
@@ -1244,7 +1247,7 @@ var FileImportExportCommands = []cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportEmbedCmd(c,
+			fireback.CommonCliImportEmbedCmd(c,
 				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				fileSeedersFs,
@@ -1255,7 +1258,7 @@ var FileImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:    "export",
 		Aliases: []string{"e"},
-		Flags: append(workspaces.CommonQueryFlags,
+		Flags: append(fireback.CommonQueryFlags,
 			&cli.StringFlag{
 				Name:     "file",
 				Usage:    "The address of file you want the csv/yaml/json be exported to",
@@ -1263,7 +1266,7 @@ var FileImportExportCommands = []cli.Command{
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
 		Action: func(c *cli.Context) error {
-			return workspaces.CommonCliExportCmd2(c,
+			return fireback.CommonCliExportCmd2(c,
 				FileEntityStream,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				c.String("file"),
@@ -1277,7 +1280,7 @@ var FileImportExportCommands = []cli.Command{
 		Name: "import",
 		Flags: append(
 			append(
-				workspaces.CommonQueryFlags,
+				fireback.CommonQueryFlags,
 				&cli.StringFlag{
 					Name:     "file",
 					Usage:    "The address of file you want the csv be imported from",
@@ -1287,12 +1290,12 @@ var FileImportExportCommands = []cli.Command{
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
 		Action: func(c *cli.Context) error {
-			workspaces.CommonCliImportCmdAuthorized(c,
+			fireback.CommonCliImportCmdAuthorized(c,
 				FileActions.Create,
 				reflect.ValueOf(&FileEntity{}).Elem(),
 				c.String("file"),
-				&workspaces.SecurityModel{
-					ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+				&fireback.SecurityModel{
+					ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_CREATE},
 				},
 				func() FileEntity {
 					v := CastFileFromCli(c)
@@ -1310,7 +1313,7 @@ var FileCliCommands []cli.Command = []cli.Command{
 	FileUpdateCmd,
 	FileAskCmd,
 	FileCreateInteractiveCmd,
-	workspaces.GetCommonRemoveQuery(
+	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		FileActions.Remove,
 	),
@@ -1318,7 +1321,7 @@ var FileCliCommands []cli.Command = []cli.Command{
 
 func FileCliFn() cli.Command {
 	commands := append(FileImportExportCommands, FileCliCommands...)
-	if !workspaces.GetConfig().Production {
+	if !fireback.GetConfig().Production {
 		commands = append(commands, FileDevCommands...)
 	}
 	return cli.Command{
@@ -1335,14 +1338,14 @@ func FileCliFn() cli.Command {
 	}
 }
 
-var FILE_ACTION_TABLE = workspaces.Module3Action{
+var FILE_ACTION_TABLE = fireback.Module3Action{
 	Name:          "table",
 	ActionAliases: []string{"t"},
-	Flags:         workspaces.CommonQueryFlags,
+	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        FileActions.Query,
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		workspaces.CommonCliTableCmd2(c,
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		fireback.CommonCliTableCmd2(c,
 			FileActions.Query,
 			security,
 			reflect.ValueOf(&FileEntity{}).Elem(),
@@ -1350,27 +1353,27 @@ var FILE_ACTION_TABLE = workspaces.Module3Action{
 		return nil
 	},
 }
-var FILE_ACTION_QUERY = workspaces.Module3Action{
+var FILE_ACTION_QUERY = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/files",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
 			qs := &FileEntityQs{}
-			workspaces.HttpQueryEntity(c, FileActions.Query, qs)
+			fireback.HttpQueryEntity(c, FileActions.Query, qs)
 		},
 	},
 	Format:         "QUERY",
 	Action:         FileActions.Query,
 	ResponseEntity: &[]FileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		qs := &FileEntityQs{}
-		workspaces.CommonCliQueryCmd3(
+		fireback.CommonCliQueryCmd3(
 			c,
 			FileActions.Query,
 			security,
@@ -1381,205 +1384,205 @@ var FILE_ACTION_QUERY = workspaces.Module3Action{
 	CliName:       "query",
 	Name:          "query",
 	ActionAliases: []string{"q"},
-	Flags:         append(workspaces.CommonQueryFlags, FileQsFlags...),
+	Flags:         append(fireback.CommonQueryFlags, FileQsFlags...),
 	Description:   "Queries all of the entities in database based on the standard query format (s+)",
 }
-var FILE_ACTION_EXPORT = workspaces.Module3Action{
+var FILE_ACTION_EXPORT = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/files/export",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpStreamFileChannel(c, FileActionExport)
+			fireback.HttpStreamFileChannel(c, FileActionExport)
 		},
 	},
 	Format:         "QUERY",
 	Action:         FileActionExport,
 	ResponseEntity: &[]FileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_GET_ONE = workspaces.Module3Action{
+var FILE_ACTION_GET_ONE = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/file/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpGetEntity(c, FileActions.GetOne)
+			fireback.HttpGetEntity(c, FileActions.GetOne)
 		},
 	},
 	Format:         "GET_ONE",
 	Action:         FileActions.GetOne,
 	ResponseEntity: &FileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_POST_ONE = workspaces.Module3Action{
+var FILE_ACTION_POST_ONE = fireback.Module3Action{
 	Name:          "create",
 	ActionAliases: []string{"c"},
 	Description:   "Create new file",
 	Flags:         FileCommonCliFlags,
 	Method:        "POST",
 	Url:           "/file",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpPostEntity(c, FileActions.Create)
+			fireback.HttpPostEntity(c, FileActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *workspaces.SecurityModel) error {
-		result, err := workspaces.CliPostEntity(c, FileActions.Create, security)
-		workspaces.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPostEntity(c, FileActions.Create, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
 	},
 	Action:         FileActions.Create,
 	Format:         "POST_ONE",
 	RequestEntity:  &FileEntity{},
 	ResponseEntity: &FileEntity{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_PATCH = workspaces.Module3Action{
+var FILE_ACTION_PATCH = fireback.Module3Action{
 	Name:          "update",
 	ActionAliases: []string{"u"},
 	Flags:         FileCommonCliFlagsOptional,
 	Method:        "PATCH",
 	Url:           "/file",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntity(c, FileActions.Update)
+			fireback.HttpUpdateEntity(c, FileActions.Update)
 		},
 	},
 	Action:         FileActions.Update,
 	RequestEntity:  &FileEntity{},
 	ResponseEntity: &FileEntity{},
 	Format:         "PATCH_ONE",
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_PATCH_BULK = workspaces.Module3Action{
+var FILE_ACTION_PATCH_BULK = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/files",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpUpdateEntities(c, FileActionBulkUpdate)
+			fireback.HttpUpdateEntities(c, FileActionBulkUpdate)
 		},
 	},
 	Action:         FileActionBulkUpdate,
 	Format:         "PATCH_BULK",
-	RequestEntity:  &workspaces.BulkRecordRequest[FileEntity]{},
-	ResponseEntity: &workspaces.BulkRecordRequest[FileEntity]{},
-	Out: &workspaces.Module3ActionBody{
+	RequestEntity:  &fireback.BulkRecordRequest[FileEntity]{},
+	ResponseEntity: &fireback.BulkRecordRequest[FileEntity]{},
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_DELETE = workspaces.Module3Action{
+var FILE_ACTION_DELETE = fireback.Module3Action{
 	Method: "DELETE",
 	Url:    "/file",
 	Format: "DELETE_DSL",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_DELETE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			workspaces.HttpRemoveEntity(c, FileActions.Remove)
+			fireback.HttpRemoveEntity(c, FileActions.Remove)
 		},
 	},
 	Action:         FileActions.Remove,
-	RequestEntity:  &workspaces.DeleteRequest{},
-	ResponseEntity: &workspaces.DeleteResponse{},
+	RequestEntity:  &fireback.DeleteRequest{},
+	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &FileEntity{},
 }
-var FILE_VARIATIONS_ACTION_PATCH = workspaces.Module3Action{
+var FILE_VARIATIONS_ACTION_PATCH = fireback.Module3Action{
 	Method: "PATCH",
 	Url:    "/file/:linkerId/variations/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_UPDATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_UPDATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpUpdateEntity(c, FileVariationsActionUpdate)
+			fireback.HttpUpdateEntity(c, FileVariationsActionUpdate)
 		},
 	},
 	Action:         FileVariationsActionUpdate,
 	Format:         "PATCH_ONE",
 	RequestEntity:  &FileVariations{},
 	ResponseEntity: &FileVariations{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileVariations",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "FileVariations",
 	},
 }
-var FILE_VARIATIONS_ACTION_GET = workspaces.Module3Action{
+var FILE_VARIATIONS_ACTION_GET = fireback.Module3Action{
 	Method: "GET",
 	Url:    "/file/variations/:linkerId/:uniqueId",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_QUERY},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_QUERY},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpGetEntity(c, FileVariationsActionGetOne)
+			fireback.HttpGetEntity(c, FileVariationsActionGetOne)
 		},
 	},
 	Action:         FileVariationsActionGetOne,
 	Format:         "GET_ONE",
 	ResponseEntity: &FileVariations{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileVariations",
 	},
 }
-var FILE_VARIATIONS_ACTION_POST = workspaces.Module3Action{
+var FILE_VARIATIONS_ACTION_POST = fireback.Module3Action{
 	Method: "POST",
 	Url:    "/file/:linkerId/variations",
-	SecurityModel: &workspaces.SecurityModel{
-		ActionRequires: []workspaces.PermissionInfo{PERM_ROOT_FILE_CREATE},
+	SecurityModel: &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_CREATE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(
 			c *gin.Context,
 		) {
-			workspaces.HttpPostEntity(c, FileVariationsActionCreate)
+			fireback.HttpPostEntity(c, FileVariationsActionCreate)
 		},
 	},
 	Action:         FileVariationsActionCreate,
 	Format:         "POST_ONE",
 	RequestEntity:  &FileVariations{},
 	ResponseEntity: &FileVariations{},
-	Out: &workspaces.Module3ActionBody{
+	Out: &fireback.Module3ActionBody{
 		Entity: "FileVariations",
 	},
-	In: &workspaces.Module3ActionBody{
+	In: &fireback.Module3ActionBody{
 		Entity: "FileVariations",
 	},
 }
@@ -1588,10 +1591,10 @@ var FILE_VARIATIONS_ACTION_POST = workspaces.Module3Action{
  *	Override this function on FileEntityHttp.go,
  *	In order to add your own http
  **/
-var AppendFileRouter = func(r *[]workspaces.Module3Action) {}
+var AppendFileRouter = func(r *[]fireback.Module3Action) {}
 
-func GetFileModule3Actions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{
+func GetFileModule3Actions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{
 		FILE_ACTION_QUERY,
 		FILE_ACTION_EXPORT,
 		FILE_ACTION_GET_ONE,
@@ -1608,32 +1611,32 @@ func GetFileModule3Actions() []workspaces.Module3Action {
 	return routes
 }
 
-var PERM_ROOT_FILE = workspaces.PermissionInfo{
+var PERM_ROOT_FILE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.file.*",
 	Name:        "Entire file actions (*)",
 	Description: "",
 }
-var PERM_ROOT_FILE_DELETE = workspaces.PermissionInfo{
+var PERM_ROOT_FILE_DELETE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.file.delete",
 	Name:        "Delete file",
 	Description: "",
 }
-var PERM_ROOT_FILE_CREATE = workspaces.PermissionInfo{
+var PERM_ROOT_FILE_CREATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.file.create",
 	Name:        "Create file",
 	Description: "",
 }
-var PERM_ROOT_FILE_UPDATE = workspaces.PermissionInfo{
+var PERM_ROOT_FILE_UPDATE = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.file.update",
 	Name:        "Update file",
 	Description: "",
 }
-var PERM_ROOT_FILE_QUERY = workspaces.PermissionInfo{
+var PERM_ROOT_FILE_QUERY = fireback.PermissionInfo{
 	CompleteKey: "root.manage.abac.file.query",
 	Name:        "Query file",
 	Description: "",
 }
-var ALL_FILE_PERMISSIONS = []workspaces.PermissionInfo{
+var ALL_FILE_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_FILE_DELETE,
 	PERM_ROOT_FILE_CREATE,
 	PERM_ROOT_FILE_UPDATE,
@@ -1643,42 +1646,42 @@ var ALL_FILE_PERMISSIONS = []workspaces.PermissionInfo{
 
 func NewFileCreatedEvent(
 	payload *FileEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "FileCreated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_FILE_QUERY,
 			},
 		},
 		CacheKey: "*abac.FileEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 func NewFileUpdatedEvent(
 	payload *FileEntity,
-	query *workspaces.QueryDSL,
-) (*workspaces.Event, error) {
-	event := &workspaces.Event{
+	query *fireback.QueryDSL,
+) (*fireback.Event, error) {
+	event := &fireback.Event{
 		Name:    "FileUpdated",
 		Payload: payload,
-		Security: &workspaces.SecurityModel{
-			ActionRequires: []workspaces.PermissionInfo{
+		Security: &fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_FILE_QUERY,
 			},
 		},
 		CacheKey: "*abac.FileEntity",
 	}
 	// Apply the source of the event based on querydsl
-	workspaces.ApplyQueryDslContextToEvent(event, *query)
+	fireback.ApplyQueryDslContextToEvent(event, *query)
 	return event, nil
 }
 
-var FileEntityBundle = workspaces.EntityBundle{
+var FileEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_FILE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.

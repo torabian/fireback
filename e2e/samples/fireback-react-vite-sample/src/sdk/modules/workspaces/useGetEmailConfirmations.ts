@@ -57,7 +57,7 @@ export function useGetEmailConfirmations({
     any,
     IResponseList<EmailConfirmationEntity>,
     any
-  >(["*workspaces.EmailConfirmationEntity", computedOptions, query], fn, {
+  >(["*fireback.EmailConfirmationEntity", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
@@ -71,4 +71,4 @@ export function useGetEmailConfirmations({
     keyExtractor: (item: EmailConfirmationEntity) => item.uniqueId,
   };
 }
-useGetEmailConfirmations.UKEY = "*workspaces.EmailConfirmationEntity";
+useGetEmailConfirmations.UKEY = "*fireback.EmailConfirmationEntity";

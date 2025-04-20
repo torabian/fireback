@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 func LicenseActionFromPlanId(
 	dto *LicenseFromPlanIdDto,
-	query workspaces.QueryDSL,
-) (*LicenseEntity, *workspaces.IError) {
+	query fireback.QueryDSL,
+) (*LicenseEntity, *fireback.IError) {
 
 	plan, err := ProductPlanActionGetOne(query)
 
@@ -53,13 +53,13 @@ func LicenseActionFromPlanId(
 		fmt.Println(4, plan.Product)
 
 		if plan.Product == nil || plan.Product.PrivateKey == nil || *plan.Product.PrivateKey == "" {
-			return nil, workspaces.Create401Error(&LicensesMessages.PrivateKeyIsMissing, []string{})
+			return nil, fireback.Create401Error(&LicensesMessages.PrivateKeyIsMissing, []string{})
 		}
 
 		license, err := GenerateLicense(doc, *plan.Product.PrivateKey)
 
 		if err != nil {
-			return nil, workspaces.GormErrorToIError(err)
+			return nil, fireback.GormErrorToIError(err)
 		}
 
 		title := *plan.Product.Name + " - License from " +

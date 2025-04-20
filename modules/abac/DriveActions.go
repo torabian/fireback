@@ -14,21 +14,21 @@ import (
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
 )
 
 func FileActionCreate(
-	dto *FileEntity, query workspaces.QueryDSL,
-) (*FileEntity, *workspaces.IError) {
+	dto *FileEntity, query fireback.QueryDSL,
+) (*FileEntity, *fireback.IError) {
 	return FileActionCreateFn(dto, query)
 }
 
 func FileActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *FileEntity,
-) (*FileEntity, *workspaces.IError) {
+) (*FileEntity, *fireback.IError) {
 	return FileActionUpdateFn(query, fields)
 }
 
@@ -49,9 +49,9 @@ type Directory struct {
 func CreateFile(model *FileEntity) error {
 
 	if model.UniqueId == "" {
-		model.UniqueId = workspaces.UUID()
+		model.UniqueId = fireback.UUID()
 	}
-	return workspaces.GetDbRef().Create(&model).Error
+	return fireback.GetDbRef().Create(&model).Error
 }
 
 /*
@@ -65,7 +65,7 @@ type FileUploadContext struct {
 	AfterCreatedHooks []UploadEventHook
 }
 
-func afterTusUploadedOnDisk(event *tusd.HookEvent, q *workspaces.QueryDSL, ctx *FileUploadContext) (*FileEntity, error) {
+func afterTusUploadedOnDisk(event *tusd.HookEvent, q *fireback.QueryDSL, ctx *FileUploadContext) (*FileEntity, error) {
 	fname := event.Upload.MetaData["filename"]
 	fpath := event.Upload.MetaData["path"]
 	fsize := event.Upload.Size
@@ -78,8 +78,8 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *workspaces.QueryDSL, ctx *
 		UniqueId:    event.Upload.ID,
 		Size:        fsize,
 		Type:        ftype,
-		WorkspaceId: workspaces.NewString(q.WorkspaceId),
-		UserId:      workspaces.NewString(q.UserId),
+		WorkspaceId: fireback.NewString(q.WorkspaceId),
+		UserId:      fireback.NewString(q.UserId),
 	}
 
 	if ctx != nil {
@@ -99,7 +99,7 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *workspaces.QueryDSL, ctx *
 var GlobalTusFileUploadContext *FileUploadContext
 
 func LiftTusServer() {
-	config := workspaces.GetConfig()
+	config := fireback.GetConfig()
 
 	if config.Storage == "" {
 		return
@@ -127,19 +127,19 @@ func LiftTusServer() {
 	go func() {
 		for {
 			event := <-handler.CompleteUploads
-			var result *workspaces.AuthResultDto
+			var result *fireback.AuthResultDto
 
 			wi := event.HTTPRequest.Header.Get("workspace-id")
 			tk := event.HTTPRequest.Header.Get("authorization")
 
-			result, err = workspaces.WithAuthorizationPure(&workspaces.AuthContextDto{
+			result, err = fireback.WithAuthorizationPure(&fireback.AuthContextDto{
 				WorkspaceId:  wi,
 				Token:        tk,
-				Capabilities: []workspaces.PermissionInfo{},
+				Capabilities: []fireback.PermissionInfo{},
 			})
 
 			if result != nil {
-				q := workspaces.QueryDSL{
+				q := fireback.QueryDSL{
 					WorkspaceId: wi,
 					UserId:      result.UserId.String,
 				}
@@ -164,7 +164,7 @@ func LiftTusServer() {
 }
 
 func LiftTusServerInHttp(app *gin.Engine) {
-	config := workspaces.GetConfig()
+	config := fireback.GetConfig()
 	if config.Storage == "" {
 		return
 	}
@@ -191,19 +191,19 @@ func LiftTusServerInHttp(app *gin.Engine) {
 	go func() {
 		for {
 			event := <-handler.CompleteUploads
-			var result *workspaces.AuthResultDto
+			var result *fireback.AuthResultDto
 
 			wi := event.HTTPRequest.Header.Get("workspace-id")
 			tk := event.HTTPRequest.Header.Get("authorization")
 
-			result, err = workspaces.WithAuthorizationPure(&workspaces.AuthContextDto{
+			result, err = fireback.WithAuthorizationPure(&fireback.AuthContextDto{
 				WorkspaceId:  wi,
 				Token:        tk,
-				Capabilities: []workspaces.PermissionInfo{},
+				Capabilities: []fireback.PermissionInfo{},
 			})
 
 			if result != nil {
-				q := workspaces.QueryDSL{
+				q := fireback.QueryDSL{
 					WorkspaceId: wi,
 					UserId:      result.UserId.String,
 				}
@@ -229,13 +229,13 @@ func copyFile(src string, dst string) {
 }
 
 func UploadFromDisk(filePath string) (*FileEntity, string, error) {
-	config := workspaces.GetConfig()
+	config := fireback.GetConfig()
 	fi, _ := os.Stat(filePath)
 
 	mtype, _ := mimetype.DetectFile(filePath)
 
 	file := tusd.FileInfo{
-		ID: workspaces.UUID_Long(),
+		ID: fireback.UUID_Long(),
 		MetaData: tusd.MetaData{
 			"filename": filepath.Base(filePath),
 			"filetype": mtype.String(),
@@ -253,7 +253,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 	copyFile(filePath, fileTarget)
 	os.WriteFile(path.Join(config.Storage, file.ID+".info"), dicJson, 0644)
 
-	entity, err := afterTusUploadedOnDisk(&event, &workspaces.QueryDSL{
+	entity, err := afterTusUploadedOnDisk(&event, &fireback.QueryDSL{
 		WorkspaceId: "system",
 		UserId:      "system",
 	}, GlobalTusFileUploadContext)
@@ -266,7 +266,7 @@ func UploadFromDisk(filePath string) (*FileEntity, string, error) {
 }
 
 func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
-	config := workspaces.GetConfig()
+	config := fireback.GetConfig()
 	sourceFile, err := fs.ReadFile(filePath)
 
 	if err != nil {
@@ -282,7 +282,7 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	mimetype := ""
 
 	file := tusd.FileInfo{
-		ID: workspaces.UUID_Long(),
+		ID: fireback.UUID_Long(),
 		MetaData: tusd.MetaData{
 			"filename": filepath.Base(filePath),
 			"filetype": mimetype,
@@ -313,7 +313,7 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 		return nil, "", err
 	}
 
-	entity, err := afterTusUploadedOnDisk(&event, &workspaces.QueryDSL{
+	entity, err := afterTusUploadedOnDisk(&event, &fireback.QueryDSL{
 		WorkspaceId: "system",
 		UserId:      "system",
 	}, GlobalTusFileUploadContext)
@@ -325,10 +325,10 @@ func UploadFromFs(fs *embed.FS, filePath string) (*FileEntity, string, error) {
 	return entity, file.ID, nil
 }
 
-func ImportYamlFromFsResources(fs *embed.FS, filePath string) []workspaces.ResourceMap {
-	result := []workspaces.ResourceMap{}
-	var resources workspaces.ContentImport[any]
-	err := workspaces.ReadYamlFileEmbed(fs, filePath, &resources)
+func ImportYamlFromFsResources(fs *embed.FS, filePath string) []fireback.ResourceMap {
+	result := []fireback.ResourceMap{}
+	var resources fireback.ContentImport[any]
+	err := fireback.ReadYamlFileEmbed(fs, filePath, &resources)
 
 	if err != nil {
 		log.Fatalln("Error importing content:", err, filePath)
@@ -337,7 +337,7 @@ func ImportYamlFromFsResources(fs *embed.FS, filePath string) []workspaces.Resou
 	for _, resource := range resources.Resources {
 		actualPath := path.Join(filepath.Dir(filePath), resource.Path)
 		entity, fileId, _ := UploadFromFs(fs, actualPath)
-		result = append(result, workspaces.ResourceMap{
+		result = append(result, fireback.ResourceMap{
 			DriveId:  entity.UniqueId,
 			FileId:   fileId,
 			Key:      resource.Key,

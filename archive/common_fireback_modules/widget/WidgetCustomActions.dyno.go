@@ -6,13 +6,13 @@ package widget
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
-func WidgetCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{}
+func WidgetCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{}
 	return routes
 }
 
@@ -20,7 +20,7 @@ var WidgetCustomActionsCli = []cli.Command{}
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var WidgetCliActionsBundle = &workspaces.CliActionsBundle{
+var WidgetCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "widget",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
@@ -30,8 +30,8 @@ var WidgetCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetWidgetActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetWidgetActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   WidgetCustomActions(),
 		CliAction: WidgetCliActionsBundle,
 	}

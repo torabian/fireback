@@ -10,14 +10,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 func CastUserAccessLevelFromCli(c *cli.Context) *UserAccessLevelDto {
 	template := &UserAccessLevelDto{}
 	if c.IsSet("user-access-per-workspace-id") {
-		template.UserAccessPerWorkspaceId = workspaces.NewStringAutoNull(c.String("user-access-per-workspace-id"))
+		template.UserAccessPerWorkspaceId = fireback.NewStringAutoNull(c.String("user-access-per-workspace-id"))
 	}
 	return template
 }
@@ -46,8 +46,8 @@ var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserAccessLevelDto struct {
-	UserAccessPerWorkspace   *workspaces.UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
-	UserAccessPerWorkspaceId workspaces.String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
+	UserAccessPerWorkspace   *fireback.UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
+	UserAccessPerWorkspaceId fireback.String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
 }
 type UserAccessLevelDtoList struct {
 	Items []*UserAccessLevelDto

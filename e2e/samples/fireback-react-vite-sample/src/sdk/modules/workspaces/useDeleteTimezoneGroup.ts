@@ -58,10 +58,10 @@ export function useDeleteTimezoneGroup(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.TimezoneGroupEntity",
+            "*fireback.TimezoneGroupEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.TimezoneGroupEntity");
+          queryClient?.invalidateQueries("*fireback.TimezoneGroupEntity");
           resolve(response);
         },
         onError(error: any) {

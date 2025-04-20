@@ -6,13 +6,13 @@ package commonprofile
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
-func CommonprofileCustomActions() []workspaces.Module3Action {
-	routes := []workspaces.Module3Action{}
+func CommonprofileCustomActions() []fireback.Module3Action {
+	routes := []fireback.Module3Action{}
 	return routes
 }
 
@@ -20,7 +20,7 @@ var CommonprofileCustomActionsCli = []cli.Command{}
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level
-var CommonprofileCliActionsBundle = &workspaces.CliActionsBundle{
+var CommonprofileCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "commonprofile",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
@@ -29,8 +29,8 @@ var CommonprofileCliActionsBundle = &workspaces.CliActionsBundle{
 	},
 }
 
-func GetCommonprofileActionsBundle() *workspaces.ModuleActionsBundle {
-	return &workspaces.ModuleActionsBundle{
+func GetCommonprofileActionsBundle() *fireback.ModuleActionsBundle {
+	return &fireback.ModuleActionsBundle{
 		Actions:   CommonprofileCustomActions(),
 		CliAction: CommonprofileCliActionsBundle,
 	}

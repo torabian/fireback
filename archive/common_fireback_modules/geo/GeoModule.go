@@ -3,16 +3,16 @@ package geo
 import (
 	"embed"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 )
 
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-func GeoModuleSetup() *workspaces.ModuleProvider {
+func GeoModuleSetup() *fireback.ModuleProvider {
 
-	module := &workspaces.ModuleProvider{
+	module := &fireback.ModuleProvider{
 		Name:          "geo",
 		Definitions:   &Module3Definitions,
 		ActionsBundle: GetGeoActionsBundle(),
@@ -35,11 +35,11 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 	})
 
 	module.ProvideMockWriterHandler(func(languages []string) {
-		GeoCountryWriteQueryMock(workspaces.MockQueryContext{Languages: languages, ItemsPerPage: 20})
-		GeoProvinceWriteQueryMock(workspaces.MockQueryContext{Languages: languages, ItemsPerPage: 20})
-		GeoCityWriteQueryMock(workspaces.MockQueryContext{Languages: languages, ItemsPerPage: 50})
-		GeoLocationWriteQueryMock(workspaces.MockQueryContext{Languages: languages, ItemsPerPage: 50})
-		GeoLocationTypeWriteQueryMock(workspaces.MockQueryContext{Languages: languages, ItemsPerPage: 50})
+		GeoCountryWriteQueryMock(fireback.MockQueryContext{Languages: languages, ItemsPerPage: 20})
+		GeoProvinceWriteQueryMock(fireback.MockQueryContext{Languages: languages, ItemsPerPage: 20})
+		GeoCityWriteQueryMock(fireback.MockQueryContext{Languages: languages, ItemsPerPage: 50})
+		GeoLocationWriteQueryMock(fireback.MockQueryContext{Languages: languages, ItemsPerPage: 50})
+		GeoLocationTypeWriteQueryMock(fireback.MockQueryContext{Languages: languages, ItemsPerPage: 50})
 	})
 
 	module.ProvidePermissionHandler(
@@ -50,7 +50,7 @@ func GeoModuleSetup() *workspaces.ModuleProvider {
 		ALL_GEO_LOCATION_PERMISSIONS,
 	)
 
-	module.Actions = [][]workspaces.Module3Action{
+	module.Actions = [][]fireback.Module3Action{
 		GetGeoCityModule3Actions(),
 		GetGeoProvinceModule3Actions(),
 		GetGeoStateModule3Actions(),

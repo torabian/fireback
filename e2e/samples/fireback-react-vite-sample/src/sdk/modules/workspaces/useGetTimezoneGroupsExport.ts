@@ -53,7 +53,7 @@ export function useGetTimezoneGroupsExport({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<TimezoneGroupEntity>, any>(
-    ["*workspaces.TimezoneGroupEntity", computedOptions, query],
+    ["*fireback.TimezoneGroupEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetTimezoneGroupsExport({
     keyExtractor: (item: TimezoneGroupEntity) => item.uniqueId,
   };
 }
-useGetTimezoneGroupsExport.UKEY = "*workspaces.TimezoneGroupEntity";
+useGetTimezoneGroupsExport.UKEY = "*fireback.TimezoneGroupEntity";

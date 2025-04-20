@@ -1,15 +1,15 @@
 package geo
 
-import "github.com/torabian/fireback/modules/workspaces"
+import "github.com/torabian/fireback/modules/fireback"
 
 func GeoLocationTypeActionCreate(
-	dto *GeoLocationTypeEntity, query workspaces.QueryDSL,
-) (*GeoLocationTypeEntity, *workspaces.IError) {
+	dto *GeoLocationTypeEntity, query fireback.QueryDSL,
+) (*GeoLocationTypeEntity, *fireback.IError) {
 	return GeoLocationTypeActionCreateFn(dto, query)
 }
 func GeoLocationTypeActionUpdate(
-	query workspaces.QueryDSL,
+	query fireback.QueryDSL,
 	fields *GeoLocationTypeEntity,
-) (*GeoLocationTypeEntity, *workspaces.IError) {
+) (*GeoLocationTypeEntity, *fireback.IError) {
 	return GeoLocationTypeActionUpdateFn(query, fields)
 }

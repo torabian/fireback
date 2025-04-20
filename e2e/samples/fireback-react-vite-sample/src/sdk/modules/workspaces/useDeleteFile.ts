@@ -58,10 +58,10 @@ export function useDeleteFile(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.FileEntity",
+            "*fireback.FileEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.FileEntity");
+          queryClient?.invalidateQueries("*fireback.FileEntity");
           resolve(response);
         },
         onError(error: any) {

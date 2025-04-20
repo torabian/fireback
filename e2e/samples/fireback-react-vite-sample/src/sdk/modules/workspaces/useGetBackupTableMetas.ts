@@ -53,7 +53,7 @@ export function useGetBackupTableMetas({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<BackupTableMetaEntity>, any>(
-    ["*workspaces.BackupTableMetaEntity", computedOptions, query],
+    ["*fireback.BackupTableMetaEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetBackupTableMetas({
     keyExtractor: (item: BackupTableMetaEntity) => item.uniqueId,
   };
 }
-useGetBackupTableMetas.UKEY = "*workspaces.BackupTableMetaEntity";
+useGetBackupTableMetas.UKEY = "*fireback.BackupTableMetaEntity";

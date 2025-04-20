@@ -70,7 +70,7 @@ export function usePatchBackupTableMetas(props?: PatchProps) {
       mutation.mutate(values, {
         onSuccess(response: IResponse<BackupTableMetaEntity>) {
           queryClient?.setQueriesData(
-            "*workspaces.BulkRecordRequest[workspaces.BackupTableMetaEntity]",
+            "*fireback.BulkRecordRequest[fireback.BackupTableMetaEntity]",
             (data: any) => fnUpdater(data, response)
           );
           resolve(response);

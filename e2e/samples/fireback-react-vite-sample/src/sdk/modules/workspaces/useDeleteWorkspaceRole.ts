@@ -58,10 +58,10 @@ export function useDeleteWorkspaceRole(props?: DeleteProps) {
            * We may not have to actually
            */
           queryClient?.setQueryData<IDeleteResponse>(
-            "*workspaces.WorkspaceRoleEntity",
+            "*fireback.WorkspaceRoleEntity",
             (data) => fnUpdater(data, response) as any
           );
-          queryClient?.invalidateQueries("*workspaces.WorkspaceRoleEntity");
+          queryClient?.invalidateQueries("*fireback.WorkspaceRoleEntity");
           resolve(response);
         },
         onError(error: any) {

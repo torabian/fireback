@@ -75,7 +75,7 @@ export function usePostGsmProviderSendSms(props?: UseRemoteQuery) {
           queryClient?.setQueryData<
             IResponseList<GsmSendSmsWithProviderActionResDto>
           >(
-            "*workspaces.GsmSendSmsWithProviderActionResDto",
+            "*fireback.GsmSendSmsWithProviderActionResDto",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);

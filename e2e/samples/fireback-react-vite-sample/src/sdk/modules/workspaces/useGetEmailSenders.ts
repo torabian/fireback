@@ -53,7 +53,7 @@ export function useGetEmailSenders({
     enabled = false;
   }
   const query$ = useQuery<any, any, IResponseList<EmailSenderEntity>, any>(
-    ["*workspaces.EmailSenderEntity", computedOptions, query],
+    ["*fireback.EmailSenderEntity", computedOptions, query],
     fn,
     {
       cacheTime: 1000,
@@ -70,4 +70,4 @@ export function useGetEmailSenders({
     keyExtractor: (item: EmailSenderEntity) => item.uniqueId,
   };
 }
-useGetEmailSenders.UKEY = "*workspaces.EmailSenderEntity";
+useGetEmailSenders.UKEY = "*fireback.EmailSenderEntity";

@@ -57,7 +57,7 @@ export function useGetNotificationConfigsExport({
     any,
     IResponseList<NotificationConfigEntity>,
     any
-  >(["*workspaces.NotificationConfigEntity", computedOptions, query], fn, {
+  >(["*fireback.NotificationConfigEntity", computedOptions, query], fn, {
     cacheTime: 1000,
     retry: false,
     keepPreviousData: true,
@@ -71,4 +71,4 @@ export function useGetNotificationConfigsExport({
     keyExtractor: (item: NotificationConfigEntity) => item.uniqueId,
   };
 }
-useGetNotificationConfigsExport.UKEY = "*workspaces.NotificationConfigEntity";
+useGetNotificationConfigsExport.UKEY = "*fireback.NotificationConfigEntity";
