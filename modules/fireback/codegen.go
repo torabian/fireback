@@ -1434,6 +1434,11 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 		fmt.Println("Error on module dyno file:", exportPath, err)
 	}
 
+	err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+	if err3 != nil {
+		fmt.Println("Error on writing content:", exportPath, err3)
+	}
+
 	if !HasQueries(ctx.Path) {
 		err7 := CreateQueriesDirectory(ctx.Path)
 		if err7 != nil {
@@ -1447,10 +1452,6 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 		}
 	}
 
-	err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-	if err3 != nil {
-		fmt.Println("Error on writing content:", exportPath, err3)
-	}
 }
 
 /**
