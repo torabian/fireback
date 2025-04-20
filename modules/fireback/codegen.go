@@ -2226,7 +2226,7 @@ func ImportGoDependencies(fields []*Module3Field, importGroupPrefix string) []Im
 			})
 		}
 
-		if field.Module != "" && field.Module != "workspaces" {
+		if field.Module != "" && field.Module != "fireback" {
 			items = append(items, ImportDependencyStrategy{
 				Items: []string{field.Target},
 				Path:  actualPrefix + field.Module,

@@ -192,7 +192,7 @@ func NewProjectCli() cli.Command {
 				if r := AskForSelect("Do you want to use a local copy of fireback instead of mod?", []string{"yes", "no"}); r == "yes" {
 					for {
 						ctx.ReplaceFireback = AskForInput("Set the fireback relative folder address", "../fireback")
-						if !Exists(filepath.Join(ctx.ReplaceFireback, "modules", "workspaces")) {
+						if !Exists(filepath.Join(ctx.ReplaceFireback, "modules", "fireback")) {
 							if r := AskForSelect("Fireback not found in directory. Try again?", []string{"yes", "no"}); r == "no" {
 								break
 							}
