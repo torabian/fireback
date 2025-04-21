@@ -29,11 +29,9 @@ var xapp = &fireback.FirebackApp{
 	RunTus: func() {
 
 	},
-	RunSocket: func(e *gin.Engine) {
 
-	},
-	RunSearch:     fireback.InjectReactiveSearch,
-	PublicFolders: []fireback.PublicFolderInfo{
+	InjectSearchEndpoint: fireback.InjectReactiveSearch,
+	PublicFolders:        []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to
 		// Bootstrap those themes

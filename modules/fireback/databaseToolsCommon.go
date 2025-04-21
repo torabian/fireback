@@ -80,6 +80,9 @@ func (x *FirebackApp) CommonHeadlessMsStart(onDatabaseCompleted func()) {
 
 func commonHeadlessStarter(x *FirebackApp, onDatabaseCompleted func(), completeTool bool) {
 
+	// Use the logger
+	initLogger()
+
 	if !excludeDatabaseConnection() {
 		// This is experimental to start the event bus
 		// Honestly maybe this needs to be running also even without database scenario,

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 )
 
 type SocketConnection struct {
@@ -69,13 +70,23 @@ func SocketConnectEndpoint(c *gin.Context) {
 	SocketSessionPool[workspaceId][res.UserId.String] = append(SocketSessionPool[workspaceId][res.UserId.String], socket)
 	socketMutex.Unlock()
 
-	// Read loop
 	for {
 		var msg interface{}
 		if err := ws.ReadJSON(&msg); err != nil {
-			break
+			// WebSocket close error?
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				LOG.Debug("WebSocket closed normally", zap.String("user", res.UserId.String))
+
+				// Only break in this case
+				break
+			} else {
+				// We need to handle this kinda.
+				LOG.Debug("WebSocket read error", zap.Error(err))
+				ws.WriteJSON("Socket interaction with webserver only supports json at this moment.")
+			}
+
 		}
-		// Handle msg if needed
+		LOG.Debug("Message from socket connection:", zap.Any("message", msg))
 	}
 
 	// Cleanup

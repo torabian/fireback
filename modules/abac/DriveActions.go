@@ -17,6 +17,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
+	"go.uber.org/zap"
 )
 
 func FileActionCreate(
@@ -150,7 +151,7 @@ func LiftTusServer() {
 		}
 	}()
 
-	fmt.Println("TUS is listenning on", ":"+config.TusPort)
+	fireback.LOG.Info("TUS file uploader separate port is listening:", zap.String("port", config.TusPort))
 
 	http.Handle("/files/",
 		WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
