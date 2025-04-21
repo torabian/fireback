@@ -46,30 +46,45 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 
 	q.UserId = dto.user.UniqueId
 	dto.workspace.WorkspaceId = fireback.NewString(workspaceId)
-	var actualWorkspace *WorkspaceEntity = nil
-	if ws, err := WorkspaceActions.Create(dto.workspace, q); err != nil {
-		if dto.restricted {
-			return err
-		}
-	} else {
-		actualWorkspace = ws
 
-		workspaceId = actualWorkspace.UniqueId
-		q.WorkspaceId = actualWorkspace.UniqueId
+	var actualWorkspace *WorkspaceEntity = nil
+	if existingWs, err9 := WorkspaceActions.GetOne(fireback.QueryDSL{UniqueId: dto.workspace.UniqueId, Tx: q.Tx}); err9 == nil && existingWs != nil {
+		if existingWs.UniqueId == dto.workspace.UniqueId {
+			actualWorkspace = existingWs
+		}
 	}
 
+	if actualWorkspace == nil {
+
+		if ws, err := WorkspaceActions.Create(dto.workspace, q); err != nil {
+			if dto.restricted {
+				return err
+			}
+		} else {
+			actualWorkspace = ws
+		}
+	}
+
+	workspaceId = actualWorkspace.UniqueId
+	q.WorkspaceId = actualWorkspace.UniqueId
+
+	var userWorkspace *UserWorkspaceEntity
 	// This is a bit special table, I did not want introduce a new concept
 	// In fireback, so it would be like this to modify things directly.
-	if userWorkspace, err := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+
+	// let's find that link, if not exists create it.
+	if errFinding := q.Tx.Debug().Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
 		WorkspaceId: fireback.NewString(workspaceId),
 		UserId:      fireback.NewString(q.UserId),
-	}, q); err != nil {
-		if dto.restricted {
-			return err
-		} else {
-			session.UserWorkspaces = []*UserWorkspaceEntity{userWorkspace}
+	}).Find(&userWorkspace); errFinding != nil {
+		if createdWorkspace, err := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+			WorkspaceId: fireback.NewString(workspaceId),
+			UserId:      fireback.NewString(q.UserId),
+		}, q); err == nil {
+			userWorkspace = createdWorkspace
 		}
-	} else {
+	}
+	if userWorkspace != nil {
 		session.UserWorkspaces = []*UserWorkspaceEntity{userWorkspace}
 	}
 
