@@ -73,7 +73,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 	// In fireback, so it would be like this to modify things directly.
 
 	// let's find that link, if not exists create it.
-	if errFinding := q.Tx.Debug().Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
+	if errFinding := q.Tx.Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
 		WorkspaceId: fireback.NewString(workspaceId),
 		UserId:      fireback.NewString(q.UserId),
 	}).Find(&userWorkspace); errFinding != nil {

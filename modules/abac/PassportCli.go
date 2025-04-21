@@ -65,17 +65,6 @@ var CreateRootUser cli.Command = cli.Command{
 	},
 }
 
-var AuthorizeOsCmd cli.Command = cli.Command{
-	Name:  "os",
-	Usage: "Authorizes the user, as os owner. Useful for desktop offline apps or mobile apps",
-
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilder(c)
-		result, err := PassportActionAuthorizeOs2(&fireback.EmptyRequest{}, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-
 var AppendEmailPassportToUser cli.Command = cli.Command{
 
 	Name:  "append-email",
@@ -134,7 +123,7 @@ var PassportCli cli.Command = cli.Command{
 	Subcommands: append([]cli.Command{
 		AppendEmailPassportToUser,
 		PassportUpdateCmd,
-		AuthorizeOsCmd,
+		OsLoginAuthenticateActionCmd,
 		CreateRootUser,
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionCmd,

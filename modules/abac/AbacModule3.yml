@@ -1,5 +1,16 @@
 name: abac
 actions:
+
+
+  - name: osLoginAuthenticate
+    method: get
+    url: /passports/os/login
+    cliName: oslogin
+    description: 
+      Logins into the system using operating system (current) user, and store the information
+      for them. Useful for desktop applications.
+    out:
+      dto: UserSessionDto
   - name: acceptInvite
     method: post
     url: /user/invitation/accept
