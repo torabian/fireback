@@ -8,23 +8,23 @@
         parent_id is null
     {{ else }}
     WITH RECURSIVE
-        workspace_entities_cte(level, unique_id, parent_id,visibility,updated,created,description,name,type_id) AS (
+        workspace_entities_cte(level, unique_id, parent_id,visibility,updated_at,created_at,description,name,type_id) AS (
         select * from (
-            SELECT 0, workspace_entities.unique_id, workspace_entities.parent_id,workspace_entities.visibility,workspace_entities.updated,workspace_entities.created,workspace_entities.description,workspace_entities.name,workspace_entities.type_id from workspace_entities
+            SELECT 0, workspace_entities.unique_id, workspace_entities.parent_id,workspace_entities.visibility,workspace_entities.updated_at,workspace_entities.created_at,workspace_entities.description,workspace_entities.name,workspace_entities.type_id from workspace_entities
             where parent_id is null
             (internalCondition)
             (extraCondition)
             limit @limit offset @offset
         )
         UNION ALL
-        SELECT workspace_entities_cte.level+1,workspace_entities.unique_id, workspace_entities.parent_id,workspace_entities.visibility,workspace_entities.updated,workspace_entities.created,workspace_entities.description,workspace_entities.name,workspace_entities.type_id
+        SELECT workspace_entities_cte.level+1,workspace_entities.unique_id, workspace_entities.parent_id,workspace_entities.visibility,workspace_entities.updated_at,workspace_entities.created_at,workspace_entities.description,workspace_entities.name,workspace_entities.type_id
             FROM workspace_entities JOIN workspace_entities_cte ON workspace_entities.parent_id=workspace_entities_cte.unique_id
             ORDER BY 2 DESC
         )
     SELECT DISTINCT
         workspace_entities_cte.level,
         workspace_entities_cte.unique_id,
-        workspace_entities_cte.parent_id,workspace_entities_cte.visibility,workspace_entities_cte.updated,workspace_entities_cte.created,workspace_entities_cte.description
+        workspace_entities_cte.parent_id,workspace_entities_cte.visibility,workspace_entities_cte.updated_at,workspace_entities_cte.created_at,workspace_entities_cte.description
 ,workspace_entities_cte.name
 ,workspace_entities_cte.type_id
         FROM workspace_entities_cte
@@ -45,7 +45,7 @@
             )
         select 
             workspace_entities_cte.unique_id,
-            workspace_entities_cte.parent_id,workspace_entities_cte.visibility,workspace_entities_cte.updated,workspace_entities_cte.created,workspace_entities_cte.description
+            workspace_entities_cte.parent_id,workspace_entities_cte.visibility,workspace_entities_cte.updated_at,workspace_entities_cte.created_at,workspace_entities_cte.description
 ,workspace_entities_cte.name
 ,workspace_entities_cte.type_id
         from workspace_entities_cte

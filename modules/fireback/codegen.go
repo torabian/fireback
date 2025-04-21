@@ -2932,8 +2932,8 @@ func (x *Module3Entity) GetSqlFields() []string {
 	items := []string{
 		"template_entities.parent_id",
 		"template_entities.visibility",
-		"template_entities.updated",
-		"template_entities.created",
+		"template_entities.updated_at",
+		"template_entities.created_at",
 	}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
@@ -2951,7 +2951,7 @@ func (x *Module3Entity) GetSqlFields() []string {
 }
 
 func (x *Module3Entity) GetSqlFieldNames() []string {
-	items := []string{"parent_id", "visibility", "updated", "created"}
+	items := []string{"parent_id", "visibility", "updated_at", "created_at"}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
 			continue
@@ -2972,8 +2972,8 @@ func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 	items := []string{
 		"template_entities_cte.parent_id",
 		"template_entities_cte.visibility",
-		"template_entities_cte.updated",
-		"template_entities_cte.created",
+		"template_entities_cte.updated_at",
+		"template_entities_cte.created_at",
 	}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
