@@ -554,8 +554,8 @@ func (x *Module3Entity) DataFields() Module3DataFields {
 		data = Module3DataFields{
 			Essentials:       true,
 			PrimaryId:        true,
-			NumericTimestamp: true,
-			DateTimestamp:    false,
+			NumericTimestamp: false,
+			DateTimestamp:    true,
 		}
 
 		return data

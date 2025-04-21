@@ -2,7 +2,17 @@
 
 Shift to user user interface provided for the admin and new projects.
 
-- [ ] Auto completion for seeder and mock files, as well as casting tree to array in yaml files
+- [x] Extensive testing for http json requests, to match the json and more
+- [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
+- [x] Revise the event system completely and make sure that the scenario of multiple instances works fine
+    with socket connection, test it in docker with multiple instances and remember each user
+    with correct session id. 
+- [x] VAPID integration with Web Push notification
+- [ ] Explore the audio streams and how they work to have endpoints
+- [ ] Improve the Android (Kotlin) SDK
+- [ ] Add replica option for the ClickHouse
+- [ ] Test with SQL Server, and check if there is easy way to integrate it.
+- [ ] Casting tree in yaml files to read the children and automatically assign the parent id.
 - [ ] Include the desktop kit.
 - [ ] Demo with integration with Nest.js for authentication
 - [ ] Add internal captcha alongside with recaptcha 3
@@ -14,16 +24,6 @@ Shift to user user interface provided for the admin and new projects.
 - [ ] Add the tabs in the project
 - [ ] Add the drawer in the project with promise/resolve/reject
 - [ ] Prepare react pre-templates. For lists, single form, single view screen, single tabbed screen, wizard
-- [ ] Explore the audio streams and how they work to have endpoints
-- [ ] Extensive testing for http json requests, to match the json and more
-
-# v1.2.2
-
-Goal of this version is to improve the fireback backend mostly, not the UI or usecases.
-The plan is the backend be perfect, and can generate major code for front-end technologies
-and reduce the time in between.
-
-- [x] Form demo, date, datetime, daterange, datetimerange components on react.
 - [ ] Review the nested modules generated and their behavior on the front-end
 - [ ] Make sure the query params, headers, url params are available and accessible via generated sdk
 - [ ] Improve the SDK with more functions, specially on react.js one it has some dead code, remove, and comment everything
@@ -31,9 +31,6 @@ and reduce the time in between.
 - [ ] Improve the SwiftUI codegen, test it via github actions
 - [ ] Streaming content such as audio or video
 - [ ] Autoscaling for the project demo to queue every request.
-- [ ] Revise the event system completely and make sure that the scenario of multiple instances works fine
-        with socket connection, test it in docker with multiple instances and remember each user
-        with correct session id. 
 - [ ] Extensive test for the socket connection and changes coming from server to be reflected on UI.
 - [ ] Revise the code generated for the typescript, specially fields on nested objects to have the path.
 - [ ] Add the replica option for the clickhouse for time series data, investigate the time series formats.
@@ -42,7 +39,6 @@ and reduce the time in between.
 - [ ] Generate the typings for the queries.
 - [ ] Passports list UI for manage
 - [ ] Bring the Arura functionality from a legacy project, make it default available on child projects with a sample.
-- [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
 - [ ] On react UI ask for signout instead of immediate signout
 - [ ] Add demo to add extra configuration for child project env files
 - [ ] Document the file upload system, allow integration with S3.
@@ -53,49 +49,3 @@ and reduce the time in between.
 - [ ] Document better the reactive actions, and make them custom types other than string only.
 - [ ] Unify the exporting mechanism for both cli and http, to get output in csv, json, and yaml formats.
 - [ ] Revise the notifications service, use integrate email service the same in otp
-
-# v1.2.1
-
-The changes planned for 1.2.1 are the following:
-
-- [x] Separate the build flows on github actions, create 2 test flow for app on mysql and sqlite
-- [x] Test and fix the issues with exporting
-- [x] Use nullable values across the project
-- [x] Make sure capabilities use . instead of slash, and add title/description to all
-- [x] Complete all functions to use optional override functions for EntityActions instead of direct function
-- [x] React.js sidebar bugfix on mobile, also fix the pull to refresh plugin.
-- [x] Build the capacitor version as well on the githubactions for android.
-- [x] Fix the child project OpenAPI documentation
-- [x] Disable the ID numeric primary key in the entities
-- [x] Self service user can change the password
-- [x] Add duration field type into the fireback
-- [x] React Native login using self-service
-- [x] Black overlay on some cases on react.js
-- [x] WorkspaceType, WorkspaceConfig, SelfService UIs
-- [x] Complete the Root menu
-- [x] Refactor front-end code into selfservice and manage
-- [x] Add google authentication
-- [x] Remove test command internally, and plan for testing product beforehand.
-- [x] Interface to manage users for Workspace Admin and root.
-- [x] Add vite React.js project demo with self service portal
-- [x] Role creation needs to be shortened to the role that user specific permissions, or admin only can create new roles.
-- [x] Allow customization of the token reading/creation scenario, for microservice projects.
-- [x] Add production flag, and disable mock, wipe, delete functionality.
-- [x] New data table and sorting fix, with mapping query string in golang, cli and http mapping
-
-# v1.1.28
-
-Add's the React.js and React native project building. For example:
-
-To create a 'front-end' folder inside project with react.js:
-```
-fireback new --ui
-```
-
-Similar, you can add also a react native project inside the new project:
-```
-fireback new --mobile
-```
-
-Both projects will have a similar structure, and include a copy of fireback UI components,
-hooks, and you can modify them.

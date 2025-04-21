@@ -23,6 +23,7 @@ import (
 	"log"
 	reflect "reflect"
 	"strings"
+	"time"
 )
 
 var timezoneGroupSeedersFs = &seeders.ViewsFs
@@ -74,16 +75,16 @@ type TimezoneGroupUtcItems struct {
 	// Unique id in the post body, it will be used. This mechanism allows to manage unsaved
 	// content on front-end much easier than requiring parent to exists first.
 	UniqueId string `json:"uniqueId,omitempty" xml:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
-	// The time that the record has been created in nano-seconds.
+	// The time that the record has been updated in datetime.
 	// the field will be automatically populated by gorm orm.
-	Created int64 `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	// The time that the record has been updated in nano-seconds.
+	UpdatedAt *time.Time `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
+	// The time that the record has been created in datetime.
 	// the field will be automatically populated by gorm orm.
-	Updated int64 `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
-	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano seconds
+	CreatedAt *time.Time `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty"`
+	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
 	// you need to make sure check this field if writing custom sql queries.
 	// the field will be automatically populated by gorm orm.
-	Deleted int64 `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
+	DeletedAt *time.Time `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
 	// Record creation date time formatting based on locale of the headers, or other
 	// possible factors.
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
@@ -181,16 +182,16 @@ type TimezoneGroupEntity struct {
 	// Unique id in the post body, it will be used. This mechanism allows to manage unsaved
 	// content on front-end much easier than requiring parent to exists first.
 	UniqueId string `json:"uniqueId,omitempty" xml:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
-	// The time that the record has been created in nano-seconds.
+	// The time that the record has been updated in datetime.
 	// the field will be automatically populated by gorm orm.
-	Created int64 `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty" gorm:"autoUpdateTime:nano"`
-	// The time that the record has been updated in nano-seconds.
+	UpdatedAt *time.Time `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
+	// The time that the record has been created in datetime.
 	// the field will be automatically populated by gorm orm.
-	Updated int64 `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
-	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano seconds
+	CreatedAt *time.Time `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty"`
+	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
 	// you need to make sure check this field if writing custom sql queries.
 	// the field will be automatically populated by gorm orm.
-	Deleted int64 `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
+	DeletedAt *time.Time `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
 	// Record creation date time formatting based on locale of the headers, or other
 	// possible factors.
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
@@ -368,12 +369,6 @@ func TimezoneGroupUtcItemsActionGetOne(
 func entityTimezoneGroupFormatter(dto *TimezoneGroupEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
-	}
-	if dto.Created > 0 {
-		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Created, query)
-	}
-	if dto.Updated > 0 {
-		dto.CreatedFormatted = fireback.FormatDateBasedOnQuery(dto.Updated, query)
 	}
 }
 func TimezoneGroupActionSeederMultiple(query fireback.QueryDSL, count int) {

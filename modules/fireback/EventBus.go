@@ -3,7 +3,6 @@ package fireback
 import (
 	"context"
 	"fmt"
-	"log"
 )
 
 var ctx = context.Background()
@@ -17,7 +16,6 @@ func GetEventBusInstance() InstanceUserSocketManager {
 func StartEventBus() {
 
 	if config.RedisEventsUrl == "" {
-		log.Default().Println("Event bus is not enabled (redisEventsUrl is missing). Using internal")
 		instance = NewLocalEventManager()
 
 		return

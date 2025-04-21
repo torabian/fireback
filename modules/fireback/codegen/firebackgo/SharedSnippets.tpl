@@ -161,16 +161,16 @@ import  "{{ $key}}"
     {{ if $v.DataFields.DateTimestamp }}
     // The time that the record has been updated in datetime.
     // the field will be automatically populated by gorm orm.
-    Updated          *time.Time                           `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
+    UpdatedAt          *time.Time                           `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
 
     // The time that the record has been created in datetime.
     // the field will be automatically populated by gorm orm.
-    Created          *time.Time                           `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty"`
+    CreatedAt          *time.Time                           `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty"`
 
     // The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
     // you need to make sure check this field if writing custom sql queries.
     // the field will be automatically populated by gorm orm.
-    Deleted          *time.Time                           `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
+    DeletedAt          *time.Time                           `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
     {{ end }}
 
     // Record creation date time formatting based on locale of the headers, or other
