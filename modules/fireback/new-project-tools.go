@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	tmplAndroid "github.com/torabian/fireback/modules/fireback/codegen/android"
 	tmplCordova "github.com/torabian/fireback/modules/fireback/codegen/capacitor"
-	tmplManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	tmpl "github.com/torabian/fireback/modules/fireback/codegen/go-new"
 	tmplIos "github.com/torabian/fireback/modules/fireback/codegen/ios"
 	tmplReactNative "github.com/torabian/fireback/modules/fireback/codegen/react-native-new"
@@ -315,10 +314,6 @@ func NewProjectCli() cli.Command {
 
 			if ctx.CreateIOSProject {
 				newProjectContentWriter(tmplIos.IosProjectTmpl, ctx, "ios")
-			}
-
-			if ctx.FirebackManage {
-				newProjectContentWriter(tmplManage.FirebackManageTmpl, ctx, path.Join("cmd", ctx.Name+"-server", "manage"))
 			}
 
 			if ctx.CreateAndroidProject {
