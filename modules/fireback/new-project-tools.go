@@ -202,6 +202,9 @@ func NewProjectCli() cli.Command {
 				}
 
 				ctx.Path = AskForInput("Name of the folder which will be generated", ctx.Name)
+				if ctx.Description == "" {
+					ctx.Description = "Built with fireback :)"
+				}
 				ctx.Description = AskForInput("Any description for the project created", ctx.Description)
 
 				if r := AskForSelect("Do you want to have front-end project in react.js?", []string{"yes", "no"}); r == "yes" {

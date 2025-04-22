@@ -32,13 +32,6 @@ var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
 var PRODUCT_DESCRIPTION = "{{ .ctx.Description }}"
 var PRODUCT_LANGUAGES = []string{"en"}
 
-{{ if .ctx.FirebackManage }}
-
-//go:embed all:manage
-var manageui embed.FS
-
-{{ end }}
-
 {{ if .ctx.CreateReactProject }}
 
 //go:embed all:ui
