@@ -112,6 +112,6 @@ var KotlinGenCatalog CodeGenCatalog = CodeGenCatalog{
 		// }
 	},
 
-	EntityDiskName: JavaEntityDiskName,
-	DtoDiskName:    JavaDtoDiskName,
+	EntityDiskName: KotlinEntityDiskName,
+	DtoDiskName:    KotlinDtoDiskName,
 }
