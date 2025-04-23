@@ -1,7 +1,6 @@
 name: fireback
 meta-workspace: true
 config:
-
   - name: production
     type: bool
     description: 
