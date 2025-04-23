@@ -26,6 +26,18 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
+var StreamAudio2SecurityModel *fireback.SecurityModel = nil
+var StreamAudio2ActionImp = fireback.DefaultEmptyReactiveAction
+
+// Reactive action does not have that
+var StreamAudio2ActionCmd cli.Command = cli.Command{
+	Name:  "stream-audio2",
+	Usage: ``,
+	Action: func(c *cli.Context) {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, StreamAudio2SecurityModel)
+		fireback.CliReactivePipeHandler(query, StreamAudio2ActionImp)
+	},
+}
 var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
 
 type osLoginAuthenticateActionImpSig func(
@@ -1627,6 +1639,21 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		{
+			Method:        "REACTIVE",
+			Url:           "/audiostream",
+			SecurityModel: StreamAudio2SecurityModel,
+			Name:          "streamAudio2",
+			Description:   "",
+			Handlers: []gin.HandlerFunc{
+				fireback.ReactiveSocketHandler(StreamAudio2ActionImp),
+			},
+			Format:         "REACTIVE",
+			ResponseEntity: string(""),
+			Out: &fireback.Module3ActionBody{
+				Entity: "",
+			},
+		},
+		{
 			Method:        "GET",
 			Url:           "/passports/os/login",
 			SecurityModel: OsLoginAuthenticateSecurityModel,
@@ -2128,6 +2155,7 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
+	StreamAudio2ActionCmd,
 	OsLoginAuthenticateActionCmd,
 	AcceptInviteActionCmd,
 	OauthAuthenticateActionCmd,
@@ -2160,6 +2188,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		StreamAudio2ActionCmd,
 		OsLoginAuthenticateActionCmd,
 		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,

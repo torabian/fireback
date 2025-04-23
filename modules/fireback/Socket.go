@@ -2,9 +2,11 @@ package fireback
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -114,4 +116,52 @@ func SocketConnectEndpoint(c *gin.Context) {
 
 func HandleSocket(e *gin.Engine) {
 	e.Any("ws", SocketConnectEndpoint)
+}
+
+// General purpose reader from socket and writer into a io.Writer.
+// could be used for sending audio, video, or actually any other file over web socket.
+// output channel is not used, to make it similar to other reactive functionality we
+// need to return that empty output channel and make sure closing it, maybe later we need it.
+func StreamToWriter(done chan bool, read chan []byte, writer io.Writer) (chan []byte, error) {
+	out := make(chan []byte)
+
+	go func() {
+		defer close(out)
+		for {
+			select {
+			case msg, ok := <-read:
+				if !ok {
+					return
+				}
+				writer.Write(msg) // you could add error check if needed
+			case <-done:
+				return
+			}
+		}
+	}()
+
+	return out, nil
+}
+
+// Stream incoming socket into a file. Here is a front-end sample:
+//
+//	async function startStreaming() {
+//		const ws = new WebSocket("ws://localhost:4500/audiostream");
+//		const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+//		const recorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp8,opus' });
+//			recorder.ondataavailable = (e) => {
+//				if (e.data.size > 0) {
+//					e.data.arrayBuffer().then(buf => ws.send(buf)); // no prefix needed
+//				}
+//			};
+//			recorder.start(250);
+//		   document.getElementById("preview").srcObject = stream;
+//		}
+func SocketStreamToFile(done chan bool, read chan []byte, fileAddressOnDisk string) (chan []byte, error) {
+	file, err := os.Create(fileAddressOnDisk)
+	if err != nil {
+		return nil, err
+	}
+
+	return StreamToWriter(done, read, file)
 }

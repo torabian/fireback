@@ -13,8 +13,8 @@ import (
 
 type BackgroundReactiveProcess struct {
 	Done      chan bool
-	Read      chan string
-	Listeners []func(*string)
+	Read      chan []byte
+	Listeners []func([]byte)
 	Group     string
 }
 
@@ -24,11 +24,11 @@ func (x *BackgroundReactiveProcess) Terminate() {
 	close(x.Done)
 }
 
-func (x *BackgroundReactiveProcess) AttachListener(listener func(*string)) {
+func (x *BackgroundReactiveProcess) AttachListener(listener func([]byte)) {
 	x.Listeners = append(x.Listeners, listener)
 }
 
-func (x *BackgroundReactiveProcess) Send(v string) {
+func (x *BackgroundReactiveProcess) Send(v []byte) {
 	x.Read <- v
 }
 
@@ -41,11 +41,11 @@ func BeginOrAttachOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReac
 	return BeginOperation(query, fn)
 }
 
-type BackgroundOptFn func(query QueryDSL, done chan bool, read chan string) (chan *string, error)
+type BackgroundOptFn func(query QueryDSL, done chan bool, read chan []byte) (chan []byte, error)
 
 func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProcess, error) {
 	done := make(chan bool)
-	read := make(chan string)
+	read := make(chan []byte)
 	ref := query.UniqueId
 
 	act, err := fn(query, done, read)
@@ -57,7 +57,7 @@ func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProc
 		Done:      done,
 		Read:      read,
 		Group:     "ControlSheet",
-		Listeners: []func(*string){},
+		Listeners: []func([]byte){},
 	}
 
 	go func() {
@@ -89,28 +89,28 @@ func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProc
 
 func ReactiveSocketHandler(factory func(
 	query QueryDSL, done chan bool,
-	read chan string,
-) (chan *string, error)) gin.HandlerFunc {
+	read chan []byte,
+) (chan []byte, error)) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
-		HttpSocketRequest(ctx, func(query QueryDSL, write func(string)) {
-			opt, err := BeginOrAttachOperation(query, factory)
-			fmt.Println("Err:", err)
-			opt.AttachListener(func(s *string) {
-				write(*s)
+		HttpSocketRequest(ctx, func(query QueryDSL, write func([]byte)) {
+			opt, _ := BeginOrAttachOperation(query, factory)
+			// @todo: error not handled
+			opt.AttachListener(func(s []byte) {
+				write(s)
 			})
 
 		}, func(query QueryDSL, i interface{}) {
-			opt, err := BeginOrAttachOperation(query, factory)
-			fmt.Println("Err:", err)
-			var kv string = i.(string)
+			opt, _ := BeginOrAttachOperation(query, factory)
+			// @todo: error not handled
+			var kv []byte = i.([]byte)
 			opt.Send(kv)
 		})
 
 	}
 }
 
-func sendStringWithInterval(ctx context.Context, interval time.Duration, out chan *string) {
+func sendStringWithInterval(ctx context.Context, interval time.Duration, out chan []byte) {
 
 	for {
 		select {
@@ -119,7 +119,7 @@ func sendStringWithInterval(ctx context.Context, interval time.Duration, out cha
 		default:
 
 			js := "Hello :)"
-			out <- &js
+			out <- []byte(js)
 			time.Sleep(time.Millisecond * 1000)
 		}
 	}
@@ -130,10 +130,10 @@ func sendStringWithInterval(ctx context.Context, interval time.Duration, out cha
 func DefaultEmptyReactiveAction(
 	query QueryDSL,
 	done chan bool,
-	read chan string,
-) (chan *string, error) {
+	read chan []byte,
+) (chan []byte, error) {
 
-	stream := make(chan *string)
+	stream := make(chan []byte)
 
 	go func() {
 		var ctx context.Context = nil
@@ -170,7 +170,7 @@ func DefaultEmptyReactiveAction(
 
 func CliReactivePipeHandler(query QueryDSL, fn BackgroundOptFn) {
 	done := make(chan bool)
-	read := make(chan string)
+	read := make(chan []byte)
 
 	out, err := fn(query, done, read)
 
@@ -197,7 +197,7 @@ func CliReactivePipeHandler(query QueryDSL, fn BackgroundOptFn) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
-		text := scanner.Text()
+		text := scanner.Bytes()
 		read <- text
 	}
 

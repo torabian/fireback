@@ -1,6 +1,9 @@
 name: abac
 actions:
 
+  - name: streamAudio2
+    method: reactive
+    url: /audiostream
 
   - name: osLoginAuthenticate
     method: get
