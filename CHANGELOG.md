@@ -8,8 +8,10 @@ Shift to user user interface provided for the admin and new projects.
     with socket connection, test it in docker with multiple instances and remember each user
     with correct session id. 
 - [x] VAPID integration with Web Push notification
+- [ ] Improve the Android (Kotlin) SDK - generate specifically reactive method due to usage in dashboard
 - [ ] Explore the audio streams and how they work to have endpoints
-- [ ] Improve the Android (Kotlin) SDK
+- [ ] Make sure the eventBus sockets is generated via fireback reactive method.
+- [ ] Webrtc audio streaming options, and video options
 - [ ] Add replica option for the ClickHouse
 - [ ] Test with SQL Server, and check if there is easy way to integrate it.
 - [ ] Casting tree in yaml files to read the children and automatically assign the parent id.
@@ -19,6 +21,7 @@ Shift to user user interface provided for the admin and new projects.
 - [ ] Work on the user invitation accepting and joining to workspace, all the scenarios.
 - [ ] Self service user can change the phone number or email address
 - [ ] Self service can delete account
+- [ ] Create notification rules mechanism, to define when a notification needs to be created based on some logic
 - [ ] Self service can quite from workspace
 - [ ] Allow project init to contain the workspace modules into the new project and be independent of the original fireback project.
 - [ ] Add the tabs in the project
