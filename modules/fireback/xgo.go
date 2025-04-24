@@ -46,7 +46,6 @@ type FirebackApp struct {
 
 	// runs TUS resumable upload server on a separate port
 	RunTus               func()
-	RunSocket            func(*gin.Engine)
 	InjectSearchEndpoint func(*gin.Engine, *FirebackApp)
 	SetupWebServerHook   func(*gin.Engine, *FirebackApp)
 	SearchProviders      []SearchProviderFn
@@ -299,10 +298,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	if x.SetupWebServerHook != nil {
 		x.SetupWebServerHook(r, x)
-	}
-
-	if x.RunSocket != nil {
-		x.RunSocket(r)
 	}
 
 	if x.InjectSearchEndpoint != nil {

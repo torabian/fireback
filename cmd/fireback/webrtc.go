@@ -11,6 +11,8 @@ import (
 	webrtc "github.com/pion/webrtc/v3"
 )
 
+// e.POST("/webrtc/offer", WebRTCOfferHandler)
+
 func WebRTCOfferHandler(c *gin.Context) {
 	var offer webrtc.SessionDescription
 	if err := c.ShouldBindJSON(&offer); err != nil {

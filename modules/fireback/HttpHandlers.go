@@ -117,7 +117,7 @@ func HttpReactiveQuery[T any](ctx *gin.Context, fn func(QueryDSL, chan bool, cha
 
 }
 
-func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, interface{})) {
+func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, SocketReadChan)) {
 	f := ExtractQueryDslFromGinContext(ctx)
 
 	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -128,13 +128,20 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead
 		return
 	}
 
+	f.RawSocketConnection = c
+
 	go func() {
 		for {
 			_, k, err := c.ReadMessage()
+
+			onRead(f, SocketReadChan{
+				Data:  k,
+				Error: err,
+			})
+
 			if err != nil {
 				return
 			}
-			onRead(f, (k))
 		}
 	}()
 

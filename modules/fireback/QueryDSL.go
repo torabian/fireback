@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 )
 
@@ -31,6 +32,9 @@ type QueryDSL struct {
 	// Useful when querying against a single element, and by passing
 	// uniqueId you can retrieve the record
 	UniqueId string `json:"uniqueId"`
+
+	// Sometimes you need to access the raw socket connection, here there is :)
+	RawSocketConnection *websocket.Conn
 
 	// It would indicate to the Gorm orm which tables to be included in the
 	// SQL search.

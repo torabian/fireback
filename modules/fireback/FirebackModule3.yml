@@ -178,7 +178,7 @@ messages:
 actions:
   - name: eventBusSubscription
     method: reactive
-    url: /ws2
+    url: /ws
     security:
       resolveStrategy: user
   - name: listCapabilities

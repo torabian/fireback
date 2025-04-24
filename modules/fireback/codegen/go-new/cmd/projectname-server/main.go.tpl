@@ -69,9 +69,6 @@ var xapp = &fireback.FirebackApp{
 	},
 	{{ if ne .ctx.IsMonolith true }}
 	*/
-	RunSocket: func(e *gin.Engine) {
-		fireback.HandleSocket(e)
-	},
 	{{ end }}
 	InjectSearchEndpoint:     fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{

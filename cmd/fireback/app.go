@@ -35,10 +35,6 @@ var xapp = &fireback.FirebackApp{
 	RunTus: func() {
 		abac.LiftTusServer()
 	},
-	RunSocket: func(e *gin.Engine) {
-		// e.POST("/webrtc/offer", WebRTCOfferHandler)
-		fireback.HandleSocket(e)
-	},
 	InjectSearchEndpoint: fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.

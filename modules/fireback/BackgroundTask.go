@@ -13,7 +13,7 @@ import (
 
 type BackgroundReactiveProcess struct {
 	Done      chan bool
-	Read      chan []byte
+	Read      chan SocketReadChan
 	Listeners []func([]byte)
 	Group     string
 }
@@ -28,7 +28,7 @@ func (x *BackgroundReactiveProcess) AttachListener(listener func([]byte)) {
 	x.Listeners = append(x.Listeners, listener)
 }
 
-func (x *BackgroundReactiveProcess) Send(v []byte) {
+func (x *BackgroundReactiveProcess) Send(v SocketReadChan) {
 	x.Read <- v
 }
 
@@ -41,11 +41,11 @@ func BeginOrAttachOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReac
 	return BeginOperation(query, fn)
 }
 
-type BackgroundOptFn func(query QueryDSL, done chan bool, read chan []byte) (chan []byte, error)
+type BackgroundOptFn func(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error)
 
 func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProcess, error) {
 	done := make(chan bool)
-	read := make(chan []byte)
+	read := make(chan SocketReadChan)
 	ref := query.UniqueId
 
 	act, err := fn(query, done, read)
@@ -89,7 +89,7 @@ func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProc
 
 func ReactiveSocketHandler(factory func(
 	query QueryDSL, done chan bool,
-	read chan []byte,
+	read chan SocketReadChan,
 ) (chan []byte, error)) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
@@ -100,11 +100,10 @@ func ReactiveSocketHandler(factory func(
 				write(s)
 			})
 
-		}, func(query QueryDSL, i interface{}) {
+		}, func(query QueryDSL, i SocketReadChan) {
 			opt, _ := BeginOrAttachOperation(query, factory)
-			// @todo: error not handled
-			var kv []byte = i.([]byte)
-			opt.Send(kv)
+
+			opt.Send(i)
 		})
 
 	}
@@ -130,7 +129,7 @@ func sendStringWithInterval(ctx context.Context, interval time.Duration, out cha
 func DefaultEmptyReactiveAction(
 	query QueryDSL,
 	done chan bool,
-	read chan []byte,
+	read chan SocketReadChan,
 ) (chan []byte, error) {
 
 	stream := make(chan []byte)
@@ -170,7 +169,7 @@ func DefaultEmptyReactiveAction(
 
 func CliReactivePipeHandler(query QueryDSL, fn BackgroundOptFn) {
 	done := make(chan bool)
-	read := make(chan []byte)
+	read := make(chan SocketReadChan)
 
 	out, err := fn(query, done, read)
 
@@ -198,7 +197,9 @@ func CliReactivePipeHandler(query QueryDSL, fn BackgroundOptFn) {
 
 	for scanner.Scan() {
 		text := scanner.Bytes()
-		read <- text
+		read <- SocketReadChan{
+			Data: text,
+		}
 	}
 
 	if err := scanner.Err(); err != nil {

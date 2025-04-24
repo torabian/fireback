@@ -109,7 +109,7 @@ func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
 			Method:        "REACTIVE",
-			Url:           "/ws2",
+			Url:           "/ws",
 			SecurityModel: EventBusSubscriptionSecurityModel,
 			Name:          "eventBusSubscription",
 			Description:   "",
