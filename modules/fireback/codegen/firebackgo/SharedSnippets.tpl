@@ -1564,6 +1564,16 @@ func {{ .e.Upper }}ActionImport(
 		Type: "int64",
 	},
 	{{ end }}
+  {{ if or (eq .Type "int") }}
+	{
+		Name:     "{{ $prefix }}{{ .Name}}",
+		StructField:     "{{ $prefix }}{{ .PublicName }}",
+		Required: {{ .IsRequired }},
+    Recommended: {{ .IsRecommended }},
+    Usage:    `{{ .ComputedCliDescription}}`,
+		Type: "int",
+	},
+	{{ end }}
   {{ if or (eq .Type "float64") }}
 	{
 		Name:     "{{ $prefix }}{{ .Name}}",
@@ -1641,6 +1651,17 @@ func {{ .e.Upper }}ActionImport(
 
     {{ if or (eq .Type "int64")}}
     &cli.Int64Flag{
+      Name:     "{{ $prefix }}{{ .ComputedCliName }}",
+      Required: {{ .IsRequired }},
+      Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
+      {{ if .Default }}
+      Value: {{ .Default }},
+      {{ end }}
+    },
+    {{ end }}
+ 
+    {{ if or (eq .Type "int")}}
+    &cli.IntFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
       Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
@@ -1889,6 +1910,12 @@ type x{{$prefix}}{{ .PublicName}} struct {
     {{ if or (eq .Type "int64") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.Int64("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }} = value
+      }
+	  {{ end }}
+    {{ if or (eq .Type "int") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.Int("{{ $prefix }}{{ .ComputedCliName }}")
         template.{{ .PublicName }} = value
       }
 	  {{ end }}
@@ -3123,7 +3150,11 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                     // {{ .FormatComputed }} - {{ .Method }}
                     
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
+                      {{ if .In }}
                         {{ $wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
+                      {{ else }}
+                        {{ $wsprefix }}HttpPost(c, {{ .Upper }}ActionFn)
+                      {{ end }}
                     {{ end }}
                     {{ if or (eq .FormatComputed "QUERY")}}
                         {{ $wsprefix }}HttpQueryEntity2(c, {{ .Upper }}ActionFn)

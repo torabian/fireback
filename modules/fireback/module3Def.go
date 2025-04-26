@@ -464,7 +464,7 @@ type Module3Action struct {
 	Url string `yaml:"url,omitempty" json:"url,omitempty" jsonschema:"description=HTTP route of the action; if not specified the action is CLI-only"`
 
 	// HTTP method type including standard and Fireback-specific methods.
-	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
+	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=webrtc,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
 
 	// Type-safe query strings for action
 	Query []*Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`

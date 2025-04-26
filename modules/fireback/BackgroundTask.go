@@ -125,6 +125,14 @@ func sendStringWithInterval(ctx context.Context, interval time.Duration, out cha
 
 }
 
+type WebRtcSignal struct{}
+
+func WebRtcAction(
+	query QueryDSL,
+) (*WebRtcSignal, error) {
+	return nil, nil
+}
+
 // This is a sample which will be used as default action for reactive items
 func DefaultEmptyReactiveAction(
 	query QueryDSL,

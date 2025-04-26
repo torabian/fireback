@@ -150,6 +150,18 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead
 	})
 }
 
+func HttpPost[V any](c *gin.Context, fn func(QueryDSL) (V, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
+
+	if result, err := fn(f); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+	} else {
+		c.JSON(200, gin.H{
+			"data": result,
+		})
+	}
+}
+
 func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
