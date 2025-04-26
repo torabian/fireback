@@ -185,6 +185,15 @@ actions:
           type: int  
         - name: y
           type: int
+    dataChannels:
+      - name: ram
+        in: 
+          fields:
+          - name: ramUsage
+            type: int
+    tracks:
+      - name: microphoneAudio
+      - name: desktopAudio
     out:
       fields:
         - name: sessionDescription

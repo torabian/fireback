@@ -449,6 +449,13 @@ type Module3ActionBody struct {
 	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"Uses a primitive type instead such as a string or int64"`
 }
 
+type Module3WebRtcDataChannel struct {
+	// Name of the data channel in the webrtc.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the data channel in the webrtc"`
+
+	// Channel data which will be sent to.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Channel data which will be sent to"`
+}
 type Module3Action struct {
 
 	// General name of the action used for generating code and CLI commands.
@@ -471,6 +478,9 @@ type Module3Action struct {
 
 	// Typesafe headers for the action
 	Headers []Module3Field `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"description=Typesafe headers."`
+
+	// Data channels in a typesafe mode in case of webrtc
+	DataChannels []Module3WebRtcDataChannel `yaml:"dataChannels,omitempty" json:"dataChannels,omitempty" jsonschema:"description=Data channels in a typesafe mode in case of webrtc"`
 
 	// Action description used in API specs and documentation.
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Action description used in API specs and documentation"`

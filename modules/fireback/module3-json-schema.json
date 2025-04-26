@@ -201,6 +201,13 @@
           "type": "array",
           "description": "Typesafe headers."
         },
+        "dataChannels": {
+          "items": {
+            "$ref": "#/definitions/Module3WebRtcDataChannel"
+          },
+          "type": "array",
+          "description": "Data channels in a typesafe mode in case of webrtc"
+        },
         "description": {
           "type": "string",
           "description": "Action description used in API specs and documentation"
@@ -914,6 +921,20 @@
         "cron": {
           "type": "string",
           "description": "The 5-6 star standard cronjob described in https://en.wikipedia.org/wiki/Cron"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3WebRtcDataChannel": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the data channel in the webrtc"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Channel data which will be sent to"
         }
       },
       "additionalProperties": false,
