@@ -10,6 +10,23 @@ import {
 import {
     CapabilityEntity,
 } from "./CapabilityEntity"
+export class MousePositionCaptureActionReqDto {
+  public x?: number | null;
+  public y?: number | null;
+public static Fields = {
+      x: 'x',
+      y: 'y',
+}
+}
+export class MousePositionCaptureActionResDto {
+  /**
+  The webrtc session description result after signalling.
+  */
+  public sessionDescription?: string | null;
+public static Fields = {
+      sessionDescription: 'sessionDescription',
+}
+}
 export class CapabilitiesTreeActionResDto {
   public capabilities?: CapabilityEntity[] | null;
     capabilitiesListId?: string[] | null;

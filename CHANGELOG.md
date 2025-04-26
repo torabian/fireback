@@ -3,6 +3,7 @@
 Shift to user user interface provided for the admin and new projects.
 
 - [x] Extensive testing for http json requests, to match the json and more
+- [x] Make sure the eventBus sockets is generated via fireback reactive method.
 - [ ] Include the docurus, githubactions, and cypress test kits into the new projects created
 - [x] Revise the event system completely and make sure that the scenario of multiple instances works fine
     with socket connection, test it in docker with multiple instances and remember each user
@@ -10,7 +11,6 @@ Shift to user user interface provided for the admin and new projects.
 - [x] VAPID integration with Web Push notification
 - [ ] Improve the Android (Kotlin) SDK - generate specifically reactive method due to usage in dashboard
 - [ ] Explore the audio streams and how they work to have endpoints
-- [ ] Make sure the eventBus sockets is generated via fireback reactive method.
 - [ ] Webrtc audio streaming options, and video options
 - [ ] Add replica option for the ClickHouse
 - [ ] Test with SQL Server, and check if there is easy way to integrate it.

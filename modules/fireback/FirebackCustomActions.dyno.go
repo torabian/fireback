@@ -7,10 +7,94 @@ package fireback
  */
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pion/webrtc/v3"
 	"github.com/urfave/cli"
 )
 
 // using shared actions here
+var MousePositionCaptureSecurityModel *SecurityModel = nil
+
+type MousePositionCaptureActionReqDto struct {
+	Offer webrtc.SessionDescription `json:"offer" yaml:"offer"`
+	X     int                       `json:"x" xml:"x" yaml:"x"        `
+	Y     int                       `json:"y" xml:"y" yaml:"y"        `
+}
+
+func (x *MousePositionCaptureActionReqDto) RootObjectName() string {
+	return "Fireback"
+}
+
+var MousePositionCaptureCommonCliFlagsOptional = []cli.Flag{
+	&cli.IntFlag{
+		Name:     "x",
+		Required: false,
+		Usage:    `x (int)`,
+	},
+	&cli.IntFlag{
+		Name:     "y",
+		Required: false,
+		Usage:    `y (int)`,
+	},
+}
+
+func MousePositionCaptureActionReqValidator(dto *MousePositionCaptureActionReqDto) *IError {
+	err := CommonStructValidatorPointer(dto, false)
+	return err
+}
+func CastMousePositionCaptureFromCli(c *cli.Context) *MousePositionCaptureActionReqDto {
+	template := &MousePositionCaptureActionReqDto{}
+	if c.IsSet("x") {
+		value := c.Int("x")
+		template.X = value
+	}
+	if c.IsSet("y") {
+		value := c.Int("y")
+		template.Y = value
+	}
+	return template
+}
+
+type MousePositionCaptureActionResDto struct {
+	// The webrtc session description result after signalling.
+	SessionDescription *webrtc.SessionDescription `json:"sessionDescription" xml:"sessionDescription" yaml:"sessionDescription"        `
+}
+
+func (x *MousePositionCaptureActionResDto) RootObjectName() string {
+	return "Fireback"
+}
+
+type mousePositionCaptureActionImpSig func(
+	req *MousePositionCaptureActionReqDto,
+	q QueryDSL) (*MousePositionCaptureActionResDto,
+	*IError,
+)
+
+var MousePositionCaptureActionImp mousePositionCaptureActionImpSig
+
+func MousePositionCaptureActionFn(
+	req *MousePositionCaptureActionReqDto,
+	q QueryDSL,
+) (
+	*MousePositionCaptureActionResDto,
+	*IError,
+) {
+	if MousePositionCaptureActionImp == nil {
+		return nil, nil
+	}
+	return MousePositionCaptureActionImp(req, q)
+}
+
+var MousePositionCaptureActionCmd cli.Command = cli.Command{
+	Name:  "mouse-position-capture",
+	Usage: ``,
+	Flags: MousePositionCaptureCommonCliFlagsOptional,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, MousePositionCaptureSecurityModel)
+		dto := CastMousePositionCaptureFromCli(c)
+		result, err := MousePositionCaptureActionFn(dto, query)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var EventBusSubscriptionSecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "user",
@@ -108,6 +192,29 @@ var CapabilitiesTreeActionCmd cli.Command = cli.Command{
 func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
+			Method:        "POST",
+			Url:           "/mouseposition",
+			SecurityModel: MousePositionCaptureSecurityModel,
+			Name:          "mousePositionCapture",
+			Description:   "",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE - webrtc
+					HttpPostWebrtc(c, MousePositionCaptureActionImp)
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         MousePositionCaptureActionFn,
+			ResponseEntity: &MousePositionCaptureActionResDto{},
+			Out: &Module3ActionBody{
+				Entity: "MousePositionCaptureActionResDto",
+			},
+			RequestEntity: &MousePositionCaptureActionReqDto{},
+			In: &Module3ActionBody{
+				Entity: "MousePositionCaptureActionReqDto",
+			},
+		},
+		{
 			Method:        "REACTIVE",
 			Url:           "/ws",
 			SecurityModel: EventBusSubscriptionSecurityModel,
@@ -164,6 +271,7 @@ func FirebackCustomActions() []Module3Action {
 }
 
 var FirebackCustomActionsCli = []cli.Command{
+	MousePositionCaptureActionCmd,
 	EventBusSubscriptionActionCmd,
 	ListCapabilitiesActionCmd,
 	CapabilitiesTreeActionCmd,
@@ -176,6 +284,7 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		MousePositionCaptureActionCmd,
 		EventBusSubscriptionActionCmd,
 		ListCapabilitiesActionCmd,
 		CapabilitiesTreeActionCmd,

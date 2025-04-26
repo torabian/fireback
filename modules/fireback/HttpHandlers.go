@@ -185,6 +185,24 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 	}
 }
 
+func HttpPostWebrtc[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
+
+	var body T
+
+	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
+		return
+	}
+
+	if entity, err := fn(body, f); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+	} else {
+		c.JSON(200, gin.H{
+			"data": entity,
+		})
+	}
+}
+
 func HttpStreamFileChannel(
 	c *gin.Context,
 	fn func(query QueryDSL) (chan []byte, *IError),

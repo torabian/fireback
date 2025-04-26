@@ -176,6 +176,20 @@ messages:
   invalidFormDataContentType:
     en: The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.
 actions:
+  - name: mousePositionCapture
+    url: /mouseposition
+    method: webrtc
+    in:
+      fields:
+        - name: x
+          type: int  
+        - name: y
+          type: int
+    out:
+      fields:
+        - name: sessionDescription
+          description: The webrtc session description result after signalling.
+
   - name: eventBusSubscription
     method: reactive
     url: /ws
