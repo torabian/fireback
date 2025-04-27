@@ -3163,6 +3163,10 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                     {{ if or (eq .FormatComputed "GET_ONE")}}
                         {{ $wsprefix }}HttpGetEntity(c, {{ .Upper }}ActionFn)
                     {{ end }}
+                    
+                    {{ if or (eq .MethodUpper "WEBRTC")}}
+                        {{ $wsprefix }}HttpPostWebrtc(c, {{ .Upper }}ActionFn)
+                    {{ end }}
                 },
                 {{ end }}
 			},
