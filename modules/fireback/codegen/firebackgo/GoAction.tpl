@@ -11,6 +11,10 @@ import (
     {{ if .m.Actions}}
 	"github.com/gin-gonic/gin"
     {{ end }}
+
+    {{ range .m.ActionsCustomImport }}
+    "{{ .}}"
+    {{ end }}
     "github.com/urfave/cli"
     {{ if ne .wsprefix "" }}
 	"github.com/torabian/fireback/modules/fireback"

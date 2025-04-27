@@ -23,6 +23,9 @@ type ErrorItem map[string]string
 // Module3 struct represents the entire file tree
 type Module3 struct {
 
+	// Custom imports appened by some macros
+	ActionsCustomImport []string
+
 	// Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks
 	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty" jsonschema:"description=Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"`
 

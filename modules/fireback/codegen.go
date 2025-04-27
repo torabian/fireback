@@ -1396,7 +1396,65 @@ func FeatureSetMacro(x *Module3) {
 	// Implement such logic here
 }
 
+// This one would add the webrtc requirement
+func WebrtcMacro(x *Module3) {
+	hasWebRtc := false
+	for _, action := range x.Actions {
+		if action.MethodUpper() == "WEBRTC" {
+			hasWebRtc = true
+			if action.In == nil {
+				action.In = &Module3ActionBody{}
+			}
+			if action.Out == nil {
+				action.Out = &Module3ActionBody{}
+			}
+
+			action.In.Fields = append(action.In.Fields, &Module3Field{
+				Name:   "offer",
+				Type:   "one",
+				Target: "webrtc.SessionDescription",
+			})
+
+			action.Out.Fields = append(action.Out.Fields, &Module3Field{
+				Name:   "sessionDescription",
+				Type:   "one",
+				Target: "webrtc.SessionDescription",
+			})
+		}
+	}
+
+	if hasWebRtc {
+		x.ActionsCustomImport = append(x.ActionsCustomImport, "github.com/pion/webrtc/v3")
+	}
+
+	for _, entity := range x.Entities {
+		for _, action := range entity.Actions {
+			if action.In == nil {
+				action.In = &Module3ActionBody{}
+			}
+			if action.Out == nil {
+				action.Out = &Module3ActionBody{}
+			}
+			action.In.Fields = append(action.In.Fields, &Module3Field{
+				Name:     "offer",
+				Type:     "one",
+				Target:   "webrtc.SessionDescription",
+				Provider: "github.com/pion/webrtc/v3",
+			})
+
+			action.Out.Fields = append(action.Out.Fields, &Module3Field{
+				Name:     "sessionDescription",
+				Type:     "one",
+				Target:   "webrtc.SessionDescription",
+				Provider: "github.com/pion/webrtc/v3",
+			})
+		}
+	}
+}
+
 func ComputeMacros(x *Module3) {
+	WebrtcMacro(x)
+
 	for _, item := range x.Macros {
 		if item.Using == "eav" {
 			EavMacro(item, x)
