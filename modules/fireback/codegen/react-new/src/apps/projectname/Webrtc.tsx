@@ -20,7 +20,6 @@ export const Webrtc = () => {
     await pc.setLocalDescription(offer);
 
     console.log(68, pc.localDescription);
-
     const res = await fetch("http://localhost:4500/webrtc/offer", {
       method: "POST",
       body: JSON.stringify(pc.localDescription),

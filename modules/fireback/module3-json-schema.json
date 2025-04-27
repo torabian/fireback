@@ -57,6 +57,12 @@
     },
     "Module3": {
       "properties": {
+        "ActionsCustomImport": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "namespace": {
           "type": "string",
           "description": "Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"
@@ -153,7 +159,10 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "ActionsCustomImport"
+      ]
     },
     "Module3Action": {
       "properties": {
@@ -182,6 +191,7 @@
             "post",
             "get",
             "delete",
+            "webrtc",
             "reactive"
           ],
           "description": "HTTP method type including standard and Fireback-specific methods"
@@ -199,6 +209,13 @@
           },
           "type": "array",
           "description": "Typesafe headers."
+        },
+        "dataChannels": {
+          "items": {
+            "$ref": "#/definitions/Module3WebRtcDataChannel"
+          },
+          "type": "array",
+          "description": "Data channels in a typesafe mode in case of webrtc"
         },
         "description": {
           "type": "string",
@@ -913,6 +930,20 @@
         "cron": {
           "type": "string",
           "description": "The 5-6 star standard cronjob described in https://en.wikipedia.org/wiki/Cron"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3WebRtcDataChannel": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the data channel in the webrtc"
+        },
+        "in": {
+          "$ref": "#/definitions/Module3ActionBody",
+          "description": "Channel data which will be sent to"
         }
       },
       "additionalProperties": false,

@@ -23,6 +23,9 @@ type ErrorItem map[string]string
 // Module3 struct represents the entire file tree
 type Module3 struct {
 
+	// Custom imports appened by some macros
+	ActionsCustomImport []string
+
 	// Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks
 	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty" jsonschema:"description=Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"`
 
@@ -449,6 +452,13 @@ type Module3ActionBody struct {
 	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"Uses a primitive type instead such as a string or int64"`
 }
 
+type Module3WebRtcDataChannel struct {
+	// Name of the data channel in the webrtc.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the data channel in the webrtc"`
+
+	// Channel data which will be sent to.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Channel data which will be sent to"`
+}
 type Module3Action struct {
 
 	// General name of the action used for generating code and CLI commands.
@@ -464,13 +474,16 @@ type Module3Action struct {
 	Url string `yaml:"url,omitempty" json:"url,omitempty" jsonschema:"description=HTTP route of the action; if not specified the action is CLI-only"`
 
 	// HTTP method type including standard and Fireback-specific methods.
-	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
+	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=webrtc,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
 
 	// Type-safe query strings for action
 	Query []*Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`
 
 	// Typesafe headers for the action
 	Headers []Module3Field `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"description=Typesafe headers."`
+
+	// Data channels in a typesafe mode in case of webrtc
+	DataChannels []Module3WebRtcDataChannel `yaml:"dataChannels,omitempty" json:"dataChannels,omitempty" jsonschema:"description=Data channels in a typesafe mode in case of webrtc"`
 
 	// Action description used in API specs and documentation.
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Action description used in API specs and documentation"`
@@ -554,8 +567,8 @@ func (x *Module3Entity) DataFields() Module3DataFields {
 		data = Module3DataFields{
 			Essentials:       true,
 			PrimaryId:        true,
-			NumericTimestamp: true,
-			DateTimestamp:    false,
+			NumericTimestamp: false,
+			DateTimestamp:    true,
 		}
 
 		return data

@@ -11,6 +11,21 @@ import (
 )
 
 // using shared actions here
+var EventBusSubscriptionSecurityModel = &SecurityModel{
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "user",
+}
+var EventBusSubscriptionActionImp = DefaultEmptyReactiveAction
+
+// Reactive action does not have that
+var EventBusSubscriptionActionCmd cli.Command = cli.Command{
+	Name:  "event-bus-subscription",
+	Usage: ``,
+	Action: func(c *cli.Context) {
+		query := CommonCliQueryDSLBuilderAuthorize(c, EventBusSubscriptionSecurityModel)
+		CliReactivePipeHandler(query, EventBusSubscriptionActionImp)
+	},
+}
 var ListCapabilitiesSecurityModel *SecurityModel = nil
 
 type listCapabilitiesActionImpSig func(
@@ -93,6 +108,21 @@ var CapabilitiesTreeActionCmd cli.Command = cli.Command{
 func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
+			Method:        "REACTIVE",
+			Url:           "/ws",
+			SecurityModel: EventBusSubscriptionSecurityModel,
+			Name:          "eventBusSubscription",
+			Description:   "",
+			Handlers: []gin.HandlerFunc{
+				ReactiveSocketHandler(EventBusSubscriptionActionImp),
+			},
+			Format:         "REACTIVE",
+			ResponseEntity: string(""),
+			Out: &Module3ActionBody{
+				Entity: "",
+			},
+		},
+		{
 			Method:        "",
 			Url:           "/list-capabilities",
 			SecurityModel: ListCapabilitiesSecurityModel,
@@ -134,6 +164,7 @@ func FirebackCustomActions() []Module3Action {
 }
 
 var FirebackCustomActionsCli = []cli.Command{
+	EventBusSubscriptionActionCmd,
 	ListCapabilitiesActionCmd,
 	CapabilitiesTreeActionCmd,
 }
@@ -145,6 +176,7 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		EventBusSubscriptionActionCmd,
 		ListCapabilitiesActionCmd,
 		CapabilitiesTreeActionCmd,
 		WebPushConfigCliFn(),

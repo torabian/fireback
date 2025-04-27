@@ -35,12 +35,7 @@ var xapp = &fireback.FirebackApp{
 	RunTus: func() {
 		abac.LiftTusServer()
 	},
-	RunSocket: func(e *gin.Engine) {
-		e.POST("/webrtc/offer", WebRTCOfferHandler)
-
-		fireback.HandleSocket(e)
-	},
-	RunSearch: fireback.InjectReactiveSearch,
+	InjectSearchEndpoint: fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to

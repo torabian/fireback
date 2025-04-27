@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -29,6 +30,8 @@ func GetOutboundIP() net.IP {
 
 var SERVER_INSTANCE string = UUID_Long()
 
+var LOG *zap.Logger
+
 // We lift two instances of webserver per application.
 // One is for manager of the server, to let them have control on their
 // users, workspace, support them, make changes to their credentials.
@@ -36,22 +39,6 @@ var SERVER_INSTANCE string = UUID_Long()
 // Other one is used for public, anyone who wants to use their software,
 // create account, etc.
 func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
-
-	if config.GinMode == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	if config.GinMode == "test" {
-		gin.SetMode(gin.TestMode)
-	}
-
-	if config.GinMode == "gin" {
-		gin.SetMode(gin.EnvGinMode)
-	}
-
-	if config.GinMode == "debug" {
-		gin.SetMode(gin.DebugMode)
-	}
 
 	port := config.Port
 
@@ -86,17 +73,15 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	fmt.Println("Http server is listening on ")
-	fmt.Println("http://localhost" + server01.Addr + "/ping")
-	fmt.Println("")
-	fmt.Println("Internal server ip: ** slash char \"/\" in the end is important in some sdks we generate depend on it **")
+	LOG.Info("Http server running on:", zap.String("url", "http://localhost"+server01.Addr+"/"))
+	LOG.Info("Ping available on:", zap.String("url", "http://localhost"+server01.Addr+"/ping"))
+	LOG.Info("Internal server ip: ** slash char \"/\" in the end is important in some sdks we generate depend on it **")
 
+	// Get's the local IP.
 	ipData := GetOutboundIP()
-
 	if ipData != nil {
-
-		fmt.Println("http://" + ipData.String() + server01.Addr + "/")
-		fmt.Println(ipData.String() + server01.Addr + "/")
+		url := "http://" + ipData.String() + server01.Addr + "/"
+		LOG.Info("Local network address:", zap.String("url", url))
 	}
 
 	g.Go(func() error {
@@ -113,6 +98,4 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	if err := g.Wait(); err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("Fireback exited. You need to either set publicServer.enabled to true or backOfficeServer.enabled to true in order to get web response.")
 }

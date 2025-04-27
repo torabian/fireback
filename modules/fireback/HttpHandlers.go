@@ -117,7 +117,7 @@ func HttpReactiveQuery[T any](ctx *gin.Context, fn func(QueryDSL, chan bool, cha
 
 }
 
-func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead func(QueryDSL, interface{})) {
+func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, SocketReadChan)) {
 	f := ExtractQueryDslFromGinContext(ctx)
 
 	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -128,20 +128,38 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func(string)), onRead
 		return
 	}
 
+	f.RawSocketConnection = c
+
 	go func() {
 		for {
 			_, k, err := c.ReadMessage()
+
+			onRead(f, SocketReadChan{
+				Data:  k,
+				Error: err,
+			})
+
 			if err != nil {
 				return
 			}
-			onRead(f, string(k))
 		}
 	}()
 
-	fn(f, func(data string) {
-
-		c.WriteMessage(websocket.TextMessage, []byte(data))
+	fn(f, func(data []byte) {
+		c.WriteMessage(websocket.TextMessage, data)
 	})
+}
+
+func HttpPost[V any](c *gin.Context, fn func(QueryDSL) (V, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
+
+	if result, err := fn(f); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+	} else {
+		c.JSON(200, gin.H{
+			"data": result,
+		})
+	}
 }
 
 func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
@@ -151,6 +169,24 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 	if id != "" {
 		f.UniqueId = id
 	}
+
+	var body T
+
+	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
+		return
+	}
+
+	if entity, err := fn(body, f); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+	} else {
+		c.JSON(200, gin.H{
+			"data": entity,
+		})
+	}
+}
+
+func HttpPostWebrtc[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
 
 	var body T
 

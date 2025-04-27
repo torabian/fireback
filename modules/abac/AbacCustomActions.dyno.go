@@ -26,6 +26,36 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
+var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
+
+type osLoginAuthenticateActionImpSig func(
+	q fireback.QueryDSL) (*UserSessionDto,
+	*fireback.IError,
+)
+
+var OsLoginAuthenticateActionImp osLoginAuthenticateActionImpSig
+
+func OsLoginAuthenticateActionFn(
+	q fireback.QueryDSL,
+) (
+	*UserSessionDto,
+	*fireback.IError,
+) {
+	if OsLoginAuthenticateActionImp == nil {
+		return nil, nil
+	}
+	return OsLoginAuthenticateActionImp(q)
+}
+
+var OsLoginAuthenticateActionCmd cli.Command = cli.Command{
+	Name:  "oslogin",
+	Usage: `Logins into the system using operating system (current) user, and store the information for them. Useful for desktop applications.`,
+	Action: func(c *cli.Context) {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OsLoginAuthenticateSecurityModel)
+		result, err := OsLoginAuthenticateActionFn(query)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var AcceptInviteSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
@@ -1597,6 +1627,25 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		{
+			Method:        "GET",
+			Url:           "/passports/os/login",
+			SecurityModel: OsLoginAuthenticateSecurityModel,
+			Name:          "osLoginAuthenticate",
+			Description:   "Logins into the system using operating system (current) user, and store the information for them. Useful for desktop applications.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// GET_ONE - get
+					fireback.HttpGetEntity(c, OsLoginAuthenticateActionFn)
+				},
+			},
+			Format:         "GET_ONE",
+			Action:         OsLoginAuthenticateActionFn,
+			ResponseEntity: &UserSessionDto{},
+			Out: &fireback.Module3ActionBody{
+				Entity: "UserSessionDto",
+			},
+		},
+		{
 			Method:        "POST",
 			Url:           "/user/invitation/accept",
 			SecurityModel: AcceptInviteSecurityModel,
@@ -2079,6 +2128,7 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
+	OsLoginAuthenticateActionCmd,
 	AcceptInviteActionCmd,
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
@@ -2110,6 +2160,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		OsLoginAuthenticateActionCmd,
 		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,
 		UserPassportsActionCmd,

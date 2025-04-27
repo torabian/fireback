@@ -5,7 +5,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 import { FormikHelpers } from "formik";
-import { useContext } from "react";
+import { useContext, useState, useRef } from "react";
 import { useMutation } from "react-query";
 import { 
   execApiFn,
@@ -16,7 +16,7 @@ import {
 import {
   RemoteQueryContext,
   UseRemoteQuery,
-  queryBeforeSend
+  queryBeforeSend,
 } from "../../core/react-tools";
     import {
         ImportUserActionReqDto,
@@ -24,7 +24,10 @@ import {
     import {
         OkayResponseDto,
     } from "../abac/OkayResponseDto"
-export function usePostUserImport(props?: UseRemoteQuery) {
+export function usePostUserImport(
+  props?: UseRemoteQuery & { 
+  }
+) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);

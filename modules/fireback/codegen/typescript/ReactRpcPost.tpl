@@ -6,7 +6,7 @@
 */
 
 import { FormikHelpers } from "formik";
-import { useContext } from "react";
+import { useContext, useState, useRef } from "react";
 import { useMutation } from "react-query";
 import { 
   execApiFn,
@@ -18,14 +18,23 @@ import {
 import {
   RemoteQueryContext,
   UseRemoteQuery,
-  queryBeforeSend
+  queryBeforeSend,
+  {{ if eq .r.MethodUpper "WEBRTC" }}
+  useWebrtcConnection,
+  {{ end }}
+
 } from "../../core/react-tools";
 
 {{ template "tsimport" . }}
 
 
-
-export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
+export function use{{ .r.GetFuncNameUpper}}(
+  props?: UseRemoteQuery & { 
+    {{ if eq .r.MethodUpper "WEBRTC" }}
+    autoConnect?: boolean 
+    {{ end }}
+  }
+) {
   let {queryClient, query, execFnOverride} = props || {};
 
   query = query || {}
@@ -52,7 +61,12 @@ export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
   {{ template "routeUrl" .r }}
 
   // Attach the details of the request to the fn
+
+  {{ if eq .r.MethodUpper "WEBRTC" }}
+  const fn = (body: any) => rpcFn("POST", computedUrl, body);
+  {{ else }}
   const fn = (body: any) => rpcFn("{{ .r.MethodUpper }}", computedUrl, body);
+  {{ end }}
 
   const mutation = useMutation<
     IResponse<{{ .r.ResponseEntityComputed}}>,
@@ -116,5 +130,37 @@ export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
     });
   };
 
+
+  {{ if eq .r.MethodUpper "WEBRTC" }}
+  let pc = useRef<RTCPeerConnection>();
+  let dataChannel = useRef<{
+    {{ range .r.DataChannels }}
+      {{ .Name }}: RTCDataChannel;
+    {{ end }}
+  }>();
+ 
+   
+  const dataChannels = [
+    {{ range .r.DataChannels }}
+      {
+        name: "{{ .Name }}",
+      },
+    {{ end }}
+  ];
+
+  const { initiate, state } = useWebrtcConnection({
+    pc,
+    dataChannel,
+    dataChannels,
+    submit,
+    autoConnect: props.autoConnect,
+  });
+
+  return { mutation, submit, fnUpdater, dataChannel, initiate, state };
+
+  {{ else}}
+
   return { mutation, submit, fnUpdater };
+
+  {{ end }}
 }

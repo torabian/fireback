@@ -161,16 +161,16 @@ import  "{{ $key}}"
     {{ if $v.DataFields.DateTimestamp }}
     // The time that the record has been updated in datetime.
     // the field will be automatically populated by gorm orm.
-    Updated          *time.Time                           `json:"updated,omitempty" xml:"updated,omitempty" yaml:"updated,omitempty"`
+    UpdatedAt          *time.Time                           `json:"updatedAt,omitempty" xml:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
 
     // The time that the record has been created in datetime.
     // the field will be automatically populated by gorm orm.
-    Created          *time.Time                           `json:"created,omitempty" xml:"created,omitempty" yaml:"created,omitempty"`
+    CreatedAt          *time.Time                           `json:"createdAt,omitempty" xml:"createdAt,omitempty" yaml:"createdAt,omitempty"`
 
     // The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
     // you need to make sure check this field if writing custom sql queries.
     // the field will be automatically populated by gorm orm.
-    Deleted          *time.Time                           `json:"deleted,omitempty" xml:"deleted,omitempty" yaml:"deleted,omitempty"`
+    DeletedAt          *time.Time                           `json:"deletedAt,omitempty" xml:"deletedAt,omitempty" yaml:"deletedAt,omitempty"`
     {{ end }}
 
     // Record creation date time formatting based on locale of the headers, or other
@@ -1564,6 +1564,16 @@ func {{ .e.Upper }}ActionImport(
 		Type: "int64",
 	},
 	{{ end }}
+  {{ if or (eq .Type "int") }}
+	{
+		Name:     "{{ $prefix }}{{ .Name}}",
+		StructField:     "{{ $prefix }}{{ .PublicName }}",
+		Required: {{ .IsRequired }},
+    Recommended: {{ .IsRecommended }},
+    Usage:    `{{ .ComputedCliDescription}}`,
+		Type: "int",
+	},
+	{{ end }}
   {{ if or (eq .Type "float64") }}
 	{
 		Name:     "{{ $prefix }}{{ .Name}}",
@@ -1641,6 +1651,17 @@ func {{ .e.Upper }}ActionImport(
 
     {{ if or (eq .Type "int64")}}
     &cli.Int64Flag{
+      Name:     "{{ $prefix }}{{ .ComputedCliName }}",
+      Required: {{ .IsRequired }},
+      Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
+      {{ if .Default }}
+      Value: {{ .Default }},
+      {{ end }}
+    },
+    {{ end }}
+ 
+    {{ if or (eq .Type "int")}}
+    &cli.IntFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
       Usage:    `{{ .ComputedCliDescription}} ({{.Type}})`,
@@ -1889,6 +1910,12 @@ type x{{$prefix}}{{ .PublicName}} struct {
     {{ if or (eq .Type "int64") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.Int64("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }} = value
+      }
+	  {{ end }}
+    {{ if or (eq .Type "int") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        value := c.Int("{{ $prefix }}{{ .ComputedCliName }}")
         template.{{ .PublicName }} = value
       }
 	  {{ end }}
@@ -3123,7 +3150,11 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                     // {{ .FormatComputed }} - {{ .Method }}
                     
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
+                      {{ if .In }}
                         {{ $wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
+                      {{ else }}
+                        {{ $wsprefix }}HttpPost(c, {{ .Upper }}ActionFn)
+                      {{ end }}
                     {{ end }}
                     {{ if or (eq .FormatComputed "QUERY")}}
                         {{ $wsprefix }}HttpQueryEntity2(c, {{ .Upper }}ActionFn)
@@ -3132,9 +3163,23 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                     {{ if or (eq .FormatComputed "GET_ONE")}}
                         {{ $wsprefix }}HttpGetEntity(c, {{ .Upper }}ActionFn)
                     {{ end }}
+                    
+                    {{ if or (eq .MethodUpper "WEBRTC")}}
+                        {{ $wsprefix }}HttpPostWebrtc(c, {{ .Upper }}ActionFn)
+                    {{ end }}
                 },
                 {{ end }}
 			},
+
+      {{ if eq .MethodUpper "WEBRTC" }}
+	    DataChannels: []{{ $wsprefix }}Module3WebRtcDataChannel{
+        {{ range .DataChannels }}
+          {
+            Name: "{{ .Name }}",
+          },
+        {{ end }}
+			},
+      {{ end }}
 			Format:         "{{ .FormatComputed }}",
             {{ if or (ne .Method "reactive")}}
 			Action:         {{ .Upper }}ActionFn,

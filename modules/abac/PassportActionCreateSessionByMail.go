@@ -7,15 +7,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-/**
-*	Does the authorization with the current logged in user on host
-*	Usually, this makes sense for desktop/mobile apps which are having a light or complete
-*	Version of the backend installed on them. Make sure this is not accessbile on the web version or cloud version.
-**/
-func PassportActionAuthorizeOs2(dto *fireback.EmptyRequest, query fireback.QueryDSL) (*UserSessionDto, *fireback.IError) {
-	return SigninWithOsUser2(query)
-}
-
 // Implementation of generating token for specific user.
 // Tokens belong to a user, and if they are removed from that workspace
 // Token would not be any useful.

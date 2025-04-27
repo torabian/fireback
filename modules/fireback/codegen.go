@@ -1396,7 +1396,85 @@ func FeatureSetMacro(x *Module3) {
 	// Implement such logic here
 }
 
+func findFieldByName(fields []*Module3Field, name string) bool {
+	for _, field := range fields {
+		if field.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+// This one would add the webrtc requirement
+func WebrtcMacro(x *Module3) {
+	hasWebRtc := false
+	for _, action := range x.Actions {
+		if action.MethodUpper() == "WEBRTC" {
+			hasWebRtc = true
+			if action.In == nil {
+				action.In = &Module3ActionBody{}
+			}
+			if action.Out == nil {
+				action.Out = &Module3ActionBody{}
+			}
+
+			if !findFieldByName(action.In.Fields, "offer") {
+				action.In.Fields = append(action.In.Fields, &Module3Field{
+					Name:   "offer",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
+
+			if !findFieldByName(action.Out.Fields, "sessionDescription") {
+				action.Out.Fields = append(action.Out.Fields, &Module3Field{
+					Name:   "sessionDescription",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
+		}
+	}
+
+	if hasWebRtc {
+		x.ActionsCustomImport = append(x.ActionsCustomImport, "github.com/pion/webrtc/v3")
+	}
+
+	for _, entity := range x.Entities {
+		for _, action := range entity.Actions {
+			if action.In == nil {
+				action.In = &Module3ActionBody{}
+			}
+			if action.Out == nil {
+				action.Out = &Module3ActionBody{}
+			}
+
+			if !findFieldByName(action.In.Fields, "offer") {
+				action.In.Fields = append(action.In.Fields, &Module3Field{
+					Name:   "offer",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
+
+			if !findFieldByName(action.Out.Fields, "sessionDescription") {
+				action.Out.Fields = append(action.Out.Fields, &Module3Field{
+					Name:   "sessionDescription",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
+		}
+	}
+}
+
 func ComputeMacros(x *Module3) {
+	WebrtcMacro(x)
+
 	for _, item := range x.Macros {
 		if item.Using == "eav" {
 			EavMacro(item, x)
@@ -2932,8 +3010,8 @@ func (x *Module3Entity) GetSqlFields() []string {
 	items := []string{
 		"template_entities.parent_id",
 		"template_entities.visibility",
-		"template_entities.updated",
-		"template_entities.created",
+		"template_entities.updated_at",
+		"template_entities.created_at",
 	}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
@@ -2951,7 +3029,7 @@ func (x *Module3Entity) GetSqlFields() []string {
 }
 
 func (x *Module3Entity) GetSqlFieldNames() []string {
-	items := []string{"parent_id", "visibility", "updated", "created"}
+	items := []string{"parent_id", "visibility", "updated_at", "created_at"}
 	for _, field := range x.Fields {
 		if field.Type == "object" {
 			continue
@@ -2972,8 +3050,8 @@ func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 	items := []string{
 		"template_entities_cte.parent_id",
 		"template_entities_cte.visibility",
-		"template_entities_cte.updated",
-		"template_entities_cte.created",
+		"template_entities_cte.updated_at",
+		"template_entities_cte.created_at",
 	}
 	for _, field := range x.Fields {
 		if field.Type == "object" {

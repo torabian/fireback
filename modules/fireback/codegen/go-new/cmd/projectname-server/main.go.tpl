@@ -32,13 +32,6 @@ var PRODUCT_NAMESPACENAME = "{{ .ctx.Name }}"
 var PRODUCT_DESCRIPTION = "{{ .ctx.Description }}"
 var PRODUCT_LANGUAGES = []string{"en"}
 
-{{ if .ctx.FirebackManage }}
-
-//go:embed all:manage
-var manageui embed.FS
-
-{{ end }}
-
 {{ if .ctx.CreateReactProject }}
 
 //go:embed all:ui
@@ -76,11 +69,8 @@ var xapp = &fireback.FirebackApp{
 	},
 	{{ if ne .ctx.IsMonolith true }}
 	*/
-	RunSocket: func(e *gin.Engine) {
-		fireback.HandleSocket(e)
-	},
 	{{ end }}
-	RunSearch:     fireback.InjectReactiveSearch,
+	InjectSearchEndpoint:     fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to

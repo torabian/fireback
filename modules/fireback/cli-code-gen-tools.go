@@ -861,6 +861,17 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				},
 			},
 			{
+				Flags: commonFlags,
+				Name:  "andkot",
+				Usage: "Generate Android Kotlin client sdk",
+				Action: func(c *cli.Context) error {
+
+					RunCodeGen(xapp, GenContextFromCli(c, KotlinGenCatalog))
+
+					return nil
+				},
+			},
+			{
 				Flags: append(commonFlags, reactFlags...),
 				Name:  "react",
 				Usage: "Generates the typescript definition and react tools for the product",

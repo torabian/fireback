@@ -1,7 +1,6 @@
 name: fireback
 meta-workspace: true
 config:
-
   - name: production
     type: bool
     description: 
@@ -177,6 +176,11 @@ messages:
   invalidFormDataContentType:
     en: The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.
 actions:
+  - name: eventBusSubscription
+    method: reactive
+    url: /ws
+    security:
+      resolveStrategy: user
   - name: listCapabilities
     cliName: list
     description: 

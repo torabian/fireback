@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	tmplAndroid "github.com/torabian/fireback/modules/fireback/codegen/android"
 	tmplCordova "github.com/torabian/fireback/modules/fireback/codegen/capacitor"
-	tmplManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
+	tmplGoDesktop "github.com/torabian/fireback/modules/fireback/codegen/go-desktop"
 	tmpl "github.com/torabian/fireback/modules/fireback/codegen/go-new"
 	tmplIos "github.com/torabian/fireback/modules/fireback/codegen/ios"
 	tmplReactNative "github.com/torabian/fireback/modules/fireback/codegen/react-native-new"
@@ -93,10 +93,43 @@ func copyFile(src string, dst string) {
 
 }
 
+const cacheFileName = "fireback_last_location_cache.txt"
+
+func getCacheFilePath() (string, error) {
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	appCacheDir := filepath.Join(dir, "firebacktools") // change to your app
+	os.MkdirAll(appCacheDir, 0700)
+	return filepath.Join(appCacheDir, cacheFileName), nil
+}
+
+func saveLastPath(path string) error {
+	cachePath, err := getCacheFilePath()
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(cachePath, []byte(path), 0644)
+}
+
+func loadLastPath() (string, error) {
+	cachePath, err := getCacheFilePath()
+	if err != nil {
+		return "", err
+	}
+	data, err := os.ReadFile(cachePath)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 type NewProjectContext struct {
 	Name                     string
 	Path                     string
 	IsMonolith               bool
+	IncludeWailsDesktop      bool
 	FirebackManage           bool
 	ModuleName               string
 	ReplaceFireback          string
@@ -154,6 +187,11 @@ func NewProjectCli() cli.Command {
 				Required: false,
 			},
 			&cli.BoolFlag{
+				Name:     "desktop-wails",
+				Usage:    "Adds golang wails framework for desktop app.",
+				Required: false,
+			},
+			&cli.BoolFlag{
 				Name:     "capacitor",
 				Usage:    "If you set --capacitor true, fireback adds capacitor project compatible with front-end (react)",
 				Required: false,
@@ -191,18 +229,28 @@ func NewProjectCli() cli.Command {
 
 				if r := AskForSelect("Do you want to use a local copy of fireback instead of mod?", []string{"yes", "no"}); r == "yes" {
 					for {
-						ctx.ReplaceFireback = AskForInput("Set the fireback relative folder address", "../fireback")
+
+						firebackLocation := ""
+						if loc, err := loadLastPath(); err == nil {
+							firebackLocation = loc
+						}
+
+						ctx.ReplaceFireback = AskForInput("Set the fireback absolute folder:", firebackLocation)
 						if !Exists(filepath.Join(ctx.ReplaceFireback, "modules", "fireback")) {
 							if r := AskForSelect("Fireback not found in directory. Try again?", []string{"yes", "no"}); r == "no" {
 								break
 							}
 						} else {
+							saveLastPath(ctx.ReplaceFireback)
 							break
 						}
 					}
 				}
 
 				ctx.Path = AskForInput("Name of the folder which will be generated", ctx.Name)
+				if ctx.Description == "" {
+					ctx.Description = "Built with fireback :)"
+				}
 				ctx.Description = AskForInput("Any description for the project created", ctx.Description)
 
 				if r := AskForSelect("Do you want to have front-end project in react.js?", []string{"yes", "no"}); r == "yes" {
@@ -215,6 +263,12 @@ func NewProjectCli() cli.Command {
 
 				if r := AskForSelect("Do you want to have fireback 'manage' admin panel react.js built independent in project?", []string{"yes", "no"}); r == "yes" {
 					ctx.FirebackManage = true
+				}
+
+				if ctx.IsMonolith {
+					if r := AskForSelect("Do you want Go wails desktop toolkit added?", []string{"no", "yes"}); r == "yes" {
+						ctx.IncludeWailsDesktop = true
+					}
 				}
 
 				if r := AskForSelect("Do you want to add fireback self-service ui as well into your project?", []string{"yes", "no"}); r == "yes" {
@@ -313,12 +367,12 @@ func NewProjectCli() cli.Command {
 				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "mobile")
 			}
 
-			if ctx.CreateIOSProject {
-				newProjectContentWriter(tmplIos.IosProjectTmpl, ctx, "ios")
+			if ctx.IncludeWailsDesktop {
+				newProjectContentWriter(tmplGoDesktop.FbGoDesktopNewTemplate, ctx, "")
 			}
 
-			if ctx.FirebackManage {
-				newProjectContentWriter(tmplManage.FirebackManageTmpl, ctx, path.Join("cmd", ctx.Name+"-server", "manage"))
+			if ctx.CreateIOSProject {
+				newProjectContentWriter(tmplIos.IosProjectTmpl, ctx, "ios")
 			}
 
 			if ctx.CreateAndroidProject {

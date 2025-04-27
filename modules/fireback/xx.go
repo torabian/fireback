@@ -15,6 +15,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli"
+	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 )
 
@@ -138,22 +140,43 @@ var WithAuthorizationPure = func(context *AuthContextDto) (*AuthResultDto, *IErr
 	return &AuthResultDto{}, nil
 }
 
+type DoctorHeadData struct {
+	ConfigurationUrl    string `yaml:"configurationUrl"`
+	FirebackVersion     string `yaml:"firebackVersion"`
+	DatabaseVendor      string `yaml:"databaseVendor"`
+	ComputedDataBaseDsn string `yaml:"computedDataBaseDsn"`
+}
+type GeneralDoctorData struct {
+	General         DoctorHeadData   `yaml:"general"`
+	EnvironmentUris *EnvironmentUris `yaml:"environmentUris"`
+	Config          Config           `yaml:"config"`
+}
+
+func (x *GeneralDoctorData) Yaml() string {
+	if x != nil {
+		str, _ := yaml.Marshal(x)
+		return (string(str))
+	}
+	return ""
+}
+
 func Doctor() {
 
-	fmt.Println("Fireback version: " + Orange + Bold + FIREBACK_VERSION + Reset)
-	fmt.Println()
 	uri, _ := ResolveConfigurationUri()
-	fmt.Println(Bold + "Configuration will be read from:" + Reset)
-	fmt.Println(uri)
-	fmt.Println()
-
 	vendor, dsn := GetDatabaseDsn(config)
-	fmt.Println(Bold + "Database connection vender:" + Reset)
-	fmt.Println(vendor)
-	fmt.Println()
+	data := GeneralDoctorData{
+		General: DoctorHeadData{
+			ConfigurationUrl:    uri,
+			FirebackVersion:     FIREBACK_VERSION,
+			DatabaseVendor:      vendor,
+			ComputedDataBaseDsn: dsn,
+		},
+		EnvironmentUris: GetEnvironmentUris(),
+		Config:          config,
+	}
 
-	fmt.Println(Bold + "Computed dsn for database connection:" + Reset)
-	fmt.Println(dsn)
+	fmt.Println(Bold + "General information:" + Reset)
+	fmt.Println(FormatYamlKeys(data.Yaml()))
 
 	fmt.Println()
 	fmt.Println(Bold + "Environment urls:" + Reset)
@@ -326,7 +349,11 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 		Aliases: []string{"s"},
 		Usage:   "Starts http server only",
 		Action: func(c *cli.Context) error {
-			Doctor()
+
+			initLogger()
+			if !config.Production {
+				Doctor()
+			}
 			cfg2 := HttpServerInstanceConfig{
 				Monitor: c.Bool("watch"),
 				Port:    c.Int64("port"),
@@ -339,6 +366,20 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 			return nil
 		},
 	}
+}
+
+func initLogger() {
+
+	if config.Production {
+		logger, _ := zap.NewProduction()
+		LOG = logger
+		defer logger.Sync() // Flushes buffer, if any
+	} else {
+		logger, _ := zap.NewDevelopment()
+		LOG = logger
+		defer logger.Sync() // Flushes buffer, if any
+	}
+
 }
 
 var ConfigCommand cli.Command = cli.Command{

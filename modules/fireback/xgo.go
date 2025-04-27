@@ -45,14 +45,13 @@ type FirebackApp struct {
 	CliActions func() []cli.Command
 
 	// runs TUS resumable upload server on a separate port
-	RunTus             func()
-	RunSocket          func(*gin.Engine)
-	RunSearch          func(*gin.Engine, *FirebackApp)
-	SetupWebServerHook func(*gin.Engine, *FirebackApp)
-	SearchProviders    []SearchProviderFn
-	SeedersSync        func()
-	MockSync           func()
-	PublicFolders      []PublicFolderInfo
+	RunTus               func()
+	InjectSearchEndpoint func(*gin.Engine, *FirebackApp)
+	SetupWebServerHook   func(*gin.Engine, *FirebackApp)
+	SearchProviders      []SearchProviderFn
+	SeedersSync          func()
+	MockSync             func()
+	PublicFolders        []PublicFolderInfo
 }
 
 /*
@@ -237,6 +236,26 @@ type HttpServerInstanceConfig struct {
 
 func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
+	if config.Production {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		if config.GinMode == "release" {
+			gin.SetMode(gin.ReleaseMode)
+		}
+
+		if config.GinMode == "test" {
+			gin.SetMode(gin.TestMode)
+		}
+
+		if config.GinMode == "gin" {
+			gin.SetMode(gin.EnvGinMode)
+		}
+
+		if config.GinMode == "debug" {
+			gin.SetMode(gin.DebugMode)
+		}
+	}
+
 	r := gin.New()
 
 	r.Use(GinMiddleware())
@@ -263,12 +282,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	r.Use(trackConnectionsMiddleware())
 
-	translations := map[string]map[string]string{}
-	for _, item := range x.Modules {
-		maps.Copy(translations, item.Translations)
-	}
-	maps.Copy(translations, BasicTranslations)
-
 	if x.RunTus != nil {
 		go x.RunTus()
 	}
@@ -277,15 +290,18 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		go taskServerLifter(x)
 	}
 
+	translations := map[string]map[string]string{}
+	for _, item := range x.Modules {
+		maps.Copy(translations, item.Translations)
+	}
+	maps.Copy(translations, BasicTranslations)
+
 	if x.SetupWebServerHook != nil {
 		x.SetupWebServerHook(r, x)
 	}
 
-	if x.RunSocket != nil {
-		go x.RunSocket(r)
-	}
-	if x.RunSearch != nil {
-		go x.RunSearch(r, x)
+	if x.InjectSearchEndpoint != nil {
+		x.InjectSearchEndpoint(r, x)
 	}
 
 	r.GET("/stoplight.js", func(c *gin.Context) {
