@@ -4,22 +4,33 @@
  *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import { BaseDto, BaseEntity } from "../../core/definitions";
+import { SessionDescription } from "../webrtc/SessionDescription";
 import { CapabilityEntity } from "./CapabilityEntity";
 export class MousePositionCaptureActionReqDto {
   public x?: number | null;
   public y?: number | null;
+  public offer?: SessionDescription | null;
+  offerId?: string | null;
+
   public static Fields = {
     x: "x",
     y: "y",
+    offerId: "offerId",
+    offer$: "offer",
   };
 }
 export class MousePositionCaptureActionResDto {
-  /**
-  The webrtc session description result after signalling.
-  */
-  public sessionDescription?: RTCSessionDescriptionInit | null;
+  public sessionDescription?: SessionDescription | null;
+  sessionDescriptionId?: string | null;
+  public sessionDescription?: SessionDescription | null;
+  sessionDescriptionId?: string | null;
   public static Fields = {
-    sessionDescription: "sessionDescription",
+    sessionDescriptionId: "sessionDescriptionId",
+    sessionDescription$: "sessionDescription",
+    sessionDescription: SessionDescription.Fields,
+    sessionDescriptionId: "sessionDescriptionId",
+    sessionDescription$: "sessionDescription",
+    sessionDescription: SessionDescription.Fields,
   };
 }
 export class CapabilitiesTreeActionResDto {

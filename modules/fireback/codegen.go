@@ -1412,13 +1412,15 @@ func WebrtcMacro(x *Module3) {
 			action.In.Fields = append(action.In.Fields, &Module3Field{
 				Name:   "offer",
 				Type:   "one",
-				Target: "webrtc.SessionDescription",
+				Target: "SessionDescription",
+				Module: "webrtc",
 			})
 
 			action.Out.Fields = append(action.Out.Fields, &Module3Field{
 				Name:   "sessionDescription",
 				Type:   "one",
-				Target: "webrtc.SessionDescription",
+				Target: "SessionDescription",
+				Module: "webrtc",
 			})
 		}
 	}
@@ -1436,17 +1438,17 @@ func WebrtcMacro(x *Module3) {
 				action.Out = &Module3ActionBody{}
 			}
 			action.In.Fields = append(action.In.Fields, &Module3Field{
-				Name:     "offer",
-				Type:     "one",
-				Target:   "webrtc.SessionDescription",
-				Provider: "github.com/pion/webrtc/v3",
+				Name:   "offer",
+				Type:   "one",
+				Target: "SessionDescription",
+				Module: "webrtc",
 			})
 
 			action.Out.Fields = append(action.Out.Fields, &Module3Field{
-				Name:     "sessionDescription",
-				Type:     "one",
-				Target:   "webrtc.SessionDescription",
-				Provider: "github.com/pion/webrtc/v3",
+				Name:   "sessionDescription",
+				Type:   "one",
+				Target: "SessionDescription",
+				Module: "webrtc",
 			})
 		}
 	}

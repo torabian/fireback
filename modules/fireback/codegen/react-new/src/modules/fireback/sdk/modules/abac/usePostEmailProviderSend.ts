@@ -5,7 +5,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 import { FormikHelpers } from "formik";
-import { useContext } from "react";
+import { useContext, useState, useRef } from "react";
 import { useMutation } from "react-query";
 import { 
   execApiFn,
@@ -16,13 +16,16 @@ import {
 import {
   RemoteQueryContext,
   UseRemoteQuery,
-  queryBeforeSend
+  queryBeforeSend,
 } from "../../core/react-tools";
     import {
         SendEmailWithProviderActionReqDto,
         SendEmailWithProviderActionResDto,
     } from "../abac/AbacActionsDto"
-export function usePostEmailProviderSend(props?: UseRemoteQuery) {
+export function usePostEmailProviderSend(
+  props?: UseRemoteQuery & { 
+  }
+) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);

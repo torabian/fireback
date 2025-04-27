@@ -6,7 +6,7 @@
 */
 
 import { FormikHelpers } from "formik";
-import { useContext } from "react";
+import { useContext, useState, useRef } from "react";
 import { useMutation } from "react-query";
 import { 
   execApiFn,
@@ -18,14 +18,23 @@ import {
 import {
   RemoteQueryContext,
   UseRemoteQuery,
-  queryBeforeSend
+  queryBeforeSend,
+  {{ if eq .r.MethodUpper "WEBRTC" }}
+  useWebrtcConnection,
+  {{ end }}
+
 } from "../../core/react-tools";
 
 {{ template "tsimport" . }}
 
 
-
-export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
+export function use{{ .r.GetFuncNameUpper}}(
+  props?: UseRemoteQuery & { 
+    {{ if eq .r.MethodUpper "WEBRTC" }}
+    autoConnect?: boolean 
+    {{ end }}
+  }
+) {
   let {queryClient, query, execFnOverride} = props || {};
 
   query = query || {}
@@ -116,5 +125,36 @@ export function use{{ .r.GetFuncNameUpper}}(props?: UseRemoteQuery) {
     });
   };
 
+
+  {{ if eq .r.MethodUpper "WEBRTC" }}
+  let pc = useRef<RTCPeerConnection>();
+  let dataChannel = useRef<{
+    mouse: RTCDataChannel;
+    ram: RTCDataChannel;
+  }>();
+
+  const dataChannels = [
+    {
+      name: "mouse",
+    },
+    {
+      name: "ram",
+    },
+  ];
+
+  const { initiate, state } = useWebrtcConnection({
+    pc,
+    dataChannel,
+    dataChannels,
+    submit,
+    autoConnect: props.autoConnect,
+  });
+
+  return { mutation, submit, fnUpdater, dataChannel, initiate, state };
+
+  {{ else}}
+
   return { mutation, submit, fnUpdater };
+
+  {{ end }}
 }

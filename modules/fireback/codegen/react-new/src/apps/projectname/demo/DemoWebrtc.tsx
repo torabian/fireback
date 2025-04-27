@@ -1,9 +1,9 @@
-import { usePostMouseposition } from "@/modules/fireback/sdk/modules/fireback/usePostMouseposition";
+import { useWebrtcMouseposition } from "@/modules/fireback/sdk/modules/fireback/useWebrtcMouseposition";
 import { debounce } from "lodash";
 import { useEffect } from "react";
 
 export function DemoWebrtc() {
-  const { dataChannel, state } = usePostMouseposition({});
+  const { dataChannel, state } = useWebrtcMouseposition({});
 
   const handleMouseMove = debounce(
     (e: MouseEvent) => {

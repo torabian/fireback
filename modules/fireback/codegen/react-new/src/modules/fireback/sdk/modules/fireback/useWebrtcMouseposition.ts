@@ -5,7 +5,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 import { FormikHelpers } from "formik";
-import { useContext } from "react";
+import { useContext, useState, useRef } from "react";
 import { useMutation } from "react-query";
 import { 
   execApiFn,
@@ -16,13 +16,18 @@ import {
 import {
   RemoteQueryContext,
   UseRemoteQuery,
-  queryBeforeSend
+  queryBeforeSend,
+  useWebrtcConnection,
 } from "../../core/react-tools";
     import {
         MousePositionCaptureActionReqDto,
         MousePositionCaptureActionResDto,
     } from "../fireback/FirebackActionsDto"
-export function usePostMouseposition(props?: UseRemoteQuery) {
+export function useWebrtcMouseposition(
+  props?: UseRemoteQuery & { 
+    autoConnect?: boolean 
+  }
+) {
   let {queryClient, query, execFnOverride} = props || {};
   query = query || {}
   const { options, execFn } = useContext(RemoteQueryContext);
@@ -41,7 +46,7 @@ export function usePostMouseposition(props?: UseRemoteQuery) {
   ).toString()}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
-  const fn = (body: any) => rpcFn("POST", computedUrl, body);
+  const fn = (body: any) => rpcFn("WEBRTC", computedUrl, body);
   const mutation = useMutation<
     IResponse<MousePositionCaptureActionResDto>,
     IResponse<MousePositionCaptureActionResDto>,
@@ -85,5 +90,25 @@ export function usePostMouseposition(props?: UseRemoteQuery) {
       });
     });
   };
-  return { mutation, submit, fnUpdater };
+  let pc = useRef<RTCPeerConnection>();
+  let dataChannel = useRef<{
+    mouse: RTCDataChannel;
+    ram: RTCDataChannel;
+  }>();
+  const dataChannels = [
+    {
+      name: "mouse",
+    },
+    {
+      name: "ram",
+    },
+  ];
+  const { initiate, state } = useWebrtcConnection({
+    pc,
+    dataChannel,
+    dataChannels,
+    submit,
+    autoConnect: props.autoConnect,
+  });
+  return { mutation, submit, fnUpdater, dataChannel, initiate, state };
 }
