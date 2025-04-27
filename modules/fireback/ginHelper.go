@@ -226,6 +226,10 @@ func CastRoutes2(routes []Module3Action, r *gin.RouterGroup) {
 		if route.Method == "POST" {
 			r.POST(route.Url, CastRouteToHandler(route)...)
 		}
+		// WebRtc is also a post request in it's nature
+		if route.Method == "WEBRTC" {
+			r.POST(route.Url, CastRouteToHandler(route)...)
+		}
 		if route.Method == "PATCH" {
 			r.PATCH(route.Url, CastRouteToHandler(route)...)
 		}

@@ -15,9 +15,10 @@ import (
 var MousePositionCaptureSecurityModel *SecurityModel = nil
 
 type MousePositionCaptureActionReqDto struct {
-	Offer webrtc.SessionDescription `json:"offer" yaml:"offer"`
-	X     int                       `json:"x" xml:"x" yaml:"x"        `
-	Y     int                       `json:"y" xml:"y" yaml:"y"        `
+	X       int                        `json:"x" xml:"x" yaml:"x"        `
+	Y       int                        `json:"y" xml:"y" yaml:"y"        `
+	Offer   *webrtc.SessionDescription `json:"offer" xml:"offer" yaml:"offer"    gorm:"foreignKey:OfferId;references:UniqueId"      `
+	OfferId String                     `json:"offerId" yaml:"offerId" xml:"offerId"  `
 }
 
 func (x *MousePositionCaptureActionReqDto) RootObjectName() string {
@@ -35,6 +36,11 @@ var MousePositionCaptureCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `y (int)`,
 	},
+	&cli.StringFlag{
+		Name:     "offer-id",
+		Required: false,
+		Usage:    `offer (one)`,
+	},
 }
 
 func MousePositionCaptureActionReqValidator(dto *MousePositionCaptureActionReqDto) *IError {
@@ -51,12 +57,15 @@ func CastMousePositionCaptureFromCli(c *cli.Context) *MousePositionCaptureAction
 		value := c.Int("y")
 		template.Y = value
 	}
+	if c.IsSet("offer-id") {
+		template.OfferId = NewStringAutoNull(c.String("offer-id"))
+	}
 	return template
 }
 
 type MousePositionCaptureActionResDto struct {
-	// The webrtc session description result after signalling.
-	SessionDescription *webrtc.SessionDescription `json:"sessionDescription" xml:"sessionDescription" yaml:"sessionDescription"        `
+	SessionDescription   *webrtc.SessionDescription `json:"sessionDescription" xml:"sessionDescription" yaml:"sessionDescription"    gorm:"foreignKey:SessionDescriptionId;references:UniqueId"      `
+	SessionDescriptionId String                     `json:"sessionDescriptionId" yaml:"sessionDescriptionId" xml:"sessionDescriptionId"  `
 }
 
 func (x *MousePositionCaptureActionResDto) RootObjectName() string {
@@ -200,7 +209,7 @@ func FirebackCustomActions() []Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// POST_ONE - webrtc
-					HttpPostWebrtc(c, MousePositionCaptureActionImp)
+					HttpPostWebrtc(c, MousePositionCaptureActionFn)
 				},
 			},
 			Format:         "POST_ONE",

@@ -6,7 +6,7 @@ import (
 	"github.com/pion/webrtc/v3"
 )
 
-func HandleWebRTC(offer webrtc.SessionDescription, peerSetup func(peerConnection *webrtc.PeerConnection)) (*webrtc.SessionDescription, error) {
+func HandleWebRTC(offer *webrtc.SessionDescription, peerSetup func(peerConnection *webrtc.PeerConnection)) (*webrtc.SessionDescription, error) {
 	peerConnection, err := webrtc.NewPeerConnection(webrtc.Configuration{
 		BundlePolicy: webrtc.BundlePolicyMaxBundle,
 		ICEServers: []webrtc.ICEServer{
@@ -34,7 +34,7 @@ func HandleWebRTC(offer webrtc.SessionDescription, peerSetup func(peerConnection
 		// Handle trickle ICE if needed
 	})
 
-	if err := peerConnection.SetRemoteDescription(offer); err != nil {
+	if err := peerConnection.SetRemoteDescription(*offer); err != nil {
 		return nil, err
 	}
 

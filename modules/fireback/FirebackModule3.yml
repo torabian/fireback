@@ -194,10 +194,7 @@ actions:
     tracks:
       - name: microphoneAudio
       - name: desktopAudio
-    out:
-      fields:
-        - name: sessionDescription
-          description: The webrtc session description result after signalling.
+
 
   - name: eventBusSubscription
     method: reactive
