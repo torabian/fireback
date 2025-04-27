@@ -201,7 +201,7 @@ var CapabilitiesTreeActionCmd cli.Command = cli.Command{
 func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		{
-			Method:        "POST",
+			Method:        "WEBRTC",
 			Url:           "/mouseposition",
 			SecurityModel: MousePositionCaptureSecurityModel,
 			Name:          "mousePositionCapture",
