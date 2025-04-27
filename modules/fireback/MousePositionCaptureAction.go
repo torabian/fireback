@@ -54,8 +54,22 @@ func MousePositionCaptureAction(
 			}
 		})
 
-		// Handle data channel for cursor position
-		peerConnection.OnDataChannel(func(dc *webrtc.DataChannel) {
+		onRam := func(dc *webrtc.DataChannel) {
+			fmt.Println("Data channel opened:", dc.Label())
+			dc.OnMessage(func(msg webrtc.DataChannelMessage) {
+				var cursorPosition struct {
+					UsedJSHeapSize int64 `json:"usedJSHeapSize"`
+				}
+				err := json.Unmarshal(msg.Data, &cursorPosition)
+				if err != nil {
+					log.Println("Error decoding cursor position:", err)
+					return
+				}
+				fmt.Printf("Ram usage: %v \n", string(msg.Data))
+			})
+		}
+
+		onMouse := func(dc *webrtc.DataChannel) {
 			fmt.Println("Data channel opened:", dc.Label())
 			dc.OnMessage(func(msg webrtc.DataChannelMessage) {
 				var cursorPosition map[string]float64
@@ -66,6 +80,17 @@ func MousePositionCaptureAction(
 				}
 				fmt.Printf("Cursor position: x = %f, y = %f\n", cursorPosition["x"], cursorPosition["y"])
 			})
+		}
+
+		// Handle data channel for cursor position
+		peerConnection.OnDataChannel(func(dc *webrtc.DataChannel) {
+			if dc.Label() == "ram" {
+				onRam(dc)
+			}
+			if dc.Label() == "mouse" {
+				onMouse(dc)
+			}
+
 		})
 	})
 
