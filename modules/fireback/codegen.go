@@ -1396,6 +1396,15 @@ func FeatureSetMacro(x *Module3) {
 	// Implement such logic here
 }
 
+func findFieldByName(fields []*Module3Field, name string) bool {
+	for _, field := range fields {
+		if field.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 // This one would add the webrtc requirement
 func WebrtcMacro(x *Module3) {
 	hasWebRtc := false
@@ -1409,19 +1418,23 @@ func WebrtcMacro(x *Module3) {
 				action.Out = &Module3ActionBody{}
 			}
 
-			action.In.Fields = append(action.In.Fields, &Module3Field{
-				Name:   "offer",
-				Type:   "one",
-				Target: "SessionDescription",
-				Module: "webrtc",
-			})
+			if !findFieldByName(action.In.Fields, "offer") {
+				action.In.Fields = append(action.In.Fields, &Module3Field{
+					Name:   "offer",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
 
-			action.Out.Fields = append(action.Out.Fields, &Module3Field{
-				Name:   "sessionDescription",
-				Type:   "one",
-				Target: "SessionDescription",
-				Module: "webrtc",
-			})
+			if !findFieldByName(action.Out.Fields, "sessionDescription") {
+				action.Out.Fields = append(action.Out.Fields, &Module3Field{
+					Name:   "sessionDescription",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
 		}
 	}
 
@@ -1437,19 +1450,24 @@ func WebrtcMacro(x *Module3) {
 			if action.Out == nil {
 				action.Out = &Module3ActionBody{}
 			}
-			action.In.Fields = append(action.In.Fields, &Module3Field{
-				Name:   "offer",
-				Type:   "one",
-				Target: "SessionDescription",
-				Module: "webrtc",
-			})
 
-			action.Out.Fields = append(action.Out.Fields, &Module3Field{
-				Name:   "sessionDescription",
-				Type:   "one",
-				Target: "SessionDescription",
-				Module: "webrtc",
-			})
+			if !findFieldByName(action.In.Fields, "offer") {
+				action.In.Fields = append(action.In.Fields, &Module3Field{
+					Name:   "offer",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
+
+			if !findFieldByName(action.Out.Fields, "sessionDescription") {
+				action.Out.Fields = append(action.Out.Fields, &Module3Field{
+					Name:   "sessionDescription",
+					Type:   "one",
+					Target: "SessionDescription",
+					Module: "webrtc",
+				})
+			}
 		}
 	}
 }

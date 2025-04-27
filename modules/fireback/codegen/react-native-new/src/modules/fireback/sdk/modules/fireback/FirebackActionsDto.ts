@@ -8,23 +8,31 @@ import {
     BaseEntity,
 } from "../../core/definitions"
 import {
+    SessionDescription,
+} from "../webrtc/SessionDescription"
+import {
     CapabilityEntity,
 } from "./CapabilityEntity"
 export class MousePositionCaptureActionReqDto {
   public x?: number | null;
   public y?: number | null;
+  public offer?: SessionDescription | null;
+      offerId?: string | null;
 public static Fields = {
       x: 'x',
       y: 'y',
+          offerId: 'offerId',
+      offer$: 'offer',
+      offer: SessionDescription.Fields,
 }
 }
 export class MousePositionCaptureActionResDto {
-  /**
-  The webrtc session description result after signalling.
-  */
-  public sessionDescription?: string | null;
+  public sessionDescription?: SessionDescription | null;
+      sessionDescriptionId?: string | null;
 public static Fields = {
-      sessionDescription: 'sessionDescription',
+          sessionDescriptionId: 'sessionDescriptionId',
+      sessionDescription$: 'sessionDescription',
+      sessionDescription: SessionDescription.Fields,
 }
 }
 export class CapabilitiesTreeActionResDto {

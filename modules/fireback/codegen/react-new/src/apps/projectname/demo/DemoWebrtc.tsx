@@ -13,8 +13,8 @@ export function DemoWebrtc() {
         dataChannel.current?.mouse.send(JSON.stringify(value));
       } catch (err) {}
     },
-    100,
-    { maxWait: 300 }
+    25,
+    { maxWait: 30 }
   );
 
   const sendRamUsage = () => {

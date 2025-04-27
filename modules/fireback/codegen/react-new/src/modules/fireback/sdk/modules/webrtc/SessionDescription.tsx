@@ -1,1 +1,3 @@
-export class SessionDescription {}
+export class SessionDescription {
+  static Fields = {};
+}

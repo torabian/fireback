@@ -46,7 +46,7 @@ export function useWebrtcMouseposition(
   ).toString()}`;
   let completeRouteUrls = true;
   // Attach the details of the request to the fn
-  const fn = (body: any) => rpcFn("WEBRTC", computedUrl, body);
+  const fn = (body: any) => rpcFn("POST", computedUrl, body);
   const mutation = useMutation<
     IResponse<MousePositionCaptureActionResDto>,
     IResponse<MousePositionCaptureActionResDto>,

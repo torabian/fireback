@@ -61,7 +61,12 @@ export function use{{ .r.GetFuncNameUpper}}(
   {{ template "routeUrl" .r }}
 
   // Attach the details of the request to the fn
+
+  {{ if eq .r.MethodUpper "WEBRTC" }}
+  const fn = (body: any) => rpcFn("POST", computedUrl, body);
+  {{ else }}
   const fn = (body: any) => rpcFn("{{ .r.MethodUpper }}", computedUrl, body);
+  {{ end }}
 
   const mutation = useMutation<
     IResponse<{{ .r.ResponseEntityComputed}}>,
