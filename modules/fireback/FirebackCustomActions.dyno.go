@@ -212,6 +212,11 @@ func FirebackCustomActions() []Module3Action {
 					HttpPostWebrtc(c, MousePositionCaptureActionFn)
 				},
 			},
+			DataChannels: []Module3WebRtcDataChannel{
+				{
+					Name: "ram",
+				},
+			},
 			Format:         "POST_ONE",
 			Action:         MousePositionCaptureActionFn,
 			ResponseEntity: &MousePositionCaptureActionResDto{},

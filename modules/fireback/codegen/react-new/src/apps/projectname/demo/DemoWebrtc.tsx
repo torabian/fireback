@@ -5,18 +5,6 @@ import { useEffect } from "react";
 export function DemoWebrtc() {
   const { dataChannel, state } = useWebrtcMouseposition({});
 
-  const handleMouseMove = debounce(
-    (e: MouseEvent) => {
-      try {
-        const value = { x: e.clientX, y: e.clientY };
-        console.log(value);
-        dataChannel.current?.mouse.send(JSON.stringify(value));
-      } catch (err) {}
-    },
-    25,
-    { maxWait: 30 }
-  );
-
   const sendRamUsage = () => {
     const re = setInterval(() => {
       const data = (performance as any).memory;
@@ -31,10 +19,6 @@ export function DemoWebrtc() {
   };
 
   useEffect(() => {
-    document.onmousemove = (e) => {
-      handleMouseMove(e);
-    };
-
     return sendRamUsage();
   }, []);
 

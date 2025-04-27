@@ -92,16 +92,12 @@ export function useWebrtcMouseposition(
   };
   let pc = useRef<RTCPeerConnection>();
   let dataChannel = useRef<{
-    mouse: RTCDataChannel;
-    ram: RTCDataChannel;
+      ram: RTCDataChannel;
   }>();
   const dataChannels = [
-    {
-      name: "mouse",
-    },
-    {
-      name: "ram",
-    },
+      {
+        name: "ram",
+      },
   ];
   const { initiate, state } = useWebrtcConnection({
     pc,

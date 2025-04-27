@@ -3170,6 +3170,16 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                 },
                 {{ end }}
 			},
+
+      {{ if eq .MethodUpper "WEBRTC" }}
+	    DataChannels: []{{ $wsprefix }}Module3WebRtcDataChannel{
+        {{ range .DataChannels }}
+          {
+            Name: "{{ .Name }}",
+          },
+        {{ end }}
+			},
+      {{ end }}
 			Format:         "{{ .FormatComputed }}",
             {{ if or (ne .Method "reactive")}}
 			Action:         {{ .Upper }}ActionFn,

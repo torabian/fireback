@@ -134,17 +134,18 @@ export function use{{ .r.GetFuncNameUpper}}(
   {{ if eq .r.MethodUpper "WEBRTC" }}
   let pc = useRef<RTCPeerConnection>();
   let dataChannel = useRef<{
-    mouse: RTCDataChannel;
-    ram: RTCDataChannel;
+    {{ range .r.DataChannels }}
+      {{ .Name }}: RTCDataChannel;
+    {{ end }}
   }>();
-
+ 
+   
   const dataChannels = [
-    {
-      name: "mouse",
-    },
-    {
-      name: "ram",
-    },
+    {{ range .r.DataChannels }}
+      {
+        name: "{{ .Name }}",
+      },
+    {{ end }}
   ];
 
   const { initiate, state } = useWebrtcConnection({
