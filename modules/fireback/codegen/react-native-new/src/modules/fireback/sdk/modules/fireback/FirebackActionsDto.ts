@@ -8,33 +8,8 @@ import {
     BaseEntity,
 } from "../../core/definitions"
 import {
-    SessionDescription,
-} from "../webrtc/SessionDescription"
-import {
     CapabilityEntity,
 } from "./CapabilityEntity"
-export class MousePositionCaptureActionReqDto {
-  public x?: number | null;
-  public y?: number | null;
-  public offer?: SessionDescription | null;
-      offerId?: string | null;
-public static Fields = {
-      x: 'x',
-      y: 'y',
-          offerId: 'offerId',
-      offer$: 'offer',
-      offer: SessionDescription.Fields,
-}
-}
-export class MousePositionCaptureActionResDto {
-  public sessionDescription?: SessionDescription | null;
-      sessionDescriptionId?: string | null;
-public static Fields = {
-          sessionDescriptionId: 'sessionDescriptionId',
-      sessionDescription$: 'sessionDescription',
-      sessionDescription: SessionDescription.Fields,
-}
-}
 export class CapabilitiesTreeActionResDto {
   public capabilities?: CapabilityEntity[] | null;
     capabilitiesListId?: string[] | null;

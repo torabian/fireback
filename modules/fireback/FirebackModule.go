@@ -59,7 +59,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 	module.ProvideCliHandlers([]cli.Command{
 		CapabilityCliFn(),
-		MousePositionCaptureActionCmd,
 		PushNotificationCmd,
 	})
 
