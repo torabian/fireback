@@ -57,12 +57,6 @@
     },
     "Module3": {
       "properties": {
-        "ActionsCustomImport": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
         "namespace": {
           "type": "string",
           "description": "Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"
@@ -159,10 +153,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "ActionsCustomImport"
-      ]
+      "type": "object"
     },
     "Module3Action": {
       "properties": {
