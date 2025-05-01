@@ -60,7 +60,7 @@ export function useReactive({
   /*
   * Creates the connection and tries to establish the connection
   */
-  const operate = (value: any) => {
+  const operate = (value: any, callback = null) => {
     if (connection.current?.readyState === 1) {
       connection.current?.close();
     }
@@ -79,16 +79,23 @@ export function useReactive({
       setConnected(true);
     };
     conn.onmessage = function (evt: any) {
-      try {
-        const msg = JSON.parse(evt.data);
-        if (msg) {
-          onMessage && onMessage(msg);
-          if (presistResult !== false) {
-            appendResult(msg);
+      if (callback !== null) {
+        return callback(evt);
+      }
+      if (evt.data instanceof Blob || evt.data instanceof ArrayBuffer) {
+        onMessage(evt.data);
+      } else {
+        try {
+          const msg = JSON.parse(evt.data);
+          if (msg) {
+            onMessage && onMessage(msg);
+            if (presistResult !== false) {
+              appendResult(msg);
+            }
           }
+        } catch (e: any) {
+          // Intenrionnaly left blank
         }
-      } catch (e: any) {
-        // Intenrionnaly left blank
       }
     };
   };

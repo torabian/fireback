@@ -1,6 +1,8 @@
 package fireback
 
 import (
+	"fmt"
+
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -13,6 +15,8 @@ func init() {
 func cleanUserFromSocketPool(query QueryDSL) {
 	workspaceId := query.WorkspaceId
 	userId := query.UserId
+
+	fmt.Println("Deleing::::", workspaceId, userId)
 
 	// Automatically happens, perhaps should not be called anymore.
 	query.RawSocketConnection.Close()
@@ -39,6 +43,7 @@ func cleanUserFromSocketPool(query QueryDSL) {
 }
 
 func addUserToEventBus(query QueryDSL) {
+
 	workspaceId := query.WorkspaceId
 	userId := query.UserId
 
@@ -48,6 +53,7 @@ func addUserToEventBus(query QueryDSL) {
 		UserId:     userId,
 		Connection: query.RawSocketConnection,
 		URW:        *query.UserAccessPerWorkspace,
+		UniqueId:   UUID_SHORT(),
 	}
 
 	socketMutex.Lock()
@@ -60,6 +66,11 @@ func addUserToEventBus(query QueryDSL) {
 }
 
 func EventBusSubscriptionAction(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error) {
+	LOG.Debug(
+		"Event bus subscription has been started",
+		zap.String("workspace-id", query.WorkspaceId),
+		zap.String("user", query.UserId),
+	)
 
 	addUserToEventBus(query)
 
@@ -76,10 +87,17 @@ func EventBusSubscriptionAction(query QueryDSL, done chan bool, read chan Socket
 					return
 				}
 
-				if websocket.IsCloseError(msg.Error, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-					LOG.Debug("WebSocket closed normally", zap.String("user", query.UserId))
-
-					// Only break in this case
+				if websocket.IsCloseError(
+					msg.Error,
+					websocket.CloseNormalClosure,
+					websocket.CloseAbnormalClosure,
+					websocket.CloseGoingAway,
+					websocket.CloseInternalServerErr,
+					websocket.CloseInvalidFramePayloadData,
+					websocket.CloseTLSHandshake,
+				) {
+					LOG.Debug("WebSocket closed", zap.String("user", query.UserId), zap.String("ws", query.WorkspaceId))
+					cleanUserFromSocketPool(query)
 					break
 				} else {
 					// We need to handle this kinda.

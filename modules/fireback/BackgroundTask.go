@@ -7,8 +7,10 @@ import (
 	"log"
 	"os"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 type BackgroundReactiveProcess struct {
@@ -87,25 +89,75 @@ func BeginOperation(query QueryDSL, fn BackgroundOptFn) (*BackgroundReactiveProc
 
 }
 
-func ReactiveSocketHandler(factory func(
+type ReactiveFactory = func(
 	query QueryDSL, done chan bool,
 	read chan SocketReadChan,
-) (chan []byte, error)) gin.HandlerFunc {
+) (chan []byte, error)
+
+func ReactiveSocketHandler(factory ReactiveFactory) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
-		HttpSocketRequest(ctx, func(query QueryDSL, write func([]byte)) {
-			opt, _ := BeginOrAttachOperation(query, factory)
-			// @todo: error not handled
-			opt.AttachListener(func(s []byte) {
-				write(s)
-			})
 
-		}, func(query QueryDSL, i SocketReadChan) {
-			opt, _ := BeginOrAttachOperation(query, factory)
+		read := make(chan SocketReadChan)
+		done := make(chan bool)
+		f := ExtractQueryDslFromGinContext(ctx)
 
-			opt.Send(i)
-		})
+		c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			c.WriteJSON(GormErrorToIError(err))
 
+			c.Close()
+			return
+		}
+
+		f.RawSocketConnection = c
+
+		write, err := factory(f, done, read)
+		if err != nil {
+			c.WriteJSON(GormErrorToIError(err))
+		}
+
+		go func() {
+			for {
+				_, data, err := c.ReadMessage()
+				read <- SocketReadChan{
+					Data:  data,
+					Error: err,
+				}
+
+				if err != nil {
+					return
+				}
+			}
+		}()
+
+		go func() {
+			for {
+				select {
+				case msg, ok := <-write:
+					if !ok {
+						// Channel closed; shutdown
+						c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+						done <- true
+						return
+					}
+					msgType := websocket.TextMessage
+					if !utf8.Valid(msg) {
+						msgType = websocket.BinaryMessage
+					}
+					err := c.WriteMessage(msgType, msg)
+
+					if err != nil {
+						// Optionally log the error or send to a logger
+						done <- true
+						return
+					}
+				case <-done:
+					c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+					return
+				}
+			}
+		}()
 	}
 }
 

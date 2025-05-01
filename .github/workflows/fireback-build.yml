@@ -97,7 +97,7 @@ jobs:
           prerelease: true
           release_name: ${{ steps.version.outputs.version }}
           tag_name: ${{ env.tag_name }}
-          body_path: CHANGELOG.md
+          body_path: docs/FIREBACK.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
 

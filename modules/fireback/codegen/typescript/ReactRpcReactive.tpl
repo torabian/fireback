@@ -70,7 +70,7 @@ export function use{{ .r.GetFuncNameUpper}}({
   /*
   * Creates the connection and tries to establish the connection
   */
-  const operate = (value: any) => {
+  const operate = (value: any, callback = null) => {
     if (connection.current?.readyState === 1) {
       connection.current?.close();
     }
@@ -86,8 +86,11 @@ export function use{{ .r.GetFuncNameUpper}}({
     )}&${new URLSearchParams(query || {})}`;
     url = url.replace(":uniqueId", query?.uniqueId);
     let conn = new WebSocket(url);
-
-     
+    {{ if .r.BinaryType }} 
+      {{ if ne .r.BinaryType "text" }}
+      conn.binaryType = "{{ .r.BinaryType }}"
+      {{ end }}
+    {{ end }}
     connection.current = conn;
 
     conn.onopen = function () {
@@ -95,16 +98,23 @@ export function use{{ .r.GetFuncNameUpper}}({
     };
 
     conn.onmessage = function (evt: any) {
-      try {
-        const msg = JSON.parse(evt.data);
-        if (msg) {
-          onMessage && onMessage(msg);
-          if (presistResult !== false) {
-            appendResult(msg);
+      if (callback !== null) {
+        return callback(evt);
+      }
+      if (evt.data instanceof Blob || evt.data instanceof ArrayBuffer) {
+        onMessage(evt.data);
+      } else {
+        try {
+          const msg = JSON.parse(evt.data);
+          if (msg) {
+            onMessage && onMessage(msg);
+            if (presistResult !== false) {
+              appendResult(msg);
+            }
           }
+        } catch (e: any) {
+          // Intenrionnaly left blank
         }
-      } catch (e: any) {
-        // Intenrionnaly left blank
       }
     };
   };

@@ -4,8 +4,6 @@
 # For VSCode, there is already a configuration in .vscode/settings.json
 # To target all Module3.yml files with autocompletion. It requires "Redhat YAML Language Support"
 # to be installed in order to show autocompletion.
-
-path: book
 name: book
 entities:
   # This is a sample entity. You can delete it and write your own

@@ -13,7 +13,7 @@ import (
 // using shared actions here
 var EventBusSubscriptionSecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
-	ResolveStrategy: "user",
+	ResolveStrategy: "workspace",
 }
 var EventBusSubscriptionActionImp = DefaultEmptyReactiveAction
 

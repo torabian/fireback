@@ -24,6 +24,7 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.9.1") // OkHttp WebSocket
     implementation("com.squareup.okhttp3:okhttp-tls:4.9.1") // OkHttp WebSocket
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
     // Use the JUnit 5 integration.
     testImplementation(libs.junit.jupiter.engine)

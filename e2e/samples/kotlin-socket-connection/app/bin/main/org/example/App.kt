@@ -19,10 +19,13 @@ fun main() {
     // Build the OkHttpClient
     val client = OkHttpClient()
 
+    val token = "ae13b288e28ec5502b750d9cdd3d677245c101217d14dcf094581b7f4772611e"
+
+    println("Token: $token")
      // Create a WebSocket request
     val request = Request.Builder()
          .url(url)
-         .header("authorization", "639f023e528357bebc2db5284d767fdae71e3865af1edecf81d4f812ee5c6b89")
+         .header("authorization", token)
          .header("workspace-id", "root")
          .build()
 

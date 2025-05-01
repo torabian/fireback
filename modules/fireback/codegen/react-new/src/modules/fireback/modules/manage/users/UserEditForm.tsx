@@ -1,10 +1,9 @@
+import { useContext } from "react";
 import { FormText } from "../../../components/forms/form-text/FormText";
 import { EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
-import { FormikProps } from "formik";
-import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 
 export const UserEditForm = ({
   form,

@@ -150,6 +150,39 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead
 	})
 }
 
+func HttpSocketRequest2(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, SocketReadChan)) {
+	f := ExtractQueryDslFromGinContext(ctx)
+
+	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	if err != nil {
+		c.WriteJSON(GormErrorToIError(err))
+
+		c.Close()
+		return
+	}
+
+	f.RawSocketConnection = c
+
+	go func() {
+		for {
+			_, k, err := c.ReadMessage()
+
+			onRead(f, SocketReadChan{
+				Data:  k,
+				Error: err,
+			})
+
+			if err != nil {
+				return
+			}
+		}
+	}()
+
+	fn(f, func(data []byte) {
+		c.WriteMessage(websocket.TextMessage, data)
+	})
+}
+
 func HttpPost[V any](c *gin.Context, fn func(QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 

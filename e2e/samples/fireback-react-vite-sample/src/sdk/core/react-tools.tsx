@@ -511,7 +511,12 @@ export function useSocket(remote, token, workspaceId, queryClient) {
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
-    if (!remote || process.env.REACT_APP_INACCURATE_MOCK_MODE == "true") {
+    if (
+      !remote ||
+      !token ||
+      token === "undefined" ||
+      process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+    ) {
       return;
     }
     const wsRemote = remote.replace("https", "wss").replace("http", "ws");

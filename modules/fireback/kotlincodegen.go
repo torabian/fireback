@@ -90,6 +90,10 @@ func KotlinActionDiskName(action *Module3Action, moduleName string) string {
 	return ToUpper(action.Name) + "Action.kt"
 }
 
+func KotlinReactiveDiskName(action *Module3Action) string {
+	return ToUpper(action.Name) + "Action.kt"
+}
+
 var KotlinGenCatalog CodeGenCatalog = CodeGenCatalog{
 	LanguageName:            "andkot",
 	ComputeField:            KotlinComputedField,
@@ -100,6 +104,8 @@ var KotlinGenCatalog CodeGenCatalog = CodeGenCatalog{
 	RpcQueryDiskName:        KotlinRpcDiskName,
 	RpcQuery:                "KotlinRpcQuery.tpl",
 	EntityGeneratorTemplate: "KotlinEntity.tpl",
+	RpcReactiveDiskName:     KotlinReactiveDiskName,
+	RpcReactive:             "KotlinRpcReactive.tpl",
 	DtoGeneratorTemplate:    "KotlinDto.tpl",
 	ActionGeneratorTemplate: "KotlinActionDto.tpl",
 	SingleActionDiskName:    KotlinActionDiskName,

@@ -80,14 +80,12 @@ func HandleEventForSocketConnections(event Event) {
 	sourceContext, _ := ToSourceContext(event.SourceContext)
 	if len(SocketSessionPool) > 0 {
 		for workspaceId, workspace := range SocketSessionPool {
-
 			if workspaceId != sourceContext.WorkspaceId {
 				// Does not belong to this workspace, continue
 				continue
 			}
 
 			for _, userConnections := range workspace {
-
 				for _, connection := range userConnections {
 
 					if event.Security != nil {

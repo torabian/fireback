@@ -137,6 +137,11 @@ func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerF
 			token = wsURLParam["token"][0]
 		}
 
+		if err3 == nil && wsURLParam["authorization"] != nil && len(wsURLParam["authorization"]) == 1 {
+
+			token = wsURLParam["authorization"][0]
+		}
+
 		if err3 == nil && wsURLParam["workspaceId"] != nil && len(wsURLParam["workspaceId"]) == 1 {
 
 			workspaceId = wsURLParam["workspaceId"][0]
@@ -165,6 +170,7 @@ func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerF
 		c.Set("user_id", result.UserId.String)
 		c.Set("uniqueId", uniqueId)
 		c.Set("workspaceId", workspaceId)
+		c.Set("workspace-id", workspaceId)
 
 	}
 }

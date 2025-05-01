@@ -3171,6 +3171,9 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                 {{ end }}
 			},
 
+      {{ if .BinaryType }}
+      BinaryType: "{{.BinaryType}}",
+      {{ end }}
       {{ if eq .MethodUpper "WEBRTC" }}
 	    DataChannels: []{{ $wsprefix }}Module3WebRtcDataChannel{
         {{ range .DataChannels }}

@@ -189,12 +189,23 @@
           "type": "string",
           "enum": [
             "post",
+            "patch",
+            "put",
             "get",
             "delete",
             "webrtc",
             "reactive"
           ],
           "description": "HTTP method type including standard and Fireback-specific methods"
+        },
+        "binaryType": {
+          "type": "string",
+          "enum": [
+            "text",
+            "arraybuffer",
+            "blob"
+          ],
+          "description": "Text by default for websocket"
         },
         "qs": {
           "items": {

@@ -1506,6 +1506,29 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 	}
 
+	// Generate the module entrypoint if not exists.
+	moduleEntry := filepath.Join(exportDir, ToUpper(x.Name)+"Module.go")
+	if !Exists(moduleEntry) {
+		folderName := strings.ToLower(exportDir)
+		args := gin.H{
+			"path": folderName,
+			"Name": ToUpper(x.Name),
+			"name": x.Name,
+		}
+
+		goModule, err := CompileString(&firebackgo.FbGoTpl, "GoModule.tpl", args)
+		if err != nil {
+			fmt.Println("Error on module main entry file:", moduleEntry, err)
+			return
+		}
+
+		err3 := WriteFileGen(ctx, moduleEntry, EscapeLines([]byte(goModule)), 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing content:", moduleEntry, err3)
+		}
+
+	}
+
 	exportPath := filepath.Join(exportDir, ToUpper(x.Name)+"Module.dyno.go")
 	data, err := x.RenderTemplate(ctx, ctx.Catalog.Templates, "GoModuleDyno.tpl")
 	if err != nil {

@@ -1,9 +1,11 @@
 package fireback
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -12,105 +14,13 @@ type SocketConnection struct {
 	UserId     string                    `json:"userId"`
 	Connection *websocket.Conn           `json:"-"`
 	URW        UserAccessPerWorkspaceDto `json:"urw"`
+	UniqueId   string                    `json:"uniqueId"`
 }
 
 var (
 	SocketSessionPool = make(map[string]map[string][]*SocketConnection) // workspaceId -> userId -> []*SocketConnection
 	socketMutex       sync.Mutex
 )
-
-// func SocketConnectEndpoint(c *gin.Context) {
-// 	wsURLParam, _ := url.ParseQuery(c.Request.URL.RawQuery)
-
-// 	workspaceId := c.Request.Header.Get("Workspace-id")
-// 	token := c.Request.Header.Get("authorization")
-
-// 	if val, ok := wsURLParam["token"]; ok && len(val) == 1 {
-// 		token = val[0]
-// 	}
-// 	if val, ok := wsURLParam["workspaceId"]; ok && len(val) == 1 {
-// 		workspaceId = val[0]
-// 	}
-
-// 	context := &AuthContextDto{
-// 		WorkspaceId:  workspaceId,
-// 		Token:        token,
-// 		Capabilities: []PermissionInfo{},
-// 	}
-
-// 	res, err := WithAuthorizationPure(context)
-// 	if err != nil {
-// 		resp, _ := json.MarshalIndent(gin.H{"error": err}, "", "  ")
-// 		http.Error(c.Writer, string(resp), int(err.HttpCode))
-// 		return
-// 	}
-
-// 	ws, err2 := Upgrader.Upgrade(c.Writer, c.Request, nil)
-// 	if err2 != nil {
-// 		log.Println("WebSocket upgrade error:", err)
-// 		return
-// 	}
-
-// 	GetEventBusInstance().AddUser(SERVER_INSTANCE, res.UserId.String)
-
-// 	socket := &SocketConnection{
-// 		UserId:     res.UserId.String,
-// 		Connection: ws,
-// 		URW:        *res.UserAccessPerWorkspace,
-// 	}
-
-// 	socketMutex.Lock()
-// 	if SocketSessionPool[workspaceId] == nil {
-// 		SocketSessionPool[workspaceId] = make(map[string][]*SocketConnection)
-// 	}
-// 	SocketSessionPool[workspaceId][res.UserId.String] = append(SocketSessionPool[workspaceId][res.UserId.String], socket)
-// 	socketMutex.Unlock()
-
-// 	for {
-// 		var msg interface{}
-// 		if err := ws.ReadJSON(&msg); err != nil {
-// 			// WebSocket close error?
-// 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-// 				LOG.Debug("WebSocket closed normally", zap.String("user", res.UserId.String))
-
-// 				// Only break in this case
-// 				break
-// 			} else {
-// 				// We need to handle this kinda.
-// 				LOG.Debug("WebSocket read error", zap.Error(err))
-// 				ws.WriteJSON("Socket interaction with webserver only supports json at this moment.")
-// 			}
-
-// 		}
-// 		LOG.Debug("Message from socket connection:", zap.Any("message", msg))
-// 	}
-
-// 	// Cleanup
-// 	ws.Close()
-// 	socketMutex.Lock()
-// 	conns := SocketSessionPool[workspaceId][res.UserId.String]
-// 	for i, conn := range conns {
-// 		if conn.Connection == ws {
-// 			conns = append(conns[:i], conns[i+1:]...)
-// 			break
-// 		}
-// 	}
-// 	if len(conns) == 0 {
-// 		delete(SocketSessionPool[workspaceId], res.UserId.String)
-// 	} else {
-// 		SocketSessionPool[workspaceId][res.UserId.String] = conns
-// 	}
-// 	if len(SocketSessionPool[workspaceId]) == 0 {
-// 		delete(SocketSessionPool, workspaceId)
-// 	}
-// 	socketMutex.Unlock()
-
-// 	GetEventBusInstance().RemoveUser(SERVER_INSTANCE, res.UserId.String)
-// }
-
-// func HandleSocket(e *gin.Engine) {
-// 	e.Any("ws", SocketConnectEndpoint)
-// }
 
 // General purpose reader from socket and writer into a io.Writer.
 // could be used for sending audio, video, or actually any other file over web socket.
@@ -163,4 +73,45 @@ func SocketStreamToFile(done chan bool, read chan SocketReadChan, fileAddressOnD
 type SocketReadChan struct {
 	Data  []byte
 	Error error
+}
+
+func StreamSlowMp3OverSocket(
+	filePath string,
+
+	// Use 2048 for a simulation
+	chunkSize int,
+	query QueryDSL,
+	done chan bool,
+	read chan SocketReadChan,
+) (chan []byte, error) {
+	stream := make(chan []byte)
+	go func() {
+		defer close(stream)
+
+		file, err := os.Open(filePath)
+		if err != nil {
+			fmt.Println("Error opening file:", err)
+			return
+		}
+		defer file.Close()
+
+		buf := make([]byte, 2048) // ~2KB chunks
+		for {
+			n, err := file.Read(buf)
+			if n > 0 {
+				chunk := make([]byte, n)
+				copy(chunk, buf[:n])
+				stream <- chunk
+			}
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				break
+			}
+			time.Sleep(40 * time.Millisecond) // mimic ~25 FPS (can be adjusted)
+		}
+	}()
+
+	return stream, nil
 }

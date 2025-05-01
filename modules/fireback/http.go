@@ -15,7 +15,7 @@ func TemplateQueryDSL(c *gin.Context) QueryDSL {
 }
 
 func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
-	workspaceId := c.GetHeader("workspace-id")
+	workspaceId := c.GetString("workspaceId")
 	internal_sql := c.GetString("internal_sql")
 	id := c.Param("uniqueId")
 	jsonQuery := c.Query("jsonQuery")

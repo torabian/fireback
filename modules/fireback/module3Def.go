@@ -24,7 +24,7 @@ type ErrorItem map[string]string
 type Module3 struct {
 
 	// Custom imports appened by some macros
-	ActionsCustomImport []string
+	ActionsCustomImport []string `jsonschema:"-" json:"-" yaml:"-"`
 
 	// Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks
 	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty" jsonschema:"description=Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"`
@@ -474,7 +474,10 @@ type Module3Action struct {
 	Url string `yaml:"url,omitempty" json:"url,omitempty" jsonschema:"description=HTTP route of the action; if not specified the action is CLI-only"`
 
 	// HTTP method type including standard and Fireback-specific methods.
-	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=get,enum=delete,enum=webrtc,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
+	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=patch,enum=put,enum=get,enum=delete,enum=webrtc,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
+
+	// Text by default for websocket, can be changed to arraybuffer or blob.
+	BinaryType string `yaml:"binaryType,omitempty" json:"binaryType,omitempty" jsonschema:"enum=text,enum=arraybuffer,enum=blob,description=Text by default for websocket, can be changed to arraybuffer or blob"`
 
 	// Type-safe query strings for action
 	Query []*Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`
