@@ -1,7 +1,7 @@
 build-ui:
 	rm -rf dist;
-	cd ../../../modules/workspaces/codegen/react-new && npm run build:bundle:demo;
-	cp -R ../../../modules/workspaces/codegen/react-new/build dist;
+	cd ../../../modules/fireback/codegen/react-new && npm run build:bundle:demo;
+	cp -R ../../../modules/fireback/codegen/react-new/build dist;
 	npx cap sync;
 
 apk:

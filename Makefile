@@ -26,7 +26,9 @@ test_rebuild:
 	node e2e/scripts/rebuild.js $(PWD)
 
 refresh:
-	./artifacts/fireback/f gen gof --def modules/workspaces/WorkspaceModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	make && \
+	./artifacts/fireback/f gen gof --def modules/abac/AbacModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/fireback/FirebackModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
 
 bundle:
@@ -41,26 +43,26 @@ bundle:
 
 rebuild-sdks:
 	rm -rf e2e/react-bed/src/sdk && \
-	rm -rf modules/workspaces/codegen/react-new/src/modules/fireback/sdk && \
+	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
 	./app gen react --path e2e/react-bed/src/sdk --no-cache true && \
-	./app gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/workspaces/codegen/react-new && npm run build
-	rm -rf modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk && \
-	./app gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/workspaces/codegen/react-native-new 
+	./app gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
+	cd modules/fireback/codegen/react-new && npm run build
+	rm -rf modules/fireback/codegen/react-native-new/src/modules/fireback/sdk && \
+	./app gen react --path modules/fireback/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
+	cd modules/fireback/codegen/react-native-new 
 
 ## This is different because we use the fireback built on ci-cd for this purpose.
 rebuild-sdks-ci:
 	rm -rf e2e/react-bed/src/sdk && \
-	rm -rf modules/workspaces/codegen/react-new/src/modules/fireback/sdk && \
-	rm -rf modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk && \
+	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
+	rm -rf modules/fireback/codegen/react-native-new/src/modules/fireback/sdk && \
 	fireback gen react --path e2e/react-bed/src/sdk --no-cache true && \
-	fireback gen react --path modules/workspaces/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/workspaces/codegen/react-new && npm run build
-	fireback gen react --path modules/workspaces/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/workspaces/codegen/react-native-new 
+	fireback gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
+	cd modules/fireback/codegen/react-new && npm run build
+	fireback gen react --path modules/fireback/codegen/react-native-new/src/modules/fireback/sdk --no-cache true && \
+	cd modules/fireback/codegen/react-native-new 
 
 # For development purposes
 
 web:
-	cd modules/workspaces/codegen/react-new && npm start
+	cd modules/fireback/codegen/react-new && npm start

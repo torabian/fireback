@@ -202,7 +202,6 @@ export function useFileUploader() {
                 { uploadId, bytesSent, bytesTotal, filename: file.name },
               ]);
             }
-            console.log(bytesSent, bytesTotal);
           },
         });
 
@@ -502,11 +501,22 @@ export interface PossibleStoreData<T> {
   jsonQuery: string;
 }
 
+export interface SocketNotification<T = any> {
+  cacheKey?: string;
+  name: string;
+  payload: T;
+}
+
 export function useSocket(remote, token, workspaceId, queryClient) {
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
-    if (!remote || process.env.REACT_APP_INACCURATE_MOCK_MODE == "true") {
+    if (
+      !remote ||
+      !token ||
+      token === "undefined" ||
+      process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+    ) {
       return;
     }
     const wsRemote = remote.replace("https", "wss").replace("http", "ws");
@@ -516,7 +526,6 @@ export function useSocket(remote, token, workspaceId, queryClient) {
         `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
       );
       conn.onerror = function (evt) {
-        console.log("Closed", evt);
         setSocketState({ state: "error" });
       };
       conn.onclose = function (evt) {
@@ -524,13 +533,14 @@ export function useSocket(remote, token, workspaceId, queryClient) {
       };
       conn.onmessage = function (evt: any) {
         try {
-          const msg = JSON.parse(evt.data);
+          const msg: SocketNotification = JSON.parse(evt.data);
 
-          if (msg?.data.entityKey) {
-            queryClient.invalidateQueries(msg?.data.entityKey);
+          // Old style event messages
+          if (msg?.cacheKey) {
+            queryClient.invalidateQueries(msg?.cacheKey);
           }
         } catch (e: any) {
-          console.log(evt);
+          console.error("Socket message parsing error", evt);
         }
       };
       conn.onopen = function (evt) {

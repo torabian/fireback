@@ -14,7 +14,7 @@ func main() {
 	// startup. For mobile or desktop might other functionality be used.
 	xapp.CommonHeadlessAppStart(func() {
 		// If anything needs to be done after database initialized
-		// workspaces.RegionalContentSyncSeeders()
-		// workspaces.AppMenuSyncSeeders()
+		// fireback.RegionalContentSyncSeeders()
+		// fireback.AppMenuSyncSeeders()
 	})
 }

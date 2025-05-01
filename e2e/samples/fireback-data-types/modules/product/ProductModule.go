@@ -9,7 +9,7 @@ package product
 import (
 	"embed"
 
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 //go:embed *Module3.yml
@@ -21,8 +21,8 @@ type ProductModuleConfig struct {
 	// do not use for passing environment variables, there is another mechanism for it
 }
 
-func ProductModuleSetup(cfg *ProductModuleConfig) *workspaces.ModuleProvider {
-	module := &workspaces.ModuleProvider{
+func ProductModuleSetup(cfg *ProductModuleConfig) *fireback.ModuleProvider {
+	module := &fireback.ModuleProvider{
 		Name:        "product",
 		Definitions: &Module3Definitions,
 
@@ -37,7 +37,7 @@ func ProductModuleSetup(cfg *ProductModuleConfig) *workspaces.ModuleProvider {
 		// and by adding them here it will be automatically added.
 		// we cannot add them automatically upon saving yaml for you,
 		// when you add a new entity in yaml, add it manually here.
-		EntityBundles: []workspaces.EntityBundle{
+		EntityBundles: []fireback.EntityBundle{
 			// Insert the NameEntityBundle here.
 			ProductEntityBundle,
 		},

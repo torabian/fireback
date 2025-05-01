@@ -4,7 +4,7 @@ sidebar_position: 53
 
 # Fireback Workspaces tables and features
 
-As you might noticed so far, Fireback is only `modules/workspaces` folder, and there is not much code
+As you might noticed so far, Fireback is only `modules/fireback` folder, and there is not much code
 out side of this module. This is intentional, to have everything needed in one module and do not focus
 on managing modules and their compatibility.
 
@@ -19,7 +19,7 @@ This approach would make everything simple, specially for those projects with le
 
 ### User, Person, Workspace entities
 
-As the name suggests, Fireback manages data under workspaces. Workspaces essentially are a group of users, which
+As the name suggests, Fireback manages data under fireback. Workspaces essentially are a group of users, which
 form a workspace, such as a team, or company. Over decades, I have seen a lot of projects which store user data
 individually but when they want to extend logic for teams, invitations, their entire database model changes
 and tons of rewrites needed. Fireback at the zero day solves this problem by defining workspace and user system.

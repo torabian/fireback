@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WebSocket Audio Stream</title>
+</head>
+<body>
+  <h3>Streaming Audio...</h3>
+  <audio id="audio" controls autoplay></audio>
+
+  <script>
+    const token = "f5b7220d7df9b938ce02f510b9ec18a6fdb69db132b0c7a91632c97c8cc7b597";
+    const workspaceId = "root";
+
+    const socket = new WebSocket(`wss://localhost:4500/audio?authorization=${encodeURIComponent(token)}&workspace-id=${encodeURIComponent(workspaceId)}`);
+    socket.onopen = () => console.log("WebSocket open");
+
+    const audioElement = document.getElementById("audio");
+    const mediaSource = new MediaSource();
+    audioElement.src = URL.createObjectURL(mediaSource);
+
+    let sourceBuffer;
+
+    mediaSource.addEventListener("sourceopen", () => {
+      sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+    });
+
+    socket.binaryType = "arraybuffer";
+
+    socket.onmessage = (event) => {
+      if (sourceBuffer && !sourceBuffer.updating) {
+        sourceBuffer.appendBuffer(new Uint8Array(event.data));
+      }
+    };
+
+    socket.onerror = (err) => console.error("WebSocket error:", err, err.toString());
+    socket.onclose = () => console.log("WebSocket closed");
+    
+  </script>
+</body>
+</html>

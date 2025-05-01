@@ -1,3 +1,0 @@
-package workspaces
-
-func init() {}

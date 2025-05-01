@@ -1,0 +1,47 @@
+---
+sidebar_position: 6.5
+---
+
+# Events
+
+Events are a major concept in many products. When there's a new order, you want to see it instantly on the screen via sockets. You might also want to send a web push notification or an email to the user when a certain event occurs.
+
+Fireback provides a distributed option to handle events in single or multi-instance applications.
+
+## Event vs Notification
+
+There are two distinct concepts in Fireback, and it's essential to understand the difference.
+
+A *Notification* is a simple, stateless object that just contains a payload. Its goal is to travel through sockets, push notifications, or other channels. It doesn’t know who should receive it or why it was created.
+
+An *Event*, on the other hand, has permissions (similar to an action) and includes information about where and by which user it was created. Events must be computed and then converted into one or many notifications.
+
+For example, when a new order happens in a workspace with five salespeople, a single event is created. But since all five are connected via sockets to the backend, it generates five separate *Notifications* based on that one event.
+
+If someone doesn’t have permission to see sales-related notifications, they are excluded through event metadata, and no notification is created for them.
+
+## Configuration
+
+You can set the event bus Redis URL using the `redisEventsUrl` config or via CLI:
+
+```bash
+./app config redis-events-url set 127.0.0.1:6379
+```
+
+## Example of defining events:
+
+```yaml
+events:
+  - cacheKey: AnythingThatWillBeSentToFrontEnd
+    description: Describe the event purpose. It's only for developer documentation
+    name: nameOfTheEventWhichWill
+    security:
+      allowOnRoot: 
+      requires:
+        - completeKey: asdasd
+      resolveStrategy: workspace
+    payload:
+      dto:  #Use dto name
+      entity: #Use entity name
+      fields: # Or define the fields
+```

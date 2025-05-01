@@ -17,7 +17,6 @@ dist
 *.exe
 .DS_Store
 .cxx
-*.app
 ui/public/md
 cachemap.txt
 cachemap.json
@@ -32,8 +31,10 @@ test2
 clients/react-bed/src/sdk
 .env.local
 .env
-app
 .db-journal
 *.db-journal
 .jsonschemas/
 e2e/cypress/screenshots
+e2e/samples/socket-connection/app
+e2e/samples/fireback-data-types/app
+/app

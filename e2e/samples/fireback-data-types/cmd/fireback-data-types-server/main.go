@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/torabian/fireback/fireback-data-types/modules/product/tags"
+	"github.com/urfave/cli"
 
 	"github.com/torabian/fireback/fireback-data-types/modules/product"
 
@@ -9,38 +10,28 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/torabian/fireback/fireback-data-types/cmd/fireback-data-types-server/menu"
-
-	"github.com/torabian/fireback/modules/workspaces"
+	"github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback-data-types"
 var PRODUCT_DESCRIPTION = "Sample project which uses all datatypes avaialble in fireback"
 var PRODUCT_LANGUAGES = []string{"en"}
 
-var xapp = &workspaces.FirebackApp{
+var xapp = &fireback.FirebackApp{
 	Title: PRODUCT_DESCRIPTION,
 
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders: []workspaces.SearchProviderFn{
-
-		workspaces.QueryMenusReact,
-		workspaces.QueryRolesReact,
-	},
+	SearchProviders:    []fireback.SearchProviderFn{},
 	SeedersSync: func() {
-		// Sample menu item to make it easier for demos
-		workspaces.AppMenuSyncSeederFromFs(&menu.Menu, []string{"new-menu.yml"}, workspaces.QueryDSL{
-			WorkspaceId: "system",
-		})
+
 	},
 	RunTus: func() {
-		workspaces.LiftTusServer()
+
 	},
-	RunSocket: func(e *gin.Engine) {
-		workspaces.HandleSocket(e)
-	},
-	RunSearch:     workspaces.InjectReactiveSearch,
-	PublicFolders: []workspaces.PublicFolderInfo{
+
+	InjectSearchEndpoint: fireback.InjectReactiveSearch,
+	PublicFolders:        []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to
 		// Bootstrap those themes
@@ -50,21 +41,21 @@ var xapp = &workspaces.FirebackApp{
 		// and then uncomment this, for example to serve static react or angular content
 		// {Fs: &ui, Folder: "ui"},
 	},
-	SetupWebServerHook: func(e *gin.Engine, xs *workspaces.FirebackApp) {
+	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
 
 	},
-	Modules: []*workspaces.ModuleProvider{
 
-		// Important to setup the workspaces at first, so the capabilties module is there
-		workspaces.WorkspaceModuleSetup(),
-		workspaces.DriveModuleSetup(),
-		workspaces.NotificationModuleSetup(),
-		workspaces.PassportsModuleSetup(),
-
-		// do not remove this comment line - it's used by fireback to append new modules
+	Modules: append([]*fireback.ModuleProvider{
+		// Add the very core module, such as capabilities
 		tags.TagsModuleSetup(nil),
 		product.ProductModuleSetup(nil),
-	},
+		fireback.FirebackModuleSetup(nil),
+		{
+			CliHandlers: []cli.Command{
+				fireback.NewProjectCli(),
+			},
+		},
+	}, abac.AbacCompleteModules()...),
 }
 
 func main() {
