@@ -83,7 +83,7 @@ export function useReactiveWs({
         return callback(evt);
       }
       if (evt.data instanceof Blob || evt.data instanceof ArrayBuffer) {
-        onMessage(evt.data);
+        onMessage?.(evt.data);
       } else {
         try {
           const msg = JSON.parse(evt.data);
