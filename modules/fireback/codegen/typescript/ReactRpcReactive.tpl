@@ -70,7 +70,7 @@ export function use{{ .r.GetFuncNameUpper}}({
   /*
   * Creates the connection and tries to establish the connection
   */
-  const operate = (value: any, callback = null) => {
+  const operate = (value: any, callback: any = null) => {
     if (connection.current?.readyState === 1) {
       connection.current?.close();
     }
