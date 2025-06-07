@@ -1592,4 +1592,5 @@ var PublicAuthenticationEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PublicAuthenticationEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

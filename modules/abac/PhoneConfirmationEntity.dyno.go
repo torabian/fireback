@@ -1441,4 +1441,5 @@ var PhoneConfirmationEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PhoneConfirmationEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

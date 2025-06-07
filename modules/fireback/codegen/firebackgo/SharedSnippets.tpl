@@ -1894,7 +1894,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
 	  {{ end }}
     {{ if or (eq .Type "json")}}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        template.{{ .PublicName }} = {{ $wsprefix }}JSONFrom("{{ $prefix }}{{ .ComputedCliName }}")
+        template.{{ .PublicName }} = {{ $wsprefix }}JSONFrom(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
     {{ if or (eq .Type "string?") }}
@@ -3328,4 +3328,153 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
     }
 
   {{ end }}
+{{ end }}
+
+{{ define "entityReplicas" }}
+  {{ $replicas := .e.Replicas }}
+  {{ if and ($replicas) ($replicas.Clickhouse) }}
+    {{ template "clickhouseReplicas" (arr $replicas.Clickhouse .e .wsprefix) }}
+
+  {{ end}}
+
+{{ end }}
+
+
+{{ define "clickhouseField" }}
+  {{ $fields := index . 0 }}
+  {{ $prefix := index . 1 }}
+  {{ $wsprefix := index . 2 }}
+
+  {{ $lastIndex := len $fields }}
+
+  {{ range $index, $field := $fields }}
+    {{ $isLast := (last $index $fields)}}
+    {{ if (ne $field.ClickhouseType "") }}
+      {{ $field.Name }} {{ $field.ClickhouseType }}{{- if (ne $isLast true) -}},{{- end -}}
+    {{ end }}
+
+    
+    {{ if (eq $field.Type "array") }}
+      {{ template "clickhouseField" (arr $field.Fields $field.Upper $wsprefix)}}
+    {{ end }}
+  {{ end }}
+  
+{{ end }}
+
+{{ define "clickhouseQueryFields" }}
+  {{ $fields := index . 0 }}
+  {{ $lastIndex := len $fields }}
+  
+  {{- range $index, $field := $fields -}}
+    {{ $isLast := (last $index $fields)}}
+    {{ .Name }}{{- if (ne $isLast true) -}},{{- end -}}
+  {{- end -}}
+{{ end }}
+
+{{ define "clickhouseQueryFieldsValues" }}
+  {{ $fields := index . 0 }}
+  {{- range $index, $field := $fields -}}
+    dto.{{ .Upper }},
+  {{- end -}}
+{{ end }}
+
+{{ define "clickhouseQueryFieldsPlaceholder" }}
+  {{ $fields := index . 0 }}
+  {{ $lastIndex := len $fields }}
+  
+  {{- range $index, $field := $fields -}}
+    {{ $isLast := (last $index $fields)}}
+    '%v'{{- if (ne $isLast true) -}},{{- end -}}
+  {{- end -}}
+{{ end }}
+
+{{ define "clickhouseReplicas" }}
+  // Click house replica options will be generated here.
+  {{ $ch := index . 0 }}
+  {{ $entity := index . 1 }}
+  {{ $wsprefix := index . 2 }}
+
+type {{ $entity.Name }}ClickHouseSig struct {
+	Insert   func(dto *{{ $entity.EntityName }}, query {{ $wsprefix }}QueryDSL) (*{{ $entity.EntityName }}, *{{ $wsprefix }}IError)
+	Query    func(query {{ $wsprefix }}QueryDSL) ([]*{{ $entity.EntityName }}, *{{ $wsprefix }}QueryResultMeta, error)
+	Migrate func() error
+}
+
+var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
+
+	Migrate: func() error {
+
+		conn, err := {{ $wsprefix }}GetReplica({{ $wsprefix }}ClickHouse)
+		if err != nil {
+			return {{ $wsprefix }}CastToIError(err)
+		}
+
+		createQuery := `
+			CREATE TABLE {{ $entity.UnderscoreName }} (
+				// fields are needed to be generated here
+        {{ template "clickhouseField" (arr $entity.Fields "" $wsprefix ) }}
+			) ENGINE = MergeTree()
+			ORDER BY tuple();
+		`
+
+		_, err2 := conn.Clickhouse.Query(context.Background(), createQuery)
+		return err2
+	},
+	// Insertion to datahouse you'll get the original dto
+	Insert: func(dto *{{ $entity.EntityName }}, query {{ $wsprefix }}QueryDSL) (*{{ $entity.EntityName }}, *{{ $wsprefix }}IError) {
+
+		conn, err := {{ $wsprefix }}GetReplica({{ $wsprefix }}ClickHouse)
+		if err != nil {
+			return nil, {{ $wsprefix }}CastToIError(err)
+		}
+
+
+    // figure out a way to create columns 
+    
+		insertQuery := fmt.Sprintf(
+			`INSERT INTO {{ $entity.UnderscoreName }} (
+        {{ template "clickhouseQueryFields" (arr $entity.Fields)}}
+      ) VALUES (
+        {{ template "clickhouseQueryFieldsPlaceholder" (arr $entity.Fields)}}
+      ) `,
+      {{ template "clickhouseQueryFieldsValues" (arr $entity.Fields)}}
+		)
+
+		// Execute the insert query
+		err = conn.Clickhouse.AsyncInsert(context.Background(), insertQuery, false)
+		if err != nil {
+			return nil, {{ $wsprefix }}CastToIError(err)
+		}
+
+		return dto, nil
+	},
+
+	// Default query feature
+	Query: func(query {{ $wsprefix }}QueryDSL) ([]*{{ $entity.EntityName }}, *{{ $wsprefix }}QueryResultMeta, error) {
+		conn, err := {{ $wsprefix }}GetReplica({{ $wsprefix }}ClickHouse)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		selectQuery := "SELECT * FROM {{ $entity.UnderscoreName }}"
+
+		rows, err := conn.Clickhouse.Query(context.Background(), selectQuery)
+		if err != nil {
+			return nil, nil, err
+		}
+		defer rows.Close()
+
+		var results []*{{ $entity.EntityName }}
+		for rows.Next() {
+			var sub {{ $entity.EntityName }}
+			if err := rows.ScanStruct(&sub); err != nil {
+				return nil, nil, err
+			}
+			results = append(results, &sub)
+		}
+
+		return results, &{{$wsprefix}}QueryResultMeta{}, nil
+	},
+}
+
 {{ end }}

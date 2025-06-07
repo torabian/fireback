@@ -769,7 +769,7 @@ func CastWebPushConfigFromCli(c *cli.Context) *WebPushConfigEntity {
 		template.ParentId = NewStringAutoNull(c.String("pid"))
 	}
 	if c.IsSet("subscription") {
-		template.Subscription = JSONFrom("subscription")
+		template.Subscription = JSONFrom(c.String("subscription"))
 	}
 	return template
 }
@@ -1420,4 +1420,5 @@ var WebPushConfigEntityBundle = EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&WebPushConfigEntity{},
 	},
+	MigrationScripts: []MigrationScript{},
 }

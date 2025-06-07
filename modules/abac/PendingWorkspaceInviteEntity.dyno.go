@@ -1442,4 +1442,5 @@ var PendingWorkspaceInviteEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PendingWorkspaceInviteEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

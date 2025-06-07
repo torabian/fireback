@@ -290,10 +290,22 @@ type Module3EntityActionConfig struct {
 	Query Module3ActionConfig `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=Modify the query rpc code."`
 }
 
+type ClickHouseReplicaInfo struct {
+	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty" `
+}
+
+type Module3EntityReplicas struct {
+	// Clickhouse replica features.
+	Clickhouse *ClickHouseReplicaInfo `yaml:"clickhouse,omitempty" json:"clickhouse,omitempty" jsonschema:"Clickhouse replica features."`
+}
+
 // Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
 // features such as permissions, actions, security, and common actions which might be created or extra
 // queries based on the type
 type Module3Entity struct {
+
+	// The replica configuration for the entity
+	Replicas *Module3EntityReplicas `json:"replicas,omitempty" yaml:"replicas,omitempty" jsonschema:"The replica configuration for the entity"`
 
 	// Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels
 	Notifications []*Module3Notification `yaml:"notifications,omitempty" json:"notifications,omitempty" jsonschema:"description=Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels"`
@@ -533,6 +545,10 @@ type Module3Action struct {
 
 func (x Module3Action) MethodUpper() string {
 	return strings.ToUpper(x.Method)
+}
+
+func (x Module3Entity) HasClickHouse() bool {
+	return x.Replicas != nil && x.Replicas.Clickhouse != nil
 }
 
 func (x Module3Action) ToCli() cli.Command {

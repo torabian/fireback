@@ -270,7 +270,7 @@ func (x *AppConfig) Json() string {
 }
 
 type QueryResultMeta struct {
-	TotalItems          int64   `json:"totalItems"`
-	TotalAvailableItems int64   `json:"totalAvailableItems"`
-	Cursor              *string `json:"cursor"`
+	TotalItems          int64   `json:"totalItems" yaml:"totalItems"`
+	TotalAvailableItems int64   `json:"totalAvailableItems" yaml:"totalAvailableItems"`
+	Cursor              *string `json:"cursor" yaml:"cursor"`
 }

@@ -2149,4 +2149,5 @@ var NotificationConfigEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&NotificationConfigEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

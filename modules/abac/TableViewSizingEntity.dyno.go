@@ -1363,4 +1363,5 @@ var TableViewSizingEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&TableViewSizingEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

@@ -1390,4 +1390,5 @@ var CapabilityEntityBundle = EntityBundle{
 		&CapabilityEntity{},
 		&CapabilityEntityPolyglot{},
 	},
+	MigrationScripts: []MigrationScript{},
 }

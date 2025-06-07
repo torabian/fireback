@@ -1429,4 +1429,5 @@ var EmailSenderEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&EmailSenderEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

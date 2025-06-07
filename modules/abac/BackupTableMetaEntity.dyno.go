@@ -1333,4 +1333,5 @@ var BackupTableMetaEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&BackupTableMetaEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

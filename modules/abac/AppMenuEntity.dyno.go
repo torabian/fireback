@@ -1538,4 +1538,5 @@ var AppMenuEntityBundle = fireback.EntityBundle{
 		&AppMenuEntity{},
 		&AppMenuEntityPolyglot{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

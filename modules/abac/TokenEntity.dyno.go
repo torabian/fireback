@@ -1371,4 +1371,5 @@ var TokenEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&TokenEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

@@ -1464,4 +1464,5 @@ var GsmProviderEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&GsmProviderEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

@@ -1698,4 +1698,5 @@ var TimezoneGroupEntityBundle = fireback.EntityBundle{
 		&TimezoneGroupUtcItems{},
 		&TimezoneGroupEntityPolyglot{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

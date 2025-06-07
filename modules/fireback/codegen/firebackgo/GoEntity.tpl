@@ -43,6 +43,10 @@ import (
 	{{ if .e.DataFields.DateTimestamp }}
 	"time"
 	{{ end }}
+
+	{{ if .e.HasClickHouse }}
+	"context"
+	{{ end }}
    
 )
 
@@ -370,6 +374,8 @@ func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]stri
 {{ template "eventInformation" (arr .e.DefaultEvents $.wsprefix) }}
 {{ template "notificationInformation" (arr .e.Notifications $.wsprefix) }}
 
+{{ template "entityReplicas" . }}
+
 
 var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	Permissions: ALL_{{ .e.AllUpper }}_PERMISSIONS,
@@ -392,4 +398,11 @@ var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
   		&{{ .e.PolyglotName}}{},
 		{{ end }}
   	},
+	MigrationScripts: []{{ $.wsprefix }}MigrationScript{
+		{{ if .e.HasClickHouse }}
+		{
+			Exec: {{ .e.Upper }}ClickHouseActions.Migrate,
+		},
+		{{ end }}
+	},
 }

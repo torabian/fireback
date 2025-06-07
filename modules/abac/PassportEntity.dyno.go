@@ -1547,4 +1547,5 @@ var PassportEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PassportEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

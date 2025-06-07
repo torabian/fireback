@@ -1393,4 +1393,5 @@ var PassportMethodEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PassportMethodEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

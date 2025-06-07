@@ -1,6 +1,22 @@
 name: fireback
 meta-workspace: true
 config:
+  - name: clickhouseDsn
+    description: 
+      In case of using clickhouse replica option, then you need to provide this configuration for connection,
+      make sure you add the username, password also in the same dsn
+    type: string
+    hint: 127.0.0.1:9000
+  - name: mongodbDsn
+    description: 
+      In case of mongodb replica option, you need to provide the installation url and all necessary config
+    type: string
+    hint: defaultmongodb instalaltion
+  - name: elasticsearchDsn
+    description: 
+      Elastic search installation url in case some entities require to write into the elastic search.
+    type: string
+    hint: default elastic search installation
   - name: production
     type: bool
     description: 
@@ -128,6 +144,7 @@ config:
   - name: windowsIdentifier
     description: Used name for installing app as system service on windows installers
     default: fireback
+
 messages:
   invalidContent:
     en: Body content is not correct. You need a valid json.

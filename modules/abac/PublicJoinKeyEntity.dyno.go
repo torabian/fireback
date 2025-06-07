@@ -1346,4 +1346,5 @@ var PublicJoinKeyEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PublicJoinKeyEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

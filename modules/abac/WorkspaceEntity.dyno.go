@@ -1471,4 +1471,5 @@ var WorkspaceEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

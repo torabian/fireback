@@ -1441,4 +1441,5 @@ var EmailConfirmationEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&EmailConfirmationEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

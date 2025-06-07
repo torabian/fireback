@@ -1481,4 +1481,5 @@ var RegionalContentEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&RegionalContentEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

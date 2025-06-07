@@ -1703,4 +1703,5 @@ var UserEntityBundle = fireback.EntityBundle{
 		&UserEntity{},
 		&UserPrimaryAddress{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

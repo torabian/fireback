@@ -1687,4 +1687,5 @@ var FileEntityBundle = fireback.EntityBundle{
 		&FileEntity{},
 		&FileVariations{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

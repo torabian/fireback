@@ -1348,4 +1348,5 @@ var WorkspaceRoleEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&WorkspaceRoleEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

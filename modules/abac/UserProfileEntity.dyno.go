@@ -1362,4 +1362,5 @@ var UserProfileEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&UserProfileEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

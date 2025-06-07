@@ -1333,4 +1333,5 @@ var PreferenceEntityBundle = fireback.EntityBundle{
 	AutoMigrationEntities: []interface{}{
 		&PreferenceEntity{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }

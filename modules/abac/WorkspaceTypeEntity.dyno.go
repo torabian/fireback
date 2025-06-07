@@ -1457,4 +1457,5 @@ var WorkspaceTypeEntityBundle = fireback.EntityBundle{
 		&WorkspaceTypeEntity{},
 		&WorkspaceTypeEntityPolyglot{},
 	},
+	MigrationScripts: []fireback.MigrationScript{},
 }
