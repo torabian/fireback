@@ -3,6 +3,15 @@
   "$id": "https://github.com/torabian/fireback/modules/fireback/module3",
   "$ref": "#/definitions/Module3",
   "definitions": {
+    "ClickHouseReplicaInfo": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "EavMacroParams": {
       "properties": {
         "name": {
@@ -337,6 +346,10 @@
           "description": "Description explains the purpose of the configuration field. It can be helpful for developers and also used in CLI for interactive configuration."
         },
         "default": true,
+        "hint": {
+          "type": "string",
+          "description": "Hint is the value that will be shown in auto complete or cli context as default value - but only to help user for understanding."
+        },
         "env": {
           "type": "string",
           "description": "Env allows you to override the default environment variable name"
@@ -397,6 +410,9 @@
     },
     "Module3Entity": {
       "properties": {
+        "replicas": {
+          "$ref": "#/definitions/Module3EntityReplicas"
+        },
         "notifications": {
           "items": {
             "$ref": "#/definitions/Module3Notification"
@@ -561,6 +577,15 @@
         "with": {
           "type": "string",
           "description": "The value to be replaced"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Module3EntityReplicas": {
+      "properties": {
+        "clickhouse": {
+          "$ref": "#/definitions/ClickHouseReplicaInfo"
         }
       },
       "additionalProperties": false,

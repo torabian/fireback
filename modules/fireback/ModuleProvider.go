@@ -30,6 +30,10 @@ type Report struct {
 	Fn           func(path string, query QueryDSL, report *Report, refl reflect.Value) *IError
 }
 
+type MigrationScript struct {
+	Exec func() error
+}
+
 // Entities also can be bundled into one
 type EntityBundle struct {
 	Permissions           []PermissionInfo
@@ -38,6 +42,7 @@ type EntityBundle struct {
 	AutoMigrationEntities []interface{}
 	CliCommands           []cli.Command
 	MockProvider          func()
+	MigrationScripts      []MigrationScript
 }
 
 type ModuleProvider struct {

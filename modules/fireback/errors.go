@@ -62,7 +62,9 @@ func CastToIError(err error) *IError {
 	}
 
 	return &IError{
-		MessageTranslated: err.Error(),
+		Message: ErrorItem{
+			"en": err.Error(),
+		},
 	}
 }
 

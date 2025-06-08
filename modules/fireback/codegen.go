@@ -420,6 +420,9 @@ func (x *Module3) PublicName() string {
 func (x *Module3Field) PublicName() string {
 	return ToUpper(x.Name)
 }
+func (x *Module3Field) Upper() string {
+	return ToUpper(x.Name)
+}
 func (x *Module3Field) AllUpper() string {
 	return strings.ToUpper(CamelCaseToWordsUnderlined(x.Name))
 }
@@ -2771,6 +2774,9 @@ func regexReplace(input, pattern, replacement string) (string, error) {
 var CommonMap = template.FuncMap{
 	"endsWithDto": func(s string) bool {
 		return strings.HasSuffix(s, "Dto")
+	},
+	"last": func(x int, a interface{}) bool {
+		return x == reflect.ValueOf(a).Len()-1
 	},
 	"goComment":         goComment,
 	"until":             generateRange,

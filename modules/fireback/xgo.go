@@ -506,6 +506,13 @@ func SyncDatabase(x *FirebackApp, db *gorm.DB) {
 				fmt.Println("There is an error on migrating:", bundle)
 				log.Fatalln(err.Error())
 			}
+
+			for _, funx := range bundle.MigrationScripts {
+				if funx.Exec != nil {
+					fmt.Println(funx.Exec())
+					os.Exit(0)
+				}
+			}
 		}
 	}
 

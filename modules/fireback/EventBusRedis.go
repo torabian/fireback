@@ -22,7 +22,7 @@ func NewRedisManager(redisURL string) (*RedisManager, error) {
 
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		log.Println("❌ Failed to connect to Redis at %s: %v - fallback to internal event system", config.RedisEventsUrl, err)
+		// log.Println("❌ Failed to connect to Redis at %s: %v - fallback to internal event system", config.RedisEventsUrl, err)
 		return nil, err
 	}
 

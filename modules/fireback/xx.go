@@ -38,6 +38,7 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 		GetSeeder(xapp),
 		GetReportsTool(xapp),
 		GetCapabilityRefreshCommand(xapp),
+		ClickHouseTestConnectionCli,
 
 		// Keep these in the last
 		CLIAboutCommand,

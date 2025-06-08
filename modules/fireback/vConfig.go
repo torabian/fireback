@@ -26,6 +26,9 @@ type Module3ConfigField struct {
 	// Default specifies the default value for the configuration field if it is not defined.
 	Default string `yaml:"default,omitempty" json:"default,omitempty" jsonschema:"description=Default specifies the default value for the configuration field if it is not defined."`
 
+	// Hint is the value that will be shown in auto complete or cli context as default value, but only to help user for understanding.
+	Hint string `yaml:"hint,omitempty" json:"hint,omitempty" jsonschema:"description=Hint is the value that will be shown in auto complete or cli context as default value - but only to help user for understanding."`
+
 	// Env allows you to override the default environment variable name, which is automatically
 	// generated from the Name field. Use this field if you want to manually specify the environment variable name.
 	Env string `yaml:"env,omitempty" json:"env,omitempty" jsonschema:"description=Env allows you to override the default environment variable name, which is automatically generated from the Name field. Use this field if you want to manually specify the environment variable name."`
