@@ -3,7 +3,7 @@
 # Define variables
 DIRNAME="../../artifacts/fireback-server-all/"
 PACKAGE_NAME="fireback"
-PACKAGE_VERSION="1.2.2"
+PACKAGE_VERSION="1.2.3"
 DESCRIPTION="Fireback ultimate golang framework"
 MAINTAINER="Ali Torabi <ali-torabian@outlook.com>"
 BIN_PATH_AMD="../../artifacts/fireback-server-all/fireback" # Change this to the actual path of your amd64 binary
