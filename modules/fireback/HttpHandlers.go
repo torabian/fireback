@@ -320,8 +320,11 @@ func HttpRawQuery[T any](
 
 		c.JSON(200, gin.H{
 			"data": gin.H{
-				"startIndex":          f.StartIndex,
-				"itemsPerPage":        f.ItemsPerPage,
+				"startIndex":   f.StartIndex,
+				"itemsPerPage": f.ItemsPerPage,
+				"next": gin.H{
+					"cursor": count.Cursor,
+				},
 				"items":               mappedItems,
 				"totalItems":          count.TotalItems,
 				"totalAvailableItems": count.TotalAvailableItems,
