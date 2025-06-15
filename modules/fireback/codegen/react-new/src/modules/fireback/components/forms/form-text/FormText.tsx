@@ -14,6 +14,7 @@ export interface FormTextProps extends BaseFormElementProps {
   label?: string;
   disabled?: boolean;
   onChange?: (value: any) => void;
+  readonly?: boolean;
 
   secureTextEntry?: boolean;
   Icon?: any;

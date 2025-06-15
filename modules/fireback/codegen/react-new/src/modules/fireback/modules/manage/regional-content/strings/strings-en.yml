@@ -1,0 +1,15 @@
+content:
+  regionalContents:
+    archiveTitle: Regional contents
+    content: Content
+    contentHint: Content
+    editRegionalContent: Edit regional content
+    keyGroup: Key group
+    keyGroupHint: Key group
+    languageId: Language id
+    languageIdHint: Language id
+    newRegionalContent: New regional content
+    region: Region
+    regionHint: Region
+    title: Title
+    titleHint: Title

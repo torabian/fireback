@@ -55,7 +55,7 @@
     {
       "id": "getuipath",
       "description": "The address of the generated content",
-      "default": "src/modules/test",
+      "default": "modules/fireback/codegen/react-new/src/modules/fireback/modules/manage",
       "type": "promptString"
     },
     {
