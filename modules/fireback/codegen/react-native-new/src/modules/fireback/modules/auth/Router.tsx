@@ -9,6 +9,7 @@ import EnterPasswordScreen from '@/modules/fireback/modules/auth/EnterPasswordSc
 import FinishSignup from '@/modules/fireback/modules/auth/FinishSignup';
 import {TransitionPresets, createStackNavigator} from '@react-navigation/stack';
 import {UserArchiveScreen} from '../users/user/UserArchiveScreen';
+import {DashboardScreen} from '../dashboard/DashboardScreen';
 
 const Stack = createStackNavigator();
 
@@ -42,6 +43,11 @@ export const AuthRouter = () => {
         options={{headerTitle: 'Finish signing up'}}
         name={FinishSignup.Name}
         component={FinishSignup}
+      />
+      <Stack.Screen
+        options={{headerTitle: 'Fake Dashboard'}}
+        name={DashboardScreen.Name}
+        component={DashboardScreen}
       />
     </Stack.Navigator>
   );

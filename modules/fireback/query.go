@@ -170,6 +170,9 @@ func CommonCliQueryCmd[T any](
 				"itemsPerPage": f.ItemsPerPage,
 				"items":        items,
 				"totalItems":   count.TotalItems,
+				"next": gin.H{
+					"cursor": count.Cursor,
+				},
 			},
 		}, "", "  ")
 
@@ -204,6 +207,9 @@ func CommonCliQueryCmd3[T any](
 				"itemsPerPage": f.ItemsPerPage,
 				"items":        items,
 				"totalItems":   count.TotalItems,
+				"next": gin.H{
+					"cursor": count.Cursor,
+				},
 			},
 		}
 		if c.Bool("yaml") {
@@ -230,7 +236,6 @@ func CommonCliQueryCmd2[T any](
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 
 	if items, count, err := fn(f); err != nil {
-		fmt.Println(12)
 		fmt.Println(err)
 	} else {
 		out := gin.H{

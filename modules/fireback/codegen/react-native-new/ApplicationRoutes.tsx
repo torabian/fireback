@@ -1,4 +1,5 @@
 import {AuthRouter} from '@/modules/fireback/modules/auth/Router';
+import {DashboardScreen} from '@/modules/fireback/modules/dashboard/DashboardScreen';
 import {UserArchiveScreen} from '@/modules/fireback/modules/users/user/UserArchiveScreen';
 import {RemoteQueryContext} from '@/modules/fireback/sdk/core/react-tools';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -40,6 +41,7 @@ function DrawerNavigator() {
         name={UserArchiveScreen.Name}
         component={UserArchiveScreen}
       />
+      <Drawer.Screen name={DashboardScreen.Name} component={DashboardScreen} />
     </Drawer.Navigator>
   );
 }
