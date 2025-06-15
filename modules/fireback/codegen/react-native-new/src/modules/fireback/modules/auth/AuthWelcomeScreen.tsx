@@ -7,6 +7,7 @@ import ContinueWithEmailScreen from './ContinueWithEmailScreen';
 import {themeDark, themeLight} from '@/themes/theme';
 import {UserArchiveScreen} from '../users/user/UserArchiveScreen';
 import {WebViewLogin} from './WebViewLogin';
+import {DashboardScreen} from '../dashboard/DashboardScreen';
 
 const AuthWelcomeScreen = () => {
   const {theme, setTheme} = useTheme();
@@ -42,6 +43,10 @@ const AuthWelcomeScreen = () => {
         title="Continue with Apple"
         icon={require('./assets/apple.png')}
         onPress={() => setTheme(themeDark)}
+      />
+      <Button
+        title="Go to dashboard"
+        onPress={() => navigate(DashboardScreen.Name)}
       />
       <Button
         title="Continue with Facebook"
