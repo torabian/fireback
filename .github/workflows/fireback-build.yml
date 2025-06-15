@@ -638,9 +638,9 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Run Yarn Install
+      - name: npm install dependencies
         run: |
-          cd modules/fireback/codegen/react-native-new && npm i
+          cd modules/fireback/codegen/react-native-new && npm i -f
 
       - name: Build application
         run: |
