@@ -38,6 +38,20 @@ items:
       label: Workspaces
   parentId: root-actions
   capabilityId: root.manage.abac.workspace.query
+- href: "/manage/regional-contents"
+  workspaceId: system
+  icon: common/workspace.svg
+  label: Regional Content
+  uniqueId: regional_content
+  visibility: A
+  activeMatcher: "/manage/regional-content"
+  translations:
+    - languageId: fa
+      label: متن ها و محتویات
+    - languageId: en
+      label: Regional Content
+  parentId: root-actions
+  capabilityId: root.manage.abac.regional-content.query
 - href: "/manage/workspace-config"
   workspaceId: system
   icon: ios-theme/icons/settings.svg

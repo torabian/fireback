@@ -16,6 +16,7 @@ import { useDriveRoutes } from "./drive/DriveRoutes";
 import { useEmailProviderRoutes } from "./mail-providers/EmailProviderRoutes";
 import { useEmailSenderRoutes } from "./mail-senders/EmailSenderRoutes";
 import { useUserRoutes } from "./users/UserRoutes";
+import { useRegionalContentRoutes } from "./regional-content/RegionalContentRoutes";
 
 export function useManageRoutes() {
   const capabilityRoutes = useCapabilityRoutes();
@@ -27,6 +28,7 @@ export function useManageRoutes() {
   const workspaceConfigRoutes = useWorkspaceConfigRoutes();
   const workspaceTypeRoutes = useWorkspaceTypeRoutes();
   const workspaceRoutes = useWorkspaceRoutes();
+  const regionalContentRoutes = useRegionalContentRoutes();
 
   return (
     <Route path="manage">
@@ -39,6 +41,7 @@ export function useManageRoutes() {
       {workspaceConfigRoutes}
       {workspaceTypeRoutes}
       {workspaceRoutes}
+      {regionalContentRoutes}
     </Route>
   );
 }

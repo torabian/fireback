@@ -60,7 +60,7 @@ export function QueryErrorView({
             {(query.error?.error?.errors || []).map((item) => {
               return (
                 <li key={item.location}>
-                  {item.messageTranslated || item.message}
+                  {item.messageTranslated || item.message} ({item.location})
                 </li>
               );
             })}
