@@ -1,0 +1,33 @@
+.bottom-nav-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid #ccc;
+  background: #fff;
+  z-index: 1000;
+
+  .nav-link {
+    text-decoration: none;
+    color: #777;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-img {
+    width: 20px;
+  }
+
+  .nav-link.active {
+    color: #000;
+    font-weight: bold;
+  }
+}
+

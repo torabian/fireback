@@ -26,7 +26,7 @@ export const UserInvitationList = () => {
           (res) => {}
         );
       },
-    });
+    })
   };
 
   const onReject = (dto: UserInvitationsQueryColumns) => {

@@ -17,6 +17,7 @@ import {
   useSelfServicePublicRoutes,
 } from "../../modules/selfservice/SelfServiceRoutes";
 import { useManageRoutes } from "../../modules/manage/ManageRoutes";
+import { useMobileKitRoutes } from "../../modules/mobile-kit/dashboard/ManageRoutes";
 
 export function FirebackEssentialRouterManager({
   children,
@@ -33,6 +34,7 @@ export function FirebackEssentialRouterManager({
 
   const selfServiceAuthenticateRoutes = useSelfServiceAuthenticateRoutes();
   const manageRoutes = useManageRoutes();
+  const mobileKitRoutes = useMobileKitRoutes();
 
   // ~ auto:useRouteDefs
 
@@ -58,6 +60,7 @@ export function FirebackEssentialRouterManager({
 
           {selfServiceAuthenticateRoutes}
           {manageRoutes}
+          {mobileKitRoutes}
 
           {children}
 

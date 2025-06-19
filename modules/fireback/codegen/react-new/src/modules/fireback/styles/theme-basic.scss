@@ -6,6 +6,7 @@
 @import "./drive.scss";
 @import "./keyboard.scss";
 @import "./datatable.scss";
+@import "./tabbar-menu.scss";
 @import "./mock-version-notice.scss";
 
 .headless-form-entity-manager {
@@ -487,4 +488,32 @@ html[dir="rtl"] {
   z-index: 9999;
   border-radius: 100%;
   opacity: 0.5;
+}
+
+
+@keyframes jumpFloat {
+  0% {
+    transform: translateY(0);
+  }
+  10% {
+    transform: translateY(-8px); // quick jump
+  }
+  100% {
+    transform: translateY(0); // slow fall
+  }
+}
+
+.empty-list-indicator, .not-found-pagex {
+  text-align: center;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  img {
+    width: 80px;
+    margin-bottom: 20px;
+    animation: jumpFloat 2.5s ease-out infinite;
+  }
 }
