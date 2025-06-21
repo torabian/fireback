@@ -195,6 +195,20 @@ func HttpPost[V any](c *gin.Context, fn func(QueryDSL) (V, *IError)) {
 	}
 }
 
+func HttpPostXhtml(c *gin.Context, fn func(QueryDSL) (*XHtml, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
+
+	if result, err := fn(f); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+	} else {
+		if result != nil {
+			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
+		} else {
+			c.AbortWithStatus(404)
+		}
+	}
+}
+
 func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
@@ -215,6 +229,31 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 		c.JSON(200, gin.H{
 			"data": entity,
 		})
+	}
+}
+
+func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*XHtml, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
+
+	id := c.Param("uniqueId")
+	if id != "" {
+		f.UniqueId = id
+	}
+
+	var body T
+
+	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
+		return
+	}
+
+	if result, err := fn(body, f); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+	} else {
+		if result != nil {
+			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
+		} else {
+			c.AbortWithStatus(404)
+		}
 	}
 }
 
@@ -359,7 +398,7 @@ func HttpGetEntity[T any](
 	}
 }
 
-func HttpHtml(
+func HttpGetXHtml(
 	c *gin.Context,
 	fn func(QueryDSL) (*XHtml, *IError),
 ) {

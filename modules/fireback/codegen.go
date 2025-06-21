@@ -198,9 +198,10 @@ func (x *Module3Enum) KeyUpper() string {
 }
 
 func (x *Module3Action) ComputeResponseEntity() string {
-	if x.Out == nil {
+	if x.Out == nil || x.Out.XHtml {
 		return `string("")`
 	}
+
 	if x.Out.Entity != "" {
 		return "&" + x.Out.Entity + "{}"
 	}
@@ -215,7 +216,7 @@ func (x *Module3Action) ComputeResponseEntity() string {
 	return "&OkayResponseDto{}"
 }
 func (x *Module3Action) ComputeResponseEntityS() string {
-	if x.Out == nil {
+	if x.Out == nil || x.Out.XHtml {
 		return ``
 	}
 
@@ -476,9 +477,16 @@ func (x *Module3Action) ActionReqDto() string {
 }
 
 func (x *Module3Action) ActionResDto() string {
+
 	if x.Out == nil {
 		return "string"
 	}
+
+	if x.Out.XHtml {
+		// This means, that fireback module cannot use XHtml type :(
+		return "*fireback.XHtml"
+	}
+
 	prefix := ""
 	if strings.ToLower(x.Format) == "query" || strings.ToLower(x.Method) == "query" {
 		prefix = "[]"
