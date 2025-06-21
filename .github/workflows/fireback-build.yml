@@ -588,7 +588,7 @@ jobs:
           cache: gradle
 
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v4
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -631,16 +631,16 @@ jobs:
           cache: gradle
 
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v4
         
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Run Yarn Install
+      - name: npm install dependencies
         run: |
-          cd modules/fireback/codegen/react-native-new && npm i
+          cd modules/fireback/codegen/react-native-new && npm i -f
 
       - name: Build application
         run: |
