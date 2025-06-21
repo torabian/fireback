@@ -37,6 +37,9 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 
 	}
 
+	// Secure cookie.
+	q.C.SetCookie("authorization", tokenString, 3600*24, "/", "", true, true)
+
 	q.ResolveStrategy = "user"
 	tokens, _, err := TokenActions.Query(q)
 
@@ -58,6 +61,15 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 			return token.Token, nil
 		}
 	}
+
+	// check the config, if using the secure cookie only, we change the token.
+	// one thing is, it should not be going down empty, it might give the front-end apps
+	// impression that token is failed.
+
+	// This causes some issues, create a separate ticket.
+	// if fireback.GetConfig().CookieAuthOnly {
+	// 	tokenString = "[Already set on secure cookie]"
+	// }
 
 	until := fireback.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{

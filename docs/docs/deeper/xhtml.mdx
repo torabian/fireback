@@ -1,0 +1,40 @@
+---
+title: XHtml
+sidebar_position: 2
+---
+
+XHtml is a output type in Fireback actions, which returns an html template.
+You an create html files in a folder, embed them, and then XHtml would render them.
+Upon development, they are being read from disk, and on productio they are read from embed file system.
+
+XHtml is perfect answer for the classic get/postback forms, you can make an endpoint to show your page,
+or accept a post back content and do some action on top of it.
+
+
+All you need to do on an action is, to set the `out.xhtml` to true:
+
+
+```yaml
+...
+actions:
+   - name: getHome
+     url: /
+     method: get
+     out:
+       xhtml: true
+   - name: postHome
+     url: /
+     method: post
+     out:
+       xhtml: true
+     in:
+       fields:
+       - name: firstName
+         type: string
+
+```
+
+When the action file is being generated, there are some helper commands for you to understand how to return
+the screen name, and parameters.
+
+This tutorial defintely worth a workshop in a video form.

@@ -172,6 +172,8 @@ type firebackMsgs struct {
 	YamlTypeError                ErrorItem
 }
 type Config struct {
+	// When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie.
+	CookieAuthOnly bool `envconfig:"COOKIE_AUTH_ONLY" description:"When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie."`
 	// In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn
 	ClickhouseDsn string `envconfig:"CLICKHOUSE_DSN" description:"In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn"`
 	// In case of mongodb replica option, you need to provide the installation url and all necessary config
@@ -259,6 +261,10 @@ func GetConfig() Config {
 }
 func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
+		cli.BoolFlag{
+			Name:  "cookie-auth-only",
+			Usage: "When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie.",
+		},
 		cli.StringFlag{
 			Name:  "clickhouse-dsn",
 			Usage: "In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn",
@@ -422,6 +428,9 @@ func GetConfigCliFlags() []cli.Flag {
 	}
 }
 func CastConfigFromCli(config *Config, c *cli.Context) {
+	if c.IsSet("cookie-auth-only") {
+		config.CookieAuthOnly = c.Bool("cookie-auth-only")
+	}
 	if c.IsSet("clickhouse-dsn") {
 		config.ClickhouseDsn = c.String("clickhouse-dsn")
 	}
@@ -545,6 +554,29 @@ func CastConfigFromCli(config *Config, c *cli.Context) {
 }
 func GetConfigCli() []cli.Command {
 	return []cli.Command{
+		{
+			Name:  "cookie-auth-only",
+			Usage: "When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie. (bool)",
+			Subcommands: []cli.Command{
+				{
+					Name: "get",
+					Action: func(c *cli.Context) error {
+						fmt.Println(config.CookieAuthOnly)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(c *cli.Context) error {
+						return ConfigSetBoolean(c, config.CookieAuthOnly, func(value bool) {
+							config.CookieAuthOnly = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
 		{
 			Name:  "clickhouse-dsn",
 			Usage: "In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn (string)",

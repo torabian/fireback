@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -74,57 +73,8 @@ type RenderContext struct {
 	Path string
 }
 
-func renderPageFromDisk(c *gin.Context, page string, params any) {
-
-	SpfNavigate := c.Query("spf") == "navigate"
-
-	if SpfNavigate {
-		c.Header("content-type", "application/json")
-	} else {
-		c.Header("content-type", "text/html")
-	}
-
-	sharedTemplates, err := loadSharedTemplates("modules/shopclient/screens/shared")
-	if err != nil {
-		fmt.Println(3, err)
-		c.String(http.StatusInternalServerError, "Error loading shared templates")
-		return
-	}
-
-	// Parse the specific page template with the shared templates
-	var items []string = append([]string{"modules/shopclient/screens/" + page}, sharedTemplates...)
-	name := path.Base(items[0])
-
-	tmpl, err := template.New(name).Funcs(funcMap).ParseFiles(items...)
-	if err != nil {
-		fmt.Println(4, err)
-		c.String(http.StatusInternalServerError, "Error loading page template")
-		return
-	}
-	var buf bytes.Buffer
-	c.Writer.WriteHeader(http.StatusOK)
-	err = tmpl.Execute(&buf, params)
-	if err != nil {
-		fmt.Println(5, err)
-		c.String(http.StatusInternalServerError, "Error rendering page")
-	}
-
-	if SpfNavigate {
-		var jsonResponse map[string]interface{} = map[string]interface{}{}
-		jsonResponse["body"] = gin.H{
-			"content": buf.String(),
-		}
-		c.JSON(http.StatusOK, jsonResponse)
-
-	} else {
-		c.Writer.Write(buf.Bytes())
-	}
-}
-
 func loadSharedTemplatesEmbed(efs fs.FS, root string) ([]string, error) {
 	var files []string
-
-	fmt.Println(5, efs)
 
 	err := fs.WalkDir(efs, root, func(path string, d fs.DirEntry, err error) error {
 		if d == nil {
@@ -197,7 +147,6 @@ func renderPageFromEmbed(fsx fs.FS, c *gin.Context, page string, params any) {
 
 	err = tmpl.ExecuteTemplate(&buf, filepath.Base(address), params)
 	if err != nil {
-		fmt.Println(5, err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
 	}
 
