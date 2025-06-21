@@ -3151,9 +3151,18 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                     
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
                       {{ if .In }}
-                        {{ $wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
+                        {{ if and (.Out) (.Out.XHtml) }}
+                          {{ $wsprefix }}HttpPostEntityXhtml(c, {{ .Upper }}ActionFn)
+                        {{ else }}
+                          {{ $wsprefix }}HttpPostEntity(c, {{ .Upper }}ActionFn)
+
+                        {{ end }}
                       {{ else }}
-                        {{ $wsprefix }}HttpPost(c, {{ .Upper }}ActionFn)
+                        {{ if and (.Out) (.Out.XHtml) }}
+                          {{ $wsprefix }}HttpPostXhtml(c, {{ .Upper }}ActionFn)
+                        {{ else }}
+                          {{ $wsprefix }}HttpPost(c, {{ .Upper }}ActionFn)
+                        {{ end }}
                       {{ end }}
                     {{ end }}
                     {{ if or (eq .FormatComputed "QUERY")}}
@@ -3161,7 +3170,11 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                     {{ end }}
                     
                     {{ if or (eq .FormatComputed "GET_ONE")}}
+                      {{ if and (.Out) (.Out.XHtml) }}
+                        {{ $wsprefix }}HttpGetXHtml(c, {{ .Upper }}ActionFn)
+                      {{ else }}
                         {{ $wsprefix }}HttpGetEntity(c, {{ .Upper }}ActionFn)
+                      {{ end }}
                     {{ end }}
                     
                     {{ if or (eq .MethodUpper "WEBRTC")}}

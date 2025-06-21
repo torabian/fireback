@@ -56,6 +56,7 @@ var xapp = &fireback.FirebackApp{
 	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
+
 		{
 			CliHandlers: []cli.Command{
 				fireback.NewProjectCli(),
