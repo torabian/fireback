@@ -48,7 +48,7 @@ type QueryDSL struct {
 	// this is gin context upon the request, which is being attached to the dsl
 	// regularly, should not be accessed directly but in reality many times we need
 	// to work low level and there is no reason framework do not allow it.
-	c *gin.Context `json:"-" yaml:"-"`
+	C *gin.Context `json:"-" yaml:"-"`
 
 	// The gorm transaction object. By setting the query Tx, you can connect
 	// few Fireback actions to be done as transaction. Fireback also uses this

@@ -189,6 +189,7 @@ var MiscCli cli.Command = cli.Command{
 		TableViewSizingCliFn(),
 		RegionalContentCliFn(),
 		AppMenuCliFn(),
+		getCssMinCombineCli(),
 	},
 }
 

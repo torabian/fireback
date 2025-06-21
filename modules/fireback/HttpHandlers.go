@@ -358,3 +358,33 @@ func HttpGetEntity[T any](
 		})
 	}
 }
+
+func HttpHtml(
+	c *gin.Context,
+	fn func(QueryDSL) (*XHtml, *IError),
+) {
+	id := c.Param("uniqueId")
+	f := ExtractQueryDslFromGinContext(c)
+	f.UniqueId = id
+	f.C = c
+
+	if item, err := fn(f); err != nil {
+
+		code := http.StatusBadRequest
+
+		if err.HttpCode > 0 {
+			code = int(err.HttpCode)
+		}
+		c.AbortWithStatusJSON(code, gin.H{
+			"error": err.ToPublicEndUser(&f),
+		})
+
+	} else {
+		if item != nil {
+
+			RenderPage(item.ScreensFs, c, item.TemplateName, item.Params)
+		} else {
+			c.AbortWithStatus(404)
+		}
+	}
+}
