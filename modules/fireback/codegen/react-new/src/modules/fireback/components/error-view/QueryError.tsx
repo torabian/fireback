@@ -49,12 +49,19 @@ export function QueryErrorView({
   const { options, setOverrideRemoteUrl, overrideRemoteUrl } =
     useContext(RemoteQueryContext);
 
-  const url = new URL(options.prefix);
-  const port = url.port || (url.protocol === "https:" ? "443" : "80");
+  let showAutoAdjustTheUrl = false;
+  let port = "80";
 
-  const showAutoAdjustTheUrl =
-    (location.host.includes("192.168") || location.host.includes("127.0")) &&
-    query.error?.message?.includes("Failed to fetch");
+  try {
+    if (options?.prefix) {
+      const url = new URL(options?.prefix);
+      port = url.port || (url.protocol === "https:" ? "443" : "80");
+      showAutoAdjustTheUrl =
+        (location.host.includes("192.168") ||
+          location.host.includes("127.0")) &&
+        query.error?.message?.includes("Failed to fetch");
+    }
+  } catch (err) {}
 
   const autoAdjust = () => {
     setOverrideRemoteUrl("http://" + location.hostname + ":" + port + "/");
