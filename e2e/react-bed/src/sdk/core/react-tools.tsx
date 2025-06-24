@@ -129,6 +129,8 @@ export interface IRemoteQueryContext {
   session: ContextSession;
   checked: boolean;
   isAuthenticated: boolean;
+  overrideRemoteUrl?: string;
+  setOverrideRemoteUrl?: (url: string) => void;
   selectedUrw?: UserRoleWorkspace;
   signout: () => void;
   selectUrw: (urw: UserRoleWorkspace) => void;
@@ -384,6 +386,7 @@ export function RemoteQueryProvider({
 }: IRemoteQueryProvider) {
   const [checked, setChecked] = useState(false);
   const [session, setSession$] = useState<ContextSession>();
+  const [overrideRemoteUrl, setOverrideRemoteUrl] = useState("");
   const [selectedWorkspaceInternal, selectWorkspace$] =
     useState<UserRoleWorkspace>();
 
@@ -426,7 +429,7 @@ export function RemoteQueryProvider({
     headers: {
       authorization: token || session?.token,
     },
-    prefix: remote + (prefix || ""),
+    prefix: (overrideRemoteUrl || remote) + (prefix || ""),
   };
 
   if (selectedWorkspaceInternal) {
@@ -476,6 +479,8 @@ export function RemoteQueryProvider({
       value={{
         options,
         signout,
+        setOverrideRemoteUrl,
+        overrideRemoteUrl,
         setSession,
         socketState,
         checked,
