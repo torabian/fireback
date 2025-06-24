@@ -12,6 +12,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import InfiniteLoader from "react-window-infinite-loader";
 import { QueryErrorView } from "../error-view/QueryError";
 import { AutoCardDrawer } from "./AutoCardDrawer";
+import { EmptyList } from "./EmptyList";
 const { FixedSizeList } = require("react-window");
 
 export const FlatListMode = ({
@@ -127,12 +128,11 @@ export const FlatListMode = ({
         triggerHeight={pullToRefreshEnabled ? 500 : 0}
         startInvisible={true}
       >
-        <div style={{ height: "calc(100vh - 100px)" }}>
+        <div style={{ height: "calc(100vh - 130px)" }}>
           <QueryErrorView query={q.query} />
 
-          {indexedData.length === 0 && !q.query?.isError && (
-            <span>{t.table.noRecords}</span>
-          )}
+          {indexedData.length === 0 && !q.query?.isError && <EmptyList />}
+
           <InfiniteLoader
             isItemLoaded={(index) => {
               return !!indexedData[index];

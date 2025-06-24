@@ -129,6 +129,8 @@ export interface IRemoteQueryContext {
   session: ContextSession;
   checked: boolean;
   isAuthenticated: boolean;
+  overrideRemoteUrl?: string;
+  setOverrideRemoteUrl?: (url: string) => void;
   selectedUrw?: UserRoleWorkspace;
   signout: () => void;
   selectUrw: (urw: UserRoleWorkspace) => void;
@@ -384,6 +386,7 @@ export function RemoteQueryProvider({
 }: IRemoteQueryProvider) {
   const [checked, setChecked] = useState(false);
   const [session, setSession$] = useState<ContextSession>();
+  const [overrideRemoteUrl, setOverrideRemoteUrl] = useState("");
   const [selectedWorkspaceInternal, selectWorkspace$] =
     useState<UserRoleWorkspace>();
 
@@ -426,7 +429,7 @@ export function RemoteQueryProvider({
     headers: {
       authorization: token || session?.token,
     },
-    prefix: remote + (prefix || ""),
+    prefix: (overrideRemoteUrl || remote) + (prefix || ""),
   };
 
   if (selectedWorkspaceInternal) {
@@ -476,6 +479,8 @@ export function RemoteQueryProvider({
       value={{
         options,
         signout,
+        setOverrideRemoteUrl,
+        overrideRemoteUrl,
         setSession,
         socketState,
         checked,
@@ -592,3 +597,73 @@ export function queryBeforeSend(query: any) {
 
   return newQuery;
 }
+
+export const useWebrtcConnection = ({
+  pc,
+  submit,
+  dataChannels,
+  dataChannel,
+  autoConnect,
+}: {
+  pc: MutableRefObject<RTCPeerConnection>;
+  submit: any;
+  dataChannels: Array<{ name: string }>;
+  dataChannel: MutableRefObject<any>;
+  autoConnect?: boolean;
+}) => {
+  const [state, setState] = useState("idle");
+
+  const executeInit = async () => {
+    setState("initiating");
+    const offer = await pc.current.createOffer();
+    setState("offerCreated");
+    await pc.current.setLocalDescription(offer);
+
+    await new Promise((resolve) => {
+      if (pc.current.iceGatheringState === "complete") {
+        resolve(true);
+      } else {
+        pc.current.onicegatheringstatechange = () => {
+          if (pc.current.iceGatheringState === "complete") resolve(true);
+        };
+      }
+    });
+
+    setState("iceComplete");
+    const answer = await submit({ offer: offer } as any);
+
+    setState("answerReady");
+    await pc.current.setRemoteDescription(answer.data.sessionDescription);
+
+    setState("connected");
+  };
+
+  const initiate = async () => {
+    // let's initiate the webrtc
+    pc.current = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+    });
+
+    for (const channel of dataChannels) {
+      dataChannel.current = {
+        ...dataChannel.current,
+        [channel.name]: pc.current.createDataChannel(channel.name),
+      };
+    }
+
+    executeInit().catch((err) => {
+      console.log(err);
+    });
+  };
+
+  useEffect(() => {
+    if (autoConnect !== false) {
+      initiate();
+    }
+  }, []);
+
+  return {
+    initiate,
+    state,
+  };
+};

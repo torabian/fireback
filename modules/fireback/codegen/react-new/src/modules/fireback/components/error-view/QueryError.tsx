@@ -46,7 +46,26 @@ export function QueryErrorView({
   children?: React.ReactNode;
 }) {
   const t = useT();
-  const { options } = useContext(RemoteQueryContext);
+  const { options, setOverrideRemoteUrl, overrideRemoteUrl } =
+    useContext(RemoteQueryContext);
+
+  let showAutoAdjustTheUrl = false;
+  let port = "80";
+
+  try {
+    if (options?.prefix) {
+      const url = new URL(options?.prefix);
+      port = url.port || (url.protocol === "https:" ? "443" : "80");
+      showAutoAdjustTheUrl =
+        (location.host.includes("192.168") ||
+          location.host.includes("127.0")) &&
+        query.error?.message?.includes("Failed to fetch");
+    }
+  } catch (err) {}
+
+  const autoAdjust = () => {
+    setOverrideRemoteUrl("http://" + location.hostname + ":" + port + "/");
+  };
 
   if (!query) {
     return null;
@@ -56,6 +75,19 @@ export function QueryErrorView({
       {query.isError && (
         <div className="basic-error-box fadein">
           {getQueryErrorString(t, query, { remote: options.prefix }) || ""}
+          {showAutoAdjustTheUrl && (
+            <button className="btn btn-sm btn-secondary" onClick={autoAdjust}>
+              Auto-reroute
+            </button>
+          )}
+          {overrideRemoteUrl && (
+            <button
+              className="btn btn-sm btn-secondary"
+              onClick={() => setOverrideRemoteUrl(undefined)}
+            >
+              Reset
+            </button>
+          )}
           <ul>
             {(query.error?.error?.errors || []).map((item) => {
               return (

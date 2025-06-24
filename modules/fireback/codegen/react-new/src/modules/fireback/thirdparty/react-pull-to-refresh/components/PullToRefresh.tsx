@@ -185,7 +185,7 @@ export class PullToRefresh extends React.Component<
             });
           }, 200);
         });
-      },
+      }
     );
   }
 
@@ -227,6 +227,8 @@ export class PullToRefresh extends React.Component<
     const containerStyle: React.CSSProperties = {
       height: "auto",
       overflow: "hidden",
+      margin: "0 -10px",
+      padding: "0 10px",
       WebkitOverflowScrolling: "touch",
       position: "relative",
       zIndex: 1,

@@ -269,16 +269,14 @@
     height: calc(100vh - $navHeight + constant(safe-area-inset-top));
     height: calc(100vh - $navHeight + env(safe-area-inset-top));
     overflow: auto;
-    // margin-top: $navHeight;
     margin-top: 0;
-    // margin-top: calc($navHeight + constant(safe-area-inset-top));
-    // margin-top: calc($navHeight + env(safe-area-inset-top));
     min-height: calc(100vh - $navHeight - constant(safe-area-inset-top));
     min-height: calc(100vh - $navHeight - env(safe-area-inset-top));
     overflow-y: auto;
     max-width: calc(100vw - 185px);
     max-width: 100%;
     padding: 0 15px;
+    padding-bottom: 60px;
   }
 
   @media only screen and (max-width: 500px) {
