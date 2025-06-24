@@ -43,6 +43,9 @@ import { usePureLocale } from "../../hooks/usePureLocale";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { WithFireback } from "./WithFireback";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
+import { OverlayProvider } from "../../components/overlay/OverlayProvider";
+import { OverlayBaseModal } from "../../components/overlay/OverlayBaseModal";
+import { OverlayDrawerImp } from "../../components/overlay/OverlayDrawer";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -340,8 +343,10 @@ const GeneralPanel = ({
         <ReactiveSearchProvider>
           <ActionMenuProvider>
             <ModalProvider>
-              <ApplicationRoutes routerId={"url-router"} />
-              <ModalManager />
+              <OverlayProvider>
+                <ApplicationRoutes routerId={"url-router"} />
+                <ModalManager />
+              </OverlayProvider>
             </ModalProvider>
             <ToastContainer />
           </ActionMenuProvider>

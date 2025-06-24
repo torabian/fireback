@@ -238,6 +238,10 @@ html[dir="rtl"] {
   animation: fadein 0.15s;
 }
 
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.437);
+}
+
 .in-capture-state {
   color: red;
 }
@@ -487,4 +491,14 @@ html[dir="rtl"] {
   z-index: 9999;
   border-radius: 100%;
   opacity: 0.5;
+}
+
+.confirm-drawer-container {
+  display: flex;
+  justify-content: space-between;
+  align-content: space-between;
+  height: 100%;
+  justify-items: flex-start;
+  flex-direction: column;
+
 }
