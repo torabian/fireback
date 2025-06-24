@@ -44,9 +44,7 @@ export const useCompleteAuth = () => {
       window.location.href = finalUrl.toString();
     } else {
       // Fallback to the default route
-      const to = (
-        process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
-      ).replace("{locale}", locale || "en");
+      const to = "/{locale}/dashboard".replace("{locale}", locale || "en");
 
       replace(to, to);
     }

@@ -33,19 +33,19 @@ import {
 import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import Sidebar from "../../components/layouts/Sidebar";
 import { ModalManager, ModalProvider } from "../../components/modal/Modal";
+import { OverlayProvider } from "../../components/overlay/OverlayProvider";
 import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
+import { TabbarMenu } from "../../components/tabbar-menu/TabbarMenu";
 import {
   AppConfig,
   AppConfigContext,
   AppConfigProvider,
 } from "../../hooks/appConfigTools";
 import { usePureLocale } from "../../hooks/usePureLocale";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { WithFireback } from "./WithFireback";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
-import { OverlayProvider } from "../../components/overlay/OverlayProvider";
-import { OverlayBaseModal } from "../../components/overlay/OverlayBaseModal";
-import { OverlayDrawerImp } from "../../components/overlay/OverlayDrawer";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
+import { WithFireback } from "./WithFireback";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -146,8 +146,12 @@ function ApplicationPanels({
 }) {
   const { routers, setFocusedRouter } = useUiState();
   const { session, checked } = useCheckAuthentication();
-
+  const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
   const selfServicePublicRoutes = useSelfServicePublicRoutes();
+  const { query: queryWorkspaces } = useGetUrwQuery({
+    queryOptions: { cacheTime: 50 },
+    query: {},
+  });
 
   if (!session && checked) {
     return (
@@ -163,66 +167,95 @@ function ApplicationPanels({
     );
   }
 
+  // const workspaces = queryWorkspaces.data?.data?.items;
+  // // When user has any workspace, they need to select it, there is no other way around
+  // const chooseWorkspace =
+  //   !queryWorkspaces.isLoading && (workspaces || []).length > 0 && !selectedUrw;
+
+  // if (chooseWorkspace) {
+  //   return (
+  //     <div className="xXXA">
+  //       <h1>Which workspace you are going to?</h1>
+  //       <pre></pre>
+  //       <ul>
+  //         {workspaces.map((workspace) => (
+  //           <li onClick={() => selectUrw(workspace)} key={workspace.uniqueId}>
+  //             {workspace.name}
+  //           </li>
+  //         ))}
+  //       </ul>
+  //     </div>
+  //   );
+  // }
+
   return (
-    <PanelGroup direction="horizontal" style={{ height: "100vh" }}>
-      <Router
-        future={{ v7_startTransition: true }}
-        basename={useHashRouter ? undefined : process.env.PUBLIC_URL}
+    <>
+      <PanelGroup
+        direction="horizontal"
+        style={{ height: "calc(100vh - 60px)" }}
       >
-        <ForcedAuthenticated>
-          <SidebarPanel />
-          <GeneralPanel
-            ApplicationRoutes={ApplicationRoutes}
-            showHandle={routers.filter((x) => x.id !== "url-router").length > 0}
-          />
-        </ForcedAuthenticated>
-      </Router>
-      {routers.length > 1
-        ? routers
-            .filter((x) => x.id !== "url-router")
-            .map((router, count) => {
-              return (
-                <MemoryRouter>
-                  <Panel
-                    order={count + 2}
-                    defaultSize={80 / routers.length}
-                    minSize={10}
-                    onClick={() => {
-                      setFocusedRouter(router.id);
-                    }}
-                    style={{
-                      position: "relative",
-                      display: "flex",
-                      width: "100%",
-                    }}
-                  >
-                    {router.focused && routers.length ? (
-                      <div className="focus-indicator"></div>
-                    ) : null}
-                    <AppConfigProvider
-                      initialConfig={{
-                        remote: process.env.REACT_APP_REMOTE_SERVICE,
+        <Router
+          future={{ v7_startTransition: true }}
+          basename={useHashRouter ? undefined : process.env.PUBLIC_URL}
+        >
+          <ForcedAuthenticated>
+            <SidebarPanel />
+            <GeneralPanel
+              ApplicationRoutes={ApplicationRoutes}
+              showHandle={
+                routers.filter((x) => x.id !== "url-router").length > 0
+              }
+            />
+            <TabbarMenu />
+          </ForcedAuthenticated>
+        </Router>
+        {routers.length > 1
+          ? routers
+              .filter((x) => x.id !== "url-router")
+              .map((router, count) => {
+                return (
+                  <MemoryRouter>
+                    <Panel
+                      order={count + 2}
+                      defaultSize={80 / routers.length}
+                      minSize={10}
+                      onClick={() => {
+                        setFocusedRouter(router.id);
+                      }}
+                      style={{
+                        position: "relative",
+                        display: "flex",
+                        width: "100%",
                       }}
                     >
-                      <ReactiveSearchProvider>
-                        <ActionMenuProvider>
-                          <QueryClientProvider client={queryClient}>
-                            <ModalProvider>
-                              <ApplicationRoutes routerId={router.id} />
-                              <ModalManager />
-                            </ModalProvider>
-                          </QueryClientProvider>
-                          <ToastContainer />
-                        </ActionMenuProvider>
-                      </ReactiveSearchProvider>
-                    </AppConfigProvider>
-                    <ResizeHandle minimal />
-                  </Panel>
-                </MemoryRouter>
-              );
-            })
-        : null}
-    </PanelGroup>
+                      {router.focused && routers.length ? (
+                        <div className="focus-indicator"></div>
+                      ) : null}
+                      <AppConfigProvider
+                        initialConfig={{
+                          remote: process.env.REACT_APP_REMOTE_SERVICE,
+                        }}
+                      >
+                        <ReactiveSearchProvider>
+                          <ActionMenuProvider>
+                            <QueryClientProvider client={queryClient}>
+                              <ModalProvider>
+                                <ApplicationRoutes routerId={router.id} />
+                                <ModalManager />
+                              </ModalProvider>
+                            </QueryClientProvider>
+                            <ToastContainer />
+                          </ActionMenuProvider>
+                        </ReactiveSearchProvider>
+                      </AppConfigProvider>
+                      <ResizeHandle minimal />
+                    </Panel>
+                  </MemoryRouter>
+                );
+              })
+          : null}
+      </PanelGroup>
+    </>
   );
 }
 function detectDeviceType() {
