@@ -84,7 +84,7 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
         sidebarVisible ? "open" : "",
         "scrollable-element"
       )}
-      style={{ display: "flex", height: "100vh" }}
+      style={{ display: "flex", height: "calc(100vh - 60px)" }}
     >
       <button className="sidebar-close" onClick={toggleSidebar}>
         <img src={source(osResources.cancel)} />

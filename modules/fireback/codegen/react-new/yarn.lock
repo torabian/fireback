@@ -9772,10 +9772,10 @@ react-refresh@0.11.0:
   resolved "https://registry.npmjs.org/react-refresh/-/react-refresh-0.11.0.tgz"
   integrity sha512-F27qZr8uUqwhWZboondsPx8tnC3Ct3SxZA3V5WyEvujRyyNv0VYPhoBg1gZ8/MV5tubQp76Trw8lTv9hzRBa+A==
 
-react-resizable-panels@^2.1.7:
-  version "2.1.7"
-  resolved "https://registry.npmjs.org/react-resizable-panels/-/react-resizable-panels-2.1.7.tgz"
-  integrity sha512-JtT6gI+nURzhMYQYsx8DKkx6bSoOGFp7A3CwMrOb8y5jFHFyqwo9m68UhmXRw57fRVJksFn1TSlm3ywEQ9vMgA==
+react-resizable-panels@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.npmjs.org/react-resizable-panels/-/react-resizable-panels-3.0.3.tgz"
+  integrity sha512-7HA8THVBHTzhDK4ON0tvlGXyMAJN1zBeRpuyyremSikgYh2ku6ltD7tsGQOcXx4NKPrZtYCm/5CBr+dkruTGQw==
 
 react-router-dom@^6.9.0:
   version "6.30.0"
