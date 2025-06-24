@@ -78,7 +78,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		StartIndex:   startIndex,
 		ItemsPerPage: itemsPerPage,
 
-		c:                      c,
+		C:                      c,
 		UserAccessPerWorkspace: urw,
 		InternalQuery:          internal_sql,
 		UserHas:                userHas,

@@ -183,6 +183,12 @@ func WithAuthorizationFn(securityModel *fireback.SecurityModel) gin.HandlerFunc 
 		wi := c.GetHeader("Workspace-id")
 		ri := c.GetHeader("Role-id")
 		tk := c.GetHeader("Authorization")
+		ck, ckerr := c.Cookie("authorization")
+
+		if ckerr == nil && ck != "" {
+			// If on secure cookie we have the authorization, we prefer that one.
+			tk = ck
+		}
 
 		context := &fireback.AuthContextDto{
 			WorkspaceId:  wi,

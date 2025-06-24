@@ -272,6 +272,9 @@
         },
         "primitive": {
           "type": "string"
+        },
+        "xhtml": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,

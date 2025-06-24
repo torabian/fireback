@@ -1,0 +1,37 @@
+---
+title: CSS and styling tools
+sidebar_position: 2
+---
+
+There are many libraries for styling front-end (html) projects introduced. I remember once less/mess was popular,
+and of course scss, sass, css-in-js, style component, and some other ideas come and go time to time.
+In this situation, sticking to pure css, with a bit tool which can bundle, minify, and resolve the import paths
+can both help the modularity, and the fact that the same files, without discussions, can be used for decades.
+
+## Fireback cssx misc command
+
+Fireback comes with a handy misc command, which can combine and minify the css files into a single output.
+That's useful, when you want to use an entry point, such as styles.css, and then include couple of more files,
+using `@import url` syntax, and finally have a `styles.min.css`.
+
+
+```
+ali@alis-MacBook-Pro fireback % ./app misc cssx --help
+NAME:
+   Fireback core microservice - v1.2.3 misc cssx - Minifies css file, and resolves the @import dependencies recursively
+
+USAGE:
+   Fireback core microservice - v1.2.3 misc cssx [command options] [arguments...]
+
+DESCRIPTION:
+   Minifies css file, and resolves the @import dependencies recursively
+
+OPTIONS:
+   --entry-point value  Absolute or relative path of the css entry point file on the disk
+   --out value          output file address. If left empty, it will write result to stdout
+   --skip-minify        If true, would skip minifying the css result file
+   
+```
+
+The command supports `@import url()` and `@import ""` formats, with `.css` extensions. To avoid printing to file,
+skip providing `--out` argument.

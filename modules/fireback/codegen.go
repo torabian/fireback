@@ -198,9 +198,10 @@ func (x *Module3Enum) KeyUpper() string {
 }
 
 func (x *Module3Action) ComputeResponseEntity() string {
-	if x.Out == nil {
+	if x.Out == nil || x.Out.XHtml {
 		return `string("")`
 	}
+
 	if x.Out.Entity != "" {
 		return "&" + x.Out.Entity + "{}"
 	}
@@ -215,7 +216,7 @@ func (x *Module3Action) ComputeResponseEntity() string {
 	return "&OkayResponseDto{}"
 }
 func (x *Module3Action) ComputeResponseEntityS() string {
-	if x.Out == nil {
+	if x.Out == nil || x.Out.XHtml {
 		return ``
 	}
 
@@ -476,9 +477,16 @@ func (x *Module3Action) ActionReqDto() string {
 }
 
 func (x *Module3Action) ActionResDto() string {
+
 	if x.Out == nil {
 		return "string"
 	}
+
+	if x.Out.XHtml {
+		// This means, that fireback module cannot use XHtml type :(
+		return "*fireback.XHtml"
+	}
+
 	prefix := ""
 	if strings.ToLower(x.Format) == "query" || strings.ToLower(x.Method) == "query" {
 		prefix = "[]"
@@ -1024,23 +1032,12 @@ func NewGoNativeModule(name string, dist string, autoImport string) error {
 		"name": name,
 	}
 
-	goModule, err := CompileString(&firebackgo.FbGoTpl, "GoModule.tpl", args)
-	if err != nil {
-		return err
-	}
-
 	goModuleDef, err := CompileString(&firebackgo.FbGoTpl, "GoModuleDef.tpl", args)
 	if err != nil {
 		return err
 	}
 
 	if err := os.MkdirAll(filepath.Join(folderName), os.ModePerm); err != nil {
-		return err
-	}
-
-	moduleName := filepath.Join(folderName, ToUpper(name)+"Module.go")
-
-	if err := os.WriteFile(moduleName, []byte(goModule), 0644); err != nil {
 		return err
 	}
 
@@ -1927,6 +1924,28 @@ func getActionTemplate(data interface{}) ([]byte, error) {
     ) {
 		// Implement the logic here.
 		
+		{{ if and (.a.Out) (.a.Out.XHtml) }}
+		/*
+			A little help for xhtml:
+			Make sure you make a folder called 'screens', and add your .html files there.
+			then add them in your go code. This is needed once in your module, do not copy them
+			for each controller (screen or action)
+
+			//go:embed all:screens
+			var embeddedScreens embed.FS
+
+			
+			Regardless of get or post (postback), you need to return a XHtml pointer:
+			Note: Params can be req, if your method is post and you accept a body.
+
+			return &fireback.XHtml{
+				Params:       nil,
+				TemplateName: "home.html",
+				ScreensFs:    fireback.ResolveScreens(embeddedScreens),
+			}, nil
+		*/
+		{{ end }}
+
 		return {{ if (eq .a.ActionResDto "string")}} "" {{ else }} nil {{ end }}, {{ if (eq .a.FormatComputed "QUERY") }} nil, {{ end }} nil
 	}
 `

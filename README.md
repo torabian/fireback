@@ -1,6 +1,9 @@
-# Fireback – Microservice-First Fullstack Framework in Go
+# Fireback – Ultimate backend framework
+
+Define yaml, generate code, generate sdks for fronts.
 
 Fireback is a **microservice-oriented backend framework** written in Go. It's designed for developers who want to build fast, scalable, and modular systems without boilerplate. It can accelerate development **20x-30x** for many common backends.
+Fireback with ABAC module, can handle large scale issues for Indie developers.
 
 <img src=".github/logo.svg" alt="Fireback logo" width="200"/>
 

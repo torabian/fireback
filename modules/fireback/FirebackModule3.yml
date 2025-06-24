@@ -1,6 +1,10 @@
 name: fireback
 meta-workspace: true
 config:
+  - name: cookieAuthOnly
+    description: When true, the sessions (after authentication) would not return the token
+      back in the response, and token will be only accessible via secure cookie.
+    type: bool
   - name: clickhouseDsn
     description: 
       In case of using clickhouse replica option, then you need to provide this configuration for connection,
