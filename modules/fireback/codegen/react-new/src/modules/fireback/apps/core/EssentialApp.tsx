@@ -33,18 +33,19 @@ import {
 import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import Sidebar from "../../components/layouts/Sidebar";
 import { ModalManager, ModalProvider } from "../../components/modal/Modal";
+import { OverlayProvider } from "../../components/overlay/OverlayProvider";
 import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
+import { TabbarMenu } from "../../components/tabbar-menu/TabbarMenu";
 import {
   AppConfig,
   AppConfigContext,
   AppConfigProvider,
 } from "../../hooks/appConfigTools";
 import { usePureLocale } from "../../hooks/usePureLocale";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { WithFireback } from "./WithFireback";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
-import { TabbarMenu } from "../../components/tabbar-menu/TabbarMenu";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
+import { WithFireback } from "./WithFireback";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -375,8 +376,10 @@ const GeneralPanel = ({
         <ReactiveSearchProvider>
           <ActionMenuProvider>
             <ModalProvider>
-              <ApplicationRoutes routerId={"url-router"} />
-              <ModalManager />
+              <OverlayProvider>
+                <ApplicationRoutes routerId={"url-router"} />
+                <ModalManager />
+              </OverlayProvider>
             </ModalProvider>
             <ToastContainer />
           </ActionMenuProvider>
