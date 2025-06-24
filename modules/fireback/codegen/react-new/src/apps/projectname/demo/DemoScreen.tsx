@@ -1,3 +1,4 @@
+import Link from "@/modules/fireback/components/link/Link";
 import { DemoFormDates } from "./DemoFormDates";
 import { DemoFormSelect } from "./DemoFormSelect";
 
@@ -8,6 +9,7 @@ export function DemoScreen() {
       <p>
         Here I put some demo and example of fireback components for react.js
       </p>
+      <Link href="/demo/modals">Check modals</Link>
       <hr />
       <DemoFormSelect />
       <DemoFormDates />
