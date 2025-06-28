@@ -13,6 +13,7 @@
     "build": "env-cmd -f ./src/apps/projectname/.env.bundle craco build",
     "build:bundle:demo": "env-cmd -f ./src/apps/projectname/.env.bundle.demo craco build",
     "build:lib": "npx tsc --project lib.tsconfig.json --outDir fireback-react-lib",
+    "build:capacitor": "env-cmd -f ./src/apps/projectname/.env.capacitor craco build",
     "github": "env-cmd -f ./src/apps/projectname/.env.githubpages craco build"
   },
   "overrides": {
