@@ -56,11 +56,6 @@ on:
         required: false
         default: true
         type: boolean
-      fireback_react_native:
-        description: "Build for react native (android)"
-        required: false
-        default: true
-        type: boolean
       fireback_capacitor:
         description: "Build Capacitor"
         required: false
@@ -435,7 +430,7 @@ jobs:
         run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock
       - name: 
           Check if the sdk generated is already committed to the codebase.
-          Fireback changes should not be out of sync with react.js and react native
+          Fireback changes should not be out of sync with react.js
           SDK
         run: |
           git diff --exit-code
