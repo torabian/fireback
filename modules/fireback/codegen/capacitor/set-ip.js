@@ -7,7 +7,7 @@ const configFilePath = "./capacitor.config.json";
 const config = JSON.parse(fs.readFileSync(configFilePath).toString());
 
 config.server = {
-  url: `http://${localIpAddress}:3000`,
+  url: `http://${localIpAddress}:3670`,
   cleartext: true,
 };
 

@@ -15,7 +15,9 @@
     "ios:dev": "npm run dev && npx cap run ios",
     "android": "npm run switch-build && npx cap run android",
     "ios": "npm run switch-build && npx cap run ios",
-    "release:mode": "npm run switch-build && npx cap sync"
+    "release:mode": "npm run switch-build && npx cap sync",
+    "prepare": "rm -rf package-lock.json && rm -rf ios && rm -rf android && npx cap add ios && npx cap add android && npm run compile",
+    "compile": "cd ../front-end && npm run build:capacitor && cd - && cp -rf ../front-end/build ."
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",

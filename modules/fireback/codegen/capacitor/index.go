@@ -2,7 +2,7 @@ package firebackcapacitor
 
 import "embed"
 
-//go:embed set-ip.js switch-build.js README.md package.json package-lock.json capacitor.config.json .gitignore
+//go:embed set-ip.js switch-build.js README.md package.json capacitor.config.json .gitignore
 var FbReactCapacitorNewTemplate embed.FS
 
 /**

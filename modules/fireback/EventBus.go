@@ -13,6 +13,10 @@ func GetEventBusInstance() InstanceUserSocketManager {
 	return instance
 }
 
+func init() {
+	instance = NewLocalEventManager()
+}
+
 func StartEventBus() {
 
 	if config.RedisEventsUrl == "" {
@@ -24,8 +28,7 @@ func StartEventBus() {
 	// Try to use redis. If fails fallback to internal
 	if redis, err := NewRedisManager(config.RedisEventsUrl); err == nil {
 		instance = redis
-	} else {
-		instance = NewLocalEventManager()
+
 	}
 
 	go instance.Subscribe(ctx, EVENT_BUS_TOPIC)
