@@ -7,5 +7,8 @@
       "launchShowDuration": 0
     }
   },
-  "server": {}
+  "server": {
+    "url": "http://192.168.0.108:3670",
+    "cleartext": true
+  }
 }
