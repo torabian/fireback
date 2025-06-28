@@ -6,6 +6,7 @@ import { useRouter } from "../../hooks/useRouter";
 import { useReactivereactiveSearch } from "../../sdk/modules/abac/useReactivereactiveSearch";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";
+import { detectDeviceType } from "../../hooks/deviceInformation";
 
 export function ReactiveSearch() {
   const t = useT();
@@ -41,6 +42,12 @@ export function ReactiveSearch() {
   useKeyPress("s", () => {
     input.current?.focus();
   });
+
+  const { isMobileView } = detectDeviceType();
+
+  if (isMobileView) {
+    return null;
+  }
 
   return (
     <form

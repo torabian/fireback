@@ -8,11 +8,19 @@
 
 import { Route } from "react-router-dom";
 import { DashboardScreen } from "./DashboardScreen";
+import { AnimatedRouteWrapper } from "@/modules/fireback/apps/core/SwipeTransition";
 
 export function useMobileKitRoutes() {
   return (
     <Route path="">
-      <Route element={<DashboardScreen />} path={"dashboard"} />
+      <Route
+        element={
+          <AnimatedRouteWrapper>
+            <DashboardScreen />
+          </AnimatedRouteWrapper>
+        }
+        path={"dashboard"}
+      />
     </Route>
   );
 }

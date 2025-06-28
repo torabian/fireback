@@ -5,8 +5,8 @@ import { useT } from "../../../hooks/useT";
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
 import { useDeleteUser } from "../../../sdk/modules/abac/useDeleteUser";
 import { useGetUsers } from "../../../sdk/modules/abac/useGetUsers";
-import { columns } from "./UserColumns";
 import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { columns } from "./UserColumns";
 
 export const UserList = () => {
   const t = useT();
@@ -16,6 +16,7 @@ export const UserList = () => {
     <>
       <CommonListManager
         columns={columns(t)}
+        // CardComponent={UserCard}
         queryHook={useGetUsers}
         uniqueIdHrefHandler={(uniqueId: string) =>
           UserEntity.Navigation.single(uniqueId)

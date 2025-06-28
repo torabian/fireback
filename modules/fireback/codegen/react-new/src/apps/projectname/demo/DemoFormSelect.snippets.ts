@@ -1,96 +1,5 @@
-import { FormDate } from "@/modules/fireback/components/forms/form-date/FormDate";
-import {
-  FormSelectMultiple,
-  FormSelect,
-} from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
-import usePresistentState from "@/modules/fireback/hooks/usePresistentState";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
-import { Formik, FormikProps } from "formik";
-import { useMemo, useState } from "react";
-import { CodeViewer } from "./CodeViewer";
-import { snippets } from "./DemoFormSelect.snippets";
-
-export function DemoFormSelect() {
-  return (
-    <div>
-      <h2>FormSelect</h2>
-      <p>
-        Selecting items are one of the most important aspect of any application.
-        You want always give the user the option to select, search, deselect
-        items and assign that selection in some part of an DTO or entity.
-      </p>
-      <div className="mt-5 mb-5">
-        <Example1 />
-        <CodeViewer codeString={snippets.Example1} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example2 />
-        <CodeViewer codeString={snippets.Example2} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example3 />
-        <CodeViewer codeString={snippets.Example3} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example4 />
-        <CodeViewer codeString={snippets.Example4} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example5 />
-        <CodeViewer codeString={snippets.Example5} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example6 />
-        <CodeViewer codeString={snippets.Example6} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example9 />
-        <CodeViewer codeString={snippets.Example9} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example8 />
-        <CodeViewer codeString={snippets.Example8} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example7 />
-        <CodeViewer codeString={snippets.Example7} />
-      </div>
-    </div>
-  );
-}
-
-const firstNames = `
-    Ali Reza Negar Sina Parisa Mehdi Hamed Kiana Bahram Nima Farzad Samira 
-    Shahram Yasmin Dariush Elham Kamran Roya Shirin Behnaz Omid Nasrin Saeed 
-    Shahab Zohreh Babak Ladan Fariba Mohsen Mojgan Amir Hossein Farhad Leila 
-    Arash Mahsa Behrad Taraneh Keyvan Setareh Vahid Soraya Peyman Neda Soheil 
-    Forough Parsa Sara Kourosh Fereshteh Niloofar Mehrazin Matin Armin Samin 
-    Pouya Anahita Shapour Laleh Dariya Navid Elnaz Siamak Shadi Behzad Rozita 
-    Hassan Tarannom Baharak Pejman Mansour Parsa Mobin Yasna Yashar Mahdieh
-    `.split(/\s+/);
-
-const lastNames = `
-    Torabi Moghaddam Khosravi Jafari Gholami Ahmadi Shams Karimi Hashemi 
-    Zand Rajabi Shariatmadari Tavakoli Hedayati Amini Behnam Farhadi Yazdani 
-    Mirzaei Eskandari Shafiei Motamedi Monfared Eslami Rashidi Daneshgar Kianian 
-    Nazari Alavi Bahrami Kordestani Noori Sharifi Abbasi Asgari Hemmati Shirazi 
-    Keshavarz Rezazadeh Kaviani Namdar Baniameri Kamali Moradi Azimi Sotoudeh 
-    Amiri Nikpour Fakhimi Karamat Taheri Javid Salimi Saidi Yousefi Rostami 
-    Najafi Ranjbar Darvishi Fallahian Ghanbari Panahi Hosseinzadeh Fattahi Rahbar 
-    Sousa Oliveira Gomez Rodriguez`.split(/\s+/);
-
-function generateUsers(count: number) {
-  return Array.from({ length: count }, (_, id) => ({
-    name: `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${
-      lastNames[Math.floor(Math.random() * lastNames.length)]
-    }`,
-    id: id + 1,
-  }));
-}
-
-const Example1 = () => {
+export const snippets = {
+  "Example1": `const Example1 = () => {
   const users = useMemo(() => generateUsers(100000), []);
   const querySource = createQuerySource(users);
   const [selectedValue, setValue] = usePresistentState<{
@@ -123,9 +32,8 @@ const Example1 = () => {
       <div>Code:</div>
     </div>
   );
-};
-
-const Example2 = () => {
+}`,
+  "Example2": `const Example2 = () => {
   const users = useMemo(() => generateUsers(10_000), []);
   const querySource = createQuerySource(users);
   const [value, setValue] = useState<{ name: string; id: number }[]>([
@@ -154,9 +62,8 @@ const Example2 = () => {
       />
     </div>
   );
-};
-
-const Example3 = () => {
+}`,
+  "Example3": `const Example3 = () => {
   const [value, setValue] = useState<RoleEntity[]>();
 
   return (
@@ -179,9 +86,8 @@ const Example3 = () => {
       />
     </div>
   );
-};
-
-const Example4 = () => {
+}`,
+  "Example4": `const Example4 = () => {
   const [value, setValue] = usePresistentState("Example4", undefined);
 
   return (
@@ -202,9 +108,8 @@ const Example4 = () => {
       />
     </div>
   );
-};
-
-const Example5 = () => {
+}`,
+  "Example5": `const Example5 = () => {
   class FormDataSample {
     user: {
       role?: RoleEntity;
@@ -256,9 +161,8 @@ const Example5 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example6 = () => {
+}`,
+  "Example6": `const Example6 = () => {
   class FormDataSample {
     user: {
       roles?: RoleEntity[];
@@ -301,9 +205,8 @@ const Example6 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example9 = () => {
+}`,
+  "Example9": `const Example9 = () => {
   const [selectedValue, setValue] = usePresistentState<number>(
     "samplePrimitivenumeric",
     3
@@ -336,9 +239,8 @@ const Example9 = () => {
       />
     </div>
   );
-};
-
-const Example8 = () => {
+}`,
+  "Example8": `const Example8 = () => {
   class FormDataSample {
     user: {
       sisters?: number;
@@ -395,9 +297,8 @@ const Example8 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example7 = () => {
+}`,
+  "Example7": `const Example7 = () => {
   class FormDataSample {
     date: string;
 
@@ -434,4 +335,5 @@ const Example7 = () => {
       </Formik>
     </div>
   );
+}`
 };

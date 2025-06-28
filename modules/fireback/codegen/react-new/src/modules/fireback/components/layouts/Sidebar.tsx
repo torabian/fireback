@@ -97,6 +97,34 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
           menu={menu}
         />
       ))}
+      {process.env.REACT_APP_GITHUB_DEMO === "true" && (
+        <MenuParticle
+          onClick={sidebarItemSelected}
+          menu={{
+            label: "Demo",
+            children: [
+              {
+                label: "Form select",
+                icon: "/ios-theme/icons/settings.svg",
+                children: [],
+                href: "/demo/form-select",
+              },
+              {
+                label: "Form Date/Time",
+                icon: "/ios-theme/icons/settings.svg",
+                children: [],
+                href: "/demo/form-date",
+              },
+              {
+                label: "Overlays & Modal",
+                icon: "/ios-theme/icons/settings.svg",
+                children: [],
+                href: "/demo/modals",
+              },
+            ],
+          }}
+        />
+      )}
       <CurrentUser onClick={sidebarItemSelected} />
     </div>
   );

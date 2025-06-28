@@ -1,47 +1,5 @@
-import { FormDateRange } from "@/modules/fireback/components/forms/form-date-range/FormDateRange";
-import { FormDate } from "@/modules/fireback/components/forms/form-date/FormDate";
-import { FormDateTimeRange } from "@/modules/fireback/components/forms/form-datetime-range/FormDateTimeRange";
-import { FormDateTime } from "@/modules/fireback/components/forms/form-datetime/FormDateTime";
-import { FormTime } from "@/modules/fireback/components/forms/form-time/FormTime";
-import { Formik, FormikProps } from "formik";
-import { CodeViewer } from "./CodeViewer";
-import { snippets } from "./DemoFormDates.snippets";
-
-export const DemoFormDates = () => {
-  return (
-    <div>
-      <h2>FormDate* component</h2>
-      <p>
-        Selecting date, time, datetime, daterange is an important aspect of many
-        different apps and softwares. Fireback react comes with a different set
-        of such components.
-      </p>
-
-      <div className="mt-5 mb-5">
-        <Example1 />
-        <CodeViewer codeString={snippets.Example1} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example2 />
-        <CodeViewer codeString={snippets.Example2} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example3 />
-        <CodeViewer codeString={snippets.Example3} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example4 />
-        <CodeViewer codeString={snippets.Example4} />
-      </div>
-      <div className="mt-5 mb-5">
-        <Example5 />
-        <CodeViewer codeString={snippets.Example5} />
-      </div>
-    </div>
-  );
-};
-
-const Example1 = () => {
+export const snippets = {
+  "Example1": `const Example1 = () => {
   class FormDataSample {
     date: string;
 
@@ -78,9 +36,8 @@ const Example1 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example2 = () => {
+}`,
+  "Example2": `const Example2 = () => {
   class FormDataSample {
     time: string;
 
@@ -117,9 +74,8 @@ const Example2 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example3 = () => {
+}`,
+  "Example3": `const Example3 = () => {
   class FormDataSample {
     datetime: string;
 
@@ -158,9 +114,8 @@ const Example3 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example5 = () => {
+}`,
+  "Example5": `const Example5 = () => {
   class FormDataSample {
     daterange: {
       startDate?: Date | null;
@@ -211,9 +166,8 @@ const Example5 = () => {
       </Formik>
     </div>
   );
-};
-
-const Example4 = () => {
+}`,
+  "Example4": `const Example4 = () => {
   class FormDataSample {
     daterange: {
       startDate?: Date | null;
@@ -264,4 +218,5 @@ const Example4 = () => {
       </Formik>
     </div>
   );
+}`
 };

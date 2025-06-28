@@ -3,6 +3,9 @@ import { FormText } from "@/modules/fireback/components/forms/form-text/FormText
 import { commonDialogs } from "@/modules/fireback/components/overlay/CommonOverlays";
 import { useOverlay } from "@/modules/fireback/components/overlay/OverlayProvider";
 import { useEffect, useRef, useState } from "react";
+import { CodeViewer } from "./CodeViewer";
+import { snippets } from "./DemoModal.snippets";
+import { Showcase } from "./Showcase";
 
 export function DemoModal() {
   const { openDrawer, openModal } = useOverlay();
@@ -146,7 +149,7 @@ export function DemoModal() {
       </p>
       <hr />
 
-      <div style={{ marginTop: "40px" }}>
+      <Showcase>
         <h2>Opening a drawer</h2>
         <p>
           Every component can be shown as modal, or in a drawer in Fireback.
@@ -154,17 +157,18 @@ export function DemoModal() {
         <button className="btn btn-sm btn-secondary" onClick={() => example1()}>
           Open a text in drawer
         </button>
-      </div>
-
-      <div style={{ marginTop: "40px" }}>
+        <CodeViewer codeString={snippets.example1} />
+      </Showcase>
+      <Showcase>
         <h2>Opening a drawer, from left</h2>
         <p>Shows a drawer from left, also larger</p>
         <button className="btn btn-sm btn-secondary" onClick={() => example2()}>
           Open a text in drawer
         </button>
-      </div>
+        <CodeViewer codeString={snippets.example2} />
+      </Showcase>
 
-      <div style={{ marginTop: "40px" }}>
+      <Showcase>
         <h2>Opening a modal, and get result</h2>
         <p>
           You can open a modal or drawer, and make some operation in it, and
@@ -172,26 +176,29 @@ export function DemoModal() {
         </p>
         <button className="btn btn-sm btn-secondary" onClick={() => example3()}>
           Open a text in drawer
-        </button>{" "}
-      </div>
+        </button>
+        <CodeViewer codeString={snippets.example3} />
+      </Showcase>
 
-      <div style={{ marginTop: "40px" }}>
+      <Showcase>
         <h2>Opening multiple</h2>
         <p>You can open multiple modals, or drawers, doesn't matter.</p>
         <button className="btn btn-sm btn-secondary" onClick={() => example4()}>
           Open 2 modal, and open 2 drawer
         </button>
-      </div>
+        <CodeViewer codeString={snippets.example4} />
+      </Showcase>
 
-      <div style={{ marginTop: "40px" }}>
+      <Showcase>
         <h2>Auto disappearing</h2>
         <p>A modal which disappears after 5 seconds</p>
         <button className="btn btn-sm btn-secondary" onClick={() => example5()}>
           Run
         </button>
-      </div>
+        <CodeViewer codeString={snippets.example5} />
+      </Showcase>
 
-      <div style={{ marginTop: "40px" }}>
+      <Showcase>
         <h2>Control from outside</h2>
         <p>
           Sometimes you want to open a drawer, and then from outside component
@@ -200,30 +207,34 @@ export function DemoModal() {
         <button className="btn btn-sm btn-secondary" onClick={() => example6()}>
           Open but close from outside
         </button>
-      </div>
+        <CodeViewer codeString={snippets.example6} />
+      </Showcase>
 
-      <div style={{ marginTop: "40px" }}>
+      <Showcase>
         <h2>Prevent close</h2>
         <p>When a drawer or modal is open, you can prevent the close.</p>
         <button className="btn btn-sm btn-secondary" onClick={() => example7()}>
           Open but ask before close
         </button>
-      </div>
-      <div style={{ marginTop: "40px" }}>
+        <CodeViewer codeString={snippets.example7} />
+      </Showcase>
+      <Showcase>
         <h2>Confirm Dialog (drawer)</h2>
         <p>There is a set of ready to use dialogs, such as confirm</p>
         <button className="btn btn-sm btn-secondary" onClick={() => example8()}>
           Open the confirm
         </button>
-      </div>
-      <div style={{ marginTop: "40px" }}>
+        <CodeViewer codeString={snippets.example8} />
+      </Showcase>
+      <Showcase>
         <h2>Confirm Dialog (modal)</h2>
         <p>There is a set of ready to use dialogs, such as confirm</p>
         <button className="btn btn-sm btn-secondary" onClick={() => example9()}>
           Open the confirm
         </button>
-      </div>
-      <div style={{ marginTop: "40px" }}>
+        <CodeViewer codeString={snippets.example9} />
+      </Showcase>
+      <Showcase>
         <h2>Update params from outside</h2>
         <p>
           In rare cases, you might want to update the params from the outside.
@@ -234,7 +245,8 @@ export function DemoModal() {
         >
           Open & Update name
         </button>
-      </div>
+        <CodeViewer codeString={snippets.example10} />
+      </Showcase>
       <br />
       <br />
       <br />
