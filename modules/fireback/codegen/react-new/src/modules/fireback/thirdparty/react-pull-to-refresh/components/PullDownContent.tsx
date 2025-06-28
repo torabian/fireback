@@ -1,17 +1,21 @@
 import * as React from "react";
 
 export interface PullDownContentProps {
-    height?: string;
-    background?: any;
-    label?: string;
+  height?: string;
+  background?: any;
+  label?: string;
 }
 
-export const PullDownContent = ({height = "200px", background = "none", label = "Pull down to refresh"}: PullDownContentProps) => (
-    <div id="container2">
-        <div id="arrow" />
-        <span>{label}</span>
-        <style>
-            {`
+export const PullDownContent = ({
+  height = "200px",
+  background = "none",
+  label = "Pull down to refresh",
+}: PullDownContentProps) => (
+  <div id="container2">
+    {/* <div id="arrow" /> */}
+    <span>{label}</span>
+    <style>
+      {`
                 #container2 {
                     background: ${background};
                     height: ${height};
@@ -36,6 +40,6 @@ export const PullDownContent = ({height = "200px", background = "none", label = 
                     }
                 }
             `}
-        </style>
-    </div>
+    </style>
+  </div>
 );

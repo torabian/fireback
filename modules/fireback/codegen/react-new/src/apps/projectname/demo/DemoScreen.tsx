@@ -1,6 +1,4 @@
 import Link from "@/modules/fireback/components/link/Link";
-import { DemoFormDates } from "./DemoFormDates";
-import { DemoFormSelect } from "./DemoFormSelect";
 
 export function DemoScreen() {
   return (
@@ -9,10 +7,16 @@ export function DemoScreen() {
       <p>
         Here I put some demo and example of fireback components for react.js
       </p>
-      <Link href="/demo/modals">Check modals</Link>
+      <div>
+        <Link href="/demo/modals">Check modals</Link>
+      </div>
+      <div>
+        <Link href="/demo/form-select">Check Selects</Link>
+      </div>
+      <div>
+        <Link href="/demo/form-date">Check Date Inputs</Link>
+      </div>
       <hr />
-      <DemoFormSelect />
-      <DemoFormDates />
     </div>
   );
 }

@@ -17,6 +17,7 @@ export const TabbarMenu = () => {
     <nav className="bottom-nav-tabbar">
       {tabs.map((tab) => (
         <ActiveLink
+          state={{ animated: true }}
           key={tab.to}
           href={tab.to}
           className={({ isActive }) =>

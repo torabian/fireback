@@ -18,7 +18,7 @@ export function AutoCardDrawer({
     <Component
       className="auto-card-list-item card mb-2 p-3"
       style={style}
-      href={uniqueIdHrefHandler}
+      href={uniqueIdHrefHandler(content.uniqueId)}
     >
       {columns.map((col) => {
         let v = col.getCellValue ? col.getCellValue(content) : "";

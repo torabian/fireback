@@ -529,3 +529,47 @@ html[dir="rtl"] {
     animation: jumpFloat 2.5s ease-out infinite;
   }
 }
+.code-viewer-container {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+body.dark-theme .copy-button {
+  background-color: #333;
+  color: #fff;
+}
+
+
+.swipe-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.swipe-enter-active {
+  transform: translateX(0%);
+  opacity: 1;
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+.swipe-exit {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.swipe-exit-active {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 300ms ease-out, opacity 300ms ease-out;
+}
+.swipe-wrapper {
+  position: absolute;
+  width: 100%;
+}

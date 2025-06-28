@@ -10,12 +10,12 @@ import {
   Sorting,
   TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import { CommonDataTable } from "../common-data-table/CommonDataTable";
 import Link from "../link/Link";
 import { filtersToJsonQuery } from "./EnttityManagerHelper";
-import { FlatListMode } from "./FlatListMode";
+import { CardComponentType, FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
 import { CopyCell } from "./CopyCell";
 import { OpenInNewRouter } from "./OpenInNewRouter";
@@ -80,6 +80,7 @@ export const CommonListManager = ({
   inlineInsertHook,
   bulkEditHook,
   urlMask,
+  CardComponent,
 }: {
   queryHook: any;
   RowDetail?: any;
@@ -97,6 +98,7 @@ export const CommonListManager = ({
   onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
   children?: any;
   queryFilters?: Array<Filter | undefined>;
+  CardComponent?: CardComponentType<unknown>;
 }) => {
   const t = useT();
   const { view } = useViewMode();
@@ -198,6 +200,7 @@ export const CommonListManager = ({
       {view === "card" && (
         <FlatListMode
           columns={columns}
+          CardComponent={CardComponent}
           jsonQuery={jsonQuery}
           deleteHook={deleteHook}
           uniqueIdHrefHandler={uniqueIdHrefHandler}

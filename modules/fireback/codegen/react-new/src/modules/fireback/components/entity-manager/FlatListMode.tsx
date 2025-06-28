@@ -1,6 +1,6 @@
 import { QueryArchiveColumn } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { FC, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   PullDownContent,
   PullToRefresh,
@@ -15,6 +15,16 @@ import { AutoCardDrawer } from "./AutoCardDrawer";
 import { EmptyList } from "./EmptyList";
 const { FixedSizeList } = require("react-window");
 
+// Define the props
+interface CardProps<T> {
+  content: T;
+}
+
+// Extend FC with static methods
+export interface CardComponentType<T> extends FC<CardProps<T>> {
+  getHeight: () => number;
+}
+
 export const FlatListMode = ({
   columns,
   deleteHook,
@@ -22,6 +32,7 @@ export const FlatListMode = ({
   udf,
   jsonQuery,
   q,
+  CardComponent,
 }: {
   udf: any;
   q: any;
@@ -30,6 +41,7 @@ export const FlatListMode = ({
   columns: QueryArchiveColumn[];
   uniqueIdHrefHandler?: (id: string) => void;
   jsonQuery?: any;
+  CardComponent?: CardComponentType<unknown>;
 }) => {
   const t = useT();
   // Used for cashing the query
@@ -48,8 +60,10 @@ export const FlatListMode = ({
 
   const reindex = (rows: Array<any>, jsonQueryKey: string) => {
     const index = udf.debouncedFilters.startIndex || 0;
+    const newData = [...indexedData]; // shallow copy
+
     if (previousQuery.current !== jsonQueryKey) {
-      indexedData = [];
+      newData.length = 0; // reset immutably
       previousQuery.current = jsonQueryKey;
     }
 
@@ -58,16 +72,13 @@ export const FlatListMode = ({
       i < (udf.debouncedFilters.itemsPerPage || 0) + index;
       i++
     ) {
-      let m = i;
-      if (index > 0) {
-        m -= index;
-      }
+      const m = i - index;
       if (rows[m]) {
-        indexedData[i] = rows[m];
+        newData[i] = rows[m];
       }
     }
-    setIndexedData([...indexedData]);
-    previousQuery.current = jsonQueryKey;
+
+    setIndexedData(newData);
   };
 
   useEffect(() => {
@@ -81,6 +92,15 @@ export const FlatListMode = ({
 
     if (!data) {
       return null;
+    }
+
+    if (CardComponent) {
+      return (
+        <CardComponent
+          key={indexedData[index]?.uniqueId}
+          content={indexedData[index]}
+        />
+      );
     }
 
     return (
@@ -128,42 +148,50 @@ export const FlatListMode = ({
         triggerHeight={pullToRefreshEnabled ? 500 : 0}
         startInvisible={true}
       >
-        <div style={{ height: "calc(100vh - 130px)" }}>
-          <QueryErrorView query={q.query} />
+        {indexedData.length === 0 && !q.query?.isError ? (
+          <div style={{ height: "calc(100vh - 130px)" }}>
+            <EmptyList />
+          </div>
+        ) : (
+          <div style={{ height: "calc(100vh - 130px)" }}>
+            <QueryErrorView query={q.query} />
 
-          {indexedData.length === 0 && !q.query?.isError && <EmptyList />}
-
-          <InfiniteLoader
-            isItemLoaded={(index) => {
-              return !!indexedData[index];
-            }}
-            itemCount={total}
-            loadMoreItems={async (startIndex, stopIndex) => {
-              udf.setFilter({
-                startIndex,
-                itemsPerPage: stopIndex - startIndex,
-              });
-            }}
-          >
-            {({ onItemsRendered, ref }) => (
-              <AutoSizer>
-                {({ height, width }: any) => (
-                  <FixedSizeList
-                    height={height}
-                    itemCount={indexedData.length}
-                    itemSize={columns.length * 24 + 10}
-                    width={width}
-                    onScroll={onScroll}
-                    onItemsRendered={onItemsRendered}
-                    ref={ref}
-                  >
-                    {Item}
-                  </FixedSizeList>
-                )}
-              </AutoSizer>
-            )}
-          </InfiniteLoader>
-        </div>
+            <InfiniteLoader
+              isItemLoaded={(index) => {
+                return !!indexedData[index];
+              }}
+              itemCount={total}
+              loadMoreItems={async (startIndex, stopIndex) => {
+                udf.setFilter({
+                  startIndex,
+                  itemsPerPage: stopIndex - startIndex,
+                });
+              }}
+            >
+              {({ onItemsRendered, ref }) => (
+                <AutoSizer>
+                  {({ height, width }: any) => (
+                    <FixedSizeList
+                      height={height}
+                      itemCount={indexedData.length}
+                      itemSize={
+                        CardComponent?.getHeight
+                          ? CardComponent.getHeight()
+                          : columns.length * 24 + 10
+                      }
+                      width={width}
+                      onScroll={onScroll}
+                      onItemsRendered={onItemsRendered}
+                      ref={ref}
+                    >
+                      {Item}
+                    </FixedSizeList>
+                  )}
+                </AutoSizer>
+              )}
+            </InfiniteLoader>
+          </div>
+        )}
       </PullToRefresh>
     </>
   );

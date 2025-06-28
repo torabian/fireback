@@ -15,6 +15,7 @@ export const OverlayDrawerImp = ({
     <Drawer
       open={visible}
       direction={params?.direction || "right"}
+      zIndex={10000}
       onClose={close}
       size={params?.size}
     >
