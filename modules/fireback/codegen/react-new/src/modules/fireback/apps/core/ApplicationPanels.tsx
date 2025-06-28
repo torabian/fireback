@@ -61,27 +61,6 @@ export function ApplicationPanels({
     );
   }
 
-  // const workspaces = queryWorkspaces.data?.data?.items;
-  // // When user has any workspace, they need to select it, there is no other way around
-  // const chooseWorkspace =
-  //   !queryWorkspaces.isLoading && (workspaces || []).length > 0 && !selectedUrw;
-
-  // if (chooseWorkspace) {
-  //   return (
-  //     <div className="xXXA">
-  //       <h1>Which workspace you are going to?</h1>
-  //       <pre></pre>
-  //       <ul>
-  //         {workspaces.map((workspace) => (
-  //           <li onClick={() => selectUrw(workspace)} key={workspace.uniqueId}>
-  //             {workspace.name}
-  //           </li>
-  //         ))}
-  //       </ul>
-  //     </div>
-  //   );
-  // }
-
   return (
     <>
       <PanelGroup

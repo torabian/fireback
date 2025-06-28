@@ -38,3 +38,5 @@ e2e/cypress/screenshots
 e2e/samples/socket-connection/app
 e2e/samples/fireback-data-types/app
 /app
+modules/fireback/codegen/capacitor/ios
+modules/fireback/codegen/capacitor/android

@@ -17,7 +17,6 @@
   }
 }
 
-
 .login-form-section {
   display: flex;
    max-width: 500px;
@@ -158,8 +157,17 @@
   }
 }
 
+html, body {
+  height: 100%;
+  overflow-y: scroll; /* or auto */
+  -webkit-overflow-scrolling: touch; /* important for momentum scrolling */
+}
+
 // The new stuff
 .signin-form-container {
+  height: 100%;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
   padding: 20px;
   max-width: 400px;
   margin: 2rem auto;

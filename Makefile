@@ -1,7 +1,10 @@
 default:
 	rm -rf app && cd cmd/fireback && make dev
+
 mock:
 	cd modules/fireback/codegen/react-new && npm run start:mock
+
+
 
 mac-pkg:
 	cd cmd/fireback && make mac-pkg
