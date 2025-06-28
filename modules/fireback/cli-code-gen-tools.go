@@ -7,7 +7,6 @@ import (
 	"path"
 	"strings"
 
-	reactnativeui "github.com/torabian/fireback/modules/fireback/codegen/react-native-ui"
 	reactui "github.com/torabian/fireback/modules/fireback/codegen/react-ui"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v3"
@@ -890,15 +889,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 
 					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog), reactui.ReactUITpl)
 
-					return nil
-				},
-			},
-			{
-				Flags: append(commonFlags, reactUIFlags...),
-				Name:  "reactn-ui",
-				Usage: "Generates the react native ui for specific action or ui",
-				Action: func(c *cli.Context) error {
-					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog), reactnativeui.ReactNativeUITpl)
 					return nil
 				},
 			},

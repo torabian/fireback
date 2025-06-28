@@ -16,7 +16,6 @@ import (
 	tmplGoDesktop "github.com/torabian/fireback/modules/fireback/codegen/go-desktop"
 	tmpl "github.com/torabian/fireback/modules/fireback/codegen/go-new"
 	tmplIos "github.com/torabian/fireback/modules/fireback/codegen/ios"
-	tmplReactNative "github.com/torabian/fireback/modules/fireback/codegen/react-native-new"
 	tmplReact "github.com/torabian/fireback/modules/fireback/codegen/react-new"
 	"github.com/urfave/cli"
 )
@@ -126,21 +125,20 @@ func loadLastPath() (string, error) {
 }
 
 type NewProjectContext struct {
-	Name                     string
-	Path                     string
-	IsMonolith               bool
-	IncludeWailsDesktop      bool
-	FirebackManage           bool
-	ModuleName               string
-	ReplaceFireback          string
-	Description              string
-	FirebackVersion          string
-	CreateReactProject       bool
-	SelfService              bool
-	CreateIOSProject         bool
-	CreateAndroidProject     bool
-	CreateCapacitorProject   bool
-	CreateReactNativeProject bool
+	Name                   string
+	Path                   string
+	IsMonolith             bool
+	IncludeWailsDesktop    bool
+	FirebackManage         bool
+	ModuleName             string
+	ReplaceFireback        string
+	Description            string
+	FirebackVersion        string
+	CreateReactProject     bool
+	SelfService            bool
+	CreateIOSProject       bool
+	CreateAndroidProject   bool
+	CreateCapacitorProject bool
 }
 
 func NewProjectCli() cli.Command {
@@ -294,20 +292,19 @@ func NewProjectCli() cli.Command {
 					pathd = c.String("name")
 				}
 				ctx = &NewProjectContext{
-					FirebackVersion:          FIREBACK_VERSION,
-					IsMonolith:               true,
-					Name:                     c.String("name"),
-					Description:              c.String("description"),
-					ReplaceFireback:          c.String("replace-fb"),
-					Path:                     pathd,
-					ModuleName:               c.String("module"),
-					CreateReactProject:       c.Bool("ui"),
-					SelfService:              c.Bool("self-service"),
-					FirebackManage:           c.Bool("manage"),
-					CreateReactNativeProject: c.Bool("mobile"),
-					CreateCapacitorProject:   c.Bool("capacitor"),
-					CreateIOSProject:         c.Bool("ios"),
-					CreateAndroidProject:     c.Bool("android"),
+					FirebackVersion:        FIREBACK_VERSION,
+					IsMonolith:             true,
+					Name:                   c.String("name"),
+					Description:            c.String("description"),
+					ReplaceFireback:        c.String("replace-fb"),
+					Path:                   pathd,
+					ModuleName:             c.String("module"),
+					CreateReactProject:     c.Bool("ui"),
+					SelfService:            c.Bool("self-service"),
+					FirebackManage:         c.Bool("manage"),
+					CreateCapacitorProject: c.Bool("capacitor"),
+					CreateIOSProject:       c.Bool("ios"),
+					CreateAndroidProject:   c.Bool("android"),
 				}
 
 				if c.IsSet("micro") {
@@ -361,10 +358,6 @@ func NewProjectCli() cli.Command {
 				dest := filepath.Join(ctx.Path, "front-end", "src/apps", ctx.Name, ".env.local")
 				copyFile(source, dest)
 
-			}
-
-			if ctx.CreateReactNativeProject {
-				newProjectContentWriter(tmplReactNative.FbReactNativeNewTemplate, ctx, "mobile")
 			}
 
 			if ctx.IncludeWailsDesktop {
