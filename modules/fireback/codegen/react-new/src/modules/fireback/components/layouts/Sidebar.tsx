@@ -11,6 +11,7 @@ import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext"
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
+import { detectDeviceType } from "../../hooks/deviceInformation";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
@@ -46,7 +47,15 @@ export const defaultNavbar: MenuItem = {
   children: [],
 };
 
-function Sidebar({ miniSize }: { miniSize: boolean }) {
+function Sidebar({
+  miniSize,
+  onClose,
+  sidebarItemSelectedExtra,
+}: {
+  miniSize: boolean;
+  onClose?: () => void;
+  sidebarItemSelectedExtra?: () => void;
+}) {
   const {
     sidebarVisible,
     toggleSidebar: toggleSidebar$,
@@ -86,20 +95,29 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
       )}
       style={{ display: "flex", height: "calc(100vh - 60px)" }}
     >
-      <button className="sidebar-close" onClick={toggleSidebar}>
+      <button
+        className="sidebar-close"
+        onClick={() => (onClose ? onClose() : toggleSidebar())}
+      >
         <img src={source(osResources.cancel)} />
       </button>
 
       {menus.map((menu) => (
         <MenuParticle
-          onClick={sidebarItemSelected}
+          onClick={() => {
+            sidebarItemSelected();
+            sidebarItemSelectedExtra?.();
+          }}
           key={menu.label}
           menu={menu}
         />
       ))}
       {process.env.REACT_APP_GITHUB_DEMO === "true" && (
         <MenuParticle
-          onClick={sidebarItemSelected}
+          onClick={() => {
+            sidebarItemSelected();
+            sidebarItemSelectedExtra?.();
+          }}
           menu={{
             label: "Demo",
             children: [
@@ -125,7 +143,12 @@ function Sidebar({ miniSize }: { miniSize: boolean }) {
           }}
         />
       )}
-      <CurrentUser onClick={sidebarItemSelected} />
+      <CurrentUser
+        onClick={() => {
+          sidebarItemSelected();
+          sidebarItemSelectedExtra?.();
+        }}
+      />
     </div>
   );
 }

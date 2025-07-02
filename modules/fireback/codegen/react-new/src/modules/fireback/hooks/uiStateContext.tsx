@@ -6,10 +6,13 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { useResizeThreshold } from "./useResizeThreshold";
 import { uuidv4 } from "./api";
 import useResponsiveThresholds from "../components/layouts/useResponsiveThreshold";
+import { detectDeviceType } from "./deviceInformation";
 
 interface ActiveRoute {
   id: string;
   focused?: boolean;
+  href?: string;
+  initialEntries?: any;
 }
 
 export interface IUIStateProvider {
@@ -21,7 +24,7 @@ export interface IUIStateProvider {
   persistSidebarSize: (value: number) => void;
   setFocusedRouter: (id: string) => void;
   updateSidebarSize: (size: number) => void;
-  addRouter: () => void;
+  addRouter: (initialRoute?: string) => void;
   sidebarItemSelected: () => void;
   closeCurrentRouter: (id: string) => void;
   collapseLeftPanel: () => void;
@@ -50,6 +53,12 @@ export function useUiState() {
   return useContext(UIStateContext);
 }
 
+/**
+ * This needs to be provided outside of the routers, because it would
+ * manage how many routers are in the application
+ * @param param0
+ * @returns
+ */
 export function UIStateProvider({ children }: { children: React.ReactNode }) {
   const panelRef = useRef(null); // This is the panel on the sidebar
   const userPreferedWidth = useRef(null); // This is the panel on the sidebar
@@ -82,8 +91,8 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     resize(exceeded ? 0 : 20);
   });
 
-  const addRouter = () => {
-    setRouters((routers) => [...routers, { id: uuidv4() }]);
+  const addRouter = (initialRoute?: string) => {
+    setRouters((routers) => [...routers, { id: uuidv4(), href: initialRoute }]);
   };
 
   const setFocusedRouter = (id: string) => {
@@ -125,9 +134,14 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       goodSize = userPreferedWidth.current;
     }
 
+    // On phone, use maximum space
+    if (detectDeviceType().isMobileView) {
+      goodSize = 80;
+    }
+
     if (width && width > 0) {
       resize(0);
-      localStorage.setItem("sidebarState", "0".toString());
+      localStorage.setItem("sidebarState", "-1".toString());
       setSidebarVisibility(false);
     } else {
       localStorage.setItem("sidebarState", goodSize.toString());
@@ -137,9 +151,6 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setSidebarRef = (ref) => {
-    if (!ref || panelRef.current) {
-      return;
-    }
     panelRef.current = ref;
   };
 

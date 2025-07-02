@@ -63,9 +63,7 @@ h2 {
     margin-top: $navHeight;
     margin-top: calc($navHeight + constant(safe-area-inset-top));
     margin-top: calc($navHeight + env(safe-area-inset-top));
-    // min-height: calc(100vh - $navHeight - constant(safe-area-inset-top));
-    // min-height: calc(100vh - $navHeight - env(safe-area-inset-top));
-    max-width: calc(100vw - 245px);
+     max-width: calc(100vw - 245px);
 
     // Compensate for fab buttons
     @media only screen and (max-width: 500px) {

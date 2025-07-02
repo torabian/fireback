@@ -9,6 +9,7 @@ import { Udf } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
 import { useReindexedContent } from "./useReindex";
 import { castColumns, TableColumnWidthInfo } from "./PaginateUtils";
+import { useLocation } from "react-router-dom";
 
 export function PaginateTable({
   columns,
@@ -26,7 +27,7 @@ export function PaginateTable({
   withFilters?: boolean;
   withPagination?: boolean;
   selectable?: boolean;
-  uniqueIdHrefHandler?: (id: string) => void;
+  uniqueIdHrefHandler?: (id: string) => string;
   RowDetail?: any;
   tableClass?: string;
   query?: UseQueryResult<any, any>;
@@ -41,6 +42,7 @@ export function PaginateTable({
   inlineInsertHook?: any;
 }) {
   const t = useT();
+  const { pathname } = useLocation();
 
   const {
     filters,
@@ -52,6 +54,8 @@ export function PaginateTable({
     onFiltersChange,
   } = udf;
 
+  console.log(100, pathname);
+
   const cols = useMemo(() => {
     return castColumns(
       columns,
@@ -60,7 +64,8 @@ export function PaginateTable({
       },
       udf,
       columnSizes,
-      uniqueIdHrefHandler
+      uniqueIdHrefHandler,
+      pathname
     );
   }, [columns, columnSizes]);
 

@@ -11,8 +11,14 @@ import { UIStateProvider } from "../../hooks/uiStateContext";
 import React, { useContext, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 
+import { ErrorBoundary } from "react-error-boundary";
+import { Fallback } from "../../components/fallback/Fallback";
 import { AppConfigContext } from "../../hooks/appConfigTools";
-import { AppTree } from "./AppTree";
+import { AuthProvider } from "../../hooks/authContext";
+import { usePureLocale } from "../../hooks/usePureLocale";
+import { SidebarMultiRouterSetup } from "./ApplicationPanels";
+import { WithFireback } from "./WithFireback";
+import { WithSelfServiceRoutes } from "./WithSelfServiceRoutes";
 
 export function EssentialApp({
   ApplicationRoutes,
@@ -34,17 +40,41 @@ export function EssentialApp({
     }
   }, []);
 
+  const { locale } = usePureLocale();
+
   return (
     <QueryClientProvider client={queryClient}>
       <UIStateProvider>
-        <AppTree
-          config={config}
-          ApplicationRoutes={ApplicationRoutes}
-          WithSdk={WithSdk}
-          mockServer={mockServer}
-          apiPrefix={apiPrefix}
-          queryClient={queryClient}
-        />
+        <AuthProvider>
+          <ErrorBoundary
+            FallbackComponent={Fallback}
+            onReset={(details) => {
+              // Reset the state of your app so the error doesn't happen again
+            }}
+          >
+            <WithFireback
+              mockServer={mockServer}
+              config={config}
+              prefix={apiPrefix}
+              queryClient={queryClient}
+              locale={locale}
+            >
+              <WithSdk
+                mockServer={mockServer}
+                prefix={apiPrefix}
+                config={config}
+                queryClient={queryClient}
+              >
+                <WithSelfServiceRoutes>
+                  <SidebarMultiRouterSetup
+                    queryClient={queryClient}
+                    ApplicationRoutes={ApplicationRoutes}
+                  />
+                </WithSelfServiceRoutes>
+              </WithSdk>
+            </WithFireback>
+          </ErrorBoundary>
+        </AuthProvider>
       </UIStateProvider>
     </QueryClientProvider>
   );

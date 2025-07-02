@@ -1,16 +1,7 @@
-import { Toast } from "../../hooks/toast";
-
 export const CopyCell = ({ value }: { value?: string }) => {
   const onCopy = (e: any) => {
     e.stopPropagation();
-    navigator.clipboard
-      .writeText(value)
-      .then(() => {
-        Toast(`Copied ${value}`, { type: "info", autoClose: 600 });
-      })
-      .catch((err) => {
-        Toast(`Copy failed.`, { type: "error", autoClose: 600 });
-      });
+    navigator.clipboard.writeText(value).then(() => {});
   };
 
   return (

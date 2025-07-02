@@ -1,16 +1,15 @@
+import { Outlet } from "react-router-dom";
 import { MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { UploaderStatsCard } from "../../modules/manage/drive/UploaderStatsCard";
-import { Outlet } from "react-router-dom";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
-import { ForcedAuthenticated } from "./ForcedAuthenticated";
 import Navbar from "./Navbar";
 
 // We do not compile the pull to refresh for desktop and web
 ////// # if env.TARGET_TYPE == 'mobile' && !env.DISABLE_PULL_TO_REFRESH
-import { useUiState } from "../../hooks/uiStateContext";
 import classNames from "classnames";
-import { useContext, useEffect, useRef } from "react";
+import { useContext } from "react";
+import { useUiState } from "../../hooks/uiStateContext";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { ReactiveSearchResult } from "../reactive-search/ReactiveSearchResult";
 // @ts-ignore
@@ -48,34 +47,7 @@ const Layout = ({
   const t = useT();
   const { result, phrase, reset } = useContext(ReactiveSearchContext);
 
-  const {
-    sidebarVisible,
-    toggleSidebar: toggleSidebar$,
-    hide,
-    setSidebarRef,
-    updateSidebarSize,
-    routers,
-    setFocusedRouter,
-  } = useUiState();
-
-  const boxRef = useRef(null);
-  const panelRef = useRef(null); // Ref for the left panel
-  const autoClose = useRef(false);
-
-  useEffect(() => {
-    setSidebarRef(panelRef.current);
-  }, [panelRef.current]);
-
-  // Cordova thingy
-  // useEffect(() => {
-  //   function listener() {
-  //     alert("Keyboard viewed!");
-  //   }
-
-  //   window.addEventListener("keyboardDidShow", listener);
-
-  //   return () => window.removeEventListener("keyboardDidShow", listener);
-  // }, []);
+  const { sidebarVisible, toggleSidebar: toggleSidebar$ } = useUiState();
 
   const onSearch = phrase.length > 0;
 

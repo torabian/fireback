@@ -1,22 +1,21 @@
-import { Toast } from "../../hooks/toast";
 import { useUiState } from "../../hooks/uiStateContext";
 
 export const OpenInNewRouter = ({ value }: { value?: string }) => {
   const { addRouter } = useUiState();
 
-  const onCopy = (e: any) => {
+  const onClick = (e: any) => {
     e.stopPropagation();
-    addRouter();
+    addRouter(value);
   };
 
   return (
-    <div className="table-btn table-open-in-new-router" onClick={onCopy}>
-      <CopyIcon />
+    <div className="table-btn table-open-in-new-router" onClick={onClick}>
+      <OpenIcon />
     </div>
   );
 };
 
-const CopyIcon = ({ size = 16, color = "silver", style = {} }) => (
+const OpenIcon = ({ size = 16, color = "silver", style = {} }) => (
   <svg
     width={size}
     height={size}

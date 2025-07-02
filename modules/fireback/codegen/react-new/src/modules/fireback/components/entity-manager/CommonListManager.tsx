@@ -91,7 +91,7 @@ export const CommonListManager = ({
   id?: string;
   urlMask?: string;
   withPreloads?: string;
-  uniqueIdHrefHandler?: (id: string) => void;
+  uniqueIdHrefHandler?: (id: string) => string;
   deep?: boolean;
   selectable?: boolean;
   withFilters?: boolean;
