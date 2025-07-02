@@ -16,12 +16,28 @@ export interface TableColumnWidthInfo {
   width: number | string;
 }
 
+function resolvePath(base, relative) {
+  const stack = base.split("/").filter(Boolean);
+  const parts = relative.split("/");
+
+  parts.forEach((part) => {
+    if (part === "..") {
+      stack.pop();
+    } else if (part !== "." && part !== "") {
+      stack.push(part);
+    }
+  });
+
+  return "/" + stack.join("/");
+}
+
 export const castColumns = (
   columns: DatatableColumn[],
   setFilter: (field: string, value: any) => void,
   udf: Udf,
   columnSizes: TableColumnWidthInfo[] = [],
-  uniqueIdHrefHandler: (id: any) => void
+  uniqueIdHrefHandler: (id: any) => string,
+  currentRouterPath: string
 ): ColumnOrColumnGroup<any, unknown>[] => {
   return columns.map((col) => {
     const info = columnSizes.find((x) => x.columnName === col.name);
@@ -31,6 +47,14 @@ export const castColumns = (
       key: col.name,
       renderCell: ({ column, row }) => {
         if (column.key === "uniqueId") {
+          let loc = uniqueIdHrefHandler
+            ? uniqueIdHrefHandler(row.uniqueId)
+            : "";
+
+          if (loc.startsWith(".")) {
+            loc = resolvePath(currentRouterPath, loc);
+          }
+
           return (
             <div style={{ position: "relative" }}>
               <Link
@@ -39,7 +63,7 @@ export const castColumns = (
                 {row.uniqueId}
               </Link>
               <CopyCell value={row.uniqueId} />
-              <OpenInNewRouter value={row.uniqueId} />
+              <OpenInNewRouter value={loc} />
             </div>
           );
         }

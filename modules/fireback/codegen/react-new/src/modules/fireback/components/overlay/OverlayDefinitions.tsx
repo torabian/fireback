@@ -31,6 +31,8 @@ export interface DrawerOpenParams {
    * The size of the drawer. Can be a string (e.g., "400px") or a number.
    */
   size?: string | number;
+
+  speed?: number;
 }
 
 /**

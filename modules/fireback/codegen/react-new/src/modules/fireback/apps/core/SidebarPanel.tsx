@@ -1,44 +1,36 @@
 import { useUiState } from "../../hooks/uiStateContext";
 
-import { useContext, useRef } from "react";
+import { useRef } from "react";
 
 import { Panel } from "react-resizable-panels";
 import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import Sidebar from "../../components/layouts/Sidebar";
 import { AppConfigProvider } from "../../hooks/appConfigTools";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { detectDeviceType } from "../../hooks/deviceInformation";
+
+const getSize = () => {
+  if (detectDeviceType().isMobileView) {
+    return 0;
+  }
+
+  const savedValue = localStorage.getItem("sidebarState");
+  const m = savedValue !== null ? parseFloat(savedValue) : null;
+
+  if (m <= 0) {
+    return 0;
+  }
+
+  return m * 1.3;
+};
 
 export const SidebarPanel = () => {
   const { setSidebarRef, persistSidebarSize } = useUiState();
   const panelRef = useRef(null);
-  const { session } = useContext(RemoteQueryContext);
 
   const onRef = (ref) => {
-    if (!ref || panelRef.current) {
-      return null;
-    }
-
     panelRef.current = ref;
     setSidebarRef(panelRef.current);
-
-    setTimeout(() => {
-      if (detectDeviceType().isMobileView) {
-        panelRef.current?.resize(0);
-      } else {
-        const savedValue = localStorage.getItem("sidebarState");
-        const m = savedValue !== null ? parseFloat(savedValue) : null;
-        const suggestedSize = (180 / window.innerWidth) * 100;
-        const stockSize = m !== null && m > suggestedSize ? m : suggestedSize;
-
-        panelRef.current?.resize(stockSize);
-      }
-    }, 0);
   };
-
-  if (!session) {
-    return null;
-  }
 
   return (
     <Panel
@@ -48,7 +40,7 @@ export const SidebarPanel = () => {
         height: "100vh",
       }}
       minSize={0}
-      defaultSize={0}
+      defaultSize={getSize()}
       ref={onRef}
     >
       <AppConfigProvider
@@ -59,11 +51,13 @@ export const SidebarPanel = () => {
         <Sidebar miniSize={false} />
       </AppConfigProvider>
 
-      <ResizeHandle
-        onDragComplete={() => {
-          persistSidebarSize(panelRef.current?.getSize());
-        }}
-      />
+      {!detectDeviceType().isMobileView && (
+        <ResizeHandle
+          onDragComplete={() => {
+            persistSidebarSize(panelRef.current?.getSize());
+          }}
+        />
+      )}
     </Panel>
   );
 };

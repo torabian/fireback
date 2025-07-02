@@ -462,7 +462,7 @@ html[dir="rtl"] {
   display: inline;
   position: absolute;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   margin-top: 2px;
   transition: 0.3s opacity ease-in-out;
 }

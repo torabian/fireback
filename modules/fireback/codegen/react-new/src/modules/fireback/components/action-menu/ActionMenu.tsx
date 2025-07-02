@@ -2,16 +2,16 @@
  * Action menu stands for those menus, which can accept some buttons, and change
  * based on the page user is.
  */
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { uniqBy } from "lodash";
-import { useT } from "../../hooks/useT";
-import { KeyboardAction, PermissionLevel } from "../../definitions/definitions";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { userMeetsAccess } from "../../hooks/accessLevels";
-import { useKeyCombination, useKeyPress } from "../../hooks/useKeyPress";
 import classNames from "classnames";
-import { osResources } from "../../resources/resources";
+import { uniqBy } from "lodash";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { KeyboardAction, PermissionLevel } from "../../definitions/definitions";
+import { userMeetsAccess } from "../../hooks/accessLevels";
 import { toBinaryString } from "../../hooks/useExportTools";
+import { useKeyCombination } from "../../hooks/useKeyPress";
+import { useT } from "../../hooks/useT";
+import { osResources } from "../../resources/resources";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 export function ActionMenuManager({
   filter,

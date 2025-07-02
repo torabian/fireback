@@ -17,6 +17,7 @@ export const OverlayDrawerImp = ({
       direction={params?.direction || "right"}
       zIndex={10000}
       onClose={close}
+      duration={params?.speed}
       size={params?.size}
     >
       {children}

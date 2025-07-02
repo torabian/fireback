@@ -159,14 +159,14 @@
 
 html, body {
   height: 100%;
-  overflow-y: scroll; /* or auto */
+  overflow-y: auto; /* or auto */
   -webkit-overflow-scrolling: touch; /* important for momentum scrolling */
 }
 
 // The new stuff
 .signin-form-container {
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 20px;
   max-width: 400px;

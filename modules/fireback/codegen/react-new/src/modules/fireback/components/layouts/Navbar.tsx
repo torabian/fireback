@@ -11,6 +11,9 @@ import { ActionMenuManager } from "../action-menu/ActionMenu";
 import ActiveLink from "../link/ActiveLink";
 import { PageTitleManager } from "../page-title/PageTitle";
 import { ReactiveSearch } from "../reactive-search/ReactiveSearch";
+import { useOverlay } from "../overlay/OverlayProvider";
+import Sidebar from "./Sidebar";
+import { detectDeviceType } from "../../hooks/deviceInformation";
 
 function Navbar({
   menu,
@@ -22,6 +25,7 @@ function Navbar({
   routerId?: string;
 }) {
   const { toggleSidebar, closeCurrentRouter } = useUiState();
+  const { openDrawer } = useOverlay();
 
   useKeyCombination(KeyboardAction.SidebarToggle, () => {
     toggleSidebar();
@@ -35,7 +39,26 @@ function Navbar({
       <div className="container-fluid">
         <div className="page-navigator">
           {routerId === "url-router" ? (
-            <button className="navbar-menu-icon" onClick={toggleSidebar}>
+            <button
+              className="navbar-menu-icon"
+              onClick={() =>
+                detectDeviceType().isMobileView
+                  ? openDrawer(
+                      ({ close }) => (
+                        <Sidebar
+                          sidebarItemSelectedExtra={close}
+                          onClose={close}
+                          miniSize={false}
+                        />
+                      ),
+                      {
+                        speed: 180,
+                        direction: "left",
+                      }
+                    )
+                  : toggleSidebar()
+              }
+            >
               <img src={source(osResources.menu)} />
             </button>
           ) : (
