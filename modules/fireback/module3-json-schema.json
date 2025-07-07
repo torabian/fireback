@@ -654,6 +654,7 @@
             "string?",
             "int?",
             "float64?",
+            "money?",
             "float32?",
             "bool?",
             "int32?",

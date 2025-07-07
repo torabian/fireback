@@ -37,6 +37,7 @@ var FIELD_TYPE_DATE string = "date"
 var FIELD_TYPE_MANY2MANY string = "many2many"
 var FIELD_TYPE_OBJECT string = "object"
 var FIELD_TYPE_EMBED string = "embed"
+var FIELD_TYPE_MONEY string = "money?"
 var FIELD_TYPE_ENUM string = "enum"
 var FIELD_TYPE_COMPUTED string = "computed"
 var FIELD_TYPE_TEXT string = "text"
@@ -300,7 +301,7 @@ func (x *Module3Field) ComputedGormTag() string {
 		return "many2many:" + x.BelongingEntityName + "_" + x.PrivateName() + ";foreignKey:UniqueId;references:UniqueId"
 	}
 
-	if x.Type == FIELD_TYPE_EMBED {
+	if x.Type == FIELD_TYPE_EMBED || x.Type == FIELD_TYPE_MONEY {
 		return "embedded"
 	}
 

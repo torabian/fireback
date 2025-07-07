@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
@@ -13,8 +12,6 @@ import (
 	"runtime"
 	"strings"
 	"text/template"
-
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tdewolff/minify"
@@ -84,7 +81,6 @@ func loadSharedTemplatesEmbed(efs fs.FS, root string) ([]string, error) {
 			return nil
 		}
 
-		fmt.Println(path, d.Name(), d.Type())
 		if err != nil {
 			return err
 		}
@@ -217,7 +213,6 @@ func renderPageFromEmbed(fsx fs.FS, c *gin.Context, page string, params any) {
 
 	sharedTemplates, err := loadSharedTemplatesEmbed(fsx, "screens/shared")
 	if err != nil {
-		fmt.Println(3, err)
 		c.String(http.StatusInternalServerError, "Error loading shared templates")
 		return
 	}
@@ -229,7 +224,6 @@ func renderPageFromEmbed(fsx fs.FS, c *gin.Context, page string, params any) {
 	tmpl, err := template.New(filepath.Base(address)).Funcs(funcMap).ParseFS(fsx, pages...)
 
 	if err != nil {
-		log.Default().Println(err)
 
 		c.String(http.StatusInternalServerError, "Error loading page")
 		return

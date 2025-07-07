@@ -86,6 +86,8 @@ func TsComputedField(field *Module3Field, isWorkspace bool) string {
 		return "number"
 	case "object", "embed":
 		return field.PublicName()
+	case "money?":
+		return "{amount: number, currency: string, formatted?: string}"
 	default:
 		return "string"
 		// return field.Type

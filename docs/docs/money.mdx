@@ -1,0 +1,53 @@
+---
+title: Money data type
+sidebar_position: 100
+---
+
+Working with money and amounts is one of the requirements in almost in every application.
+Many times you want to store or parse amounts (value + currency) in database, for a product price,
+or other reasons.
+
+Fireback provides a datatype, called Money. It's accessible using `money?` since version 1.2.4.
+
+```yaml
+entities:
+  - name: table1
+    fields:
+    - name: amount
+      type: money?
+```
+
+Defining a field with `money?` type causes that `fireback.Money` struct to be used, which is representing 
+a amount. You can provide the amount as a string, both in cli and http post requests:
+
+```yaml
+amount:
+    amount: 100
+    currency: usd
+```
+
+also, both in yaml and json, it's accepted to send string:
+
+```yaml
+amount: 100$
+```
+
+and the field will be automatically converted. Money struct provides a set of helper functions as well, such as:
+
+```go
+package home2
+
+import (
+	"fmt"
+
+	"github.com/torabian/fireback/modules/fireback"
+)
+
+func init() {
+
+	fmt.Println(fireback.NewMoneyAutoNull("100$").Plus("200$").Format("en-us"))
+
+	// prints $300.00
+}
+```
+

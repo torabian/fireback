@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"gopkg.in/yaml.v2"
 )
 
 func HttpUpdateEntity[T any, V any](c *gin.Context, fn func(QueryDSL, T) (V, *IError)) {
@@ -208,27 +209,51 @@ func HttpPostXhtml(c *gin.Context, fn func(QueryDSL) (*XHtml, *IError)) {
 		}
 	}
 }
-
 func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
-
 	id := c.Param("uniqueId")
 	if id != "" {
 		f.UniqueId = id
 	}
 
 	var body T
-
 	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
 		return
 	}
 
-	if entity, err := fn(body, f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+	entity, err := fn(body, f)
+
+	accept := c.GetHeader("Accept")
+	isYAML := accept == "application/x-yaml" || accept == "application/yaml" || accept == "text/yaml"
+
+	if err != nil {
+		// Error response
+		if isYAML {
+			c.Header("Content-Type", "application/x-yaml")
+			yamlData, marshalErr := yaml.Marshal(gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+			if marshalErr != nil {
+				c.AbortWithStatusJSON(500, gin.H{"error": "failed to marshal yaml"})
+				return
+			}
+			c.Writer.WriteHeader(500)
+			c.Writer.Write(yamlData)
+		} else {
+			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+		}
+		return
+	}
+
+	// Success response
+	if isYAML {
+		c.Header("Content-Type", "application/x-yaml")
+		yamlData, err := yaml.Marshal(gin.H{"data": entity})
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": "failed to marshal yaml"})
+			return
+		}
+		c.Writer.Write(yamlData)
 	} else {
-		c.JSON(200, gin.H{
-			"data": entity,
-		})
+		c.JSON(200, gin.H{"data": entity})
 	}
 }
 
