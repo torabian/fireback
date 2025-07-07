@@ -7,7 +7,6 @@ import (
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
 
-	"github.com/torabian/fireback/modules/home2"
 	"github.com/urfave/cli"
 )
 
@@ -58,7 +57,6 @@ var xapp = &fireback.FirebackApp{
 	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
-		home2.Home2ModuleSetup(nil),
 		{
 			CliHandlers: []cli.Command{
 				fireback.NewProjectCli(),
