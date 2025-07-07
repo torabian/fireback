@@ -1902,6 +1902,11 @@ type x{{$prefix}}{{ .PublicName}} struct {
         template.{{ .PublicName }} = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
+    {{ if or (eq .Type "money?") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        template.{{ .PublicName }} = {{ $wsprefix }}NewMoneyAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
+      }
+	  {{ end }}
     {{ if or (eq .Type "duration?") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         template.{{ .PublicName }} = {{ $wsprefix }}NewDurationAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))

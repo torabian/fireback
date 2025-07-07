@@ -43,6 +43,8 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return field.Type
 	case "int64?", "int32?", "int?", "float64?", "float32?", "bool?":
 		return prefix + strings.ReplaceAll(ToUpper(field.Type), "?", "")
+	case "money?":
+		return prefix + strings.ReplaceAll(ToUpper(field.Type), "?", "")
 	case "Timestamp":
 		return "*string"
 	case "datenano":

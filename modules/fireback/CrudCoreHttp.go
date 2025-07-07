@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
 )
 
 var Upgrader = websocket.Upgrader{
@@ -241,44 +242,54 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 // and cast it to the 'body'. Make sure calling this with &body, not body
 // Extend this function if you want to support different formats.
 func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any, f QueryDSL) (aborted bool) {
-
 	bodyBytes, err := ginBodyToBytes(c)
 	if err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
-		return true
+		return abortWithError(c, err, f)
 	}
 
 	switch DetectGinContentType(c) {
-
 	case ContentTypeYAML:
 		if err := BindYamlStringWithDetails(bodyBytes, body); err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
-			return true
+			return abortWithError(c, err, f)
 		}
 	case ContentTypeFormData:
 		if err := BindMultiPartFormDataWithDetails(c, body); err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
-			return true
+			return abortWithError(c, err, f)
 		}
 	case ContentTypeURLEncoded:
 		if err := BindFormUrlEncodedWithDetails(c, body); err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
-			return true
+			return abortWithError(c, err, f)
 		}
 	case ContentTypeXML:
 		if err := BindXmlStringWithDetails(bodyBytes, body); err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
-			return true
+			return abortWithError(c, err, f)
 		}
-
 	default:
 		if err := BindJsonStringWithDetails(bodyBytes, body); err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f)})
-			return true
+			return abortWithError(c, err, f)
 		}
 	}
 
 	return false
+}
+
+func abortWithError(c *gin.Context, err error, f QueryDSL) bool {
+	accept := c.GetHeader("Accept")
+	isYAML := accept == "application/x-yaml" || accept == "application/yaml" || accept == "text/yaml"
+
+	if isYAML {
+		c.Header("Content-Type", "application/x-yaml")
+		yamlData, marshalErr := yaml.Marshal(err)
+		if marshalErr != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": "failed to marshal yaml"})
+			return true
+		}
+		c.Writer.WriteHeader(500)
+		c.Writer.Write(yamlData)
+	} else {
+		c.AbortWithStatusJSON(500, err)
+	}
+	return true
 }
 
 type BulkRecordRequest[T any] struct {
