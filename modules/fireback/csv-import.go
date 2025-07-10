@@ -204,7 +204,11 @@ func SetField(item interface{}, fieldName string, value interface{}) error {
 		return fmt.Errorf("field %s does not exist within the provided item", fieldName)
 	}
 	fieldVal := v.Field(fieldNum)
-	fieldVal.Set(reflect.ValueOf(value))
+	val := reflect.ValueOf(value)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	fieldVal.Set(val)
 	return nil
 }
 

@@ -13,5 +13,6 @@ import (
 )
 
 func GetSQLiteDialector(dsn string) gorm.Dialector {
+
 	return sqlite.Open(dsn)
 }

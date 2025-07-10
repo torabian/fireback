@@ -4,7 +4,7 @@ projectBinary = f
 deb:
 	bash ./fireback-deb.sh
 dev:
-	go build -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
+	go build --tags "fts5" -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
 	../../app gen module3spec --out ../../modules/fireback/module3-json-schema.json
 

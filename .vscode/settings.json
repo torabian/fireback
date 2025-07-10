@@ -38,5 +38,6 @@
     "./modules/fireback/module3-json-schema.json": [
       "*Module3.yml"
     ]
-  }
+  },
+  "java.compile.nullAnalysis.mode": "disabled"
 }

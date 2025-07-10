@@ -3,56 +3,12 @@
  */
 package org.example
 import okhttp3.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello baby2!"
-        }
-}
-
-
-
-fun main() {
-
-    val url = "http://localhost:4500/ws"
-    // Build the OkHttpClient
-    val client = OkHttpClient()
-
-    val token = "ae13b288e28ec5502b750d9cdd3d677245c101217d14dcf094581b7f4772611e"
-
-    println("Token: $token")
-     // Create a WebSocket request
-    val request = Request.Builder()
-         .url(url)
-         .header("authorization", token)
-         .header("workspace-id", "root")
-         .build()
-
-    val listener = object : WebSocketListener(){
-        override fun onOpen(webSocket: WebSocket, response: Response) {
-            println("WebSocket Opened: $response")
-            webSocket.send("Hello")
-        }
-
-        override fun onMessage(webSocket: WebSocket, text: String) {
-            println("Received message: $text")
-        }
-
-        override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-            println("WebSocket Closed. Code: $code, Reason: $reason")
-        }
-
-        override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-            println("Error: ${t.message}")
-        }
-    }
-
-    // Start the WebSocket connection
-    client.newWebSocket(request, listener)
-
-    // Wait for the connection to close (optional in a real application)
-    Thread.sleep(1000)
-    println(client)
-    println(App().greeting)
+fun main() = runBlocking {
+    val (messages, connect) = useEventBusSubscription()
+    messages.onEach { println("Got: $it") }.launchIn(this)
+    connect()
+    delay(10_000)
 }

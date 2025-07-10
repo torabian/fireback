@@ -1,0 +1,86 @@
+name: suggestion
+description: 
+  Suggestion module is a way to rank contents, such as video, posts, etc to users,
+  based on full text search, user interaction, location, and so on.
+  Aims to be general purpose, and allow to be extended.
+  
+# This is a Module3.yml file format which is a complex definition of entities,
+# actions, dtos, queries, and many more necessary things for a project.
+# Make sure you have installed correct vscode extensions, to get intelisense and auto-save feature.
+# You can read about extensions here:
+# https://torabian.github.io/fireback/docs/vscode-extension-and-developing
+
+# also learn how to create Module3.yml files:
+# https://torabian.github.io/fireback/docs/module3-definition/
+
+entities:
+  - name: content
+    description: 
+      Source of the content which will be indexed by the FTS5 table.
+      Other modules can use this entity to set the content.
+    fields:
+      - name: title
+        recommended: true
+        type: string
+        description: The content title, such as video title, course title, post title.
+      - name: excerpt
+        recommended: true
+        type: string
+        description: 
+          Excerpt of the content, useful for search and sometimes showing on different location of 
+          the website or app, in lists or feeds.
+
+      - name: contentType
+        recommended: true
+        type: string
+        description: The content title, such as video title, course title, post title.
+
+
+actions:
+  - name: query
+    url: /suggestion/query
+    method: post
+    in:
+      fields:
+        - name: itemsPerPage
+          type: int
+          default: 10
+          description:
+            The number of items to return.
+        - name: startIndex
+          type: int
+          default: 0
+          description:
+            The index of the first item to return.
+        - name: phrase
+          type: string
+          description:
+            The query to search for.
+            It is a string that will be used to search for the content.
+    description: 
+      The final result of the query, it is a list of content entities based on the search.
+      It is a list of content entities based on the search.
+    out:
+      fields:
+        - name: items
+          type: array
+          fields:
+          - name: title
+            type: string
+            description: The title of the content.
+          - name: excerpt
+            type: string
+            description: The excerpt
+          - name: contentType
+            type: string
+            description: The content type group
+  - name: restore
+    description: 
+      Deletes the FTS5 table (sqlite) and recreates it.
+    method: post
+  
+  - name: resync
+    description:
+      Resyncs the content_virtual table with the content_entities table.
+    method: post
+    url: /suggestion/resync
