@@ -33,6 +33,7 @@ test_rebuild:
 refresh:
 	make && \
 	./artifacts/fireback/f gen gof --def modules/abac/AbacModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/suggestion/SuggestionModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	./artifacts/fireback/f gen gof --def modules/fireback/FirebackModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
 
