@@ -1315,27 +1315,27 @@ func GetContentModule3Actions() []fireback.Module3Action {
 }
 
 var PERM_ROOT_CONTENT = fireback.PermissionInfo{
-	CompleteKey: "root.modules.modules.suggestion.content.*",
+	CompleteKey: "root.modules.suggestion.content.*",
 	Name:        "Entire content actions (*)",
 	Description: "",
 }
 var PERM_ROOT_CONTENT_DELETE = fireback.PermissionInfo{
-	CompleteKey: "root.modules.modules.suggestion.content.delete",
+	CompleteKey: "root.modules.suggestion.content.delete",
 	Name:        "Delete content",
 	Description: "",
 }
 var PERM_ROOT_CONTENT_CREATE = fireback.PermissionInfo{
-	CompleteKey: "root.modules.modules.suggestion.content.create",
+	CompleteKey: "root.modules.suggestion.content.create",
 	Name:        "Create content",
 	Description: "",
 }
 var PERM_ROOT_CONTENT_UPDATE = fireback.PermissionInfo{
-	CompleteKey: "root.modules.modules.suggestion.content.update",
+	CompleteKey: "root.modules.suggestion.content.update",
 	Name:        "Update content",
 	Description: "",
 }
 var PERM_ROOT_CONTENT_QUERY = fireback.PermissionInfo{
-	CompleteKey: "root.modules.modules.suggestion.content.query",
+	CompleteKey: "root.modules.suggestion.content.query",
 	Name:        "Query content",
 	Description: "",
 }
