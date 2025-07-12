@@ -138,7 +138,7 @@ describe("Logging in with the signin", () => {
             }
           }
 
-          expect(countFilesImported).to.equal(3);
+          expect(countFilesImported).to.equal(4);
         });
       });
 
