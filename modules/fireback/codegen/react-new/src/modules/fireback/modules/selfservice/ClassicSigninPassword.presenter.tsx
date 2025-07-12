@@ -1,31 +1,28 @@
-import { FormikProps, useFormik } from "formik";
-import { useContext, useEffect, useRef } from "react";
+import { useFormik } from "formik";
+import { useEffect } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { usePostPassportsSigninClassic } from "../../sdk/modules/abac/usePostPassportsSigninClassic";
 import { usePostWorkspacePassportRequestOtp } from "../../sdk/modules/abac/usePostWorkspacePassportRequestOtp";
 
 import { useS } from "../../hooks/useS";
-import { strings } from "./strings/translations";
-import { useCompleteAuth } from "./auth.common";
 import {
   ClassicSigninActionReqDto,
   ClassicSigninActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
+import { useCompleteAuth } from "./auth.common";
+import { strings } from "./strings/translations";
 
 export const usePresenter = () => {
   const s = useS(strings);
-  const { goBack, state, replace, push } = useRouter();
+  const { goBack, state, push } = useRouter();
   const { locale } = useLocale();
   const { onComplete } = useCompleteAuth();
   const { submit: singin, mutation } = usePostPassportsSigninClassic();
   const otpEnabled = state?.canContinueOnOtp;
   const { submit: requestOtp } = usePostWorkspacePassportRequestOtp();
-
-  const { setSession } = useContext(RemoteQueryContext);
 
   const submit = (values: Partial<ClassicSigninActionReqDto>) => {
     singin({ value: values.value, password: values.password })

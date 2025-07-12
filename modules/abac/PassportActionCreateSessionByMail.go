@@ -38,8 +38,8 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 	}
 
 	// Secure cookie, only if gin is present
-	if q.C != nil {
-		q.C.SetCookie("authorization", tokenString, 3600*24, "/", "", true, true)
+	if q.G != nil {
+		q.G.SetCookie("authorization", tokenString, 3600*24, "/", "", true, true)
 	}
 
 	q.ResolveStrategy = "user"

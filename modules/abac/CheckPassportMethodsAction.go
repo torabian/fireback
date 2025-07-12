@@ -64,6 +64,11 @@ func CheckPassportMethodsAction(q fireback.QueryDSL) (*CheckPassportMethodsActio
 				state.Google = true
 				state.GoogleOAuthClientKey = item.ClientKey
 			}
+
+			if Type == PassportMethodType.Facebook {
+				state.Facebook = true
+				state.FacebookAppId = item.ClientKey
+			}
 		}
 	}
 

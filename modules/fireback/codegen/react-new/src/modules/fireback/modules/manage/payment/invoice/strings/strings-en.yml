@@ -1,0 +1,11 @@
+content:
+  invoices:
+    amount: Amount
+    amountHint: Amount
+    archiveTitle: Invoices
+    editInvoice: Edit invoice
+    finalStatus: Final status
+    finalStatusHint: Final status
+    newInvoice: New invoice
+    title: Title
+    titleHint: Title

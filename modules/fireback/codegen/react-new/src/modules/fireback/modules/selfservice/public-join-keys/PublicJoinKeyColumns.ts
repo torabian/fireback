@@ -1,15 +1,15 @@
 import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
-import { enTranslations } from "@/modules/fireback/translations/en";
+import { strings } from "./strings/translations";
 
-export const columns = (t: typeof enTranslations) => [
+export const columns = (s: typeof strings) => [
   {
     name: "uniqueId",
-    title: t.table.uniqueId,
+    title: s.uniqueId,
     width: 200,
   },
   {
     name: "role",
-    title: t.table.uniqueId,
+    title: s.roleName,
     width: 200,
     getCellValue: (entity: PublicJoinKeyEntity) => entity.role?.name,
   },

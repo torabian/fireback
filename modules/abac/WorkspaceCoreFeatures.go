@@ -318,6 +318,7 @@ func GetUserAccessLevels(query fireback.QueryDSL) (*UserAccessLevelDto, *firebac
 	for _, item := range items {
 		if ws[item.WorkspaceId] == nil {
 			ws[item.WorkspaceId] = &struct {
+				Name               string
 				WorkspacesAccesses []string
 				UserRoles          map[string]*struct {
 					Name     string
@@ -325,6 +326,8 @@ func GetUserAccessLevels(query fireback.QueryDSL) (*UserAccessLevelDto, *firebac
 				}
 			}{}
 		}
+
+		ws[item.WorkspaceId].Name = item.WorkspaceName
 
 		if item.Type == "account_restrict" {
 			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {

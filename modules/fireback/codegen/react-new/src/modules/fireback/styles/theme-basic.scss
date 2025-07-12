@@ -236,11 +236,15 @@ html[dir="rtl"] {
 }
 
 .with-fade-in {
-  animation: fadein 0.15s;
+  animation: fadeInOpacity 0.15s;
 }
 
 .modal-overlay {
   background-color: rgba(0, 0, 0, 0.437);
+
+  &.invisible {
+    animation: fadeOutOpacity 0.4s;
+  }
 }
 
 .in-capture-state {

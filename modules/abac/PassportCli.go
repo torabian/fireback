@@ -3,6 +3,7 @@ package abac
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
@@ -131,6 +132,10 @@ var PassportCli cli.Command = cli.Command{
 		OauthAuthenticateActionCmd,
 		PassportWipeCmd,
 		PassportUpdateCmd,
+		fireback.GetCommonRemoveQuery(
+			reflect.ValueOf(&PassportEntity{}).Elem(),
+			PassportActions.Remove,
+		),
 		fireback.GetCommonQuery(PassportActions.Query),
 	}, fireback.FirebackCustomActionsCli...),
 }

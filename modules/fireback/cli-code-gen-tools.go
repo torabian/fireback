@@ -228,7 +228,7 @@ func GetSeeder(xapp *FirebackApp) cli.Command {
 	return cli.Command{
 
 		Name:  "seeders",
-		Usage: "Imports all necessarys eeders",
+		Usage: "Imports all necessary seeders",
 		Action: func(c *cli.Context) error {
 			ExecuteSeederImport(xapp)
 			return nil

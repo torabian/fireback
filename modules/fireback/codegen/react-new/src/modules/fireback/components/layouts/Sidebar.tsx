@@ -91,9 +91,9 @@ function Sidebar({
         miniSize ? "sidebar-extra-small" : "",
         "sidebar",
         sidebarVisible ? "open" : "",
-        "scrollable-element"
+        "scrollable-element",
+        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined
       )}
-      style={{ display: "flex", height: "calc(100vh - 60px)" }}
     >
       <button
         className="sidebar-close"

@@ -3,16 +3,23 @@ import {
   BaseModalOpenParams,
   OverlayInstanceComponentProps,
 } from "./OverlayDefinitions";
+import classNames from "classnames";
 
 export const OverlayBaseModal = ({
   children,
   close,
+  visible,
   params,
 }: {
   children: ReactNode;
 } & OverlayInstanceComponentProps<unknown, BaseModalOpenParams>) => {
   return (
-    <div className="modal d-block with-fade-in modal-overlay">
+    <div
+      className={classNames(
+        "modal d-block with-fade-in modal-overlay",
+        visible ? "visible" : "invisible"
+      )}
+    >
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">

@@ -40,3 +40,4 @@ e2e/samples/fireback-data-types/app
 /app
 modules/fireback/codegen/capacitor/ios
 modules/fireback/codegen/capacitor/android
+e2e/samples/fireback-payment/app

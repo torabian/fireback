@@ -26,7 +26,7 @@ items:
   workspaceId: system
   icon: ios-theme/icons/settings.svg
   label: Account & Profile
-  activeMatcher: "/selfservice"
+  activeMatcher: "/selfservice$"
   uniqueId: selfservice
   visibility: A
   translations:

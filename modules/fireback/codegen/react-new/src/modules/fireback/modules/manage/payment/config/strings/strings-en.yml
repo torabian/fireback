@@ -1,0 +1,11 @@
+content:
+  paymentConfigs:
+    archiveTitle: Payment configs
+    editPaymentConfig: Edit payment config
+    enableStripe: Enable stripe
+    enableStripeHint: Enable stripe
+    newPaymentConfig: New payment config
+    stripeCallbackUrl: Stripe callback url
+    stripeCallbackUrlHint: The url, which the payment success validator service is deployed, such as http://localhost:4500/payment/invoice
+    stripeSecretKey: Stripe secret key
+    stripeSecretKeyHint: Stripe secret key is starting with sk_...

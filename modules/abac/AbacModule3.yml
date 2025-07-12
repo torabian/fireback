@@ -179,7 +179,12 @@ actions:
         - name: google
           type: bool
           default: false
+        - name: facebook
+          type: bool
+          default: false
         - name: googleOAuthClientKey
+          type: string
+        - name: facebookAppId
           type: string
         - name: enabledRecaptcha2
           type: bool
@@ -945,7 +950,7 @@ entities:
     fields:
       - name: type
         type: enum
-        validate: oneof=email phone google,required
+        validate: oneof=email phone google facebook,required
         of:
           - k: email
             description: Authenticate users using email
@@ -953,6 +958,8 @@ entities:
             description: Authenticat users using phone number, can be sms, calls, or whatsapp.
           - k: google
             description: Users can be authenticated using their google account
+          - k: facebook
+            description: Users can be authenticated using their facebook account
       - name: region
         type: enum
         default: global

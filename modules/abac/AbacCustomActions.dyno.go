@@ -467,7 +467,9 @@ type CheckPassportMethodsActionResDto struct {
 	Email                bool   `json:"email" xml:"email" yaml:"email"        `
 	Phone                bool   `json:"phone" xml:"phone" yaml:"phone"        `
 	Google               bool   `json:"google" xml:"google" yaml:"google"        `
+	Facebook             bool   `json:"facebook" xml:"facebook" yaml:"facebook"        `
 	GoogleOAuthClientKey string `json:"googleOAuthClientKey" xml:"googleOAuthClientKey" yaml:"googleOAuthClientKey"        `
+	FacebookAppId        string `json:"facebookAppId" xml:"facebookAppId" yaml:"facebookAppId"        `
 	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" xml:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
 	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 }

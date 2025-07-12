@@ -55,8 +55,10 @@ export const usePresenter = () => {
     const newData = {
       email: methodData.email || false,
       google: methodData.google || false,
+      facebook: methodData.facebook || false,
       phone: methodData.phone || false,
       googleOAuthClientKey: methodData.googleOAuthClientKey,
+      facebookAppId: (methodData as any).facebookAppId,
     };
 
     const totalAvailableMethods = Object.values(newData).filter(Boolean).length;
@@ -70,6 +72,9 @@ export const usePresenter = () => {
       }
       if (newData.google) {
         onSelect(AuthMethod.Google, false);
+      }
+      if (newData.facebook) {
+        onSelect(AuthMethod.Facebook, false);
       }
     }
 

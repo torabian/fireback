@@ -2,14 +2,19 @@ import "react-data-grid/lib/styles.css";
 
 import { debounce } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
-import { CalculatedColumn, DataGrid, DataGridHandle } from "react-data-grid";
+import {
+  CalculatedColumn,
+  DataGrid,
+  DataGridHandle,
+  SelectColumn,
+} from "react-data-grid";
 import { UseQueryResult } from "react-query";
+import { useLocation } from "react-router-dom";
 import { DatatableColumn } from "../../definitions/definitions";
 import { Udf } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
-import { useReindexedContent } from "./useReindex";
 import { castColumns, TableColumnWidthInfo } from "./PaginateUtils";
-import { useLocation } from "react-router-dom";
+import { useReindexedContent } from "./useReindex";
 
 export function PaginateTable({
   columns,
@@ -54,19 +59,20 @@ export function PaginateTable({
     onFiltersChange,
   } = udf;
 
-  console.log(100, pathname);
-
   const cols = useMemo(() => {
-    return castColumns(
-      columns,
-      (field, value) => {
-        udf.setFilter({ [field]: value });
-      },
-      udf,
-      columnSizes,
-      uniqueIdHrefHandler,
-      pathname
-    );
+    return [
+      SelectColumn,
+      ...castColumns(
+        columns,
+        (field, value) => {
+          udf.setFilter({ [field]: value });
+        },
+        udf,
+        columnSizes,
+        uniqueIdHrefHandler,
+        pathname
+      ),
+    ];
   }, [columns, columnSizes]);
 
   const { indexedData, reindex } = useReindexedContent(udf);
@@ -106,6 +112,10 @@ export function PaginateTable({
         columns={cols}
         onScroll={handleScroll}
         onColumnResize={onColumnResize}
+        onSelectedRowsChange={(value) => {
+          setSelection(Array.from(value));
+        }}
+        selectedRows={new Set(selection)}
         ref={ref}
         rows={indexedData}
         rowKeyGetter={(item) => item.uniqueId}

@@ -433,7 +433,7 @@ func HttpGetXHtml(
 	id := c.Param("uniqueId")
 	f := ExtractQueryDslFromGinContext(c)
 	f.UniqueId = id
-	f.C = c
+	f.G = c
 
 	if item, err := fn(f); err != nil {
 
@@ -442,6 +442,17 @@ func HttpGetXHtml(
 		if err.HttpCode > 0 {
 			code = int(err.HttpCode)
 		}
+
+		// Instead, render a html template with some good looking html,
+		// and show the error message
+		// This is the result of PublicEndUser:
+		// 		type IPublicError struct {
+		// 	Message           string                 `json:"message,omitempty"`
+		// 	MessageTranslated string                 `json:"messageTranslated,omitempty"`
+		// 	MessageParams     map[string]interface{} `json:"messageParams,omitempty"`
+		// 	Errors            []*IPublicErrorItem    `json:"errors,omitempty"`
+		// 	HttpCode          int32                  `json:"httpCode,omitempty"`
+		// }
 		c.AbortWithStatusJSON(code, gin.H{
 			"error": err.ToPublicEndUser(&f),
 		})

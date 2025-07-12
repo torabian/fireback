@@ -72,3 +72,5 @@ content:
     passportsTitle: Passports
     passportsDescription: View emails, phone numbers associated with your account.
 
+  selectWorkspace: You have multiple workspaces associated with your account. Select one to continue.
+  selectWorkspaceTitle: Select workspace

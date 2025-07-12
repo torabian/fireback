@@ -24,6 +24,7 @@ import { useUserInvitationRoutes } from "./user-invitations/UserInvitationRoutes
 import { useWorkspaceInviteRoutes } from "./workspace-invites/WorkspaceInviteRoutes";
 import { SelfServiceHome } from "./SelfServiceHome";
 import { AnimatedRouteWrapper } from "../../apps/core/SwipeTransition";
+import { SelectWorkspaceScreen } from "./SelectWorkspace.screen";
 
 /**
  * Public routes are those which do not require user to be authenticate,
@@ -50,6 +51,7 @@ export function useSelfServicePublicRoutes() {
           element={<ClassicPassportAccountCreation />}
         ></Route>
         <Route path={"password"} element={<ClassicSigninPassword />}></Route>
+
         <Route path={"otp"} element={<OtpScreen />}></Route>
       </Route>
 

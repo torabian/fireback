@@ -18,6 +18,7 @@ export const PassportMethodForm = ({
 
   const source = createQuerySource([
     { name: "Google", uniqueId: "google" },
+    { name: "Facebook", uniqueId: "facebook" },
     { name: "Email", uniqueId: "email" },
     { name: "Phone", uniqueId: "phone" },
   ]);
@@ -49,7 +50,7 @@ export const PassportMethodForm = ({
         label={s.passportMethods.region}
         hint={s.passportMethods.regionHint}
       />
-      {values.type === "google" ? (
+      {values.type === "google" || (values.type as any) === "facebook" ? (
         <FormText
           value={values.clientKey}
           onChange={(value) =>
