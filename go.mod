@@ -171,6 +171,7 @@ require (
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
+	github.com/stripe/stripe-go/v82 v82.3.0 // indirect
 	github.com/swaggest/jsonschema-go v0.3.70 // indirect
 	github.com/swaggest/refl v1.3.0 // indirect
 	github.com/tdewolff/minify/v2 v2.23.8 // indirect

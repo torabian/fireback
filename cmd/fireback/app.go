@@ -6,6 +6,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
+	"github.com/torabian/fireback/modules/payment"
 	"github.com/torabian/fireback/modules/suggestion"
 
 	"github.com/urfave/cli"
@@ -58,6 +59,10 @@ var xapp = &fireback.FirebackApp{
 	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
+
+		// Add fireback payment module also
+		payment.PaymentModuleSetup(nil),
+
 		suggestion.SuggestionModuleSetup(nil),
 		{
 			CliHandlers: []cli.Command{

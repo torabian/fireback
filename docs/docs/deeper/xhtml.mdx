@@ -7,12 +7,12 @@ XHtml is a output type in Fireback actions, which returns an html template.
 You an create html files in a folder, embed them, and then XHtml would render them.
 Upon development, they are being read from disk, and on production they are read from embed file system.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/jEgbZGyhMNw?si=cLadVcAhNo7jtRQ9" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<iframe width="100%" height="400" src="https://www.youtube.com/embed/jEgbZGyhMNw?si=cLadVcAhNo7jtRQ9" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
-XHtml is perfect answer for the classic get/postback forms, you can make an endpoint to show your page,
+XHtml is the simplest form of building websites, without additional framework, using pure css, almost pure html,
+and of course pure javascript. XHtml is perfect answer for the classic get/postback forms, you can make an endpoint to show your page,
 or accept a post back content and do some action on top of it.
-
 
 All you need to do on an action is, to set the `out.xhtml` to true:
 
@@ -37,7 +37,22 @@ actions:
 
 ```
 
-When the action file is being generated, there are some helper commands for you to understand how to return
-the screen name, and parameters.
+Following code would create a GetHomeAction.go and PostHomeAction.go files.
+After here, you need to create `screens` folder, and create your html and static assets there.
 
-This tutorial defintely worth a workshop in a video form.
+I would invite you to watch the video instead.
+
+## Conventions
+
+All files can go to the screens folder, regardless of their type. Go codes treated as normal fireback modules,
+and you will pass the data to them directly.
+
+Shared templates need to live in the `screens/shared` as go template.
+
+
+## Notes regarding XHtml
+
+Xhtml renders static assets, such as link, img, script tags relative to the markup template, and on the fly,
+changes the import paths. This causes all intelisense on simple html to work, as well as javascript intelises.
+Fireback combines css, and minifies them, but js won't be bundled, instead would be using import/export native feature
+of the browser to import other files.

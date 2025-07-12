@@ -8,7 +8,7 @@ import { ChangePasswordDto, usePresenter } from "./ChangePassword.presenter";
 import { strings } from "./strings/translations";
 
 export const ChangePasswordScreen = ({}: {}) => {
-  const { submit, mutation, form, s } = usePresenter();
+  const { mutation, form, s } = usePresenter();
 
   return (
     <div className="signin-form-container">

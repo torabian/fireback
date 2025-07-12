@@ -13,7 +13,7 @@ export type PassportMethodEntityKeys =
   keyof typeof PassportMethodEntity.Fields;
 export class PassportMethodEntity extends BaseEntity {
   public children?: PassportMethodEntity[] | null;
-  public type?: "email" | "phone" | "google" | null;
+  public type?: "email" | "phone" | "google" | "facebook" | null;
   /**
   The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
   */
@@ -66,7 +66,7 @@ export class PassportMethodEntity extends BaseEntity {
     {
       "name": "type",
       "type": "enum",
-      "validate": "oneof=email phone google,required",
+      "validate": "oneof=email phone google facebook,required",
       "of": [
         {
           "k": "email",
@@ -79,9 +79,13 @@ export class PassportMethodEntity extends BaseEntity {
         {
           "k": "google",
           "description": "Users can be authenticated using their google account"
+        },
+        {
+          "k": "facebook",
+          "description": "Users can be authenticated using their facebook account"
         }
       ],
-      "computedType": "\"email\" | \"phone\" | \"google\"",
+      "computedType": "\"email\" | \"phone\" | \"google\" | \"facebook\"",
       "gormMap": {}
     },
     {

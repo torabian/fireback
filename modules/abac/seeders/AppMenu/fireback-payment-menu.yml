@@ -1,0 +1,29 @@
+items:
+- label: Payment Configuration
+  description:
+    Manage the payment configuration, such as api keys, enabled gateways, and more.
+  uniqueId: root-payment-config
+  parentId: root-actions
+  icon: ios-theme/icons/settings.svg
+  visibility: A
+  activeMatcher: payment/config
+  workspaceId: system
+  capabilityId: root.manage.payment.payment-config.query
+  href: "/manage/payment/config"
+  translations:
+    - languageId: en
+      label: Payment Configuration
+- label: Payment Invoices
+  description:
+    Payment invoices which created to be tracked as payment intent
+  uniqueId: root-payment-invoices
+  parentId: root-actions
+  activeMatcher: payment/invoice
+  icon: ios-theme/icons/settings.svg
+  visibility: A
+  workspaceId: system
+  capabilityId: root.manage.payment.invoice.query
+  href: "/manage/payment/invoices"
+  translations:
+    - languageId: en
+      label: Payment Invoices

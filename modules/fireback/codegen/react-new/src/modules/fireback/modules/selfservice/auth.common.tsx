@@ -1,12 +1,15 @@
 import { useContext } from "react";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useRouter } from "../../hooks/useRouter";
+import { IResponse } from "../../definitions/JSONStyle";
 import { useLocale } from "../../hooks/useLocale";
+import { useRouter } from "../../hooks/useRouter";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { ClassicSigninActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export enum AuthMethod {
   Email = "email",
   Phone = "phone",
   Google = "google",
+  Facebook = "facebook",
 }
 
 export interface AuthAvailableMethods {
@@ -14,15 +17,17 @@ export interface AuthAvailableMethods {
   phone: boolean;
   google: boolean;
   googleOAuthClientKey?: string;
+  facebookAppId?: string;
+  facebook: boolean;
 }
 
 export const useCompleteAuth = () => {
-  const { setSession } = useContext(RemoteQueryContext);
+  const { setSession, selectUrw, selectedUrw } = useContext(RemoteQueryContext);
   const { locale } = useLocale();
-  const { goBack, state, replace, push } = useRouter();
-  const onComplete = (res) => {
-    setSession(res.data.session);
+  const { replace } = useRouter();
 
+  const onComplete = (res: IResponse<ClassicSigninActionResDto>) => {
+    setSession(res.data.session);
     // Handle React Native WebView
     if ((window as any).ReactNativeWebView) {
       (window as any).ReactNativeWebView.postMessage(JSON.stringify(res.data));
@@ -35,7 +40,12 @@ export const useCompleteAuth = () => {
     // Get the token from session response
     const token = res.data?.session?.token; // Adjust based on your API response
 
-    if (redirectUrl && token) {
+    if (!token) {
+      alert("Authentication has failed.");
+      return;
+    }
+
+    if (redirectUrl) {
       // Append the token to the redirect URL
       const finalUrl = new URL(redirectUrl);
       finalUrl.searchParams.set("session", JSON.stringify(res.data.session));

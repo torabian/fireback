@@ -77,12 +77,13 @@ var UserRoleWorkspacePermissionDtoCommonCliFlagsOptional = []cli.Flag{
 }
 
 type UserRoleWorkspacePermissionDto struct {
-	WorkspaceId  string `json:"workspaceId" yaml:"workspaceId"        `
-	RoleName     string `json:"roleName" yaml:"roleName"        `
-	UserId       string `json:"userId" yaml:"userId"        `
-	RoleId       string `json:"roleId" yaml:"roleId"        `
-	CapabilityId string `json:"capabilityId" yaml:"capabilityId"        `
-	Type         string `json:"type" yaml:"type"        `
+	WorkspaceName string `json:"workspaceName" yaml:"workspaceName"        `
+	WorkspaceId   string `json:"workspaceId" yaml:"workspaceId"        `
+	RoleName      string `json:"roleName" yaml:"roleName"        `
+	UserId        string `json:"userId" yaml:"userId"        `
+	RoleId        string `json:"roleId" yaml:"roleId"        `
+	CapabilityId  string `json:"capabilityId" yaml:"capabilityId"        `
+	Type          string `json:"type" yaml:"type"        `
 }
 type UserRoleWorkspacePermissionDtoList struct {
 	Items []*UserRoleWorkspacePermissionDto

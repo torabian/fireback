@@ -8,6 +8,8 @@ import {
   PanelRouterWithSidebar,
   PanelRouterWrapper,
 } from "./PanelRouterWrapper";
+import classNames from "classnames";
+import { detectDeviceType } from "../../hooks/deviceInformation";
 
 const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -32,10 +34,17 @@ export function SidebarMultiRouterSetup({
   });
 
   return (
-    <PanelGroup direction="horizontal" style={{ height: "calc(100vh - 60px)" }}>
+    <PanelGroup
+      direction="horizontal"
+      className={classNames(
+        "application-panels",
+        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined
+      )}
+    >
       {computedRouters.map((router, count) => {
         return (
           <router.Router
+            key={router.id}
             future={{ v7_startTransition: true }}
             basename={useHashRouter ? undefined : process.env.PUBLIC_URL}
             initialEntries={router.initialEntries}
@@ -47,7 +56,7 @@ export function SidebarMultiRouterSetup({
                 queryClient={queryClient}
               />
             </router.Wrapper>
-            <TabbarMenu />
+            {detectDeviceType().isMobileView ? <TabbarMenu /> : undefined}
           </router.Router>
         );
       })}

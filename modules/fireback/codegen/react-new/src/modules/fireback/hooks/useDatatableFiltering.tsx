@@ -1,22 +1,21 @@
 import { Filter, Sorting } from "@devexpress/dx-react-grid";
+import { parse, stringify } from "qs";
 import { useContext, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useLocation } from "react-router-dom";
 import {
   IMenuActionItem,
   useMenuTools,
 } from "../components/action-menu/ActionMenu";
 import { ModalContext } from "../components/modal/Modal";
+import { commonDialogs } from "../components/overlay/CommonOverlays";
 import { KeyboardAction } from "../definitions/definitions";
 import { Filters } from "../hooks/datatabletools";
-import { useLocale } from "../hooks/useLocale";
 import { useRouter } from "../hooks/useRouter";
 import { osResources } from "../resources/resources";
 import { DeleteRequest } from "../sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";
 import { useT } from "./useT";
-import { useLocation } from "react-router-dom";
-import { parse, stringify } from "qs";
 
 export function useDatatableFiltering({
   urlMask,
@@ -32,6 +31,7 @@ export function useDatatableFiltering({
   const t = useT();
   const router = useRouter();
 
+  const { confirmModal } = commonDialogs();
   const { withDebounce } = useDebouncedEffect();
   const init = {
     itemsPerPage: 100,
@@ -139,18 +139,20 @@ export function useDatatableFiltering({
   };
 
   const deleteItems = async () => {
-    useModal.openModal({
+    confirmModal({
       title: t.confirm,
-      confirmButtonLabel: t.common.yes,
-      component: () => <div>{t.deleteConfirmMessage}</div>,
-      onSubmit: async () => {
-        if (submitDelete) {
-          await submitDelete(idsToQuery(selection), null as any);
-          onRecordsDeleted && onRecordsDeleted();
+      confirmLabel: t.common.yes,
+      cancelLabel: t.common.no,
+      description: t.deleteConfirmMessage,
+    })
+      .promise.then(({ type }) => {
+        if (type === "resolved") {
+          return submitDelete(idsToQuery(selection), null as any);
         }
-        return true;
-      },
-    });
+      })
+      .then(() => {
+        onRecordsDeleted && onRecordsDeleted();
+      });
   };
 
   const deleteAction = (): IMenuActionItem => ({

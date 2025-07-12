@@ -163,6 +163,10 @@ func (m Money) export(locale string) *moneyOutput {
 	}
 }
 
+func (m Money) Formatted() string {
+	return m.Format("en-us")
+}
+
 func (m Money) exportJSONOrYAML() *moneyOutput {
 	if !m.Amount.Valid && !m.Currency.Valid {
 		return nil

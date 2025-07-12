@@ -20,8 +20,17 @@
   }
 }
 
+.application-panels {
+  height: 100vh;
+
+  &.has-bottom-tab {
+    height: calc(100vh - 60px) !important;
+  }
+}
+
 .sidebar {
   z-index: 999;
+  height: 100vh;
   display: flex;
   padding: 10px;
   flex-direction: column;
@@ -30,6 +39,11 @@
   span {
     color: #8a8fa4;
   }
+
+  &.has-bottom-tab {
+    height: calc(100vh - 60px) !important;
+  }
+
   .category {
     color: black;
     margin-top: 20px;

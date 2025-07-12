@@ -98,6 +98,7 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 	var f QueryDSL = QueryDSL{
 		Query:        queryString,
 		StartIndex:   startIndex,
+		C:            c,
 		Cursor:       cursor,
 		WorkspaceId:  workspaceId,
 		Language:     lang,

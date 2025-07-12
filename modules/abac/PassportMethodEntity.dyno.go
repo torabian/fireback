@@ -116,7 +116,7 @@ type PassportMethodEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Type             string `json:"type" xml:"type" yaml:"type"  validate:"oneof=email phone google,required"        `
+	Type             string `json:"type" xml:"type" yaml:"type"  validate:"oneof=email phone google facebook,required"        `
 	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
 	Region string `json:"region" xml:"region" yaml:"region"  validate:"required,oneof=global"        `
 	// Client key for those methods such as 'google' which require oauth client key
@@ -704,7 +704,7 @@ var PassportMethodCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `One of: 'email', 'phone', 'google' (enum)`,
+		Usage:    `One of: 'email', 'phone', 'google', 'facebook' (enum)`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
@@ -724,7 +724,7 @@ var PassportMethodCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       `One of: 'email', 'phone', 'google'`,
+		Usage:       `One of: 'email', 'phone', 'google', 'facebook'`,
 		Type:        "string",
 	},
 	{
@@ -763,7 +763,7 @@ var PassportMethodCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `One of: 'email', 'phone', 'google' (enum)`,
+		Usage:    `One of: 'email', 'phone', 'google', 'facebook' (enum)`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
@@ -1317,16 +1317,18 @@ var PassportMethodType = newPassportMethodType()
 
 func newPassportMethodType() *xPassportMethodType {
 	return &xPassportMethodType{
-		Email:  "email",
-		Phone:  "phone",
-		Google: "google",
+		Email:    "email",
+		Phone:    "phone",
+		Google:   "google",
+		Facebook: "facebook",
 	}
 }
 
 type xPassportMethodType struct {
-	Email  string
-	Phone  string
-	Google string
+	Email    string
+	Phone    string
+	Google   string
+	Facebook string
 }
 
 var PassportMethodRegion = newPassportMethodRegion()

@@ -33,7 +33,7 @@ func QueryUserRoleWorkspacesAction(
 			}
 
 			items = append(items, &QueryUserRoleWorkspacesActionResDto{
-				Name:         workspaceId,
+				Name:         content.Name,
 				UniqueId:     workspaceId,
 				Roles:        roles,
 				Capabilities: content.WorkspacesAccesses,

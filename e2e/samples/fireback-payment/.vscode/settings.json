@@ -1,0 +1,16 @@
+{
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "\\Module3.yml$",
+        "cmd": "./artifacts/fireback-payment-server/fireback-payment gen gof --relative-to ${workspaceFolder} --def ${file} --no-cache true --gof-module github.com/torabian/fireback/fireback-payment  && ./artifacts/fireback-payment-server/fireback-payment gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}"
+      },
+    ]
+  },
+  "yaml.schemas": {
+    ".jsonschemas/module3-json-schema.json": [
+      "*Module3.yml"
+    ]
+  }
+}
+  

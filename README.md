@@ -144,7 +144,8 @@ The reason I have started this project was to change the course of action for en
 ## Sample client key OAuth google
 
 1040931581120-prdfdml80dl7uaq3999jkge72dph280l.apps.googleusercontent.com
-
+fb: 1242737803616678
+Stripe sample: sk_ test _51Rgi39Q mgiVL99NYaGNt4onAjBbSraf4Lo10siAoaZ5MhsdRQ i749V6dxRWAFqt0jL1epuYYPtee8iL8shHSjfxX002eyc6eWo
 ## Change the fireback version
 
 In order to release a new fireback, follow these steps:
@@ -155,8 +156,9 @@ In order to release a new fireback, follow these steps:
 - .github/workflows/fireback-build.yml
 - modules/fireback/version.go
 - make refresh && make rebuild-sdks
+- cd cmd/fireback && make ui2 (it's for the selfservice and manage bundles to be available in the binary)
 
-  ## Archive has been removed.
+## Archive has been removed.
 
-  The archive folder which had old codes for different purposes is removed in 7fe548ebbbbeaa3291b53e8cb5b21f2bc34d895b commit. Checkout that
-  if you needed.
+The archive folder which had old codes for different purposes is removed in 7fe548ebbbbeaa3291b53e8cb5b21f2bc34d895b commit. Checkout that
+if you needed.

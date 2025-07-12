@@ -34,10 +34,109 @@ type BaseScreenData struct {
 	SpfNavigate bool
 }
 
-func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
-	// Do not use FS until find out a way to embed properly
+func ServeFileInliner(c *gin.Context, page string, file string, fsx fs.FS) {
+	// get the directory of the page, e.g. for "foo/bar.html" → "foo/"
+	pageDir := filepath.Dir(page)
+	// join pageDir + file to get relative path
+	relativePath := filepath.ToSlash(filepath.Join(pageDir, file))
 
-	renderPageFromEmbed(fsx, c, page, params)
+	data, err := fs.ReadFile(fsx, "screens/"+relativePath)
+	if err != nil {
+		c.String(http.StatusNotFound, "File not found")
+		return
+	}
+	// Detect content-type by file extension
+	ext := strings.ToLower(filepath.Ext(file))
+	var contentType string
+	switch ext {
+	case ".css":
+		contentType = "text/css"
+		cont, _ := resolveCssImportsFS(fsx, "screens/"+relativePath, map[string]bool{})
+
+		m := minify.New()
+		m.AddFunc("text/css", css.Minify)
+
+		minified, err := m.String("text/css", cont)
+		if err != nil {
+			c.Data(http.StatusBadRequest, contentType, data)
+			return
+		}
+
+		data = []byte(minified)
+	case ".js":
+		contentType = "application/javascript"
+		data = serveJavascript(data, c.Request.URL.Path)
+
+	case ".png":
+		contentType = "image/png"
+	case ".jpg", ".jpeg":
+		contentType = "image/jpeg"
+	case ".gif":
+		contentType = "image/gif"
+	case ".svg":
+		contentType = "image/svg+xml"
+	default:
+		contentType = "application/octet-stream"
+	}
+
+	c.Data(http.StatusOK, contentType, data)
+}
+
+func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
+
+	file := c.Query("file")
+	if file != "" {
+		ServeFileInliner(c, page, file, fsx)
+		return
+	}
+
+	address := "screens/" + page
+
+	SpfNavigate := c.Query("spf") == "navigate"
+
+	if SpfNavigate {
+		c.Header("content-type", "application/json")
+	} else {
+		c.Header("content-type", "text/html")
+	}
+
+	sharedTemplates, err := loadSharedTemplatesEmbed(fsx, "screens/shared")
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error loading shared templates")
+		return
+	}
+
+	pages := append([]string{
+		address,
+	}, sharedTemplates...)
+
+	tmpl, err := template.New(filepath.Base(address)).Funcs(funcMap).ParseFS(fsx, pages...)
+
+	if err != nil {
+
+		c.String(http.StatusInternalServerError, "Error loading page")
+		return
+	}
+
+	var buf bytes.Buffer
+	c.Writer.WriteHeader(http.StatusOK)
+
+	err = tmpl.ExecuteTemplate(&buf, filepath.Base(address), params)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error rendering page:"+err.Error())
+	}
+
+	if SpfNavigate {
+		var jsonResponse map[string]interface{} = map[string]interface{}{}
+		jsonResponse["body"] = gin.H{
+			"content": buf.String(),
+		}
+		c.JSON(http.StatusOK, jsonResponse)
+
+	} else {
+		htmlWithPrependedFiles := prependFileQuery(buf.String())
+		c.Writer.Write([]byte(htmlWithPrependedFiles))
+	}
 
 }
 
@@ -152,102 +251,6 @@ func resolveCssImportsFS(fsx fs.FS, path string, visited map[string]bool) (strin
 // Do not use FS until find out a way to embed properly
 func renderPageFromEmbed(fsx fs.FS, c *gin.Context, page string, params any) {
 
-	file := c.Query("file")
-	if file != "" {
-		// get the directory of the page, e.g. for "foo/bar.html" → "foo/"
-		pageDir := filepath.Dir(page)
-		// join pageDir + file to get relative path
-		relativePath := filepath.ToSlash(filepath.Join(pageDir, file))
-
-		data, err := fs.ReadFile(fsx, "screens/"+relativePath)
-		if err != nil {
-			c.String(http.StatusNotFound, "File not found")
-			return
-		}
-		// Detect content-type by file extension
-		ext := strings.ToLower(filepath.Ext(file))
-		var contentType string
-		switch ext {
-		case ".css":
-			contentType = "text/css"
-			cont, _ := resolveCssImportsFS(fsx, "screens/"+relativePath, map[string]bool{})
-
-			m := minify.New()
-			m.AddFunc("text/css", css.Minify)
-
-			minified, err := m.String("text/css", cont)
-			if err != nil {
-				panic(err)
-			}
-
-			data = []byte(minified)
-		case ".js":
-			contentType = "application/javascript"
-			data = serveJavascript(data, c.Request.URL.Path)
-
-		case ".png":
-			contentType = "image/png"
-		case ".jpg", ".jpeg":
-			contentType = "image/jpeg"
-		case ".gif":
-			contentType = "image/gif"
-		case ".svg":
-			contentType = "image/svg+xml"
-		default:
-			contentType = "application/octet-stream"
-		}
-
-		c.Data(http.StatusOK, contentType, data)
-		return
-	}
-
-	address := "screens/" + page
-
-	SpfNavigate := c.Query("spf") == "navigate"
-
-	if SpfNavigate {
-		c.Header("content-type", "application/json")
-	} else {
-		c.Header("content-type", "text/html")
-	}
-
-	sharedTemplates, err := loadSharedTemplatesEmbed(fsx, "screens/shared")
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error loading shared templates")
-		return
-	}
-
-	pages := append([]string{
-		address,
-	}, sharedTemplates...)
-
-	tmpl, err := template.New(filepath.Base(address)).Funcs(funcMap).ParseFS(fsx, pages...)
-
-	if err != nil {
-
-		c.String(http.StatusInternalServerError, "Error loading page")
-		return
-	}
-
-	var buf bytes.Buffer
-	c.Writer.WriteHeader(http.StatusOK)
-
-	err = tmpl.ExecuteTemplate(&buf, filepath.Base(address), params)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error rendering page")
-	}
-
-	if SpfNavigate {
-		var jsonResponse map[string]interface{} = map[string]interface{}{}
-		jsonResponse["body"] = gin.H{
-			"content": buf.String(),
-		}
-		c.JSON(http.StatusOK, jsonResponse)
-
-	} else {
-		htmlWithPrependedFiles := prependFileQuery(buf.String())
-		c.Writer.Write([]byte(htmlWithPrependedFiles))
-	}
 }
 
 func serveJavascript(data []byte, ginPath string) []byte {

@@ -125,7 +125,7 @@ var WithAuthorizationFn = func(securityModel *SecurityModel) gin.HandlerFunc {
 }
 
 type UserAccessPerWorkspaceDto map[string]*struct {
-
+	Name string
 	// The access which are available to this workspace, not to the specific user.
 	// Even a user has access to many things, these accesses need to reduce those
 	WorkspacesAccesses []string

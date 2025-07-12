@@ -13,6 +13,7 @@ import { AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { FacebookLogin } from "./FacebookLogin";
 
 export const WelcomeScreen = () => {
   const {
@@ -83,8 +84,11 @@ const Form = ({
   const { locale } = useLocale();
   const { goBack, state, replace, push } = useRouter();
 
-  const continueWithResult = (token: string) => {
-    submit({ service: "google", token })
+  const continueWithResult = (
+    token: string,
+    service: "google" | "facebook"
+  ) => {
+    submit({ service, token })
       .then((res) => {
         setSession(res.data.session);
         if ((window as any).ReactNativeWebView) {
@@ -140,8 +144,19 @@ const Form = ({
           </button>
         ) : null}
 
+        {availableOptions.facebook ? (
+          <FacebookLogin
+            facebookAppId={availableOptions.facebookAppId}
+            continueWithResult={(value) =>
+              continueWithResult(value, "facebook")
+            }
+          />
+        ) : null}
+
         {availableOptions.google ? (
-          <GoogleLogin continueWithResult={continueWithResult} />
+          <GoogleLogin
+            continueWithResult={(value) => continueWithResult(value, "google")}
+          />
         ) : null}
       </div>
     </form>
