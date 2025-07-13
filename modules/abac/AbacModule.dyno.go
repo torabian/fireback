@@ -79,6 +79,7 @@ const (
 	SessionSecretIsNeeded                     abacCode = "SessionSecretIsNeeded"
 	SessionSecretIsNotAvailable               abacCode = "SessionSecretIsNotAvailable"
 	SmsNotSent                                abacCode = "SmsNotSent"
+	TokenNotFound                             abacCode = "TokenNotFound"
 	TotpCodeIsNotValid                        abacCode = "TotpCodeIsNotValid"
 	TotpIsNotAvailableForThisPassport         abacCode = "TotpIsNotAvailableForThisPassport"
 	UnsupportedOAuth                          abacCode = "UnsupportedOAuth"
@@ -267,6 +268,10 @@ func newAbacMessageCode() *abacMsgs {
 			"$":  "SmsNotSent",
 			"en": "Sending text message has failed.",
 		},
+		TokenNotFound: fireback.ErrorItem{
+			"$":  "TokenNotFound",
+			"en": "Token not found or no longer valid.",
+		},
 		TotpCodeIsNotValid: fireback.ErrorItem{
 			"$":  "TotpCodeIsNotValid",
 			"en": "The totp code from the app is incorrect. Double check and try again.",
@@ -344,6 +349,7 @@ type abacMsgs struct {
 	SessionSecretIsNeeded                     fireback.ErrorItem
 	SessionSecretIsNotAvailable               fireback.ErrorItem
 	SmsNotSent                                fireback.ErrorItem
+	TokenNotFound                             fireback.ErrorItem
 	TotpCodeIsNotValid                        fireback.ErrorItem
 	TotpIsNotAvailableForThisPassport         fireback.ErrorItem
 	UnsupportedOAuth                          fireback.ErrorItem

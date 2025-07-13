@@ -504,6 +504,8 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 		if dslError == nil {
 			countQ = countQ.Where(parsedQuery.Raw, sql_adaptor.StringSliceToInterfaceSlice(parsedQuery.Values)...)
 			q = q.Where(parsedQuery.Raw, sql_adaptor.StringSliceToInterfaceSlice(parsedQuery.Values)...)
+		} else {
+			fmt.Println("Query error", dslError)
 		}
 	}
 

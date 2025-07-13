@@ -18,6 +18,9 @@ func Create401Error(msg *ErrorItem, list []string) *IError {
 	result := IError{
 		Message:  *msg,
 		HttpCode: 401,
+		MessageParams: map[string]interface{}{
+			"list": list,
+		},
 	}
 
 	return &result

@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { IResponse } from "../../definitions/JSONStyle";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
@@ -37,6 +37,9 @@ export const useCompleteAuth = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get("redirect");
 
+    // check also, if there is localstorage to redirect regardless
+    const redirect2 = sessionStorage.getItem("redirect_temporary");
+
     // Get the token from session response
     const token = res.data?.session?.token; // Adjust based on your API response
 
@@ -45,7 +48,10 @@ export const useCompleteAuth = () => {
       return;
     }
 
-    if (redirectUrl) {
+    if (redirect2) {
+      window.location.href = redirect2;
+      sessionStorage.removeItem("redirect_temporary");
+    } else if (redirectUrl) {
       // Append the token to the redirect URL
       const finalUrl = new URL(redirectUrl);
       finalUrl.searchParams.set("session", JSON.stringify(res.data.session));
@@ -61,4 +67,22 @@ export const useCompleteAuth = () => {
   };
 
   return { onComplete };
+};
+
+export const useStoreRedirectParam = (key = "redirect") => {
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    const hashIndex = hash.indexOf("?");
+
+    let hashParams = new URLSearchParams();
+    if (hashIndex !== -1) {
+      hashParams = new URLSearchParams(hash.slice(hashIndex));
+    }
+
+    const redirect = searchParams.get(key) || hashParams.get(key);
+    if (redirect) {
+      sessionStorage.setItem(key, redirect);
+    }
+  }, [key]);
 };

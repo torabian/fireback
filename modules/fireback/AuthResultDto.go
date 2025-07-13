@@ -72,6 +72,7 @@ type AuthResultDto struct {
 	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
 	UserAccessPerWorkspaceId String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
 	UserId                   String                     `json:"userId" yaml:"userId"        `
+	User                     interface{}                `json:"-" yaml:"-"        `
 	WorkspaceId              String                     `json:"workspaceId" yaml:"workspaceId"        `
 	RoleId                   String                     `json:"roleId" yaml:"roleId"`
 	// After authentication, this object contains the workspace permissions and current selected role permissions, to create context sql query based on that

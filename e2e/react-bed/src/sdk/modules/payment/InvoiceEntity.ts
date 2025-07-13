@@ -27,6 +27,10 @@ export class InvoiceEntity extends BaseEntity {
   */
   public notificationKey?: string | null;
   /**
+  When the payment is successful, it might use this url to make a redirect.
+  */
+  public redirectAfterSuccess?: string | null;
+  /**
   Final status of the invoice from a accounting perspective
   */
   public finalStatus?: "payed" | "pending" | null;
@@ -92,6 +96,13 @@ export class InvoiceEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "name": "redirectAfterSuccess",
+      "description": "When the payment is successful, it might use this url to make a redirect.",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
       "name": "finalStatus",
       "description": "Final status of the invoice from a accounting perspective",
       "type": "enum",
@@ -117,6 +128,7 @@ public static Fields = {
       title: `title`,
       amount: `amount`,
       notificationKey: `notificationKey`,
+      redirectAfterSuccess: `redirectAfterSuccess`,
       finalStatus: `finalStatus`,
 }
 }

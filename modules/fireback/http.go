@@ -32,6 +32,8 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	o, _ := c.GetQuery("startIndex")
 	startIndex, _ := strconv.Atoi(o)
 
+	cursor, _ := c.GetQuery("cursor")
+
 	l, _ := c.GetQuery("itemsPerPage")
 	itemsPerPage, _ := strconv.Atoi(l)
 
@@ -80,6 +82,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 
 		G:                      c,
 		UserAccessPerWorkspace: urw,
+		Cursor:                 &cursor,
 		InternalQuery:          internal_sql,
 		UserHas:                userHas,
 		WorkspaceHas:           workspaceHas,

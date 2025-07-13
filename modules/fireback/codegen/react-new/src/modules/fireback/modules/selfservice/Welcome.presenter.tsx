@@ -4,7 +4,11 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
 import { useGetPassportsAvailableMethods } from "../../sdk/modules/abac/useGetPassportsAvailableMethods";
-import { AuthAvailableMethods, AuthMethod } from "./auth.common";
+import {
+  AuthAvailableMethods,
+  AuthMethod,
+  useStoreRedirectParam,
+} from "./auth.common";
 import {
   CheckPassportMethodsActionResDto,
   ClassicSigninActionReqDto,
@@ -21,6 +25,8 @@ export const usePresenter = () => {
   const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
     unauthorized: true,
   });
+
+  useStoreRedirectParam("redirect_temporary");
 
   const [availableOptions, setAvailableOptions] =
     useState<AuthAvailableMethods>(undefined);

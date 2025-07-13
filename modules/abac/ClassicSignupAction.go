@@ -129,6 +129,11 @@ func completeClassicSignupProcess(
 		fireback.GetRef(q).Where(&PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&PublicAuthenticationEntity{})
 	}
 
+	// Let's also set the cookie.
+	if q.G != nil {
+		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
+	}
+
 	return &ClassicSignupActionResDto{
 		Session:        session,
 		ContinueToTotp: false,

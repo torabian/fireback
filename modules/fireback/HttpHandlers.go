@@ -276,8 +276,6 @@ func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*XHtml, *I
 	} else {
 		if result != nil {
 			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
-		} else {
-			c.AbortWithStatus(404)
 		}
 	}
 }
