@@ -9,13 +9,13 @@ import (
 // Extend this function to detect the different payment methods enabled in the project
 // for now it's only stripe
 func resolveProvider(invoiceId string, mode string) (PaymentProvider, *fireback.IError) {
+	config, err := PaymentConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: "root"})
+
+	if err != nil || config == nil {
+		return nil, fireback.Create401Error(&PaymentMessages.PaymentProviderIsNotAvailable, []string{})
+	}
 
 	if mode == "http" {
-
-		config, err := PaymentConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: "root"})
-		if err != nil || config == nil {
-			return nil, fireback.Create401Error(&PaymentMessages.PaymentProviderIsNotAvailable, []string{})
-		}
 
 		provider := &StripeProvider{
 			CompleteRedirectUrl: strings.ReplaceAll(config.StripeCallbackUrl, "{invoiceId}", invoiceId),

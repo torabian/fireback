@@ -27,6 +27,20 @@ type IError struct {
 	HttpCode          int32                  `json:"httpCode,omitempty"`
 }
 
+func (x *IError) Is(value string) bool {
+	if x.Message == nil {
+		return false
+	}
+
+	code := x.Message["$"]
+
+	if code == value {
+		return true
+	}
+
+	return false
+}
+
 func (x *IError) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -146,4 +160,14 @@ func (r *IError) ToPublicEndUser(q interface {
 func (r *IError) Error() string {
 	str, _ := json.MarshalIndent(r, "", "  ")
 	return string(str)
+}
+
+func FindActionByName(actions []Module3Action, name string) *Module3Action {
+	for _, action := range actions {
+		if action.Name == name {
+			return &action
+		}
+	}
+
+	return nil
 }

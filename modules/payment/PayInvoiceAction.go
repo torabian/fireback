@@ -16,9 +16,8 @@ func init() {
 var OnInvoiceStatusChange func(ie *InvoiceEntity) = nil
 
 func payInvoiceHTTP(q fireback.QueryDSL) (string, *fireback.IError) {
-	invoiceId := q.G.Param("uniqueId")
-	q.UniqueId = invoiceId
 
+	invoiceId := q.UniqueId
 	provider, err := resolveProvider(invoiceId, "http")
 	if err != nil {
 		return "", err
@@ -30,9 +29,7 @@ func payInvoiceHTTP(q fireback.QueryDSL) (string, *fireback.IError) {
 
 		if handleErr != nil {
 			return "", handleErr
-
 		} else {
-
 			return "✅ Payment initialized. Awaiting confirmation...", nil
 		}
 	}
@@ -43,6 +40,8 @@ func payInvoiceHTTP(q fireback.QueryDSL) (string, *fireback.IError) {
 	}
 
 	if result.URL != "" {
+		fmt.Println("Here it is the invoice url to proceed", result.URL)
+
 		q.G.Redirect(301, result.URL)
 	} else if result.Instructions != "" {
 		// Maybe an html page here instead

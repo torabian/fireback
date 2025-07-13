@@ -136,6 +136,11 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.Quer
 		session.Token = token
 	}
 
+	// Secure cookie, only if gin is present
+	if q.G != nil {
+		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
+	}
+
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
@@ -114,7 +115,7 @@ func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
 
 	if err != nil {
 
-		c.String(http.StatusInternalServerError, "Error loading page")
+		c.String(http.StatusInternalServerError, "Error loading page"+err.Error())
 		return
 	}
 
@@ -206,14 +207,24 @@ func loadSharedTemplates(sharedDir string) ([]string, error) {
 
 	return files, nil
 }
-
 func prependFileQuery(htmlContent string) string {
 	re := regexp.MustCompile(`(?i)<(img|script|link)[^>]*\s(href|src)=["'](\.\/)?([^"']+)["']`)
 
 	return re.ReplaceAllStringFunc(htmlContent, func(m string) string {
-		// Find href/src attr inside the matched tag string
 		attrRe := regexp.MustCompile(`(?i)(href|src)=["'](\.\/)?([^"']+)["']`)
-		return attrRe.ReplaceAllString(m, `$1="?file=$3"`)
+		return attrRe.ReplaceAllStringFunc(m, func(attr string) string {
+			parts := attrRe.FindStringSubmatch(attr)
+			if len(parts) < 4 {
+				return attr
+			}
+
+			url := parts[3]
+			if strings.HasPrefix(url, "http") || strings.HasPrefix(url, "/") {
+				return attr // skip modifying
+			}
+
+			return fmt.Sprintf(`%s="?file=%s"`, parts[1], url)
+		})
 	})
 }
 

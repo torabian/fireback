@@ -53,7 +53,10 @@ entities:
         The unique key, when an event related to the invoice happened it would be triggered.
         For example if another module wants to initiate the payment, and after payment success,
         wants to run some code, it would be listening to invoice events and notificationKey will come.
-
+    - name: redirectAfterSuccess
+      type: string
+      description: 
+        When the payment is successful, it might use this url to make a redirect.
     - name: finalStatus
       type: enum
       description: Final status of the invoice from a accounting perspective

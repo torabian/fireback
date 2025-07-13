@@ -665,21 +665,7 @@ items:
       name: Europe/Jersey
     - uniqueId: Europe/London
       name: Europe/London
-- value: British Summer Time
-  uniqueId: British Summer Time
-  abbr: BST
-  offset: 1
-  isdst: true
-  text: "(UTC+01:00) Edinburgh, London"
-  utcItems:
-    - uniqueId: Europe/Isle_of_Man
-      name: Europe/Isle_of_Man
-    - uniqueId: Europe/Guernsey
-      name: Europe/Guernsey
-    - uniqueId: Europe/Jersey
-      name: Europe/Jersey
-    - uniqueId: Europe/London
-      name: Europe/London
+
 - value: GDT Standard Time
   uniqueId: GDT Standard Time
   abbr: GDT
@@ -872,21 +858,6 @@ items:
   utcItems:
     - uniqueId: Africa/Windhoek
       name: Africa/Windhoek
-- value: GTB Standard Time
-  uniqueId: GTB Standard Time
-  abbr: GDT
-  offset: 3
-  isdst: true
-  text: "(UTC+02:00) Athens, Bucharest"
-  utcItems:
-    - uniqueId: Asia/Nicosia
-      name: Asia/Nicosia
-    - uniqueId: Europe/Athens
-      name: Europe/Athens
-    - uniqueId: Europe/Bucharest
-      name: Europe/Bucharest
-    - uniqueId: Europe/Chisinau
-      name: Europe/Chisinau
 - value: Middle East Standard Time
   uniqueId: Middle East Standard Time
   abbr: MEDT
@@ -980,31 +951,6 @@ items:
       name: Africa/Mbabane
     - uniqueId: Etc/GMT-2
       name: Etc/GMT-2
-- value: FLE Standard Time
-  uniqueId: FLE Standard Time
-  abbr: FDT
-  offset: 3
-  isdst: true
-  text: "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius"
-  utcItems:
-    - uniqueId: Europe/Helsinki
-      name: Europe/Helsinki
-    - uniqueId: Europe/Kiev
-      name: Europe/Kiev
-    - uniqueId: Europe/Mariehamn
-      name: Europe/Mariehamn
-    - uniqueId: Europe/Riga
-      name: Europe/Riga
-    - uniqueId: Europe/Sofia
-      name: Europe/Sofia
-    - uniqueId: Europe/Tallinn
-      name: Europe/Tallinn
-    - uniqueId: Europe/Uzhgorod
-      name: Europe/Uzhgorod
-    - uniqueId: Europe/Vilnius
-      name: Europe/Vilnius
-    - uniqueId: Europe/Zaporozhye
-      name: Europe/Zaporozhye
 - value: Turkey Standard Time
   uniqueId: Turkey Standard Time
   abbr: TDT
@@ -1653,8 +1599,6 @@ items:
   utcItems:
     - uniqueId: Asia/Anadyr
       name: Asia/Anadyr
-    - uniqueId: Asia/Kamchatka
-      name: Asia/Kamchatka
     - uniqueId: Asia/Magadan
       name: Asia/Magadan
     - uniqueId: Asia/Srednekolymsk

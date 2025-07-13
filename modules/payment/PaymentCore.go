@@ -65,6 +65,10 @@ func handlePaymentResult(provider PaymentProvider, sessionIDFromCallback string,
 		OnInvoiceStatusChange(transaction.Invoice)
 	}
 
+	if q.G != nil && transaction.Invoice.RedirectAfterSuccess != "" {
+		q.G.Redirect(301, transaction.Invoice.RedirectAfterSuccess)
+	}
+
 	return nil
 }
 

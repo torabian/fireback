@@ -244,6 +244,10 @@ actions:
             Capabilities related to this role which are available
           primitive: string
 
+  - name: signout
+    url: /passport/signout
+    description: Signout the user, clears cookies or does anything else if needed.
+    method: post
     
   - name: reactiveSearch
     description: 
@@ -1605,6 +1609,10 @@ messages:
       Request requires authroization, please make sure you are logged in, and
       have enough access level
     fa: شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید
+  
+  tokenNotFound:
+    en: Token not found or no longer valid.
+  
   userNotFoundOrDeleted:
     en: >-
       User not found, your account might be deleted, or access level has been

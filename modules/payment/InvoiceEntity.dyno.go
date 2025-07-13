@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var invoiceSeedersFs = &seeders.ViewsFs
@@ -33,10 +34,11 @@ func ResetInvoiceSeeders(fs *embed.FS) {
 }
 
 type InvoiceEntityQs struct {
-	Title           fireback.QueriableField `cli:"title" table:"invoice" column:"title" qs:"title"`
-	Amount          fireback.QueriableField `cli:"amount" table:"invoice" column:"amount" qs:"amount"`
-	NotificationKey fireback.QueriableField `cli:"notification-key" table:"invoice" column:"notification_key" qs:"notificationKey"`
-	FinalStatus     fireback.QueriableField `cli:"final-status" table:"invoice" column:"final_status" qs:"finalStatus"`
+	Title                fireback.QueriableField `cli:"title" table:"invoice" column:"title" qs:"title"`
+	Amount               fireback.QueriableField `cli:"amount" table:"invoice" column:"amount" qs:"amount"`
+	NotificationKey      fireback.QueriableField `cli:"notification-key" table:"invoice" column:"notification_key" qs:"notificationKey"`
+	RedirectAfterSuccess fireback.QueriableField `cli:"redirect-after-success" table:"invoice" column:"redirect_after_success" qs:"redirectAfterSuccess"`
+	FinalStatus          fireback.QueriableField `cli:"final-status" table:"invoice" column:"final_status" qs:"finalStatus"`
 }
 
 func (x *InvoiceEntityQs) GetQuery() string {
@@ -55,6 +57,10 @@ var InvoiceQsFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "notification-key",
 		Usage: "The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.",
+	},
+	&cli.StringFlag{
+		Name:  "redirect-after-success",
+		Usage: "When the payment is successful, it might use this url to make a redirect.",
 	},
 	&cli.StringFlag{
 		Name:  "final-status",
@@ -128,6 +134,8 @@ type InvoiceEntity struct {
 	Amount fireback.Money `json:"amount" xml:"amount" yaml:"amount"  validate:"required"    gorm:"embedded"      `
 	// The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.
 	NotificationKey string `json:"notificationKey" xml:"notificationKey" yaml:"notificationKey"        `
+	// When the payment is successful, it might use this url to make a redirect.
+	RedirectAfterSuccess string `json:"redirectAfterSuccess" xml:"redirectAfterSuccess" yaml:"redirectAfterSuccess"        `
 	// Final status of the invoice from a accounting perspective
 	FinalStatus string           `json:"finalStatus" xml:"finalStatus" yaml:"finalStatus"  validate:"required"        `
 	Children    []*InvoiceEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
@@ -225,10 +233,11 @@ var INVOICE_EVENTS = []string{
 }
 
 type InvoiceFieldMap struct {
-	Title           fireback.TranslatedString `yaml:"title"`
-	Amount          fireback.TranslatedString `yaml:"amount"`
-	NotificationKey fireback.TranslatedString `yaml:"notificationKey"`
-	FinalStatus     fireback.TranslatedString `yaml:"finalStatus"`
+	Title                fireback.TranslatedString `yaml:"title"`
+	Amount               fireback.TranslatedString `yaml:"amount"`
+	NotificationKey      fireback.TranslatedString `yaml:"notificationKey"`
+	RedirectAfterSuccess fireback.TranslatedString `yaml:"redirectAfterSuccess"`
+	FinalStatus          fireback.TranslatedString `yaml:"finalStatus"`
 }
 
 var InvoiceEntityMetaConfig map[string]int64 = map[string]int64{
@@ -356,6 +365,7 @@ Make sure you wrap the entire array in 'items' field. Also before that, I provid
 Title: (type: text) Description: Explanation about the invoice, the reason someone needs to pay
 Amount: (type: money?) Description: Amount of the invoice which has to be payed
 NotificationKey: (type: string) Description: The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.
+RedirectAfterSuccess: (type: string) Description: When the payment is successful, it might use this url to make a redirect.
 FinalStatus: (type: enum) Description: Final status of the invoice from a accounting perspective
 And here is the actual object signature:
 ` + v.Seeder() + `
@@ -382,11 +392,13 @@ func InvoiceRecursiveAddUniqueId(dto *InvoiceEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func InvoiceMultiInsertFn(dtos []*InvoiceEntity, query fireback.QueryDSL) ([]*InvoiceEntity, *fireback.IError) {
@@ -729,6 +741,11 @@ var InvoiceCommonCliFlags = []cli.Flag{
 		Usage:    `The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come. (string)`,
 	},
 	&cli.StringFlag{
+		Name:     "redirect-after-success",
+		Required: false,
+		Usage:    `When the payment is successful, it might use this url to make a redirect. (string)`,
+	},
+	&cli.StringFlag{
 		Name:     "final-status",
 		Required: true,
 		Usage:    `One of: 'payed', 'pending' (enum)`,
@@ -741,6 +758,14 @@ var InvoiceCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 		Required:    false,
 		Recommended: false,
 		Usage:       `The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.`,
+		Type:        "string",
+	},
+	{
+		Name:        "redirectAfterSuccess",
+		StructField: "RedirectAfterSuccess",
+		Required:    false,
+		Recommended: false,
+		Usage:       `When the payment is successful, it might use this url to make a redirect.`,
 		Type:        "string",
 	},
 	{
@@ -782,6 +807,11 @@ var InvoiceCommonCliFlagsOptional = []cli.Flag{
 		Name:     "notification-key",
 		Required: false,
 		Usage:    `The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come. (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "redirect-after-success",
+		Required: false,
+		Usage:    `When the payment is successful, it might use this url to make a redirect. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "final-status",
@@ -854,6 +884,9 @@ func CastInvoiceFromCli(c *cli.Context) *InvoiceEntity {
 	}
 	if c.IsSet("notification-key") {
 		template.NotificationKey = c.String("notification-key")
+	}
+	if c.IsSet("redirect-after-success") {
+		template.RedirectAfterSuccess = c.String("redirect-after-success")
 	}
 	if c.IsSet("final-status") {
 		template.FinalStatus = c.String("final-status")

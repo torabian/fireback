@@ -316,6 +316,7 @@ func structToEnvMap(config interface{}) (map[string]string, error) {
 }
 
 func SaveEnvFile(config interface{}, filename string) error {
+
 	envMap, err := structToEnvMap(config)
 	if err != nil {
 		return err

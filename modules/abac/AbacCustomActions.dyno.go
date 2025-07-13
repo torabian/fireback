@@ -598,6 +598,36 @@ var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+var SignoutSecurityModel *fireback.SecurityModel = nil
+
+type signoutActionImpSig func(
+	q fireback.QueryDSL) (string,
+	*fireback.IError,
+)
+
+var SignoutActionImp signoutActionImpSig
+
+func SignoutActionFn(
+	q fireback.QueryDSL,
+) (
+	string,
+	*fireback.IError,
+) {
+	if SignoutActionImp == nil {
+		return "", nil
+	}
+	return SignoutActionImp(q)
+}
+
+var SignoutActionCmd cli.Command = cli.Command{
+	Name:  "signout",
+	Usage: `Signout the user, clears cookies or does anything else if needed.`,
+	Action: func(c *cli.Context) {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SignoutSecurityModel)
+		result, err := SignoutActionFn(query)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+	},
+}
 var ReactiveSearchSecurityModel *fireback.SecurityModel = nil
 var ReactiveSearchActionImp = fireback.DefaultEmptyReactiveAction
 
@@ -1835,6 +1865,25 @@ func AbacCustomActions() []fireback.Module3Action {
 			},
 		},
 		{
+			Method:        "POST",
+			Url:           "/passport/signout",
+			SecurityModel: SignoutSecurityModel,
+			Name:          "signout",
+			Description:   "Signout the user, clears cookies or does anything else if needed.",
+			Handlers: []gin.HandlerFunc{
+				func(c *gin.Context) {
+					// POST_ONE - post
+					fireback.HttpPost(c, SignoutActionFn)
+				},
+			},
+			Format:         "POST_ONE",
+			Action:         SignoutActionFn,
+			ResponseEntity: string(""),
+			Out: &fireback.Module3ActionBody{
+				Entity: "",
+			},
+		},
+		{
 			Method:        "REACTIVE",
 			Url:           "reactive-search",
 			SecurityModel: ReactiveSearchSecurityModel,
@@ -2140,6 +2189,7 @@ var AbacCustomActionsCli = []cli.Command{
 	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
+	SignoutActionCmd,
 	ReactiveSearchActionCmd,
 	ImportUserActionCmd,
 	SendEmailActionCmd,
@@ -2172,6 +2222,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
+		SignoutActionCmd,
 		ReactiveSearchActionCmd,
 		ImportUserActionCmd,
 		SendEmailActionCmd,

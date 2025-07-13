@@ -17,6 +17,13 @@ var ROOT_VAR = "root"
 
 type WithAuthorizationPureImpl func(context *fireback.AuthContextDto) (*fireback.AuthResultDto, *fireback.IError)
 
+func maskToken(token string) string {
+	if len(token) <= 6 {
+		return token // too short to mask meaningfully
+	}
+	return token[:2] + "***" + token[len(token)-4:]
+}
+
 // Default authorization compute function for Fireback ABAC.
 // You can get inspired by this function and make the authorization
 func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.AuthResultDto, *fireback.IError) {
@@ -32,7 +39,9 @@ func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.A
 	user, err := GetUserFromToken(token)
 
 	if err != nil {
-		return nil, fireback.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.TokenNotFound, []string{
+			maskToken(token),
+		})
 	}
 
 	if user == nil {
@@ -57,7 +66,7 @@ func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.A
 	}
 
 	result.UserId = fireback.NewString(user.UniqueId)
-
+	result.User = user
 	result.UserAccessPerWorkspace = access.UserAccessPerWorkspace
 	result.SqlContext = GetSqlContext(access.UserAccessPerWorkspace, context.WorkspaceId, context.AllowCascade)
 
