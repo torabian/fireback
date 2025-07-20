@@ -704,6 +704,11 @@ var PublicJoinKeyCommonCliFlags = []cli.Flag{
 var PublicJoinKeyCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{}
 var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -778,6 +783,7 @@ func (x *PublicJoinKeyEntity) FromCli(c *cli.Context) *PublicJoinKeyEntity {
 }
 func CastPublicJoinKeyFromCli(c *cli.Context) *PublicJoinKeyEntity {
 	template := &PublicJoinKeyEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}

@@ -206,32 +206,6 @@ func (m Money) Value() (driver.Value, error) {
 	return nil, errors.New("direct value not supported, use embedded columns")
 }
 
-// Helpers
-func ifValidInt64Ptr(v sql.NullInt64) *int64 {
-	if v.Valid {
-		return &v.Int64
-	}
-	return nil
-}
-func ifValidStringPtr(v sql.NullString) *string {
-	if v.Valid {
-		return &v.String
-	}
-	return nil
-}
-func ifValidInt64(v sql.NullInt64) interface{} {
-	if v.Valid {
-		return v.Int64
-	}
-	return nil
-}
-func ifValidString(v sql.NullString) interface{} {
-	if v.Valid {
-		return v.String
-	}
-	return nil
-}
-
 // NewMoney creates a Money instance
 func NewMoney(amount int64, currency string) Money {
 	return Money{

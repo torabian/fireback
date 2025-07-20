@@ -15,6 +15,7 @@ import (
 
 func CastEmailOtpResponseFromCli(c *cli.Context) *EmailOtpResponseDto {
 	template := &EmailOtpResponseDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("request-id") {
 		template.RequestId = fireback.NewStringAutoNull(c.String("request-id"))
 	}
@@ -25,6 +26,11 @@ func CastEmailOtpResponseFromCli(c *cli.Context) *EmailOtpResponseDto {
 }
 
 var EmailOtpResponseDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

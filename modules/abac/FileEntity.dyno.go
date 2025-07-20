@@ -101,6 +101,7 @@ func (x *FileVariations) RootObjectName() string {
 
 type FileEntityQs struct {
 	Name        fireback.QueriableField `cli:"name" table:"file" column:"name" qs:"name"`
+	OperationId fireback.QueriableField `cli:"operation-id" table:"file" column:"operation_id" qs:"operationId"`
 	DiskPath    fireback.QueriableField `cli:"disk-path" table:"file" column:"disk_path" qs:"diskPath"`
 	Size        fireback.QueriableField `cli:"size" table:"file" column:"size" qs:"size"`
 	VirtualPath fireback.QueriableField `cli:"virtual-path" table:"file" column:"virtual_path" qs:"virtualPath"`
@@ -116,6 +117,10 @@ var FileQsFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "name",
 		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "operation-id",
+		Usage: "For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.",
 	},
 	&cli.StringFlag{
 		Name:  "disk-path",
@@ -197,15 +202,17 @@ type FileEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string            `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             string            `json:"name" xml:"name" yaml:"name"        `
-	DiskPath         string            `json:"diskPath" xml:"diskPath" yaml:"diskPath"        `
-	Size             int64             `json:"size" xml:"size" yaml:"size"        `
-	VirtualPath      string            `json:"virtualPath" xml:"virtualPath" yaml:"virtualPath"        `
-	Type             string            `json:"type" xml:"type" yaml:"type"        `
-	Variations       []*FileVariations `json:"variations" xml:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Children         []*FileEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *FileEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	Name             string `json:"name" xml:"name" yaml:"name"        `
+	// For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.
+	OperationId string            `json:"operationId" xml:"operationId" yaml:"operationId"        `
+	DiskPath    string            `json:"diskPath" xml:"diskPath" yaml:"diskPath"        `
+	Size        int64             `json:"size" xml:"size" yaml:"size"        `
+	VirtualPath string            `json:"virtualPath" xml:"virtualPath" yaml:"virtualPath"        `
+	Type        string            `json:"type" xml:"type" yaml:"type"        `
+	Variations  []*FileVariations `json:"variations" xml:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Children    []*FileEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo    *FileEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func FileEntityStream(q fireback.QueryDSL) (chan []*FileEntity, *fireback.QueryResultMeta, error) {
@@ -300,6 +307,7 @@ var FILE_EVENTS = []string{
 
 type FileFieldMap struct {
 	Name        fireback.TranslatedString `yaml:"name"`
+	OperationId fireback.TranslatedString `yaml:"operationId"`
 	DiskPath    fireback.TranslatedString `yaml:"diskPath"`
 	Size        fireback.TranslatedString `yaml:"size"`
 	VirtualPath fireback.TranslatedString `yaml:"virtualPath"`
@@ -481,6 +489,7 @@ with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 Name: (type: string) Description: 
+OperationId: (type: string) Description: For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.
 DiskPath: (type: string) Description: 
 Size: (type: int64) Description: 
 VirtualPath: (type: string) Description: 
@@ -874,6 +883,11 @@ var FileCommonCliFlags = []cli.Flag{
 		Usage:    `name (string)`,
 	},
 	&cli.StringFlag{
+		Name:     "operation-id",
+		Required: false,
+		Usage:    `For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database. (string)`,
+	},
+	&cli.StringFlag{
 		Name:     "disk-path",
 		Required: false,
 		Usage:    `diskPath (string)`,
@@ -906,6 +920,14 @@ var FileCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 		Required:    false,
 		Recommended: false,
 		Usage:       `name`,
+		Type:        "string",
+	},
+	{
+		Name:        "operationId",
+		StructField: "OperationId",
+		Required:    false,
+		Recommended: false,
+		Usage:       `For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.`,
 		Type:        "string",
 	},
 	{
@@ -943,6 +965,11 @@ var FileCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 }
 var FileCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -961,6 +988,11 @@ var FileCommonCliFlagsOptional = []cli.Flag{
 		Name:     "name",
 		Required: false,
 		Usage:    `name (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "operation-id",
+		Required: false,
+		Usage:    `For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database. (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "disk-path",
@@ -1037,6 +1069,7 @@ func (x *FileEntity) FromCli(c *cli.Context) *FileEntity {
 }
 func CastFileFromCli(c *cli.Context) *FileEntity {
 	template := &FileEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}
@@ -1045,6 +1078,9 @@ func CastFileFromCli(c *cli.Context) *FileEntity {
 	}
 	if c.IsSet("name") {
 		template.Name = c.String("name")
+	}
+	if c.IsSet("operation-id") {
+		template.OperationId = c.String("operation-id")
 	}
 	if c.IsSet("disk-path") {
 		template.DiskPath = c.String("disk-path")
@@ -1319,7 +1355,7 @@ func FileCliFn() cli.Command {
 	return cli.Command{
 		Name:        "file",
 		Description: "Files module actions",
-		Usage:       `File manager, uploading files and actions related.`,
+		Usage:       `Tus file uploading reference of the content. Every files being uploaded using tus will be stored in this table.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

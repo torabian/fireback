@@ -15,6 +15,7 @@ import (
 
 func CastExchangeKeyInformationFromCli(c *cli.Context) *ExchangeKeyInformationDto {
 	template := &ExchangeKeyInformationDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("key") {
 		template.Key = c.String("key")
 	}
@@ -25,6 +26,11 @@ func CastExchangeKeyInformationFromCli(c *cli.Context) *ExchangeKeyInformationDt
 }
 
 var ExchangeKeyInformationDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

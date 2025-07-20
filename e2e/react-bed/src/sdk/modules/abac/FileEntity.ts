@@ -17,6 +17,10 @@ export type FileEntityKeys =
 export class FileEntity extends BaseEntity {
   public children?: FileEntity[] | null;
   public name?: string | null;
+  /**
+  For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.
+  */
+  public operationId?: string | null;
   public diskPath?: string | null;
   public size?: number | null;
   public virtualPath?: string | null;
@@ -71,6 +75,13 @@ export class FileEntity extends BaseEntity {
       "gormMap": {}
     },
     {
+      "name": "operationId",
+      "description": "For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.",
+      "type": "string",
+      "computedType": "string",
+      "gormMap": {}
+    },
+    {
       "name": "diskPath",
       "type": "string",
       "computedType": "string",
@@ -111,11 +122,12 @@ export class FileEntity extends BaseEntity {
       "linkedTo": "FileEntity"
     }
   ],
-  "description": "File manager, uploading files and actions related."
+  "description": "Tus file uploading reference of the content. Every files being uploaded using tus will be stored in this table."
 }
 public static Fields = {
   ...BaseEntity.Fields,
       name: `name`,
+      operationId: `operationId`,
       diskPath: `diskPath`,
       size: `size`,
       virtualPath: `virtualPath`,

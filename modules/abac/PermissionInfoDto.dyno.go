@@ -15,6 +15,7 @@ import (
 
 func CastPermissionInfoFromCli(c *cli.Context) *PermissionInfoDto {
 	template := &PermissionInfoDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("name") {
 		template.Name = c.String("name")
 	}
@@ -28,6 +29,11 @@ func CastPermissionInfoFromCli(c *cli.Context) *PermissionInfoDto {
 }
 
 var PermissionInfoDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

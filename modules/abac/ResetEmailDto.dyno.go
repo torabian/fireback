@@ -15,6 +15,7 @@ import (
 
 func CastResetEmailFromCli(c *cli.Context) *ResetEmailDto {
 	template := &ResetEmailDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("password") {
 		template.Password = c.String("password")
 	}
@@ -22,6 +23,11 @@ func CastResetEmailFromCli(c *cli.Context) *ResetEmailDto {
 }
 
 var ResetEmailDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

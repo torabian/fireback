@@ -15,6 +15,7 @@ import (
 
 func CastTestMailFromCli(c *cli.Context) *TestMailDto {
 	template := &TestMailDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("sender-id") {
 		template.SenderId = c.String("sender-id")
 	}
@@ -34,6 +35,11 @@ func CastTestMailFromCli(c *cli.Context) *TestMailDto {
 }
 
 var TestMailDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

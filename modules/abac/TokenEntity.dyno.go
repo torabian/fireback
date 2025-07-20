@@ -721,6 +721,11 @@ var TokenCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 }
 var TokenCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -797,6 +802,7 @@ func (x *TokenEntity) FromCli(c *cli.Context) *TokenEntity {
 }
 func CastTokenFromCli(c *cli.Context) *TokenEntity {
 	template := &TokenEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}

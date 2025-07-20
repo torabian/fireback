@@ -880,6 +880,11 @@ var PublicAuthenticationCommonInteractiveCliFlags = []fireback.CliInteractiveFla
 }
 var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -996,6 +1001,7 @@ func (x *PublicAuthenticationEntity) FromCli(c *cli.Context) *PublicAuthenticati
 }
 func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity {
 	template := &PublicAuthenticationEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}

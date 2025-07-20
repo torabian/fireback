@@ -30,6 +30,11 @@ func (x *NotificationActionReqDto) RootObjectName() string {
 
 var NotificationCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "session-id",
 		Required: false,
 		Usage:    `The session which has been assigned during payment process initially. (string)`,
@@ -47,6 +52,7 @@ func NotificationActionReqValidator(dto *NotificationActionReqDto) *fireback.IEr
 }
 func CastNotificationFromCli(c *cli.Context) *NotificationActionReqDto {
 	template := &NotificationActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("session-id") {
 		template.SessionId = c.String("session-id")
 	}
@@ -106,6 +112,11 @@ func (x *VerifyTransactionActionReqDto) RootObjectName() string {
 
 var VerifyTransactionCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "session-id",
 		Required: false,
 		Usage:    `The session which has been assigned during payment process initially. (string)`,
@@ -128,6 +139,7 @@ func VerifyTransactionActionReqValidator(dto *VerifyTransactionActionReqDto) *fi
 }
 func CastVerifyTransactionFromCli(c *cli.Context) *VerifyTransactionActionReqDto {
 	template := &VerifyTransactionActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("session-id") {
 		template.SessionId = c.String("session-id")
 	}
@@ -226,6 +238,11 @@ func (x *RegisterTransactionActionReqDto) RootObjectName() string {
 
 var RegisterTransactionCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "email",
 		Required: false,
 		Usage:    `Customer email address (string)`,
@@ -248,6 +265,7 @@ func RegisterTransactionActionReqValidator(dto *RegisterTransactionActionReqDto)
 }
 func CastRegisterTransactionFromCli(c *cli.Context) *RegisterTransactionActionReqDto {
 	template := &RegisterTransactionActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("email") {
 		template.Email = c.String("email")
 	}

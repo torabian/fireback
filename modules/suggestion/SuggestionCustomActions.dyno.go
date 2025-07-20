@@ -37,6 +37,11 @@ func (x *QueryActionReqDto) RootObjectName() string {
 }
 
 var QueryCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.IntFlag{
 		Name:     "items-per-page",
 		Required: false,
@@ -61,6 +66,7 @@ func QueryActionReqValidator(dto *QueryActionReqDto) *fireback.IError {
 }
 func CastQueryFromCli(c *cli.Context) *QueryActionReqDto {
 	template := &QueryActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("items-per-page") {
 		value := c.Int("items-per-page")
 		template.ItemsPerPage = value

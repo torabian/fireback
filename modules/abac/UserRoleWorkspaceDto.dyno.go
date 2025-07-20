@@ -15,6 +15,7 @@ import (
 
 func CastUserRoleWorkspaceFromCli(c *cli.Context) *UserRoleWorkspaceDto {
 	template := &UserRoleWorkspaceDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("role-id") {
 		template.RoleId = c.String("role-id")
 	}
@@ -22,6 +23,11 @@ func CastUserRoleWorkspaceFromCli(c *cli.Context) *UserRoleWorkspaceDto {
 }
 
 var UserRoleWorkspaceDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

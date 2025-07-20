@@ -765,13 +765,21 @@ entities:
             validate: required
 
   - name: file
-    description: 'File manager, uploading files and actions related.'
+    description: 
+      Tus file uploading reference of the content.
+      Every files being uploaded using tus will be stored in this table.
     permRewrite:
       replace: root.modules
       with: root.manage
     fields:
       - name: name
         type: string
+      - name: operationId
+        type: string
+        description: 
+          For each upload, we need to assign a operation id, so if the operation
+          has been cancelled, it would be cleared automatically, and there won't be orphant
+          files in the database.
       - name: diskPath
         type: string
       - name: size

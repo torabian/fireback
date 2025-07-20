@@ -15,6 +15,7 @@ import (
 
 func CastAssignRoleFromCli(c *cli.Context) *AssignRoleDto {
 	template := &AssignRoleDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("role-id") {
 		template.RoleId = c.String("role-id")
 	}
@@ -36,6 +37,11 @@ func CastAssignRoleFromCli(c *cli.Context) *AssignRoleDto {
 }
 
 var AssignRoleDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

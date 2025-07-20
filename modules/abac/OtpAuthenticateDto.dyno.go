@@ -15,6 +15,7 @@ import (
 
 func CastOtpAuthenticateFromCli(c *cli.Context) *OtpAuthenticateDto {
 	template := &OtpAuthenticateDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -31,6 +32,11 @@ func CastOtpAuthenticateFromCli(c *cli.Context) *OtpAuthenticateDto {
 }
 
 var OtpAuthenticateDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

@@ -15,6 +15,7 @@ import (
 
 func CastClassicAuthFromCli(c *cli.Context) *ClassicAuthDto {
 	template := &ClassicAuthDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -40,6 +41,11 @@ func CastClassicAuthFromCli(c *cli.Context) *ClassicAuthDto {
 }
 
 var ClassicAuthDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

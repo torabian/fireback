@@ -15,6 +15,7 @@ import (
 
 func CastPhoneNumberAccountCreationFromCli(c *cli.Context) *PhoneNumberAccountCreationDto {
 	template := &PhoneNumberAccountCreationDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("phone-number") {
 		template.PhoneNumber = c.String("phone-number")
 	}
@@ -22,6 +23,11 @@ func CastPhoneNumberAccountCreationFromCli(c *cli.Context) *PhoneNumberAccountCr
 }
 
 var PhoneNumberAccountCreationDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

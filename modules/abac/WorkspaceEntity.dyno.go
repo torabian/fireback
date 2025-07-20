@@ -785,6 +785,11 @@ var WorkspaceCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 }
 var WorkspaceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -866,6 +871,7 @@ func (x *WorkspaceEntity) FromCli(c *cli.Context) *WorkspaceEntity {
 }
 func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
 	template := &WorkspaceEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}

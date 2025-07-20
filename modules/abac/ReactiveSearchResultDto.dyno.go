@@ -15,6 +15,7 @@ import (
 
 func CastReactiveSearchResultFromCli(c *cli.Context) *ReactiveSearchResultDto {
 	template := &ReactiveSearchResultDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("unique-id") {
 		template.UniqueId = c.String("unique-id")
 	}
@@ -40,6 +41,11 @@ func CastReactiveSearchResultFromCli(c *cli.Context) *ReactiveSearchResultDto {
 }
 
 var ReactiveSearchResultDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

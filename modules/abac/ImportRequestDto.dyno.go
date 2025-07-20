@@ -15,6 +15,7 @@ import (
 
 func CastImportRequestFromCli(c *cli.Context) *ImportRequestDto {
 	template := &ImportRequestDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("file") {
 		template.File = c.String("file")
 	}
@@ -22,6 +23,11 @@ func CastImportRequestFromCli(c *cli.Context) *ImportRequestDto {
 }
 
 var ImportRequestDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
