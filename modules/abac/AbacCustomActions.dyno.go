@@ -72,6 +72,11 @@ func (x *AcceptInviteActionReqDto) RootObjectName() string {
 
 var AcceptInviteCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "invitation-unique-id",
 		Required: true,
 		Usage:    `The invitation id which will be used to process (string)`,
@@ -84,6 +89,7 @@ func AcceptInviteActionReqValidator(dto *AcceptInviteActionReqDto) *fireback.IEr
 }
 func CastAcceptInviteFromCli(c *cli.Context) *AcceptInviteActionReqDto {
 	template := &AcceptInviteActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("invitation-unique-id") {
 		template.InvitationUniqueId = c.String("invitation-unique-id")
 	}
@@ -137,6 +143,11 @@ func (x *OauthAuthenticateActionReqDto) RootObjectName() string {
 
 var OauthAuthenticateCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "token",
 		Required: false,
 		Usage:    `The token that Auth2 provider returned to the front-end, which will be used to validate the backend (string)`,
@@ -154,6 +165,7 @@ func OauthAuthenticateActionReqValidator(dto *OauthAuthenticateActionReqDto) *fi
 }
 func CastOauthAuthenticateFromCli(c *cli.Context) *OauthAuthenticateActionReqDto {
 	template := &OauthAuthenticateActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("token") {
 		template.Token = c.String("token")
 	}
@@ -275,6 +287,11 @@ func (x *ChangePasswordActionReqDto) RootObjectName() string {
 
 var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
 		Usage:    `New password meeting the security requirements. (string)`,
@@ -292,6 +309,7 @@ func ChangePasswordActionReqValidator(dto *ChangePasswordActionReqDto) *fireback
 }
 func CastChangePasswordFromCli(c *cli.Context) *ChangePasswordActionReqDto {
 	template := &ChangePasswordActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("password") {
 		template.Password = c.String("password")
 	}
@@ -386,6 +404,11 @@ func (x *ConfirmClassicPassportTotpActionReqDto) RootObjectName() string {
 
 var ConfirmClassicPassportTotpCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `Passport value, email or phone number which is already successfully registered. (string)`,
@@ -408,6 +431,7 @@ func ConfirmClassicPassportTotpActionReqValidator(dto *ConfirmClassicPassportTot
 }
 func CastConfirmClassicPassportTotpFromCli(c *cli.Context) *ConfirmClassicPassportTotpActionReqDto {
 	template := &ConfirmClassicPassportTotpActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -652,6 +676,11 @@ func (x *ImportUserActionReqDto) RootObjectName() string {
 
 var ImportUserCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "path",
 		Required: false,
 		Usage:    `path (string)`,
@@ -664,6 +693,7 @@ func ImportUserActionReqValidator(dto *ImportUserActionReqDto) *fireback.IError 
 }
 func CastImportUserFromCli(c *cli.Context) *ImportUserActionReqDto {
 	template := &ImportUserActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("path") {
 		template.Path = c.String("path")
 	}
@@ -715,6 +745,11 @@ func (x *SendEmailActionReqDto) RootObjectName() string {
 
 var SendEmailCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "to-address",
 		Required: true,
 		Usage:    `toAddress (string)`,
@@ -732,6 +767,7 @@ func SendEmailActionReqValidator(dto *SendEmailActionReqDto) *fireback.IError {
 }
 func CastSendEmailFromCli(c *cli.Context) *SendEmailActionReqDto {
 	template := &SendEmailActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("to-address") {
 		template.ToAddress = c.String("to-address")
 	}
@@ -796,6 +832,11 @@ func (x *SendEmailWithProviderActionReqDto) RootObjectName() string {
 
 var SendEmailWithProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "email-provider-id",
 		Required: false,
 		Usage:    `emailProvider (one)`,
@@ -818,6 +859,7 @@ func SendEmailWithProviderActionReqValidator(dto *SendEmailWithProviderActionReq
 }
 func CastSendEmailWithProviderFromCli(c *cli.Context) *SendEmailWithProviderActionReqDto {
 	template := &SendEmailWithProviderActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("email-provider-id") {
 		template.EmailProviderId = fireback.NewStringAutoNull(c.String("email-provider-id"))
 	}
@@ -917,6 +959,11 @@ func (x *GsmSendSmsActionReqDto) RootObjectName() string {
 
 var GsmSendSmsCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "to-number",
 		Required: true,
 		Usage:    `toNumber (string)`,
@@ -934,6 +981,7 @@ func GsmSendSmsActionReqValidator(dto *GsmSendSmsActionReqDto) *fireback.IError 
 }
 func CastGsmSendSmsFromCli(c *cli.Context) *GsmSendSmsActionReqDto {
 	template := &GsmSendSmsActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("to-number") {
 		template.ToNumber = c.String("to-number")
 	}
@@ -998,6 +1046,11 @@ func (x *GsmSendSmsWithProviderActionReqDto) RootObjectName() string {
 
 var GsmSendSmsWithProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "gsm-provider-id",
 		Required: false,
 		Usage:    `gsmProvider (one)`,
@@ -1020,6 +1073,7 @@ func GsmSendSmsWithProviderActionReqValidator(dto *GsmSendSmsWithProviderActionR
 }
 func CastGsmSendSmsWithProviderFromCli(c *cli.Context) *GsmSendSmsWithProviderActionReqDto {
 	template := &GsmSendSmsWithProviderActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("gsm-provider-id") {
 		template.GsmProviderId = fireback.NewStringAutoNull(c.String("gsm-provider-id"))
 	}
@@ -1089,6 +1143,11 @@ func (x *ClassicSigninActionReqDto) RootObjectName() string {
 
 var ClassicSigninCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `value (string)`,
@@ -1116,6 +1175,7 @@ func ClassicSigninActionReqValidator(dto *ClassicSigninActionReqDto) *fireback.I
 }
 func CastClassicSigninFromCli(c *cli.Context) *ClassicSigninActionReqDto {
 	template := &ClassicSigninActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -1199,6 +1259,11 @@ func (x *ClassicSignupActionReqDto) RootObjectName() string {
 
 var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `value (string)`,
@@ -1251,6 +1316,7 @@ func ClassicSignupActionReqValidator(dto *ClassicSignupActionReqDto) *fireback.I
 }
 func CastClassicSignupFromCli(c *cli.Context) *ClassicSignupActionReqDto {
 	template := &ClassicSignupActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -1343,6 +1409,11 @@ func (x *CreateWorkspaceActionReqDto) RootObjectName() string {
 
 var CreateWorkspaceCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
 		Usage:    `name (string)`,
@@ -1365,6 +1436,7 @@ func CreateWorkspaceActionReqValidator(dto *CreateWorkspaceActionReqDto) *fireba
 }
 func CastCreateWorkspaceFromCli(c *cli.Context) *CreateWorkspaceActionReqDto {
 	template := &CreateWorkspaceActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("name") {
 		template.Name = c.String("name")
 	}
@@ -1423,6 +1495,11 @@ func (x *CheckClassicPassportActionReqDto) RootObjectName() string {
 
 var CheckClassicPassportCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `value (string)`,
@@ -1440,6 +1517,7 @@ func CheckClassicPassportActionReqValidator(dto *CheckClassicPassportActionReqDt
 }
 func CastCheckClassicPassportFromCli(c *cli.Context) *CheckClassicPassportActionReqDto {
 	template := &CheckClassicPassportActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -1507,6 +1585,11 @@ func (x *ClassicPassportOtpActionReqDto) RootObjectName() string {
 
 var ClassicPassportOtpCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `value (string)`,
@@ -1524,6 +1607,7 @@ func ClassicPassportOtpActionReqValidator(dto *ClassicPassportOtpActionReqDto) *
 }
 func CastClassicPassportOtpFromCli(c *cli.Context) *ClassicPassportOtpActionReqDto {
 	template := &ClassicPassportOtpActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}
@@ -1593,6 +1677,11 @@ func (x *ClassicPassportRequestOtpActionReqDto) RootObjectName() string {
 
 var ClassicPassportRequestOtpCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `Passport value (email, phone number) which would be recieving the otp code. (string)`,
@@ -1605,6 +1694,7 @@ func ClassicPassportRequestOtpActionReqValidator(dto *ClassicPassportRequestOtpA
 }
 func CastClassicPassportRequestOtpFromCli(c *cli.Context) *ClassicPassportRequestOtpActionReqDto {
 	template := &ClassicPassportRequestOtpActionReqDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("value") {
 		template.Value = c.String("value")
 	}

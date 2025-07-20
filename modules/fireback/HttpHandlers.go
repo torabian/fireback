@@ -209,6 +209,7 @@ func HttpPostXhtml(c *gin.Context, fn func(QueryDSL) (*XHtml, *IError)) {
 		}
 	}
 }
+
 func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 	id := c.Param("uniqueId")
@@ -221,7 +222,15 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 		return
 	}
 
+	// If type of entity is string, or bool, or number, then just send the result
+	// as string
 	entity, err := fn(body, f)
+
+	switch v := any(entity).(type) {
+	case string:
+		c.String(http.StatusOK, v)
+		return
+	}
 
 	accept := c.GetHeader("Accept")
 	isYAML := accept == "application/x-yaml" || accept == "application/yaml" || accept == "text/yaml"

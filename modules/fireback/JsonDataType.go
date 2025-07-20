@@ -45,9 +45,21 @@ func (j JSON) Value() (driver.Value, error) {
 
 // Scan scan value into Jsonb, implements sql.Scanner interface
 func (j *JSON) Scan(value interface{}) error {
+	m, err := ScanDbField(value)
+	if err != nil {
+		return err
+	}
+
+	*j = m
+	return nil
+}
+
+func ScanDbField(value interface{}) ([]byte, error) {
+
+	var j []byte
 	if value == nil {
-		*j = JSON("null")
-		return nil
+		j = JSON("null")
+		return j, nil
 	}
 	var bytes []byte
 	switch v := value.(type) {
@@ -59,12 +71,12 @@ func (j *JSON) Scan(value interface{}) error {
 	case string:
 		bytes = []byte(v)
 	default:
-		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+		return nil, errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 	}
 
 	result := json.RawMessage(bytes)
-	*j = JSON(result)
-	return nil
+	j = JSON(result)
+	return j, nil
 }
 
 // MarshalJSON to output non base64 encoded []byte

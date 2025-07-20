@@ -15,6 +15,7 @@ import (
 
 func CastEmailAccountSigninFromCli(c *cli.Context) *EmailAccountSigninDto {
 	template := &EmailAccountSigninDto{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("email") {
 		template.Email = c.String("email")
 	}
@@ -25,6 +26,11 @@ func CastEmailAccountSigninFromCli(c *cli.Context) *EmailAccountSigninDto {
 }
 
 var EmailAccountSigninDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,

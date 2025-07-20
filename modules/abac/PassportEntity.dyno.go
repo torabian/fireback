@@ -847,6 +847,11 @@ var PassportCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 }
 var PassportCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -958,6 +963,7 @@ func (x *PassportEntity) FromCli(c *cli.Context) *PassportEntity {
 }
 func CastPassportFromCli(c *cli.Context) *PassportEntity {
 	template := &PassportEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}

@@ -655,6 +655,7 @@
             "int?",
             "float64?",
             "money?",
+            "xfile?",
             "float32?",
             "bool?",
             "int32?",

@@ -164,9 +164,13 @@ func LiftTusServer() {
 	}
 }
 
+// TUS file uploading systems can be running directly into a gin server
+// This is done because, the golang routines are capable of nonblcking io.
+
 func LiftTusServerInHttp(app *gin.Engine) {
 	config := fireback.GetConfig()
 	if config.Storage == "" {
+		fireback.LOG.Info("File server has been skipped, because there is no directory.")
 		return
 	}
 

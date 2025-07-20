@@ -33,6 +33,11 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 
 
 var {{ .e.DtoName }}CommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
   {{ template "entityCommonCliFlag" (arr .e.CompleteFields "") }}
 }
 

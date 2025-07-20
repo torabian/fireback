@@ -315,11 +315,19 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() []*{{ $.wsprefix }}TaskActi
 
 {{ if .In }}
   var {{ upper .Name }}CommonCliFlagsOptional = []cli.Flag{
+    &cli.StringFlag{
+      Name:     "x-src",
+      Required: false,
+      Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+    },
     {{ template "dtoCliFlag" (arr .In.Fields "") }}
   }
 
   func Cast{{ upper .Name }}TaskFromCli (c *cli.Context) *{{ template "taskrequestbody" . }} {
     template := &{{- template "taskrequestbody" . -}}{}
+
+    {{ $.wsprefix}}HandleXsrc(c, template)
+
     {{ template "entityCliCastRecursive" (arr .In.Fields "" $.wsprefix)}}
     return template
   }

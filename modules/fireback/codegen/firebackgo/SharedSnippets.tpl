@@ -1757,6 +1757,11 @@ var {{ .e.Upper }}CommonInteractiveCliFlags = []{{ .wsprefix }}CliInteractiveFla
 }
 
 var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
+  &cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
   {{ template "entityCommonCliFlag" (arr .e.CompleteFields "") }}
 }
 {{ end }}
@@ -1902,6 +1907,11 @@ type x{{$prefix}}{{ .PublicName}} struct {
         template.{{ .PublicName }} = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
+    {{ if or (eq .Type "xfile?") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        template.{{ .PublicName }} = {{ $wsprefix }}NewXFileAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
+      }
+	  {{ end }}
     {{ if or (eq .Type "money?") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         template.{{ .PublicName }} = {{ $wsprefix }}NewMoneyAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
@@ -1980,6 +1990,8 @@ func (x* {{ .e.ObjectName }}) FromCli(c *cli.Context) *{{ .e.ObjectName }} {
 func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
 
+  {{ .wsprefix}}HandleXsrc(c, template)
+
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}
@@ -2001,7 +2013,8 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 
 func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
-
+  {{ .wsprefix}}HandleXsrc(c, template)
+  
 	{{ template "entityCliCastRecursive" (arr .e.CompleteFields "" .wsprefix)}}
 
 	return template
@@ -3018,6 +3031,11 @@ type {{ $name }}Msgs struct {
       }
 
       var {{ .Upper }}CommonCliFlagsOptional = []cli.Flag{
+        &cli.StringFlag{
+          Name:     "x-src",
+          Required: false,
+          Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+        },
         {{ template "dtoCliFlag" (arr .In.Fields "") }}
       }
 
@@ -3036,6 +3054,8 @@ type {{ $name }}Msgs struct {
 
       func Cast{{ .Upper }}FromCli (c *cli.Context) *{{ .Upper }}ActionReqDto {
         template := &{{ .Upper }}ActionReqDto{}
+
+        {{ $wsprefix}}HandleXsrc(c, template)
 
         {{ template "entityCliCastRecursive" (arr .In.Fields "" $wsprefix)}}
 

@@ -751,6 +751,11 @@ var RoleCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 }
 var RoleCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -825,6 +830,7 @@ func (x *RoleEntity) FromCli(c *cli.Context) *RoleEntity {
 }
 func CastRoleFromCli(c *cli.Context) *RoleEntity {
 	template := &RoleEntity{}
+	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
 	}

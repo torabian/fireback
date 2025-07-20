@@ -15,10 +15,16 @@ import (
 
 func CastOkayResponseFromCli(c *cli.Context) *OkayResponseDto {
 	template := &OkayResponseDto{}
+	fireback.HandleXsrc(c, template)
 	return template
 }
 
 var OkayResponseDtoCommonCliFlagsOptional = []cli.Flag{
+	&cli.StringFlag{
+		Name:     "x-src",
+		Required: false,
+		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
 	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
