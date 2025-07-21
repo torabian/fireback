@@ -23,6 +23,10 @@ func UUID() string {
 func UUID_NANO() string {
 	id, _ := gonanoid.New()
 
+	// I don't want dashes and underlines. Hurts the URL
+	id = strings.ReplaceAll(id, "_", "")
+	id = strings.ReplaceAll(id, "-", "")
+
 	return id
 }
 
