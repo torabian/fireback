@@ -18,12 +18,17 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const { query: queryWorkspaces } = useGetUrwQuery({ query: {} });
   const { query } = useGetCteAppMenus({
     queryClient,
-    queryOptions: { refetchOnWindowFocus: false },
+    queryOptions: {
+      refetchOnWindowFocus: false,
+      enabled: !queryWorkspaces.isError && queryWorkspaces.isSuccess,
+    },
     query: {
       itemsPerPage: 9999,
     },
   });
+
   const { locale } = useLocale();
+
   useEffect(() => {
     query.refetch();
   }, [locale]);

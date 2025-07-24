@@ -3,9 +3,11 @@ package fireback
 import (
 	"net/http"
 	reflect "reflect"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,9 +21,9 @@ func HttpUpdateEntity[T any, V any](c *gin.Context, fn func(QueryDSL, T) (V, *IE
 	}
 
 	if entity, err := fn(f, body); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.ToPublicEndUser(&f)})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f)})
 	} else {
-		c.JSON(200, gin.H{
+		GinWriteContent(c, 200, gin.H{
 			"data": entity,
 		})
 	}
@@ -37,9 +39,9 @@ func HttpUpdateEntities[T any](c *gin.Context, fn func(QueryDSL, *BulkRecordRequ
 	}
 
 	if entity, err := fn(f, &body); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.ToPublicEndUser(&f)})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f)})
 	} else {
-		c.JSON(200, gin.H{
+		GinWriteContent(c, 200, gin.H{
 			"data": entity,
 		})
 	}
@@ -47,21 +49,15 @@ func HttpUpdateEntities[T any](c *gin.Context, fn func(QueryDSL, *BulkRecordRequ
 
 func HttpRemoveEntity[T any](c *gin.Context, fn func(QueryDSL) (T, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
-
 	var body DeleteRequest
-
 	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
 		return
 	}
-
 	f.Query = body.Query
-
 	if item, err := fn(f); err != nil {
-		c.JSON(400, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f)})
 	} else {
-		c.JSON(200, gin.H{
+		GinWriteContent(c, 200, gin.H{
 			"data": gin.H{
 				"rowsAffected": item,
 			},
@@ -188,9 +184,9 @@ func HttpPost[V any](c *gin.Context, fn func(QueryDSL) (V, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
 	if result, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": result})
 	} else {
-		c.JSON(200, gin.H{
+		GinWriteContent(c, 200, gin.H{
 			"data": result,
 		})
 	}
@@ -200,7 +196,7 @@ func HttpPostXhtml(c *gin.Context, fn func(QueryDSL) (*XHtml, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
 	if result, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": result})
 	} else {
 		if result != nil {
 			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
@@ -222,8 +218,7 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 		return
 	}
 
-	// If type of entity is string, or bool, or number, then just send the result
-	// as string
+	// If type of entity is string, or bool, or number, then just send the result as string
 	entity, err := fn(body, f)
 
 	switch v := any(entity).(type) {
@@ -232,38 +227,12 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 		return
 	}
 
-	accept := c.GetHeader("Accept")
-	isYAML := accept == "application/x-yaml" || accept == "application/yaml" || accept == "text/yaml"
-
 	if err != nil {
-		// Error response
-		if isYAML {
-			c.Header("Content-Type", "application/x-yaml")
-			yamlData, marshalErr := yaml.Marshal(gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
-			if marshalErr != nil {
-				c.AbortWithStatusJSON(500, gin.H{"error": "failed to marshal yaml"})
-				return
-			}
-			c.Writer.WriteHeader(500)
-			c.Writer.Write(yamlData)
-		} else {
-			c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
-		}
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
 		return
 	}
 
-	// Success response
-	if isYAML {
-		c.Header("Content-Type", "application/x-yaml")
-		yamlData, err := yaml.Marshal(gin.H{"data": entity})
-		if err != nil {
-			c.AbortWithStatusJSON(500, gin.H{"error": "failed to marshal yaml"})
-			return
-		}
-		c.Writer.Write(yamlData)
-	} else {
-		c.JSON(200, gin.H{"data": entity})
-	}
+	GinWriteContent(c, 200, gin.H{"data": entity})
 }
 
 func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*XHtml, *IError)) {
@@ -281,7 +250,7 @@ func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*XHtml, *I
 	}
 
 	if result, err := fn(body, f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": result})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": result})
 	} else {
 		if result != nil {
 			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
@@ -299,9 +268,9 @@ func HttpPostWebrtc[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 	}
 
 	if entity, err := fn(body, f); err != nil {
-		c.AbortWithStatusJSON(500, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
 	} else {
-		c.JSON(200, gin.H{
+		GinWriteContent(c, 200, gin.H{
 			"data": entity,
 		})
 	}
@@ -329,8 +298,8 @@ func HttpQueryEntity[T any](
 ) {
 
 	f := ExtractQueryDslFromGinContext(c)
-
 	QueriableFieldFromGinContext(reflect.ValueOf(qs), "", c)
+	ComputeSqlColumns(qs, &f)
 
 	method := reflect.ValueOf(qs).MethodByName("GetQuery")
 	if method.IsValid() {
@@ -343,15 +312,68 @@ func HttpQueryEntity[T any](
 	}
 
 	if items, count, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err,
-		})
+		GinWriteContent(c, 500, gin.H{"error": err})
 	} else {
 		result := QueryEntitySuccessResult(f, items, count)
 		result["jsonQuery"] = c.Query("jsonQuery")
-		c.JSON(200, result)
+		GinWriteContent(c, 200, result)
 	}
 }
+
+func isYaml(headerValue string) bool {
+
+	return slices.Contains([]string{
+		"application/x-yaml",
+		"application/yaml",
+		"text/yaml",
+		"yaml",
+		"yml",
+	}, headerValue)
+
+}
+func isCsv(headerValue string) bool {
+
+	return slices.Contains([]string{
+		"text/csv",
+		"csv",
+	}, headerValue)
+
+}
+
+func IsYaml(c *gin.Context) bool {
+	return isYaml(c.GetHeader("Accept"))
+}
+
+func IsYamlCli(c *cli.Context) bool {
+	return isYaml(c.String("x-accept"))
+}
+
+func IsCsvCli(c *cli.Context) bool {
+	return isCsv(c.String("x-accept"))
+}
+
+// When done with a http handler, you can use this to write the content
+// Use it for successful operations
+func GinWriteContent(c *gin.Context, code int, content gin.H) {
+
+	isYAML := IsYaml(c)
+
+	if isYAML {
+		c.Header("Content-Type", "application/x-yaml")
+		c.Status(code)
+		yamlData, err := yaml.Marshal(content)
+		if err != nil {
+			c.AbortWithStatusJSON(500, gin.H{"error": "failed to marshal yaml"})
+			return
+		}
+		c.Writer.Write(yamlData)
+
+		return
+	}
+
+	c.JSON(code, content)
+}
+
 func HttpQueryEntity2[T any](
 	c *gin.Context,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
@@ -360,47 +382,13 @@ func HttpQueryEntity2[T any](
 	f := ExtractQueryDslFromGinContext(c)
 
 	if items, count, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		GinWriteContent(c, http.StatusBadRequest, gin.H{
 			"error": err.ToPublicEndUser(&f),
 		})
 	} else {
 		result := QueryEntitySuccessResult(f, items, count)
 		result["jsonQuery"] = c.Query("jsonQuery")
-		c.JSON(200, result)
-	}
-}
-
-func HttpRawQuery[T any](
-	c *gin.Context,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
-) {
-
-	f := ExtractQueryDslFromGinContext(c)
-
-	if items, count, err := fn(f); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
-	} else {
-
-		mappedItems := []map[string]interface{}{}
-		for _, item := range items {
-			content := PolyglotQueryHandler(item, &f)
-			mappedItems = append(mappedItems, content)
-		}
-
-		c.JSON(200, gin.H{
-			"data": gin.H{
-				"startIndex":   f.StartIndex,
-				"itemsPerPage": f.ItemsPerPage,
-				"next": gin.H{
-					"cursor": count.Cursor,
-				},
-				"items":               mappedItems,
-				"totalItems":          count.TotalItems,
-				"totalAvailableItems": count.TotalAvailableItems,
-			},
-		})
+		GinWriteContent(c, 200, result)
 	}
 }
 
@@ -413,21 +401,18 @@ func HttpGetEntity[T any](
 	f.UniqueId = id
 
 	if item, err := fn(f); err != nil {
-
 		code := http.StatusBadRequest
-
 		if err.HttpCode > 0 {
 			code = int(err.HttpCode)
 		}
-		c.AbortWithStatusJSON(code, gin.H{
+
+		GinWriteContent(c, code, gin.H{
 			"error": err.ToPublicEndUser(&f),
 		})
-
 	} else {
 
 		data := PolyglotQueryHandler(item, &f)
-
-		c.JSON(200, gin.H{
+		GinWriteContent(c, 200, gin.H{
 			"data": data,
 		})
 	}
@@ -450,23 +435,11 @@ func HttpGetXHtml(
 			code = int(err.HttpCode)
 		}
 
-		// Instead, render a html template with some good looking html,
-		// and show the error message
-		// This is the result of PublicEndUser:
-		// 		type IPublicError struct {
-		// 	Message           string                 `json:"message,omitempty"`
-		// 	MessageTranslated string                 `json:"messageTranslated,omitempty"`
-		// 	MessageParams     map[string]interface{} `json:"messageParams,omitempty"`
-		// 	Errors            []*IPublicErrorItem    `json:"errors,omitempty"`
-		// 	HttpCode          int32                  `json:"httpCode,omitempty"`
-		// }
-		c.AbortWithStatusJSON(code, gin.H{
+		GinWriteContent(c, code, gin.H{
 			"error": err.ToPublicEndUser(&f),
 		})
-
 	} else {
 		if item != nil {
-
 			RenderPage(item.ScreensFs, c, item.TemplateName, item.Params)
 		} else {
 			c.AbortWithStatus(404)

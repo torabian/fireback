@@ -33,7 +33,7 @@ func ResetBackupTableMetaSeeders(fs *embed.FS) {
 }
 
 type BackupTableMetaEntityQs struct {
-	TableNameInDb fireback.QueriableField `cli:"table-name-in-db" table:"backup_table_meta" column:"table_name_in_db" qs:"tableNameInDb"`
+	TableNameInDb fireback.QueriableField `cli:"table-name-in-db" table:"backup_table_meta" typeof:"string" column:"table_name_in_db" qs:"tableNameInDb"`
 }
 
 func (x *BackupTableMetaEntityQs) GetQuery() string {
@@ -667,6 +667,10 @@ func BackupTableMetaActionImport(
 
 var BackupTableMetaCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -702,6 +706,10 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1025,8 +1033,8 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 	BACKUP_TABLE_META_ACTION_QUERY.ToCli(),
 	BACKUP_TABLE_META_ACTION_TABLE.ToCli(),
+	BACKUP_TABLE_META_ACTION_PATCH.ToCli(),
 	BackupTableMetaCreateCmd,
-	BackupTableMetaUpdateCmd,
 	BackupTableMetaAskCmd,
 	BackupTableMetaCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1193,6 +1201,13 @@ var BACKUP_TABLE_META_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "BackupTableMetaEntity",
+	},
+	Description: "Update the BackupTableMeta entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, BackupTableMetaActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var BACKUP_TABLE_META_ACTION_PATCH_BULK = fireback.Module3Action{

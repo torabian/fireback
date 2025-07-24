@@ -26,6 +26,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	queryString, _ := c.GetQuery("query")
 	withPreloads, _ := c.GetQuery("withPreloads")
 	isDeep, _ := c.GetQuery("deep")
+	xSelect, _ := c.GetQuery("x-select")
 
 	searchPhrase := c.Query("searchPhrase")
 
@@ -76,9 +77,10 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	}
 
 	var f QueryDSL = QueryDSL{
-		Query:        queryString,
-		StartIndex:   startIndex,
-		ItemsPerPage: itemsPerPage,
+		Query:            queryString,
+		StartIndex:       startIndex,
+		ItemsPerPage:     itemsPerPage,
+		SelectableColumn: SmartSplit(xSelect),
 
 		G:                      c,
 		UserAccessPerWorkspace: urw,

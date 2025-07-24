@@ -33,11 +33,11 @@ func ResetPendingWorkspaceInviteSeeders(fs *embed.FS) {
 }
 
 type PendingWorkspaceInviteEntityQs struct {
-	Value         fireback.QueriableField `cli:"value" table:"pending_workspace_invite" column:"value" qs:"value"`
-	Type          fireback.QueriableField `cli:"type" table:"pending_workspace_invite" column:"type" qs:"type"`
-	CoverLetter   fireback.QueriableField `cli:"cover-letter" table:"pending_workspace_invite" column:"cover_letter" qs:"coverLetter"`
-	WorkspaceName fireback.QueriableField `cli:"workspace-name" table:"pending_workspace_invite" column:"workspace_name" qs:"workspaceName"`
-	Role          fireback.QueriableField `cli:"role" table:"pending_workspace_invite" column:"role" qs:"role"`
+	Value         fireback.QueriableField `cli:"value" table:"pending_workspace_invite" typeof:"string" column:"value" qs:"value"`
+	Type          fireback.QueriableField `cli:"type" table:"pending_workspace_invite" typeof:"string" column:"type" qs:"type"`
+	CoverLetter   fireback.QueriableField `cli:"cover-letter" table:"pending_workspace_invite" typeof:"string" column:"cover_letter" qs:"coverLetter"`
+	WorkspaceName fireback.QueriableField `cli:"workspace-name" table:"pending_workspace_invite" typeof:"string" column:"workspace_name" qs:"workspaceName"`
+	Role          fireback.QueriableField `cli:"role" table:"pending_workspace_invite" typeof:"one" column:"role" qs:"role"`
 }
 
 func (x *PendingWorkspaceInviteEntityQs) GetQuery() string {
@@ -700,6 +700,10 @@ func PendingWorkspaceInviteActionImport(
 
 var PendingWorkspaceInviteCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -779,6 +783,10 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1134,8 +1142,8 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	PENDING_WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
 	PENDING_WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
+	PENDING_WORKSPACE_INVITE_ACTION_PATCH.ToCli(),
 	PendingWorkspaceInviteCreateCmd,
-	PendingWorkspaceInviteUpdateCmd,
 	PendingWorkspaceInviteAskCmd,
 	PendingWorkspaceInviteCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1302,6 +1310,13 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
+	},
+	Description: "Update the PendingWorkspaceInvite entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PendingWorkspaceInviteActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = fireback.Module3Action{

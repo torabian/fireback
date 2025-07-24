@@ -33,11 +33,11 @@ func ResetInvoiceSeeders(fs *embed.FS) {
 }
 
 type InvoiceEntityQs struct {
-	Title                fireback.QueriableField `cli:"title" table:"invoice" column:"title" qs:"title"`
-	Amount               fireback.QueriableField `cli:"amount" table:"invoice" column:"amount" qs:"amount"`
-	NotificationKey      fireback.QueriableField `cli:"notification-key" table:"invoice" column:"notification_key" qs:"notificationKey"`
-	RedirectAfterSuccess fireback.QueriableField `cli:"redirect-after-success" table:"invoice" column:"redirect_after_success" qs:"redirectAfterSuccess"`
-	FinalStatus          fireback.QueriableField `cli:"final-status" table:"invoice" column:"final_status" qs:"finalStatus"`
+	Title                fireback.QueriableField `cli:"title" table:"invoice" typeof:"text" column:"title" qs:"title"`
+	Amount               fireback.QueriableField `cli:"amount" table:"invoice" typeof:"money?" column:"amount" qs:"amount"`
+	NotificationKey      fireback.QueriableField `cli:"notification-key" table:"invoice" typeof:"string" column:"notification_key" qs:"notificationKey"`
+	RedirectAfterSuccess fireback.QueriableField `cli:"redirect-after-success" table:"invoice" typeof:"string" column:"redirect_after_success" qs:"redirectAfterSuccess"`
+	FinalStatus          fireback.QueriableField `cli:"final-status" table:"invoice" typeof:"enum" column:"final_status" qs:"finalStatus"`
 }
 
 func (x *InvoiceEntityQs) GetQuery() string {
@@ -708,6 +708,10 @@ func InvoiceActionImport(
 
 var InvoiceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -779,6 +783,10 @@ var InvoiceCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1138,8 +1146,8 @@ var InvoiceImportExportCommands = []cli.Command{
 var InvoiceCliCommands []cli.Command = []cli.Command{
 	INVOICE_ACTION_QUERY.ToCli(),
 	INVOICE_ACTION_TABLE.ToCli(),
+	INVOICE_ACTION_PATCH.ToCli(),
 	InvoiceCreateCmd,
-	InvoiceUpdateCmd,
 	InvoiceAskCmd,
 	InvoiceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1311,6 +1319,13 @@ var INVOICE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "InvoiceEntity",
+	},
+	Description: "Update the Invoice entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, InvoiceActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var INVOICE_ACTION_PATCH_BULK = fireback.Module3Action{

@@ -33,11 +33,11 @@ func ResetUserWorkspaceSeeders(fs *embed.FS) {
 }
 
 type UserWorkspaceEntityQs struct {
-	User                 fireback.QueriableField `cli:"user" table:"user_workspace" column:"user" qs:"user"`
-	Workspace            fireback.QueriableField `cli:"workspace" table:"user_workspace" column:"workspace" qs:"workspace"`
-	UserPermissions      fireback.QueriableField `cli:"user-permissions" table:"user_workspace" column:"user_permissions" qs:"userPermissions"`
-	RolePermission       fireback.QueriableField `cli:"role-permission" table:"user_workspace" column:"role_permission" qs:"rolePermission"`
-	WorkspacePermissions fireback.QueriableField `cli:"workspace-permissions" table:"user_workspace" column:"workspace_permissions" qs:"workspacePermissions"`
+	User                 fireback.QueriableField `cli:"user" table:"user_workspace" typeof:"one" column:"user" qs:"user"`
+	Workspace            fireback.QueriableField `cli:"workspace" table:"user_workspace" typeof:"one" column:"workspace" qs:"workspace"`
+	UserPermissions      fireback.QueriableField `cli:"user-permissions" table:"user_workspace" typeof:"arrayP" column:"user_permissions" qs:"userPermissions"`
+	RolePermission       fireback.QueriableField `cli:"role-permission" table:"user_workspace" typeof:"arrayP" column:"role_permission" qs:"rolePermission"`
+	WorkspacePermissions fireback.QueriableField `cli:"workspace-permissions" table:"user_workspace" typeof:"arrayP" column:"workspace_permissions" qs:"workspacePermissions"`
 }
 
 func (x *UserWorkspaceEntityQs) GetQuery() string {
@@ -700,6 +700,10 @@ func UserWorkspaceActionImport(
 
 var UserWorkspaceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -731,6 +735,10 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1066,8 +1074,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 var UserWorkspaceCliCommands []cli.Command = []cli.Command{
 	USER_WORKSPACE_ACTION_QUERY.ToCli(),
 	USER_WORKSPACE_ACTION_TABLE.ToCli(),
+	USER_WORKSPACE_ACTION_PATCH.ToCli(),
 	UserWorkspaceCreateCmd,
-	UserWorkspaceUpdateCmd,
 	UserWorkspaceAskCmd,
 	UserWorkspaceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1240,6 +1248,13 @@ var USER_WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
+	},
+	Description: "Update the UserWorkspace entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, UserWorkspaceActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var USER_WORKSPACE_ACTION_PATCH_BULK = fireback.Module3Action{

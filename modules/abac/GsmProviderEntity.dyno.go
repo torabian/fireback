@@ -33,11 +33,11 @@ func ResetGsmProviderSeeders(fs *embed.FS) {
 }
 
 type GsmProviderEntityQs struct {
-	ApiKey           fireback.QueriableField `cli:"api-key" table:"gsm_provider" column:"api_key" qs:"apiKey"`
-	MainSenderNumber fireback.QueriableField `cli:"main-sender-number" table:"gsm_provider" column:"main_sender_number" qs:"mainSenderNumber"`
-	Type             fireback.QueriableField `cli:"type" table:"gsm_provider" column:"type" qs:"type"`
-	InvokeUrl        fireback.QueriableField `cli:"invoke-url" table:"gsm_provider" column:"invoke_url" qs:"invokeUrl"`
-	InvokeBody       fireback.QueriableField `cli:"invoke-body" table:"gsm_provider" column:"invoke_body" qs:"invokeBody"`
+	ApiKey           fireback.QueriableField `cli:"api-key" table:"gsm_provider" typeof:"string" column:"api_key" qs:"apiKey"`
+	MainSenderNumber fireback.QueriableField `cli:"main-sender-number" table:"gsm_provider" typeof:"string" column:"main_sender_number" qs:"mainSenderNumber"`
+	Type             fireback.QueriableField `cli:"type" table:"gsm_provider" typeof:"enum" column:"type" qs:"type"`
+	InvokeUrl        fireback.QueriableField `cli:"invoke-url" table:"gsm_provider" typeof:"string" column:"invoke_url" qs:"invokeUrl"`
+	InvokeBody       fireback.QueriableField `cli:"invoke-body" table:"gsm_provider" typeof:"string" column:"invoke_body" qs:"invokeBody"`
 }
 
 func (x *GsmProviderEntityQs) GetQuery() string {
@@ -699,6 +699,10 @@ func GsmProviderActionImport(
 
 var GsmProviderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -786,6 +790,10 @@ var GsmProviderCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1141,8 +1149,8 @@ var GsmProviderImportExportCommands = []cli.Command{
 var GsmProviderCliCommands []cli.Command = []cli.Command{
 	GSM_PROVIDER_ACTION_QUERY.ToCli(),
 	GSM_PROVIDER_ACTION_TABLE.ToCli(),
+	GSM_PROVIDER_ACTION_PATCH.ToCli(),
 	GsmProviderCreateCmd,
-	GsmProviderUpdateCmd,
 	GsmProviderAskCmd,
 	GsmProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1309,6 +1317,13 @@ var GSM_PROVIDER_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
+	},
+	Description: "Update the GsmProvider entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, GsmProviderActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var GSM_PROVIDER_ACTION_PATCH_BULK = fireback.Module3Action{

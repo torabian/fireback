@@ -33,11 +33,11 @@ func ResetEmailConfirmationSeeders(fs *embed.FS) {
 }
 
 type EmailConfirmationEntityQs struct {
-	User      fireback.QueriableField `cli:"user" table:"email_confirmation" column:"user" qs:"user"`
-	Status    fireback.QueriableField `cli:"status" table:"email_confirmation" column:"status" qs:"status"`
-	Email     fireback.QueriableField `cli:"email" table:"email_confirmation" column:"email" qs:"email"`
-	Key       fireback.QueriableField `cli:"key" table:"email_confirmation" column:"key" qs:"key"`
-	ExpiresAt fireback.QueriableField `cli:"expires-at" table:"email_confirmation" column:"expires_at" qs:"expiresAt"`
+	User      fireback.QueriableField `cli:"user" table:"email_confirmation" typeof:"one" column:"user" qs:"user"`
+	Status    fireback.QueriableField `cli:"status" table:"email_confirmation" typeof:"string" column:"status" qs:"status"`
+	Email     fireback.QueriableField `cli:"email" table:"email_confirmation" typeof:"string" column:"email" qs:"email"`
+	Key       fireback.QueriableField `cli:"key" table:"email_confirmation" typeof:"string" column:"key" qs:"key"`
+	ExpiresAt fireback.QueriableField `cli:"expires-at" table:"email_confirmation" typeof:"string" column:"expires_at" qs:"expiresAt"`
 }
 
 func (x *EmailConfirmationEntityQs) GetQuery() string {
@@ -699,6 +699,10 @@ func EmailConfirmationActionImport(
 
 var EmailConfirmationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -778,6 +782,10 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1133,8 +1141,8 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
 	EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
+	EMAIL_CONFIRMATION_ACTION_PATCH.ToCli(),
 	EmailConfirmationCreateCmd,
-	EmailConfirmationUpdateCmd,
 	EmailConfirmationAskCmd,
 	EmailConfirmationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1301,6 +1309,13 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
+	},
+	Description: "Update the EmailConfirmation entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, EmailConfirmationActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{

@@ -9,7 +9,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// Field selector for the databases
+type SelectableColumn []string
+
 type QueryDSL struct {
+
+	// Used on queries, to select specific columns
+	SelectableColumn SelectableColumn `json:"columns" yaml:"columns"`
+
+	// Used on queries, to select specific columns
+	SelectableColumnSql SelectableColumn `json:"-" yaml:"-"`
+
 	// It's a common string query againt database in text format.
 	Query string `json:"query"`
 

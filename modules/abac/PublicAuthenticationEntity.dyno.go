@@ -33,17 +33,17 @@ func ResetPublicAuthenticationSeeders(fs *embed.FS) {
 }
 
 type PublicAuthenticationEntityQs struct {
-	User                fireback.QueriableField `cli:"user" table:"public_authentication" column:"user" qs:"user"`
-	TotpSecret          fireback.QueriableField `cli:"totp-secret" table:"public_authentication" column:"totp_secret" qs:"totpSecret"`
-	TotpLink            fireback.QueriableField `cli:"totp-link" table:"public_authentication" column:"totp_link" qs:"totpLink"`
-	Passport            fireback.QueriableField `cli:"passport" table:"public_authentication" column:"passport" qs:"passport"`
-	SessionSecret       fireback.QueriableField `cli:"session-secret" table:"public_authentication" column:"session_secret" qs:"sessionSecret"`
-	PassportValue       fireback.QueriableField `cli:"passport-value" table:"public_authentication" column:"passport_value" qs:"passportValue"`
-	IsInCreationProcess fireback.QueriableField `cli:"is-in-creation-process" table:"public_authentication" column:"is_in_creation_process" qs:"isInCreationProcess"`
-	Status              fireback.QueriableField `cli:"status" table:"public_authentication" column:"status" qs:"status"`
-	BlockedUntil        fireback.QueriableField `cli:"blocked-until" table:"public_authentication" column:"blocked_until" qs:"blockedUntil"`
-	Otp                 fireback.QueriableField `cli:"otp" table:"public_authentication" column:"otp" qs:"otp"`
-	RecoveryAbsoluteUrl fireback.QueriableField `cli:"recovery-absolute-url" table:"public_authentication" column:"recovery_absolute_url" qs:"recoveryAbsoluteUrl"`
+	User                fireback.QueriableField `cli:"user" table:"public_authentication" typeof:"one" column:"user" qs:"user"`
+	TotpSecret          fireback.QueriableField `cli:"totp-secret" table:"public_authentication" typeof:"string" column:"totp_secret" qs:"totpSecret"`
+	TotpLink            fireback.QueriableField `cli:"totp-link" table:"public_authentication" typeof:"string" column:"totp_link" qs:"totpLink"`
+	Passport            fireback.QueriableField `cli:"passport" table:"public_authentication" typeof:"one" column:"passport" qs:"passport"`
+	SessionSecret       fireback.QueriableField `cli:"session-secret" table:"public_authentication" typeof:"string" column:"session_secret" qs:"sessionSecret"`
+	PassportValue       fireback.QueriableField `cli:"passport-value" table:"public_authentication" typeof:"string" column:"passport_value" qs:"passportValue"`
+	IsInCreationProcess fireback.QueriableField `cli:"is-in-creation-process" table:"public_authentication" typeof:"bool?" column:"is_in_creation_process" qs:"isInCreationProcess"`
+	Status              fireback.QueriableField `cli:"status" table:"public_authentication" typeof:"string" column:"status" qs:"status"`
+	BlockedUntil        fireback.QueriableField `cli:"blocked-until" table:"public_authentication" typeof:"datenano" column:"blocked_until" qs:"blockedUntil"`
+	Otp                 fireback.QueriableField `cli:"otp" table:"public_authentication" typeof:"string" column:"otp" qs:"otp"`
+	RecoveryAbsoluteUrl fireback.QueriableField `cli:"recovery-absolute-url" table:"public_authentication" typeof:"string" column:"recovery_absolute_url" qs:"recoveryAbsoluteUrl"`
 }
 
 func (x *PublicAuthenticationEntityQs) GetQuery() string {
@@ -755,6 +755,10 @@ func PublicAuthenticationActionImport(
 
 var PublicAuthenticationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -883,6 +887,10 @@ var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1279,8 +1287,8 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 	PUBLIC_AUTHENTICATION_ACTION_QUERY.ToCli(),
 	PUBLIC_AUTHENTICATION_ACTION_TABLE.ToCli(),
+	PUBLIC_AUTHENTICATION_ACTION_PATCH.ToCli(),
 	PublicAuthenticationCreateCmd,
-	PublicAuthenticationUpdateCmd,
 	PublicAuthenticationAskCmd,
 	PublicAuthenticationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1450,6 +1458,13 @@ var PUBLIC_AUTHENTICATION_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PublicAuthenticationEntity",
+	},
+	Description: "Update the PublicAuthentication entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PublicAuthenticationActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PUBLIC_AUTHENTICATION_ACTION_PATCH_BULK = fireback.Module3Action{

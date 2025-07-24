@@ -32,8 +32,8 @@ func ResetCapabilitySeeders(fs *embed.FS) {
 }
 
 type CapabilityEntityQs struct {
-	Name        QueriableField `cli:"name" table:"capability" column:"name" qs:"name"`
-	Description QueriableField `cli:"description" table:"capability" column:"description" qs:"description"`
+	Name        QueriableField `cli:"name" table:"capability" typeof:"string" column:"name" qs:"name"`
+	Description QueriableField `cli:"description" table:"capability" typeof:"string" column:"description" qs:"description"`
 }
 
 func (x *CapabilityEntityQs) GetQuery() string {
@@ -693,6 +693,10 @@ func CapabilityActionImport(
 
 var CapabilityCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -741,6 +745,10 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1076,8 +1084,8 @@ var CapabilityImportExportCommands = []cli.Command{
 var CapabilityCliCommands []cli.Command = []cli.Command{
 	CAPABILITY_ACTION_QUERY.ToCli(),
 	CAPABILITY_ACTION_TABLE.ToCli(),
+	CAPABILITY_ACTION_PATCH.ToCli(),
 	CapabilityCreateCmd,
-	CapabilityUpdateCmd,
 	CapabilityAskCmd,
 	CapabilityCreateInteractiveCmd,
 	GetCommonRemoveQuery(
@@ -1247,6 +1255,13 @@ var CAPABILITY_ACTION_PATCH = Module3Action{
 	},
 	In: &Module3ActionBody{
 		Entity: "CapabilityEntity",
+	},
+	Description: "Update the Capability entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		result, err := CliPatchEntity(c, CapabilityActions.Update, security)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var CAPABILITY_ACTION_PATCH_BULK = Module3Action{

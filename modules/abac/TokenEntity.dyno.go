@@ -33,9 +33,9 @@ func ResetTokenSeeders(fs *embed.FS) {
 }
 
 type TokenEntityQs struct {
-	User       fireback.QueriableField `cli:"user" table:"token" column:"user" qs:"user"`
-	Token      fireback.QueriableField `cli:"token" table:"token" column:"token" qs:"token"`
-	ValidUntil fireback.QueriableField `cli:"valid-until" table:"token" column:"valid_until" qs:"validUntil"`
+	User       fireback.QueriableField `cli:"user" table:"token" typeof:"one" column:"user" qs:"user"`
+	Token      fireback.QueriableField `cli:"token" table:"token" typeof:"string" column:"token" qs:"token"`
+	ValidUntil fireback.QueriableField `cli:"valid-until" table:"token" typeof:"datetime" column:"valid_until" qs:"validUntil"`
 }
 
 func (x *TokenEntityQs) GetQuery() string {
@@ -684,6 +684,10 @@ func TokenActionImport(
 
 var TokenCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -724,6 +728,10 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1059,8 +1067,8 @@ var TokenImportExportCommands = []cli.Command{
 var TokenCliCommands []cli.Command = []cli.Command{
 	TOKEN_ACTION_QUERY.ToCli(),
 	TOKEN_ACTION_TABLE.ToCli(),
+	TOKEN_ACTION_PATCH.ToCli(),
 	TokenCreateCmd,
-	TokenUpdateCmd,
 	TokenAskCmd,
 	TokenCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1229,6 +1237,13 @@ var TOKEN_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
+	},
+	Description: "Update the Token entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, TokenActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var TOKEN_ACTION_PATCH_BULK = fireback.Module3Action{

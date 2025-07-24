@@ -53,22 +53,22 @@ func (x *UserPrimaryAddress) RootObjectName() string {
 }
 
 type UserEntityQs struct {
-	FirstName      fireback.QueriableField `cli:"first-name" table:"user" column:"first_name" qs:"firstName"`
-	LastName       fireback.QueriableField `cli:"last-name" table:"user" column:"last_name" qs:"lastName"`
-	Photo          fireback.QueriableField `cli:"photo" table:"user" column:"photo" qs:"photo"`
-	Gender         fireback.QueriableField `cli:"gender" table:"user" column:"gender" qs:"gender"`
-	Title          fireback.QueriableField `cli:"title" table:"user" column:"title" qs:"title"`
-	BirthDate      fireback.QueriableField `cli:"birth-date" table:"user" column:"birth_date" qs:"birthDate"`
-	Avatar         fireback.QueriableField `cli:"avatar" table:"user" column:"avatar" qs:"avatar"`
-	LastIpAddress  fireback.QueriableField `cli:"last-ip-address" table:"user" column:"last_ip_address" qs:"lastIpAddress"`
+	FirstName      fireback.QueriableField `cli:"first-name" table:"user" typeof:"string" column:"first_name" qs:"firstName"`
+	LastName       fireback.QueriableField `cli:"last-name" table:"user" typeof:"string" column:"last_name" qs:"lastName"`
+	Photo          fireback.QueriableField `cli:"photo" table:"user" typeof:"string" column:"photo" qs:"photo"`
+	Gender         fireback.QueriableField `cli:"gender" table:"user" typeof:"int?" column:"gender" qs:"gender"`
+	Title          fireback.QueriableField `cli:"title" table:"user" typeof:"string" column:"title" qs:"title"`
+	BirthDate      fireback.QueriableField `cli:"birth-date" table:"user" typeof:"date" column:"birth_date" qs:"birthDate"`
+	Avatar         fireback.QueriableField `cli:"avatar" table:"user" typeof:"string" column:"avatar" qs:"avatar"`
+	LastIpAddress  fireback.QueriableField `cli:"last-ip-address" table:"user" typeof:"string" column:"last_ip_address" qs:"lastIpAddress"`
 	PrimaryAddress struct {
-		AddressLine1    fireback.QueriableField `cli:"primary-address.address-line1" table:"user" column:"address_line1" qs:"addressLine1"`
-		AddressLine2    fireback.QueriableField `cli:"primary-address.address-line2" table:"user" column:"address_line2" qs:"addressLine2"`
-		City            fireback.QueriableField `cli:"primary-address.city" table:"user" column:"city" qs:"city"`
-		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" column:"state_or_province" qs:"stateOrProvince"`
-		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" column:"postal_code" qs:"postalCode"`
-		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" column:"country_code" qs:"countryCode"`
-	}
+		AddressLine1    fireback.QueriableField `cli:"primary-address.address-line1" table:"user" typeof:"string" column:"address_line1" qs:"addressLine1"`
+		AddressLine2    fireback.QueriableField `cli:"primary-address.address-line2" table:"user" typeof:"string?" column:"address_line2" qs:"addressLine2"`
+		City            fireback.QueriableField `cli:"primary-address.city" table:"user" typeof:"string?" column:"city" qs:"city"`
+		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" typeof:"string?" column:"state_or_province" qs:"stateOrProvince"`
+		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" typeof:"string?" column:"postal_code" qs:"postalCode"`
+		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" typeof:"string?" column:"country_code" qs:"countryCode"`
+	} `cli:"primary-address" table:"user" column:"primary_address" typeof:"embed" qs:"primaryAddress" preload:"PrimaryAddress"`
 }
 
 func (x *UserEntityQs) GetQuery() string {
@@ -786,6 +786,10 @@ func UserActionImport(
 
 var UserCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -941,6 +945,10 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1367,8 +1375,8 @@ var UserImportExportCommands = []cli.Command{
 var UserCliCommands []cli.Command = []cli.Command{
 	USER_ACTION_QUERY.ToCli(),
 	USER_ACTION_TABLE.ToCli(),
+	USER_ACTION_PATCH.ToCli(),
 	UserCreateCmd,
-	UserUpdateCmd,
 	UserAskCmd,
 	UserCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1537,6 +1545,13 @@ var USER_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
+	},
+	Description: "Update the User entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, UserActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var USER_ACTION_PATCH_BULK = fireback.Module3Action{

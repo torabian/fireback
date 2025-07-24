@@ -3,14 +3,11 @@
 package fireback
 
 import (
-	"fmt"
-
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
-	_ "modernc.org/sqlite"
 )
 
 func GetSQLiteDialector(dsn string) gorm.Dialector {
-	fmt.Println("Called")
+
 	return sqlite.Open(dsn)
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,11 @@ var CommonQueryFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:  "verbose",
 		Usage: "Verbose query, show fireback columns as well such as workspace, etc",
+	},
+	&cli.StringFlag{
+		Name:     "x-select",
+		Required: false,
+		Usage:    `Select only specific fields to be queried and returned`,
 	},
 	&cli.BoolFlag{
 		Name:  "minimal",
@@ -38,9 +44,9 @@ var CommonQueryFlags = []cli.Flag{
 		Usage: "Items per page",
 		Value: 0,
 	},
-	&cli.BoolFlag{
-		Name:  "yaml",
-		Usage: "Make result as yaml file",
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Change the return results to such as as 'yaml'",
 	},
 	&cli.StringFlag{
 		Name:  "sort",
@@ -96,51 +102,6 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Comman
 
 }
 
-func GetCommonQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
-
-	return cli.Command{
-
-		Name:    "query",
-		Aliases: []string{"q"},
-		Flags:   CommonQueryFlags,
-		Usage:   "Queries all of the entities in database based on the standard query format",
-		Action: func(c *cli.Context) error {
-			CommonCliQueryCmd(
-				c,
-				fn,
-			)
-
-			return nil
-		},
-	}
-
-}
-
-// This is with security
-func GetCommonQuery2[T any](
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
-	security *SecurityModel,
-) cli.Command {
-
-	return cli.Command{
-
-		Name:    "query",
-		Aliases: []string{"q"},
-		Flags:   CommonQueryFlags,
-		Usage:   "Queries all of the entities in database based on the standard query format (s+)",
-		Action: func(c *cli.Context) error {
-			CommonCliQueryCmd2(
-				c,
-				fn,
-				security,
-			)
-
-			return nil
-		},
-	}
-
-}
-
 func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
 
 	return cli.Command{
@@ -150,9 +111,11 @@ func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, e
 		Flags:   CommonQueryFlags,
 		Usage:   "Same as query, but in recursive manner",
 		Action: func(c *cli.Context) error {
-			CommonCliQueryCmd(
+			CommonCliQueryCmd3(
 				c,
 				fn,
+				nil,
+				nil,
 			)
 
 			return nil
@@ -170,9 +133,11 @@ func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMe
 		Flags:   CommonQueryFlags,
 		Usage:   "Extended query, provides way more details, and combines the one-to-many hirechical relations",
 		Action: func(c *cli.Context) error {
-			CommonCliQueryCmd(
+			CommonCliQueryCmd3(
 				c,
 				fn,
+				nil,
+				nil,
 			)
 
 			return nil
@@ -190,9 +155,11 @@ func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta,
 		Flags:   CommonQueryFlags,
 		Usage:   "Pivots the the entire table based on conditions",
 		Action: func(c *cli.Context) error {
-			CommonCliQueryCmd(
+			CommonCliQueryCmd3(
 				c,
 				fn,
+				nil,
+				nil,
 			)
 
 			return nil
@@ -345,9 +312,7 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 	resultIsNil := result == nil || (reflect.ValueOf(result).Kind() == reflect.Ptr && reflect.ValueOf(result).IsNil())
 
 	if !resultIsNil {
-		body, _ := json.MarshalIndent(result, "", "  ")
-		fmt.Println(string(body))
-
+		cliSuccessPrinter(c, result)
 	}
 
 	if err != nil {
@@ -436,6 +401,7 @@ func (q QueriableField) String() string {
 }
 
 func QueriableFieldFromCliContext(v reflect.Value, parent string, c *cli.Context) {
+
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem() // Dereference pointer
 	}
@@ -509,6 +475,74 @@ func QueriableFieldFromGinContext(v reflect.Value, parent string, c *gin.Context
 		}
 
 	}
+}
+
+type QuerySelectionInfo struct {
+	Columns  []string
+	Preloads []string
+}
+
+func (x QuerySelectionInfo) Json() string {
+
+	str, _ := json.MarshalIndent(x, "", "  ")
+	return (string(str))
+
+}
+
+func DatabaseColumnsResolver(
+	v reflect.Value,
+	parent string,
+	requestedFields []string,
+	value QuerySelectionInfo,
+	autoInclude bool,
+) QuerySelectionInfo {
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return value
+	}
+
+	t := v.Type()
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		qs := field.Tag.Get("qs")
+		column := field.Tag.Get("column")
+		preload := field.Tag.Get("preload")
+		typeof := field.Tag.Get("typeof")
+		fieldValue := v.Field(i)
+
+		fullName := parent + qs
+
+		if qs == "" {
+			continue
+		}
+
+		// Nested struct
+		if typeof == "one" || typeof == "object" || typeof == "array" || typeof == "many2many" {
+			if slices.Contains(requestedFields, qs) {
+				if preload != "" {
+					value.Preloads = append(value.Preloads, preload)
+				}
+			}
+
+			value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, false)
+		} else if typeof == "embed" {
+			if slices.Contains(requestedFields, qs) {
+				value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, true)
+			}
+		} else {
+			if fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
+				if slices.Contains(requestedFields, qs) || autoInclude {
+					value.Columns = append(value.Columns, column)
+				}
+			}
+		}
+
+	}
+
+	return value
 }
 
 func GenerateQueryStringStyle(v reflect.Value, parent string) string {

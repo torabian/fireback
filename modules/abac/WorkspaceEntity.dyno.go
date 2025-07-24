@@ -35,9 +35,9 @@ func ResetWorkspaceSeeders(fs *embed.FS) {
 }
 
 type WorkspaceEntityQs struct {
-	Description fireback.QueriableField `cli:"description" table:"workspace" column:"description" qs:"description"`
-	Name        fireback.QueriableField `cli:"name" table:"workspace" column:"name" qs:"name"`
-	Type        fireback.QueriableField `cli:"type" table:"workspace" column:"type" qs:"type"`
+	Description fireback.QueriableField `cli:"description" table:"workspace" typeof:"string" column:"description" qs:"description"`
+	Name        fireback.QueriableField `cli:"name" table:"workspace" typeof:"string" column:"name" qs:"name"`
+	Type        fireback.QueriableField `cli:"type" table:"workspace" typeof:"one" column:"type" qs:"type"`
 }
 
 func (x *WorkspaceEntityQs) GetQuery() string {
@@ -735,6 +735,10 @@ func WorkspaceActionImport(
 
 var WorkspaceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -788,6 +792,10 @@ var WorkspaceCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1131,8 +1139,8 @@ var WorkspaceImportExportCommands = []cli.Command{
 var WorkspaceCliCommands []cli.Command = []cli.Command{
 	WORKSPACE_ACTION_QUERY.ToCli(),
 	WORKSPACE_ACTION_TABLE.ToCli(),
+	WORKSPACE_ACTION_PATCH.ToCli(),
 	WorkspaceCreateCmd,
-	WorkspaceUpdateCmd,
 	WorkspaceAskCmd,
 	WorkspaceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1326,6 +1334,13 @@ var WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceEntity",
+	},
+	Description: "Update the Workspace entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, WorkspaceActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var WORKSPACE_ACTION_PATCH_BULK = fireback.Module3Action{

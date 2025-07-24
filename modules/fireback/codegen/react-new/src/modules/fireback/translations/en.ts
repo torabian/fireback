@@ -716,6 +716,9 @@ export const enTranslations = {
   },
   wokspaces: {
     body: "Body",
+    typeDescription: "Description",
+    typeDescriptionHint:
+      "Describe the workspace type, when user tries to signup will see.",
     cascadeNotificationConfig:
       "Cascade notification config to the sub workspaces",
     cascadeNotificationConfigHint:
@@ -789,6 +792,9 @@ export const enTranslations = {
     workspaceTypeSlugHint:
       "The path that publicly will be available to users, if they signup through this account this role would be assigned to them.",
     workspaceTypeTitle: "Title",
+    workspaceTypeUniqueId: "Unique Id",
+    workspaceTypeUniqueIdHint:
+      "Unique id can be used to redirect user to direct signin",
     workspaceTypeTitleHint: "The title of the Workspace",
   },
 };

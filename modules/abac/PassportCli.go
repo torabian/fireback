@@ -136,6 +136,6 @@ var PassportCli cli.Command = cli.Command{
 			reflect.ValueOf(&PassportEntity{}).Elem(),
 			PassportActions.Remove,
 		),
-		fireback.GetCommonQuery(PassportActions.Query),
+		PASSPORT_ACTION_QUERY.ToCli(),
 	}, fireback.FirebackCustomActionsCli...),
 }

@@ -70,6 +70,19 @@ func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (*V, *IErr
 
 }
 
+func CliPatchEntity[T any, V any](c *cli.Context, fn func(QueryDSL, T) (*V, *IError), security *SecurityModel) (*V, *IError) {
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
+	var body T
+
+	if result, err := BindCli(c, &body); err != nil {
+		fmt.Println("CORRECT_BODY_SIGNATURE_IS_NEEDED", err)
+		return nil, GormErrorToIError(err)
+	} else {
+		return fn(f, CastAnyToT[T](result))
+	}
+
+}
+
 func ginBodyToBytes(c *gin.Context) ([]byte, *IError) {
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -212,16 +225,30 @@ func PolyglotQueryHandler(entity any, query *QueryDSL) map[string]interface{} {
 }
 
 func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMeta) gin.H {
-	mappedItems := []map[string]interface{}{}
+
+	var formatted = []json.RawMessage{}
 	for _, item := range items {
+		if len([]string(f.SelectableColumn)) > 0 {
+			data, _ := MarshalWithWhitelist(item, []string(f.SelectableColumn))
+			formatted = append(formatted, json.RawMessage(data))
+		} else {
+
+			data, _ := json.Marshal(item)
+			formatted = append(formatted, json.RawMessage(data))
+		}
+	}
+
+	for index, item := range formatted {
 		content := PolyglotQueryHandler(item, &f)
-		mappedItems = append(mappedItems, content)
+		raw, _ := json.Marshal(content)
+		jsonMsg := json.RawMessage(raw)
+		formatted[index] = jsonMsg
 	}
 
 	data := gin.H{
 		"startIndex":   f.StartIndex,
 		"itemsPerPage": f.ItemsPerPage,
-		"items":        mappedItems,
+		"items":        formatted,
 	}
 
 	if meta != nil {
@@ -230,6 +257,16 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 		}
 		data["totalItems"] = meta.TotalItems
 		data["totalAvailableItems"] = meta.TotalAvailableItems
+	}
+
+	if f.G != nil && IsYaml(f.G) || f.C != nil && (f.C.String("x-accept") == "application/x-yaml" || f.C.String("x-accept") == "application/yaml" || f.C.String("x-accept") == "text/yaml" || f.C.String("x-accept") == "yaml" || f.C.String("x-accept") == "yml") {
+		var yamlFormatted []any
+		for _, item := range formatted {
+			var m any
+			_ = json.Unmarshal(item, &m)
+			yamlFormatted = append(yamlFormatted, m)
+		}
+		data["items"] = yamlFormatted
 	}
 
 	return gin.H{

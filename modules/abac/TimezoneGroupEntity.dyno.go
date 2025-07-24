@@ -100,12 +100,12 @@ func (x *TimezoneGroupUtcItems) RootObjectName() string {
 }
 
 type TimezoneGroupEntityQs struct {
-	Value    fireback.QueriableField `cli:"value" table:"timezone_group" column:"value" qs:"value"`
-	Abbr     fireback.QueriableField `cli:"abbr" table:"timezone_group" column:"abbr" qs:"abbr"`
-	Offset   fireback.QueriableField `cli:"offset" table:"timezone_group" column:"offset" qs:"offset"`
-	Isdst    fireback.QueriableField `cli:"isdst" table:"timezone_group" column:"isdst" qs:"isdst"`
-	Text     fireback.QueriableField `cli:"text" table:"timezone_group" column:"text" qs:"text"`
-	UtcItems fireback.QueriableField `cli:"utc-items" table:"timezone_group" column:"utc_items" qs:"utcItems"`
+	Value    fireback.QueriableField `cli:"value" table:"timezone_group" typeof:"string" column:"value" qs:"value"`
+	Abbr     fireback.QueriableField `cli:"abbr" table:"timezone_group" typeof:"string" column:"abbr" qs:"abbr"`
+	Offset   fireback.QueriableField `cli:"offset" table:"timezone_group" typeof:"int64" column:"offset" qs:"offset"`
+	Isdst    fireback.QueriableField `cli:"isdst" table:"timezone_group" typeof:"bool" column:"isdst" qs:"isdst"`
+	Text     fireback.QueriableField `cli:"text" table:"timezone_group" typeof:"string" column:"text" qs:"text"`
+	UtcItems fireback.QueriableField `cli:"utc-items" table:"timezone_group" typeof:"array" column:"utc_items" qs:"utcItems"`
 }
 
 func (x *TimezoneGroupEntityQs) GetQuery() string {
@@ -352,7 +352,9 @@ func TimezoneGroupUtcItemsActionUpdate(
 		dbref = query.Tx
 	}
 	query.Tx = dbref
-	err := dbref.UpdateColumns(&dto).Error
+	cond2 := &TimezoneGroupUtcItems{LinkerId: fireback.NewString(query.LinkerId), UniqueId: query.UniqueId}
+	q := query.Tx.Where(cond2)
+	err := q.UpdateColumns(&dto).Error
 	if err != nil {
 		err := fireback.GormErrorToIError(err)
 		return nil, err
@@ -883,6 +885,10 @@ func TimezoneGroupActionImport(
 
 var TimezoneGroupCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -975,6 +981,10 @@ var TimezoneGroupCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1337,8 +1347,8 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 	TIMEZONE_GROUP_ACTION_QUERY.ToCli(),
 	TIMEZONE_GROUP_ACTION_TABLE.ToCli(),
+	TIMEZONE_GROUP_ACTION_PATCH.ToCli(),
 	TimezoneGroupCreateCmd,
-	TimezoneGroupUpdateCmd,
 	TimezoneGroupAskCmd,
 	TimezoneGroupCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1495,6 +1505,13 @@ var TIMEZONE_GROUP_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "TimezoneGroupEntity",
+	},
+	Description: "Update the TimezoneGroup entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, TimezoneGroupActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var TIMEZONE_GROUP_ACTION_PATCH_BULK = fireback.Module3Action{

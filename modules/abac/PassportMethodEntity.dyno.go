@@ -33,9 +33,9 @@ func ResetPassportMethodSeeders(fs *embed.FS) {
 }
 
 type PassportMethodEntityQs struct {
-	Type      fireback.QueriableField `cli:"type" table:"passport_method" column:"type" qs:"type"`
-	Region    fireback.QueriableField `cli:"region" table:"passport_method" column:"region" qs:"region"`
-	ClientKey fireback.QueriableField `cli:"client-key" table:"passport_method" column:"client_key" qs:"clientKey"`
+	Type      fireback.QueriableField `cli:"type" table:"passport_method" typeof:"enum" column:"type" qs:"type"`
+	Region    fireback.QueriableField `cli:"region" table:"passport_method" typeof:"enum" column:"region" qs:"region"`
+	ClientKey fireback.QueriableField `cli:"client-key" table:"passport_method" typeof:"string" column:"client_key" qs:"clientKey"`
 }
 
 func (x *PassportMethodEntityQs) GetQuery() string {
@@ -687,6 +687,10 @@ func PassportMethodActionImport(
 
 var PassportMethodCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -749,6 +753,10 @@ var PassportMethodCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1044,8 +1052,8 @@ var PassportMethodImportExportCommands = []cli.Command{
 var PassportMethodCliCommands []cli.Command = []cli.Command{
 	PASSPORT_METHOD_ACTION_QUERY.ToCli(),
 	PASSPORT_METHOD_ACTION_TABLE.ToCli(),
+	PASSPORT_METHOD_ACTION_PATCH.ToCli(),
 	PassportMethodCreateCmd,
-	PassportMethodUpdateCmd,
 	PassportMethodAskCmd,
 	PassportMethodCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1220,6 +1228,13 @@ var PASSPORT_METHOD_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
+	},
+	Description: "Update the PassportMethod entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PassportMethodActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PASSPORT_METHOD_ACTION_PATCH_BULK = fireback.Module3Action{

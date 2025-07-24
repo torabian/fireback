@@ -33,8 +33,8 @@ func ResetRoleSeeders(fs *embed.FS) {
 }
 
 type RoleEntityQs struct {
-	Name         fireback.QueriableField `cli:"name" table:"role" column:"name" qs:"name"`
-	Capabilities fireback.QueriableField `cli:"capabilities" table:"role" column:"capabilities" qs:"capabilities"`
+	Name         fireback.QueriableField `cli:"name" table:"role" typeof:"string" column:"name" qs:"name"`
+	Capabilities fireback.QueriableField `cli:"capabilities" table:"role" typeof:"many2many" column:"capabilities" qs:"capabilities"`
 }
 
 func (x *RoleEntityQs) GetQuery() string {
@@ -714,6 +714,10 @@ func RoleActionImport(
 
 var RoleCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -754,6 +758,10 @@ var RoleCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1091,8 +1099,8 @@ var RoleImportExportCommands = []cli.Command{
 var RoleCliCommands []cli.Command = []cli.Command{
 	ROLE_ACTION_QUERY.ToCli(),
 	ROLE_ACTION_TABLE.ToCli(),
+	ROLE_ACTION_PATCH.ToCli(),
 	RoleCreateCmd,
-	RoleUpdateCmd,
 	RoleAskCmd,
 	RoleCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1259,6 +1267,13 @@ var ROLE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "RoleEntity",
+	},
+	Description: "Update the Role entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, RoleActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var ROLE_ACTION_PATCH_BULK = fireback.Module3Action{

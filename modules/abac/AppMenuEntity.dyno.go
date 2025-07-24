@@ -35,11 +35,11 @@ func ResetAppMenuSeeders(fs *embed.FS) {
 }
 
 type AppMenuEntityQs struct {
-	Label         fireback.QueriableField `cli:"label" table:"app_menu" column:"label" qs:"label"`
-	Href          fireback.QueriableField `cli:"href" table:"app_menu" column:"href" qs:"href"`
-	Icon          fireback.QueriableField `cli:"icon" table:"app_menu" column:"icon" qs:"icon"`
-	ActiveMatcher fireback.QueriableField `cli:"active-matcher" table:"app_menu" column:"active_matcher" qs:"activeMatcher"`
-	Capability    fireback.QueriableField `cli:"capability" table:"app_menu" column:"capability" qs:"capability"`
+	Label         fireback.QueriableField `cli:"label" table:"app_menu" typeof:"string" column:"label" qs:"label"`
+	Href          fireback.QueriableField `cli:"href" table:"app_menu" typeof:"string" column:"href" qs:"href"`
+	Icon          fireback.QueriableField `cli:"icon" table:"app_menu" typeof:"string" column:"icon" qs:"icon"`
+	ActiveMatcher fireback.QueriableField `cli:"active-matcher" table:"app_menu" typeof:"string" column:"active_matcher" qs:"activeMatcher"`
+	Capability    fireback.QueriableField `cli:"capability" table:"app_menu" typeof:"one" column:"capability" qs:"capability"`
 }
 
 func (x *AppMenuEntityQs) GetQuery() string {
@@ -773,6 +773,10 @@ func AppMenuActionImport(
 
 var AppMenuCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -852,6 +856,10 @@ var AppMenuCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1207,8 +1215,8 @@ var AppMenuImportExportCommands = []cli.Command{
 var AppMenuCliCommands []cli.Command = []cli.Command{
 	APP_MENU_ACTION_QUERY.ToCli(),
 	APP_MENU_ACTION_TABLE.ToCli(),
+	APP_MENU_ACTION_PATCH.ToCli(),
 	AppMenuCreateCmd,
-	AppMenuUpdateCmd,
 	AppMenuAskCmd,
 	AppMenuCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1396,6 +1404,13 @@ var APP_MENU_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
+	},
+	Description: "Update the AppMenu entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, AppMenuActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var APP_MENU_ACTION_PATCH_BULK = fireback.Module3Action{

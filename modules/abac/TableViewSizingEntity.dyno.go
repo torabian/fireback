@@ -33,8 +33,8 @@ func ResetTableViewSizingSeeders(fs *embed.FS) {
 }
 
 type TableViewSizingEntityQs struct {
-	TableName fireback.QueriableField `cli:"table-name" table:"table_view_sizing" column:"table_name" qs:"tableName"`
-	Sizes     fireback.QueriableField `cli:"sizes" table:"table_view_sizing" column:"sizes" qs:"sizes"`
+	TableName fireback.QueriableField `cli:"table-name" table:"table_view_sizing" typeof:"string" column:"table_name" qs:"tableName"`
+	Sizes     fireback.QueriableField `cli:"sizes" table:"table_view_sizing" typeof:"string" column:"sizes" qs:"sizes"`
 }
 
 func (x *TableViewSizingEntityQs) GetQuery() string {
@@ -675,6 +675,10 @@ func TableViewSizingActionImport(
 
 var TableViewSizingCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -723,6 +727,10 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1054,8 +1062,8 @@ var TableViewSizingImportExportCommands = []cli.Command{
 var TableViewSizingCliCommands []cli.Command = []cli.Command{
 	TABLE_VIEW_SIZING_ACTION_QUERY.ToCli(),
 	TABLE_VIEW_SIZING_ACTION_TABLE.ToCli(),
+	TABLE_VIEW_SIZING_ACTION_PATCH.ToCli(),
 	TableViewSizingCreateCmd,
-	TableViewSizingUpdateCmd,
 	TableViewSizingAskCmd,
 	TableViewSizingCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1223,6 +1231,13 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
+	},
+	Description: "Update the TableViewSizing entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, TableViewSizingActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = fireback.Module3Action{

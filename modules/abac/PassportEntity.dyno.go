@@ -33,15 +33,15 @@ func ResetPassportSeeders(fs *embed.FS) {
 }
 
 type PassportEntityQs struct {
-	ThirdPartyVerifier fireback.QueriableField `cli:"third-party-verifier" table:"passport" column:"third_party_verifier" qs:"thirdPartyVerifier"`
-	Type               fireback.QueriableField `cli:"type" table:"passport" column:"type" qs:"type"`
-	User               fireback.QueriableField `cli:"user" table:"passport" column:"user" qs:"user"`
-	Value              fireback.QueriableField `cli:"value" table:"passport" column:"value" qs:"value"`
-	TotpSecret         fireback.QueriableField `cli:"totp-secret" table:"passport" column:"totp_secret" qs:"totpSecret"`
-	TotpConfirmed      fireback.QueriableField `cli:"totp-confirmed" table:"passport" column:"totp_confirmed" qs:"totpConfirmed"`
-	Password           fireback.QueriableField `cli:"password" table:"passport" column:"password" qs:"password"`
-	Confirmed          fireback.QueriableField `cli:"confirmed" table:"passport" column:"confirmed" qs:"confirmed"`
-	AccessToken        fireback.QueriableField `cli:"access-token" table:"passport" column:"access_token" qs:"accessToken"`
+	ThirdPartyVerifier fireback.QueriableField `cli:"third-party-verifier" table:"passport" typeof:"string" column:"third_party_verifier" qs:"thirdPartyVerifier"`
+	Type               fireback.QueriableField `cli:"type" table:"passport" typeof:"string" column:"type" qs:"type"`
+	User               fireback.QueriableField `cli:"user" table:"passport" typeof:"one" column:"user" qs:"user"`
+	Value              fireback.QueriableField `cli:"value" table:"passport" typeof:"string" column:"value" qs:"value"`
+	TotpSecret         fireback.QueriableField `cli:"totp-secret" table:"passport" typeof:"string" column:"totp_secret" qs:"totpSecret"`
+	TotpConfirmed      fireback.QueriableField `cli:"totp-confirmed" table:"passport" typeof:"bool?" column:"totp_confirmed" qs:"totpConfirmed"`
+	Password           fireback.QueriableField `cli:"password" table:"passport" typeof:"string" column:"password" qs:"password"`
+	Confirmed          fireback.QueriableField `cli:"confirmed" table:"passport" typeof:"bool?" column:"confirmed" qs:"confirmed"`
+	AccessToken        fireback.QueriableField `cli:"access-token" table:"passport" typeof:"string" column:"access_token" qs:"accessToken"`
 }
 
 func (x *PassportEntityQs) GetQuery() string {
@@ -735,6 +735,10 @@ func PassportActionImport(
 
 var PassportCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -850,6 +854,10 @@ var PassportCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1235,8 +1243,8 @@ var PassportImportExportCommands = []cli.Command{
 var PassportCliCommands []cli.Command = []cli.Command{
 	PASSPORT_ACTION_QUERY.ToCli(),
 	PASSPORT_ACTION_TABLE.ToCli(),
+	PASSPORT_ACTION_PATCH.ToCli(),
 	PassportCreateCmd,
-	PassportUpdateCmd,
 	PassportAskCmd,
 	PassportCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1405,6 +1413,13 @@ var PASSPORT_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PassportEntity",
+	},
+	Description: "Update the Passport entity by unique id",
+	CliName:     "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PassportActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PASSPORT_ACTION_PATCH_BULK = fireback.Module3Action{
