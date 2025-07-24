@@ -16,11 +16,11 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/getkin/kin-openapi v0.124.0
-	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/gizak/termui/v3 v3.1.0
+	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
@@ -55,6 +55,8 @@ require (
 	github.com/swaggest/openapi-go v0.2.51
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/tdewolff/minify/v2 v2.23.8
+	github.com/tidwall/gjson v1.18.0
+	github.com/tidwall/sjson v1.2.5
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli v1.22.9
 	github.com/wk8/go-ordered-map/v2 v2.1.8
@@ -62,16 +64,15 @@ require (
 	github.com/yaa110/go-persian-calendar v1.1.5
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.39.0
-	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
-	golang.org/x/sync v0.15.0
-	golang.org/x/text v0.26.0
+	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
+	golang.org/x/sync v0.16.0
+	golang.org/x/text v0.27.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/postgres v1.5.6
 	gorm.io/driver/sqlite v1.5.2
-	gorm.io/gorm v1.25.7
-	modernc.org/sqlite v1.38.0
+	gorm.io/gorm v1.30.1
 )
 
 require (
@@ -97,6 +98,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
+	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -172,10 +174,8 @@ require (
 	github.com/swaggest/refl v1.3.0 // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/parse/v2 v2.8.1 // indirect
-	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
@@ -193,4 +193,5 @@ require (
 	modernc.org/libc v1.66.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
+	modernc.org/sqlite v1.38.0 // indirect
 )
