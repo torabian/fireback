@@ -1187,8 +1187,8 @@ var InvoiceTransactionImportExportCommands = []cli.Command{
 var InvoiceTransactionCliCommands []cli.Command = []cli.Command{
 	INVOICE_TRANSACTION_ACTION_QUERY.ToCli(),
 	INVOICE_TRANSACTION_ACTION_TABLE.ToCli(),
+	INVOICE_TRANSACTION_ACTION_PATCH.ToCli(),
 	InvoiceTransactionCreateCmd,
-	InvoiceTransactionUpdateCmd,
 	InvoiceTransactionAskCmd,
 	InvoiceTransactionCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1356,7 +1356,8 @@ var INVOICE_TRANSACTION_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "InvoiceTransactionEntity",
 	},
-	CliName: "update",
+	Description: "Update the InvoiceTransaction entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, InvoiceTransactionActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

@@ -1093,8 +1093,8 @@ var PaymentConfigImportExportCommands = []cli.Command{
 var PaymentConfigCliCommands []cli.Command = []cli.Command{
 	PAYMENT_CONFIG_ACTION_QUERY.ToCli(),
 	PAYMENT_CONFIG_ACTION_TABLE.ToCli(),
+	PAYMENT_CONFIG_ACTION_PATCH.ToCli(),
 	PaymentConfigCreateCmd,
-	PaymentConfigUpdateCmd,
 	PaymentConfigAskCmd,
 	PaymentConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1272,7 +1272,8 @@ var PAYMENT_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PaymentConfigEntity",
 	},
-	CliName: "update",
+	Description: "Update the PaymentConfig entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PaymentConfigActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

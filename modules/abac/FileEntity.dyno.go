@@ -1347,8 +1347,8 @@ var FileImportExportCommands = []cli.Command{
 var FileCliCommands []cli.Command = []cli.Command{
 	FILE_ACTION_QUERY.ToCli(),
 	FILE_ACTION_TABLE.ToCli(),
+	FILE_ACTION_PATCH.ToCli(),
 	FileCreateCmd,
-	FileUpdateCmd,
 	FileAskCmd,
 	FileCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1516,7 +1516,8 @@ var FILE_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
 	},
-	CliName: "update",
+	Description: "Update the File entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, FileActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

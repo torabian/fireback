@@ -1243,8 +1243,8 @@ var PassportImportExportCommands = []cli.Command{
 var PassportCliCommands []cli.Command = []cli.Command{
 	PASSPORT_ACTION_QUERY.ToCli(),
 	PASSPORT_ACTION_TABLE.ToCli(),
+	PASSPORT_ACTION_PATCH.ToCli(),
 	PassportCreateCmd,
-	PassportUpdateCmd,
 	PassportAskCmd,
 	PassportCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1414,7 +1414,8 @@ var PASSPORT_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PassportEntity",
 	},
-	CliName: "update",
+	Description: "Update the Passport entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PassportActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

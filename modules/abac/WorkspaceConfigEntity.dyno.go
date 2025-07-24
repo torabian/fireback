@@ -1226,8 +1226,8 @@ var WorkspaceConfigImportExportCommands = []cli.Command{
 var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
 	WORKSPACE_CONFIG_ACTION_QUERY.ToCli(),
 	WORKSPACE_CONFIG_ACTION_TABLE.ToCli(),
+	WORKSPACE_CONFIG_ACTION_PATCH.ToCli(),
 	WorkspaceConfigCreateCmd,
-	WorkspaceConfigUpdateCmd,
 	WorkspaceConfigAskCmd,
 	WorkspaceConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1405,7 +1405,8 @@ var WORKSPACE_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
 	},
-	CliName: "update",
+	Description: "Update the WorkspaceConfig entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, WorkspaceConfigActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

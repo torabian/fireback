@@ -1084,8 +1084,8 @@ var CapabilityImportExportCommands = []cli.Command{
 var CapabilityCliCommands []cli.Command = []cli.Command{
 	CAPABILITY_ACTION_QUERY.ToCli(),
 	CAPABILITY_ACTION_TABLE.ToCli(),
+	CAPABILITY_ACTION_PATCH.ToCli(),
 	CapabilityCreateCmd,
-	CapabilityUpdateCmd,
 	CapabilityAskCmd,
 	CapabilityCreateInteractiveCmd,
 	GetCommonRemoveQuery(
@@ -1256,7 +1256,8 @@ var CAPABILITY_ACTION_PATCH = Module3Action{
 	In: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
-	CliName: "update",
+	Description: "Update the Capability entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPatchEntity(c, CapabilityActions.Update, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})

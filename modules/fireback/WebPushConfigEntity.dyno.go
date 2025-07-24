@@ -1029,8 +1029,8 @@ var WebPushConfigImportExportCommands = []cli.Command{
 var WebPushConfigCliCommands []cli.Command = []cli.Command{
 	WEB_PUSH_CONFIG_ACTION_QUERY.ToCli(),
 	WEB_PUSH_CONFIG_ACTION_TABLE.ToCli(),
+	WEB_PUSH_CONFIG_ACTION_PATCH.ToCli(),
 	WebPushConfigCreateCmd,
-	WebPushConfigUpdateCmd,
 	WebPushConfigAskCmd,
 	WebPushConfigCreateInteractiveCmd,
 	GetCommonRemoveQuery(
@@ -1203,7 +1203,8 @@ var WEB_PUSH_CONFIG_ACTION_PATCH = Module3Action{
 	In: &Module3ActionBody{
 		Entity: "WebPushConfigEntity",
 	},
-	CliName: "update",
+	Description: "Update the WebPushConfig entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPatchEntity(c, WebPushConfigActions.Update, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})

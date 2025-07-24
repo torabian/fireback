@@ -1347,8 +1347,8 @@ var PaymentParameterImportExportCommands = []cli.Command{
 var PaymentParameterCliCommands []cli.Command = []cli.Command{
 	PAYMENT_PARAMETER_ACTION_QUERY.ToCli(),
 	PAYMENT_PARAMETER_ACTION_TABLE.ToCli(),
+	PAYMENT_PARAMETER_ACTION_PATCH.ToCli(),
 	PaymentParameterCreateCmd,
-	PaymentParameterUpdateCmd,
 	PaymentParameterAskCmd,
 	PaymentParameterCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1518,7 +1518,8 @@ var PAYMENT_PARAMETER_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PaymentParameterEntity",
 	},
-	CliName: "update",
+	Description: "Update the PaymentParameter entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PaymentParameterActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

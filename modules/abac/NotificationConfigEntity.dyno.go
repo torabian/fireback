@@ -1752,8 +1752,8 @@ var NotificationConfigImportExportCommands = []cli.Command{
 var NotificationConfigCliCommands []cli.Command = []cli.Command{
 	NOTIFICATION_CONFIG_ACTION_QUERY.ToCli(),
 	NOTIFICATION_CONFIG_ACTION_TABLE.ToCli(),
+	NOTIFICATION_CONFIG_ACTION_PATCH.ToCli(),
 	NotificationConfigCreateCmd,
-	NotificationConfigUpdateCmd,
 	NotificationConfigAskCmd,
 	NotificationConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1929,7 +1929,8 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
 	},
-	CliName: "update",
+	Description: "Update the NotificationConfig entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, NotificationConfigActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

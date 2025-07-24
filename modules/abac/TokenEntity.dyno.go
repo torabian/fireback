@@ -1067,8 +1067,8 @@ var TokenImportExportCommands = []cli.Command{
 var TokenCliCommands []cli.Command = []cli.Command{
 	TOKEN_ACTION_QUERY.ToCli(),
 	TOKEN_ACTION_TABLE.ToCli(),
+	TOKEN_ACTION_PATCH.ToCli(),
 	TokenCreateCmd,
-	TokenUpdateCmd,
 	TokenAskCmd,
 	TokenCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1238,7 +1238,8 @@ var TOKEN_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "TokenEntity",
 	},
-	CliName: "update",
+	Description: "Update the Token entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TokenActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

@@ -1074,8 +1074,8 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 var UserWorkspaceCliCommands []cli.Command = []cli.Command{
 	USER_WORKSPACE_ACTION_QUERY.ToCli(),
 	USER_WORKSPACE_ACTION_TABLE.ToCli(),
+	USER_WORKSPACE_ACTION_PATCH.ToCli(),
 	UserWorkspaceCreateCmd,
-	UserWorkspaceUpdateCmd,
 	UserWorkspaceAskCmd,
 	UserWorkspaceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1249,7 +1249,8 @@ var USER_WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
-	CliName: "update",
+	Description: "Update the UserWorkspace entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserWorkspaceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

@@ -1141,8 +1141,8 @@ var PhoneConfirmationImportExportCommands = []cli.Command{
 var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
 	PHONE_CONFIRMATION_ACTION_QUERY.ToCli(),
 	PHONE_CONFIRMATION_ACTION_TABLE.ToCli(),
+	PHONE_CONFIRMATION_ACTION_PATCH.ToCli(),
 	PhoneConfirmationCreateCmd,
-	PhoneConfirmationUpdateCmd,
 	PhoneConfirmationAskCmd,
 	PhoneConfirmationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1310,7 +1310,8 @@ var PHONE_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
 	},
-	CliName: "update",
+	Description: "Update the PhoneConfirmation entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PhoneConfirmationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

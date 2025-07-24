@@ -1141,8 +1141,8 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
 	EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
+	EMAIL_CONFIRMATION_ACTION_PATCH.ToCli(),
 	EmailConfirmationCreateCmd,
-	EmailConfirmationUpdateCmd,
 	EmailConfirmationAskCmd,
 	EmailConfirmationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1310,7 +1310,8 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "EmailConfirmationEntity",
 	},
-	CliName: "update",
+	Description: "Update the EmailConfirmation entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, EmailConfirmationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

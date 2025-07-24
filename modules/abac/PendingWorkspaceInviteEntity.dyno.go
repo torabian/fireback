@@ -1142,8 +1142,8 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	PENDING_WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
 	PENDING_WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
+	PENDING_WORKSPACE_INVITE_ACTION_PATCH.ToCli(),
 	PendingWorkspaceInviteCreateCmd,
-	PendingWorkspaceInviteUpdateCmd,
 	PendingWorkspaceInviteAskCmd,
 	PendingWorkspaceInviteCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1311,7 +1311,8 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
-	CliName: "update",
+	Description: "Update the PendingWorkspaceInvite entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PendingWorkspaceInviteActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

@@ -1033,8 +1033,8 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 	BACKUP_TABLE_META_ACTION_QUERY.ToCli(),
 	BACKUP_TABLE_META_ACTION_TABLE.ToCli(),
+	BACKUP_TABLE_META_ACTION_PATCH.ToCli(),
 	BackupTableMetaCreateCmd,
-	BackupTableMetaUpdateCmd,
 	BackupTableMetaAskCmd,
 	BackupTableMetaCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1202,7 +1202,8 @@ var BACKUP_TABLE_META_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "BackupTableMetaEntity",
 	},
-	CliName: "update",
+	Description: "Update the BackupTableMeta entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, BackupTableMetaActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

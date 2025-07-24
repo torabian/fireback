@@ -1125,8 +1125,8 @@ var EmailSenderImportExportCommands = []cli.Command{
 var EmailSenderCliCommands []cli.Command = []cli.Command{
 	EMAIL_SENDER_ACTION_QUERY.ToCli(),
 	EMAIL_SENDER_ACTION_TABLE.ToCli(),
+	EMAIL_SENDER_ACTION_PATCH.ToCli(),
 	EmailSenderCreateCmd,
-	EmailSenderUpdateCmd,
 	EmailSenderAskCmd,
 	EmailSenderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1296,7 +1296,8 @@ var EMAIL_SENDER_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
-	CliName: "update",
+	Description: "Update the EmailSender entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, EmailSenderActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

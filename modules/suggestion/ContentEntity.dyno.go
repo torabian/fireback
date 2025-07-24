@@ -1094,8 +1094,8 @@ var ContentImportExportCommands = []cli.Command{
 var ContentCliCommands []cli.Command = []cli.Command{
 	CONTENT_ACTION_QUERY.ToCli(),
 	CONTENT_ACTION_TABLE.ToCli(),
+	CONTENT_ACTION_PATCH.ToCli(),
 	ContentCreateCmd,
-	ContentUpdateCmd,
 	ContentAskCmd,
 	ContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1263,7 +1263,8 @@ var CONTENT_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "ContentEntity",
 	},
-	CliName: "update",
+	Description: "Update the Content entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, ContentActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

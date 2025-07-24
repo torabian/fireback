@@ -1287,8 +1287,8 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 	PUBLIC_AUTHENTICATION_ACTION_QUERY.ToCli(),
 	PUBLIC_AUTHENTICATION_ACTION_TABLE.ToCli(),
+	PUBLIC_AUTHENTICATION_ACTION_PATCH.ToCli(),
 	PublicAuthenticationCreateCmd,
-	PublicAuthenticationUpdateCmd,
 	PublicAuthenticationAskCmd,
 	PublicAuthenticationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1459,7 +1459,8 @@ var PUBLIC_AUTHENTICATION_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PublicAuthenticationEntity",
 	},
-	CliName: "update",
+	Description: "Update the PublicAuthentication entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PublicAuthenticationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

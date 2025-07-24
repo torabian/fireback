@@ -1062,8 +1062,8 @@ var TableViewSizingImportExportCommands = []cli.Command{
 var TableViewSizingCliCommands []cli.Command = []cli.Command{
 	TABLE_VIEW_SIZING_ACTION_QUERY.ToCli(),
 	TABLE_VIEW_SIZING_ACTION_TABLE.ToCli(),
+	TABLE_VIEW_SIZING_ACTION_PATCH.ToCli(),
 	TableViewSizingCreateCmd,
-	TableViewSizingUpdateCmd,
 	TableViewSizingAskCmd,
 	TableViewSizingCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1232,7 +1232,8 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	CliName: "update",
+	Description: "Update the TableViewSizing entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TableViewSizingActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

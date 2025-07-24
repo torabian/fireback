@@ -1046,8 +1046,8 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
 	PUBLIC_JOIN_KEY_ACTION_QUERY.ToCli(),
 	PUBLIC_JOIN_KEY_ACTION_TABLE.ToCli(),
+	PUBLIC_JOIN_KEY_ACTION_PATCH.ToCli(),
 	PublicJoinKeyCreateCmd,
-	PublicJoinKeyUpdateCmd,
 	PublicJoinKeyAskCmd,
 	PublicJoinKeyCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1215,7 +1215,8 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
 	},
-	CliName: "update",
+	Description: "Update the PublicJoinKey entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PublicJoinKeyActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

@@ -1347,8 +1347,8 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 	TIMEZONE_GROUP_ACTION_QUERY.ToCli(),
 	TIMEZONE_GROUP_ACTION_TABLE.ToCli(),
+	TIMEZONE_GROUP_ACTION_PATCH.ToCli(),
 	TimezoneGroupCreateCmd,
-	TimezoneGroupUpdateCmd,
 	TimezoneGroupAskCmd,
 	TimezoneGroupCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1506,7 +1506,8 @@ var TIMEZONE_GROUP_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "TimezoneGroupEntity",
 	},
-	CliName: "update",
+	Description: "Update the TimezoneGroup entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TimezoneGroupActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

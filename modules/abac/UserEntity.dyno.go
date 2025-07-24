@@ -1375,8 +1375,8 @@ var UserImportExportCommands = []cli.Command{
 var UserCliCommands []cli.Command = []cli.Command{
 	USER_ACTION_QUERY.ToCli(),
 	USER_ACTION_TABLE.ToCli(),
+	USER_ACTION_PATCH.ToCli(),
 	UserCreateCmd,
-	UserUpdateCmd,
 	UserAskCmd,
 	UserCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1546,7 +1546,8 @@ var USER_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "UserEntity",
 	},
-	CliName: "update",
+	Description: "Update the User entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

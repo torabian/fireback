@@ -1149,8 +1149,8 @@ var GsmProviderImportExportCommands = []cli.Command{
 var GsmProviderCliCommands []cli.Command = []cli.Command{
 	GSM_PROVIDER_ACTION_QUERY.ToCli(),
 	GSM_PROVIDER_ACTION_TABLE.ToCli(),
+	GSM_PROVIDER_ACTION_PATCH.ToCli(),
 	GsmProviderCreateCmd,
-	GsmProviderUpdateCmd,
 	GsmProviderAskCmd,
 	GsmProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1318,7 +1318,8 @@ var GSM_PROVIDER_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "GsmProviderEntity",
 	},
-	CliName: "update",
+	Description: "Update the GsmProvider entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, GsmProviderActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

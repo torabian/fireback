@@ -1047,8 +1047,8 @@ var WorkspaceRoleImportExportCommands = []cli.Command{
 var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 	WORKSPACE_ROLE_ACTION_QUERY.ToCli(),
 	WORKSPACE_ROLE_ACTION_TABLE.ToCli(),
+	WORKSPACE_ROLE_ACTION_PATCH.ToCli(),
 	WorkspaceRoleCreateCmd,
-	WorkspaceRoleUpdateCmd,
 	WorkspaceRoleAskCmd,
 	WorkspaceRoleCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
@@ -1217,7 +1217,8 @@ var WORKSPACE_ROLE_ACTION_PATCH = fireback.Module3Action{
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
 	},
-	CliName: "update",
+	Description: "Update the WorkspaceRole entity by unique id",
+	CliName:     "update",
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, WorkspaceRoleActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
