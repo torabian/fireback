@@ -101,9 +101,9 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 			{{ .PublicName }} struct {
 				{{ $newPrefix := print $prefix .ComputedCliName "." }}
 				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
-			}
+			} `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" typeof:"{{.Type}}" qs:"{{.Name}}" preload:"{{ $prefix }}{{ .PublicName }}"`
 		{{ else }}
-			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
+			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" typeof:"{{.Type}}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
 		{{ end }}
 	{{ end }}
 

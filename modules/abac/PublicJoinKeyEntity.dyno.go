@@ -33,8 +33,8 @@ func ResetPublicJoinKeySeeders(fs *embed.FS) {
 }
 
 type PublicJoinKeyEntityQs struct {
-	Role      fireback.QueriableField `cli:"role" table:"public_join_key" column:"role" qs:"role"`
-	Workspace fireback.QueriableField `cli:"workspace" table:"public_join_key" column:"workspace" qs:"workspace"`
+	Role      fireback.QueriableField `cli:"role" table:"public_join_key" typeof:"one" column:"role" qs:"role"`
+	Workspace fireback.QueriableField `cli:"workspace" table:"public_join_key" typeof:"one" column:"workspace" qs:"workspace"`
 }
 
 func (x *PublicJoinKeyEntityQs) GetQuery() string {
@@ -676,6 +676,10 @@ func PublicJoinKeyActionImport(
 
 var PublicJoinKeyCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -707,6 +711,10 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1206,6 +1214,12 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PublicJoinKeyEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PublicJoinKeyActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = fireback.Module3Action{

@@ -50,6 +50,20 @@ func GetCapabilityRefreshCommand(xapp *FirebackApp) cli.Command {
 
 }
 
+func GetStats(xapp *FirebackApp) cli.Command {
+	return cli.Command{
+		Name:        "stats",
+		Flags:       CommonQueryFlags,
+		Usage:       "Some stats regarding the application will go here",
+		Description: "Some stats regarding the application will go here",
+		Action: func(c *cli.Context) error {
+
+			return nil
+		},
+	}
+
+}
+
 func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 	for _, item := range x.Modules {

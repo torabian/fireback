@@ -33,10 +33,10 @@ func ResetEmailSenderSeeders(fs *embed.FS) {
 }
 
 type EmailSenderEntityQs struct {
-	FromName         fireback.QueriableField `cli:"from-name" table:"email_sender" column:"from_name" qs:"fromName"`
-	FromEmailAddress fireback.QueriableField `cli:"from-email-address" table:"email_sender" column:"from_email_address" qs:"fromEmailAddress"`
-	ReplyTo          fireback.QueriableField `cli:"reply-to" table:"email_sender" column:"reply_to" qs:"replyTo"`
-	NickName         fireback.QueriableField `cli:"nick-name" table:"email_sender" column:"nick_name" qs:"nickName"`
+	FromName         fireback.QueriableField `cli:"from-name" table:"email_sender" typeof:"string" column:"from_name" qs:"fromName"`
+	FromEmailAddress fireback.QueriableField `cli:"from-email-address" table:"email_sender" typeof:"string" column:"from_email_address" qs:"fromEmailAddress"`
+	ReplyTo          fireback.QueriableField `cli:"reply-to" table:"email_sender" typeof:"string" column:"reply_to" qs:"replyTo"`
+	NickName         fireback.QueriableField `cli:"nick-name" table:"email_sender" typeof:"string" column:"nick_name" qs:"nickName"`
 }
 
 func (x *EmailSenderEntityQs) GetQuery() string {
@@ -692,6 +692,10 @@ func EmailSenderActionImport(
 
 var EmailSenderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -766,6 +770,10 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1287,6 +1295,12 @@ var EMAIL_SENDER_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "EmailSenderEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, EmailSenderActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var EMAIL_SENDER_ACTION_PATCH_BULK = fireback.Module3Action{

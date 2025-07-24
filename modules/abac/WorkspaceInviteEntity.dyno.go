@@ -33,17 +33,17 @@ func ResetWorkspaceInviteSeeders(fs *embed.FS) {
 }
 
 type WorkspaceInviteEntityQs struct {
-	PublicKey         fireback.QueriableField `cli:"public-key" table:"workspace_invite" column:"public_key" qs:"publicKey"`
-	CoverLetter       fireback.QueriableField `cli:"cover-letter" table:"workspace_invite" column:"cover_letter" qs:"coverLetter"`
-	TargetUserLocale  fireback.QueriableField `cli:"target-user-locale" table:"workspace_invite" column:"target_user_locale" qs:"targetUserLocale"`
-	Email             fireback.QueriableField `cli:"email" table:"workspace_invite" column:"email" qs:"email"`
-	Phonenumber       fireback.QueriableField `cli:"phonenumber" table:"workspace_invite" column:"phonenumber" qs:"phonenumber"`
-	Workspace         fireback.QueriableField `cli:"workspace" table:"workspace_invite" column:"workspace" qs:"workspace"`
-	FirstName         fireback.QueriableField `cli:"first-name" table:"workspace_invite" column:"first_name" qs:"firstName"`
-	LastName          fireback.QueriableField `cli:"last-name" table:"workspace_invite" column:"last_name" qs:"lastName"`
-	ForceEmailAddress fireback.QueriableField `cli:"force-email-address" table:"workspace_invite" column:"force_email_address" qs:"forceEmailAddress"`
-	ForcePhoneNumber  fireback.QueriableField `cli:"force-phone-number" table:"workspace_invite" column:"force_phone_number" qs:"forcePhoneNumber"`
-	Role              fireback.QueriableField `cli:"role" table:"workspace_invite" column:"role" qs:"role"`
+	PublicKey         fireback.QueriableField `cli:"public-key" table:"workspace_invite" typeof:"string" column:"public_key" qs:"publicKey"`
+	CoverLetter       fireback.QueriableField `cli:"cover-letter" table:"workspace_invite" typeof:"string" column:"cover_letter" qs:"coverLetter"`
+	TargetUserLocale  fireback.QueriableField `cli:"target-user-locale" table:"workspace_invite" typeof:"string" column:"target_user_locale" qs:"targetUserLocale"`
+	Email             fireback.QueriableField `cli:"email" table:"workspace_invite" typeof:"string" column:"email" qs:"email"`
+	Phonenumber       fireback.QueriableField `cli:"phonenumber" table:"workspace_invite" typeof:"string" column:"phonenumber" qs:"phonenumber"`
+	Workspace         fireback.QueriableField `cli:"workspace" table:"workspace_invite" typeof:"one" column:"workspace" qs:"workspace"`
+	FirstName         fireback.QueriableField `cli:"first-name" table:"workspace_invite" typeof:"string" column:"first_name" qs:"firstName"`
+	LastName          fireback.QueriableField `cli:"last-name" table:"workspace_invite" typeof:"string" column:"last_name" qs:"lastName"`
+	ForceEmailAddress fireback.QueriableField `cli:"force-email-address" table:"workspace_invite" typeof:"bool?" column:"force_email_address" qs:"forceEmailAddress"`
+	ForcePhoneNumber  fireback.QueriableField `cli:"force-phone-number" table:"workspace_invite" typeof:"bool?" column:"force_phone_number" qs:"forcePhoneNumber"`
+	Role              fireback.QueriableField `cli:"role" table:"workspace_invite" typeof:"one" column:"role" qs:"role"`
 }
 
 func (x *WorkspaceInviteEntityQs) GetQuery() string {
@@ -759,6 +759,10 @@ func WorkspaceInviteActionImport(
 
 var WorkspaceInviteCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -892,6 +896,10 @@ var WorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1458,6 +1466,12 @@ var WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceInviteEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, WorkspaceInviteActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var WORKSPACE_INVITE_ACTION_PATCH_BULK = fireback.Module3Action{

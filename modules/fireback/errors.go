@@ -2,8 +2,8 @@ package fireback
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -87,37 +87,37 @@ func IResponseFromString[T any](err string) *IResponse[T] {
 }
 
 func GormErrorToIError(err error) *IError {
-
 	if err == nil {
 		return nil
 	}
 
-	message := map[string]string{
-		"$": "Unknown error occured",
-	}
-	// Implement this, and translate all of the error message if needed.
-	// Some messages should not go out, at all.
-	// msg := err.Error()
-	var code int32 = 500
+	httpCode := http.StatusInternalServerError
+	params := map[string]interface{}{}
 
-	if err == gorm.ErrRecordNotFound {
-		code = http.StatusNotFound
-	} else if strings.Contains(err.Error(), "UNIQUE constraint") {
-
-		code = 501
-		message = map[string]string{
-			"$": "Unique key violation, you cannot have duplicate unique keys",
+	// For not found errors, we are going to tell it to client no matter production or not
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		httpCode = http.StatusNotFound
+		return &IError{
+			Message:  FirebackMessages.ResourceNotFound,
+			HttpCode: int32(httpCode),
 		}
-	} else {
-		log.Default().Println("Unhandled gorm error", err)
 	}
 
-	result := IError{
-		Message:  message,
-		HttpCode: code,
+	// For other gorm errors, its necessary, that to understand there is a database level error,
+	// and we hide the details on production
+
+	if !config.Production {
+		params["nativeError"] = err.Error()
 	}
 
-	return &result
+	httpCode = http.StatusBadRequest
+
+	return &IError{
+		Message:       FirebackMessages.DatabaseOperationError,
+		MessageParams: params,
+		HttpCode:      int32(httpCode),
+	}
+
 }
 
 func SliceValidator[T any](items []*T, isPatch bool, prefix string) []*IErrorItem {

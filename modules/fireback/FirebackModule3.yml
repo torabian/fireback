@@ -171,7 +171,10 @@ messages:
   bodyIsEmptyEof:
     en: Body is empty. Please provide the necessary data and try again.
     $key: io.EOF
-  
+  resourceNotFound:
+    en: The data you are looking for is not available, or you do not have right access.
+  databaseOperationError:
+    en: There is an issue while trying to query database.
   bodyReadAfterClose:
     en: Body is read after closed. The request might have been processed incorrectly.
     $key: http.ErrBodyReadAfterClose

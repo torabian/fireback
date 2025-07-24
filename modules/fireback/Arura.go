@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/html"
 )
 
 type Screen[T any] struct {
@@ -136,6 +137,21 @@ func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
 
 	} else {
 		htmlWithPrependedFiles := prependFileQuery(buf.String())
+
+		// Ithink here we need to do,  if config.Production is prod and minify before sending
+		htmlMinifier := minify.New()
+		htmlMinifier.AddFunc("text/html", html.Minify)
+
+		if config.Production {
+			var minified bytes.Buffer
+			err := htmlMinifier.Minify("text/html", &minified, bytes.NewBufferString(htmlWithPrependedFiles))
+			if err == nil {
+				c.Writer.Write(minified.Bytes())
+				return
+			}
+			// fallback to unminified if error
+		}
+
 		c.Writer.Write([]byte(htmlWithPrependedFiles))
 	}
 

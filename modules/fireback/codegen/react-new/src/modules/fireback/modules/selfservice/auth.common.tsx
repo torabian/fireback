@@ -48,9 +48,12 @@ export const useCompleteAuth = () => {
       return;
     }
 
+    // Clean up url options which are set earlier.
+    sessionStorage.removeItem("redirect_temporary");
+    sessionStorage.removeItem("workspace_type_id");
+
     if (redirect2) {
       window.location.href = redirect2;
-      sessionStorage.removeItem("redirect_temporary");
     } else if (redirectUrl) {
       // Append the token to the redirect URL
       const finalUrl = new URL(redirectUrl);
@@ -69,20 +72,26 @@ export const useCompleteAuth = () => {
   return { onComplete };
 };
 
-export const useStoreRedirectParam = (key = "redirect") => {
+/**
+ * @description A lot of times, we need to set an option for authentication,
+ * from external source such as query params, such as redirect url, selected workspace.
+ * This function would read that from query params or hash, and store it in session storage.
+ * @param key
+ */
+export const useTemporaryParamOptions = (keys: string[]) => {
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const hash = window.location.hash;
-    const hashIndex = hash.indexOf("?");
+    const hashIndex = window.location.hash.indexOf("?");
+    const hashParams =
+      hashIndex !== -1
+        ? new URLSearchParams(window.location.hash.slice(hashIndex))
+        : new URLSearchParams();
 
-    let hashParams = new URLSearchParams();
-    if (hashIndex !== -1) {
-      hashParams = new URLSearchParams(hash.slice(hashIndex));
-    }
-
-    const redirect = searchParams.get(key) || hashParams.get(key);
-    if (redirect) {
-      sessionStorage.setItem(key, redirect);
-    }
-  }, [key]);
+    keys.forEach((key) => {
+      const value = searchParams.get(key) || hashParams.get(key);
+      if (value) {
+        sessionStorage.setItem(key, value);
+      }
+    });
+  }, [keys.join(",")]); // join to avoid useEffect missing changes
 };

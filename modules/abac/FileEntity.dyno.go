@@ -100,13 +100,13 @@ func (x *FileVariations) RootObjectName() string {
 }
 
 type FileEntityQs struct {
-	Name        fireback.QueriableField `cli:"name" table:"file" column:"name" qs:"name"`
-	OperationId fireback.QueriableField `cli:"operation-id" table:"file" column:"operation_id" qs:"operationId"`
-	DiskPath    fireback.QueriableField `cli:"disk-path" table:"file" column:"disk_path" qs:"diskPath"`
-	Size        fireback.QueriableField `cli:"size" table:"file" column:"size" qs:"size"`
-	VirtualPath fireback.QueriableField `cli:"virtual-path" table:"file" column:"virtual_path" qs:"virtualPath"`
-	Type        fireback.QueriableField `cli:"type" table:"file" column:"type" qs:"type"`
-	Variations  fireback.QueriableField `cli:"variations" table:"file" column:"variations" qs:"variations"`
+	Name        fireback.QueriableField `cli:"name" table:"file" typeof:"string" column:"name" qs:"name"`
+	OperationId fireback.QueriableField `cli:"operation-id" table:"file" typeof:"string" column:"operation_id" qs:"operationId"`
+	DiskPath    fireback.QueriableField `cli:"disk-path" table:"file" typeof:"string" column:"disk_path" qs:"diskPath"`
+	Size        fireback.QueriableField `cli:"size" table:"file" typeof:"int64" column:"size" qs:"size"`
+	VirtualPath fireback.QueriableField `cli:"virtual-path" table:"file" typeof:"string" column:"virtual_path" qs:"virtualPath"`
+	Type        fireback.QueriableField `cli:"type" table:"file" typeof:"string" column:"type" qs:"type"`
+	Variations  fireback.QueriableField `cli:"variations" table:"file" typeof:"array" column:"variations" qs:"variations"`
 }
 
 func (x *FileEntityQs) GetQuery() string {
@@ -352,7 +352,9 @@ func FileVariationsActionUpdate(
 		dbref = query.Tx
 	}
 	query.Tx = dbref
-	err := dbref.UpdateColumns(&dto).Error
+	cond2 := &FileVariations{LinkerId: fireback.NewString(query.LinkerId), UniqueId: query.UniqueId}
+	q := query.Tx.Where(cond2)
+	err := q.UpdateColumns(&dto).Error
 	if err != nil {
 		err := fireback.GormErrorToIError(err)
 		return nil, err
@@ -863,6 +865,10 @@ func FileActionImport(
 
 var FileCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -968,6 +974,10 @@ var FileCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1505,6 +1515,12 @@ var FILE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "FileEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, FileActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var FILE_ACTION_PATCH_BULK = fireback.Module3Action{

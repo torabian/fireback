@@ -346,6 +346,20 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 				Usage: "Makes a delay on serving xattach files to mimic slow server, might slow down also API calls",
 			},
 		},
+		Subcommands: []cli.Command{
+			{
+				Name:  "routes",
+				Usage: "Returns the count of the http requests in the application",
+				Action: func(c *cli.Context) error {
+					engine := engineFn(HttpServerInstanceConfig{})
+					fmt.Println("Total routes:", len(engine.Routes()))
+					for _, route := range engine.Routes() {
+						fmt.Println(route.Method, route.Path)
+					}
+					return nil
+				},
+			},
+		},
 		Name:    "start",
 		Aliases: []string{"s"},
 		Usage:   "Starts http server only",

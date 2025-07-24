@@ -33,11 +33,11 @@ func ResetPhoneConfirmationSeeders(fs *embed.FS) {
 }
 
 type PhoneConfirmationEntityQs struct {
-	User        fireback.QueriableField `cli:"user" table:"phone_confirmation" column:"user" qs:"user"`
-	Status      fireback.QueriableField `cli:"status" table:"phone_confirmation" column:"status" qs:"status"`
-	PhoneNumber fireback.QueriableField `cli:"phone-number" table:"phone_confirmation" column:"phone_number" qs:"phoneNumber"`
-	Key         fireback.QueriableField `cli:"key" table:"phone_confirmation" column:"key" qs:"key"`
-	ExpiresAt   fireback.QueriableField `cli:"expires-at" table:"phone_confirmation" column:"expires_at" qs:"expiresAt"`
+	User        fireback.QueriableField `cli:"user" table:"phone_confirmation" typeof:"one" column:"user" qs:"user"`
+	Status      fireback.QueriableField `cli:"status" table:"phone_confirmation" typeof:"string" column:"status" qs:"status"`
+	PhoneNumber fireback.QueriableField `cli:"phone-number" table:"phone_confirmation" typeof:"string" column:"phone_number" qs:"phoneNumber"`
+	Key         fireback.QueriableField `cli:"key" table:"phone_confirmation" typeof:"string" column:"key" qs:"key"`
+	ExpiresAt   fireback.QueriableField `cli:"expires-at" table:"phone_confirmation" typeof:"string" column:"expires_at" qs:"expiresAt"`
 }
 
 func (x *PhoneConfirmationEntityQs) GetQuery() string {
@@ -699,6 +699,10 @@ func PhoneConfirmationActionImport(
 
 var PhoneConfirmationCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -778,6 +782,10 @@ var PhoneConfirmationCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1301,6 +1309,12 @@ var PHONE_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PhoneConfirmationEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PhoneConfirmationActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PHONE_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{

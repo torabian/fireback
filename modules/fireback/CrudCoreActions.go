@@ -76,7 +76,12 @@ func ListGormSubEntities(entity reflect.Value) []string {
 		if t == "fireback.Int" || t == "Int" {
 			continue
 		}
+
 		if t == "fireback.XDateTime" || t == "XDateTime" {
+			continue
+		}
+
+		if t == "*fireback.XDateTime" || t == "*XDateTime" {
 			continue
 		}
 		if t == "fireback.Int64" || t == "Int64" {
@@ -450,6 +455,29 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 
 	}
 
+	if len(query.SelectableColumnSql) > 0 {
+		selectall := []string(query.SelectableColumnSql)
+
+		// These are default field which are needed.
+		if !Contains(selectall, "uniqueId") {
+			selectall = append(selectall, "unique_id")
+		}
+
+		if !Contains(selectall, "linkerId") {
+			selectall = append(selectall, "linker_id")
+		}
+
+		if !Contains(selectall, "ID") {
+			selectall = append(selectall, "id")
+		}
+
+		for index, w := range selectall {
+			selectall[index] = ToSnakeCase(w)
+		}
+
+		q = q.Select(selectall)
+	}
+
 	q = q.Where(query.InternalQuery).
 		Order(ToSnakeCase(query.Sort))
 
@@ -520,7 +548,10 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 		idField := v2.Elem().FieldByName("ID")
 		if idField.IsValid() {
 			val := idField.Uint()
-			cur := fmt.Sprintf("id(%v)+sort(%v)", val, query.Sort)
+			cur := fmt.Sprintf("id(%v)", val)
+			if query.Sort != "" {
+				cur += fmt.Sprintf("+sort(%v)", query.Sort)
+			}
 			cursor = &cur
 		}
 	}

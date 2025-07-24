@@ -33,8 +33,8 @@ func ResetUserProfileSeeders(fs *embed.FS) {
 }
 
 type UserProfileEntityQs struct {
-	FirstName fireback.QueriableField `cli:"first-name" table:"user_profile" column:"first_name" qs:"firstName"`
-	LastName  fireback.QueriableField `cli:"last-name" table:"user_profile" column:"last_name" qs:"lastName"`
+	FirstName fireback.QueriableField `cli:"first-name" table:"user_profile" typeof:"string" column:"first_name" qs:"firstName"`
+	LastName  fireback.QueriableField `cli:"last-name" table:"user_profile" typeof:"string" column:"last_name" qs:"lastName"`
 }
 
 func (x *UserProfileEntityQs) GetQuery() string {
@@ -675,6 +675,10 @@ func UserProfileActionImport(
 
 var UserProfileCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -723,6 +727,10 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1222,6 +1230,12 @@ var USER_PROFILE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "UserProfileEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, UserProfileActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var USER_PROFILE_ACTION_PATCH_BULK = fireback.Module3Action{

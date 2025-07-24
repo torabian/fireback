@@ -42,6 +42,10 @@ var QueryCommonCliFlagsOptional = []cli.Flag{
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
 	&cli.IntFlag{
 		Name:     "items-per-page",
 		Required: false,

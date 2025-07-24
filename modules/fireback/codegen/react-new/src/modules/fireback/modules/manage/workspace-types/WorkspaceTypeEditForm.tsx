@@ -7,6 +7,7 @@ import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { FormSelect } from "../../../components/forms/form-select/FormSelect";
 import { useGetRoles } from "../../../sdk/modules/abac/useGetRoles";
+import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
 
 export const WorkspaceTypeEditForm = ({
   form,
@@ -18,6 +19,16 @@ export const WorkspaceTypeEditForm = ({
 
   return (
     <>
+      <FormText
+        value={values.uniqueId}
+        onChange={(value) =>
+          form.setFieldValue(WorkspaceTypeEntity.Fields.uniqueId, value, false)
+        }
+        errorMessage={form.errors.uniqueId}
+        label={t.wokspaces.workspaceTypeUniqueId}
+        autoFocus={!isEditing}
+        hint={t.wokspaces.workspaceTypeUniqueIdHint}
+      />
       <FormText
         value={values.title}
         onChange={(value) =>
@@ -46,43 +57,19 @@ export const WorkspaceTypeEditForm = ({
         errorMessage={form.errors.roleId}
       />
 
-      {/* <FormSelect
-        value={values.type}
+      <FormRichText
+        value={values.description}
         onChange={(value) =>
-          setFieldValue(EmailProviderEntity.Fields.type, value, false)
+          form.setFieldValue(
+            WorkspaceTypeEntity.Fields.description,
+            value,
+            false
+          )
         }
-        options={[{ label: "Sendgrid", value: "sendgrid" }]}
-        errorMessage={errors.type}
-        label="Provider type"
-        hint="Select the mail provider from list. Under the list you can find all providers we support."
-      /> */}
-      {/* <FormText
-        value={values.senderAddress}
-        onChange={(value) =>
-          setFieldValue(EmailProviderEntity.Fields.senderAddress, value, false)
-        }
-        errorMessage={errors.senderAddress}
-        label="MailProvider.senderAddress"
-        hint="Mail provider.senderAddress"
+        errorMessage={form.errors.description}
+        label={t.wokspaces.typeDescription}
+        hint={t.wokspaces.typeDescriptionHint}
       />
-      <FormText
-        value={values.senderName}
-        onChange={(value) =>
-          setFieldValue(EmailProviderEntity.Fields.senderName, value, false)
-        }
-        errorMessage={errors.senderName}
-        label="MailProvider.senderName"
-        hint="Mail provider.senderName"
-      /> */}
-      {/* <FormText
-        value={values.apiKey}
-        onChange={(value) =>
-          setFieldValue(EmailProviderEntity.Fields.apiKey, value, false)
-        }
-        errorMessage={errors.apiKey}
-        label="API Key"
-        hint="The API key related to the mail service provider, if applicable"
-      /> */}
     </>
   );
 };

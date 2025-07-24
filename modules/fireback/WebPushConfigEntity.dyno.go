@@ -32,7 +32,7 @@ func ResetWebPushConfigSeeders(fs *embed.FS) {
 }
 
 type WebPushConfigEntityQs struct {
-	Subscription QueriableField `cli:"subscription" table:"web_push_config" column:"subscription" qs:"subscription"`
+	Subscription QueriableField `cli:"subscription" table:"web_push_config" typeof:"json" column:"subscription" qs:"subscription"`
 }
 
 func (x *WebPushConfigEntityQs) GetQuery() string {
@@ -668,6 +668,10 @@ func WebPushConfigActionImport(
 
 var WebPushConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -694,6 +698,10 @@ var WebPushConfigCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1194,6 +1202,12 @@ var WEB_PUSH_CONFIG_ACTION_PATCH = Module3Action{
 	},
 	In: &Module3ActionBody{
 		Entity: "WebPushConfigEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
+		result, err := CliPatchEntity(c, WebPushConfigActions.Update, security)
+		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var WEB_PUSH_CONFIG_ACTION_PATCH_BULK = Module3Action{

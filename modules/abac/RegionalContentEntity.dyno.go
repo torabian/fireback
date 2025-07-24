@@ -33,11 +33,11 @@ func ResetRegionalContentSeeders(fs *embed.FS) {
 }
 
 type RegionalContentEntityQs struct {
-	Content    fireback.QueriableField `cli:"content" table:"regional_content" column:"content" qs:"content"`
-	Region     fireback.QueriableField `cli:"region" table:"regional_content" column:"region" qs:"region"`
-	Title      fireback.QueriableField `cli:"title" table:"regional_content" column:"title" qs:"title"`
-	LanguageId fireback.QueriableField `cli:"language-id" table:"regional_content" column:"language_id" qs:"languageId"`
-	KeyGroup   fireback.QueriableField `cli:"key-group" table:"regional_content" column:"key_group" qs:"keyGroup"`
+	Content    fireback.QueriableField `cli:"content" table:"regional_content" typeof:"html" column:"content" qs:"content"`
+	Region     fireback.QueriableField `cli:"region" table:"regional_content" typeof:"string" column:"region" qs:"region"`
+	Title      fireback.QueriableField `cli:"title" table:"regional_content" typeof:"string" column:"title" qs:"title"`
+	LanguageId fireback.QueriableField `cli:"language-id" table:"regional_content" typeof:"string" column:"language_id" qs:"languageId"`
+	KeyGroup   fireback.QueriableField `cli:"key-group" table:"regional_content" typeof:"enum" column:"key_group" qs:"keyGroup"`
 }
 
 func (x *RegionalContentEntityQs) GetQuery() string {
@@ -717,6 +717,10 @@ func RegionalContentActionImport(
 
 var RegionalContentCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -796,6 +800,10 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1326,6 +1334,12 @@ var REGIONAL_CONTENT_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, RegionalContentActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var REGIONAL_CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{

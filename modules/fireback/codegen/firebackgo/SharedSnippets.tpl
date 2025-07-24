@@ -246,7 +246,9 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionUpdate(
     }
 
     query.Tx = dbref
-    err := dbref.UpdateColumns(&dto).Error
+    cond2 := &{{ $.e.Upper }}{{ .PublicName }}{LinkerId: fireback.NewString(query.LinkerId), UniqueId: query.UniqueId}
+    q := query.Tx.Where(cond2)
+    err := q.UpdateColumns(&dto).Error
     if err != nil {
         err := {{ $.wsprefix }}GormErrorToIError(err)
         return nil, err
@@ -1749,6 +1751,10 @@ func {{ .e.Upper }}ActionImport(
 
 {{ define "cliFlags" }}
 var {{ .e.Upper }}CommonCliFlags = []cli.Flag{
+  &cli.StringFlag{
+		Name:     "x-accept",
+		Usage:    "Return type of the the content, such as json or yaml",
+	},
   {{ template "entityCommonCliFlag" (arr .e.CompleteFields "") }}
 }
 
@@ -1761,6 +1767,10 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+  &cli.StringFlag{
+		Name:     "x-accept",
+		Usage:    "Return type of the the content, such as json or yaml",
 	},
   {{ template "entityCommonCliFlag" (arr .e.CompleteFields "") }}
 }
@@ -2300,10 +2310,10 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
     var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
       {{.e.AllUpper}}_ACTION_QUERY.ToCli(),
       {{.e.AllUpper}}_ACTION_TABLE.ToCli(),
+      {{.e.AllUpper}}_ACTION_PATCH.ToCli(),
       {{ if ne .e.Access "read" }}
 
       {{ .e.Upper }}CreateCmd,
-      {{ .e.Upper }}UpdateCmd,
       {{ .e.Upper }}AskCmd,
       {{ .e.Upper }}CreateInteractiveCmd,
       {{ .wsprefix }}GetCommonRemoveQuery(
@@ -2583,6 +2593,13 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module3Action{
   In: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
+  Description: "Update the {{ .e.Upper}} entity by unique id",
+  CliName:    "update",
+  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+   result, err := {{ .wsprefix }}CliPatchEntity(c, {{ .e.Upper }}Actions.Update, security)
+   {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+   return err
+  },
 }
 
 
@@ -3035,6 +3052,10 @@ type {{ $name }}Msgs struct {
           Name:     "x-src",
           Required: false,
           Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+        },
+        &cli.StringFlag{
+          Name:     "x-accept",
+          Usage:    "Return type of the the content, such as json or yaml",
         },
         {{ template "dtoCliFlag" (arr .In.Fields "") }}
       }

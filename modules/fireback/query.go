@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"embed"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -106,6 +108,10 @@ func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
 		ItemsPerPage: itemsPerPage,
 	}
 
+	if c.IsSet("x-select") {
+		f.SelectableColumn = SmartSplit(c.String("x-select"))
+	}
+
 	if len(withPreloads) > 0 {
 		f.WithPreloads = strings.Split(strings.Trim(withPreloads, " "), ",")
 	}
@@ -155,31 +161,29 @@ func lineCounter(r io.Reader) int {
 		}
 	}
 }
-func CommonCliQueryCmd[T any](
-	c *cli.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
-) {
 
-	f := CommonCliQueryDSLBuilder(c)
+var smartSplitRegex = regexp.MustCompile(`[;\s,]+`)
 
-	if items, count, err := fn(f); err != nil {
-		fmt.Println(err)
-	} else {
-		jsonString, _ := json.MarshalIndent(gin.H{
-			"data": gin.H{
-				"startIndex":   f.StartIndex,
-				"itemsPerPage": f.ItemsPerPage,
-				"items":        items,
-				"totalItems":   count.TotalItems,
-				"next": gin.H{
-					"cursor": count.Cursor,
-				},
-			},
-		}, "", "  ")
+func SmartSplit(input string) []string {
+	if strings.TrimSpace(input) == "" {
+		return []string{}
+	}
 
-		fmt.Println(string(jsonString))
+	return smartSplitRegex.Split(input, -1)
+}
+
+func ComputeSqlColumns(qs interface{}, f *QueryDSL) {
+	if len(f.SelectableColumn) > 0 {
+		res := DatabaseColumnsResolver(reflect.ValueOf(qs), "", []string(f.SelectableColumn), QuerySelectionInfo{}, false)
+
+		f.SelectableColumnSql = res.Columns
+
+		if len(res.Preloads) > 0 {
+			f.WithPreloads = append(f.WithPreloads, res.Preloads...)
+		}
 	}
 }
+
 func CommonCliQueryCmd3[T any](
 	c *cli.Context,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
@@ -189,80 +193,70 @@ func CommonCliQueryCmd3[T any](
 	QueriableFieldFromCliContext(reflect.ValueOf(qs), "", c)
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 
-	method := reflect.ValueOf(qs).MethodByName("GetQuery")
-	if method.IsValid() {
-		results := method.Call(nil) // Call the method with no arguments
+	if qs != nil {
 
-		// Check if it returns at least one result
-		if len(results) > 0 {
-			f.Query = results[0].Interface().(string)
+		ComputeSqlColumns(qs, &f)
+		method := reflect.ValueOf(qs).MethodByName("GetQuery")
+		if method.IsValid() {
+			results := method.Call(nil) // Call the method with no arguments
+
+			// Check if it returns at least one result
+			if len(results) > 0 {
+				f.Query = results[0].Interface().(string)
+			}
 		}
 	}
 
 	if items, count, err := fn(f); err != nil {
 		log.Fatal(err)
 	} else {
-		out := gin.H{
-			"data": gin.H{
-				"startIndex":   f.StartIndex,
-				"itemsPerPage": f.ItemsPerPage,
-				"items":        items,
-				"totalItems":   count.TotalItems,
-				"next": gin.H{
-					"cursor": count.Cursor,
-				},
-			},
-		}
-		if c.Bool("yaml") {
-			body, err2 := yaml.Marshal(out)
-			if err2 != nil {
-				log.Fatal(err2)
-			}
-			fmt.Println(string(body))
-		} else {
-			jsonString, _ := json.MarshalIndent(out, "", "  ")
-
-			fmt.Println(string(jsonString))
-		}
-
+		out := QueryEntitySuccessResult(f, items, count)
+		cliSuccessPrinter(c, out)
 	}
 }
-
-func CommonCliQueryCmd2[T any](
-	c *cli.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
-	security *SecurityModel,
-) {
-
-	f := CommonCliQueryDSLBuilderAuthorize(c, security)
-
-	if items, count, err := fn(f); err != nil {
-		fmt.Println(err)
-	} else {
-		out := gin.H{
-			"data": gin.H{
-				"startIndex":   f.StartIndex,
-				"itemsPerPage": f.ItemsPerPage,
-				"items":        items,
-				"totalItems":   count.TotalItems,
-				"next": gin.H{
-					"cursor": count.Cursor,
-				},
-			},
+func cliSuccessPrinter(c *cli.Context, out any) {
+	if IsYamlCli(c) {
+		body, err := yaml.Marshal(out)
+		if err != nil {
+			log.Fatal(err)
 		}
-		if c.Bool("yaml") {
-			body, err2 := yaml.Marshal(out)
-			if err2 != nil {
-				log.Fatal(err2)
-			}
-			fmt.Println(string(body))
-		} else {
-			jsonString, _ := json.MarshalIndent(out, "", "  ")
-
-			fmt.Println(string(jsonString))
-		}
-
+		fmt.Println(string(body))
+		return
 	}
+
+	if IsCsvCli(c) {
+		if list, ok := out.([]map[string]interface{}); ok {
+			if len(list) == 0 {
+				return
+			}
+			// Collect headers
+			headers := make([]string, 0, len(list[0]))
+			for k := range list[0] {
+				headers = append(headers, k)
+			}
+
+			w := csv.NewWriter(os.Stdout)
+			_ = w.Write(headers)
+
+			for _, row := range list {
+				record := make([]string, len(headers))
+				for i, h := range headers {
+					val := row[h]
+					record[i] = fmt.Sprintf("%v", val)
+				}
+				_ = w.Write(record)
+			}
+			w.Flush()
+			return
+		}
+
+		log.Fatal("CSV output requires []map[string]interface{} format, try yaml or json")
+		return
+	}
+
+	// Default to JSON
+	jsonString, _ := json.MarshalIndent(out, "", "  ")
+	fmt.Println(string(jsonString))
 }
 
 func GetColumnsFromReflect[T any](v reflect.Value) []string {
@@ -346,29 +340,6 @@ func ExtractStringValueFromReflectCell[T any](row *T, t string, n string) string
 		value = "N/A"
 	}
 	return value
-}
-
-func excludeDefaultFields(items []string) []string {
-	excluded := []string{}
-	toExclude := []string{
-		"CreatedFormatted",
-		"UpdatedFormatted",
-		"LinkedTo",
-		"Children",
-		"Rank",
-		"IsDeletable",
-		"IsUpdatable",
-	}
-
-	for _, item := range items {
-		if !Contains(toExclude, item) {
-			excluded = append(excluded, item)
-		}
-	}
-
-	fmt.Println("Excluded:", excluded)
-
-	return excluded
 }
 
 func CommonCliTableCmd2[T any](
@@ -568,33 +539,6 @@ func SeederFromFSImportBatch[T any](
 	}
 
 }
-
-// func Unmarshal(reader *csv.Reader, v interface{}) error {
-// 	record, err := reader.Read()
-// 	if err != nil {
-// 		return err
-// 	}
-// 	s := reflect.ValueOf(v).Elem()
-// 	if s.NumField() != len(record) {
-// 		return &FieldMismatch{s.NumField(), len(record)}
-// 	}
-// 	for i := 0; i < s.NumField(); i++ {
-// 		f := s.Field(i)
-// 		switch f.Type().String() {
-// 		case "string":
-// 			f.SetString(record[i])
-// 		case "int":
-// 			ival, err := strconv.ParseInt(record[i], 10, 0)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			f.SetInt(ival)
-// 		default:
-// 			return &UnsupportedType{f.Type().String()}
-// 		}
-// 	}
-// 	return nil
-// }
 
 type ExportCatalog[T any] struct {
 	Writer             *os.File

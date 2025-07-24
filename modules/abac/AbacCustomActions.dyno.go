@@ -77,6 +77,10 @@ var AcceptInviteCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "invitation-unique-id",
 		Required: true,
 		Usage:    `The invitation id which will be used to process (string)`,
@@ -146,6 +150,10 @@ var OauthAuthenticateCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "token",
@@ -292,6 +300,10 @@ var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "password",
 		Required: true,
 		Usage:    `New password meeting the security requirements. (string)`,
@@ -407,6 +419,10 @@ var ConfirmClassicPassportTotpCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "value",
@@ -681,6 +697,10 @@ var ImportUserCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "path",
 		Required: false,
 		Usage:    `path (string)`,
@@ -748,6 +768,10 @@ var SendEmailCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "to-address",
@@ -835,6 +859,10 @@ var SendEmailWithProviderCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "email-provider-id",
@@ -964,6 +992,10 @@ var GsmSendSmsCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "to-number",
 		Required: true,
 		Usage:    `toNumber (string)`,
@@ -1049,6 +1081,10 @@ var GsmSendSmsWithProviderCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "gsm-provider-id",
@@ -1146,6 +1182,10 @@ var ClassicSigninCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "value",
@@ -1262,6 +1302,10 @@ var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "value",
@@ -1414,6 +1458,10 @@ var CreateWorkspaceCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "name",
 		Required: false,
 		Usage:    `name (string)`,
@@ -1498,6 +1546,10 @@ var CheckClassicPassportCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "value",
@@ -1590,6 +1642,10 @@ var ClassicPassportOtpCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "value",
 		Required: true,
 		Usage:    `value (string)`,
@@ -1680,6 +1736,10 @@ var ClassicPassportRequestOtpCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "value",

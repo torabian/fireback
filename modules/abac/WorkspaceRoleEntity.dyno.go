@@ -33,8 +33,8 @@ func ResetWorkspaceRoleSeeders(fs *embed.FS) {
 }
 
 type WorkspaceRoleEntityQs struct {
-	UserWorkspace fireback.QueriableField `cli:"user-workspace" table:"workspace_role" column:"user_workspace" qs:"userWorkspace"`
-	Role          fireback.QueriableField `cli:"role" table:"workspace_role" column:"role" qs:"role"`
+	UserWorkspace fireback.QueriableField `cli:"user-workspace" table:"workspace_role" typeof:"one" column:"user_workspace" qs:"userWorkspace"`
+	Role          fireback.QueriableField `cli:"role" table:"workspace_role" typeof:"one" column:"role" qs:"role"`
 }
 
 func (x *WorkspaceRoleEntityQs) GetQuery() string {
@@ -677,6 +677,10 @@ func WorkspaceRoleActionImport(
 
 var WorkspaceRoleCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -708,6 +712,10 @@ var WorkspaceRoleCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1208,6 +1216,12 @@ var WORKSPACE_ROLE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceRoleEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, WorkspaceRoleActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var WORKSPACE_ROLE_ACTION_PATCH_BULK = fireback.Module3Action{

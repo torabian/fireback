@@ -33,10 +33,10 @@ func ResetWorkspaceTypeSeeders(fs *embed.FS) {
 }
 
 type WorkspaceTypeEntityQs struct {
-	Title       fireback.QueriableField `cli:"title" table:"workspace_type" column:"title" qs:"title"`
-	Description fireback.QueriableField `cli:"description" table:"workspace_type" column:"description" qs:"description"`
-	Slug        fireback.QueriableField `cli:"slug" table:"workspace_type" column:"slug" qs:"slug"`
-	Role        fireback.QueriableField `cli:"role" table:"workspace_type" column:"role" qs:"role"`
+	Title       fireback.QueriableField `cli:"title" table:"workspace_type" typeof:"string" column:"title" qs:"title"`
+	Description fireback.QueriableField `cli:"description" table:"workspace_type" typeof:"string" column:"description" qs:"description"`
+	Slug        fireback.QueriableField `cli:"slug" table:"workspace_type" typeof:"string" column:"slug" qs:"slug"`
+	Role        fireback.QueriableField `cli:"role" table:"workspace_type" typeof:"one" column:"role" qs:"role"`
 }
 
 func (x *WorkspaceTypeEntityQs) GetQuery() string {
@@ -723,6 +723,10 @@ func WorkspaceTypeActionImport(
 
 var WorkspaceTypeCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -789,6 +793,10 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1261,6 +1269,12 @@ var WORKSPACE_TYPE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceTypeEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, WorkspaceTypeActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var WORKSPACE_TYPE_ACTION_PATCH_BULK = fireback.Module3Action{

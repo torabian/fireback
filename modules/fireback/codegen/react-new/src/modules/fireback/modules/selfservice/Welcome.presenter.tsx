@@ -7,7 +7,7 @@ import { useGetPassportsAvailableMethods } from "../../sdk/modules/abac/useGetPa
 import {
   AuthAvailableMethods,
   AuthMethod,
-  useStoreRedirectParam,
+  useTemporaryParamOptions,
 } from "./auth.common";
 import {
   CheckPassportMethodsActionResDto,
@@ -26,7 +26,7 @@ export const usePresenter = () => {
     unauthorized: true,
   });
 
-  useStoreRedirectParam("redirect_temporary");
+  useTemporaryParamOptions(["redirect_temporary", "workspace_type_id"]);
 
   const [availableOptions, setAvailableOptions] =
     useState<AuthAvailableMethods>(undefined);

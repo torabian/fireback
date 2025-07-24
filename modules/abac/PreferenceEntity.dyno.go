@@ -33,7 +33,7 @@ func ResetPreferenceSeeders(fs *embed.FS) {
 }
 
 type PreferenceEntityQs struct {
-	Timezone fireback.QueriableField `cli:"timezone" table:"preference" column:"timezone" qs:"timezone"`
+	Timezone fireback.QueriableField `cli:"timezone" table:"preference" typeof:"string" column:"timezone" qs:"timezone"`
 }
 
 func (x *PreferenceEntityQs) GetQuery() string {
@@ -667,6 +667,10 @@ func PreferenceActionImport(
 
 var PreferenceCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -702,6 +706,10 @@ var PreferenceCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1193,6 +1201,12 @@ var PREFERENCE_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PreferenceEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PreferenceActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PREFERENCE_ACTION_PATCH_BULK = fireback.Module3Action{

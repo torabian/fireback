@@ -33,16 +33,16 @@ func ResetWorkspaceConfigSeeders(fs *embed.FS) {
 }
 
 type WorkspaceConfigEntityQs struct {
-	EnableRecaptcha2       fireback.QueriableField `cli:"enable-recaptcha2" table:"workspace_config" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
-	EnableOtp              fireback.QueriableField `cli:"enable-otp" table:"workspace_config" column:"enable_otp" qs:"enableOtp"`
-	RequireOtpOnSignup     fireback.QueriableField `cli:"require-otp-on-signup" table:"workspace_config" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
-	RequireOtpOnSignin     fireback.QueriableField `cli:"require-otp-on-signin" table:"workspace_config" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
-	Recaptcha2ServerKey    fireback.QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
-	Recaptcha2ClientKey    fireback.QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
-	EnableTotp             fireback.QueriableField `cli:"enable-totp" table:"workspace_config" column:"enable_totp" qs:"enableTotp"`
-	ForceTotp              fireback.QueriableField `cli:"force-totp" table:"workspace_config" column:"force_totp" qs:"forceTotp"`
-	ForcePasswordOnPhone   fireback.QueriableField `cli:"force-password-on-phone" table:"workspace_config" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
-	ForcePersonNameOnPhone fireback.QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
+	EnableRecaptcha2       fireback.QueriableField `cli:"enable-recaptcha2" table:"workspace_config" typeof:"bool?" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
+	EnableOtp              fireback.QueriableField `cli:"enable-otp" table:"workspace_config" typeof:"bool?" column:"enable_otp" qs:"enableOtp"`
+	RequireOtpOnSignup     fireback.QueriableField `cli:"require-otp-on-signup" table:"workspace_config" typeof:"bool?" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
+	RequireOtpOnSignin     fireback.QueriableField `cli:"require-otp-on-signin" table:"workspace_config" typeof:"bool?" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
+	Recaptcha2ServerKey    fireback.QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" typeof:"string" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey    fireback.QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" typeof:"string" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
+	EnableTotp             fireback.QueriableField `cli:"enable-totp" table:"workspace_config" typeof:"bool?" column:"enable_totp" qs:"enableTotp"`
+	ForceTotp              fireback.QueriableField `cli:"force-totp" table:"workspace_config" typeof:"bool?" column:"force_totp" qs:"forceTotp"`
+	ForcePasswordOnPhone   fireback.QueriableField `cli:"force-password-on-phone" table:"workspace_config" typeof:"bool?" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
+	ForcePersonNameOnPhone fireback.QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" typeof:"bool?" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
 }
 
 func (x *WorkspaceConfigEntityQs) GetQuery() string {
@@ -751,6 +751,10 @@ func WorkspaceConfigActionImport(
 
 var WorkspaceConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -839,6 +843,10 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1396,6 +1404,12 @@ var WORKSPACE_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "WorkspaceConfigEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, WorkspaceConfigActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var WORKSPACE_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{

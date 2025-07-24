@@ -17,8 +17,10 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
     form,
     state,
     workspaceTypes,
+    workspaceTypeId,
     totpUrl,
     isLoading,
+    setSelectedWorkspaceType,
     s,
   } = usePresenter();
 
@@ -40,6 +42,36 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
     );
   }
 
+  // If there are more than single workspace, we need to ask the user to choose one.
+  if (workspaceTypes.length >= 2 && !workspaceTypeId) {
+    return (
+      <div
+        className="signin-form-container fadein"
+        style={{ animation: "fadein 1s" }}
+      >
+        <h1>{s.completeYourAccount}</h1>
+        <p>{s.completeYourAccountDescription}</p>
+        <div className=" ">
+          {workspaceTypes.map((workspaceType) => (
+            <div className="mt-3">
+              <h2>{workspaceType.title}</h2>
+              <p>{workspaceType.description}</p>
+              <button
+                key={workspaceType.uniqueId}
+                className="btn btn-outline-primary w-100"
+                onClick={() => {
+                  setSelectedWorkspaceType(workspaceType.uniqueId);
+                }}
+              >
+                Select
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="signin-form-container fadein"
@@ -47,11 +79,8 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
     >
       <h1>{s.completeYourAccount}</h1>
       <p>{s.completeYourAccountDescription}</p>
-
       <QueryErrorView query={mutation} />
-
       <Form form={form} mutation={mutation} />
-
       <button
         id="go-step-back"
         onClick={goBack}

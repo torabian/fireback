@@ -1,23 +1,22 @@
-import { FormikProps, useFormik } from "formik";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useFormik } from "formik";
+import { useEffect, useState } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { IResponse } from "../../sdk/core/http-tools";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useGetWorkspacePublicTypes } from "../../sdk/modules/abac/useGetWorkspacePublicTypes";
 import { usePostPassportsSignupClassic } from "../../sdk/modules/abac/usePostPassportsSignupClassic";
 
 import { useS } from "../../hooks/useS";
-import { strings } from "./strings/translations";
-import { useCompleteAuth } from "./auth.common";
 import {
   ClassicSignupActionReqDto,
   ClassicSignupActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
+import { useCompleteAuth } from "./auth.common";
+import { strings } from "./strings/translations";
 
 export const usePresenter = () => {
-  const { goBack, state, replace, push } = useRouter();
+  const { goBack, state, push } = useRouter();
   const { locale } = useLocale();
   const { onComplete } = useCompleteAuth();
   const { submit: signup, mutation } = usePostPassportsSignupClassic();
@@ -27,7 +26,8 @@ export const usePresenter = () => {
   });
   const s = useS(strings);
 
-  const { setSession } = useContext(RemoteQueryContext);
+  // The external service requests specific workspace type.
+  const requestedWorkspaceTypeId = sessionStorage.getItem("workspace_type_id");
 
   const submit = (values: Partial<ClassicSignupActionReqDto>) => {
     signup({
@@ -70,17 +70,23 @@ export const usePresenter = () => {
     }
   };
 
-  const [selectedWorkspaceId, setSelected] = useState("");
-  const workspaceTypeId =
+  const [selectedWorkspaceTypeId, setSelectedWorkspaceType] = useState("");
+  let workspaceTypeId =
     workspaceTypes.length === 1
       ? workspaceTypes[0].uniqueId
-      : selectedWorkspaceId;
+      : selectedWorkspaceTypeId;
+
+  if (requestedWorkspaceTypeId) {
+    workspaceTypeId = requestedWorkspaceTypeId;
+  }
 
   return {
     mutation,
     isLoading,
     form,
+    setSelectedWorkspaceType,
     totpUrl,
+    workspaceTypeId,
     submit,
     goBack,
     s,

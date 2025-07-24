@@ -33,13 +33,13 @@ func ResetInvoiceTransactionSeeders(fs *embed.FS) {
 }
 
 type InvoiceTransactionEntityQs struct {
-	Invoice           fireback.QueriableField `cli:"invoice" table:"invoice_transaction" column:"invoice" qs:"invoice"`
-	Amount            fireback.QueriableField `cli:"amount" table:"invoice_transaction" column:"amount" qs:"amount"`
-	Provider          fireback.QueriableField `cli:"provider" table:"invoice_transaction" column:"provider" qs:"provider"`
-	ExternalSessionId fireback.QueriableField `cli:"external-session-id" table:"invoice_transaction" column:"external_session_id" qs:"externalSessionId"`
-	ExternalPaymentId fireback.QueriableField `cli:"external-payment-id" table:"invoice_transaction" column:"external_payment_id" qs:"externalPaymentId"`
-	FailureReason     fireback.QueriableField `cli:"failure-reason" table:"invoice_transaction" column:"failure_reason" qs:"failureReason"`
-	PaidAt            fireback.QueriableField `cli:"paid-at" table:"invoice_transaction" column:"paid_at" qs:"paidAt"`
+	Invoice           fireback.QueriableField `cli:"invoice" table:"invoice_transaction" typeof:"one" column:"invoice" qs:"invoice"`
+	Amount            fireback.QueriableField `cli:"amount" table:"invoice_transaction" typeof:"int64" column:"amount" qs:"amount"`
+	Provider          fireback.QueriableField `cli:"provider" table:"invoice_transaction" typeof:"string" column:"provider" qs:"provider"`
+	ExternalSessionId fireback.QueriableField `cli:"external-session-id" table:"invoice_transaction" typeof:"string" column:"external_session_id" qs:"externalSessionId"`
+	ExternalPaymentId fireback.QueriableField `cli:"external-payment-id" table:"invoice_transaction" typeof:"string" column:"external_payment_id" qs:"externalPaymentId"`
+	FailureReason     fireback.QueriableField `cli:"failure-reason" table:"invoice_transaction" typeof:"string" column:"failure_reason" qs:"failureReason"`
+	PaidAt            fireback.QueriableField `cli:"paid-at" table:"invoice_transaction" typeof:"datetime" column:"paid_at" qs:"paidAt"`
 }
 
 func (x *InvoiceTransactionEntityQs) GetQuery() string {
@@ -723,6 +723,10 @@ func InvoiceTransactionActionImport(
 
 var InvoiceTransactionCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -815,6 +819,10 @@ var InvoiceTransactionCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1347,6 +1355,12 @@ var INVOICE_TRANSACTION_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "InvoiceTransactionEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, InvoiceTransactionActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var INVOICE_TRANSACTION_ACTION_PATCH_BULK = fireback.Module3Action{

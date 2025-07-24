@@ -33,33 +33,33 @@ func ResetNotificationConfigSeeders(fs *embed.FS) {
 }
 
 type NotificationConfigEntityQs struct {
-	CascadeToSubWorkspaces                 fireback.QueriableField `cli:"cascade-to-sub-workspaces" table:"notification_config" column:"cascade_to_sub_workspaces" qs:"cascadeToSubWorkspaces"`
-	ForcedCascadeEmailProvider             fireback.QueriableField `cli:"forced-cascade-email-provider" table:"notification_config" column:"forced_cascade_email_provider" qs:"forcedCascadeEmailProvider"`
-	GeneralEmailProvider                   fireback.QueriableField `cli:"general-email-provider" table:"notification_config" column:"general_email_provider" qs:"generalEmailProvider"`
-	GeneralGsmProvider                     fireback.QueriableField `cli:"general-gsm-provider" table:"notification_config" column:"general_gsm_provider" qs:"generalGsmProvider"`
-	InviteToWorkspaceContent               fireback.QueriableField `cli:"invite-to-workspace-content" table:"notification_config" column:"invite_to_workspace_content" qs:"inviteToWorkspaceContent"`
-	InviteToWorkspaceContentExcerpt        fireback.QueriableField `cli:"invite-to-workspace-content-excerpt" table:"notification_config" column:"invite_to_workspace_content_excerpt" qs:"inviteToWorkspaceContentExcerpt"`
-	InviteToWorkspaceContentDefault        fireback.QueriableField `cli:"invite-to-workspace-content-default" table:"notification_config" column:"invite_to_workspace_content_default" qs:"inviteToWorkspaceContentDefault"`
-	InviteToWorkspaceContentDefaultExcerpt fireback.QueriableField `cli:"invite-to-workspace-content-default-excerpt" table:"notification_config" column:"invite_to_workspace_content_default_excerpt" qs:"inviteToWorkspaceContentDefaultExcerpt"`
-	InviteToWorkspaceTitle                 fireback.QueriableField `cli:"invite-to-workspace-title" table:"notification_config" column:"invite_to_workspace_title" qs:"inviteToWorkspaceTitle"`
-	InviteToWorkspaceTitleDefault          fireback.QueriableField `cli:"invite-to-workspace-title-default" table:"notification_config" column:"invite_to_workspace_title_default" qs:"inviteToWorkspaceTitleDefault"`
-	InviteToWorkspaceSender                fireback.QueriableField `cli:"invite-to-workspace-sender" table:"notification_config" column:"invite_to_workspace_sender" qs:"inviteToWorkspaceSender"`
-	AccountCenterEmailSender               fireback.QueriableField `cli:"account-center-email-sender" table:"notification_config" column:"account_center_email_sender" qs:"accountCenterEmailSender"`
-	ForgetPasswordContent                  fireback.QueriableField `cli:"forget-password-content" table:"notification_config" column:"forget_password_content" qs:"forgetPasswordContent"`
-	ForgetPasswordContentExcerpt           fireback.QueriableField `cli:"forget-password-content-excerpt" table:"notification_config" column:"forget_password_content_excerpt" qs:"forgetPasswordContentExcerpt"`
-	ForgetPasswordContentDefault           fireback.QueriableField `cli:"forget-password-content-default" table:"notification_config" column:"forget_password_content_default" qs:"forgetPasswordContentDefault"`
-	ForgetPasswordContentDefaultExcerpt    fireback.QueriableField `cli:"forget-password-content-default-excerpt" table:"notification_config" column:"forget_password_content_default_excerpt" qs:"forgetPasswordContentDefaultExcerpt"`
-	ForgetPasswordTitle                    fireback.QueriableField `cli:"forget-password-title" table:"notification_config" column:"forget_password_title" qs:"forgetPasswordTitle"`
-	ForgetPasswordTitleDefault             fireback.QueriableField `cli:"forget-password-title-default" table:"notification_config" column:"forget_password_title_default" qs:"forgetPasswordTitleDefault"`
-	ForgetPasswordSender                   fireback.QueriableField `cli:"forget-password-sender" table:"notification_config" column:"forget_password_sender" qs:"forgetPasswordSender"`
-	AcceptLanguage                         fireback.QueriableField `cli:"accept-language" table:"notification_config" column:"accept_language" qs:"acceptLanguage"`
-	ConfirmEmailSender                     fireback.QueriableField `cli:"confirm-email-sender" table:"notification_config" column:"confirm_email_sender" qs:"confirmEmailSender"`
-	ConfirmEmailContent                    fireback.QueriableField `cli:"confirm-email-content" table:"notification_config" column:"confirm_email_content" qs:"confirmEmailContent"`
-	ConfirmEmailContentExcerpt             fireback.QueriableField `cli:"confirm-email-content-excerpt" table:"notification_config" column:"confirm_email_content_excerpt" qs:"confirmEmailContentExcerpt"`
-	ConfirmEmailContentDefault             fireback.QueriableField `cli:"confirm-email-content-default" table:"notification_config" column:"confirm_email_content_default" qs:"confirmEmailContentDefault"`
-	ConfirmEmailContentDefaultExcerpt      fireback.QueriableField `cli:"confirm-email-content-default-excerpt" table:"notification_config" column:"confirm_email_content_default_excerpt" qs:"confirmEmailContentDefaultExcerpt"`
-	ConfirmEmailTitle                      fireback.QueriableField `cli:"confirm-email-title" table:"notification_config" column:"confirm_email_title" qs:"confirmEmailTitle"`
-	ConfirmEmailTitleDefault               fireback.QueriableField `cli:"confirm-email-title-default" table:"notification_config" column:"confirm_email_title_default" qs:"confirmEmailTitleDefault"`
+	CascadeToSubWorkspaces                 fireback.QueriableField `cli:"cascade-to-sub-workspaces" table:"notification_config" typeof:"bool" column:"cascade_to_sub_workspaces" qs:"cascadeToSubWorkspaces"`
+	ForcedCascadeEmailProvider             fireback.QueriableField `cli:"forced-cascade-email-provider" table:"notification_config" typeof:"bool" column:"forced_cascade_email_provider" qs:"forcedCascadeEmailProvider"`
+	GeneralEmailProvider                   fireback.QueriableField `cli:"general-email-provider" table:"notification_config" typeof:"one" column:"general_email_provider" qs:"generalEmailProvider"`
+	GeneralGsmProvider                     fireback.QueriableField `cli:"general-gsm-provider" table:"notification_config" typeof:"one" column:"general_gsm_provider" qs:"generalGsmProvider"`
+	InviteToWorkspaceContent               fireback.QueriableField `cli:"invite-to-workspace-content" table:"notification_config" typeof:"string" column:"invite_to_workspace_content" qs:"inviteToWorkspaceContent"`
+	InviteToWorkspaceContentExcerpt        fireback.QueriableField `cli:"invite-to-workspace-content-excerpt" table:"notification_config" typeof:"string" column:"invite_to_workspace_content_excerpt" qs:"inviteToWorkspaceContentExcerpt"`
+	InviteToWorkspaceContentDefault        fireback.QueriableField `cli:"invite-to-workspace-content-default" table:"notification_config" typeof:"string" column:"invite_to_workspace_content_default" qs:"inviteToWorkspaceContentDefault"`
+	InviteToWorkspaceContentDefaultExcerpt fireback.QueriableField `cli:"invite-to-workspace-content-default-excerpt" table:"notification_config" typeof:"string" column:"invite_to_workspace_content_default_excerpt" qs:"inviteToWorkspaceContentDefaultExcerpt"`
+	InviteToWorkspaceTitle                 fireback.QueriableField `cli:"invite-to-workspace-title" table:"notification_config" typeof:"string" column:"invite_to_workspace_title" qs:"inviteToWorkspaceTitle"`
+	InviteToWorkspaceTitleDefault          fireback.QueriableField `cli:"invite-to-workspace-title-default" table:"notification_config" typeof:"string" column:"invite_to_workspace_title_default" qs:"inviteToWorkspaceTitleDefault"`
+	InviteToWorkspaceSender                fireback.QueriableField `cli:"invite-to-workspace-sender" table:"notification_config" typeof:"one" column:"invite_to_workspace_sender" qs:"inviteToWorkspaceSender"`
+	AccountCenterEmailSender               fireback.QueriableField `cli:"account-center-email-sender" table:"notification_config" typeof:"one" column:"account_center_email_sender" qs:"accountCenterEmailSender"`
+	ForgetPasswordContent                  fireback.QueriableField `cli:"forget-password-content" table:"notification_config" typeof:"string" column:"forget_password_content" qs:"forgetPasswordContent"`
+	ForgetPasswordContentExcerpt           fireback.QueriableField `cli:"forget-password-content-excerpt" table:"notification_config" typeof:"string" column:"forget_password_content_excerpt" qs:"forgetPasswordContentExcerpt"`
+	ForgetPasswordContentDefault           fireback.QueriableField `cli:"forget-password-content-default" table:"notification_config" typeof:"string" column:"forget_password_content_default" qs:"forgetPasswordContentDefault"`
+	ForgetPasswordContentDefaultExcerpt    fireback.QueriableField `cli:"forget-password-content-default-excerpt" table:"notification_config" typeof:"string" column:"forget_password_content_default_excerpt" qs:"forgetPasswordContentDefaultExcerpt"`
+	ForgetPasswordTitle                    fireback.QueriableField `cli:"forget-password-title" table:"notification_config" typeof:"string" column:"forget_password_title" qs:"forgetPasswordTitle"`
+	ForgetPasswordTitleDefault             fireback.QueriableField `cli:"forget-password-title-default" table:"notification_config" typeof:"string" column:"forget_password_title_default" qs:"forgetPasswordTitleDefault"`
+	ForgetPasswordSender                   fireback.QueriableField `cli:"forget-password-sender" table:"notification_config" typeof:"one" column:"forget_password_sender" qs:"forgetPasswordSender"`
+	AcceptLanguage                         fireback.QueriableField `cli:"accept-language" table:"notification_config" typeof:"text" column:"accept_language" qs:"acceptLanguage"`
+	ConfirmEmailSender                     fireback.QueriableField `cli:"confirm-email-sender" table:"notification_config" typeof:"one" column:"confirm_email_sender" qs:"confirmEmailSender"`
+	ConfirmEmailContent                    fireback.QueriableField `cli:"confirm-email-content" table:"notification_config" typeof:"string" column:"confirm_email_content" qs:"confirmEmailContent"`
+	ConfirmEmailContentExcerpt             fireback.QueriableField `cli:"confirm-email-content-excerpt" table:"notification_config" typeof:"string" column:"confirm_email_content_excerpt" qs:"confirmEmailContentExcerpt"`
+	ConfirmEmailContentDefault             fireback.QueriableField `cli:"confirm-email-content-default" table:"notification_config" typeof:"string" column:"confirm_email_content_default" qs:"confirmEmailContentDefault"`
+	ConfirmEmailContentDefaultExcerpt      fireback.QueriableField `cli:"confirm-email-content-default-excerpt" table:"notification_config" typeof:"string" column:"confirm_email_content_default_excerpt" qs:"confirmEmailContentDefaultExcerpt"`
+	ConfirmEmailTitle                      fireback.QueriableField `cli:"confirm-email-title" table:"notification_config" typeof:"string" column:"confirm_email_title" qs:"confirmEmailTitle"`
+	ConfirmEmailTitleDefault               fireback.QueriableField `cli:"confirm-email-title-default" table:"notification_config" typeof:"string" column:"confirm_email_title_default" qs:"confirmEmailTitleDefault"`
 }
 
 func (x *NotificationConfigEntityQs) GetQuery() string {
@@ -886,6 +886,10 @@ func NotificationConfigActionImport(
 
 var NotificationConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -1203,6 +1207,10 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1920,6 +1928,12 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "NotificationConfigEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, NotificationConfigActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{

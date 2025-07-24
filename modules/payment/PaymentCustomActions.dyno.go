@@ -35,6 +35,10 @@ var NotificationCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
 	},
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "session-id",
 		Required: false,
 		Usage:    `The session which has been assigned during payment process initially. (string)`,
@@ -115,6 +119,10 @@ var VerifyTransactionCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "session-id",
@@ -241,6 +249,10 @@ var RegisterTransactionCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "email",

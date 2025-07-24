@@ -33,9 +33,9 @@ func ResetContentSeeders(fs *embed.FS) {
 }
 
 type ContentEntityQs struct {
-	Title       fireback.QueriableField `cli:"title" table:"content" column:"title" qs:"title"`
-	Excerpt     fireback.QueriableField `cli:"excerpt" table:"content" column:"excerpt" qs:"excerpt"`
-	ContentType fireback.QueriableField `cli:"content-type" table:"content" column:"content_type" qs:"contentType"`
+	Title       fireback.QueriableField `cli:"title" table:"content" typeof:"string" column:"title" qs:"title"`
+	Excerpt     fireback.QueriableField `cli:"excerpt" table:"content" typeof:"string" column:"excerpt" qs:"excerpt"`
+	ContentType fireback.QueriableField `cli:"content-type" table:"content" typeof:"string" column:"content_type" qs:"contentType"`
 }
 
 func (x *ContentEntityQs) GetQuery() string {
@@ -686,6 +686,10 @@ func ContentActionImport(
 
 var ContentCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -747,6 +751,10 @@ var ContentCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1254,6 +1262,12 @@ var CONTENT_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "ContentEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, ContentActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{

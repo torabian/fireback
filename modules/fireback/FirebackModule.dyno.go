@@ -35,6 +35,7 @@ const (
 	BodyIsMissing                firebackCode = "BodyIsMissing"
 	BodyReadAfterClose           firebackCode = "BodyReadAfterClose"
 	BodyUnexpectedEof            firebackCode = "BodyUnexpectedEof"
+	DatabaseOperationError       firebackCode = "DatabaseOperationError"
 	FieldInvalidEmail            firebackCode = "FieldInvalidEmail"
 	FieldOneOf                   firebackCode = "FieldOneOf"
 	FieldRequired                firebackCode = "FieldRequired"
@@ -45,6 +46,7 @@ const (
 	JsonInvalidFieldType         firebackCode = "JsonInvalidFieldType"
 	JsonMalformed                firebackCode = "JsonMalformed"
 	JsonUnmarshalUnsupportedType firebackCode = "JsonUnmarshalUnsupportedType"
+	ResourceNotFound             firebackCode = "ResourceNotFound"
 	UnknownErrorReadingBody      firebackCode = "UnknownErrorReadingBody"
 	ValidationFailedOnSomeFields firebackCode = "ValidationFailedOnSomeFields"
 	XmlDecodingError             firebackCode = "XmlDecodingError"
@@ -76,6 +78,10 @@ func newFirebackMessageCode() *firebackMsgs {
 			"$":    "BodyUnexpectedEof",
 			"$key": "io.ErrUnexpectedEOF",
 			"en":   "Body unexpected EOF. The data you sent appears incomplete. Please check your request and try again.",
+		},
+		DatabaseOperationError: ErrorItem{
+			"$":  "DatabaseOperationError",
+			"en": "There is an issue while trying to query database.",
 		},
 		FieldInvalidEmail: ErrorItem{
 			"$":  "FieldInvalidEmail",
@@ -117,6 +123,10 @@ func newFirebackMessageCode() *firebackMsgs {
 			"$":  "JsonUnmarshalUnsupportedType",
 			"en": "Unsupported type when unmarshalling json",
 		},
+		ResourceNotFound: ErrorItem{
+			"$":  "ResourceNotFound",
+			"en": "The data you are looking for is not available, or you do not have right access.",
+		},
 		UnknownErrorReadingBody: ErrorItem{
 			"$":  "UnknownErrorReadingBody",
 			"en": "We cannot read the body of your request.",
@@ -153,6 +163,7 @@ type firebackMsgs struct {
 	BodyIsMissing                ErrorItem
 	BodyReadAfterClose           ErrorItem
 	BodyUnexpectedEof            ErrorItem
+	DatabaseOperationError       ErrorItem
 	FieldInvalidEmail            ErrorItem
 	FieldOneOf                   ErrorItem
 	FieldRequired                ErrorItem
@@ -163,6 +174,7 @@ type firebackMsgs struct {
 	JsonInvalidFieldType         ErrorItem
 	JsonMalformed                ErrorItem
 	JsonUnmarshalUnsupportedType ErrorItem
+	ResourceNotFound             ErrorItem
 	UnknownErrorReadingBody      ErrorItem
 	ValidationFailedOnSomeFields ErrorItem
 	XmlDecodingError             ErrorItem

@@ -33,17 +33,17 @@ func ResetPaymentParameterSeeders(fs *embed.FS) {
 }
 
 type PaymentParameterEntityQs struct {
-	PosId          fireback.QueriableField `cli:"pos-id" table:"payment_parameter" column:"pos_id" qs:"posId"`
-	MerchantId     fireback.QueriableField `cli:"merchant-id" table:"payment_parameter" column:"merchant_id" qs:"merchantId"`
-	Crc            fireback.QueriableField `cli:"crc" table:"payment_parameter" column:"crc" qs:"crc"`
-	SecretId       fireback.QueriableField `cli:"secret-id" table:"payment_parameter" column:"secret_id" qs:"secretId"`
-	UrlReturn      fireback.QueriableField `cli:"url-return" table:"payment_parameter" column:"url_return" qs:"urlReturn"`
-	UrlStatus      fireback.QueriableField `cli:"url-status" table:"payment_parameter" column:"url_status" qs:"urlStatus"`
-	Currency       fireback.QueriableField `cli:"currency" table:"payment_parameter" column:"currency" qs:"currency"`
-	Country        fireback.QueriableField `cli:"country" table:"payment_parameter" column:"country" qs:"country"`
-	PaymentPageUrl fireback.QueriableField `cli:"payment-page-url" table:"payment_parameter" column:"payment_page_url" qs:"paymentPageUrl"`
-	RegisterApiUrl fireback.QueriableField `cli:"register-api-url" table:"payment_parameter" column:"register_api_url" qs:"registerApiUrl"`
-	VerifyApiUrl   fireback.QueriableField `cli:"verify-api-url" table:"payment_parameter" column:"verify_api_url" qs:"verifyApiUrl"`
+	PosId          fireback.QueriableField `cli:"pos-id" table:"payment_parameter" typeof:"string" column:"pos_id" qs:"posId"`
+	MerchantId     fireback.QueriableField `cli:"merchant-id" table:"payment_parameter" typeof:"string" column:"merchant_id" qs:"merchantId"`
+	Crc            fireback.QueriableField `cli:"crc" table:"payment_parameter" typeof:"string" column:"crc" qs:"crc"`
+	SecretId       fireback.QueriableField `cli:"secret-id" table:"payment_parameter" typeof:"string" column:"secret_id" qs:"secretId"`
+	UrlReturn      fireback.QueriableField `cli:"url-return" table:"payment_parameter" typeof:"string" column:"url_return" qs:"urlReturn"`
+	UrlStatus      fireback.QueriableField `cli:"url-status" table:"payment_parameter" typeof:"string" column:"url_status" qs:"urlStatus"`
+	Currency       fireback.QueriableField `cli:"currency" table:"payment_parameter" typeof:"string" column:"currency" qs:"currency"`
+	Country        fireback.QueriableField `cli:"country" table:"payment_parameter" typeof:"string" column:"country" qs:"country"`
+	PaymentPageUrl fireback.QueriableField `cli:"payment-page-url" table:"payment_parameter" typeof:"string" column:"payment_page_url" qs:"paymentPageUrl"`
+	RegisterApiUrl fireback.QueriableField `cli:"register-api-url" table:"payment_parameter" typeof:"string" column:"register_api_url" qs:"registerApiUrl"`
+	VerifyApiUrl   fireback.QueriableField `cli:"verify-api-url" table:"payment_parameter" typeof:"string" column:"verify_api_url" qs:"verifyApiUrl"`
 }
 
 func (x *PaymentParameterEntityQs) GetQuery() string {
@@ -759,6 +759,10 @@ func PaymentParameterActionImport(
 
 var PaymentParameterCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -928,6 +932,10 @@ var PaymentParameterCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1509,6 +1517,12 @@ var PAYMENT_PARAMETER_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PaymentParameterEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PaymentParameterActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PAYMENT_PARAMETER_ACTION_PATCH_BULK = fireback.Module3Action{

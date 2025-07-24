@@ -33,9 +33,9 @@ func ResetPaymentConfigSeeders(fs *embed.FS) {
 }
 
 type PaymentConfigEntityQs struct {
-	EnableStripe      fireback.QueriableField `cli:"enable-stripe" table:"payment_config" column:"enable_stripe" qs:"enableStripe"`
-	StripeSecretKey   fireback.QueriableField `cli:"stripe-secret-key" table:"payment_config" column:"stripe_secret_key" qs:"stripeSecretKey"`
-	StripeCallbackUrl fireback.QueriableField `cli:"stripe-callback-url" table:"payment_config" column:"stripe_callback_url" qs:"stripeCallbackUrl"`
+	EnableStripe      fireback.QueriableField `cli:"enable-stripe" table:"payment_config" typeof:"bool?" column:"enable_stripe" qs:"enableStripe"`
+	StripeSecretKey   fireback.QueriableField `cli:"stripe-secret-key" table:"payment_config" typeof:"string" column:"stripe_secret_key" qs:"stripeSecretKey"`
+	StripeCallbackUrl fireback.QueriableField `cli:"stripe-callback-url" table:"payment_config" typeof:"string" column:"stripe_callback_url" qs:"stripeCallbackUrl"`
 }
 
 func (x *PaymentConfigEntityQs) GetQuery() string {
@@ -688,6 +688,10 @@ func PaymentConfigActionImport(
 
 var PaymentConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
+	},
+	&cli.StringFlag{
 		Name:     "wid",
 		Required: false,
 		Usage:    "Provide workspace id, if you want to change the data workspace",
@@ -741,6 +745,10 @@ var PaymentConfigCommonCliFlagsOptional = []cli.Flag{
 		Name:     "x-src",
 		Required: false,
 		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
+	},
+	&cli.StringFlag{
+		Name:  "x-accept",
+		Usage: "Return type of the the content, such as json or yaml",
 	},
 	&cli.StringFlag{
 		Name:     "wid",
@@ -1263,6 +1271,12 @@ var PAYMENT_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	},
 	In: &fireback.Module3ActionBody{
 		Entity: "PaymentConfigEntity",
+	},
+	CliName: "update",
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		result, err := fireback.CliPatchEntity(c, PaymentConfigActions.Update, security)
+		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return err
 	},
 }
 var PAYMENT_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{
