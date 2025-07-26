@@ -3,15 +3,30 @@
 */
 export const en = {
   invoices: {
-    amount: "Amount",
     amountHint: "Amount",
     archiveTitle: "Invoices",
+    newInvoice: "New invoice",
+    titleHint: "Title",
+    amount: "Amount",
+    editInvoice: "Edit invoice",
     finalStatus: "Final status",
     finalStatusHint: "Final status",
-    newInvoice: "New invoice",
-    editInvoice: "Edit invoice",
     title: "Title",
-    titleHint: "Title",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  invoices: {
+    amount: "Kwota",
+    amountHint: "Kwota",
+    finalStatus: "Status końcowy",
+    newInvoice: "Nowa faktura",
+    titleHint: "Tytuł",
+    archiveTitle: "Faktury",
+    editInvoice: "Edytuj fakturę",
+    finalStatusHint: "Status końcowy",
+    title: "Tytuł",
   },
 };
- export const strings = {...en, };
+ export const strings = {...en, $pl:pl};

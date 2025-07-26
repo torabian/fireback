@@ -1,0 +1,15 @@
+extends: []
+content:
+  accept: Akceptuj
+  acceptBtn: Tak
+  actions: Akcje
+  confirmAcceptDescription: Czy na pewno chcesz dołączyć?
+  confirmAcceptTitle: Potwierdź zaproszenie
+  confirmRejectDescription: Czy na pewno chcesz odrzucić to zaproszenie? Aby dołączyć
+    ponownie, musisz zostać ponownie zaproszony przez administratorów.
+  confirmRejectTitle: Odrzuć zaproszenie
+  method: Metoda
+  passport: Paszport
+  reject: Odrzuć
+  roleName: Nazwa roli
+  workspaceName: Nazwa przestrzeni roboczej

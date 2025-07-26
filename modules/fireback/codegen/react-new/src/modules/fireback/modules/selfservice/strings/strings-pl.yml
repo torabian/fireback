@@ -1,0 +1,66 @@
+extends: []
+content:
+  anotherAccount: Wybierz inne konto
+  cancelStep: Anuluj i spróbuj innej metody.
+  changePassword:
+    description: Aby zmienić hasło, wprowadź nowe hasło dwukrotnie w polach poniżej
+    pass1Label: Hasło
+    pass2Label: Powtórz hasło
+    submit: Zmień hasło
+    title: Zmień hasło
+  chooseAnotherMethod: Wybierz inną metodę
+  completeYourAccount: Uzupełnij swoje konto
+  completeYourAccountDescription: Uzupełnij poniższe informacje, aby zakończyć rejestrację
+  continue: Kontynuuj
+  continueWithEmail: Kontynuuj za pomocą e-maila
+  continueWithEmailDescription: Wprowadź swój adres e-mail, aby kontynuować.
+  continueWithPhone: Kontynuuj za pomocą numeru telefonu
+  continueWithPhoneDescription: Wprowadź swój numer telefonu, aby kontynuować.
+  emailMethod: E-mail
+  enterOtp: Wprowadź jednorazowy kod
+  enterOtpDescription: Wysłaliśmy jednorazowy kod, wprowadź go, aby kontynuować.
+  enterPassword: Wprowadź hasło
+  enterPasswordDescription: Wprowadź swoje hasło, aby kontynuować autoryzację konta.
+  enterTotp: Wprowadź kod TOTP
+  enterTotpDescription: Otwórz aplikację uwierzytelniającą i wprowadź 6-cyfrowy kod.
+  firstName: Imię
+  google: Google
+  home:
+    description: Zarządzaj swoim kontem, e-mailami, hasłami i innymi
+    passports: Paszporty
+    passportsDescription: Zobacz e-maile i numery telefonów powiązane z Twoim kontem.
+    passportsTitle: Paszporty
+    title: Konto i profil
+  lastName: Nazwisko
+  noAuthenticationMethod: Uwierzytelnianie obecnie niedostępne
+  noAuthenticationMethodDescription: Logowanie i rejestracja są obecnie niedostępne
+    w Twoim regionie. Jeśli uważasz, że to błąd lub potrzebujesz dostępu, skontaktuj
+    się z administratorem.
+  password: Hasło
+  phoneMethod: Numer telefonu
+  registerationNotPossible: Rejestracja niemożliwa.
+  registerationNotPossibleLine1: W tym projekcie nie ma dostępnych typów przestrzeni
+    roboczych do publicznego tworzenia konta.
+  registerationNotPossibleLine2: Skontaktuj się z administratorem usługi, aby utworzył
+    konto dla Ciebie.
+  selectWorkspace: Masz wiele przestrzeni roboczych powiązanych z Twoim kontem. Wybierz
+    jedną, aby kontynuować.
+  selectWorkspaceTitle: Wybierz przestrzeń roboczą
+  setupDualFactor: Skonfiguruj uwierzytelnianie dwuskładnikowe
+  setupTotp: Skonfiguruj uwierzytelnianie dwuskładnikowe
+  setupTotpDescription: Aby zakończyć rejestrację konta, zeskanuj poniższy kod za
+    pomocą aplikacji „Microsoft Authenticator” lub „Google Authenticator”. Następnie
+    wprowadź tutaj 6-cyfrowy kod z aplikacji.
+  skipTotpButton: Pomiń na razie
+  skipTotpInfo: Możesz skonfigurować to później, odwiedzając sekcję bezpieczeństwa
+    konta.
+  useOneTimePassword: Użyj jednorazowego hasła zamiast tego
+  userPassports:
+    add: Dodaj nowy paszport
+    description: Tutaj możesz zobaczyć listę paszportów, które możesz wykorzystać
+      do uwierzytelniania w systemie.
+    remove: Usuń paszport
+    title: Paszporty
+  welcomeBack: Witamy ponownie
+  welcomeBackDescription: Wybierz dowolną opcję, aby kontynuować dostęp do swojego
+    konta.
