@@ -1,0 +1,37 @@
+---
+title: Seeders and mocks
+sidebar_position: 4
+---
+
+
+In many projects there are requirement to fullfil database with some static content, as if they are a part of program.
+Fireback emphasizes a lot on moving data into database. Even for male/female selection, it would be benefitial to move them
+into a table in database and not add them in to the codebase or hardcode on front-end.
+
+This makes fireback databases extreamly robust, and allows to rewrite application in upcoming decades if a new or better programming
+language appears. Also helps translations, localisation, whitelabling easier, and you can imagine the rest.
+
+To make this easier, we provide 2 concepts of `seeders` and `mocks`. Seeders, are the content, usually have a specific uniqueid,
+and you can sync them into the database. Such as timezones, they are useful in most projects. Mocks on the other hands,
+are a way of creating test data. Imagine you want to simulate list of products, but specific ones, you'll add them
+as mocks part of each entity.
+
+From technical point of view, both of them are yaml files (might be json as well, but coverage is not tested.). They need to follow
+such signature:
+
+```
+resources:
+- key: anyThingAsKey
+  path: ./file1.png // This is relative to the yml file, which will be placed in embed in go
+  blob: true/false // If true, it would be stored as blob. Useful with xfile? datatype.
+
+content:
+- anyKey: ($ref:anyThingAsKey) or ($refblob:anyThingAsKey)
+... add as many as items you want.
+```
+
+When you create entities, there will be mocks and seeders folders for that entity as well created on the module,
+and if you place files there the `mlist`, `slist`, `msync` and `ssync` commands will appear.
+
+**These commands are not available on http** for security purposes at the moment, and it's quite impractical to have them.
+This could be argued though, lets say the admin can check the seeders or mocks via ui.

@@ -1,0 +1,7 @@
+extends: []
+content:
+  editPassport: Edit Passport
+  newPassport: New Passport
+  value: Identifier (email, phonenumber)
+  valueHint: The actual identifier for passport, for email is the complete address
+    for example

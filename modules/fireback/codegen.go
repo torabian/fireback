@@ -294,6 +294,12 @@ func (x *Module3Field) ComputedGormTag() string {
 		return x.Gorm
 	}
 
+	if x.Type == FIELD_TYPE_XFILE {
+		mpref := x.UnderscoreName() + "_"
+
+		return "embedded;embeddedPrefix:" + mpref
+	}
+
 	if x.Type == FIELD_TYPE_TEXT {
 		return "text"
 	}

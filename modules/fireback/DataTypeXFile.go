@@ -5,16 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 )
-
-type XFileMeta struct {
-	FileID   string `json:"fileId" yaml:"fileId"`
-	FileName string `json:"fileName" yaml:"fileName"`
-	URL      string `json:"url" yaml:"url"`
-	Mime     string `json:"mime" yaml:"mime"`
-	Size     int64  `json:"size" yaml:"size"`
-}
 
 func (x XFileMeta) Json() string {
 	str, _ := json.MarshalIndent(x, "", "  ")
@@ -39,9 +34,20 @@ func (XFileMeta) GormDataType() string {
 }
 
 type XFile struct {
-	Meta XFileMeta
+	Meta XFileMeta `json:"meta" yaml:"meta" gorm:"-" sql:"-"`
+
+	// Store the file size in a separate column
+	Filesize uint64 `json:"fileSize" yaml:"fileSize"`
 
 	Blob []byte `gorm:"type:blob" json:"-" yaml:"-"`
+}
+
+type XFileMeta struct {
+	FileID   string `json:"fileId" yaml:"fileId"`
+	FileName string `json:"fileName" yaml:"fileName"`
+	URL      string `json:"url" yaml:"url"`
+	Mime     string `json:"mime" yaml:"mime"`
+	IsBase64 bool   `json:"isBase64,omitempty" yaml:"isBase64,omitempty"`
 }
 
 func (f *XFile) UnmarshalJSON(data []byte) error {
@@ -78,6 +84,9 @@ func (f *XFile) parseXFileInput(obj interface{}) error {
 				if errDl == nil {
 					f.Blob = file.Content
 					f.Meta.Mime = file.Mime
+					f.Filesize = uint64(len(file.Content))
+
+					return nil
 				}
 			}
 
@@ -85,7 +94,13 @@ func (f *XFile) parseXFileInput(obj interface{}) error {
 
 			f.Blob = parsed.Content
 			f.Meta.Mime = parsed.Mime
+			f.Filesize = uint64(len(parsed.Content))
+			return nil
 		}
+
+		// In the end, the string is just []byte as well
+		f.Blob = []byte(obj.(string))
+		f.Filesize = uint64(len(f.Blob))
 
 		return nil
 
@@ -105,7 +120,7 @@ func (f *XFile) parseXFileInput(obj interface{}) error {
 			f.Meta.Mime = mime
 		}
 		if size, ok := v["size"].(float64); ok {
-			f.Meta.Size = int64(size)
+			f.Filesize = uint64(size)
 		}
 		if url, ok := v["url"].(string); ok {
 			f.Meta.URL = url
@@ -120,22 +135,76 @@ func (f *XFile) parseXFileInput(obj interface{}) error {
 	}
 }
 
-// MarshalJSON - ensure blob is encoded as base64 string in field "blob"
-func (f XFile) MarshalJSON() ([]byte, error) {
-	type Alias XFile
+func encodeBlobDataURL(blob []byte, filename string) string {
+	if len(blob) == 0 {
+		return ""
+	}
 
-	aux := &struct {
-		Blob string `json:"blob,omitempty"`
-		*Alias
-	}{
-		Alias: (*Alias)(&f),
-	}
-	if len(f.Blob) > 0 {
-		aux.Blob = base64.StdEncoding.EncodeToString(f.Blob)
-	}
-	return json.Marshal(aux)
+	mime := detectMimeType(blob, filename)
+	encoded := base64.StdEncoding.EncodeToString(blob)
+	return fmt.Sprintf("data:%s;base64,%s", mime, encoded)
 }
 
+// MarshalJSON - ensure blob is encoded as base64 string in field "blob"
+func (f XFile) marshalStructWithEncodedBlob() any {
+	const maxInlineSize = 25 * 1024 // 25KB
+
+	var blobData string
+	meta := f.Meta
+	meta.IsBase64 = false
+
+	// If inlining allowed, inline it.
+	if len(f.Blob) > 0 && len(f.Blob) <= maxInlineSize {
+		blobData = encodeBlobDataURL(f.Blob, meta.FileName)
+		meta.IsBase64 = true
+	} else {
+		// Now we need to give a url, so the user can read the file
+		blobData = "large"
+	}
+
+	return &struct {
+		Blob     string    `json:"blob,omitempty" yaml:"blob,omitempty"`
+		Meta     XFileMeta `json:"meta" yaml:"meta"`
+		FileSize uint64    `json:"fileSize" yaml:"fileSize"`
+	}{
+		Blob:     blobData,
+		Meta:     meta,
+		FileSize: f.Filesize,
+	}
+}
+func (f XFile) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f.marshalStructWithEncodedBlob())
+}
+
+func (f XFile) MarshalYAML() (interface{}, error) {
+	return f.marshalStructWithEncodedBlob(), nil
+}
 func NewXFileAutoNull(value string) XFile {
+	if Exists(value) {
+		fmt.Println("File exists", value)
+
+		info, err := os.Stat(value)
+		if err != nil {
+			fmt.Println("Failed to stat file:", err)
+			return XFile{}
+		}
+
+		data, err := os.ReadFile(value)
+		if err != nil {
+			fmt.Println("Failed to read file:", err)
+			return XFile{}
+		}
+
+		mime := http.DetectContentType(data)
+
+		return XFile{
+			Blob:     data,
+			Filesize: uint64(info.Size()),
+			Meta: XFileMeta{
+				FileName: filepath.Base(value),
+				Mime:     mime,
+			},
+		}
+	}
 	return XFile{}
 }

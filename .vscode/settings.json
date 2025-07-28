@@ -10,7 +10,7 @@
         "match": "\\Module3.yml$"
       },
       {
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --path ${file}",
+        "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --langs en,pl --path ${file}",
         "match": "strings-([a-z][a-z]).yml$"
       }
     ]

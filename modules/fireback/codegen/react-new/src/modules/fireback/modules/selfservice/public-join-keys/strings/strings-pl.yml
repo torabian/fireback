@@ -1,0 +1,4 @@
+extends: []
+content:
+  roleName: Nazwa roli
+  uniqueId: Unikalny identyfikator

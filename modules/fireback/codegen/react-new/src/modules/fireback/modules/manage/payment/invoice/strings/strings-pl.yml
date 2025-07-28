@@ -1,0 +1,12 @@
+extends: []
+content:
+  invoices:
+    amount: Kwota
+    amountHint: Kwota
+    archiveTitle: Faktury
+    editInvoice: Edytuj fakturę
+    finalStatus: Status końcowy
+    finalStatusHint: Status końcowy
+    newInvoice: Nowa faktura
+    title: Tytuł
+    titleHint: Tytuł

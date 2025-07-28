@@ -1,0 +1,13 @@
+extends: []
+content:
+  paymentConfigs:
+    archiveTitle: Konfiguracje płatności
+    editPaymentConfig: Edytuj konfigurację płatności
+    enableStripe: Włącz Stripe
+    enableStripeHint: Włącz Stripe
+    newPaymentConfig: Nowa konfiguracja płatności
+    stripeCallbackUrl: URL zwrotny Stripe
+    stripeCallbackUrlHint: URL, pod którym działa usługa weryfikująca powodzenie płatności,
+      np. http://localhost:4500/payment/invoice
+    stripeSecretKey: Tajny klucz Stripe
+    stripeSecretKeyHint: Tajny klucz Stripe zaczyna się od sk_...

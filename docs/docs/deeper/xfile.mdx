@@ -1,0 +1,49 @@
+---
+title: XFile, Upload and download in fireback
+sidebar_position: 4
+---
+
+Most projects, often work with the files to be uploaded, or downloaded. Images, audio files, video,
+large and small files, and many more cases which touches even simplest projects outthere.
+
+Fireback comes with a sophisticated file system, which covers small files (1KB), Medium files (1MB), and large
+(+1MB files) covered, with solutations to even upload and store 100GB files.
+
+Working with files (usually binary) could be categorized into these 3 sections:
+
+* Uploading files into a system
+* Keeping files into a system,
+* Serving files from a system
+
+## Uploading files into fireback(projects)
+
+Fireback allows different methods to upload a file into an application. Typically, applications 
+are http servers, but also files could be uploaded into the project via cli, if needed or the application
+is basically a cli tool.
+
+Content we will focus:
+
+* Uploading files via posting html forms (form-data)
+* Uploading files via embedding as base64 in json requests
+* Uploading large files via TUS api, which is fully integrated with Fireback. (https://tus.io/ to read more)
+
+## Storing files in fireback
+
+Fireback allows to have multiple methods of storing files, they are generally:
+
+* Custom defined developer method of storing files
+* Into database, blob field in any table
+* On the disk, on the same server
+* On thirdparty storage providers (Such as AWS.)
+
+## Serving content
+
+Regardless of where the file is stored, fireback allows you to serve those files, or write them into
+disk. Serving files storage, fireback tries to allow multiple connection and range support to read
+concurrently the files.
+
+## XFile data type
+
+Fireback provides a data type called XFile under fireback module, which would handle all of the different
+file uploading scenarios, also represents the file information upon querying the database.
+
