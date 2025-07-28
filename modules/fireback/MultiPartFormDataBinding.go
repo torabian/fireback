@@ -82,9 +82,9 @@ func ConvertToXFile(fileHeader *multipart.FileHeader) (*XFile, error) {
 		Meta: XFileMeta{
 			FileName: fileHeader.Filename,
 			Mime:     mime,
-			Size:     fileHeader.Size,
 		},
-		Blob: blob,
+		Filesize: uint64(fileHeader.Size),
+		Blob:     blob,
 		// FileID, //URL: populate after upload or save
 	}, nil
 }

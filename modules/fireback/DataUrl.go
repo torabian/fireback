@@ -16,7 +16,7 @@ type DataURL struct {
 	RawInput string
 }
 
-// ParseDataURL parses a full data URL and extracts all metadata + content
+// parses a full data URL and extracts all metadata + content
 func ParseDataURL(input string) (*DataURL, error) {
 	if !strings.HasPrefix(input, "data:") {
 		return nil, nil

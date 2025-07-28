@@ -2,12 +2,18 @@ package fireback
 
 import (
 	"embed"
+	"encoding/base64"
 	"fmt"
+	"io/fs"
 	"log"
+	"net/http"
 	reflect "reflect"
 	"regexp"
+	"strings"
 
 	"github.com/schollz/progressbar/v3"
+	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 )
 
 /*
@@ -44,6 +50,9 @@ type ContentImport[T any] struct {
 
 		// unique key in the importing file context, which will be available as ($ref:key) in the document
 		Key string `yaml:"key"`
+
+		// If true, it would upload it, rather reads it as []bytes and will replace it directly in the field.
+		Blob bool `yaml:"blob"`
 	} `yaml:"resources"`
 }
 
@@ -57,12 +66,6 @@ func importYamlFromFileOnDisk[T any](
 	importYamlFromArray(content, fn, f, false)
 }
 
-func ReplaceResourcesInStruct(input any, resourceList []ResourceMap) {
-	v := reflect.ValueOf(input)
-	replaceStringsRecursively(v, resourceList)
-	addUniqueIdRecursively(v)
-}
-
 // When we are working with objects, it's necessary to add a uniqueId to them
 // when they are importing. This, do it :)
 func AutoUniqueIdItems(input any) {
@@ -70,57 +73,76 @@ func AutoUniqueIdItems(input any) {
 	addUniqueIdRecursively(v)
 }
 
-func replaceRef(input string, items []ResourceMap) string {
-	re := regexp.MustCompile(`\(\$ref:([^\)]+)\)`)
+func detectMimeType(blob []byte, filename string) string {
+	// Check extension
+	if strings.HasSuffix(strings.ToLower(filename), ".svg") {
+		return "image/svg+xml"
+	}
 
-	result := re.ReplaceAllStringFunc(input, func(match string) string {
+	// Check content
+	if len(blob) > 10 && strings.Contains(string(blob[:512]), "<svg") {
+		return "image/svg+xml"
+	}
+
+	// Fallback to built-in detection
+	return http.DetectContentType(blob)
+}
+
+func ConvertBlobToDataURI(blob []byte, filename string) (string, error) {
+	mimeType := detectMimeType(blob, filename) // detects from first 512 bytes
+	b64 := base64.StdEncoding.EncodeToString(blob)
+	dataURI := fmt.Sprintf("data:%s;base64,%s", mimeType, b64)
+	return dataURI, nil
+}
+
+func replaceRef(input string, items []ResourceMap) string {
+	var result string
+
+	{
+		re := regexp.MustCompile(`\(\$ref:([^\)]+)\)`)
+
+		result = re.ReplaceAllStringFunc(input, func(match string) string {
+			key := re.FindStringSubmatch(match)[1]
+			for _, item := range items {
+				if item.Key == key {
+					return item.DriveId
+				}
+			}
+			return match
+		})
+	}
+
+	return result
+}
+
+func replaceRefBlob(input string, items []ResourceMap) string {
+	var result string
+
+	re := regexp.MustCompile(`\(\$refblob:([^\)]+)\)`)
+
+	result = re.ReplaceAllStringFunc(input, func(match string) string {
 		key := re.FindStringSubmatch(match)[1]
 		for _, item := range items {
 			if item.Key == key {
-				return item.DriveId
+
+				// Temporarily we convert all files into the base64, and then
+				// assign it. Might be more efficient if directly assigned as bytes,
+				// but since it's an string replacement, it's working everywhere not only
+				// on xfile? data type
+				base64data, err := ConvertBlobToDataURI(item.Blob, "")
+				if err != nil {
+					LOG.Error("Converting a blob into base64 failed, %w", zap.Error(err))
+					continue
+				}
+
+				return base64data
+
 			}
 		}
 		return match
 	})
 
 	return result
-}
-
-/*
-Iterates through an struct instance, and it will replace the ($ref:key) based on the resourceList
-paramters in all of them. It's useful for importing, exporting context to manage the binary files
-to be downloaded or uploaded
-*/
-func replaceStringsRecursively(v reflect.Value, resourceList []ResourceMap) {
-	// We need to handle the case where v is a pointer
-	if v.Kind() == reflect.Ptr {
-		if v.IsNil() {
-			return
-		}
-		v = v.Elem()
-	}
-
-	switch v.Kind() {
-	case reflect.Struct:
-		for i := 0; i < v.NumField(); i++ {
-			replaceStringsRecursively(v.Field(i), resourceList)
-		}
-	case reflect.String:
-		if v.CanSet() {
-			value := v.String()
-			v.SetString(replaceRef(value, resourceList))
-
-		}
-	case reflect.Slice, reflect.Array:
-		for i := 0; i < v.Len(); i++ {
-			replaceStringsRecursively(v.Index(i), resourceList)
-		}
-	case reflect.Map:
-		for _, key := range v.MapKeys() {
-			val := v.MapIndex(key)
-			replaceStringsRecursively(val, resourceList)
-		}
-	}
 }
 
 func addUniqueIdRecursively(v reflect.Value) {
@@ -166,81 +188,28 @@ func importYamlFromFileEmbed[T any](
 	f QueryDSL,
 	silent bool,
 ) {
-	var content ContentImport[T]
-	if err := ReadYamlFileEmbed(fsRef, importFilePath, &content); err != nil {
-		log.Fatalln(err)
-	}
 	resourceMap := ImportYamlFromFsResources(fsRef, importFilePath)
 
-	for _, item := range content.Items {
-		ReplaceResourcesInStruct(item, resourceMap)
+	rawContent, err := fs.ReadFile(fsRef, importFilePath)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// Let's replace the text level content, blobs will become strings
+	// inefficient for very large files, but easier and reliable than reflect.
+	rawContent = []byte(replaceRefBlob(string(rawContent), resourceMap))
+
+	// Old school refereces
+	rawContent = []byte(replaceRef(string(rawContent), resourceMap))
+
+	var content ContentImport[T]
+	if err := yaml.Unmarshal([]byte(rawContent), &content); err != nil {
+		log.Default().Println("Yaml file is broken:", importFilePath)
 	}
 
 	importYamlFromArray(content, fn, f, silent)
 }
 
-func importYamlFromFileEmbedBatch[T any](
-	fsRef *embed.FS,
-	importFilePath string,
-	fn func(dto []*T, query QueryDSL) ([]*T, *IError),
-	f QueryDSL,
-	silent bool,
-) {
-	var content ContentImport[T]
-	if err := ReadYamlFileEmbed(fsRef, importFilePath, &content); err != nil {
-		log.Fatalln(err)
-	}
-	resourceMap := ImportYamlFromFsResources(fsRef, importFilePath)
-
-	for _, item := range content.Items {
-		ReplaceResourcesInStruct(item, resourceMap)
-	}
-
-	importYamlFromArrayBatch(content, fn, f, silent)
-}
-
-func importYamlFromArrayBatch[T any](
-	content ContentImport[T],
-	fn func(dto []*T, query QueryDSL) ([]*T, *IError),
-	f QueryDSL,
-	silent bool,
-) {
-
-	successInsert := 0
-	failureInsert := 0
-
-	bar := progressbar.Default(int64(len(content.Items)))
-
-	count := 0
-	items := []*T{}
-
-	for _, item := range content.Items {
-		items = append(items, &item)
-		count++
-
-		if count == 10 {
-			_, err := fn(items, f)
-			if err == nil {
-				successInsert++
-			} else {
-				failureInsert++
-			}
-
-			bar.Add(count)
-			count = 0
-			items = []*T{}
-		}
-	}
-
-	_, err := fn(items, f)
-	if err == nil {
-		successInsert++
-	} else {
-		failureInsert++
-	}
-
-	fmt.Println("Success", successInsert, "Failure", failureInsert)
-}
 func importYamlFromArray[T any](
 	content ContentImport[T],
 	fn func(dto *T, query QueryDSL) (*T, *IError),
@@ -276,6 +245,7 @@ type ResourceMap struct {
 	DriveId  string
 	Key      string
 	DiskPath string
+	Blob     []byte
 }
 
 // Implement this

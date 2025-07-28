@@ -1,0 +1,16 @@
+extends: []
+content:
+  regionalContents:
+    archiveTitle: Treści regionalne
+    content: Treść
+    contentHint: Treść
+    editRegionalContent: Edytuj treść regionalną
+    keyGroup: Grupa kluczy
+    keyGroupHint: Grupa kluczy
+    languageId: Identyfikator języka
+    languageIdHint: Identyfikator języka
+    newRegionalContent: Nowa treść regionalna
+    region: Region
+    regionHint: Region
+    title: Tytuł
+    titleHint: Tytuł

@@ -341,14 +341,38 @@ func ImportYamlFromFsResources(fs *embed.FS, filePath string) []fireback.Resourc
 
 	for _, resource := range resources.Resources {
 		actualPath := path.Join(filepath.Dir(filePath), resource.Path)
-		entity, fileId, _ := UploadFromFs(fs, actualPath)
+
+		uniqueId := ""
+		fileId := ""
+		var fileBytes []byte = nil
+
+		if resource.Blob {
+
+			r, err := fs.ReadFile(actualPath)
+			if err != nil {
+				log.Default().Printf("could not read the: %v as blob because: %w", actualPath, err)
+				continue
+			}
+
+			fileBytes = r
+		} else {
+			entity, fileId2, err := UploadFromFs(fs, actualPath)
+			uniqueId = entity.UniqueId
+			fileId = fileId2
+			if err != nil {
+				log.Default().Printf("uploading failed: %w", err)
+
+				continue
+			}
+		}
+
 		result = append(result, fireback.ResourceMap{
-			DriveId:  entity.UniqueId,
+			DriveId:  uniqueId,
 			FileId:   fileId,
 			Key:      resource.Key,
 			DiskPath: actualPath,
+			Blob:     fileBytes,
 		})
-
 	}
 
 	return result
