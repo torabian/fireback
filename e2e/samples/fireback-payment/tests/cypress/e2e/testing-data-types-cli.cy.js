@@ -80,15 +80,6 @@ describe("Logging in with the signin", () => {
     });
   });
 
-  it("should create the entity on non-existing unique-id", () => {
-    const cmd = `product product u --name ali`;
-
-    cy.task("exec", cmd).then((x) => {
-      const res = JSON.parse(x);
-      console.log(res);
-    });
-  });
-
   it("should be able to export the products", () => {
     cy.task("exec", `product product export --file test.json`).then((x) => {
       cy.task("log", x);
