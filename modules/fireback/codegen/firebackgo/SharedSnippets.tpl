@@ -2604,7 +2604,7 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module3Action{
     if err != nil {
       return err;
     }
-   return err
+   return nil
   },
 }
 

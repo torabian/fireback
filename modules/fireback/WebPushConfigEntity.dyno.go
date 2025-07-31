@@ -1214,7 +1214,7 @@ var WEB_PUSH_CONFIG_ACTION_PATCH = Module3Action{
 		if err != nil {
 			return err
 		}
-		return err
+		return nil
 	},
 }
 var WEB_PUSH_CONFIG_ACTION_PATCH_BULK = Module3Action{

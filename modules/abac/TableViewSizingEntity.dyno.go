@@ -1243,7 +1243,7 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = fireback.Module3Action{
 		if err != nil {
 			return err
 		}
-		return err
+		return nil
 	},
 }
 var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = fireback.Module3Action{

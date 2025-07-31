@@ -1321,7 +1321,7 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 		if err != nil {
 			return err
 		}
-		return err
+		return nil
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{

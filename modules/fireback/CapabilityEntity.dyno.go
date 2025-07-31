@@ -1267,7 +1267,7 @@ var CAPABILITY_ACTION_PATCH = Module3Action{
 		if err != nil {
 			return err
 		}
-		return err
+		return nil
 	},
 }
 var CAPABILITY_ACTION_PATCH_BULK = Module3Action{
