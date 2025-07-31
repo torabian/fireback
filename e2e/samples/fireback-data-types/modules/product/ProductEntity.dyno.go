@@ -160,7 +160,7 @@ type ProductEntity struct {
 	LinkedTo  *ProductEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func ProductEntityStream(q fireback.QueryDSL) (chan []*ProductEntity, *fireback.QueryResultMeta, error) {
+func ProductEntityStream(q fireback.QueryDSL) (chan []*ProductEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*ProductEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -222,7 +222,7 @@ type productActionsSig struct {
 	MultiInsert    func(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*ProductEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*ProductEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var ProductActions productActionsSig = productActionsSig{
@@ -515,7 +515,7 @@ func ProductActionGetByWorkspaceFn(query fireback.QueryDSL) (*ProductEntity, *fi
 	entityProductFormatter(item, query)
 	return item, err
 }
-func ProductActionQueryFn(query fireback.QueryDSL) ([]*ProductEntity, *fireback.QueryResultMeta, error) {
+func ProductActionQueryFn(query fireback.QueryDSL) ([]*ProductEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[ProductEntity](query, refl)
 	for _, item := range items {
@@ -985,7 +985,7 @@ func ProductWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Product", result)
 	}
 }
-func ProductsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func ProductsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
