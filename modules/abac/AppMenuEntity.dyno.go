@@ -144,7 +144,7 @@ type AppMenuEntity struct {
 	LinkedTo     *AppMenuEntity             `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func AppMenuEntityStream(q fireback.QueryDSL) (chan []*AppMenuEntity, *fireback.QueryResultMeta, error) {
+func AppMenuEntityStream(q fireback.QueryDSL) (chan []*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*AppMenuEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -206,8 +206,8 @@ type appMenuActionsSig struct {
 	MultiInsert    func(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error)
-	CteQuery       func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError)
+	CteQuery       func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var AppMenuActions appMenuActionsSig = appMenuActionsSig{
@@ -512,7 +512,7 @@ func AppMenuActionGetByWorkspaceFn(query fireback.QueryDSL) (*AppMenuEntity, *fi
 	entityAppMenuFormatter(item, query)
 	return item, err
 }
-func AppMenuActionQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error) {
+func AppMenuActionQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[AppMenuEntity](query, refl)
 	for _, item := range items {
@@ -576,13 +576,13 @@ func (dto *AppMenuEntity) Add(nodes ...*AppMenuEntity) bool {
 	}
 	return dto.Size() == size+len(nodes)
 }
-func AppMenuActionCommonPivotQuery(query fireback.QueryDSL) ([]*fireback.PivotResult, *fireback.QueryResultMeta, error) {
+func AppMenuActionCommonPivotQuery(query fireback.QueryDSL) ([]*fireback.PivotResult, *fireback.QueryResultMeta, *fireback.IError) {
 	items, meta, err := fireback.UnsafeQuerySqlFromFs[fireback.PivotResult](
 		&queries.QueriesFs, "AppMenuCommonPivot.sqlite.dyno", query,
 	)
 	return items, meta, err
 }
-func AppMenuActionCteQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error) {
+func AppMenuActionCteQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	items, meta, err := fireback.ContextAwareVSqlOperation[AppMenuEntity](
 		refl, &queries.QueriesFs, "AppMenuCte.vsql", query,
@@ -1017,7 +1017,7 @@ func AppMenuWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
 }
-func AppMenusActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func AppMenusActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1368,7 +1368,10 @@ var APP_MENU_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, AppMenuActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         AppMenuActions.Create,
 	Format:         "POST_ONE",
@@ -1410,7 +1413,10 @@ var APP_MENU_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, AppMenuActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var APP_MENU_ACTION_PATCH_BULK = fireback.Module3Action{

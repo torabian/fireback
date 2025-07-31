@@ -111,7 +111,7 @@ type PreferenceEntity struct {
 	LinkedTo         *PreferenceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PreferenceEntityStream(q fireback.QueryDSL) (chan []*PreferenceEntity, *fireback.QueryResultMeta, error) {
+func PreferenceEntityStream(q fireback.QueryDSL) (chan []*PreferenceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PreferenceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -173,7 +173,7 @@ type preferenceActionsSig struct {
 	MultiInsert    func(dtos []*PreferenceEntity, query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PreferenceActions preferenceActionsSig = preferenceActionsSig{
@@ -452,7 +452,7 @@ func PreferenceActionGetByWorkspaceFn(query fireback.QueryDSL) (*PreferenceEntit
 	entityPreferenceFormatter(item, query)
 	return item, err
 }
-func PreferenceActionQueryFn(query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.QueryResultMeta, error) {
+func PreferenceActionQueryFn(query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PreferenceEntity](query, refl)
 	for _, item := range items {
@@ -835,7 +835,7 @@ func PreferenceWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Preference", result)
 	}
 }
-func PreferencesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PreferencesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1165,7 +1165,10 @@ var PREFERENCE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PreferenceActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PreferenceActions.Create,
 	Format:         "POST_ONE",
@@ -1207,7 +1210,10 @@ var PREFERENCE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PreferenceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var PREFERENCE_ACTION_PATCH_BULK = fireback.Module3Action{

@@ -62,7 +62,7 @@ var AppMenuTests = []fireback.Test{
 
 func init() {
 
-	AppMenuActions.CteQuery = func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, error) {
+	AppMenuActions.CteQuery = func(query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError) {
 		result, qrm, err := AppMenuActionCteQueryFn(query)
 		return result, qrm, err
 	}

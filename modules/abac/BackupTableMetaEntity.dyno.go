@@ -111,7 +111,7 @@ type BackupTableMetaEntity struct {
 	LinkedTo         *BackupTableMetaEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func BackupTableMetaEntityStream(q fireback.QueryDSL) (chan []*BackupTableMetaEntity, *fireback.QueryResultMeta, error) {
+func BackupTableMetaEntityStream(q fireback.QueryDSL) (chan []*BackupTableMetaEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*BackupTableMetaEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -173,7 +173,7 @@ type backupTableMetaActionsSig struct {
 	MultiInsert    func(dtos []*BackupTableMetaEntity, query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*BackupTableMetaEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*BackupTableMetaEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var BackupTableMetaActions backupTableMetaActionsSig = backupTableMetaActionsSig{
@@ -452,7 +452,7 @@ func BackupTableMetaActionGetByWorkspaceFn(query fireback.QueryDSL) (*BackupTabl
 	entityBackupTableMetaFormatter(item, query)
 	return item, err
 }
-func BackupTableMetaActionQueryFn(query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.QueryResultMeta, error) {
+func BackupTableMetaActionQueryFn(query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[BackupTableMetaEntity](query, refl)
 	for _, item := range items {
@@ -835,7 +835,7 @@ func BackupTableMetaWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "BackupTableMeta", result)
 	}
 }
-func BackupTableMetasActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func BackupTableMetasActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1165,7 +1165,10 @@ var BACKUP_TABLE_META_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, BackupTableMetaActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         BackupTableMetaActions.Create,
 	Format:         "POST_ONE",
@@ -1207,7 +1210,10 @@ var BACKUP_TABLE_META_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, BackupTableMetaActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var BACKUP_TABLE_META_ACTION_PATCH_BULK = fireback.Module3Action{

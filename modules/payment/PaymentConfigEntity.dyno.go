@@ -126,7 +126,7 @@ type PaymentConfigEntity struct {
 	LinkedTo          *PaymentConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PaymentConfigEntityStream(q fireback.QueryDSL) (chan []*PaymentConfigEntity, *fireback.QueryResultMeta, error) {
+func PaymentConfigEntityStream(q fireback.QueryDSL) (chan []*PaymentConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PaymentConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -188,7 +188,7 @@ type paymentConfigActionsSig struct {
 	MultiInsert    func(dtos []*PaymentConfigEntity, query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PaymentConfigEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PaymentConfigEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PaymentConfigActions paymentConfigActionsSig = paymentConfigActionsSig{
@@ -471,7 +471,7 @@ func PaymentConfigActionGetByWorkspaceFn(query fireback.QueryDSL) (*PaymentConfi
 	entityPaymentConfigFormatter(item, query)
 	return item, err
 }
-func PaymentConfigActionQueryFn(query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.QueryResultMeta, error) {
+func PaymentConfigActionQueryFn(query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PaymentConfigEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PaymentConfigEntity](query, refl)
 	for _, item := range items {
@@ -891,7 +891,7 @@ func PaymentConfigWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "PaymentConfig", result)
 	}
 }
-func PaymentConfigsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PaymentConfigsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1233,7 +1233,10 @@ var PAYMENT_CONFIG_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PaymentConfigActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PaymentConfigActions.Create,
 	Format:         "POST_ONE",
@@ -1277,7 +1280,10 @@ var PAYMENT_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PaymentConfigActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var PAYMENT_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{

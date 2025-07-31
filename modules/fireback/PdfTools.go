@@ -194,7 +194,7 @@ func OperateOnRecord[T any](y *float64, cfg gopdf.Config, pdfCatalog *PdfWriterM
 
 func DatabaseScanner[T any](
 	query QueryDSL,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 ) chan *T {
 
 	stream := make(chan *T)
@@ -270,7 +270,7 @@ type PdfExportData struct {
 func PdfExporter[T any](
 	path string,
 	query QueryDSL,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	refl reflect.Value,
 	bar *progressbar.ProgressBar,
 	data *PdfExportData,

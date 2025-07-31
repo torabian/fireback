@@ -136,7 +136,7 @@ type RegionalContentEntity struct {
 	LinkedTo         *RegionalContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func RegionalContentEntityStream(q fireback.QueryDSL) (chan []*RegionalContentEntity, *fireback.QueryResultMeta, error) {
+func RegionalContentEntityStream(q fireback.QueryDSL) (chan []*RegionalContentEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*RegionalContentEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -198,7 +198,7 @@ type regionalContentActionsSig struct {
 	MultiInsert    func(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var RegionalContentActions regionalContentActionsSig = regionalContentActionsSig{
@@ -501,7 +501,7 @@ func RegionalContentActionGetByWorkspaceFn(query fireback.QueryDSL) (*RegionalCo
 	entityRegionalContentFormatter(item, query)
 	return item, err
 }
-func RegionalContentActionQueryFn(query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.QueryResultMeta, error) {
+func RegionalContentActionQueryFn(query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[RegionalContentEntity](query, refl)
 	for _, item := range items {
@@ -963,7 +963,7 @@ func RegionalContentWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "RegionalContent", result)
 	}
 }
-func RegionalContentsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func RegionalContentsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1297,7 +1297,10 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, RegionalContentActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         RegionalContentActions.Create,
 	Format:         "POST_ONE",
@@ -1340,7 +1343,10 @@ var REGIONAL_CONTENT_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, RegionalContentActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var REGIONAL_CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{

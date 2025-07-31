@@ -64,7 +64,7 @@ func {{ upper .m.Name }}Json() string {
 
   str2, _ := yaml.Marshal("")
 	_ = str2
-
+ 
   str, _ := json.MarshalIndent("dont remove me", "", "  ")
 	return (string(str))
 }
@@ -419,7 +419,7 @@ func (x *{{ upper .Name }}TaskParams) Json() string {
 {{ end }}
 
 
-func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "querycolumns" . }}, *{{ $.wsprefix}}QueryResultMeta, error) {
+func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "querycolumns" . }}, *{{ $.wsprefix}}QueryResultMeta, *{{ $.wsprefix }}IError) {
 	refl := reflect.ValueOf(&{{ template "querycolumns" . }}{})
 	items, meta, err := {{ $.wsprefix}}ContextAwareVSqlOperation[{{ template "querycolumns" . }}](
 		refl, &queries.QueriesFs, "{{ upper .Name }}.vsql", query,

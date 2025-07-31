@@ -117,7 +117,7 @@ type TableViewSizingEntity struct {
 	LinkedTo         *TableViewSizingEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func TableViewSizingEntityStream(q fireback.QueryDSL) (chan []*TableViewSizingEntity, *fireback.QueryResultMeta, error) {
+func TableViewSizingEntityStream(q fireback.QueryDSL) (chan []*TableViewSizingEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*TableViewSizingEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -179,7 +179,7 @@ type tableViewSizingActionsSig struct {
 	MultiInsert    func(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var TableViewSizingActions tableViewSizingActionsSig = tableViewSizingActionsSig{
@@ -460,7 +460,7 @@ func TableViewSizingActionGetByWorkspaceFn(query fireback.QueryDSL) (*TableViewS
 	entityTableViewSizingFormatter(item, query)
 	return item, err
 }
-func TableViewSizingActionQueryFn(query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.QueryResultMeta, error) {
+func TableViewSizingActionQueryFn(query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[TableViewSizingEntity](query, refl)
 	for _, item := range items {
@@ -864,7 +864,7 @@ func TableViewSizingWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "TableViewSizing", result)
 	}
 }
-func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1195,7 +1195,10 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, TableViewSizingActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         TableViewSizingActions.Create,
 	Format:         "POST_ONE",
@@ -1237,7 +1240,10 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TableViewSizingActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = fireback.Module3Action{

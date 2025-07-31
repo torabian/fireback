@@ -544,10 +544,31 @@ type Module3Action struct {
 
 	// Internal metadata for code generation.
 	RootModule *Module3 `yaml:"-" json:"-" jsonschema:"-"`
+
+	// How the qs is being handled.
+	QsMode string `yaml:"qsMode,omitempty" json:"qsMode,omitempty" jsonschema:"enum=reflect"`
 }
 
 func (x Module3Action) MethodUpper() string {
 	return strings.ToUpper(x.Method)
+}
+
+func (x Module3Action) QSFields() []*Module3Field {
+
+	// At the moment, the query string fields is only supported for query
+	if x.Format != "query" {
+		return nil
+	}
+
+	if x.QsMode == "reflect" && x.Out != nil && x.Out.Fields != nil {
+		return x.Out.Fields
+	}
+
+	if x.In != nil && x.In.Fields != nil {
+		return x.In.Fields
+	}
+
+	return nil
 }
 
 func (x Module3Entity) HasClickHouse() bool {

@@ -89,6 +89,12 @@ type QueryDSL struct {
 
 	LinkerId string `json:"-"`
 
+	/// Extra where sql generated in the filter process.
+	FilterQuery string `json:"-" yaml:"-"`
+
+	/// JQ Json query generated
+	JqQuery string `json:"-" yaml:"-"`
+
 	// This is the person who is requesting, regardless of the workspace
 	SearchPhrase string `json:"searchPhrase"`
 

@@ -123,7 +123,7 @@ type TokenEntity struct {
 	LinkedTo         *TokenEntity        `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func TokenEntityStream(q fireback.QueryDSL) (chan []*TokenEntity, *fireback.QueryResultMeta, error) {
+func TokenEntityStream(q fireback.QueryDSL) (chan []*TokenEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*TokenEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -185,7 +185,7 @@ type tokenActionsSig struct {
 	MultiInsert    func(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*TokenEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*TokenEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var TokenActions tokenActionsSig = tokenActionsSig{
@@ -468,7 +468,7 @@ func TokenActionGetByWorkspaceFn(query fireback.QueryDSL) (*TokenEntity, *fireba
 	entityTokenFormatter(item, query)
 	return item, err
 }
-func TokenActionQueryFn(query fireback.QueryDSL) ([]*TokenEntity, *fireback.QueryResultMeta, error) {
+func TokenActionQueryFn(query fireback.QueryDSL) ([]*TokenEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[TokenEntity](query, refl)
 	for _, item := range items {
@@ -867,7 +867,7 @@ func TokenWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Token", result)
 	}
 }
-func TokensActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func TokensActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1200,7 +1200,10 @@ var TOKEN_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, TokenActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         TokenActions.Create,
 	Format:         "POST_ONE",
@@ -1243,7 +1246,10 @@ var TOKEN_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TokenActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var TOKEN_ACTION_PATCH_BULK = fireback.Module3Action{

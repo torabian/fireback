@@ -118,7 +118,7 @@ type RoleEntity struct {
 	LinkedTo           *RoleEntity                  `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func RoleEntityStream(q fireback.QueryDSL) (chan []*RoleEntity, *fireback.QueryResultMeta, error) {
+func RoleEntityStream(q fireback.QueryDSL) (chan []*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*RoleEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -180,7 +180,7 @@ type roleActionsSig struct {
 	MultiInsert    func(dtos []*RoleEntity, query fireback.QueryDSL) ([]*RoleEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*RoleEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*RoleEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var RoleActions roleActionsSig = roleActionsSig{
@@ -482,7 +482,7 @@ func RoleActionGetByWorkspaceFn(query fireback.QueryDSL) (*RoleEntity, *fireback
 	entityRoleFormatter(item, query)
 	return item, err
 }
-func RoleActionQueryFn(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, error) {
+func RoleActionQueryFn(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&RoleEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[RoleEntity](query, refl)
 	for _, item := range items {
@@ -901,7 +901,7 @@ func RoleWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Role", result)
 	}
 }
-func RolesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func RolesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1231,7 +1231,10 @@ var ROLE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, RoleActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         RoleActions.Create,
 	Format:         "POST_ONE",
@@ -1273,7 +1276,10 @@ var ROLE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, RoleActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var ROLE_ACTION_PATCH_BULK = fireback.Module3Action{

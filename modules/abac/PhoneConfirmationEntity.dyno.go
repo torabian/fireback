@@ -135,7 +135,7 @@ type PhoneConfirmationEntity struct {
 	LinkedTo         *PhoneConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PhoneConfirmationEntityStream(q fireback.QueryDSL) (chan []*PhoneConfirmationEntity, *fireback.QueryResultMeta, error) {
+func PhoneConfirmationEntityStream(q fireback.QueryDSL) (chan []*PhoneConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PhoneConfirmationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -197,7 +197,7 @@ type phoneConfirmationActionsSig struct {
 	MultiInsert    func(dtos []*PhoneConfirmationEntity, query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PhoneConfirmationActions phoneConfirmationActionsSig = phoneConfirmationActionsSig{
@@ -484,7 +484,7 @@ func PhoneConfirmationActionGetByWorkspaceFn(query fireback.QueryDSL) (*PhoneCon
 	entityPhoneConfirmationFormatter(item, query)
 	return item, err
 }
-func PhoneConfirmationActionQueryFn(query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.QueryResultMeta, error) {
+func PhoneConfirmationActionQueryFn(query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PhoneConfirmationEntity](query, refl)
 	for _, item := range items {
@@ -943,7 +943,7 @@ func PhoneConfirmationWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "PhoneConfirmation", result)
 	}
 }
-func PhoneConfirmationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PhoneConfirmationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1273,7 +1273,10 @@ var PHONE_CONFIRMATION_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PhoneConfirmationActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PhoneConfirmationActions.Create,
 	Format:         "POST_ONE",
@@ -1315,7 +1318,10 @@ var PHONE_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PhoneConfirmationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var PHONE_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{

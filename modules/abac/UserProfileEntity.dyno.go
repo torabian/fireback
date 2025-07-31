@@ -117,7 +117,7 @@ type UserProfileEntity struct {
 	LinkedTo         *UserProfileEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func UserProfileEntityStream(q fireback.QueryDSL) (chan []*UserProfileEntity, *fireback.QueryResultMeta, error) {
+func UserProfileEntityStream(q fireback.QueryDSL) (chan []*UserProfileEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*UserProfileEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -179,7 +179,7 @@ type userProfileActionsSig struct {
 	MultiInsert    func(dtos []*UserProfileEntity, query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*UserProfileEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*UserProfileEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var UserProfileActions userProfileActionsSig = userProfileActionsSig{
@@ -460,7 +460,7 @@ func UserProfileActionGetByWorkspaceFn(query fireback.QueryDSL) (*UserProfileEnt
 	entityUserProfileFormatter(item, query)
 	return item, err
 }
-func UserProfileActionQueryFn(query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.QueryResultMeta, error) {
+func UserProfileActionQueryFn(query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[UserProfileEntity](query, refl)
 	for _, item := range items {
@@ -864,7 +864,7 @@ func UserProfileWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "UserProfile", result)
 	}
 }
-func UserProfilesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func UserProfilesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1194,7 +1194,10 @@ var USER_PROFILE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, UserProfileActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         UserProfileActions.Create,
 	Format:         "POST_ONE",
@@ -1236,7 +1239,10 @@ var USER_PROFILE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserProfileActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var USER_PROFILE_ACTION_PATCH_BULK = fireback.Module3Action{

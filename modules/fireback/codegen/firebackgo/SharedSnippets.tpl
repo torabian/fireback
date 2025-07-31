@@ -922,7 +922,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     return item, err
   }
 
-  func {{ .e.Upper}}ActionQueryFn(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
+  func {{ .e.Upper}}ActionQueryFn(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, *{{ .wsprefix }}IError) {
     refl := reflect.ValueOf(&{{ .e.EntityName }}{})
     items, meta, err := {{ .wsprefix }}QueryEntitiesPointer[{{ .e.EntityName }}](query, refl)
 
@@ -943,7 +943,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
 
   {{ if .e.HasExtendedQuer }}
 
-  func {{ .e.Upper }}ActionExtendedQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .wsprefix }}PivotResult, *{{ .wsprefix }}QueryResultMeta, error) {
+  func {{ .e.Upper }}ActionExtendedQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .wsprefix }}PivotResult, *{{ .wsprefix }}QueryResultMeta, *{{ .wsprefix }}IError) {
 
       items, meta, err := {{ .wsprefix }}UnsafeQuerySqlFromFs[{{ .wsprefix }}PivotResult](
         &queries.QueriesFs, "{{ .e.Upper }}Extended.sqlite.dyno", query,
@@ -979,7 +979,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     return dto.Size() == size+len(nodes)
   }
 
-  func {{ .e.Upper }}ActionCommonPivotQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .wsprefix }}PivotResult, *{{ .wsprefix }}QueryResultMeta, error) {
+  func {{ .e.Upper }}ActionCommonPivotQuery(query {{ .wsprefix }}QueryDSL) ([]*{{ .wsprefix }}PivotResult, *{{ .wsprefix }}QueryResultMeta, *{{  .wsprefix }}IError) {
 
     items, meta, err := {{ .wsprefix }}UnsafeQuerySqlFromFs[{{ .wsprefix }}PivotResult](
       &queries.QueriesFs, "{{ .e.Upper }}CommonPivot.sqlite.dyno", query,
@@ -988,7 +988,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     return items, meta, err
   }
 
-  func {{ .e.Upper }}ActionCteQueryFn(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error) {
+  func {{ .e.Upper }}ActionCteQueryFn(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, *{{  .wsprefix }}IError) {
     refl := reflect.ValueOf(&{{.e.EntityName}}{})
     items, meta, err := {{ .wsprefix }}ContextAwareVSqlOperation[{{ .e.EntityName }}](
       refl, &queries.QueriesFs, "{{ .e.Upper }}Cte.vsql", query,
@@ -2544,7 +2544,10 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module3Action{
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
     result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}Actions.Create, security)
     {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
-    return err
+    if err != nil {
+      return err;
+    }
+    return nil
   },
   Action: {{ .e.Upper }}Actions.Create,
   Format: "POST_ONE",
@@ -2598,7 +2601,10 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module3Action{
   CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
    result, err := {{ .wsprefix }}CliPatchEntity(c, {{ .e.Upper }}Actions.Update, security)
    {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
-   return err
+    if err != nil {
+      return err;
+    }
+   return nil
   },
 }
 
@@ -3130,12 +3136,32 @@ type {{ $name }}Msgs struct {
     }
   {{ end }}
 
+  {{ if .QSFields }}
+  type {{ .Upper }}Qs struct {
+    {{ template "qsFields" (arr .QSFields "" $wsprefix "tablena" )}}
+  }
+  func (x * {{ .Upper }}Qs) GetQuery() string {
+    return {{ $wsprefix }} GenerateQueryStringStyle(reflect.ValueOf(x), "")
+  }
+  
+  func (x * {{ .Upper }}Qs) GetJq() string {
+    return {{ $wsprefix }} GenerateQueryJqStyle(reflect.ValueOf(x), "")
+  }
+
+  var {{ .Upper }}QsFlags = []cli.Flag{
+    {{ template "qsFlags" (arr .QSFields "" )}}
+  }
+  {{ end }}
   
   var {{ .Upper }}ActionCmd cli.Command = cli.Command{
     Name:  "{{ .ComputedCliName }}",
     Usage: `{{ .Description }}`,
       {{ if (eq .FormatComputed "QUERY") }}
-      Flags: {{ $wsprefix }}CommonQueryFlags,
+        {{ if .QSFields }}
+          Flags: append({{ $wsprefix }}CommonQueryFlags, {{ .Upper }}QsFlags...),
+        {{ else}}
+          Flags: {{ $wsprefix }}CommonQueryFlags,
+        {{ end }}
       {{ end }}
 
       {{ if .In }}
@@ -3146,32 +3172,50 @@ type {{ $name }}Msgs struct {
           {{ end }}
       {{ end }}
     Action: func(c *cli.Context) {
+      {{ if or (eq .FormatComputed "QUERY")}}
+        
+        {{ if .QSFields }}
+          qs := &{{ .Upper }}Qs{}
+        {{ end }}
+        {{ $wsprefix }}CommonCliQueryCmd3IError(
+          c,
+          {{ .Upper }}ActionFn,
+          {{ .Upper }}SecurityModel,
+          {{ if .QSFields }}
+          qs,
+          {{ else }}
+          nil,
+          {{ end }}
+        )
 
-      query := {{ $wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Upper }}SecurityModel)
+      {{ else }}
+
+          query := {{ $wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Upper }}SecurityModel)
 
           {{ if or (ne .Method "reactive")}}
 
-          {{ if .In }}
-              {{ if .In.Fields }}
-              dto := Cast{{ .Upper }}FromCli(c)
-              {{ else if .In.Entity }}
-              dto := Cast{{ .In.EntityPure }}FromCli(c)
-              {{ end }}
-          {{ end }}
+            {{ if .In }}
+                {{ if .In.Fields }}
+                dto := Cast{{ .Upper }}FromCli(c)
+                {{ else if .In.Entity }}
+                dto := Cast{{ .In.EntityPure }}FromCli(c)
+                {{ end }}
+            {{ end }}
 
 
-          {{ if or (eq .FormatComputed "QUERY")}}
-      result, _, err := {{ .Upper }}ActionFn(query)
-          {{ else if or (eq .ComputeRequestEntity "") }}
-      result, err := {{ .Upper }}ActionFn(query)
+            {{ if or (eq .FormatComputed "QUERY")}}
+              result, _, err := {{ .Upper }}ActionFn(query)
+            {{ else if or (eq .ComputeRequestEntity "") }}
+              result, err := {{ .Upper }}ActionFn(query)
+            {{ else }}
+              result, err := {{ .Upper }}ActionFn(dto, query)
+            {{ end }}
+            {{ $wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
+
           {{ else }}
-      result, err := {{ .Upper }}ActionFn(dto, query)
-          {{ end }}
-
-      {{ $wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
-          {{ else }}
-          {{ $wsprefix }}CliReactivePipeHandler(query, {{ .Upper }}ActionImp)
+            {{ $wsprefix }}CliReactivePipeHandler(query, {{ .Upper }}ActionImp)
           {{end}}
+      {{ end }}
     },
   }
 
@@ -3194,6 +3238,9 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                 {{ else }}
 				func(c *gin.Context) {
                     // {{ .FormatComputed }} - {{ .Method }}
+                    {{ if .QSFields }}
+                    qs := &{{ .Upper }}Qs{}
+                    {{ end }}
                     
                     {{ if or (eq .FormatComputed "POST") (eq .Method "POST") (eq .Method "post") }}
                       {{ if .In }}
@@ -3212,7 +3259,15 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
                       {{ end }}
                     {{ end }}
                     {{ if or (eq .FormatComputed "QUERY")}}
-                        {{ $wsprefix }}HttpQueryEntity2(c, {{ .Upper }}ActionFn)
+                        {{ $wsprefix }}HttpQueryEntity(
+                          c,
+                          {{ .Upper }}ActionFn,
+                          {{ if .QSFields }}
+                            qs,
+                          {{ else }}
+                            nil,
+                          {{ end }}
+                          )
                     {{ end }}
                     
                     {{ if or (eq .FormatComputed "GET_ONE")}}
@@ -3455,7 +3510,7 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
 
 type {{ $entity.Name }}ClickHouseSig struct {
 	Insert   func(dto *{{ $entity.EntityName }}, query {{ $wsprefix }}QueryDSL) (*{{ $entity.EntityName }}, *{{ $wsprefix }}IError)
-	Query    func(query {{ $wsprefix }}QueryDSL) ([]*{{ $entity.EntityName }}, *{{ $wsprefix }}QueryResultMeta, error)
+	Query    func(query {{ $wsprefix }}QueryDSL) ([]*{{ $entity.EntityName }}, *{{ $wsprefix }}QueryResultMeta, *{{ $wsprefix }}IError)
 	Migrate func() error
 }
 
@@ -3509,7 +3564,7 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 	},
 
 	// Default query feature
-	Query: func(query {{ $wsprefix }}QueryDSL) ([]*{{ $entity.EntityName }}, *{{ $wsprefix }}QueryResultMeta, error) {
+	Query: func(query {{ $wsprefix }}QueryDSL) ([]*{{ $entity.EntityName }}, *{{ $wsprefix }}QueryResultMeta, *{{ $wsprefix }}IError) {
 		conn, err := {{ $wsprefix }}GetReplica({{ $wsprefix }}ClickHouse)
 		if err != nil {
 			return nil, nil, err
@@ -3536,4 +3591,43 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 	},
 }
 
+{{ end }}
+
+
+{{ define "qsFields" }}
+	{{ $fields := index . 0}}
+	{{ $prefix := index . 1}}
+	{{ $wsprefix := index . 2}}
+	{{ $table := index . 3}}
+	{{ range $fields }}
+		{{ if or (eq .Type "object") (eq .Type "embed")}}
+			{{ .PublicName }} struct {
+				{{ $newPrefix := print $prefix .ComputedCliName "." }}
+				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
+			} `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" typeof:"{{.Type}}" qs:"{{.Name}}" preload:"{{ $prefix }}{{ .PublicName }}"`
+		{{ else }}
+			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" typeof:"{{.Type}}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
+		{{ end }}
+	{{ end }}
+
+{{ end }}
+
+
+{{ define "qsFlags"}}
+	{{ $fields := index . 0}}
+  	{{ $prefix := index . 1}}
+
+	{{ range $fields }}
+
+		{{ if or (eq .Type "object") (eq .Type "embed")}}
+			{{ $newPrefix := print $prefix .ComputedCliName "-" }}
+			{{ template "qsFlags" (arr .Fields $newPrefix )}}
+		{{ else }}
+			&cli.StringFlag{
+				Name:     "{{ $prefix }}{{ .ComputedCliName }}",
+				Usage:    "{{ .Description }}",
+			},
+		{{ end }}
+		
+	{{ end }}
 {{ end }}

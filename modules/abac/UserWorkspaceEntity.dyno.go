@@ -135,7 +135,7 @@ type UserWorkspaceEntity struct {
 	LinkedTo             *UserWorkspaceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func UserWorkspaceEntityStream(q fireback.QueryDSL) (chan []*UserWorkspaceEntity, *fireback.QueryResultMeta, error) {
+func UserWorkspaceEntityStream(q fireback.QueryDSL) (chan []*UserWorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*UserWorkspaceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -197,7 +197,7 @@ type userWorkspaceActionsSig struct {
 	MultiInsert    func(dtos []*UserWorkspaceEntity, query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*UserWorkspaceEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*UserWorkspaceEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var UserWorkspaceActions userWorkspaceActionsSig = userWorkspaceActionsSig{
@@ -484,7 +484,7 @@ func UserWorkspaceActionGetByWorkspaceFn(query fireback.QueryDSL) (*UserWorkspac
 	entityUserWorkspaceFormatter(item, query)
 	return item, err
 }
-func UserWorkspaceActionQueryFn(query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.QueryResultMeta, error) {
+func UserWorkspaceActionQueryFn(query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[UserWorkspaceEntity](query, refl)
 	for _, item := range items {
@@ -874,7 +874,7 @@ func UserWorkspaceWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "UserWorkspace", result)
 	}
 }
-func UserWorkspacesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func UserWorkspacesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1211,7 +1211,10 @@ var USER_WORKSPACE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, UserWorkspaceActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         UserWorkspaceActions.Create,
 	Format:         "POST_ONE",
@@ -1254,7 +1257,10 @@ var USER_WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserWorkspaceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var USER_WORKSPACE_ACTION_PATCH_BULK = fireback.Module3Action{

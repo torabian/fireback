@@ -210,7 +210,7 @@ type UserEntity struct {
 	LinkedTo       *UserEntity         `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func UserEntityStream(q fireback.QueryDSL) (chan []*UserEntity, *fireback.QueryResultMeta, error) {
+func UserEntityStream(q fireback.QueryDSL) (chan []*UserEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*UserEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -272,7 +272,7 @@ type userActionsSig struct {
 	MultiInsert    func(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*UserEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*UserEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*UserEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*UserEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var UserActions userActionsSig = userActionsSig{
@@ -570,7 +570,7 @@ func UserActionGetByWorkspaceFn(query fireback.QueryDSL) (*UserEntity, *fireback
 	entityUserFormatter(item, query)
 	return item, err
 }
-func UserActionQueryFn(query fireback.QueryDSL) ([]*UserEntity, *fireback.QueryResultMeta, error) {
+func UserActionQueryFn(query fireback.QueryDSL) ([]*UserEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&UserEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[UserEntity](query, refl)
 	for _, item := range items {
@@ -1175,7 +1175,7 @@ func UserWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "User", result)
 	}
 }
-func UsersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func UsersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1508,7 +1508,10 @@ var USER_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, UserActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         UserActions.Create,
 	Format:         "POST_ONE",
@@ -1551,7 +1554,10 @@ var USER_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var USER_ACTION_PATCH_BULK = fireback.Module3Action{

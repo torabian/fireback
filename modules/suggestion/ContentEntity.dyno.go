@@ -126,7 +126,7 @@ type ContentEntity struct {
 	LinkedTo    *ContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func ContentEntityStream(q fireback.QueryDSL) (chan []*ContentEntity, *fireback.QueryResultMeta, error) {
+func ContentEntityStream(q fireback.QueryDSL) (chan []*ContentEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*ContentEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -188,7 +188,7 @@ type contentActionsSig struct {
 	MultiInsert    func(dtos []*ContentEntity, query fireback.QueryDSL) ([]*ContentEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*ContentEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*ContentEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*ContentEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*ContentEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var ContentActions contentActionsSig = contentActionsSig{
@@ -471,7 +471,7 @@ func ContentActionGetByWorkspaceFn(query fireback.QueryDSL) (*ContentEntity, *fi
 	entityContentFormatter(item, query)
 	return item, err
 }
-func ContentActionQueryFn(query fireback.QueryDSL) ([]*ContentEntity, *fireback.QueryResultMeta, error) {
+func ContentActionQueryFn(query fireback.QueryDSL) ([]*ContentEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&ContentEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[ContentEntity](query, refl)
 	for _, item := range items {
@@ -896,7 +896,7 @@ func ContentWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Content", result)
 	}
 }
-func ContentsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func ContentsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1226,7 +1226,10 @@ var CONTENT_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, ContentActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         ContentActions.Create,
 	Format:         "POST_ONE",
@@ -1268,7 +1271,10 @@ var CONTENT_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, ContentActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{

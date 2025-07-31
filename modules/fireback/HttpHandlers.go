@@ -291,32 +291,25 @@ func HttpStreamFileChannel(
 	GinStreamFromChannel(c, chanStream)
 
 }
-func HttpQueryEntity[T any](
-	c *gin.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
-	qs interface{},
-) {
 
-	f := ExtractQueryDslFromGinContext(c)
-	QueriableFieldFromGinContext(reflect.ValueOf(qs), "", c)
-	ComputeSqlColumns(qs, &f)
+func getFilterQuery(qs interface{}, f *QueryDSL) {
 
 	method := reflect.ValueOf(qs).MethodByName("GetQuery")
 	if method.IsValid() {
 		results := method.Call(nil) // Call the method with no arguments
-
-		// Check if it returns at least one result
 		if len(results) > 0 {
-			f.Query = results[0].Interface().(string)
+			f.FilterQuery = results[0].Interface().(string)
 		}
 	}
+}
+func getJqQuery(qs interface{}, f *QueryDSL) {
 
-	if items, count, err := fn(f); err != nil {
-		GinWriteContent(c, 500, gin.H{"error": err})
-	} else {
-		result := QueryEntitySuccessResult(f, items, count)
-		result["jsonQuery"] = c.Query("jsonQuery")
-		GinWriteContent(c, 200, result)
+	method := reflect.ValueOf(qs).MethodByName("GetJq")
+	if method.IsValid() {
+		results := method.Call(nil) // Call the method with no arguments
+		if len(results) > 0 {
+			f.JqQuery = results[0].Interface().(string)
+		}
 	}
 }
 
@@ -374,17 +367,29 @@ func GinWriteContent(c *gin.Context, code int, content gin.H) {
 	c.JSON(code, content)
 }
 
-func HttpQueryEntity2[T any](
-	c *gin.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
-) {
-
+func getHttpF(qs interface{}, c *gin.Context) QueryDSL {
 	f := ExtractQueryDslFromGinContext(c)
 
+	if qs != nil {
+		InitQueryStruct(qs)
+
+		QueriableFieldFromGinContext(reflect.ValueOf(qs), "", c)
+		DetectSelectFieldsInSQL(qs, &f)
+		getFilterQuery(qs, &f)
+		getJqQuery(qs, &f)
+	}
+
+	return f
+}
+
+func HttpQueryEntity[T any](
+	c *gin.Context,
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
+	qs interface{},
+) {
+	f := getHttpF(qs, c)
 	if items, count, err := fn(f); err != nil {
-		GinWriteContent(c, http.StatusBadRequest, gin.H{
-			"error": err.ToPublicEndUser(&f),
-		})
+		GinWriteContent(c, 500, gin.H{"error": err})
 	} else {
 		result := QueryEntitySuccessResult(f, items, count)
 		result["jsonQuery"] = c.Query("jsonQuery")

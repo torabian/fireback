@@ -162,7 +162,7 @@ type PassportEntity struct {
 	LinkedTo      *PassportEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PassportEntityStream(q fireback.QueryDSL) (chan []*PassportEntity, *fireback.QueryResultMeta, error) {
+func PassportEntityStream(q fireback.QueryDSL) (chan []*PassportEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PassportEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -224,7 +224,7 @@ type passportActionsSig struct {
 	MultiInsert    func(dtos []*PassportEntity, query fireback.QueryDSL) ([]*PassportEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PassportEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PassportEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PassportEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PassportEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PassportActions passportActionsSig = passportActionsSig{
@@ -519,7 +519,7 @@ func PassportActionGetByWorkspaceFn(query fireback.QueryDSL) (*PassportEntity, *
 	entityPassportFormatter(item, query)
 	return item, err
 }
-func PassportActionQueryFn(query fireback.QueryDSL) ([]*PassportEntity, *fireback.QueryResultMeta, error) {
+func PassportActionQueryFn(query fireback.QueryDSL) ([]*PassportEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PassportEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PassportEntity](query, refl)
 	for _, item := range items {
@@ -1043,7 +1043,7 @@ func PassportWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Passport", result)
 	}
 }
-func PassportsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PassportsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1376,7 +1376,10 @@ var PASSPORT_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PassportActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PassportActions.Create,
 	Format:         "POST_ONE",
@@ -1419,7 +1422,10 @@ var PASSPORT_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PassportActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var PASSPORT_ACTION_PATCH_BULK = fireback.Module3Action{

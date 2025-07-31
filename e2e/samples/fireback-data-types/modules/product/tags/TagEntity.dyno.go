@@ -123,7 +123,7 @@ type TagEntity struct {
 	LinkedTo         *TagEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-"`
 }
 
-func TagEntityStream(q fireback.QueryDSL) (chan []*TagEntity, *fireback.QueryResultMeta, error) {
+func TagEntityStream(q fireback.QueryDSL) (chan []*TagEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*TagEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -185,7 +185,7 @@ type tagActionsSig struct {
 	MultiInsert    func(dtos []*TagEntity, query fireback.QueryDSL) ([]*TagEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TagEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TagEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*TagEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*TagEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var TagActions tagActionsSig = tagActionsSig{
@@ -468,7 +468,7 @@ func TagActionGetByWorkspaceFn(query fireback.QueryDSL) (*TagEntity, *fireback.I
 	entityTagFormatter(item, query)
 	return item, err
 }
-func TagActionQueryFn(query fireback.QueryDSL) ([]*TagEntity, *fireback.QueryResultMeta, error) {
+func TagActionQueryFn(query fireback.QueryDSL) ([]*TagEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&TagEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[TagEntity](query, refl)
 	for _, item := range items {
@@ -861,7 +861,7 @@ func TagWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Tag", result)
 	}
 }
-func TagsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func TagsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,

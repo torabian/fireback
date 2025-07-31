@@ -172,7 +172,8 @@ func SmartSplit(input string) []string {
 	return smartSplitRegex.Split(input, -1)
 }
 
-func ComputeSqlColumns(qs interface{}, f *QueryDSL) {
+// Computes which columns from database need to be selected
+func DetectSelectFieldsInSQL(qs interface{}, f *QueryDSL) {
 	if len(f.SelectableColumn) > 0 {
 		res := DatabaseColumnsResolver(reflect.ValueOf(qs), "", []string(f.SelectableColumn), QuerySelectionInfo{}, false)
 
@@ -186,25 +187,94 @@ func ComputeSqlColumns(qs interface{}, f *QueryDSL) {
 
 func CommonCliQueryCmd3[T any](
 	c *cli.Context,
-	fn func(query QueryDSL) ([]T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
 	security *SecurityModel,
 	qs interface{},
 ) {
-	QueriableFieldFromCliContext(reflect.ValueOf(qs), "", c)
-	f := CommonCliQueryDSLBuilderAuthorize(c, security)
+	wrapped := func(query QueryDSL) ([]T, *QueryResultMeta, *IError) {
+		items, meta, err := fn(query)
+		return items, meta, CastToIError(err)
+	}
 
-	if qs != nil {
+	CommonCliQueryCmd3IError(c, wrapped, security, qs)
+}
 
-		ComputeSqlColumns(qs, &f)
-		method := reflect.ValueOf(qs).MethodByName("GetQuery")
-		if method.IsValid() {
-			results := method.Call(nil) // Call the method with no arguments
+func GenerateGoJQFilterRecursive(v reflect.Value, pathPrefix string) []string {
+	var filters []string
+	t := v.Type()
 
-			// Check if it returns at least one result
-			if len(results) > 0 {
-				f.Query = results[0].Interface().(string)
+	for i := 0; i < v.NumField(); i++ {
+		fieldVal := v.Field(i)
+		fieldType := t.Field(i)
+		fieldName := fieldType.Tag.Get("qs")
+
+		if fieldName == "" {
+			fieldName = strings.ToLower(fieldType.Name)
+		}
+
+		fullPath := pathPrefix + "." + fieldName
+
+		// Dereference pointers
+		if fieldVal.Kind() == reflect.Ptr && !fieldVal.IsNil() {
+			fieldVal = fieldVal.Elem()
+		}
+
+		// Recursively handle nested structs
+		if fieldVal.Kind() == reflect.Struct && fieldVal.Type().Name() != "QueriableField" {
+			filters = append(filters, GenerateGoJQFilterRecursive(fieldVal, fullPath)...)
+			continue
+		}
+
+		if fieldVal.Type().Name() == "QueriableField" {
+			query := fieldVal.FieldByName("Query").String()
+			op := fieldVal.FieldByName("Operation").String()
+
+			if query == "" {
+				continue
+			}
+
+			switch op {
+			case "eq":
+				filters = append(filters, fmt.Sprintf("%s == \"%s\"", fullPath, query))
+			case "contains":
+				filters = append(filters, fmt.Sprintf("contains(%s; \"%s\")", fullPath, query))
+			case "startswith":
+				filters = append(filters, fmt.Sprintf("startswith(%s; \"%s\")", fullPath, query))
+			default:
+				filters = append(filters, fmt.Sprintf("%s == \"%s\"", fullPath, query))
 			}
 		}
+	}
+
+	return filters
+}
+
+func GenerateGoJQFilter(v any) string {
+	val := reflect.ValueOf(v)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	filters := GenerateGoJQFilterRecursive(val, "")
+	if len(filters) == 0 {
+		return ".[]"
+	}
+	return fmt.Sprintf(".[] | select(%s)", strings.Join(filters, " and "))
+}
+
+func CommonCliQueryCmd3IError[T any](
+	c *cli.Context,
+	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
+	security *SecurityModel,
+	qs interface{},
+) {
+	f := CommonCliQueryDSLBuilderAuthorize(c, security)
+	if qs != nil {
+		InitQueryStruct(qs)
+
+		QueriableFieldFromCliContext(reflect.ValueOf(qs), "", c)
+		DetectSelectFieldsInSQL(qs, &f)
+		getFilterQuery(qs, &f)
+		getJqQuery(qs, &f)
 	}
 
 	if items, count, err := fn(f); err != nil {
@@ -214,6 +284,7 @@ func CommonCliQueryCmd3[T any](
 		cliSuccessPrinter(c, out)
 	}
 }
+
 func cliSuccessPrinter(c *cli.Context, out any) {
 	if IsYamlCli(c) {
 		body, err := yaml.Marshal(out)
@@ -344,7 +415,7 @@ func ExtractStringValueFromReflectCell[T any](row *T, t string, n string) string
 
 func CommonCliTableCmd2[T any](
 	c *cli.Context,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	security *SecurityModel,
 	v reflect.Value,
 ) {
@@ -502,12 +573,12 @@ type ExportCatalog[T any] struct {
 	F                  QueryDSL
 	ExportFilePath     string
 	QueryResultMeta    *QueryResultMeta
-	Fn                 func(query QueryDSL) ([]*T, *QueryResultMeta, error)
+	Fn                 func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)
 }
 
 func YamlExporterChannel[T any](
 	query QueryDSL,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	preloads []string,
 ) (chan []byte, *IError) {
 
@@ -549,7 +620,7 @@ func YamlExporterChannel[T any](
 
 func YamlExporterChannelT[T any](
 	query QueryDSL,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	preloads []string,
 ) (chan []interface{}, *IError) {
 
@@ -641,7 +712,7 @@ func YamlExporter[T any](catalog *ExportCatalog[T], bar *progressbar.ProgressBar
 
 func CommonCliExportCmd[T any](
 	c *cli.Context,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, error),
+	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	v reflect.Value,
 	exportFilePath string,
 	translationRef *embed.FS,
@@ -659,9 +730,8 @@ func CommonCliExportCmd[T any](
 	if err != nil {
 		fmt.Println(err)
 	}
-	writer, err := os.Create(exportFilePath)
-
-	if err != nil {
+	writer, err2 := os.Create(exportFilePath)
+	if err2 != nil {
 		log.Fatalf("failed creating file: %s", err)
 	}
 
@@ -696,7 +766,7 @@ func CommonCliExportCmd[T any](
 
 func CommonCliExportCmd2[T any](
 	c *cli.Context,
-	fn func(q QueryDSL) (chan []*T, *QueryResultMeta, error),
+	fn func(q QueryDSL) (chan []*T, *QueryResultMeta, *IError),
 	v reflect.Value,
 	exportFilePath string,
 	translationRef *embed.FS,
@@ -733,8 +803,8 @@ func CommonCliExportCmd2[T any](
 		exporter = JsonExporterWriter
 	}
 
-	stats, err := exporter(stream, exportFilePath)
-	if err != nil {
+	stats, err3 := exporter(stream, exportFilePath)
+	if err3 != nil {
 		log.Fatalln(err)
 	}
 

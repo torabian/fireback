@@ -135,7 +135,7 @@ type EmailConfirmationEntity struct {
 	LinkedTo         *EmailConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func EmailConfirmationEntityStream(q fireback.QueryDSL) (chan []*EmailConfirmationEntity, *fireback.QueryResultMeta, error) {
+func EmailConfirmationEntityStream(q fireback.QueryDSL) (chan []*EmailConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*EmailConfirmationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -197,7 +197,7 @@ type emailConfirmationActionsSig struct {
 	MultiInsert    func(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var EmailConfirmationActions emailConfirmationActionsSig = emailConfirmationActionsSig{
@@ -484,7 +484,7 @@ func EmailConfirmationActionGetByWorkspaceFn(query fireback.QueryDSL) (*EmailCon
 	entityEmailConfirmationFormatter(item, query)
 	return item, err
 }
-func EmailConfirmationActionQueryFn(query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.QueryResultMeta, error) {
+func EmailConfirmationActionQueryFn(query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[EmailConfirmationEntity](query, refl)
 	for _, item := range items {
@@ -943,7 +943,7 @@ func EmailConfirmationWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "EmailConfirmation", result)
 	}
 }
-func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1273,7 +1273,10 @@ var EMAIL_CONFIRMATION_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, EmailConfirmationActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         EmailConfirmationActions.Create,
 	Format:         "POST_ONE",
@@ -1315,7 +1318,10 @@ var EMAIL_CONFIRMATION_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, EmailConfirmationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{

@@ -155,7 +155,7 @@ type InvoiceTransactionEntity struct {
 	LinkedTo *InvoiceTransactionEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func InvoiceTransactionEntityStream(q fireback.QueryDSL) (chan []*InvoiceTransactionEntity, *fireback.QueryResultMeta, error) {
+func InvoiceTransactionEntityStream(q fireback.QueryDSL) (chan []*InvoiceTransactionEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*InvoiceTransactionEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -217,7 +217,7 @@ type invoiceTransactionActionsSig struct {
 	MultiInsert    func(dtos []*InvoiceTransactionEntity, query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*InvoiceTransactionEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*InvoiceTransactionEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var InvoiceTransactionActions invoiceTransactionActionsSig = invoiceTransactionActionsSig{
@@ -508,7 +508,7 @@ func InvoiceTransactionActionGetByWorkspaceFn(query fireback.QueryDSL) (*Invoice
 	entityInvoiceTransactionFormatter(item, query)
 	return item, err
 }
-func InvoiceTransactionActionQueryFn(query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.QueryResultMeta, error) {
+func InvoiceTransactionActionQueryFn(query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&InvoiceTransactionEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[InvoiceTransactionEntity](query, refl)
 	for _, item := range items {
@@ -989,7 +989,7 @@ func InvoiceTransactionWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "InvoiceTransaction", result)
 	}
 }
-func InvoiceTransactionsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func InvoiceTransactionsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1319,7 +1319,10 @@ var INVOICE_TRANSACTION_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, InvoiceTransactionActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         InvoiceTransactionActions.Create,
 	Format:         "POST_ONE",
@@ -1361,7 +1364,10 @@ var INVOICE_TRANSACTION_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, InvoiceTransactionActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var INVOICE_TRANSACTION_ACTION_PATCH_BULK = fireback.Module3Action{

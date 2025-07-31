@@ -111,7 +111,7 @@ type WebPushConfigEntity struct {
 	LinkedTo     *WebPushConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WebPushConfigEntityStream(q QueryDSL) (chan []*WebPushConfigEntity, *QueryResultMeta, error) {
+func WebPushConfigEntityStream(q QueryDSL) (chan []*WebPushConfigEntity, *QueryResultMeta, *IError) {
 	cn := make(chan []*WebPushConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -173,7 +173,7 @@ type webPushConfigActionsSig struct {
 	MultiInsert    func(dtos []*WebPushConfigEntity, query QueryDSL) ([]*WebPushConfigEntity, *IError)
 	GetOne         func(query QueryDSL) (*WebPushConfigEntity, *IError)
 	GetByWorkspace func(query QueryDSL) (*WebPushConfigEntity, *IError)
-	Query          func(query QueryDSL) ([]*WebPushConfigEntity, *QueryResultMeta, error)
+	Query          func(query QueryDSL) ([]*WebPushConfigEntity, *QueryResultMeta, *IError)
 }
 
 var WebPushConfigActions webPushConfigActionsSig = webPushConfigActionsSig{
@@ -452,7 +452,7 @@ func WebPushConfigActionGetByWorkspaceFn(query QueryDSL) (*WebPushConfigEntity, 
 	entityWebPushConfigFormatter(item, query)
 	return item, err
 }
-func WebPushConfigActionQueryFn(query QueryDSL) ([]*WebPushConfigEntity, *QueryResultMeta, error) {
+func WebPushConfigActionQueryFn(query QueryDSL) ([]*WebPushConfigEntity, *QueryResultMeta, *IError) {
 	refl := reflect.ValueOf(&WebPushConfigEntity{})
 	items, meta, err := QueryEntitiesPointer[WebPushConfigEntity](query, refl)
 	for _, item := range items {
@@ -829,7 +829,7 @@ func WebPushConfigWriteQueryMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "WebPushConfig", result)
 	}
 }
-func WebPushConfigsActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+func WebPushConfigsActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, *IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1165,7 +1165,10 @@ var WEB_PUSH_CONFIG_ACTION_POST_ONE = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPostEntity(c, WebPushConfigActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         WebPushConfigActions.Create,
 	Format:         "POST_ONE",
@@ -1208,7 +1211,10 @@ var WEB_PUSH_CONFIG_ACTION_PATCH = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPatchEntity(c, WebPushConfigActions.Update, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var WEB_PUSH_CONFIG_ACTION_PATCH_BULK = Module3Action{

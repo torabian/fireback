@@ -21,6 +21,10 @@ import (
     {{ end }}
 )
 
+import (
+	"reflect"
+  
+)
 
 {{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut )}}
 
@@ -28,6 +32,13 @@ var {{ .m.Upper }}CustomActionsCli = []cli.Command {
 {{ range .m.Actions }}
     {{ .Upper }}ActionCmd,
 {{ end }}
+}
+
+// Only to include some headers
+func {{ upper .m.Name }}JsonInclude()  {
+    str4 := reflect.ValueOf(nil)
+    _ = str4
+
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider

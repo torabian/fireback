@@ -209,7 +209,7 @@ type TimezoneGroupEntity struct {
 	LinkedTo         *TimezoneGroupEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func TimezoneGroupEntityStream(q fireback.QueryDSL) (chan []*TimezoneGroupEntity, *fireback.QueryResultMeta, error) {
+func TimezoneGroupEntityStream(q fireback.QueryDSL) (chan []*TimezoneGroupEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*TimezoneGroupEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -271,7 +271,7 @@ type timezoneGroupActionsSig struct {
 	MultiInsert    func(dtos []*TimezoneGroupEntity, query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TimezoneGroupEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TimezoneGroupEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var TimezoneGroupActions timezoneGroupActionsSig = timezoneGroupActionsSig{
@@ -650,7 +650,7 @@ func TimezoneGroupActionGetByWorkspaceFn(query fireback.QueryDSL) (*TimezoneGrou
 	entityTimezoneGroupFormatter(item, query)
 	return item, err
 }
-func TimezoneGroupActionQueryFn(query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.QueryResultMeta, error) {
+func TimezoneGroupActionQueryFn(query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[TimezoneGroupEntity](query, refl)
 	for _, item := range items {
@@ -1149,7 +1149,7 @@ func TimezoneGroupWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "TimezoneGroup", result)
 	}
 }
-func TimezoneGroupsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func TimezoneGroupsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1471,7 +1471,10 @@ var TIMEZONE_GROUP_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, TimezoneGroupActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         TimezoneGroupActions.Create,
 	Format:         "POST_ONE",
@@ -1511,7 +1514,10 @@ var TIMEZONE_GROUP_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TimezoneGroupActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 var TIMEZONE_GROUP_ACTION_PATCH_BULK = fireback.Module3Action{
