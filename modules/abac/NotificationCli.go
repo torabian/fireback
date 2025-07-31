@@ -71,9 +71,8 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 			log.Fatalln(err.Error())
 		}
 
-		senders, err := GetEmailSenderAsStringList(items)
-
-		if err != nil {
+		senders, err2 := GetEmailSenderAsStringList(items)
+		if err2 != nil {
 			log.Fatalln(err.Error())
 		}
 

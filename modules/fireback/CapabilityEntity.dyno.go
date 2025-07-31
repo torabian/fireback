@@ -117,7 +117,7 @@ type CapabilityEntity struct {
 	LinkedTo         *CapabilityEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func CapabilityEntityStream(q QueryDSL) (chan []*CapabilityEntity, *QueryResultMeta, error) {
+func CapabilityEntityStream(q QueryDSL) (chan []*CapabilityEntity, *QueryResultMeta, *IError) {
 	cn := make(chan []*CapabilityEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -179,7 +179,7 @@ type capabilityActionsSig struct {
 	MultiInsert    func(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError)
 	GetOne         func(query QueryDSL) (*CapabilityEntity, *IError)
 	GetByWorkspace func(query QueryDSL) (*CapabilityEntity, *IError)
-	Query          func(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error)
+	Query          func(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, *IError)
 }
 
 var CapabilityActions capabilityActionsSig = capabilityActionsSig{
@@ -477,7 +477,7 @@ func CapabilityActionGetByWorkspaceFn(query QueryDSL) (*CapabilityEntity, *IErro
 	entityCapabilityFormatter(item, query)
 	return item, err
 }
-func CapabilityActionQueryFn(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, error) {
+func CapabilityActionQueryFn(query QueryDSL) ([]*CapabilityEntity, *QueryResultMeta, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	items, meta, err := QueryEntitiesPointer[CapabilityEntity](query, refl)
 	for _, item := range items {
@@ -884,7 +884,7 @@ func CapabilityWriteQueryMock(ctx MockQueryContext) {
 		WriteMockDataToFile(lang, "", "Capability", result)
 	}
 }
-func CapabilitiesActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, error) {
+func CapabilitiesActionQueryString(keyword string, page int) ([]string, *QueryResultMeta, *IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1218,7 +1218,10 @@ var CAPABILITY_ACTION_POST_ONE = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPostEntity(c, CapabilityActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         CapabilityActions.Create,
 	Format:         "POST_ONE",
@@ -1261,6 +1264,9 @@ var CAPABILITY_ACTION_PATCH = Module3Action{
 	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		result, err := CliPatchEntity(c, CapabilityActions.Update, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

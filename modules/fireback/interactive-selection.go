@@ -17,8 +17,8 @@ type cliQueryModel struct {
 	onComplete func([]string)
 	selection  []string
 	title      string
-	queryFunc  func(string, int) ([]string, *QueryResultMeta, error) // Generic query func
-	page       int                                                   // Keep track of pagination page
+	queryFunc  func(string, int) ([]string, *QueryResultMeta, *IError) // Generic query func
+	page       int                                                     // Keep track of pagination page
 }
 
 func (m cliQueryModel) Init() tea.Cmd {
@@ -166,7 +166,7 @@ func (m cliQueryModel) querySuggestions(input string) tea.Cmd {
 
 func CliInteractiveSearchAndSelect(
 	title string,
-	fn func(keyword string, page int) ([]string, *QueryResultMeta, error),
+	fn func(keyword string, page int) ([]string, *QueryResultMeta, *IError),
 ) []string {
 	selection := []string{}
 	model := cliQueryModel{

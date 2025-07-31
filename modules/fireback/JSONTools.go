@@ -2,7 +2,12 @@ package fireback
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
 
+	"github.com/itchyny/gojq"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
@@ -55,4 +60,105 @@ func removeNulls(m map[string]interface{}) {
 			}
 		}
 	}
+}
+
+func SearchJqInArray[T any](queryJson string, items []T) ([]T, error) {
+
+	if queryJson == "" {
+		return items, nil
+	}
+
+	prejson, _ := json.MarshalIndent(items, "", "  ")
+
+	var input interface{}
+	if err := json.Unmarshal(prejson, &input); err != nil {
+		log.Fatal(err)
+	}
+
+	res := []T{}
+	query, err := gojq.Parse(queryJson)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	iter := query.Run(input)
+
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+
+		if err, isErr := v.(error); isErr {
+			return nil, err
+		}
+
+		// If the query result is a slice, unpack it
+		if arr, isSlice := v.([]interface{}); isSlice {
+			for _, item := range arr {
+				// Marshal & unmarshal to convert from `interface{}` to `T`
+				data, _ := json.Marshal(item)
+				var out T
+				json.Unmarshal(data, &out)
+				res = append(res, out)
+			}
+		} else {
+			// Fallback single item
+			data, _ := json.Marshal(v)
+			var out T
+			json.Unmarshal(data, &out)
+			res = append(res, out)
+		}
+	}
+
+	return res, nil
+}
+
+// Paginates an array slice, and creates QRM object out of it, and returns the items
+func QueryArrayInMemory[T any](items []T, q QueryDSL) ([]T, *QueryResultMeta, *IError) {
+	totalAvailableItems := len(items)
+	items, err := SearchJqInArray(q.JqQuery, items)
+
+	if err != nil {
+		return nil, nil, CastToIError(err)
+	}
+
+	cursorIn := q.Cursor
+	limit := q.ItemsPerPage
+
+	start := 0
+
+	if cursorIn != nil && *cursorIn != "" {
+		if strings.HasPrefix(*cursorIn, "index(") && strings.HasSuffix(*cursorIn, ")") {
+			inner := strings.TrimSuffix(strings.TrimPrefix(*cursorIn, "index("), ")")
+			if i, err := strconv.Atoi(inner); err == nil && i >= 0 {
+				start = i
+			}
+		}
+	}
+
+	if start >= len(items) {
+		return []T{}, &QueryResultMeta{
+			TotalItems:          int64(len(items)),
+			TotalAvailableItems: int64(totalAvailableItems),
+			Cursor:              nil,
+		}, nil
+	}
+
+	end := start + limit
+	if end > len(items) {
+		end = len(items)
+	}
+
+	var nextCursor *string
+	if end < len(items) {
+		cursorStr := fmt.Sprintf("index(%d)", end)
+		nextCursor = &cursorStr
+	}
+
+	return items[start:end], &QueryResultMeta{
+		TotalItems:          int64(len(items[start:end])),
+		TotalAvailableItems: int64(len(items)),
+		Cursor:              nextCursor,
+	}, nil
 }

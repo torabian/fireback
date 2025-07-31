@@ -44,7 +44,7 @@ actions:
       - name: service
         type: string
         description: 
-          The service name, such as "google" which later backend will use to authorize the token
+          The service name, such as 'google' which later backend will use to authorize the token
           and create the user.
     out:
       fields:

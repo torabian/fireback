@@ -10,6 +10,9 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
+import (
+	"reflect"
+)
 
 // using shared actions here
 type PayInvoiceQueryPathParams struct {
@@ -469,6 +472,12 @@ var PaymentCustomActionsCli = []cli.Command{
 	PayInvoiceActionCmd,
 	RegisterTransactionActionCmd,
 	CheckProductInventoryActionCmd,
+}
+
+// Only to include some headers
+func PaymentJsonInclude() {
+	str4 := reflect.ValueOf(nil)
+	_ = str4
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider

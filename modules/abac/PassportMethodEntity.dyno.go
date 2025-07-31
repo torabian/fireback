@@ -125,7 +125,7 @@ type PassportMethodEntity struct {
 	LinkedTo  *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*PassportMethodEntity, *fireback.QueryResultMeta, error) {
+func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*PassportMethodEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PassportMethodEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -187,7 +187,7 @@ type passportMethodActionsSig struct {
 	MultiInsert    func(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PassportMethodActions passportMethodActionsSig = passportMethodActionsSig{
@@ -470,7 +470,7 @@ func PassportMethodActionGetByWorkspaceFn(query fireback.QueryDSL) (*PassportMet
 	entityPassportMethodFormatter(item, query)
 	return item, err
 }
-func PassportMethodActionQueryFn(query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.QueryResultMeta, error) {
+func PassportMethodActionQueryFn(query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PassportMethodEntity](query, refl)
 	for _, item := range items {
@@ -903,7 +903,7 @@ func PassportMethodWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "PassportMethod", result)
 	}
 }
-func PassportMethodsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PassportMethodsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1190,7 +1190,10 @@ var PASSPORT_METHOD_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PassportMethodActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PassportMethodActions.Create,
 	Format:         "POST_ONE",
@@ -1234,6 +1237,9 @@ var PASSPORT_METHOD_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PassportMethodActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

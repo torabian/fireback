@@ -222,7 +222,7 @@ type CommonCountSqlResult struct {
 	TotalItems int64 `gorm:"totalItems"`
 }
 
-func UnsafeQuerySqlFromFs[T any](fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+func UnsafeQuerySqlFromFs[T any](fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, *IError) {
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
 		TotalAvailableItems: -1,
@@ -251,7 +251,7 @@ type VSqlContext struct {
 	IsCounter bool
 }
 
-func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, *IError) {
 	extraCondition := ""
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
@@ -292,13 +292,13 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 		var output bytes.Buffer
 		tmpl, err := template.New("example").Parse(content)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, GormErrorToIError(err)
 		}
 		err = tmpl.Execute(&output, ctx)
 
 		if err != nil {
 			fmt.Println("Error executing template:", err)
-			return nil, nil, err
+			return nil, nil, GormErrorToIError(err)
 		}
 
 		sqlQuery = output.String()
@@ -321,13 +321,13 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 		var output bytes.Buffer
 		tmpl, err := template.New("example").Parse(content)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, GormErrorToIError(err)
 		}
 		err = tmpl.Execute(&output, ctx)
 
 		if err != nil {
 			fmt.Println("Error executing template:", err)
-			return nil, nil, err
+			return nil, nil, GormErrorToIError(err)
 		}
 
 		sqlQueryCounter = output.String()
@@ -337,7 +337,7 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, extraCondition, values...)
 }
 
-func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryDSL, extraCondition string, values ...interface{}) ([]*T, *QueryResultMeta, error) {
+func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryDSL, extraCondition string, values ...interface{}) ([]*T, *QueryResultMeta, *IError) {
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
 		TotalAvailableItems: -1,
@@ -386,7 +386,7 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 		return nil, qrm, GormErrorToIError(err)
 	}
 
-	return result, qrm, err
+	return result, qrm, GormErrorToIError(err)
 }
 
 // Returns the connection to database, if it has a transaction
@@ -425,7 +425,7 @@ func parseCursor(cursor string) CursorInfo {
 	return CursorInfo{}
 }
 
-func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *QueryResultMeta, error) {
+func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *QueryResultMeta, *IError) {
 	ref := GetRef(query)
 	var items []*T
 	var item *T
@@ -478,8 +478,11 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 		q = q.Select(selectall)
 	}
 
-	q = q.Where(query.InternalQuery).
-		Order(ToSnakeCase(query.Sort))
+	q = q.Where(query.InternalQuery)
+	if query.FilterQuery != "" {
+		q = q.Where(query.FilterQuery)
+	}
+	q = q.Order(ToSnakeCase(query.Sort))
 
 	countQ := ref
 
@@ -489,7 +492,13 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 		countQ = countQ.Where("unique_id <> \"system\"")
 	}
 
-	countQ = countQ.Where(query.InternalQuery).Model(item)
+	countQ = countQ.Where(query.InternalQuery)
+
+	if query.FilterQuery != "" {
+		countQ = countQ.Where(query.FilterQuery)
+	}
+
+	countQ = countQ.Model(item)
 
 	// Total availble means all records, which user could possiblty see,
 	// But the Query (filters, search) won't affect them.
@@ -563,7 +572,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 	}
 
 	if err != nil {
-		return items, meta, err
+		return items, meta, GormErrorToIError(err)
 	}
 
 	return items, meta, nil

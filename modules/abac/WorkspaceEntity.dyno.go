@@ -126,7 +126,7 @@ type WorkspaceEntity struct {
 	LinkedTo         *WorkspaceEntity     `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceEntityStream(q fireback.QueryDSL) (chan []*WorkspaceEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceEntityStream(q fireback.QueryDSL) (chan []*WorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*WorkspaceEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -188,8 +188,8 @@ type workspaceActionsSig struct {
 	MultiInsert    func(dtos []*WorkspaceEntity, query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, error)
-	CteQuery       func(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError)
+	CteQuery       func(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var WorkspaceActions workspaceActionsSig = workspaceActionsSig{
@@ -473,7 +473,7 @@ func WorkspaceActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceEntity,
 	entityWorkspaceFormatter(item, query)
 	return item, err
 }
-func WorkspaceActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceEntity](query, refl)
 	for _, item := range items {
@@ -537,13 +537,13 @@ func (dto *WorkspaceEntity) Add(nodes ...*WorkspaceEntity) bool {
 	}
 	return dto.Size() == size+len(nodes)
 }
-func WorkspaceActionCommonPivotQuery(query fireback.QueryDSL) ([]*fireback.PivotResult, *fireback.QueryResultMeta, error) {
+func WorkspaceActionCommonPivotQuery(query fireback.QueryDSL) ([]*fireback.PivotResult, *fireback.QueryResultMeta, *fireback.IError) {
 	items, meta, err := fireback.UnsafeQuerySqlFromFs[fireback.PivotResult](
 		&queries.QueriesFs, "WorkspaceCommonPivot.sqlite.dyno", query,
 	)
 	return items, meta, err
 }
-func WorkspaceActionCteQueryFn(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceActionCteQueryFn(query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	items, meta, err := fireback.ContextAwareVSqlOperation[WorkspaceEntity](
 		refl, &queries.QueriesFs, "WorkspaceCte.vsql", query,
@@ -939,7 +939,7 @@ func WorkspaceWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "Workspace", result)
 	}
 }
-func WorkspacesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func WorkspacesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1297,7 +1297,10 @@ var WORKSPACE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, WorkspaceActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         WorkspaceActions.Create,
 	Format:         "POST_ONE",
@@ -1340,6 +1343,9 @@ var WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, WorkspaceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

@@ -119,7 +119,7 @@ type WorkspaceRoleEntity struct {
 	LinkedTo         *WorkspaceRoleEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceRoleEntityStream(q fireback.QueryDSL) (chan []*WorkspaceRoleEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceRoleEntityStream(q fireback.QueryDSL) (chan []*WorkspaceRoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*WorkspaceRoleEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -181,7 +181,7 @@ type workspaceRoleActionsSig struct {
 	MultiInsert    func(dtos []*WorkspaceRoleEntity, query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var WorkspaceRoleActions workspaceRoleActionsSig = workspaceRoleActionsSig{
@@ -462,7 +462,7 @@ func WorkspaceRoleActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceRol
 	entityWorkspaceRoleFormatter(item, query)
 	return item, err
 }
-func WorkspaceRoleActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceRoleActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceRoleEntity](query, refl)
 	for _, item := range items {
@@ -849,7 +849,7 @@ func WorkspaceRoleWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "WorkspaceRole", result)
 	}
 }
-func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func WorkspaceRolesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1180,7 +1180,10 @@ var WORKSPACE_ROLE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, WorkspaceRoleActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         WorkspaceRoleActions.Create,
 	Format:         "POST_ONE",
@@ -1222,6 +1225,9 @@ var WORKSPACE_ROLE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, WorkspaceRoleActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

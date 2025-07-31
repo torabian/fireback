@@ -274,7 +274,7 @@ type NotificationConfigEntity struct {
 	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func NotificationConfigEntityStream(q fireback.QueryDSL) (chan []*NotificationConfigEntity, *fireback.QueryResultMeta, error) {
+func NotificationConfigEntityStream(q fireback.QueryDSL) (chan []*NotificationConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*NotificationConfigEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -336,7 +336,7 @@ type notificationConfigActionsSig struct {
 	MultiInsert    func(dtos []*NotificationConfigEntity, query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var NotificationConfigActions notificationConfigActionsSig = notificationConfigActionsSig{
@@ -669,7 +669,7 @@ func NotificationConfigActionGetByWorkspaceFn(query fireback.QueryDSL) (*Notific
 	entityNotificationConfigFormatter(item, query)
 	return item, err
 }
-func NotificationConfigActionQueryFn(query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.QueryResultMeta, error) {
+func NotificationConfigActionQueryFn(query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[NotificationConfigEntity](query, refl)
 	for _, item := range items {
@@ -1550,7 +1550,7 @@ func NotificationConfigWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "NotificationConfig", result)
 	}
 }
-func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func NotificationConfigsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1890,7 +1890,10 @@ var NOTIFICATION_CONFIG_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, NotificationConfigActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         NotificationConfigActions.Create,
 	Format:         "POST_ONE",
@@ -1934,6 +1937,9 @@ var NOTIFICATION_CONFIG_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, NotificationConfigActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

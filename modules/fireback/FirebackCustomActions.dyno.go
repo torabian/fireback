@@ -9,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
 )
+import (
+	"reflect"
+)
 
 // using shared actions here
 var EventBusSubscriptionSecurityModel = &SecurityModel{
@@ -167,6 +170,12 @@ var FirebackCustomActionsCli = []cli.Command{
 	EventBusSubscriptionActionCmd,
 	ListCapabilitiesActionCmd,
 	CapabilitiesTreeActionCmd,
+}
+
+// Only to include some headers
+func FirebackJsonInclude() {
+	str4 := reflect.ValueOf(nil)
+	_ = str4
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider

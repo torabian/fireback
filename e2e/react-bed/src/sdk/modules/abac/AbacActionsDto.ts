@@ -51,7 +51,7 @@ export class OauthAuthenticateActionReqDto {
   */
   public token?: string | null;
   /**
-  The service name, such as "google" which later backend will use to authorize the token and create the user.
+  The service name, such as 'google' which later backend will use to authorize the token and create the user.
   */
   public service?: string | null;
 public static Fields = {

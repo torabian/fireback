@@ -251,6 +251,12 @@
         "security": {
           "$ref": "#/definitions/SecurityModel",
           "description": "Defines access control similar to middleware checking permissions"
+        },
+        "qsMode": {
+          "type": "string",
+          "enum": [
+            "reflect"
+          ]
         }
       },
       "additionalProperties": false,

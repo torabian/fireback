@@ -97,7 +97,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IEr
 	return items
 }
 
-func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, error) {
+func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
 	// Make this API public, so the signup screen can get it.
 	// At this moment, we just move things back as are, but maybe later we need
 	// to add some limits on what kind of information is going out.

@@ -177,7 +177,7 @@ type PublicAuthenticationEntity struct {
 	LinkedTo              *PublicAuthenticationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PublicAuthenticationEntityStream(q fireback.QueryDSL) (chan []*PublicAuthenticationEntity, *fireback.QueryResultMeta, error) {
+func PublicAuthenticationEntityStream(q fireback.QueryDSL) (chan []*PublicAuthenticationEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PublicAuthenticationEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -239,7 +239,7 @@ type publicAuthenticationActionsSig struct {
 	MultiInsert    func(dtos []*PublicAuthenticationEntity, query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PublicAuthenticationEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PublicAuthenticationEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PublicAuthenticationActions publicAuthenticationActionsSig = publicAuthenticationActionsSig{
@@ -539,7 +539,7 @@ func PublicAuthenticationActionGetByWorkspaceFn(query fireback.QueryDSL) (*Publi
 	entityPublicAuthenticationFormatter(item, query)
 	return item, err
 }
-func PublicAuthenticationActionQueryFn(query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.QueryResultMeta, error) {
+func PublicAuthenticationActionQueryFn(query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicAuthenticationEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PublicAuthenticationEntity](query, refl)
 	for _, item := range items {
@@ -1087,7 +1087,7 @@ func PublicAuthenticationWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "PublicAuthentication", result)
 	}
 }
-func PublicAuthenticationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PublicAuthenticationsActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1421,7 +1421,10 @@ var PUBLIC_AUTHENTICATION_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PublicAuthenticationActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PublicAuthenticationActions.Create,
 	Format:         "POST_ONE",
@@ -1464,6 +1467,9 @@ var PUBLIC_AUTHENTICATION_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PublicAuthenticationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

@@ -102,7 +102,7 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Comman
 
 }
 
-func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
+func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) cli.Command {
 
 	return cli.Command{
 
@@ -124,7 +124,7 @@ func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, e
 
 }
 
-func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
+func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) cli.Command {
 
 	return cli.Command{
 
@@ -146,7 +146,7 @@ func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMe
 
 }
 
-func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, error)) cli.Command {
+func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) cli.Command {
 
 	return cli.Command{
 
@@ -283,29 +283,6 @@ func AskForPassword(label string, defaultV string) string {
 	return value
 }
 
-func TranslateIError(err *IError, translateDictionary map[string]map[string]string, targetLanguage string) {
-	if err == nil {
-		return
-	}
-	// if err.Message != "" && translateDictionary[err.Message][targetLanguage] != "" {
-	// 	err.MessageTranslated = translateDictionary[err.Message][targetLanguage]
-	// }
-
-	// for _, errItem := range err.Errors {
-	// 	// Some fields are having params, so we detect them and translate them appropriately
-
-	// 	// min=1 means that field is required, and empty string is not accepted
-	// 	if errItem.Message == "min" && errItem.ErrorParam == "1" {
-	// 		errItem.Message = "required"
-	// 	}
-
-	// 	if errItem.Message != "" && translateDictionary[errItem.Message][targetLanguage] != "" {
-
-	// 		errItem.MessageTranslated = translateDictionary[errItem.Message][targetLanguage]
-	// 	}
-	// }
-}
-
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
 	f := CommonCliQueryDSLBuilder(c)
 
@@ -316,6 +293,7 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 	}
 
 	if err != nil {
+
 		err2 := err.ToPublicEndUser(&f)
 
 		if err2 == nil {
@@ -328,7 +306,6 @@ func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map
 
 		os.Exit(int(err2.HttpCode))
 	}
-	os.Exit(0)
 }
 
 func CommonInitSeeder[T any](format string, entity *T) {
@@ -375,106 +352,45 @@ type ModuleActionsBundle struct {
 	Actions []Module3Action
 }
 
-type QueriableField struct {
-	Query     string
-	Operation string
-}
-
-func (q QueriableField) String() string {
-	if q.Query == "" {
-		return ""
+func populateQueriableFields(v reflect.Value, parent string, getValue func(field reflect.StructField) string) {
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return
 	}
 
-	// Now we need to check, if there are no special signs, such as
-	// =, < > ! , {", then user intended to be equal
+	t := v.Type()
 
-	autoPrefix := "="
-	if len(q.Query) > 0 {
-		if q.Query[0] == '<' || q.Query[0] == '>' || q.Query[0] == '%' || q.Query[0] == '!' || q.Query[0] == '=' || q.Query[0] == '{' {
-			// Then it's assumed user completed the expq.Queryssion,
-			autoPrefix = ""
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		name := parent + field.Name
+		fieldValue := v.Field(i)
+
+		// Recursively handle embedded/nested structs
+		if field.Type.Kind() == reflect.Struct {
+			populateQueriableFields(fieldValue, name+".", getValue)
+		}
+
+		if fieldValue.CanSet() && fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
+			current := fieldValue.Interface().(QueriableField)
+			current.UserInput = getValue(field)
+			fieldValue.Set(reflect.ValueOf(current))
 		}
 	}
-
-	// I need the reflect tag column from itself
-	return "$col " + autoPrefix + q.Query
 }
 
 func QueriableFieldFromCliContext(v reflect.Value, parent string, c *cli.Context) {
-
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem() // Dereference pointer
-	}
-	if v.Kind() != reflect.Struct {
-		return
-	}
-
-	t := v.Type() // Get the struct type
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		name := parent + field.Name
-
-		cli := field.Tag.Get("cli")
-
-		// Handle embedded/nested struct
-		if field.Type.Kind() == reflect.Struct {
-			QueriableFieldFromCliContext(v.Field(i), name+".", c)
-		}
-
-		if cli == "" {
-			continue
-		}
-
-		// Set value if the field is a struct with a `Value` field
-		fieldValue := v.Field(i)
-		if fieldValue.CanSet() {
-			if fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
-				fieldValue.Set(reflect.ValueOf(QueriableField{Query: c.String(cli)}))
-			}
-		}
-
-	}
+	populateQueriableFields(v, parent, func(field reflect.StructField) string {
+		return c.String(field.Tag.Get("cli"))
+	})
 }
 
 func QueriableFieldFromGinContext(v reflect.Value, parent string, c *gin.Context) {
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem() // Dereference pointer
-	}
-	if v.Kind() != reflect.Struct {
-		return
-	}
-
-	t := v.Type() // Get the struct type
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		name := parent + field.Name
-
-		qs := field.Tag.Get("qs")
-
-		// Handle embedded/nested struct
-		if field.Type.Kind() == reflect.Struct {
-			QueriableFieldFromGinContext(v.Field(i), name+".", c)
-		}
-
-		if qs == "" {
-			continue
-		}
-
-		// Set value if the field is a struct with a `Value` field
-		fieldValue := v.Field(i)
-		if fieldValue.CanSet() {
-			if fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
-
-				qk, ok := c.GetQuery(qs)
-				if ok {
-					fieldValue.Set(reflect.ValueOf(QueriableField{Query: qk}))
-				}
-			}
-		}
-
-	}
+	populateQueriableFields(v, parent, func(field reflect.StructField) string {
+		val, _ := c.GetQuery(field.Tag.Get("qs"))
+		return val
+	})
 }
 
 type QuerySelectionInfo struct {
@@ -546,13 +462,24 @@ func DatabaseColumnsResolver(
 }
 
 func GenerateQueryStringStyle(v reflect.Value, parent string) string {
-	data := GenerateQuery(v, parent)
+	data := GenerateQuery(v, parent, "AsSql")
 
 	query := strings.Join(data, " and ")
 	return query
 }
 
-func GenerateQuery(v reflect.Value, parent string) []string {
+func GenerateQueryJqStyle(v reflect.Value, parent string) string {
+	data := GenerateQuery(v, parent, "AsJq")
+	if len(data) == 0 {
+		return ""
+	}
+
+	query := strings.Join(data, " and ")
+
+	return fmt.Sprintf("map(select(%s))", query)
+}
+
+func GenerateQuery(v reflect.Value, parent string, funcName string) []string {
 	var values []string
 
 	// Dereference pointer if it's a pointer
@@ -573,7 +500,7 @@ func GenerateQuery(v reflect.Value, parent string) []string {
 
 		// Handle embedded/nested structs
 		if field.Type.Kind() == reflect.Struct {
-			values = append(values, GenerateQuery(v.Field(i), name+".")...)
+			values = append(values, GenerateQuery(v.Field(i), name+".", funcName)...)
 		}
 
 		// Skip non-QueriableField fields
@@ -584,7 +511,7 @@ func GenerateQuery(v reflect.Value, parent string) []string {
 		// Call the String method for QueriableField
 		fieldValue := v.Field(i)
 		if fieldValue.CanAddr() {
-			method := fieldValue.Addr().MethodByName("String")
+			method := fieldValue.Addr().MethodByName(funcName)
 			if method.IsValid() {
 				result := method.Call(nil) // Call String() with no arguments
 				if len(result) > 0 {
@@ -592,7 +519,8 @@ func GenerateQuery(v reflect.Value, parent string) []string {
 					res := result[0].Interface().(string)
 
 					if strings.TrimSpace(res) != "" {
-						values = append(values, strings.ReplaceAll(res, "$col", field.Tag.Get("column")))
+						val := field.Tag.Get("column")
+						values = append(values, strings.ReplaceAll(res, "$col", val))
 					}
 				}
 			}

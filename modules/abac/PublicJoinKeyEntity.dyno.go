@@ -118,7 +118,7 @@ type PublicJoinKeyEntity struct {
 	LinkedTo         *PublicJoinKeyEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PublicJoinKeyEntityStream(q fireback.QueryDSL) (chan []*PublicJoinKeyEntity, *fireback.QueryResultMeta, error) {
+func PublicJoinKeyEntityStream(q fireback.QueryDSL) (chan []*PublicJoinKeyEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PublicJoinKeyEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -180,7 +180,7 @@ type publicJoinKeyActionsSig struct {
 	MultiInsert    func(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PublicJoinKeyActions publicJoinKeyActionsSig = publicJoinKeyActionsSig{
@@ -461,7 +461,7 @@ func PublicJoinKeyActionGetByWorkspaceFn(query fireback.QueryDSL) (*PublicJoinKe
 	entityPublicJoinKeyFormatter(item, query)
 	return item, err
 }
-func PublicJoinKeyActionQueryFn(query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.QueryResultMeta, error) {
+func PublicJoinKeyActionQueryFn(query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PublicJoinKeyEntity](query, refl)
 	for _, item := range items {
@@ -848,7 +848,7 @@ func PublicJoinKeyWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "PublicJoinKey", result)
 	}
 }
-func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1178,7 +1178,10 @@ var PUBLIC_JOIN_KEY_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PublicJoinKeyActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PublicJoinKeyActions.Create,
 	Format:         "POST_ONE",
@@ -1220,6 +1223,9 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PublicJoinKeyActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

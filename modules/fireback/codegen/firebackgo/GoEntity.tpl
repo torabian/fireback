@@ -91,23 +91,6 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 
 {{ end }}
 
-{{ define "qsFields" }}
-	{{ $fields := index . 0}}
-	{{ $prefix := index . 1}}
-	{{ $wsprefix := index . 2}}
-	{{ $table := index . 3}}
-	{{ range $fields }}
-		{{ if or (eq .Type "object") (eq .Type "embed")}}
-			{{ .PublicName }} struct {
-				{{ $newPrefix := print $prefix .ComputedCliName "." }}
-				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
-			} `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" typeof:"{{.Type}}" qs:"{{.Name}}" preload:"{{ $prefix }}{{ .PublicName }}"`
-		{{ else }}
-			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" typeof:"{{.Type}}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
-		{{ end }}
-	{{ end }}
-
-{{ end }}
 
 type {{ .e.EntityName }}Qs struct {
 	{{ template "qsFields" (arr .e.CompleteFields "" $.wsprefix .e.TableName )}}
@@ -117,24 +100,6 @@ func (x * {{ .e.EntityName }}Qs) GetQuery() string {
 	return {{ $.wsprefix }} GenerateQueryStringStyle(reflect.ValueOf(x), "")
 }
 
-{{ define "qsFlags"}}
-	{{ $fields := index . 0}}
-  	{{ $prefix := index . 1}}
-
-	{{ range $fields }}
-
-		{{ if or (eq .Type "object") (eq .Type "embed")}}
-			{{ $newPrefix := print $prefix .ComputedCliName "-" }}
-			{{ template "qsFlags" (arr .Fields $newPrefix )}}
-		{{ else }}
-			&cli.StringFlag{
-				Name:     "{{ $prefix }}{{ .ComputedCliName }}",
-				Usage:    "{{ .Description }}",
-			},
-		{{ end }}
-		
-	{{ end }}
-{{ end }}
 
 var {{ .e.Upper }}QsFlags = []cli.Flag{
 	{{ template "qsFlags" (arr .e.CompleteFields "" )}}
@@ -154,7 +119,7 @@ type {{ .e.EntityName }} struct {
 }
 
 
-func {{ .e.EntityName }}Stream(q {{ $.wsprefix }}QueryDSL) (chan []*{{ .e.EntityName }}, *{{$.wsprefix}}QueryResultMeta, error) {
+func {{ .e.EntityName }}Stream(q {{ $.wsprefix }}QueryDSL) (chan []*{{ .e.EntityName }}, *{{$.wsprefix}}QueryResultMeta, *{{ $.wsprefix }}IError) {
 
 	cn := make(chan []*{{ .e.EntityName }})
 	q.ItemsPerPage = 50
@@ -230,9 +195,9 @@ type {{ .e.Name }}ActionsSig struct {
 	MultiInsert func(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.Upper}}Entity, *{{ .wsprefix }}IError)
 	GetOne func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
 	GetByWorkspace func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
-	Query func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error)
+	Query func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, *{{ .wsprefix }}IError)
 	{{ if .e.Cte }}
-	CteQuery func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, error)
+	CteQuery func(query {{ .wsprefix }}QueryDSL) ([]*{{ .e.EntityName }}, *{{ .wsprefix }}QueryResultMeta, *{{ .wsprefix }}IError)
 	{{ end }}
 }
 
@@ -322,7 +287,7 @@ func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix
 {{ template "entityMockAndSeeders" . }}
 
 
-func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]string, *{{ $.wsprefix }}QueryResultMeta, error) {
+func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]string, *{{ $.wsprefix }}QueryResultMeta, *{{ $.wsprefix }}IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,

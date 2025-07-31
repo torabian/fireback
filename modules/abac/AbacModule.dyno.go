@@ -387,7 +387,7 @@ func (x *UserInvitationsQueryColumns) Json() string {
 	}
 	return ""
 }
-func UserInvitationsQuery(query fireback.QueryDSL) ([]*UserInvitationsQueryColumns, *fireback.QueryResultMeta, error) {
+func UserInvitationsQuery(query fireback.QueryDSL) ([]*UserInvitationsQueryColumns, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&UserInvitationsQueryColumns{})
 	items, meta, err := fireback.ContextAwareVSqlOperation[UserInvitationsQueryColumns](
 		refl, &queries.QueriesFs, "UserInvitations.vsql", query,

@@ -41,9 +41,6 @@ func GinPostTranslateErrorMessages(dic map[string]map[string]string) gin.Handler
 
 		if statusCode >= 400 {
 			res := IResponseFromString[any](originBytes.String())
-			if res != nil && res.Error != nil {
-				TranslateIError(res.Error, dic, lang)
-			}
 			data, _ := json.MarshalIndent(res, "", "  ")
 			wb.Write(data)
 		} else {

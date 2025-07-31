@@ -136,7 +136,7 @@ type PendingWorkspaceInviteEntity struct {
 	LinkedTo         *PendingWorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func PendingWorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
+func PendingWorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*PendingWorkspaceInviteEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -198,7 +198,7 @@ type pendingWorkspaceInviteActionsSig struct {
 	MultiInsert    func(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var PendingWorkspaceInviteActions pendingWorkspaceInviteActionsSig = pendingWorkspaceInviteActionsSig{
@@ -485,7 +485,7 @@ func PendingWorkspaceInviteActionGetByWorkspaceFn(query fireback.QueryDSL) (*Pen
 	entityPendingWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func PendingWorkspaceInviteActionQueryFn(query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
+func PendingWorkspaceInviteActionQueryFn(query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[PendingWorkspaceInviteEntity](query, refl)
 	for _, item := range items {
@@ -944,7 +944,7 @@ func PendingWorkspaceInviteWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "PendingWorkspaceInvite", result)
 	}
 }
-func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1274,7 +1274,10 @@ var PENDING_WORKSPACE_INVITE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PendingWorkspaceInviteActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         PendingWorkspaceInviteActions.Create,
 	Format:         "POST_ONE",
@@ -1316,6 +1319,9 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PendingWorkspaceInviteActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

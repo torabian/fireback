@@ -10,6 +10,9 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
+import (
+	"reflect"
+)
 
 // using shared actions here
 type QueryUserRoleWorkspacesResDtoRoles struct {
@@ -137,7 +140,7 @@ var OauthAuthenticateSecurityModel *fireback.SecurityModel = nil
 type OauthAuthenticateActionReqDto struct {
 	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
 	Token string `json:"token" xml:"token" yaml:"token"        `
-	// The service name, such as "google" which later backend will use to authorize the token and create the user.
+	// The service name, such as 'google' which later backend will use to authorize the token and create the user.
 	Service string `json:"service" xml:"service" yaml:"service"        `
 }
 
@@ -163,7 +166,7 @@ var OauthAuthenticateCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "service",
 		Required: false,
-		Usage:    `The service name, such as "google" which later backend will use to authorize the token and create the user. (string)`,
+		Usage:    `The service name, such as 'google' which later backend will use to authorize the token and create the user. (string)`,
 	},
 }
 
@@ -272,9 +275,12 @@ var UserPassportsActionCmd cli.Command = cli.Command{
 	Usage: `Returns list of passports belongs to an specific user.`,
 	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserPassportsSecurityModel)
-		result, _, err := UserPassportsActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.CommonCliQueryCmd3IError(
+			c,
+			UserPassportsActionFn,
+			UserPassportsSecurityModel,
+			nil,
+		)
 	},
 }
 var ChangePasswordSecurityModel = &fireback.SecurityModel{
@@ -394,9 +400,12 @@ var UserInvitationsActionCmd cli.Command = cli.Command{
 	Usage: `Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.`,
 	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
-		result, _, err := UserInvitationsActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.CommonCliQueryCmd3IError(
+			c,
+			UserInvitationsActionFn,
+			UserInvitationsSecurityModel,
+			nil,
+		)
 	},
 }
 var ConfirmClassicPassportTotpSecurityModel *fireback.SecurityModel = nil
@@ -585,9 +594,12 @@ var QueryWorkspaceTypesPubliclyActionCmd cli.Command = cli.Command{
 	Usage: `Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.`,
 	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPubliclySecurityModel)
-		result, _, err := QueryWorkspaceTypesPubliclyActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.CommonCliQueryCmd3IError(
+			c,
+			QueryWorkspaceTypesPubliclyActionFn,
+			QueryWorkspaceTypesPubliclySecurityModel,
+			nil,
+		)
 	},
 }
 var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
@@ -633,9 +645,12 @@ var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
 	Usage: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
 	Flags: fireback.CommonQueryFlags,
 	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
-		result, _, err := QueryUserRoleWorkspacesActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		fireback.CommonCliQueryCmd3IError(
+			c,
+			QueryUserRoleWorkspacesActionFn,
+			QueryUserRoleWorkspacesSecurityModel,
+			nil,
+		)
 	},
 }
 var SignoutSecurityModel *fireback.SecurityModel = nil
@@ -1882,7 +1897,11 @@ func AbacCustomActions() []fireback.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					fireback.HttpQueryEntity2(c, UserPassportsActionFn)
+					fireback.HttpQueryEntity(
+						c,
+						UserPassportsActionFn,
+						nil,
+					)
 				},
 			},
 			Format:         "QUERY",
@@ -1924,7 +1943,11 @@ func AbacCustomActions() []fireback.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					fireback.HttpQueryEntity2(c, UserInvitationsActionFn)
+					fireback.HttpQueryEntity(
+						c,
+						UserInvitationsActionFn,
+						nil,
+					)
 				},
 			},
 			Format:         "QUERY",
@@ -1985,7 +2008,11 @@ func AbacCustomActions() []fireback.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					fireback.HttpQueryEntity2(c, QueryWorkspaceTypesPubliclyActionFn)
+					fireback.HttpQueryEntity(
+						c,
+						QueryWorkspaceTypesPubliclyActionFn,
+						nil,
+					)
 				},
 			},
 			Format:         "QUERY",
@@ -2004,7 +2031,11 @@ func AbacCustomActions() []fireback.Module3Action {
 			Handlers: []gin.HandlerFunc{
 				func(c *gin.Context) {
 					// QUERY - get
-					fireback.HttpQueryEntity2(c, QueryUserRoleWorkspacesActionFn)
+					fireback.HttpQueryEntity(
+						c,
+						QueryUserRoleWorkspacesActionFn,
+						nil,
+					)
 				},
 			},
 			Format:         "QUERY",
@@ -2353,6 +2384,12 @@ var AbacCustomActionsCli = []cli.Command{
 	CheckClassicPassportActionCmd,
 	ClassicPassportOtpActionCmd,
 	ClassicPassportRequestOtpActionCmd,
+}
+
+// Only to include some headers
+func AbacJsonInclude() {
+	str4 := reflect.ValueOf(nil)
+	_ = str4
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider

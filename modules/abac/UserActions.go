@@ -188,16 +188,3 @@ func UserActionUpdate(
 ) (*UserEntity, *fireback.IError) {
 	return UserActionUpdateFn(query, fields)
 }
-
-// func UserActionQuery(query QueryDSL) ([]*UserEntity, *QueryResultMeta, error) {
-
-// 	result, qrm, err := UnsafeQuerySqlFromFs[UserEntity](
-// 		&queries.QueriesFs, "queryUsers", query,
-// 	)
-
-// 	if err != nil {
-// 		return nil, nil, err
-// 	}
-
-// 	return result, qrm, err
-// }

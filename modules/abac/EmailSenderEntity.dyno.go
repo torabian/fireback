@@ -129,7 +129,7 @@ type EmailSenderEntity struct {
 	LinkedTo         *EmailSenderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func EmailSenderEntityStream(q fireback.QueryDSL) (chan []*EmailSenderEntity, *fireback.QueryResultMeta, error) {
+func EmailSenderEntityStream(q fireback.QueryDSL) (chan []*EmailSenderEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*EmailSenderEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -191,7 +191,7 @@ type emailSenderActionsSig struct {
 	MultiInsert    func(dtos []*EmailSenderEntity, query fireback.QueryDSL) ([]*EmailSenderEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*EmailSenderEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*EmailSenderEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*EmailSenderEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*EmailSenderEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var EmailSenderActions emailSenderActionsSig = emailSenderActionsSig{
@@ -476,7 +476,7 @@ func EmailSenderActionGetByWorkspaceFn(query fireback.QueryDSL) (*EmailSenderEnt
 	entityEmailSenderFormatter(item, query)
 	return item, err
 }
-func EmailSenderActionQueryFn(query fireback.QueryDSL) ([]*EmailSenderEntity, *fireback.QueryResultMeta, error) {
+func EmailSenderActionQueryFn(query fireback.QueryDSL) ([]*EmailSenderEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailSenderEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[EmailSenderEntity](query, refl)
 	for _, item := range items {
@@ -925,7 +925,7 @@ func EmailSenderWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "EmailSender", result)
 	}
 }
-func EmailSendersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func EmailSendersActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1258,7 +1258,10 @@ var EMAIL_SENDER_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, EmailSenderActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         EmailSenderActions.Create,
 	Format:         "POST_ONE",
@@ -1301,6 +1304,9 @@ var EMAIL_SENDER_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, EmailSenderActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

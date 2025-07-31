@@ -183,7 +183,7 @@ type WorkspaceInviteEntity struct {
 	LinkedTo *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
-func WorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*WorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*WorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	cn := make(chan []*WorkspaceInviteEntity)
 	q.ItemsPerPage = 50
 	q.StartIndex = 0
@@ -245,7 +245,7 @@ type workspaceInviteActionsSig struct {
 	MultiInsert    func(dtos []*WorkspaceInviteEntity, query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
-	Query          func(query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.QueryResultMeta, error)
+	Query          func(query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var WorkspaceInviteActions workspaceInviteActionsSig = workspaceInviteActionsSig{
@@ -544,7 +544,7 @@ func WorkspaceInviteActionGetByWorkspaceFn(query fireback.QueryDSL) (*WorkspaceI
 	entityWorkspaceInviteFormatter(item, query)
 	return item, err
 }
-func WorkspaceInviteActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.QueryResultMeta, error) {
+func WorkspaceInviteActionQueryFn(query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	items, meta, err := fireback.QueryEntitiesPointer[WorkspaceInviteEntity](query, refl)
 	for _, item := range items {
@@ -1099,7 +1099,7 @@ func WorkspaceInviteWriteQueryMock(ctx fireback.MockQueryContext) {
 		fireback.WriteMockDataToFile(lang, "", "WorkspaceInvite", result)
 	}
 }
-func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, error) {
+func WorkspaceInvitesActionQueryString(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError) {
 	searchFields := []string{
 		`unique_id %"{keyword}"%`,
 		`name %"{keyword}"%`,
@@ -1430,7 +1430,10 @@ var WORKSPACE_INVITE_ACTION_POST_ONE = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, WorkspaceInviteActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-		return err
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 	Action:         WorkspaceInviteActions.Create,
 	Format:         "POST_ONE",
@@ -1472,6 +1475,9 @@ var WORKSPACE_INVITE_ACTION_PATCH = fireback.Module3Action{
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, WorkspaceInviteActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		if err != nil {
+			return err
+		}
 		return err
 	},
 }

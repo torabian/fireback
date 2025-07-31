@@ -10,6 +10,9 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
+import (
+	"reflect"
+)
 
 // using shared actions here
 type QueryResDtoItems struct {
@@ -257,6 +260,12 @@ var SuggestionCustomActionsCli = []cli.Command{
 	QueryActionCmd,
 	RestoreActionCmd,
 	ResyncActionCmd,
+}
+
+// Only to include some headers
+func SuggestionJsonInclude() {
+	str4 := reflect.ValueOf(nil)
+	_ = str4
 }
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
