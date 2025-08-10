@@ -104,6 +104,9 @@ func (f *XFile) parseXFileInput(obj interface{}) error {
 
 		return nil
 
+	case nil:
+		return nil
+
 	case map[string]interface{}:
 		// Extract known fields
 		if b64, ok := v["blob"].(string); ok && b64 != "" {
@@ -157,6 +160,8 @@ func (f XFile) marshalStructWithEncodedBlob() any {
 	if len(f.Blob) > 0 && len(f.Blob) <= maxInlineSize {
 		blobData = encodeBlobDataURL(f.Blob, meta.FileName)
 		meta.IsBase64 = true
+	} else if len(f.Blob) == 0 {
+		return nil
 	} else {
 		// Now we need to give a url, so the user can read the file
 		blobData = "large"

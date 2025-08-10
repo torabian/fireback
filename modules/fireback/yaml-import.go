@@ -80,7 +80,7 @@ func detectMimeType(blob []byte, filename string) string {
 	}
 
 	// Check content
-	if len(blob) > 10 && strings.Contains(string(blob[:512]), "<svg") {
+	if len(blob) > 10 && strings.Contains(string(blob[:min(len(blob), 512)]), "<svg") {
 		return "image/svg+xml"
 	}
 

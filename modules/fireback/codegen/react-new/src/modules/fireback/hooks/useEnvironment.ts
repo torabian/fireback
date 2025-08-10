@@ -26,7 +26,7 @@ export function useRemoteInformation() {
       return d?.diskPath;
     }
 
-    return `${process.env.REACT_APP_REMOTE_FILE_SERVER}files-inline/${d?.diskPath}`;
+    return `${process.env.REACT_APP_REMOTE_SERVICE}files-inline/${d?.diskPath}`;
   };
 
   const downloadPath = (d?: FileEntity) => {
@@ -34,7 +34,7 @@ export function useRemoteInformation() {
       return replacePossibleMetaPaths(d.uniqueId);
     }
 
-    return `${process.env.REACT_APP_REMOTE_FILE_SERVER}files/${d?.diskPath}`;
+    return `${process.env.REACT_APP_REMOTE_SERVICE}files/${d?.diskPath}`;
   };
 
   return { directPath, downloadPath };

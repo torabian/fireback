@@ -4,12 +4,12 @@
 export function replacePossibleMetaPaths(data?: string): string {
   let value = (data || "").replaceAll(
     /fbtusid_____(.*)_____/g,
-    process.env.REACT_APP_REMOTE_FILE_SERVER + "files/$1"
+    process.env.REACT_APP_REMOTE_SERVICE + "files/$1"
   );
 
   value = (value || "").replaceAll(
     /directasset_____(.*)_____/g,
-    process.env.REACT_APP_PUBLIC_URL + "$1"
+    process.env.REACT_APP_REMOTE_SERVICE + "$1"
   );
 
   return value;
@@ -21,5 +21,5 @@ export function MetaPathAwareContent({ data }: { data?: string }) {
 }
 
 export function getFileUrlFromTusId(tusId: string) {
-  return process.env.REACT_APP_REMOTE_FILE_SERVER + "files/" + tusId;
+  return process.env.REACT_APP_REMOTE_SERVICE + "files/" + tusId;
 }

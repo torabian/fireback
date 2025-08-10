@@ -37,64 +37,66 @@ export function useFileUploader() {
     return upload([new File([blob], filename)]);
   };
 
+  const uploadSingle = (
+    file: File,
+    silent: boolean = false
+  ): Promise<string> => {
+    return new Promise(
+      (resolve: (t: string) => void, reject: (err: any) => void) => {
+        const upload = new Upload(file, {
+          endpoint: (process.env.REACT_APP_REMOTE_SERVICE || "") + "tus",
+          onBeforeRequest(req: any) {
+            req.setHeader("authorization", session.token);
+            req.setHeader("workspace-id", selectedUrw?.workspaceId);
+          },
+          headers: {
+            // authorization: authorization,
+          },
+          metadata: {
+            filename: file.name,
+            path: "/database/users",
+            filetype: file.type,
+          },
+          onSuccess() {
+            const uploadId = upload.url?.match(/([a-z0-9]){10,}/gi);
+            resolve(`${uploadId}`);
+          },
+          onError(error) {
+            reject(error);
+          },
+
+          onProgress(bytesSent, bytesTotal) {
+            const uploadId = upload.url?.match(/([a-z0-9]){10,}/gi)?.toString();
+            if (uploadId) {
+              const item: ActiveUpload = {
+                uploadId,
+                bytesSent,
+                filename: file.name,
+                bytesTotal,
+              };
+
+              if (silent !== true) {
+                setActiveUploads((activeUploads) =>
+                  appendTheProgress(activeUploads, item)
+                );
+              }
+            }
+          },
+        });
+
+        upload.start();
+      }
+    );
+  };
+
   const upload = (
     files: File[],
     silent: boolean = false
   ): Promise<string>[] => {
-    const result = files.map((file) => {
-      return new Promise(
-        (resolve: (t: string) => void, reject: (err: any) => void) => {
-          const upload = new Upload(file, {
-            endpoint: process.env.REACT_APP_REMOTE_FILE_SERVER + "files/",
-            onBeforeRequest(req: any) {
-              req.setHeader("authorization", session.token);
-              req.setHeader("workspace-id", selectedUrw?.workspaceId);
-            },
-            headers: {
-              // authorization: authorization,
-            },
-            metadata: {
-              filename: file.name,
-              path: "/database/users",
-              filetype: file.type,
-            },
-            onSuccess() {
-              const uploadId = upload.url?.match(/([a-z0-9]){10,}/gi);
-              resolve(`${uploadId}`);
-            },
-            onError(error) {
-              alert(error);
-              reject(error);
-            },
-
-            onProgress(bytesSent, bytesTotal) {
-              const uploadId = upload.url
-                ?.match(/([a-z0-9]){10,}/gi)
-                ?.toString();
-              if (uploadId) {
-                const item: ActiveUpload = {
-                  uploadId,
-                  bytesSent,
-                  filename: file.name,
-                  bytesTotal,
-                };
-
-                if (silent !== true) {
-                  setActiveUploads((activeUploads) =>
-                    appendTheProgress(activeUploads, item)
-                  );
-                }
-              }
-            },
-          });
-
-          upload.start();
-        }
-      );
+    return files.map((file) => {
+      return uploadSingle(file);
     });
-
-    return result;
   };
 
-  return { upload, activeUploads, uploadBlob };
+  return { upload, activeUploads, uploadBlob, uploadSingle };
 }

@@ -26,9 +26,6 @@ var xapp = &fireback.FirebackApp{
 	SeedersSync: func() {
 
 	},
-	RunTus: func() {
-
-	},
 
 	InjectSearchEndpoint: fireback.InjectReactiveSearch,
 	PublicFolders:        []fireback.PublicFolderInfo{
