@@ -149,6 +149,7 @@ export interface EntityFormProps<T> {
     [key in keyof Partial<T>]: boolean;
   };
   form: FormikProps<Partial<T>>;
+  initialData?: Partial<T>;
   isEditing?: boolean;
 }
 

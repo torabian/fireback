@@ -35,9 +35,7 @@ var xapp = &fireback.FirebackApp{
 		abac.PassportMethodSyncSeeders()
 		abac.AppMenuSyncSeeders()
 	},
-	RunTus: func() {
-		abac.LiftTusServer()
-	},
+
 	InjectSearchEndpoint: fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.

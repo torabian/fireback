@@ -2,13 +2,14 @@ import { httpErrorHanlder } from "../../hooks/api";
 import { Toast } from "../../hooks/toast";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { Formik, FormikHelpers, FormikProps } from "formik";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { KeyboardAction } from "../../definitions/definitions";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
 import { IResponse } from "../../definitions/JSONStyle";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { set } from "lodash";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -21,6 +22,7 @@ export interface CommonEntityManagerProps<T> {
   patchHook?: any;
   onlyOnRoot?: boolean;
   onEditTitle?: string;
+  beforeSetValues?: (data: Partial<T>) => Partial<T>;
   customClass?: string;
   onCreateTitle?: string;
   onCancel?: () => void;
@@ -50,17 +52,21 @@ export const CommonEntityManager = ({
   onCreateTitle,
   onEditTitle,
   setInnerRef,
+  beforeSetValues,
   forceEdit,
   onlyOnRoot,
   customClass,
   beforeSubmit,
   onSuccessPatchOrPost,
 }: CommonEntityManagerProps<any>) => {
+  const [initialData, setInitialData] = useState();
   const { router, isEditing, locale, formik, t } = useCommonEntityManager<
     Partial<any>
   >({
     data,
   });
+
+  const touchedData = useRef({});
 
   useBackButton(onCancel, KeyboardAction.CommonBack);
   const { selectedUrw } = useContext(RemoteQueryContext);
@@ -70,9 +76,17 @@ export const CommonEntityManager = ({
 
   useEffect(() => {
     if (getQuery.data?.data) {
-      formik.current?.setValues({
-        ...getQuery.data.data,
-      });
+      formik.current?.setValues(
+        beforeSetValues
+          ? beforeSetValues({
+              ...getQuery.data.data,
+            })
+          : {
+              ...getQuery.data.data,
+            }
+      );
+
+      setInitialData(getQuery.data?.data);
     }
   }, [getQuery.data]);
 
@@ -82,7 +96,9 @@ export const CommonEntityManager = ({
     );
   }, [postHook?.isLoading, patchHook?.isLoading]);
 
-  const onSubmit = (values: Partial<any>, d: FormikHelpers<Partial<any>>) => {
+  const onSubmit = (p: Partial<any>, d: FormikHelpers<Partial<any>>) => {
+    let values: any = touchedData.current;
+    values.uniqueId = p.uniqueId;
     if (beforeSubmit) {
       values = beforeSubmit(values);
     }
@@ -165,7 +181,21 @@ export const CommonEntityManager = ({
             </div>
             {disableOnGetFailed === true &&
             getSingleHook?.query?.isError ? null : (
-              <Form isEditing={isEditing} form={form} />
+              <Form
+                isEditing={isEditing}
+                initialData={initialData}
+                form={{
+                  ...form,
+                  setFieldValue: (
+                    field: string,
+                    value: any,
+                    shouldValidate?: boolean
+                  ) => {
+                    set(touchedData.current, field, value);
+                    return form.setFieldValue(field, value, shouldValidate);
+                  },
+                }}
+              />
             )}
             <button type="submit" className="d-none" />
           </fieldset>

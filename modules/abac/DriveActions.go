@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -17,7 +16,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
-	"go.uber.org/zap"
 )
 
 func FileActionCreate(
@@ -99,70 +97,70 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *fireback.QueryDSL, ctx *Fi
 
 var GlobalTusFileUploadContext *FileUploadContext
 
-func LiftTusServer() {
-	config := fireback.GetConfig()
+// func LiftTusServer() {
+// 	config := fireback.GetConfig()
 
-	if config.Storage == "" {
-		return
-	}
+// 	if config.Storage == "" {
+// 		return
+// 	}
 
-	store := filestore.FileStore{
-		Path: config.Storage,
-	}
+// 	store := filestore.FileStore{
+// 		Path: config.Storage,
+// 	}
 
-	os.Mkdir(config.Storage, 0777)
+// 	os.Mkdir(config.Storage, 0777)
 
-	composer := tusd.NewStoreComposer()
-	store.UseIn(composer)
+// 	composer := tusd.NewStoreComposer()
+// 	store.UseIn(composer)
 
-	handler, err := tusd.NewHandler(tusd.Config{
-		BasePath:              "/files/",
-		StoreComposer:         composer,
-		NotifyCompleteUploads: true,
-	})
+// 	handler, err := tusd.NewHandler(tusd.Config{
+// 		BasePath:              "/files/",
+// 		StoreComposer:         composer,
+// 		NotifyCompleteUploads: true,
+// 	})
 
-	if err != nil {
-		panic(fmt.Errorf("unable to create handler: %s", err))
-	}
+// 	if err != nil {
+// 		panic(fmt.Errorf("unable to create handler: %s", err))
+// 	}
 
-	go func() {
-		for {
-			event := <-handler.CompleteUploads
-			var result *fireback.AuthResultDto
+// 	go func() {
+// 		for {
+// 			event := <-handler.CompleteUploads
+// 			var result *fireback.AuthResultDto
 
-			wi := event.HTTPRequest.Header.Get("workspace-id")
-			tk := event.HTTPRequest.Header.Get("authorization")
+// 			wi := event.HTTPRequest.Header.Get("workspace-id")
+// 			tk := event.HTTPRequest.Header.Get("authorization")
 
-			result, err = fireback.WithAuthorizationPure(&fireback.AuthContextDto{
-				WorkspaceId:  wi,
-				Token:        tk,
-				Capabilities: []fireback.PermissionInfo{},
-			})
+// 			result, err = fireback.WithAuthorizationPure(&fireback.AuthContextDto{
+// 				WorkspaceId:  wi,
+// 				Token:        tk,
+// 				Capabilities: []fireback.PermissionInfo{},
+// 			})
 
-			if result != nil {
-				q := fireback.QueryDSL{
-					WorkspaceId: wi,
-					UserId:      result.UserId.String,
-				}
+// 			if result != nil {
+// 				q := fireback.QueryDSL{
+// 					WorkspaceId: wi,
+// 					UserId:      result.UserId.String,
+// 				}
 
-				afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
-			}
+// 				afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)
+// 			}
 
-		}
-	}()
+// 		}
+// 	}()
 
-	fireback.LOG.Info("TUS file uploader separate port is listening:", zap.String("port", config.TusPort))
+// 	fireback.LOG.Info("TUS file uploader separate port is listening:", zap.String("port", config.TusPort))
 
-	http.Handle("/files/",
-		WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
-	)
-	http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.TusPort))))
+// 	http.Handle("/files/",
+// 		WithAuthorizationHttp(http.StripPrefix("/files/", handler), true),
+// 	)
+// 	http.Handle("/files-inline/", http.StripPrefix("/files-inline/", http.FileServer(http.Dir(config.TusPort))))
 
-	err = http.ListenAndServe(":"+config.TusPort, nil)
-	if err != nil {
-		panic(fmt.Errorf("Unable to listen: %s", err))
-	}
-}
+// 	err = http.ListenAndServe(":"+config.TusPort, nil)
+// 	if err != nil {
+// 		panic(fmt.Errorf("Unable to listen: %s", err))
+// 	}
+// }
 
 // TUS file uploading systems can be running directly into a gin server
 // This is done because, the golang routines are capable of nonblcking io.

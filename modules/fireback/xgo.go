@@ -44,8 +44,6 @@ type FirebackApp struct {
 	// Custom cli actions or command that you might want to add to the project
 	CliActions func() []cli.Command
 
-	// runs TUS resumable upload server on a separate port
-	RunTus               func()
 	InjectSearchEndpoint func(*gin.Engine, *FirebackApp)
 	SetupWebServerHook   func(*gin.Engine, *FirebackApp)
 	SearchProviders      []SearchProviderFn
@@ -281,10 +279,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 	})
 
 	r.Use(trackConnectionsMiddleware())
-
-	if x.RunTus != nil {
-		go x.RunTus()
-	}
 
 	if config.WithTaskServer {
 		go taskServerLifter(x)
