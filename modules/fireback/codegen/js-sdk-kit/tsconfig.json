@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+     "target": "es2015",
+    "lib": ["es2015", "dom"],
+    "module": "ESNext", 
+    "declaration": true,             // generate .d.ts
+    "outDir": "build",            // compiled raw js output
+    "noImplicitAny": false,          // allow implicit any
+    "skipLibCheck": true,            // ignore types of node_modules
+    "esModuleInterop": true,         // for easier import of commonjs libs
+    "forceConsistentCasingInFileNames": false,
+  },
+  "include": ["src/**/*"]
+}
