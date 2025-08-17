@@ -1,0 +1,19 @@
+{
+  "name": "js-sdk-kit",
+  "version": "1.0.0",
+  "description": "Sharable code for javascript world sdk.",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@types/qs": "^6.14.0",
+    "qs": "^6.14.0"
+  }
+}
