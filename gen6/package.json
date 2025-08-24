@@ -1,0 +1,15 @@
+{
+  "name": "gen6",
+  "version": "1.0.0",
+  "main": "AcceptInviteAction.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "axios": "^1.11.0"
+  }
+}

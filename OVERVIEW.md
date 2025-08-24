@@ -1,4 +1,4 @@
-# Fireback core microservice - v1.2.3
+# Fireback core microservice - v1.2.4
 Total modules: 11
 Modules overview: workspaces, workspaces, workspaces, workspaces, geo, accessibility, widget, commonprofile, currency, licenses, worldtimezone
 ## Workspaces
