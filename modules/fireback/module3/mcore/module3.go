@@ -1,0 +1,817 @@
+/**
+Current file is set of definitions, to create Module3 yaml files.
+Module3 is a declarative way of creating backend entities, crud actions on them,
+and many complex operation. Fireback would generate those codes for many languages
+both for backend and front-end purposes.
+
+Backend code can be generated in: C and Golang
+Front-end code can be generated in: Angular, React, Pure TypeScript, Android Java, Swift
+*/
+
+package mcore
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+)
+
+var FIELD_TYPE_ARRAY string = "array"
+var FIELD_TYPE_ARRAYP string = "arrayP"
+var FIELD_TYPE_JSON string = "json"
+var FIELD_TYPE_ONE string = "one"
+var FIELD_TYPE_DATE string = "date"
+var FIELD_TYPE_MANY2MANY string = "many2many"
+var FIELD_TYPE_OBJECT string = "object"
+var FIELD_TYPE_EMBED string = "embed"
+var FIELD_TYPE_MONEY string = "money?"
+var FIELD_TYPE_XFILE string = "xfile?"
+var FIELD_TYPE_ENUM string = "enum"
+var FIELD_TYPE_COMPUTED string = "computed"
+var FIELD_TYPE_TEXT string = "text"
+var FIELD_TYPE_STRING string = "string"
+var FIELD_TYPE_ANY string = "any"
+var ROUTE_FORMAT_DELETE string = "DELETE_DSL"
+var ROUTE_FORMAT_QUERY string = "QUERY"
+var ROUTE_FORMAT_POST string = "POST_ONE"
+var ROUTE_FORMAT_GET_ONE string = "GET_ONE"
+var ROUTE_FORMAT_REACTIVE string = "REACTIVE"
+var ROUTE_FORMAT_PATCH string = "PATCH_ONE"
+var ROUTE_FORMAT_PATCH_BULK string = "PATCH_BULK"
+
+type ErrorItem map[string]string
+
+// Module3 struct represents the entire file tree
+type Module3 struct {
+
+	// Custom imports appened by some macros
+	ActionsCustomImport []string `jsonschema:"-" json:"-" yaml:"-"`
+
+	// Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks
+	Namespace string `yaml:"namespace,omitempty" json:"namespace,omitempty" jsonschema:"description=Represents where is the location of the module in app tree. Similar to PHP namespacing sytem it be used to explicitly as export path of the actions for client frameworks"`
+
+	// Description of module and it's purpose. Used in code gen and creating documents.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of module and it's purpose. Used in code gen and creating documents."`
+
+	// Version of the module. Helpful for different code generation phases but it's not necessary.
+	Version string `yaml:"version,omitempty" json:"version,omitempty" jsonschema:"description=Version of the module. Helpful for different code generation phases but it's not necessary."`
+
+	// Magic property for Fireback FirebackModule3.yml file. It's gonna be true only in a single file internally in Fireback
+	MetaWorkspace bool `yaml:"meta-workspace,omitempty" json:"meta-workspace,omitempty" jsonschema:"description=Magic property for Fireback FirebackModule3.yml file. It's gonna be true only in a single file internally in Fireback"`
+
+	// Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the module. Needs to be lower camel case and Module.go and Module.dyno.go will be generated based on this name."`
+
+	// List of entities that module contains. Entities are basically tables in database with their mapping on golang and general actions generated for them
+	Entities []Module3Entity `yaml:"entities,omitempty" json:"entities,omitempty" jsonschema:"description=List of entities that module contains. Entities are basically tables in database with their mapping on golang and general actions generated for them"`
+
+	// Tasks are actions which are triggered by a queue message or a cron job.
+	Tasks []*Module3Task `yaml:"tasks,omitempty" json:"tasks,omitempty" jsonschema:"description=Tasks are actions which are triggered by a queue message or a cron job."`
+
+	// Dtos are basically golang structs with some additional functionality which can be used for request/response actions
+	Dto []Module3Dto `yaml:"dtos,omitempty" json:"dtos,omitempty" jsonschema:"description=Dtos are basically golang structs with some additional functionality which can be used for request/response actions"`
+
+	// Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic
+	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
+
+	// Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures.
+	Macros []Module3Macro `yaml:"macros,omitempty" json:"macros,omitempty" jsonschema:"description=Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures."`
+
+	// Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here.
+	Remotes []*Module3Remote `yaml:"remotes,omitempty" json:"remotes,omitempty" jsonschema:"description=Remotes are definition of external services which could be contacted via http and Fireback developer can make them typesafe by defining them here."`
+
+	// Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels
+	Notifications []*Module3Notification `yaml:"notifications,omitempty" json:"notifications,omitempty" jsonschema:"description=Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels"`
+
+	// Events are internal changes that can be triggered by different sources
+	Events []*Module3Event `yaml:"events,omitempty" json:"events,omitempty" jsonschema:"description=Events are internal changes that can be triggered by different sources"`
+
+	// Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code.
+	Queries []*Module3Query `yaml:"queries,omitempty" json:"queries,omitempty" jsonschema:"description=Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code."`
+
+	// An interesting way of defining env variables
+	Config []*Module3ConfigField `yaml:"config,omitempty" json:"config,omitempty" jsonschema:"description=An interesting way of defining env variables"`
+
+	// Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale.
+	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty" jsonschema:"description=Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."`
+}
+
+// Trigger is an automatic mechanism of task to be automatically run
+// At the moment cron jobs are the only supported method.
+type Module3Trigger struct {
+
+	// The 5-6 star standard cronjob described in https://en.wikipedia.org/wiki/Cron
+	Cron string `yaml:"cron,omitempty" json:"cron,omitempty" jsonschema:"description=The 5-6 star standard cronjob described in https://en.wikipedia.org/wiki/Cron"`
+}
+
+// Task is a general function or similarly Fireback Action, which has no results
+// and could be run via Queue services or cronjobs
+// Developer needs to implement the functionality manually, Fireback only generates the func signature
+// Tasks are only available internally and not exported via http or client sdks
+type Module3Task struct {
+
+	// List of triggers such as cronjobs which can make this task run automatically.
+	Triggers []Module3Trigger `yaml:"triggers,omitempty" json:"triggers,omitempty" jsonschema:"description=List of triggers such as cronjobs which can make this task run automatically."`
+
+	// Name of the task is general identifier and golang functions will be generated based on it.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the task is general identifier and golang functions will be generated based on it."`
+
+	// Description of the task useful for developers and generated documentations.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the task useful for developers and generated documentations."`
+
+	// Parameters that can be sent to this task. Since tasks are runnable in the golang as well
+	// they can get parameters in go and cli if necessary. For cronjobs might make no sense.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Parameters that can be sent to this task. Since tasks are runnable in the golang as well they can get parameters in go and cli if necessary. For cronjobs might make no sense."`
+}
+
+// This is a fireback remote definition, you can make the external API calls typesafe using
+// definitions. This feature is documented in docs/remotes.md
+type Module3Remote struct {
+	// Remote action name, it will become the Golang function that you will call
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Remote action name, it will become the Golang function that you will call"`
+
+	// Standard HTTP methods
+	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=get,enum=post,enum=put,enum=delete,enum=patch,enum=options,enum=head,description=Standard HTTP methods"`
+
+	// The url which will be requested. You need to add full url here, but maybe you could add a prefix
+	// also in the client from your Go code - There might be a prefix for remotes later version of fireback
+	Url string `yaml:"url,omitempty" json:"url,omitempty" jsonschema:"description=The url which will be requested. You need to add full url here, but maybe you could add a prefix also in the client from your Go code - There might be a prefix for remotes later version of fireback"`
+
+	// Standard Module3ActionBody object. Could have fields, entity, dto as content and you
+	// can define the output to cast automatically into them. If the response could be different objects, add them all
+	// and create custom dtos and manually map them
+	Out *Module3ActionBody `yaml:"out,omitempty" json:"out,omitempty" jsonschema:"description=Standard Module3ActionBody object. Could have fields, entity, dto as content and you can define the output to cast automatically into them. If the response could be different objects, add them all and create custom dtos and manually map them."`
+
+	// Standard Module3ActionBody object. Could have fields, entity, dto as content and you
+	// can define the input parameters as struct in Go and fireback will convert it into
+	// json.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Standard Module3ActionBody object. Could have fields entity dto as content and you can define the input parameters as struct in Go and fireback will convert it into json."`
+
+	// Query params for the address if you want to define them in Golang dynamically instead of URL
+	Query []*Module3Field `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=Query params for the address if you want to define them in Golang dynamically instead of URL."`
+}
+
+// Used in Module3Field as the definition of enum items
+type Module3Enum struct {
+	// Enum key which will be used in golang generation and validation
+	Key string `yaml:"k,omitempty" json:"k,omitempty" jsonschema:"description=Enum key which will be used in golang generation and validation"`
+
+	// Description of the enum for developers. It's not translated or meant to be shown to end users.
+	Descrtipion string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the enum for developers. It's not translated or meant to be shown to end users."`
+}
+
+// Macros is a pre-compile mechanism in Fireback, and it will modify the module definition
+// before it's given to the compiler. The idea is for example, you can add extra entities
+// on some modules with it.
+// Until version 1.2.1, there is a single macro for EAV database model, which would create
+// All of the necessary tables and fields.
+// Custom macros can be indefintely useful, but need to be very well defined and documented since
+// the parameters are interface{}
+type Module3Macro struct {
+
+	// The macro name which you are using. Fireback developers need to add the macros name here as reference.
+	Using string `yaml:"using,omitempty" json:"using,omitempty" jsonschema:"enum=eav,description=The macro name which you are using. Fireback developers need to add the macros name here as reference."`
+
+	// Params are the macro configuration which are dynamically set based on each macro itself.
+	// They will be passed as interface{} to macro and function itself will decide what to do next.
+	Params interface{} `yaml:"params,omitempty" json:"params,omitempty" jsonschema:"description=Params are the macro configuration which are dynamically set based on each macro itself. They will be passed as interface{} to macro and function itself will decide what to do next."`
+}
+
+func ConvertParams(params interface{}) interface{} {
+	if params == nil {
+		return nil
+	}
+
+	// Handle map[interface{}]interface{} case
+	if rawMap, ok := params.(map[interface{}]interface{}); ok {
+		converted := make(map[string]interface{})
+		for k, v := range rawMap {
+			if key, isString := k.(string); isString {
+				converted[key] = v
+			}
+		}
+		return converted
+	}
+	return params
+}
+
+// Useful for calling when writing a custom macro.
+func Module3MacroCastParams[T any](m *Module3Macro) (*T, error) {
+	m.Params = ConvertParams(m.Params)
+
+	data, err := json.Marshal(m.Params)
+	if err != nil {
+		return nil, err
+	}
+
+	var result T
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+type Module3FieldMatch struct {
+
+	// The dto name from Fireback which will be matched. Might be also work with any other go struct but check the generated code.
+	Dto *string `yaml:"dto,omitempty" json:"dto,omitempty" jsonschema:"description=The dto name from Fireback which will be matched. Might be also work with any other go struct but check the generated code."`
+}
+
+// Used in Module code generation to customized the generated code for gorm tags on Fireback
+// Data management fields such as workspace or user id. For example, you can add extra indexes on these
+// fields.
+type GormOverrideMap struct {
+
+	// Override the workspace id configuration for gorm instead of default config. Useful for adding extra constraints or indexes.
+	WorkspaceId string `yaml:"workspaceId,omitempty" json:"workspaceId,omitempty" jsonschema:"description=Override the workspace id configuration for gorm instead of default config. Useful for adding extra constraints or indexes."`
+
+	// Override the user id configuration for gorm instead of default config. Useful for adding extra constraints or indexes.
+	UserId string `yaml:"userId,omitempty" json:"userId,omitempty" jsonschema:"description=Override the user id configuration for gorm instead of default config. Useful for adding extra constraints or indexes."`
+}
+
+// Permission is an access key to limit the usages of a feature.
+type Module3Permission struct {
+	// Name of the permission which will be used in golang and external ui
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the permission which will be used in golang and external ui"`
+
+	// Key of the permission, separated with dots such as root.feature.action
+	Key string `yaml:"key,omitempty" json:"key,omitempty" jsonschema:"description=Key of the permission, separated with dots such as root.feature.action"`
+
+	// Description of the permission for developers or users. Not translated at this moment.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the permission for developers or users. Not translated at this moment."`
+}
+
+type Module3Message map[string]map[string]string
+
+type Module3DataFields struct {
+
+	// Essential is a set of the fields which fireback uses to give userId and workspaceId
+	Essentials bool `yaml:"essentials,omitempty" json:"essentials,omitempty" jsonschema:"default=true,description=Essential is a set of the fields which fireback uses to give userId and workspaceId"`
+
+	// Adds a int primary key auto increment
+	PrimaryId bool `yaml:"primaryId,omitempty" json:"primaryId,omitempty" jsonschema:"default=true,description=Adds a int primary key auto increment"`
+
+	// adds created - updated - delete as nano seconds to the database
+	NumericTimestamp bool `yaml:"numericTimestamp,omitempty" json:"numericTimestamp,omitempty" jsonschema:"default=true,description=adds created - updated - delete as nano seconds to the database"`
+
+	// adds created - updated - deleted fields as timestamps
+	DateTimestamp bool `yaml:"dateTimestamp,omitempty" json:"dateTimestamp,omitempty" jsonschema:"default=false,description=adds created - updated - deleted fields as timestamps"`
+}
+
+// Used to adjust the features generated for each entity.
+type Module3EntityFeatures struct {
+
+	// Adds a CLI task to automatically generate mocks.
+	// Disable this if it is not relevant for the feature
+	// or if validations are required, making a custom mock necessary.
+	// IMPORTANT: This is a pointer because it is enabled by default.
+	Mock *bool `yaml:"mock,omitempty" json:"mock,omitempty" jsonschema:"Adds a CLI task to automatically generate mocks Disable this if it is not relevant for the feature or if validations are required making a custom mock necessary IMPORTANT This is a pointer because it is enabled by default"`
+
+	// Enables embedded mock files for an entity.
+	// Disables the 'msync' and 'mlist' commands.
+	MSync *bool `yaml:"msync,omitempty" json:"msync,omitempty" jsonschema:"Enables embedded mock files for an entity disabling the 'msync' and 'mlist' commands"`
+}
+
+// Checks if codegen needs to print a default mocking tools for the entity
+func (x Module3EntityFeatures) HasMockAction() bool {
+
+	if x.Mock != nil && !*x.Mock {
+		return false
+	}
+
+	return true
+}
+
+// Checks id module3 definition enabled or disabled the feature
+func (x Module3EntityFeatures) HasMsyncActions() bool {
+
+	if x.MSync != nil && !*x.MSync {
+		return false
+	}
+
+	return true
+}
+
+type Module3EntityPermissionRewrite struct {
+	Replace string `yaml:"replace,omitempty" json:"replace,omitempty" jsonschema:"description=The value to be replaced"`
+	With    string `yaml:"with,omitempty" json:"with,omitempty" jsonschema:"description=The value to be replaced"`
+}
+
+type Module3ActionConfig struct {
+	Qs      []Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Typesafe query strings."`
+	Headers []Module3Field `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"description=Typesafe headers."`
+}
+
+// Contains extra configuration for each rpc which will be generated on fireback
+// this is an attempt to reduce the need for custom actions, by giving you some control over
+// the code might be generated.
+type Module3EntityActionConfig struct {
+	Query Module3ActionConfig `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=Modify the query rpc code."`
+}
+
+type ClickHouseReplicaInfo struct {
+	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty" `
+}
+
+type Module3EntityReplicas struct {
+	// Clickhouse replica features.
+	Clickhouse *ClickHouseReplicaInfo `yaml:"clickhouse,omitempty" json:"clickhouse,omitempty" jsonschema:"Clickhouse replica features."`
+}
+
+// Represents Entities in Fireback. An entity in Fireback is a table in database, with addition general
+// features such as permissions, actions, security, and common actions which might be created or extra
+// queries based on the type
+type Module3Entity struct {
+
+	// The replica configuration for the entity
+	Replicas *Module3EntityReplicas `json:"replicas,omitempty" yaml:"replicas,omitempty" jsonschema:"The replica configuration for the entity"`
+
+	// Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels
+	Notifications []*Module3Notification `yaml:"notifications,omitempty" json:"notifications,omitempty" jsonschema:"description=Notifications are end-user messages, such as push notification, socket notification, and could be sent to user via different channels"`
+
+	// Events are internal changes that can be triggered by different sources
+	Events []*Module3Event `yaml:"events,omitempty" json:"events,omitempty" jsonschema:"description=Events are internal changes that can be triggered by different sources"`
+
+	// Modify the actions configuration, add headers, params and more to default generated actions and code
+	Rpc Module3EntityActionConfig `yaml:"rpc,omitempty" json:"rpc,omitempty" jsonschema:"Modify the actions configuration, add headers, params and more to default generated actions and code."`
+
+	// Rewrites the default permission generated value, for example if you want to regroup them somehow else.
+	PremissionsRewrite *Module3EntityPermissionRewrite `yaml:"permRewrite,omitempty" json:"permRewrite,omitempty" jsonschema:"description=Rewrites the default permission generated value, for example if you want to regroup them somehow else."`
+
+	// Extra permissions that an entity might need. You can add extra permissions that you will need in your
+	// business logic related to entity in itself, to make it easier become as a group and document
+	// later
+	Permissions []Module3Permission `yaml:"permissions,omitempty" json:"permissions,omitempty" jsonschema:"description=Extra permissions that an entity might need. You can add extra permissions that you will need in your business logic related to entity in itself to make it easier become as a group and document later"`
+
+	// Actions or extra actions (on top of default actions which automatically is generated) these are
+	// the same actions that you can define for a module, but defining them on entity level make it easier
+	// to relate them and group them. Also permission might be added automatically (need to clearify)
+	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions or extra actions (on top of default actions which automatically is generated) these are the same actions that you can define for a module but defining them on entity level make it easier to relate them and group them. Also permission might be added automatically (need to clearify)"`
+
+	// The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=The entity name is crucial as it determines database table names and is used by Fireback's Go and code generation tools; note that changing an entity name does not delete previously created entities requiring manual file deletion and only camelCase naming is supported."`
+
+	// You can make sure there is only one record of the entity per user or workspace using this option.
+	// for example, if you want only one credit card per workspace, you can set distinctBy: workspace
+	// and it will do the job
+	DistinctBy string `yaml:"distinctBy,omitempty" json:"distinctBy,omitempty" jsonschema:"enum=workspace,enum=user,description=You can ensure there is only one record of the entity per user or workspace using this option for example if you want only one credit card per workspace set distinctBy: workspace and it will do the job"`
+
+	// Customize the features generated for entity, less common  changes goes to this object
+	Features Module3EntityFeatures `yaml:"features,omitempty" json:"features,omitempty" jsonschema:"description=Customize the features generated for entity, less common  changes goes to this object"`
+
+	// Changes the default table name based on project prefix and entity name useful for times that you want to connect project to an existing database
+	Table string `yaml:"table,omitempty" json:"table,omitempty" jsonschema:"description=Changes the default table name based on project prefix and entity name useful for times that you want to connect project to an existing database"`
+
+	// Use fields allows you to customize the entity default generated fields.
+	UseFields *Module3DataFields `yaml:"useFields,omitempty" json:"useFields,omitempty" jsonschema:"description=Use fields allows you to customize the entity default generated fields."`
+
+	// Manages the entity models
+	SecurityModel *EntitySecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Manages the entity models"`
+
+	// Adds a golang code to the geenrated code in very top location of the file after imports and before any code.
+	PrependScript string `yaml:"prependScript,omitempty" json:"prependScript,omitempty" jsonschema:"description=Adds a golang code to the geenrated code in very top location of the file after imports and before any code."`
+
+	// Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale.
+	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty" jsonschema:"description=Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."`
+
+	// Adds a extra code before the create action in the entity. This is pure golang code.
+	// Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity.
+	PrependCreateScript string `yaml:"prependCreateScript,omitempty" json:"prependCreateScript,omitempty" jsonschema:"description=Adds a extra code before the create action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."`
+
+	// Adds a extra code before the update action in the entity. This is pure golang code.
+	// Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity.
+	PrependUpdateScript string `yaml:"prependUpdateScript,omitempty" json:"prependUpdateScript,omitempty" jsonschema:"description=Adds a extra code before the update action in the entity. This is pure golang code. Use it with caution such meta codes make module unreadable overtime. You can add script on non-dyno file of the entity."`
+
+	// Access is a method of limiting which type offunctionality will be created for the entity. For example access read will remove all create functionality from code and public API.
+	Access string `yaml:"access,omitempty" json:"access,omitempty" jsonschema:"description=Access is a method of limiting which type offunctionality will be created for the entity. For example access read will remove all create functionality from code and public API."`
+
+	// For entities, if the query scope is public the query action will become automatically public and without authentication
+	QueryScope string `yaml:"queryScope,omitempty" json:"queryScope,omitempty" jsonschema:"enum=public,enum=specific,description=For entities, if the query scope is public the query action will become automatically public and without authentication"`
+
+	// A list of extra queries that Fireback can generate for the the entity. Fireback might offer some extra queries to be generated so they will be listed here.
+	Queries []string `yaml:"queries,omitempty" json:"queries,omitempty" jsonschema:"description=A list of extra queries that Fireback can generate for the the entity. Fireback might offer some extra queries to be generated so they will be listed here."`
+
+	// Override the some default Fireback generated fields gorm configuration.
+	GormMap GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty" jsonschema:"description=Override the some default Fireback generated fields gorm configuration."`
+
+	// Define the fields that this entity will have both in golang and database columns.
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=Define the fields that this entity will have both in golang and database columns."`
+
+	// The name of the entity which will appear in CLI. By default the name of the entity will be used with dashes.
+	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty" jsonschema:"description=The name of the entity which will appear in CLI. By default the name of the entity will be used with dashes."`
+
+	// The alternative shortcut in the CLI. By default it's empty and only the entity name or CliName.
+	CliShort string `yaml:"cliShort,omitempty" json:"cliShort,omitempty" jsonschema:"description=The alternative shortcut in the CLI. By default it's empty and only the entity name or CliName."`
+
+	// Description about the purpose of the entity. It will be used in CLI and codegen documentation.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the purpose of the entity. It will be used in CLI and codegen documentation."`
+
+	// CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang.
+	Cte bool `yaml:"cte,omitempty" json:"cte,omitempty" jsonschema:"description=CTE is a common recursive feature of an entity; enabling it generates SQL for recursive parent-child CTE queries and makes it available in Golang."`
+
+	// The name of the golang function which will recieve entity pointer to make some modification
+	// upon query, get or other details.
+	PostFormatter string `yaml:"postFormatter,omitempty" json:"postFormatter,omitempty" jsonschema:"description=The name of the golang function which will recieve entity pointer to make some modification upon query, get or other details."`
+
+	// Internal metadata for code generation.
+	RootModule *Module3 `yaml:"-" json:"-" jsonschema:"-"`
+}
+
+// Events are definitions of a low level occurence across the application,
+// for example an entity created - a user logged in - etc.
+type Module3Event struct {
+
+	// Name of the event which will be generated in golang and used as key to trigger or subscribe
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the event which will be generated in golang and used as key to trigger or subscribe"`
+
+	// Description of the event (developer visible only)
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the event (developer visible only)"`
+
+	// Payload of the event
+	Payload *Module3ActionBody `yaml:"payload,omitempty" json:"payload,omitempty" jsonschema:"description=Payload of the event"`
+
+	// Security model of the event, which determines who can see it
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Security model of the event, which determines who can see it"`
+
+	// Mechanism to trigger a cache refresh on clients
+	CacheKey string `yaml:"cacheKey,omitempty" json:"cacheKey,omitempty" jsonschema:"description=Mechanism to trigger a cache refresh on clients"`
+}
+
+// Events are definitions of a low level occurence across the application,
+// for example an entity created - a user logged in - etc.
+type Module3Notification struct {
+
+	// Name of the notification which will be generated in golang and used as key to trigger or subscribe
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the notification which will be generated in golang and used as key to trigger or subscribe"`
+
+	// Description of the event (developer visible only)
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the event (developer visible only)"`
+
+	// Payload of the notification
+	Payload *Module3ActionBody `yaml:"payload,omitempty" json:"payload,omitempty" jsonschema:"description=Payload of the notification"`
+}
+
+// Represents a dto in an application. Can be used for variety of reasons,
+// request response of an action, or even internally. Fireback generates bunch of
+// helpers for each dto, so it might make sense to define them in Module3 instead
+// of pure struct in golang.
+type Module3Dto struct {
+
+	// Name of the dto, in camel case, the rest of the code related to this dto is being generated based on this
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the dto in camel case the rest of the code related to this dto is being generated based on this"`
+
+	// List of fields and body definitions of the dto
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=List of fields and body definitions of the dto"`
+}
+
+// Represents any action request or response DTO.
+// Used in multiple places as the request/response signature.
+type Module3ActionBody struct {
+
+	// Defines the fields directly, and DTO will be generated
+	// and assigned automatically.
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"Defines the fields directly and DTO will be generated and assigned automatically"`
+
+	// Selects the DTO existing in the module from Golang.
+	// It can also be a pure Go struct, but those do not compile.
+	Dto string `yaml:"dto,omitempty" json:"dto,omitempty" jsonschema:"Selects the DTO existing in the module from Golang It can also be a pure Go struct but those do not compile"`
+
+	// Use a entity which is generated by Fireback instead.
+	Entity string `yaml:"entity,omitempty" json:"entity,omitempty" jsonschema:"Generates the entity name in the module"`
+
+	// Uses a primitive type instead, such as a string or int64.
+	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"Uses a primitive type instead such as a string or int64"`
+
+	// Returns the page as XHTML format from arura file. Simply used for showing html content, or post back architecture
+	XHtml bool `yaml:"xhtml,omitempty" json:"xhtml,omitempty" jsonschema:"Returns the page as XHTML format from arura file. Simply used for showing html content, or post back architecture"`
+}
+
+type Module3WebRtcDataChannel struct {
+	// Name of the data channel in the webrtc.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the data channel in the webrtc"`
+
+	// Channel data which will be sent to.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Channel data which will be sent to"`
+}
+
+// Represent a header in the general web requests
+type Module3Header struct {
+	// Name of the header accessible on programming languages.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the header accessible on programming languages"`
+
+	// Value type, which will be parsed or read. All will be cast from the string value of header
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=string,enum=int64,enum=float64,enum=bool,description=Value type, which will be parsed or read. All will be cast from the string value of header"`
+
+	// Description of the value and reason usually to developers, http specs and cli
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description of the value and reason usually to developers, http specs and cli"`
+}
+
+type Module3Action struct {
+
+	// General name of the action used for generating code and CLI commands.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=General name of the action used for generating code and CLI commands"`
+
+	// Overrides the CLI action name if specified otherwise defaults to Name.
+	CliName string `yaml:"cliName,omitempty" json:"cliName,omitempty" jsonschema:"description=Overrides the CLI action name if specified otherwise defaults to Name"`
+
+	// CLI command aliases for shorter action names.
+	ActionAliases []string `yaml:"actionAliases,omitempty" json:"actionAliases,omitempty" jsonschema:"description=CLI command aliases for shorter action names"`
+
+	// HTTP route of the action; if not specified the action is CLI-only.
+	Url string `yaml:"url,omitempty" json:"url,omitempty" jsonschema:"description=HTTP route of the action; if not specified the action is CLI-only"`
+
+	// HTTP method type including standard and Fireback-specific methods.
+	Method string `yaml:"method,omitempty" json:"method,omitempty" jsonschema:"enum=post,enum=patch,enum=put,enum=get,enum=delete,enum=webrtc,enum=reactive,description=HTTP method type including standard and Fireback-specific methods"`
+
+	// Text by default for websocket, can be changed to arraybuffer or blob.
+	BinaryType string `yaml:"binaryType,omitempty" json:"binaryType,omitempty" jsonschema:"enum=text,enum=arraybuffer,enum=blob,description=Text by default for websocket, can be changed to arraybuffer or blob"`
+
+	// Type-safe query strings for action
+	Query []*Module3Field `yaml:"qs,omitempty" json:"qs,omitempty" jsonschema:"description=Type-safe query parameters for CLI and HTTP requests"`
+
+	// Typesafe headers for the action
+	Headers []Module3Header `yaml:"headers,omitempty" json:"headers,omitempty" jsonschema:"description=Typesafe headers."`
+
+	// Data channels in a typesafe mode in case of webrtc
+	DataChannels []Module3WebRtcDataChannel `yaml:"dataChannels,omitempty" json:"dataChannels,omitempty" jsonschema:"description=Data channels in a typesafe mode in case of webrtc"`
+
+	// Action description used in API specs and documentation.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Action description used in API specs and documentation"`
+
+	// Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK.
+	Format string `yaml:"format,omitempty" json:"format,omitempty" jsonschema:"enum=reactive,enum=query,description=Higher-level request format such as POST_ONE PATCH_ONE, QUERY, and PATCH_BULK"`
+
+	// Request body definition similar to HTTP request body.
+	In *Module3ActionBody `yaml:"in,omitempty" json:"in,omitempty" jsonschema:"description=Request body definition similar to HTTP request body"`
+
+	// Response body definition similar to HTTP response body.
+	Out *Module3ActionBody `yaml:"out,omitempty" json:"out,omitempty" jsonschema:"description=Response body definition similar to HTTP response body"`
+
+	// Defines access control similar to middleware checking permissions, tokens, and roles.
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Defines access control similar to middleware checking permissions, tokens, and roles"`
+
+	// External function name used in generated code.
+	ExternFuncName string `yaml:"-" json:"-" jsonschema:"-"`
+
+	// Struct representing the request body used for generating RPC code.
+	RequestEntity any `yaml:"-" json:"-" jsonschema:"-"`
+
+	// Struct representing the response body used for generating RPC code.
+	ResponseEntity any `yaml:"-" json:"-" jsonschema:"-"`
+
+	// Function representing the action's implementation.
+	Action any `yaml:"-" json:"-" jsonschema:"-"`
+
+	// Pointer to the struct representing the entity being operated on.
+	TargetEntity any `yaml:"-" json:"-" jsonschema:"-"`
+
+	// Internal metadata for code generation.
+	RootModule *Module3 `yaml:"-" json:"-" jsonschema:"-"`
+
+	// How the qs is being handled.
+	QsMode string `yaml:"qsMode,omitempty" json:"qsMode,omitempty" jsonschema:"enum=reflect"`
+}
+
+func (x Module3Action) MethodUpper() string {
+	return strings.ToUpper(x.Method)
+}
+
+func (x Module3Action) QSFields() []*Module3Field {
+
+	// At the moment, the query string fields is only supported for query
+	if x.Format != "query" {
+		return nil
+	}
+
+	if x.QsMode == "reflect" && x.Out != nil && x.Out.Fields != nil {
+		return x.Out.Fields
+	}
+
+	if x.In != nil && x.In.Fields != nil {
+		return x.In.Fields
+	}
+
+	return nil
+}
+
+func (x Module3Entity) HasClickHouse() bool {
+	return x.Replicas != nil && x.Replicas.Clickhouse != nil
+}
+
+func (x *Module3) ActionsAsList() []string {
+	items := []string{}
+	for index, action := range x.Actions {
+		items = append(items, fmt.Sprintf("%v", index)+" >>> "+action.Name+"("+action.Url+")")
+	}
+
+	return items
+}
+
+func (x *Module3Entity) DataFields() Module3DataFields {
+	data := Module3DataFields{}
+
+	if x.UseFields == nil {
+		data = Module3DataFields{
+			Essentials:       true,
+			PrimaryId:        true,
+			NumericTimestamp: false,
+			DateTimestamp:    true,
+		}
+
+		return data
+	} else {
+		data = *x.UseFields
+	}
+
+	return data
+}
+
+// Module3Query represents an SQL query configuration used by Fireback.
+// Fireback will generate Golang functions to run the queries and will
+// replace placeholders such as the current user and workspaces in the SQL query.
+type Module3Query struct {
+
+	// Name is the identifier for the query. It will be used to generate controller
+	// code and should uniquely identify the query.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name is the identifier for the query. It will be used to generate controller code and should uniquely identify the query."`
+
+	// Description provides a detailed explanation of the query. It helps other
+	// developers or API consumers understand what the query does and its purpose.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description provides a detailed explanation of the query. It helps other developers or API consumers understand what the query does and its purpose."`
+
+	// Columns defines the structure of the result set returned by the query.
+	// It lists the expected columns in the result when the query is executed.
+	Columns *Module3ActionBody `yaml:"columns,omitempty" json:"columns,omitempty" jsonschema:"description=Columns defines the structure of the result set returned by the query. It lists the expected columns in the result when the query is executed."`
+
+	// The actual SQL or VSQL query. There are some special placeholders and this is infact a golang template
+	// which will be converted in the end to SQL and will be sent to ORM.
+	Query string `yaml:"query,omitempty" json:"query,omitempty" jsonschema:"description=The actual SQL or VSQL query. There are some special placeholders and this is infact a golang template which will be converted in the end to SQL and will be sent to ORM."`
+}
+
+// Module3ConfigField represents a configuration field, typically a variable definition,
+// which is converted into a Go struct. It provides functionality to read the value from
+// YAML, environment variables, and CLI flags, with the option to save it as a .env file.
+// This struct offers a type-safe way to use environment variables while documenting
+// them in a YAML configuration file.
+type Module3ConfigField struct {
+
+	// Name is the identifier for the configuration field, used both in Go code and
+	// the environment file. By default, the name will be converted to uppercase with
+	// underscores to reference the environment variable, unless overridden by the 'env' field.
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name is the identifier for the configuration field used both in Go code and the environment file. By default the name will be converted to uppercase with underscores to reference the environment variable unless overridden by the 'env' field."`
+
+	// Type defines the data type for the environment variable. It supports standard Go types
+	// such as string, bool, int64, and others, along with custom Fireback types.
+	// Ensure that the chosen type is supported.
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"description=Type defines the data type for the environment variable. It supports standard Go types such as string - bool - int64 - and others - along with custom Fireback types. Ensure that the chosen type is supported."`
+
+	// Description explains the purpose of the configuration field. It can be helpful for developers
+	// and also used in CLI for interactive configuration.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description explains the purpose of the configuration field. It can be helpful for developers and also used in CLI for interactive configuration."`
+
+	// Default specifies the default value for the configuration field if it is not defined.
+	Default string `yaml:"default,omitempty" json:"default,omitempty" jsonschema:"description=Default specifies the default value for the configuration field if it is not defined."`
+
+	// Hint is the value that will be shown in auto complete or cli context as default value, but only to help user for understanding.
+	Hint string `yaml:"hint,omitempty" json:"hint,omitempty" jsonschema:"description=Hint is the value that will be shown in auto complete or cli context as default value - but only to help user for understanding."`
+
+	// Env allows you to override the default environment variable name, which is automatically
+	// generated from the Name field. Use this field if you want to manually specify the environment variable name.
+	Env string `yaml:"env,omitempty" json:"env,omitempty" jsonschema:"description=Env allows you to override the default environment variable name, which is automatically generated from the Name field. Use this field if you want to manually specify the environment variable name."`
+
+	// Fields defines child configuration fields in case the current field represents an object
+	// or an array of subfields. Note that support for nested fields may be limited.
+	Fields []Module3ConfigField `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=Fields defines child configuration fields in case the current field represents an object or an array of subfields. Note that support for nested fields may be limited."`
+}
+
+func (x *Module3ConfigField) DashedName() string {
+	return strings.ReplaceAll(ToSnakeCase(x.Name), "_", "-")
+}
+
+// This struct represents a general field. It could be a field in an go struct, useful
+// for defining golang structs, database entities, DTOs, or database query results.
+// an entitiy can have an array of fields, and each field might have their own children based on
+// type.
+type Module3Field struct {
+
+	// Name of the field in camel case. Will be upper case automatically when necessary
+	Name string `yaml:"name,omitempty" json:"name,omitempty" jsonschema:"description=Name of the field in camel case. Will be upper case automatically when necessary"`
+
+	// Recommended field will be asked upon an interactive cli operation.
+	Recommended bool `yaml:"recommended,omitempty" json:"recommended,omitempty" jsonschema:"description=Recommended field will be asked upon an interactive cli operation."`
+
+	// Description about the field for developers and generated documents.
+	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the field for developers and generated documents."`
+
+	// Type of the field based on Fireback types.
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=string?,enum=int?,enum=float64?,enum=money?,enum=xfile?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=int,enum=datetime,enum=json,enum=embed,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=many2many,enum=arrayP,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=duration?,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
+
+	// Primitive type in golang when type: arrayP is set
+	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"description=Primitive type in golang when type: arrayP is set"`
+
+	// The entity in golang which will be operated on in case of type: one or type: many2many
+	Target string `yaml:"target,omitempty" json:"target,omitempty" jsonschema:"description=The entity in golang which will be operated on in case of type: one or type: many2many"`
+
+	// The meta tag for validate library which will be checked on different operations
+	Validate string `yaml:"validate,omitempty" json:"validate,omitempty" jsonschema:"description=The meta tag for validate library which will be checked on different operations"`
+
+	// For the html and text fields there will be a automatic excerpt generated.
+	ExcerptSize int `yaml:"excerptSize,omitempty" json:"excerptSize,omitempty" jsonschema:"description=For the html and text fields there will be a automatic excerpt generated."`
+
+	// Default value of the field which will be added to the meta tags
+	Default interface{} `yaml:"default,omitempty" json:"default,omitempty" jsonschema:"description=Default value of the field which will be added to the meta tags"`
+
+	// If true adds the field into polyglot table for translations. Only works with the first level fields.
+	Translate bool `yaml:"translate,omitempty" json:"translate,omitempty" jsonschema:"description=If true adds the field into polyglot table for translations. Only works with the first leve"`
+
+	// It would skip the sanitization for html field types allowing store anything as html
+	Unsafe bool `yaml:"unsafe,omitempty" json:"unsafe,omitempty" jsonschema:"description=It would skip the sanitization for html field types allowing store anything as htm"`
+
+	// Allow create is a useful option to set true if the type one or many2many could be allowed to create entities on target table.
+	AllowCreate bool `yaml:"allowCreate,omitempty" json:"allowCreate,omitempty" jsonschema:"description=Allow create is a useful option to set true if the type one or many2many could be allowed to crea"`
+
+	// When using one or many2many types you need to set the module name here to import that in generated go file.
+	Module string `yaml:"module,omitempty" json:"module,omitempty" jsonschema:"description=When using one or many2many types you need to set the module name here to import tha"`
+
+	// The go project module of the important target for one or many2many fields if its from external library
+	Provider string `yaml:"provider,omitempty" json:"provider,omitempty" jsonschema:"description=The go project module of the important target for one or many2many fields if its from exte"`
+
+	// The json tag of the generated field. Defaults to the name but can be overwritten with this field
+	Json string `yaml:"json,omitempty" json:"json,omitempty" jsonschema:"description=The json tag of the generated field. Defaults to the name but can be overwritten"`
+
+	// The yaml tag of the generated field. Defaults to the name but can be overwritten with this field
+	Yaml string `yaml:"yaml,omitempty" json:"yaml,omitempty" jsonschema:"description=The yaml tag of the generated field. Defaults to the name but can be overwritten"`
+
+	// The xml tag of the generated field. Defaults to the name but can be overwritten with this field
+	Xml string `yaml:"xml,omitempty" json:"xml,omitempty" jsonschema:"description=The xml tag of the generated field. Defaults to the name but can be overwritten"`
+
+	// List of enum values in case of enum type for the field. Check Module3Enum for more details how to define them.
+	OfType []*Module3Enum `yaml:"of,omitempty" json:"of,omitempty" jsonschema:"description=List of enum values in case of enum type for the field. Check Module3Enum for more d"`
+
+	// When type is one there will be another field added with Id prefix. This tag will override gorm meta tag of that field
+	IdFieldGorm string `yaml:"idFieldGorm,omitempty" json:"idFieldGorm,omitempty" jsonschema:"description=When type is one there will be another field added with Id prefix. This tag will override gorm meta"`
+
+	// Not sure what it does
+	ComputedType string `yaml:"computedType,omitempty" json:"computedType,omitempty" jsonschema:"description=Not sure what it does"`
+
+	// On the json type this field will generate necessary code to cast it into different dtos
+	Matches []*Module3FieldMatch `yaml:"matches,omitempty" json:"matches,omitempty" jsonschema:"description=On the json type this field will generate necessary code to cast it into different dtos"`
+
+	// Override the gorm meta tag generated for golang, to add custom types or anything else.
+	Gorm string `yaml:"gorm,omitempty" json:"gorm,omitempty" jsonschema:"description=Override the gorm meta tag generated for golang, to add custom types or anything else."`
+
+	// Override the Fireback default fields gorm tags for extra constraint or other configuration.
+	GormMap GormOverrideMap `yaml:"gormMap,omitempty" json:"gormMap,omitempty" jsonschema:"description=Used in Module code generation to customized the generated code for gorm tags on Fireback Data management fields such as workspace or user id. For example, you can add extra indexes on these fields."`
+
+	// Direct manipulation of the sql meta tag on the field.
+	Sql string `yaml:"sql,omitempty" json:"sql,omitempty" jsonschema:"description=Direct manipulation of the sql meta tag on the field."`
+
+	// This is the name of field considering how deep it is. Used internally for fireback codegen, not available on definition
+	FullName string `yaml:"-,omitempty" json:"-,omitempty" jsonschema:"-"`
+
+	// For types such as array or object children fields can be defined and will separate struct with name prefixed to parent
+	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=For types such as array or object children fields can be defined and will separate struct with name prefixed to parent"`
+
+	IsVirtualObject bool `yaml:"-" json:"-" jsonschema:"-"`
+
+	LinkedTo string `yaml:"linkedTo,omitempty" json:"linkedTo,omitempty" jsonschema:"-"`
+
+	RootClass string `yaml:"rootClass,omitempty" json:"rootClass,omitempty" jsonschema:"-"`
+
+	BelongingEntityName string `yaml:"-" json:"-"`
+}
+
+// Used for defining the entity overall action permissions
+type EntitySecurityModel struct {
+	// Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality. Read mechanism won't be affected.
+	WriteOnRoot *bool `json:"writeOnRoot,omitempty" yaml:"writeOnRoot,omitempty" jsonschema:"description=Only users which belong to root and actively selected the root workspace can write to this entity from Fireback default functionality. Read mechanism won't be affected."`
+
+	// Only users which belong to root and actively selected the root workspace can read from entity from Fireback default functionality. Write mechanism is not affected.
+	ReadOnRoot *bool `json:"readOnRoot,omitempty" yaml:"readOnRoot,omitempty" jsonschema:"description=Only users which belong to root and actively selected the root workspace can read from entity from Fireback default functionality. Write mechanism is not affected."`
+
+	// Resolve strategy means that the content belongs either to workspace or user. It affects the query.
+	ResolveStrategy *string `json:"resolveStrategy,omitempty" yaml:"resolveStrategy,omitempty" jsonschema:"enum=workspace,enum=user, description=Resolve strategy means that the content belongs either to workspace or user. It affects the query."`
+}
+
+// Used for actions generally
+type SecurityModel struct {
+	// Only users which belong to root and actively selected the root workspace can
+	// write to this entity from Fireback default functionality
+	AllowOnRoot bool `json:"allowOnRoot,omitempty" yaml:"allowOnRoot,omitempty"`
+
+	// Set of permissions which are required for this service.
+	ActionRequires []PermissionInfo `json:"requires,omitempty" yaml:"requires,omitempty"`
+
+	// Resolve strategy is by default on the workspace, you can change it by user
+	// also. Be sure of the consequences
+	ResolveStrategy string `json:"resolveStrategy,omitempty" yaml:"resolveStrategy,omitempty"`
+}
+
+type PermissionInfo struct {
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
+	GoVariable  string `yaml:"-" json:"-"`
+}

@@ -1,0 +1,330 @@
+import { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { ExecutionContext, createParamDecorator } from '@nestjs/common';
+import { TypedRequestInit, URLSearchParamsX, fetchx } from './sdk';
+/**
+* Action to communicate with the action classicPassportRequestOtp
+*/
+
+
+	/**
+ * FetchClassicPassportRequestOtpAction
+ */
+
+export class FetchClassicPassportRequestOtpAction {
+  static URL = '/workspace/passport/request-otp';
+  static Method = 'post';
+
+  
+  	static Axios = (clientInstance: AxiosInstance, config: AxiosRequestConfig<unknown>) =>
+		clientInstance
+		.request<unknown, AxiosResponse<unknown>, unknown>(config)
+
+		
+		.then((res) => {
+			return {
+			...res,
+
+			
+			// if there is a output class, create instance out of it.
+			data: new ClassicPassportRequestOtpRes(res.data),
+			};
+		});
+		
+	
+  
+  
+	static Fetch = (
+		init?: TypedRequestInit<unknown, unknown> | undefined,
+		qs?: ClassicPassportRequestOtpQueryParams,
+		overrideUrl?: string
+	) =>
+		fetchx<unknown, unknown, unknown>(
+			new URL((overrideUrl ?? FetchClassicPassportRequestOtpAction.URL ) + '?' + qs?.toString()),
+			init
+		)
+
+		
+			.then((res) => res.json())
+		
+
+	
+		
+			.then((data) => new ClassicPassportRequestOtpRes (data));
+		
+
+	
+}
+
+
+
+
+
+
+
+
+
+	
+/**
+  * @decription The base class definition for classicPassportRequestOtpReq
+  **/
+
+export class ClassicPassportRequestOtpReq {
+	 
+		/**
+  * @type {string}
+  * @description Passport value (email, phone number) which would be recieving the otp code.
+  **/
+ value;
+		/**
+  * @returns {string}
+  * @description Passport value (email, phone number) which would be recieving the otp code.
+  **/
+getValue () { return this[`value`] }
+		/**
+  * @param {string}
+  * @description Passport value (email, phone number) which would be recieving the otp code.
+  **/
+setValue (value) { this[`value`] = value; return this; } 
+	
+
+	
+
+	/** a placeholder for WebRequestX auto patching the json content to the object **/
+	static __jsonParsable;
+
+	
+		/**
+   * Nest.js decorator for controller headers. Instead of using @Headers() value: any, now you can use for example:
+   * @example
+   * @Get()
+   * getHello(@ClassicPassportRequestOtpReq.Nest() headers: ClassicPassportRequestOtpReq): string {
+   *  return JSON.stringify(headers.getContentType());
+   * }
+   */
+  static Nest = createParamDecorator(
+	(_data, ctx) => {
+		// @ts-ignore
+		const request = ctx.switchToHttp().getRequest();
+		// @ts-ignore
+		return new ClassicPassportRequestOtpReq( request.body );
+	},
+  );
+
+
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+/**
+  * @decription The base class definition for classicPassportRequestOtpRes
+  **/
+
+export class ClassicPassportRequestOtpRes {
+	 
+		/**
+  * @type {number}
+  * @description 
+  **/
+ suspendUntil;
+		/**
+  * @returns {number}
+  * @description 
+  **/
+getSuspendUntil () { return this[`suspendUntil`] }
+		/**
+  * @param {number}
+  * @description 
+  **/
+setSuspendUntil (value) { this[`suspendUntil`] = value; return this; } 
+	 
+		/**
+  * @type {number}
+  * @description 
+  **/
+ validUntil;
+		/**
+  * @returns {number}
+  * @description 
+  **/
+getValidUntil () { return this[`validUntil`] }
+		/**
+  * @param {number}
+  * @description 
+  **/
+setValidUntil (value) { this[`validUntil`] = value; return this; } 
+	 
+		/**
+  * @type {number}
+  * @description 
+  **/
+ blockedUntil;
+		/**
+  * @returns {number}
+  * @description 
+  **/
+getBlockedUntil () { return this[`blockedUntil`] }
+		/**
+  * @param {number}
+  * @description 
+  **/
+setBlockedUntil (value) { this[`blockedUntil`] = value; return this; } 
+	 
+		/**
+  * @type {number}
+  * @description The amount of time left to unblock for next request
+  **/
+ secondsToUnblock;
+		/**
+  * @returns {number}
+  * @description The amount of time left to unblock for next request
+  **/
+getSecondsToUnblock () { return this[`secondsToUnblock`] }
+		/**
+  * @param {number}
+  * @description The amount of time left to unblock for next request
+  **/
+setSecondsToUnblock (value) { this[`secondsToUnblock`] = value; return this; } 
+	
+
+	
+
+	/** a placeholder for WebRequestX auto patching the json content to the object **/
+	static __jsonParsable;
+
+	
+		/**
+   * Nest.js decorator for controller headers. Instead of using @Headers() value: any, now you can use for example:
+   * @example
+   * @Get()
+   * getHello(@ClassicPassportRequestOtpRes.Nest() headers: ClassicPassportRequestOtpRes): string {
+   *  return JSON.stringify(headers.getContentType());
+   * }
+   */
+  static Nest = createParamDecorator(
+	(_data, ctx) => {
+		// @ts-ignore
+		const request = ctx.switchToHttp().getRequest();
+		// @ts-ignore
+		return new ClassicPassportRequestOtpRes( request.body );
+	},
+  );
+
+
+	
+}
+
+
+
+
+
+
+
+
+/**
+ * ClassicPassportRequestOtpHeaders class
+ * Auto-generated from Module3Action
+ */
+export class ClassicPassportRequestOtpHeaders extends Headers {
+
+  // the getters generated by us would be casting types before returning.
+  // you still can use .get function to get the string value.
+  #getTyped(key, type) {
+    const val = this.get(key);
+    if (val == null) return null;
+
+    const t = type.toLowerCase();
+
+    if (t.includes('number')) return Number(val);
+    if (t.includes('bool')) return val === 'true';
+    return val; // string or any other fallback
+  }
+
+
+  /**
+   * @returns {Record<string, string>}
+   * Converts Headers to plain object
+   */
+  toObject() {
+    return Object.fromEntries(this.entries());
+  }
+
+  
+  /**
+   * Nest.js decorator for controller headers. Instead of using @Headers() value: any, now you can use for example:
+   * @example
+   * @Get()
+   * getHello(@ClassicPassportRequestOtpHeaders.Nest() headers: ClassicPassportRequestOtpHeaders): string {
+   *  return JSON.stringify(headers.getContentType());
+   * }
+   */
+  static Nest = createParamDecorator(
+	(_data, ctx) => {
+		// @ts-ignore
+		const request = ctx.switchToHttp().getRequest();
+		// @ts-ignore
+		return new ClassicPassportRequestOtpHeaders(Object.entries(request.headers));
+	},
+  );
+
+  
+}
+
+
+
+
+/**
+ * ClassicPassportRequestOtpQueryParams class
+ * Auto-generated from Module3Action
+ */
+export class ClassicPassportRequestOtpQueryParams extends URLSearchParamsX {
+
+
+  // the getters generated by us would be casting types before returning.
+  // you still can use .get function to get the string value.
+  #getTyped(key, type) {
+    const val = this.get(key);
+    if (val == null) return null;
+
+    const t = type.toLowerCase();
+
+    if (t.includes('number')) return Number(val);
+    if (t.includes('bool')) return val === 'true';
+    return val; // string or any other fallback
+  }
+
+
+  
+  /**
+   * Nest.js decorator for controller query. Instead of using @Query() value: any, now you can use for example:
+   * @example
+   * @Get()
+   * getHello(@ClassicPassportRequestOtpQueryParams.Nest() query: ClassicPassportRequestOtpQueryParams): string {
+   *  return JSON.stringify(query.getMyfield());
+   * }
+   */
+  static Nest = createParamDecorator(
+	(_data, ctx) => {
+		// @ts-ignore
+		const request = ctx.switchToHttp().getRequest();
+		// @ts-ignore
+		return new ClassicPassportRequestOtpQueryParams(request.query);
+	},
+  );
+
+  
+}
+
+
+ 
