@@ -753,7 +753,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					ctx := GenContextFromCli(c, FirebackGoGenCatalog)
 
 					if len(ctx.ModulesOnDisk) > 0 {
-						ctx.Path = path.Dir(ctx.ModulesOnDisk[0])
+						ctx.Path = path.Dir(strings.ReplaceAll(ctx.ModulesOnDisk[0], "\\", "/"))
 					}
 
 					if c.IsSet("relative-to") {
