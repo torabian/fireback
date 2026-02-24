@@ -29,6 +29,332 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "EmiAction": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "General name of the action used for generating code and CLI commands"
+        },
+        "cliName": {
+          "type": "string",
+          "description": "Overrides the CLI action name if specified otherwise defaults to Name"
+        },
+        "url": {
+          "type": "string",
+          "description": "HTTP route of the action; if not specified the action is CLI-only"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "post",
+            "patch",
+            "put",
+            "get",
+            "delete",
+            "reactive"
+          ],
+          "description": "HTTP method type including standard and Emi-specific methods"
+        },
+        "binaryType": {
+          "type": "string",
+          "enum": [
+            "text",
+            "arraybuffer",
+            "blob"
+          ],
+          "description": "Text by default for websocket"
+        },
+        "qs": {
+          "items": {
+            "$ref": "#/definitions/EmiQueryField"
+          },
+          "type": "array",
+          "description": "Type-safe query parameters for CLI and HTTP requests"
+        },
+        "description": {
+          "type": "string",
+          "description": "Action description used in API specs and documentation"
+        },
+        "in": {
+          "$ref": "#/definitions/EmiActionBody",
+          "description": "Request body definition similar to HTTP request body"
+        },
+        "out": {
+          "$ref": "#/definitions/EmiActionBody",
+          "description": "Response body definition similar to HTTP response body"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiActionBody": {
+      "properties": {
+        "headers": {
+          "items": {
+            "$ref": "#/definitions/EmiHeader"
+          },
+          "type": "array",
+          "description": "Typesafe headers."
+        },
+        "envelope": {
+          "type": "string",
+          "description": "Envelop the content"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/EmiField"
+          },
+          "type": "array"
+        },
+        "dto": {
+          "type": "string"
+        },
+        "primitive": {
+          "type": "string"
+        },
+        "xhtml": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiDto": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description about the purpose of the dto. It will be used in CLI and codegen documentation."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the dto in camel case the rest of the code related to this dto is being generated based on this"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/EmiField"
+          },
+          "type": "array",
+          "description": "List of fields and body definitions of the dto"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiEnumInline": {
+      "properties": {
+        "k": {
+          "type": "string",
+          "description": "Enum key which will be used in golang generation and validation"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the enum for developers. It's not translated or meant to be shown to end users."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiField": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the field in camel case. Will be upper case automatically when necessary"
+        },
+        "cli": {
+          "type": "string",
+          "description": "The field name apperance on the cli tools"
+        },
+        "recommended": {
+          "type": "boolean",
+          "description": "Recommended field will be asked upon an interactive cli operation."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description about the field for developers and generated documents."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "array",
+            "map?",
+            "map",
+            "slice",
+            "one",
+            "collection",
+            "object",
+            "enum",
+            "string",
+            "bool",
+            "int",
+            "int32",
+            "int64",
+            "float32",
+            "float64",
+            "array?",
+            "slice?",
+            "one?",
+            "collection?",
+            "object?",
+            "enum?",
+            "string?",
+            "bool?",
+            "int?",
+            "int32?",
+            "int64?",
+            "float32?",
+            "float64?",
+            "any",
+            "complex"
+          ],
+          "description": "Type of the field based on Emi types."
+        },
+        "mapKey": {
+          "type": "string",
+          "enum": [
+            "string",
+            "int",
+            "any"
+          ],
+          "description": "When the field type is map or map? you can modify the key type."
+        },
+        "primitive": {
+          "type": "string",
+          "description": "Primitive type in golang when type: slice is set"
+        },
+        "target": {
+          "type": "string",
+          "description": "The entity in golang which will be operated on in case of type: one or type: collection"
+        },
+        "default": {
+          "description": "Default value of the field which will be added to the meta tags"
+        },
+        "module": {
+          "type": "string",
+          "description": "When using one or collection types you need to set the module name here to import tha"
+        },
+        "provider": {
+          "type": "string",
+          "description": "The go project module of the important target for one or collection fields if its from exte"
+        },
+        "of": {
+          "items": {
+            "$ref": "#/definitions/EmiEnumInline"
+          },
+          "type": "array",
+          "description": "List of enum values in case of enum type for the field. Check EmiEnumInline for more d"
+        },
+        "complex": {
+          "type": "string",
+          "description": "In case of complex data type"
+        },
+        "matches": {
+          "items": {
+            "$ref": "#/definitions/EmiFieldMatch"
+          },
+          "type": "array",
+          "description": "On the json type this field will generate necessary code to cast it into different dtos"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/EmiField"
+          },
+          "type": "array",
+          "description": "For types such as array or object children fields can be defined and will separate struct with name prefixed to parent"
+        },
+        "tags": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "Tags are key/pair values which might be useful in some languages - such as golang. There you can specifiy extra tags for language."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiFieldMatch": {
+      "properties": {
+        "dto": {
+          "type": "string",
+          "description": "The dto name from Emi which will be matched. Might be also work with any other go struct but check the generated code."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiHeader": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the header accessible on programming languages"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "int64",
+            "float64",
+            "bool"
+          ],
+          "description": "Value type"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the value and reason usually to developers"
+        },
+        "complex": {
+          "type": "string",
+          "description": "In case of complex data type"
+        },
+        "complexNamespace": {
+          "type": "string",
+          "description": "Complex namespace means the prefix which the complex is available for example math.Vector3 the 'math' section is the namespace"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiQueryField": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the field in camel case. Will be upper case automatically when necessary"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description about the field for developers and generated documents."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "array",
+            "slice",
+            "object",
+            "string",
+            "int",
+            "bool",
+            "int32",
+            "int64",
+            "float32",
+            "float64"
+          ],
+          "description": "Type of the field based on Emi types."
+        },
+        "primitive": {
+          "type": "string",
+          "description": "Primitive type in golang when type: slice is set"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/EmiField"
+          },
+          "type": "array",
+          "description": "For types such as array or object children fields can be defined and will separate struct with name prefixed to parent"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "EntitySecurityModel": {
       "properties": {
         "writeOnRoot": {
@@ -113,6 +439,20 @@
           },
           "type": "array",
           "description": "Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"
+        },
+        "acts": {
+          "items": {
+            "$ref": "#/definitions/EmiAction"
+          },
+          "type": "array",
+          "description": "Actions based on Emi compiler - aims to replace the actions from Fireback"
+        },
+        "dtom": {
+          "items": {
+            "$ref": "#/definitions/EmiDto"
+          },
+          "type": "array",
+          "description": "Dtos based on Emi definitions"
         },
         "macros": {
           "items": {
