@@ -757,7 +757,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					}
 
 					if c.IsSet("relative-to") {
-						ctx.RelativePath = strings.ReplaceAll(ctx.Path, c.String("relative-to"), "")
+						ctx.RelativePath = strings.ReplaceAll(ctx.Path, strings.ReplaceAll(c.String("relative-to"), "\\", "/"), "")
 						if strings.HasPrefix(ctx.RelativePath, "/") {
 							ctx.RelativePath = ctx.RelativePath[1:]
 						}
