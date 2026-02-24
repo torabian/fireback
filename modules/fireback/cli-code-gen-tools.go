@@ -753,7 +753,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					ctx := GenContextFromCli(c, FirebackGoGenCatalog)
 
 					if len(ctx.ModulesOnDisk) > 0 {
-						ctx.Path = path.Dir(ctx.ModulesOnDisk[0])
+						ctx.Path = path.Dir(strings.ReplaceAll(ctx.ModulesOnDisk[0], "\\", "/"))
 					}
 
 					if c.IsSet("relative-to") {
@@ -766,8 +766,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					}
 
 					ctx.RelativePathDot = strings.ReplaceAll(ctx.RelativePath, "/", ".")
-
-					fmt.Println("Path", ctx.Path, "Relative to:", ctx.RelativePath, "RelativePathDot", ctx.RelativePathDot)
 
 					RunCodeGen(xapp, ctx)
 
