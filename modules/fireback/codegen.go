@@ -25,6 +25,9 @@ import (
 	"github.com/gertd/go-pluralize"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggest/openapi-go/openapi3"
+	"github.com/torabian/emi/lib/core"
+	"github.com/torabian/emi/lib/golang"
+	"github.com/torabian/emi/lib/js"
 	firebackgo "github.com/torabian/fireback/modules/fireback/codegen/firebackgo"
 	"gopkg.in/yaml.v2"
 )
@@ -1152,9 +1155,6 @@ func RunCodeGenExternal(ctx *CodeGenContext) error {
 
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
-		// if len(ctx.Modules) > 0 && !Contains(ctx.Modules, item.Name) {
-		// 	continue
-		// }
 		item.Generate(ctx)
 	}
 
@@ -1637,6 +1637,61 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 
 	}
+
+	for _, dto := range x.Dtom {
+
+		// Fireback, has a naming convension which Emi, as a general compiler
+		// doesn't. It would always put the names upper case, and end Dtos with .Dto affix
+		// on the struct name and file name.
+		dtoName := ToUpper(dto.Name) + "Dto"
+		exportPath := filepath.Join(exportDir, dtoName+".go")
+
+		result, err := golang.GoCommonStructGenerator(
+			dto.Fields,
+			core.MicroGenContext{},
+			golang.GoCommonStructContext{RootClassName: dtoName, EmiLocation: "github.com/torabian/emi/emigo"},
+		)
+		if err != nil {
+			log.Fatalln("Emi dto generation error:", err)
+		}
+
+		data := []byte(golang.AsFullDocument(result, x.Name))
+		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+		if err3 != nil {
+			fmt.Println("Error on writing content:", exportPath, err3)
+		}
+
+	}
+
+	/// Emi compiler action
+	for _, action := range x.Acts {
+		var content string
+		var exportPath string
+
+		if ctx.Catalog.LanguageName == "TypeScript" {
+			res, err := js.JsActionManifest(action, core.MicroGenContext{Tags: "typescript"}, []js.RecognizedComplex{})
+			if err != nil {
+				log.Fatalln("Emi actions (acts) generation error:", err)
+			}
+			content = golang.AsFullDocument(res, x.Name)
+			exportPath = filepath.Join(exportDir, action.Name+".ts")
+		}
+
+		if ctx.Catalog.LanguageName == "FirebackGo" {
+			res, err := golang.GoActionRender(action, core.MicroGenContext{}, []golang.RecognizedComplex{})
+			if err != nil {
+				log.Fatalln("Emi actions (acts) generation error:", err)
+			}
+			content = golang.AsFullDocument(res, x.Name)
+			exportPath = filepath.Join(exportDir, action.Name+".go")
+		}
+
+		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
+		if err3 != nil {
+			log.Fatalln("Error on writing query content:", exportPath, err3)
+		}
+	}
+
 	for _, query := range x.Queries {
 
 		// Computing field types is important for target writter.
