@@ -490,7 +490,20 @@ func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 
 func SyncDatabase(x *FirebackApp, db *gorm.DB) {
 
+	actualDb, _ := db.DB()
 	for _, item := range x.Modules {
+
+		fmt.Println("Module", item.GoMigrateDirectory, " - name: ", item.Name)
+		if len(item.GoMigrateDirectory) > 0 {
+			for _, migrationDirectory := range item.GoMigrateDirectory {
+				fmt.Println(1, "---", migrationDirectory)
+				if err := ApplyGoMigration(actualDb, migrationDirectory); err != nil {
+					log.Fatalln("Error on migration: %w", err)
+				}
+			}
+		}
+
+		continue
 		if item.EntityProvider != nil {
 			item.EntityProvider(db)
 		}

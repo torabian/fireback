@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/fireback/modules/car"
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
@@ -60,6 +61,8 @@ var xapp = &fireback.FirebackApp{
 
 		// Add fireback payment module also
 		payment.PaymentModuleSetup(nil),
+
+		car.CarModuleSetup(nil),
 
 		suggestion.SuggestionModuleSetup(nil),
 		{

@@ -13,9 +13,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
@@ -28,6 +30,7 @@ import (
 	"github.com/torabian/emi/lib/core"
 	"github.com/torabian/emi/lib/golang"
 	"github.com/torabian/emi/lib/js"
+	"github.com/torabian/emi/lib/querypredict"
 	firebackgo "github.com/torabian/fireback/modules/fireback/codegen/firebackgo"
 	"gopkg.in/yaml.v2"
 )
@@ -1555,12 +1558,101 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 		}
 	}
 
-	if !HasMetasFolder(ctx.Path) {
-		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
-			fmt.Errorf("Error on writing content: err: %v", err9)
+	if !HasMigrations(ctx.Path) {
+		err7 := CreateMigrationsDirectory(ctx.Path)
+		if err7 != nil {
+			fmt.Println("Error on generation of migration folder.", err7)
 		}
 	}
 
+	doc := querypredict.QueryDocument{
+		Package: x.Name,
+	}
+	// Now after the queries is created, we need to convert the sql files in that directory into golang query predict files
+	err2 := ReadSQLFiles(DiskFS{Root: filepath.Join(ctx.Path, "queries")}, ".", 1, func(filePath string, data []byte) error {
+		doc.Queries = append(doc.Queries, querypredict.QuerySpec{
+			Name:  strings.ReplaceAll(path.Base(filePath), ".sql", ""),
+			Query: string(data),
+		})
+
+		return nil
+	})
+
+	if err2 != nil {
+		fmt.Println("Looking for sql files to create query predict failed:", err2)
+	}
+
+	files, err := querypredict.ProcessQueryPredicts(doc)
+	if err != nil {
+		fmt.Println("Error on writing content: err: %v", err)
+	}
+
+	for _, file := range files {
+
+		filePath := path.Join(ctx.Path, file.Location, file.Name+file.Extension)
+		os.MkdirAll(path.Dir(filePath), os.ModePerm)
+
+		if err := os.WriteFile(filePath, []byte(file.ActualScript), 0644); err != nil {
+			fmt.Println("error on writing file to disk: %v, %v, %w", file.Location, file.Name, err)
+		}
+	}
+
+	if !HasMetasFolder(ctx.Path) {
+		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
+			fmt.Println("Error on writing content: err: %v", err9)
+		}
+	}
+}
+
+// DiskFS implements FS for the OS file system
+type DiskFS struct {
+	Root string
+}
+
+func (d DiskFS) ReadDir(dirname string) ([]fs.DirEntry, error) {
+	return os.ReadDir(filepath.Join(d.Root, dirname))
+}
+
+func (d DiskFS) ReadFile(name string) ([]byte, error) {
+	return os.ReadFile(filepath.Join(d.Root, name))
+}
+
+// FS defines minimal interface for reading files and walking directories
+type FS interface {
+	ReadDir(dirname string) ([]fs.DirEntry, error)
+	ReadFile(name string) ([]byte, error)
+}
+
+// ReadSQLFiles walks the FS and reads all .sql files up to maxDepth
+func ReadSQLFiles(fsys FS, root string, maxDepth int, reader func(path string, data []byte) error) error {
+	var walk func(path string, depth int) error
+	walk = func(path string, depth int) error {
+		if maxDepth >= 0 && depth > maxDepth {
+			return nil
+		}
+		entries, err := fsys.ReadDir(path)
+		if err != nil {
+			return err
+		}
+		for _, e := range entries {
+			p := filepath.Join(path, e.Name())
+			if e.IsDir() {
+				if err := walk(p, depth+1); err != nil {
+					return err
+				}
+			} else if strings.HasSuffix(e.Name(), ".sql") {
+				data, err := fsys.ReadFile(p)
+				if err != nil {
+					return err
+				}
+				if err := reader(p, data); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+	return walk(root, 0)
 }
 
 /**
@@ -2770,6 +2862,15 @@ func HasQueries(dir string) bool {
 	return false
 }
 
+func HasMigrations(dir string) bool {
+	mocks := filepath.Join(dir, "migrations")
+
+	if _, err := os.Stat(mocks); !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
 func CreateMockDirectory(dir string, entity *Module3Entity) error {
 	basePath := filepath.Join(dir, "mocks", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
@@ -2802,6 +2903,25 @@ import "embed"
 
 //go:embed *
 var QueriesFs embed.FS
+
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
+}
+func CreateMigrationsDirectory(dir string) error {
+	basePath := filepath.Join(dir, "migrations")
+	indexPath := filepath.Join(basePath, "index.go")
+
+	// Create the directory, and add index.go into it
+	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
+		return err
+	}
+	var indexContent = `package migrations
+
+import "embed"
+
+//go:embed *
+var MigrationsFs embed.FS
 
 `
 

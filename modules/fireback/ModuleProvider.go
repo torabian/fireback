@@ -63,8 +63,9 @@ type ModuleProvider struct {
 	Translations        map[string]map[string]string
 	Tests               []Test
 
-	Children      []*ModuleProvider
-	EntityBundles []EntityBundle
+	GoMigrateDirectory []embed.FS
+	Children           []*ModuleProvider
+	EntityBundles      []EntityBundle
 
 	// A set of functions that you can add, when project is being initialised then they will be called.
 	// each module can have those hook inits, for example abac adds some other questions.

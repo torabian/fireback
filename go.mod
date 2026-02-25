@@ -26,6 +26,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/go-querystring v1.1.0
 	github.com/gookit/event v1.0.6
 	github.com/gorilla/websocket v1.5.1
@@ -66,10 +67,10 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaa110/go-persian-calendar v1.1.5
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.39.0
+	golang.org/x/crypto v0.45.0
 	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
-	golang.org/x/sync v0.16.0
-	golang.org/x/text v0.27.0
+	golang.org/x/sync v0.18.0
+	golang.org/x/text v0.31.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.2
@@ -96,7 +97,7 @@ require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
@@ -118,7 +119,7 @@ require (
 	github.com/itchyny/timefmt-go v0.1.6 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
-	github.com/jackc/pgx/v5 v5.5.3 // indirect
+	github.com/jackc/pgx/v5 v5.5.4 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
@@ -132,7 +133,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/mattn/go-sqlite3 v1.14.17 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -166,7 +167,7 @@ require (
 	github.com/pion/transport/v3 v3.0.7 // indirect
 	github.com/pion/turn/v2 v2.1.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
@@ -185,15 +186,16 @@ require (
 	github.com/wlynxg/anet v0.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
-	go.opentelemetry.io/otel v1.35.0 // indirect
-	go.opentelemetry.io/otel/trace v1.35.0 // indirect
+	github.com/xwb1989/sqlparser v0.0.0-20180606152119-120387863bf2 // indirect
+	go.opentelemetry.io/otel v1.37.0 // indirect
+	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.18.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/term v0.32.0 // indirect
-	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/protobuf v1.36.6 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/term v0.37.0 // indirect
+	golang.org/x/time v0.12.0 // indirect
+	google.golang.org/protobuf v1.36.7 // indirect
 	modernc.org/libc v1.66.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
