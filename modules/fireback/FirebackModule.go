@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 
+	"github.com/torabian/fireback/modules/fireback/migrations"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
@@ -55,6 +56,8 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		EntityBundles: []EntityBundle{
 			WebPushConfigEntityBundle,
 		},
+
+		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
 	module.ProvideCliHandlers([]cli.Command{
