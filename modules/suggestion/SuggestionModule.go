@@ -9,6 +9,7 @@ import (
 	"embed"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/suggestion/migrations"
 )
 
 //go:embed *Module3.yml
@@ -36,6 +37,7 @@ func SuggestionModuleSetup(cfg *SuggestionModuleConfig) *fireback.ModuleProvider
 		EntityBundles: []fireback.EntityBundle{
 			// Insert the NameEntityBundle here.
 		},
+		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 	return module
 }

@@ -148,7 +148,6 @@ config:
   - name: windowsIdentifier
     description: Used name for installing app as system service on windows installers
     default: fireback
-
 messages:
   invalidContent:
     en: Body content is not correct. You need a valid json.

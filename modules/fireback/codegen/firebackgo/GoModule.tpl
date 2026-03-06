@@ -9,6 +9,7 @@ package {{ lower .Name }}
 import (
 	"embed"
 	"github.com/torabian/fireback/modules/fireback"
+	"{{ .gofModule }}/{{ .ctx.RelativePath }}/migrations"
 )
 
 //go:embed *Module3.yml
@@ -39,6 +40,10 @@ func {{ .Name }}ModuleSetup(cfg *{{ .Name }}ModuleConfig) *fireback.ModuleProvid
 		EntityBundles: []fireback.EntityBundle{
 			// Insert the NameEntityBundle here.
 		},
+
+		// Goose framework directory, which would contain sql files for that framework,
+		// which would be running near automigration of gorm.
+		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
 	return module

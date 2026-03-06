@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 
+	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
@@ -111,9 +112,10 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	fireback.WithSocketAuthorization = WithSocketAuthorization
 
 	module := &fireback.ModuleProvider{
-		Name:        "abac",
-		Definitions: &Module3Definitions,
-		OnEnvInit:   OnInitEnvHook,
+		Name:               "abac",
+		Definitions:        &Module3Definitions,
+		OnEnvInit:          OnInitEnvHook,
+		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
 	workspaceModuleCore(module)
