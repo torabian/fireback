@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/lib/core"
 	emi "github.com/torabian/emi/lib/core"
 	"github.com/urfave/cli"
 )
@@ -80,6 +81,9 @@ type Module3 struct {
 
 	// Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale.
 	Messages Module3Message `yaml:"messages,omitempty" json:"messages,omitempty" jsonschema:"description=Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."`
+
+	// Emi complex data types for different languages.
+	Complexes []core.EmiComplex `yaml:"complexes,omitempty" json:"complexes,omitempty" jsonschema:"description=Emi complex data types for different languages."`
 }
 
 // Trigger is an automatic mechanism of task to be automatically run

@@ -1413,6 +1413,23 @@ func findFieldByName(fields []*Module3Field, name string) bool {
 	return false
 }
 
+func DiscoverGoComplexes(module *Module3) []golang.RecognizedComplex {
+	items := []golang.RecognizedComplex{}
+	for _, complex := range module.Complexes {
+
+		// only pick general or js/ts specific complexes for js-modules
+		if complex.Compiler == "go" {
+			items = append(items, golang.RecognizedComplex{
+				Symbol:         complex.Name,
+				ImportLocation: complex.Location,
+				Namespace:      complex.Namespace,
+			})
+		}
+	}
+
+	return items
+}
+
 // This one would add the webrtc requirement
 func WebrtcMacro(x *Module3) {
 	hasWebRtc := false
@@ -1575,6 +1592,9 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		exportDir = filepath.Join(ctx.Path, x.Namespace)
 	}
 
+	tsComplexes := DiscoverJsComplexes(x)
+	goComplexes := DiscoverGoComplexes(x)
+
 	// This is nasty. Let's change the entry point of the compiler soon for different
 	// languages. Initial idea was to add as many as targets, now it's only go/react
 	if ctx.Catalog.LanguageName != "FirebackGo" {
@@ -1652,7 +1672,11 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			result, err := golang.GoCommonStructGenerator(
 				dto.Fields,
 				core.MicroGenContext{},
-				golang.GoCommonStructContext{RootClassName: dtoName, EmiLocation: "github.com/torabian/emi/emigo"},
+				golang.GoCommonStructContext{
+					RootClassName:       dtoName,
+					EmiLocation:         "github.com/torabian/emi/emigo",
+					RecognizedComplexes: goComplexes,
+				},
 			)
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
@@ -1665,7 +1689,10 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			result, err := js.JsCommonObjectGenerator(
 				dto.Fields,
 				core.MicroGenContext{},
-				js.JsCommonObjectContext{RootClassName: dtoName},
+				js.JsCommonObjectContext{
+					RootClassName:       dtoName,
+					RecognizedComplexes: tsComplexes,
+				},
 			)
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
@@ -1686,7 +1713,11 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		var exportPath string
 
 		if ctx.Catalog.LanguageName == "TypeScript" {
-			res, err := js.JsActionManifest(action, core.MicroGenContext{Tags: "typescript,react"}, []js.RecognizedComplex{})
+			res, err := js.JsActionManifest(
+				action,
+				core.MicroGenContext{Tags: "typescript,react"},
+				tsComplexes,
+			)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
@@ -1695,7 +1726,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
-			res, err := golang.GoActionRender(action, core.MicroGenContext{}, []golang.RecognizedComplex{})
+			res, err := golang.GoActionRender(action, core.MicroGenContext{}, goComplexes)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
@@ -1965,6 +1996,22 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 
 	}
+}
+
+func DiscoverJsComplexes(module *Module3) []js.RecognizedComplex {
+	items := []js.RecognizedComplex{}
+	for _, complex := range module.Complexes {
+
+		// only pick general or js/ts specific complexes for js-modules
+		if complex.Compiler == "js" || complex.Compiler == "ts" || complex.Compiler == "" {
+			items = append(items, js.RecognizedComplex{
+				Symbol:         complex.Name,
+				ImportLocation: complex.Location,
+			})
+		}
+	}
+
+	return items
 }
 
 func ToUpper(t string) string {
