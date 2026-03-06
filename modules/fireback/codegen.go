@@ -1644,18 +1644,35 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		// doesn't. It would always put the names upper case, and end Dtos with .Dto affix
 		// on the struct name and file name.
 		dtoName := ToUpper(dto.Name) + "Dto"
-		exportPath := filepath.Join(exportDir, dtoName+".go")
+		var exportPath string
+		var data []byte
 
-		result, err := golang.GoCommonStructGenerator(
-			dto.Fields,
-			core.MicroGenContext{},
-			golang.GoCommonStructContext{RootClassName: dtoName, EmiLocation: "github.com/torabian/emi/emigo"},
-		)
-		if err != nil {
-			log.Fatalln("Emi dto generation error:", err)
+		if ctx.Catalog.LanguageName == "FirebackGo" {
+			exportPath = filepath.Join(exportDir, dtoName+".go")
+			result, err := golang.GoCommonStructGenerator(
+				dto.Fields,
+				core.MicroGenContext{},
+				golang.GoCommonStructContext{RootClassName: dtoName, EmiLocation: "github.com/torabian/emi/emigo"},
+			)
+			if err != nil {
+				log.Fatalln("Emi dto generation error:", err)
+			}
+			data = []byte(golang.AsFullDocument(result, x.Name))
 		}
 
-		data := []byte(golang.AsFullDocument(result, x.Name))
+		if ctx.Catalog.LanguageName == "TypeScript" {
+			exportPath = filepath.Join(exportDir, dtoName+".ts")
+			result, err := js.JsCommonObjectGenerator(
+				dto.Fields,
+				core.MicroGenContext{},
+				js.JsCommonObjectContext{RootClassName: dtoName},
+			)
+			if err != nil {
+				log.Fatalln("Emi dto generation error:", err)
+			}
+			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result))
+		}
+
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 		if err3 != nil {
 			fmt.Println("Error on writing content:", exportPath, err3)
@@ -1669,11 +1686,11 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		var exportPath string
 
 		if ctx.Catalog.LanguageName == "TypeScript" {
-			res, err := js.JsActionManifest(action, core.MicroGenContext{Tags: "typescript"}, []js.RecognizedComplex{})
+			res, err := js.JsActionManifest(action, core.MicroGenContext{Tags: "typescript,react"}, []js.RecognizedComplex{})
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
-			content = golang.AsFullDocument(res, x.Name)
+			content = js.AsFullDocument(res)
 			exportPath = filepath.Join(exportDir, action.Name+".ts")
 		}
 
