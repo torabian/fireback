@@ -6,6 +6,7 @@ dev:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server/$(project) . && \
 	echo "Binary has been built in: ./artifacts/$(project)-server/$(project) and ./app" && \
 	cp ../../artifacts/$(project)-server/$(project) ../../app && \
+	cp ../../artifacts/$(project)-server/$(project) ../../artifacts/$(project)-server/$(project).exe && \
 	mkdir -p ../../.jsonschemas && \
 	../../app gen module3spec --out ../../.jsonschemas/module3-json-schema.json
 

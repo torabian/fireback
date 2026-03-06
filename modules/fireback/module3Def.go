@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	emi "github.com/torabian/emi/lib/core"
 	"github.com/urfave/cli"
 )
 
@@ -52,6 +53,12 @@ type Module3 struct {
 
 	// Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic
 	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
+
+	// Actions based on Emi compiler - aims to replace the actions from Fireback
+	Acts []*emi.EmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
+
+	// Dtos based on Emi definitions
+	Dtom []*emi.EmiDto `yaml:"dtom,omitempty" json:"dtom,omitempty" jsonschema:"description=Dtos based on Emi definitions"`
 
 	// Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures.
 	Macros []Module3Macro `yaml:"macros,omitempty" json:"macros,omitempty" jsonschema:"description=Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures."`

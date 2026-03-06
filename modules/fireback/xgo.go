@@ -1,9 +1,11 @@
 package fireback
 
 import (
+	"database/sql"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -12,11 +14,12 @@ import (
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/pressly/goose/v3"
 	statics "github.com/torabian/fireback/modules/fireback/static"
 	"github.com/urfave/cli"
+	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v2"
-	"gorm.io/gorm"
 )
 
 /*
@@ -488,28 +491,60 @@ func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 	}
 }
 
-func SyncDatabase(x *FirebackApp, db *gorm.DB) {
+type GooseZapLogger struct {
+	Logger *zap.Logger
+}
 
-	for _, item := range x.Modules {
-		if item.EntityProvider != nil {
-			item.EntityProvider(db)
-		}
+func (l GooseZapLogger) Printf(format string, v ...interface{}) {
+	l.Logger.Sugar().Infof(format, v...)
+}
 
-		for _, bundle := range item.EntityBundles {
-			if err := dbref.AutoMigrate(bundle.AutoMigrationEntities...); err != nil {
-				fmt.Println("There is an error on migrating:", bundle)
-				log.Fatalln(err.Error())
-			}
+func (l GooseZapLogger) Fatalf(format string, v ...interface{}) {
+	l.Logger.Sugar().Fatalf(format, v...)
+}
 
-			for _, funx := range bundle.MigrationScripts {
-				if funx.Exec != nil {
-					fmt.Println(funx.Exec())
-					os.Exit(0)
-				}
-			}
-		}
+// Logs all files under a given directory in an embedded FS
+func LogAllFiles(fsys embed.FS, dir string) error {
+	subFS, err := fs.Sub(fsys, dir)
+	if err != nil {
+		return err
 	}
 
+	return fs.WalkDir(subFS, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			fmt.Println("File:", path)
+		}
+		return nil
+	})
+}
+
+func RunMigrationBasedOnGoose(db *sql.DB, moduleName string, dialect string, mdir *embed.FS) error {
+
+	goose.SetTableName("goose_db_module_" + moduleName)
+	goose.SetBaseFS(mdir)
+	goose.SetDialect(dialect)
+
+	// Set a logger to capture all output
+	// Use our custom logger
+	goose.SetLogger(GooseZapLogger{Logger: LOG})
+
+	// Optionally, enable verbose mode
+	goose.SetVerbose(true)
+
+	// Run all migrations
+	err := goose.Up(db, ".")
+	if err != nil {
+		if strings.Contains(err.Error(), "no migration files found") {
+			// handle empty migration directory gracefully
+			return nil
+		}
+		return err
+	}
+
+	return nil
 }
 
 func RunApp(xapp *FirebackApp) {

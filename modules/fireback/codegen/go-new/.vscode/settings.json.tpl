@@ -3,7 +3,7 @@
     "commands": [
       {
         "match": "\\Module3.yml$",
-        "cmd": "./artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen gof --relative-to ${workspaceFolder} --def ${file} --no-cache true --gof-module {{ .ctx.ModuleName }} && ./artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}"
+        "cmd": "${workspaceFolder}/artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen gof --relative-to ${workspaceFolder} --def ${file} --no-cache true --gof-module {{ .ctx.ModuleName }} && ./artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}"
       },
     ]
   },
