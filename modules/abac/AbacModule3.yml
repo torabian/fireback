@@ -1,4 +1,37 @@
 name: abac
+
+acts:
+  - name: checkPassportMethods2
+    url: /v2/passports/available-methods
+    description: 
+      Publicly available information to create the authentication form, and show users
+      how they can signin or signup to the system. Based on the PassportMethod entities,
+      it will compute the available methods for the user, considering their region (IP for example)
+    method: get
+    out:
+      envelope: GResponse
+      fields:
+        - name: email
+          type: bool
+          default: false
+        - name: phone
+          type: bool
+          default: false
+        - name: google
+          type: bool
+          default: false
+        - name: facebook
+          type: bool
+          default: false
+        - name: googleOAuthClientKey
+          type: string
+        - name: facebookAppId
+          type: string
+        - name: enabledRecaptcha2
+          type: bool
+          default: false
+        - name: recaptcha2ClientKey
+          type: string          
 actions:
   - name: osLoginAuthenticate
     method: get
@@ -191,6 +224,7 @@ actions:
           default: false
         - name: recaptcha2ClientKey
           type: string
+  
   - name: queryWorkspaceTypesPublicly
     format: query
     method: get
@@ -208,8 +242,7 @@ actions:
       - name: uniqueId
         type: string
       - name: slug
-        type: string
-  
+        type: string 
   - name: queryUserRoleWorkspaces
     format: query
     method: get
@@ -243,12 +276,10 @@ actions:
           description: 
             Capabilities related to this role which are available
           primitive: string
-
   - name: signout
     url: /passport/signout
     description: Signout the user, clears cookies or does anything else if needed.
     method: post
-    
   - name: reactiveSearch
     description: 
       Reactive search is a general purpose search mechanism for different modules,
@@ -574,6 +605,7 @@ actions:
         - name: secondsToUnblock
           type: int64
           description: The amount of time left to unblock for next request
+
 dtos:
   - name: userImport
     fields:

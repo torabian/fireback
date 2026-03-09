@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
@@ -162,6 +163,11 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		GetTimezoneGroupModule3Actions(),
 		GetWorkspaceConfigModule3Actions(),
 		GetRegionalContentModule3Actions(),
+		[]fireback.Module3Action{
+			{
+				Handlers: []gin.HandlerFunc{},
+			},
+		},
 	}
 
 	module.ProvideCliHandlers([]cli.Command{

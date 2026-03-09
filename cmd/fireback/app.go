@@ -53,6 +53,31 @@ var xapp = &fireback.FirebackApp{
 	},
 	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
 
+		abac.CheckPassportMethods2Action(
+			e,
+			func(c abac.CheckPassportMethods2ActionRequest, gin *gin.Context) (*abac.CheckPassportMethods2ActionResponse, error) {
+				res, err := abac.CheckPassportMethodsAction(fireback.QueryDSL{})
+				if err != nil {
+					return nil, err
+				}
+
+				return &abac.CheckPassportMethods2ActionResponse{
+					Payload: Envelope{
+						Data: abac.CheckPassportMethods2ActionRes{
+							Email:                res.Email,
+							Phone:                res.Phone,
+							Google:               res.Google,
+							Facebook:             res.Facebook,
+							GoogleOAuthClientKey: res.GoogleOAuthClientKey,
+							FacebookAppId:        res.FacebookAppId,
+							EnabledRecaptcha2:    res.EnabledRecaptcha2,
+							Recaptcha2ClientKey:  res.Recaptcha2ClientKey,
+						},
+					},
+				}, nil
+			},
+		)
+
 	},
 	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
@@ -68,4 +93,8 @@ var xapp = &fireback.FirebackApp{
 			},
 		},
 	}, abac.AbacCompleteModules()...),
+}
+
+type Envelope struct {
+	Data interface{} `json:"data"`
 }
