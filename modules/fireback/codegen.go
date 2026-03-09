@@ -13,9 +13,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	reflect "reflect"
 	"regexp"
@@ -28,6 +30,7 @@ import (
 	"github.com/torabian/emi/lib/core"
 	"github.com/torabian/emi/lib/golang"
 	"github.com/torabian/emi/lib/js"
+	"github.com/torabian/emi/lib/querypredict"
 	firebackgo "github.com/torabian/fireback/modules/fireback/codegen/firebackgo"
 	"gopkg.in/yaml.v2"
 )
@@ -1413,6 +1416,23 @@ func findFieldByName(fields []*Module3Field, name string) bool {
 	return false
 }
 
+func DiscoverGoComplexes(module *Module3) []golang.RecognizedComplex {
+	items := []golang.RecognizedComplex{}
+	for _, complex := range module.Complexes {
+
+		// only pick general or js/ts specific complexes for js-modules
+		if complex.Compiler == "go" {
+			items = append(items, golang.RecognizedComplex{
+				Symbol:         complex.Name,
+				ImportLocation: complex.Location,
+				Namespace:      complex.Namespace,
+			})
+		}
+	}
+
+	return items
+}
+
 // This one would add the webrtc requirement
 func WebrtcMacro(x *Module3) {
 	hasWebRtc := false
@@ -1519,9 +1539,11 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 	if !Exists(moduleEntry) {
 		folderName := strings.ToLower(exportDir)
 		args := gin.H{
-			"path": folderName,
-			"Name": ToUpper(x.Name),
-			"name": x.Name,
+			"path":      folderName,
+			"Name":      ToUpper(x.Name),
+			"name":      x.Name,
+			"ctx":       ctx,
+			"gofModule": ctx.GofModuleName,
 		}
 
 		goModule, err := CompileString(&firebackgo.FbGoTpl, "GoModule.tpl", args)
@@ -1555,12 +1577,101 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 		}
 	}
 
-	if !HasMetasFolder(ctx.Path) {
-		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
-			fmt.Errorf("Error on writing content: err: %v", err9)
+	if !HasMigrations(ctx.Path) {
+		err7 := CreateMigrationsDirectory(ctx.Path)
+		if err7 != nil {
+			fmt.Println("Error on generation of migration folder.", err7)
 		}
 	}
 
+	doc := querypredict.QueryDocument{
+		Package: x.Name,
+	}
+	// Now after the queries is created, we need to convert the sql files in that directory into golang query predict files
+	err2 := ReadSQLFiles(DiskFS{Root: filepath.Join(ctx.Path, "queries")}, ".", 1, func(filePath string, data []byte) error {
+		doc.Queries = append(doc.Queries, querypredict.QuerySpec{
+			Name:  strings.ReplaceAll(path.Base(filePath), ".sql", ""),
+			Query: string(data),
+		})
+
+		return nil
+	})
+
+	if err2 != nil {
+		fmt.Println("Looking for sql files to create query predict failed:", err2)
+	}
+
+	files, err := querypredict.ProcessQueryPredicts(doc)
+	if err != nil {
+		fmt.Println("Error on writing content: err: %v", err)
+	}
+
+	for _, file := range files {
+
+		filePath := path.Join(ctx.Path, file.Location, file.Name+file.Extension)
+		os.MkdirAll(path.Dir(filePath), os.ModePerm)
+
+		if err := os.WriteFile(filePath, []byte(file.ActualScript), 0644); err != nil {
+			fmt.Println("error on writing file to disk: %v, %v, %w", file.Location, file.Name, err)
+		}
+	}
+
+	if !HasMetasFolder(ctx.Path) {
+		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
+			fmt.Println("Error on writing content: err: %v", err9)
+		}
+	}
+}
+
+// DiskFS implements FS for the OS file system
+type DiskFS struct {
+	Root string
+}
+
+func (d DiskFS) ReadDir(dirname string) ([]fs.DirEntry, error) {
+	return os.ReadDir(filepath.Join(d.Root, dirname))
+}
+
+func (d DiskFS) ReadFile(name string) ([]byte, error) {
+	return os.ReadFile(filepath.Join(d.Root, name))
+}
+
+// FS defines minimal interface for reading files and walking directories
+type FS interface {
+	ReadDir(dirname string) ([]fs.DirEntry, error)
+	ReadFile(name string) ([]byte, error)
+}
+
+// ReadSQLFiles walks the FS and reads all .sql files up to maxDepth
+func ReadSQLFiles(fsys FS, root string, maxDepth int, reader func(path string, data []byte) error) error {
+	var walk func(path string, depth int) error
+	walk = func(path string, depth int) error {
+		if maxDepth >= 0 && depth > maxDepth {
+			return nil
+		}
+		entries, err := fsys.ReadDir(path)
+		if err != nil {
+			return err
+		}
+		for _, e := range entries {
+			p := filepath.Join(path, e.Name())
+			if e.IsDir() {
+				if err := walk(p, depth+1); err != nil {
+					return err
+				}
+			} else if strings.HasSuffix(e.Name(), ".sql") {
+				data, err := fsys.ReadFile(p)
+				if err != nil {
+					return err
+				}
+				if err := reader(p, data); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+	return walk(root, 0)
 }
 
 /**
@@ -1574,6 +1685,9 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 	if x.Namespace != "" {
 		exportDir = filepath.Join(ctx.Path, x.Namespace)
 	}
+
+	tsComplexes := DiscoverJsComplexes(x)
+	goComplexes := DiscoverGoComplexes(x)
 
 	// This is nasty. Let's change the entry point of the compiler soon for different
 	// languages. Initial idea was to add as many as targets, now it's only go/react
@@ -1644,18 +1758,42 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		// doesn't. It would always put the names upper case, and end Dtos with .Dto affix
 		// on the struct name and file name.
 		dtoName := ToUpper(dto.Name) + "Dto"
-		exportPath := filepath.Join(exportDir, dtoName+".go")
+		var exportPath string
+		var data []byte
 
-		result, err := golang.GoCommonStructGenerator(
-			dto.Fields,
-			core.MicroGenContext{},
-			golang.GoCommonStructContext{RootClassName: dtoName, EmiLocation: "github.com/torabian/emi/emigo"},
-		)
-		if err != nil {
-			log.Fatalln("Emi dto generation error:", err)
+		if ctx.Catalog.LanguageName == "FirebackGo" {
+			exportPath = filepath.Join(exportDir, dtoName+".go")
+			result, err := golang.GoCommonStructGenerator(
+				dto.Fields,
+				core.MicroGenContext{},
+				golang.GoCommonStructContext{
+					RootClassName:       dtoName,
+					EmiLocation:         "github.com/torabian/emi/emigo",
+					RecognizedComplexes: goComplexes,
+				},
+			)
+			if err != nil {
+				log.Fatalln("Emi dto generation error:", err)
+			}
+			data = []byte(golang.AsFullDocument(result, x.Name))
 		}
 
-		data := []byte(golang.AsFullDocument(result, x.Name))
+		if ctx.Catalog.LanguageName == "TypeScript" {
+			exportPath = filepath.Join(exportDir, dtoName+".ts")
+			result, err := js.JsCommonObjectGenerator(
+				dto.Fields,
+				core.MicroGenContext{},
+				js.JsCommonObjectContext{
+					RootClassName:       dtoName,
+					RecognizedComplexes: tsComplexes,
+				},
+			)
+			if err != nil {
+				log.Fatalln("Emi dto generation error:", err)
+			}
+			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result))
+		}
+
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 		if err3 != nil {
 			fmt.Println("Error on writing content:", exportPath, err3)
@@ -1669,16 +1807,20 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		var exportPath string
 
 		if ctx.Catalog.LanguageName == "TypeScript" {
-			res, err := js.JsActionManifest(action, core.MicroGenContext{Tags: "typescript"}, []js.RecognizedComplex{})
+			res, err := js.JsActionManifest(
+				action,
+				core.MicroGenContext{Tags: "typescript,react"},
+				tsComplexes,
+			)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
-			content = golang.AsFullDocument(res, x.Name)
+			content = js.AsFullDocument(res)
 			exportPath = filepath.Join(exportDir, action.Name+".ts")
 		}
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
-			res, err := golang.GoActionRender(action, core.MicroGenContext{}, []golang.RecognizedComplex{})
+			res, err := golang.GoActionRender(action, core.MicroGenContext{}, goComplexes)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
@@ -1948,6 +2090,22 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 
 	}
+}
+
+func DiscoverJsComplexes(module *Module3) []js.RecognizedComplex {
+	items := []js.RecognizedComplex{}
+	for _, complex := range module.Complexes {
+
+		// only pick general or js/ts specific complexes for js-modules
+		if complex.Compiler == "js" || complex.Compiler == "ts" || complex.Compiler == "" {
+			items = append(items, js.RecognizedComplex{
+				Symbol:         complex.Name,
+				ImportLocation: complex.Location,
+			})
+		}
+	}
+
+	return items
 }
 
 func ToUpper(t string) string {
@@ -2770,6 +2928,15 @@ func HasQueries(dir string) bool {
 	return false
 }
 
+func HasMigrations(dir string) bool {
+	mocks := filepath.Join(dir, "migrations")
+
+	if _, err := os.Stat(mocks); !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
 func CreateMockDirectory(dir string, entity *Module3Entity) error {
 	basePath := filepath.Join(dir, "mocks", entity.Upper())
 	indexPath := filepath.Join(basePath, "index.go")
@@ -2802,6 +2969,25 @@ import "embed"
 
 //go:embed *
 var QueriesFs embed.FS
+
+`
+
+	return os.WriteFile(indexPath, []byte(indexContent), 0644)
+}
+func CreateMigrationsDirectory(dir string) error {
+	basePath := filepath.Join(dir, "migrations")
+	indexPath := filepath.Join(basePath, "index.go")
+
+	// Create the directory, and add index.go into it
+	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
+		return err
+	}
+	var indexContent = `package migrations
+
+import "embed"
+
+//go:embed *
+var MigrationsFs embed.FS
 
 `
 
@@ -3022,11 +3208,11 @@ func (action *Module3Action) Render(
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"m":                   x,
 		"ctx":                 ctx,
+		"gofModule":           ctx.GofModuleName,
 		"woo":                 33,
 		"childrenIn":          ChildItemsActionIn(action, ctx, isWorkspace),
 		"remoteQueryChildren": RemoteQueryAppend(ctx, x.Remotes, isWorkspace),
 		"taskChildren":        RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
-		"gofModule":           ctx.GofModuleName,
 		"queriesChildren":     QueryAppend(ctx, x.Queries, isWorkspace),
 		"childrenOut":         ChildItemsActionOut(action, ctx, isWorkspace),
 		"fv":                  FIREBACK_VERSION,

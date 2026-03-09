@@ -119,6 +119,32 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "EmiComplex": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": " Name of the complex class or struct"
+        },
+        "namespace": {
+          "type": "string",
+          "description": " Namespace or package name for example in golang"
+        },
+        "location": {
+          "type": "string",
+          "description": " Location of the definition"
+        },
+        "compiler": {
+          "type": "string",
+          "enum": [
+            "go",
+            "ts"
+          ],
+          "description": "Different compilers can import the definition from different locations"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "EmiDto": {
       "properties": {
         "description": {
@@ -499,6 +525,13 @@
         "messages": {
           "$ref": "#/definitions/Module3Message",
           "description": "Messages are translatable strings which will be used as errors and other types of messages and become automatically picked via user locale."
+        },
+        "complexes": {
+          "items": {
+            "$ref": "#/definitions/EmiComplex"
+          },
+          "type": "array",
+          "description": "Emi complex data types for different languages."
         }
       },
       "additionalProperties": false,

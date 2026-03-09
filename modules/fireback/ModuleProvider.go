@@ -63,6 +63,13 @@ type ModuleProvider struct {
 	Translations        map[string]map[string]string
 	Tests               []Test
 
+	GoMigrateDirectory *embed.FS
+
+	// On goose or go migrate, there is such table to keep knowledge of how much migration
+	// already has happened. If empty, module name is used, but when it's duplicate name or
+	// nested modules then it would be good to change it.
+	DatabaseMigrationHistoryName string
+
 	Children      []*ModuleProvider
 	EntityBundles []EntityBundle
 

@@ -453,7 +453,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
  
       - run: |
-          cd modules/fireback/codegen/react-new/src/modules/fireback && npm version --no-git-tag-version 1.2.4-${{ github.sha }} && npm publish --tag=latest --access public
+          cd modules/fireback/codegen/react-new/src/modules/fireback && npm version --no-git-tag-version 1.2.5-${{ github.sha }} && npm publish --tag=latest --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_PUBLISH }}
@@ -562,7 +562,7 @@ jobs:
         run: hdiutil attach Packages.dmg
 
       - name: Install Packages
-        run: sudo installer -pkg /Volumes/Packages\ 1.2.10/Install\ Packages.pkg -target /
+        run: sudo installer -pkg /Volumes/Packages\ 1.2.11/Install\ Packages.pkg -target /
 
       - name: Build Backend
         run: cd cmd/fireback && make mac-pkg

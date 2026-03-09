@@ -10,6 +10,7 @@ import (
 	"embed"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/payment/migrations"
 	"github.com/urfave/cli"
 )
 
@@ -85,6 +86,7 @@ func PaymentModuleSetup(cfg *PaymentModuleConfig) *fireback.ModuleProvider {
 			// we cannot add them automatically upon saving yaml for you,
 			// when you add a new entity in yaml, add it manually here.
 		},
+		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
 	return module
