@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
 	"io"
 	"net/http"
 	"net/url"
@@ -276,3 +277,6 @@ func CheckPassportMethods2ActionCall(
 	}
 	return &result, nil
 }
+
+// Fireback adds some code into generated code from Emi, starting next line.
+var CheckPassportMethods2ActionSecurityModel *fireback.SecurityModel = nil

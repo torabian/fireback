@@ -22,8 +22,8 @@ func CastEmailOtpResponseDtoFromCli(c emigo.CliCastable) EmailOtpResponseDto {
 
 // The base class definition for emailOtpResponseDto
 type EmailOtpResponseDto struct {
-	Request     PublicAuthenticationEntity `yaml:"request" json:"request"`
-	UserSession UserSessionDto             `yaml:"userSession" json:"userSession"`
+	Request     PublicAuthenticationEntity `json:"request" yaml:"request"`
+	UserSession UserSessionDto             `json:"userSession" yaml:"userSession"`
 }
 
 func (x *EmailOtpResponseDto) Json() string {

@@ -29,7 +29,39 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "EmiAction": {
+    "EmiActionBody": {
+      "properties": {
+        "headers": {
+          "items": {
+            "$ref": "#/definitions/EmiHeader"
+          },
+          "type": "array",
+          "description": "Typesafe headers."
+        },
+        "envelope": {
+          "type": "string",
+          "description": "Envelop the content"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/definitions/EmiField"
+          },
+          "type": "array"
+        },
+        "dto": {
+          "type": "string"
+        },
+        "primitive": {
+          "type": "string"
+        },
+        "xhtml": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmiActionExtended": {
       "properties": {
         "name": {
           "type": "string",
@@ -82,38 +114,10 @@
         "out": {
           "$ref": "#/definitions/EmiActionBody",
           "description": "Response body definition similar to HTTP response body"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "EmiActionBody": {
-      "properties": {
-        "headers": {
-          "items": {
-            "$ref": "#/definitions/EmiHeader"
-          },
-          "type": "array",
-          "description": "Typesafe headers."
         },
-        "envelope": {
-          "type": "string",
-          "description": "Envelop the content"
-        },
-        "fields": {
-          "items": {
-            "$ref": "#/definitions/EmiField"
-          },
-          "type": "array"
-        },
-        "dto": {
-          "type": "string"
-        },
-        "primitive": {
-          "type": "string"
-        },
-        "xhtml": {
-          "type": "boolean"
+        "security": {
+          "$ref": "#/definitions/SecurityModel",
+          "description": "Manages the entity models"
         }
       },
       "additionalProperties": false,
@@ -468,7 +472,7 @@
         },
         "acts": {
           "items": {
-            "$ref": "#/definitions/EmiAction"
+            "$ref": "#/definitions/EmiActionExtended"
           },
           "type": "array",
           "description": "Actions based on Emi compiler - aims to replace the actions from Fireback"

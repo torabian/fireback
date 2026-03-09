@@ -51,7 +51,7 @@ func CastTestMailDtoFromCli(c emigo.CliCastable) TestMailDto {
 type TestMailDto struct {
 	SenderId string `json:"senderId" yaml:"senderId"`
 	ToName   string `json:"toName" yaml:"toName"`
-	ToEmail  string `json:"toEmail" yaml:"toEmail"`
+	ToEmail  string `yaml:"toEmail" json:"toEmail"`
 	Subject  string `json:"subject" yaml:"subject"`
 	Content  string `json:"content" yaml:"content"`
 }

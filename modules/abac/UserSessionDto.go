@@ -48,7 +48,7 @@ func CastUserSessionDtoFromCli(c emigo.CliCastable) UserSessionDto {
 // The base class definition for userSessionDto
 type UserSessionDto struct {
 	Passport       PassportEntity         `json:"passport" yaml:"passport"`
-	Token          string                 `json:"token" yaml:"token"`
+	Token          string                 `yaml:"token" json:"token"`
 	ExchangeKey    string                 `json:"exchangeKey" yaml:"exchangeKey"`
 	UserWorkspaces []UserWorkspaceEntity  `json:"userWorkspaces" yaml:"userWorkspaces"`
 	User           UserEntity             `json:"user" yaml:"user"`

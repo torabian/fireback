@@ -21,7 +21,7 @@ func CastOkayResponseDtoFromCli(c emigo.CliCastable) OkayResponseDto {
 
 // The base class definition for okayResponseDto
 type OkayResponseDto struct {
-	Status int `json:"status" yaml:"status"`
+	Status int `yaml:"status" json:"status"`
 }
 
 func (x *OkayResponseDto) Json() string {

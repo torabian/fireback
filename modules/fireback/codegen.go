@@ -1824,7 +1824,15 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
+
+			/// Let's append some code to the generated code.
+			err = EmiActionFirebackExtendedGenerateCode(action, ctx, x, res)
+			if err != nil {
+				log.Fatalln("Fireback extending emi actions has been failed:", err)
+			}
+
 			content = golang.AsFullDocument(res, x.Name)
+
 			exportPath = filepath.Join(exportDir, action.Name+".go")
 		}
 
@@ -3082,6 +3090,78 @@ func mergeMaps(map1, map2 map[string]interface{}) map[string]interface{} {
 
 	return merged
 }
+
+// Emi generates general purpose code, but in Fireback
+// we want to add some stuff around it, such as wrapper for security,
+// Cli action, or more. Call this after each action rendered.
+func EmiActionFirebackExtendedGenerateCode(
+	action *EmiActionExtended,
+	ctx *CodeGenContext,
+	module *Module3,
+	res *core.CodeChunkCompiled,
+) error {
+
+	tplContent := `
+	  {{ if .action.SecurityModel }}
+  var {{ .action.GetName }}SecurityModel = &{{ .wsprefix }}SecurityModel{
+    ActionRequires: []{{ .wsprefix }}PermissionInfo{ 
+        {{ range .action.SecurityModel.ActionRequires }}
+            {
+              CompleteKey: "{{ .CompleteKey }}",
+            },
+        {{ end }}
+    },
+    {{ if and (.action.SecurityModel) (.action.SecurityModel.ResolveStrategy) }}
+      ResolveStrategy: "{{ .action.SecurityModel.ResolveStrategy }}",
+    {{ end }}
+
+  }
+  {{ else }}
+  var {{ .action.GetName }}SecurityModel *{{ .wsprefix }}SecurityModel = nil
+  {{ end }}
+	
+	`
+
+	t, err := template.New("").Funcs(CommonMap).Parse(tplContent)
+	if err != nil {
+		return err
+	}
+	var tpl bytes.Buffer
+
+	wsPrefix := "fireback."
+	if module.MetaWorkspace {
+		wsPrefix = ""
+	}
+
+	params := gin.H{
+		"action":    action,
+		"m":         module,
+		"fv":        FIREBACK_VERSION,
+		"gofModule": ctx.GofModuleName,
+		"ctx":       ctx,
+		"wsprefix":  wsPrefix,
+	}
+
+	err = t.Execute(&tpl, params)
+
+	if err != nil {
+		return err
+	}
+
+	res.ActualScript = append(
+		res.ActualScript,
+		[]byte("// Fireback adds some code into generated code from Emi, starting next line.\r\n"+string(tpl.Bytes())+"\r\n")...,
+	)
+
+	if wsPrefix != "" {
+		res.CodeChunkDependensies = append(res.CodeChunkDependensies, core.CodeChunkDependency{
+			Location: "github.com/torabian/fireback/modules/fireback",
+		})
+	}
+
+	return nil
+}
+
 func (x *Module3Entity) RenderTemplate(
 	ctx *CodeGenContext,
 	fs embed.FS,

@@ -49,11 +49,11 @@ func CastAssignRoleDtoFromCli(c emigo.CliCastable) AssignRoleDto {
 
 // The base class definition for assignRoleDto
 type AssignRoleDto struct {
-	RoleId     string `json:"roleId" yaml:"roleId"`
-	UserId     string `yaml:"userId" json:"userId"`
+	RoleId     string `yaml:"roleId" json:"roleId"`
+	UserId     string `json:"userId" yaml:"userId"`
 	Visibility string `json:"visibility" yaml:"visibility"`
-	Updated    int64  `json:"updated" yaml:"updated"`
-	Created    int64  `json:"created" yaml:"created"`
+	Updated    int64  `yaml:"updated" json:"updated"`
+	Created    int64  `yaml:"created" json:"created"`
 }
 
 func (x *AssignRoleDto) Json() string {

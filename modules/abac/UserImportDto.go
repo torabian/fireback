@@ -112,7 +112,7 @@ type UserImportDtoAddress struct {
 	Street  string `json:"street" yaml:"street"`
 	ZipCode string `json:"zipCode" yaml:"zipCode"`
 	City    string `json:"city" yaml:"city"`
-	Country string `json:"country" yaml:"country"`
+	Country string `yaml:"country" json:"country"`
 }
 
 func (x *UserImportDto) Json() string {

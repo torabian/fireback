@@ -63,13 +63,13 @@ func CastClassicAuthDtoFromCli(c emigo.CliCastable) ClassicAuthDto {
 
 // The base class definition for classicAuthDto
 type ClassicAuthDto struct {
-	Value           string `json:"value" yaml:"value" validate:"required"`
-	Password        string `yaml:"password" validate:"required" json:"password"`
+	Value           string `validate:"required" json:"value" yaml:"value"`
+	Password        string `validate:"required" json:"password" yaml:"password"`
 	FirstName       string `validate:"required" json:"firstName" yaml:"firstName"`
 	LastName        string `validate:"required" json:"lastName" yaml:"lastName"`
-	InviteId        string `json:"inviteId" yaml:"inviteId"`
-	PublicJoinKeyId string `json:"publicJoinKeyId" yaml:"publicJoinKeyId"`
-	WorkspaceTypeId string `yaml:"workspaceTypeId" json:"workspaceTypeId"`
+	InviteId        string `yaml:"inviteId" json:"inviteId"`
+	PublicJoinKeyId string `yaml:"publicJoinKeyId" json:"publicJoinKeyId"`
+	WorkspaceTypeId string `json:"workspaceTypeId" yaml:"workspaceTypeId"`
 }
 
 func (x *ClassicAuthDto) Json() string {

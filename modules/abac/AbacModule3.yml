@@ -32,6 +32,24 @@ acts:
           default: false
         - name: recaptcha2ClientKey
           type: string          
+  - name: acceptInvite2
+    method: post
+    url: /v2/user/invitation/accept
+    description: 
+      Use it when user accepts an invitation, and it will complete the joining process
+    security:
+      resolveStrategy: user
+        
+    in:
+      fields:
+        - name: invitationUniqueId
+          type: string
+          tags:
+            validate: required
+          description: 
+            The invitation id which will be used to process
+
+
 actions:
   - name: osLoginAuthenticate
     method: get

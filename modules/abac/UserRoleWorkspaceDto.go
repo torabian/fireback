@@ -29,7 +29,7 @@ func CastUserRoleWorkspaceDtoFromCli(c emigo.CliCastable) UserRoleWorkspaceDto {
 // The base class definition for userRoleWorkspaceDto
 type UserRoleWorkspaceDto struct {
 	RoleId       string   `json:"roleId" yaml:"roleId"`
-	Capabilities []string `json:"capabilities" yaml:"capabilities"`
+	Capabilities []string `yaml:"capabilities" json:"capabilities"`
 }
 
 func (x *UserRoleWorkspaceDto) Json() string {

@@ -28,7 +28,7 @@ func CastExchangeKeyInformationDtoFromCli(c emigo.CliCastable) ExchangeKeyInform
 
 // The base class definition for exchangeKeyInformationDto
 type ExchangeKeyInformationDto struct {
-	Key        string `yaml:"key" json:"key"`
+	Key        string `json:"key" yaml:"key"`
 	Visibility string `json:"visibility" yaml:"visibility"`
 }
 

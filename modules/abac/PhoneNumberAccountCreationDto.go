@@ -21,7 +21,7 @@ func CastPhoneNumberAccountCreationDtoFromCli(c emigo.CliCastable) PhoneNumberAc
 
 // The base class definition for phoneNumberAccountCreationDto
 type PhoneNumberAccountCreationDto struct {
-	PhoneNumber string `json:"phoneNumber" yaml:"phoneNumber"`
+	PhoneNumber string `yaml:"phoneNumber" json:"phoneNumber"`
 }
 
 func (x *PhoneNumberAccountCreationDto) Json() string {

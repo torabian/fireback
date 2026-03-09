@@ -56,7 +56,7 @@ type Module3 struct {
 	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
 
 	// Actions based on Emi compiler - aims to replace the actions from Fireback
-	Acts []*emi.EmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
+	Acts []*EmiActionExtended `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
 
 	// Dtos based on Emi definitions
 	Dtom []*emi.EmiDto `yaml:"dtom,omitempty" json:"dtom,omitempty" jsonschema:"description=Dtos based on Emi definitions"`
@@ -84,6 +84,15 @@ type Module3 struct {
 
 	// Emi complex data types for different languages.
 	Complexes []core.EmiComplex `yaml:"complexes,omitempty" json:"complexes,omitempty" jsonschema:"description=Emi complex data types for different languages."`
+}
+
+// Extends the emi actions, and adds fireback features on top of that.
+type EmiActionExtended struct {
+
+	// Let's extend whatever emi provides
+	emi.EmiAction `yaml:",inline"`
+
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Manages the entity models"`
 }
 
 // Trigger is an automatic mechanism of task to be automatically run

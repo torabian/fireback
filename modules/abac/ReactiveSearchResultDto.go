@@ -65,9 +65,9 @@ func CastReactiveSearchResultDtoFromCli(c emigo.CliCastable) ReactiveSearchResul
 type ReactiveSearchResultDto struct {
 	UniqueId    string `json:"uniqueId" yaml:"uniqueId"`
 	Phrase      string `json:"phrase" yaml:"phrase"`
-	Icon        string `yaml:"icon" json:"icon"`
+	Icon        string `json:"icon" yaml:"icon"`
 	Description string `json:"description" yaml:"description"`
-	Group       string `json:"group" yaml:"group"`
+	Group       string `yaml:"group" json:"group"`
 	UiLocation  string `json:"uiLocation" yaml:"uiLocation"`
 	ActionFn    string `json:"actionFn" yaml:"actionFn"`
 }

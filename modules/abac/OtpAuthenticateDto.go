@@ -42,10 +42,10 @@ func CastOtpAuthenticateDtoFromCli(c emigo.CliCastable) OtpAuthenticateDto {
 
 // The base class definition for otpAuthenticateDto
 type OtpAuthenticateDto struct {
-	Value    string `validate:"required" json:"value" yaml:"value"`
+	Value    string `yaml:"value" validate:"required" json:"value"`
 	Otp      string `json:"otp" yaml:"otp"`
 	Type     string `validate:"required" json:"type" yaml:"type"`
-	Password string `json:"password" yaml:"password" validate:"required"`
+	Password string `validate:"required" json:"password" yaml:"password"`
 }
 
 func (x *OtpAuthenticateDto) Json() string {
