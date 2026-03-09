@@ -119,6 +119,16 @@ func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q fireback.Quer
 	}, nil
 }
 
+func DerefUserWorkspaceEntities(in []*UserWorkspaceEntity) []UserWorkspaceEntity {
+	out := make([]UserWorkspaceEntity, 0, len(in))
+	for _, v := range in {
+		if v != nil {
+			out = append(out, *v)
+		}
+	}
+	return out
+}
+
 func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 	// Get the user workspaces as well
 	q.UserId = session.User.UniqueId
@@ -127,7 +137,8 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.Quer
 	if err != nil {
 		return fireback.GormErrorToIError(err)
 	}
-	session.UserWorkspaces = workspacesItems
+
+	session.UserWorkspaces = DerefUserWorkspaceEntities(workspacesItems)
 
 	// Authorize the session, put the token
 	if token, err := session.User.AuthorizeWithToken(q); err != nil {
@@ -172,13 +183,16 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback
 	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
 		return nil, err
 	} else {
-		session.User = user
-		session.Passport = passport
-		passportPassword = passport.Password
-	}
+		if user == nil {
+			return nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+		}
+		session.User = *user
 
-	if session.User == nil {
-		return nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+		if passport != nil {
+			session.Passport = *passport
+		}
+
+		passportPassword = passport.Password
 	}
 
 	return &passportPassword, nil

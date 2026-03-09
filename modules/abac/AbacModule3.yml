@@ -606,7 +606,7 @@ actions:
           type: int64
           description: The amount of time left to unblock for next request
 
-dtos:
+dtom:
   - name: userImport
     fields:
       - name: avatar
@@ -642,13 +642,16 @@ dtos:
       - name: roleId
         type: string
       - name: capabilities
-        type: arrayP
+        type: slice
         primitive: string
   - name: importRequest
     fields:
       - name: file
         type: string
   - name: okayResponse
+    fields:
+      - name: status
+        type: int
   - name: testMail
     fields:
       - name: senderId
@@ -700,16 +703,20 @@ dtos:
     fields:
       - name: value
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: password
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: firstName
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: lastName
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: inviteId
         type: string
       - name: publicJoinKeyId
@@ -720,9 +727,11 @@ dtos:
     fields:
       - name: email
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: password
-        validate: required
+        tags:
+          validate: required
         type: string
   - name: phoneNumberAccountCreation
     fields:
@@ -738,7 +747,7 @@ dtos:
       - name: exchangeKey
         type: string
       - name: userWorkspaces
-        type: many2many
+        type: collection
         target: UserWorkspaceEntity
       - name: user
         type: one
@@ -749,15 +758,18 @@ dtos:
     fields:
       - name: value
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: otp
         type: string
       - name: type
         type: string
-        validate: required
+        tags:
+          validate: required
       - name: password
         type: string
-        validate: required
+        tags:
+          validate: required
   - name: emailOtpResponse
     fields:
       - name: request
@@ -770,6 +782,8 @@ dtos:
     fields:
       - name: password
         type: string
+ 
+  
 entities:
   - name: timezoneGroup
     description: World timezone information
