@@ -1780,9 +1780,13 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 		if ctx.Catalog.LanguageName == "TypeScript" {
 			exportPath = filepath.Join(exportDir, dtoName+".ts")
+
 			result, err := js.JsCommonObjectGenerator(
 				dto.Fields,
-				core.MicroGenContext{},
+				core.MicroGenContext{
+					Tags:  "react,typescript",
+					Flags: map[string]string{"react-query": "^3.39.3"},
+				},
 				js.JsCommonObjectContext{
 					RootClassName:       dtoName,
 					RecognizedComplexes: tsComplexes,
@@ -1791,7 +1795,10 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
 			}
-			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result))
+			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result, core.MicroGenContext{
+				Tags:  "react,typescript",
+				Flags: map[string]string{"react-query": "^3.39.3"},
+			}))
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
@@ -1815,7 +1822,13 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
-			content = js.AsFullDocument(res)
+			content = js.AsFullDocument(
+				res,
+				core.MicroGenContext{
+					Tags:  "react,typescript",
+					Flags: map[string]string{"react-query": "^3.39.3"},
+				},
+			)
 			exportPath = filepath.Join(exportDir, action.Name+".ts")
 		}
 
