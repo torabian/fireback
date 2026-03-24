@@ -1816,7 +1816,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		if ctx.Catalog.LanguageName == "TypeScript" {
 			res, err := js.JsActionManifest(
 				action,
-				core.MicroGenContext{Tags: "typescript,react"},
+				core.MicroGenContext{Tags: "typescript,react", Flags: map[string]string{"react-query": "^3.39.3"}},
 				tsComplexes,
 			)
 			if err != nil {
