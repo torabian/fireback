@@ -3,16 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
-import { useGetPassportsAvailableMethods } from "../../sdk/modules/abac/useGetPassportsAvailableMethods";
+import {
+  CheckPassportMethodsActionResDto,
+  ClassicSigninActionReqDto,
+} from "../../sdk/modules/abac/AbacActionsDto";
+import { useCheckPassportMethods2ActionQuery } from "../../sdk/modules/abac/CheckPassportMethods2";
 import {
   AuthAvailableMethods,
   AuthMethod,
   useTemporaryParamOptions,
 } from "./auth.common";
-import {
-  CheckPassportMethodsActionResDto,
-  ClassicSigninActionReqDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const t = useT();
@@ -22,9 +22,7 @@ export const usePresenter = () => {
     Partial<ClassicSigninActionReqDto>
   > | null>();
 
-  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
-    unauthorized: true,
-  });
+  const query = useCheckPassportMethods2ActionQuery({});
 
   useTemporaryParamOptions(["redirect_temporary", "workspace_type_id"]);
 
@@ -35,8 +33,7 @@ export const usePresenter = () => {
     ? Object.values(availableOptions).filter(Boolean).length
     : undefined;
 
-  const methodData: CheckPassportMethodsActionResDto =
-    passportMethodsQuery.data?.data;
+  const methodData: CheckPassportMethodsActionResDto = query.data?.data?.item;
 
   const onSelect = (value: AuthMethod, canGoBack = true) => {
     switch (value) {
@@ -58,15 +55,19 @@ export const usePresenter = () => {
       return;
     }
 
+    // Extract the authentication methods here.
+    // Make sure, you select only fields which are indicating an option,
+    // because adding extra fields here might interfer with auto-selection later.
     const newData = {
-      email: methodData.email || false,
-      google: methodData.google || false,
-      facebook: methodData.facebook || false,
-      phone: methodData.phone || false,
+      email: methodData.email,
+      google: methodData.google,
+      facebook: methodData.facebook,
+      phone: methodData.phone,
       googleOAuthClientKey: methodData.googleOAuthClientKey,
       facebookAppId: (methodData as any).facebookAppId,
     };
 
+    // If there is only a single method to login available
     const totalAvailableMethods = Object.values(newData).filter(Boolean).length;
 
     if (totalAvailableMethods === 1) {
@@ -92,8 +93,8 @@ export const usePresenter = () => {
     formik,
     onSelect,
     availableOptions,
-    passportMethodsQuery,
-    isLoadingMethods: passportMethodsQuery.isLoading,
+    passportMethodsQuery: query,
+    isLoadingMethods: query.isLoading,
     totalAvailableMethods,
   };
 };
