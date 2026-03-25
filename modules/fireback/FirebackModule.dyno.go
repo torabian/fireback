@@ -1532,15 +1532,13 @@ var config Config = Config{
 	WindowsIdentifier:       "fireback",
 }
 
-/*
-*
+/**
 You can call this function on first line of your main function.
 This is different from fireback configuration (for now), you can
 define config: in module3 file, similar to fields in entities,
 and we generate the config struct and this function would read .env.local,
 .env.prod, etc - depending on the ENV=xxx env variable.
-*
-*/
+**/
 func LoadConfiguration() Config {
 	HandleEnvVars(&config)
 	return config
