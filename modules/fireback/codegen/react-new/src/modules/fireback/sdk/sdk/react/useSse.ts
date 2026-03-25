@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useRef, useState } from "react";
 import type { TypedRequestInit } from "../common/fetchx";
 export interface UseSSEResult<T> {

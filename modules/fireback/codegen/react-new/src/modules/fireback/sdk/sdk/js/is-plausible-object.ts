@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Used in fetch context, to detect if the response is not a buffer
  * or arraybufer, then create class instance of it.

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type TypedRequestInit<TBody = unknown, THeaders = unknown> = Omit<
   RequestInit,
   "body" | "headers"

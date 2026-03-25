@@ -1,3 +1,4 @@
+// @ts-nocheck
 type ConstructorWithArg<T = any, R = any> = new (arg: T, ...rest: any[]) => R;
 export class WebSocketX<
   SendType = string | ArrayBufferLike | Blob | ArrayBufferView,

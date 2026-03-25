@@ -10,6 +10,12 @@ import { useRecaptcha2 } from "../../hooks/useRecaptcha2";
 import { useS } from "../../hooks/useS";
 import { strings } from "./strings/translations";
 import { CheckClassicPassportActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import {
+  CheckPassportMethods2ActionRes,
+  useCheckPassportMethods2ActionQuery,
+} from "../../sdk/modules/abac/CheckPassportMethods2";
+import { FetchxContext } from "../../sdk/sdk/common/fetchx";
+import { GResponse } from "../../sdk/sdk/envelopes";
 
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const s = useS(strings);
@@ -18,14 +24,23 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const { submit: submitCheck, mutation } = usePostWorkspacePassportCheck();
   const canGoBack = state?.canGoBack === false ? false : true;
 
-  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
-    unauthorized: true,
-  });
+  // const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
+  //   unauthorized: true,
+  // });
 
-  const enabledRecaptcha2 =
-    passportMethodsQuery.data?.data?.enabledRecaptcha2 || false;
+  const { response, data } = useCheckPassportMethods2ActionQuery({});
+
+  console.log(data);
+
+  // const m = data as any as GResponse<CheckPassportMethods2ActionRes>;
+  // console.log(m.data.item.email);
+
+  const enabledRecaptcha2 = data?.data?.item.enabledRecaptcha2 || false;
   const recaptcha2ClientKey =
-    passportMethodsQuery.data?.data?.recaptcha2ClientKey || undefined;
+    data?.data?.item?.recaptcha2ClientKey || undefined;
+
+    console.log(2, data?.data?.item)
+    
 
   const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
     submitCheck(data)
@@ -88,7 +103,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
 
     form.setFieldValue(
       CheckClassicPassportActionReqDto.Fields.securityToken,
-      value
+      value,
     );
   }, [value]);
 

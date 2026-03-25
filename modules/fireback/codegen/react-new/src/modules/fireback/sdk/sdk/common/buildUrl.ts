@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Handy tool to create a final callable url, from query string, query params,
  * and the actual url.

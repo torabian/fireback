@@ -4,6 +4,8 @@ import React from "react";
 import { QueryClient } from "react-query";
 import { mockExecFn } from "../../hooks/mock-tools";
 import { RemoteQueryProvider as FirebackQueryProvider } from "../../sdk/core/react-tools";
+import { FetchxProvider } from "../../sdk/sdk/react/useFetchx";
+import { FetchxContext } from "../../sdk/sdk/common/fetchx";
 
 export function WithFireback({
   children,
@@ -36,7 +38,15 @@ export function WithFireback({
       // defaultExecFn={() => (options: any) =>
       //   mockExecFn(options, mockServer.current, t)}
     >
-      {children}
+      <FetchxProvider
+        value={
+          new FetchxContext(
+            process.env.REACT_APP_REMOTE_SERVICE?.replace(/\/$/, ""),
+          )
+        }
+      >
+        {children}
+      </FetchxProvider>
     </FirebackQueryProvider>
   );
 }

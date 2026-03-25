@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const isPlausibleObject = (obj: any) => {
   const isBuffer =
     typeof globalThis.Buffer !== "undefined" &&

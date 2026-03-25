@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useRef, useState, useCallback } from "react";
 import { WebSocketX } from "../common/WebSocketX";
 export type UseWebSocketResult<TSend, TRecv> = {

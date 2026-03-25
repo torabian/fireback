@@ -1,5 +1,67 @@
 name: abac
+acts:
+  - name: CheckPassportMethods2
+    url: /passports/available-methods2
+    description: 
+      Publicly available information to create the authentication form, and show users
+      how they can signin or signup to the system. Based on the PassportMethod entities,
+      it will compute the available methods for the user, considering their region (IP for example)
+    method: get
+    out:
+      envelope: GResponse
+      fields:
+        - name: email
+          type: bool
+          default: false
+        - name: phone
+          type: bool
+          default: false
+        - name: google
+          type: bool
+          default: false
+        - name: facebook
+          type: bool
+          default: false
+        - name: googleOAuthClientKey
+          type: string
+        - name: facebookAppId
+          type: string
+        - name: enabledRecaptcha2
+          type: bool
+          default: false
+        - name: recaptcha2ClientKey
+          type: string
 actions:
+  - name: checkPassportMethods
+    url: /passports/available-methods
+    description: 
+      Publicly available information to create the authentication form, and show users
+      how they can signin or signup to the system. Based on the PassportMethod entities,
+      it will compute the available methods for the user, considering their region (IP for example)
+    method: get
+    out:
+      fields:
+        - name: email
+          type: bool
+          default: false
+        - name: phone
+          type: bool
+          default: false
+        - name: google
+          type: bool
+          default: false
+        - name: facebook
+          type: bool
+          default: false
+        - name: googleOAuthClientKey
+          type: string
+        - name: facebookAppId
+          type: string
+        - name: enabledRecaptcha2
+          type: bool
+          default: false
+        - name: recaptcha2ClientKey
+          type: string
   - name: osLoginAuthenticate
     method: get
     url: /passports/os/login
@@ -161,36 +223,7 @@ actions:
       - name: session
         type: one
         target: UserSessionDto
-  - name: checkPassportMethods
-    url: /passports/available-methods
-    description: 
-      Publicly available information to create the authentication form, and show users
-      how they can signin or signup to the system. Based on the PassportMethod entities,
-      it will compute the available methods for the user, considering their region (IP for example)
-    method: get
-    out:
-      fields:
-        - name: email
-          type: bool
-          default: false
-        - name: phone
-          type: bool
-          default: false
-        - name: google
-          type: bool
-          default: false
-        - name: facebook
-          type: bool
-          default: false
-        - name: googleOAuthClientKey
-          type: string
-        - name: facebookAppId
-          type: string
-        - name: enabledRecaptcha2
-          type: bool
-          default: false
-        - name: recaptcha2ClientKey
-          type: string
+
   - name: queryWorkspaceTypesPublicly
     format: query
     method: get

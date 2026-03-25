@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { stringify, parse } from "qs";
 /**
  * Extended URLSearchParams that stores data in a nested object

@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
@@ -173,5 +174,36 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		MiscCli,
 	})
 
+	module.GinWebServerInitHooks = append(
+		module.GinWebServerInitHooks,
+		func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+			CheckPassportMethods2Action(g, CheckPassportMethods2ActionImpl)
+			return nil
+		},
+	)
+
 	return module
+}
+
+func WrapData(v any) any {
+	return map[string]any{
+		"data": map[string]any{
+			"item": v,
+		},
+	}
+}
+
+var CheckPassportMethods2ActionImpl = func(c CheckPassportMethods2ActionRequest, gin *gin.Context) (*CheckPassportMethods2ActionResponse, error) {
+	resp, err := CheckPassportMethodsAction(fireback.QueryDSL{})
+	if err != nil {
+		return nil, err
+	}
+
+	if resp == nil {
+		return nil, nil
+	}
+
+	return &CheckPassportMethods2ActionResponse{
+		Payload: WrapData(resp),
+	}, nil
 }

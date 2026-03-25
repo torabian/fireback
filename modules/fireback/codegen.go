@@ -24,6 +24,7 @@ import (
 	"strings"
 	"text/template"
 
+	ts_envelopes "github.com/torabian/emi/lib/js/ts-envelopes"
 	tssdk "github.com/torabian/emi/lib/js/ts-sdk"
 
 	"github.com/gertd/go-pluralize"
@@ -1135,6 +1136,9 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 
 	if ctx.Catalog.LanguageName == "TypeScript" {
 		sdkFiles := core.FsEmbedToVirtualFile(&tssdk.Content, "sdk")
+		var source *embed.FS = &ts_envelopes.Content
+		sdkFiles = append(sdkFiles, core.FsEmbedToVirtualFile(source, "sdk/envelopes")...)
+
 		for _, file := range sdkFiles {
 
 			exportPath := filepath.Join(exportDir, file.Location, file.Name)
@@ -1144,7 +1148,7 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 
 			os.MkdirAll(filepath.Dir(exportPath), os.ModePerm)
 
-			if err := WriteFileGen(ctx, exportPath, EscapeLines([]byte(file.ActualScript)), 0644); err != nil {
+			if err := WriteFileGen(ctx, exportPath, EscapeLines([]byte("// @ts-nocheck\r\n"+file.ActualScript)), 0644); err != nil {
 				log.Fatalln("Failed to write emi sdk static files for typescript", err)
 			}
 		}

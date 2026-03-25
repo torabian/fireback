@@ -36,6 +36,26 @@ import {
   */
   public secondsToUnblock?: number | null;
   }
+export class CheckPassportMethodsActionResDto {
+  public email?: boolean | null;
+  public phone?: boolean | null;
+  public google?: boolean | null;
+  public facebook?: boolean | null;
+  public googleOAuthClientKey?: string | null;
+  public facebookAppId?: string | null;
+  public enabledRecaptcha2?: boolean | null;
+  public recaptcha2ClientKey?: string | null;
+public static Fields = {
+      email: 'email',
+      phone: 'phone',
+      google: 'google',
+      facebook: 'facebook',
+      googleOAuthClientKey: 'googleOAuthClientKey',
+      facebookAppId: 'facebookAppId',
+      enabledRecaptcha2: 'enabledRecaptcha2',
+      recaptcha2ClientKey: 'recaptcha2ClientKey',
+}
+}
 export class AcceptInviteActionReqDto {
   /**
   The invitation id which will be used to process
@@ -137,26 +157,6 @@ public static Fields = {
           sessionId: 'sessionId',
       session$: 'session',
       session: UserSessionDto.Fields,
-}
-}
-export class CheckPassportMethodsActionResDto {
-  public email?: boolean | null;
-  public phone?: boolean | null;
-  public google?: boolean | null;
-  public facebook?: boolean | null;
-  public googleOAuthClientKey?: string | null;
-  public facebookAppId?: string | null;
-  public enabledRecaptcha2?: boolean | null;
-  public recaptcha2ClientKey?: string | null;
-public static Fields = {
-      email: 'email',
-      phone: 'phone',
-      google: 'google',
-      facebook: 'facebook',
-      googleOAuthClientKey: 'googleOAuthClientKey',
-      facebookAppId: 'facebookAppId',
-      enabledRecaptcha2: 'enabledRecaptcha2',
-      recaptcha2ClientKey: 'recaptcha2ClientKey',
 }
 }
 export class QueryWorkspaceTypesPubliclyActionResDto {
