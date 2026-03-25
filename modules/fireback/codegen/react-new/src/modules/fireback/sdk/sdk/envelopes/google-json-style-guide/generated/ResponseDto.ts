@@ -1,9 +1,8 @@
-// @ts-nocheck
 import { withPrefix } from "./sdk/common/withPrefix";
 /**
  * The base class definition for responseDto
  **/
-export class ResponseDto {
+export class ResponseDto<T> {
   /**
    * Version of the API used for this response.
    * @type {string}
@@ -129,12 +128,12 @@ export class ResponseDto {
   }
   /**
    * Main data payload of the response.
-   * @type {ResponseDto.Data}
+   * @type {ResponseDto.Data<T>}
    **/
-  #data!: InstanceType<typeof ResponseDto.Data>;
+  #data!: InstanceType<typeof ResponseDto.Data<T>>;
   /**
    * Main data payload of the response.
-   * @returns {ResponseDto.Data}
+   * @returns {ResponseDto.Data<T>}
    **/
   get data() {
     return this.#data;
@@ -143,7 +142,7 @@ export class ResponseDto {
    * Main data payload of the response.
    * @type {ResponseDto.Data}
    **/
-  set data(value: InstanceType<typeof ResponseDto.Data>) {
+  set data(value: InstanceType<typeof ResponseDto.Data<T>>) {
     // For objects, the sub type needs to always be instance of the sub class.
     if (value instanceof ResponseDto.Data) {
       this.#data = value;
@@ -151,7 +150,7 @@ export class ResponseDto {
       this.#data = new ResponseDto.Data(value);
     }
   }
-  setData(value: InstanceType<typeof ResponseDto.Data>) {
+  setData(value: InstanceType<typeof ResponseDto.Data<T>>) {
     this.data = value;
     return this;
   }
@@ -194,9 +193,9 @@ export class ResponseDto {
     #item: T = null;
     /**
      * Single item returned by the API.
-     * @returns {any}
+     * @returns {T}
      **/
-    get item() {
+    get item(): T {
       return this.#item;
     }
     /**
@@ -689,7 +688,7 @@ export class ResponseDto {
      * casts the fields of a javascript object into the class properties one by one
      **/
     applyFromObject(data = {}) {
-      const d = data as Partial<Data>;
+      const d = data as Partial<Data<T>>;
       if (d.item !== undefined) {
         this.item = d.item;
       }
@@ -1391,7 +1390,7 @@ export class ResponseDto {
    * casts the fields of a javascript object into the class properties one by one
    **/
   applyFromObject(data = {}) {
-    const d = data as Partial<ResponseDto>;
+    const d = data as Partial<ResponseDto<T>>;
     if (d.apiVersion !== undefined) {
       this.apiVersion = d.apiVersion;
     }
@@ -1419,7 +1418,7 @@ export class ResponseDto {
    * These are the class instances, which need to be initialised, regardless of the constructor incoming data
    **/
   #lateInitFields(data = {}) {
-    const d = data as Partial<ResponseDto>;
+    const d = data as Partial<ResponseDto<T>>;
     if (!(d.data instanceof ResponseDto.Data)) {
       this.data = new ResponseDto.Data(d.data || {});
     }
@@ -1488,7 +1487,7 @@ export class ResponseDto {
   }
 }
 export abstract class ResponseDtoFactory {
-  abstract create(data: unknown): ResponseDto;
+  abstract create(data: unknown): ResponseDto<unknown>;
 }
 type PartialDeep<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
@@ -1530,7 +1529,7 @@ export type ResponseDtoType = {
    * Main data payload of the response.
    * @type {ResponseDtoType.DataType}
    **/
-  data: ResponseDtoType.DataType;
+  data: ResponseDtoType.DataType<T>;
   /**
    * Error details, if the request failed.
    * @type {ResponseDtoType.ErrorType}
@@ -1542,12 +1541,12 @@ export namespace ResponseDtoType {
   /**
    * The base type definition for dataType
    **/
-  export type DataType = {
+  export type DataType<T> = {
     /**
      * Single item returned by the API.
      * @type {any}
      **/
-    item: any;
+    item2: T;
     /**
      * List of items returned by the API.
      * @type {any}

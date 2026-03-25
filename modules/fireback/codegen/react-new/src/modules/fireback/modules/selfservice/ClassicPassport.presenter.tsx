@@ -30,7 +30,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
 
   const { response, data } = useCheckPassportMethods2ActionQuery({});
 
-  console.log(data);
+  console.log(data.data.item);
 
   // const m = data as any as GResponse<CheckPassportMethods2ActionRes>;
   // console.log(m.data.item.email);
@@ -39,8 +39,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const recaptcha2ClientKey =
     data?.data?.item?.recaptcha2ClientKey || undefined;
 
-    console.log(2, data?.data?.item)
-    
+  console.log(2, data?.data?.item);
 
   const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
     submitCheck(data)
