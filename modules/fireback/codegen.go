@@ -24,6 +24,8 @@ import (
 	"strings"
 	"text/template"
 
+	tssdk "github.com/torabian/emi/lib/js/ts-sdk"
+
 	"github.com/gertd/go-pluralize"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggest/openapi-go/openapi3"
@@ -638,8 +640,15 @@ func GetMD5Hash(text []byte) string {
 	hash := md5.Sum(text)
 	return hex.EncodeToString(hash[:])
 }
+func normalizeNewlines(data []byte) []byte {
+	// First normalize everything to \n, then to \r\n
+	s := strings.ReplaceAll(string(data), "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\n", "\r\n")
+	return []byte(s)
+}
 
 func WriteFileGen(ctx *CodeGenContext, name string, data []byte, perm os.FileMode) error {
+	data = normalizeNewlines(data)
 
 	gen, okay := generatorHash[name]
 
@@ -1112,6 +1121,7 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 	// Which might need to be fixed.
 
 	if len(ctx.ModulesOnDisk) > 0 || ctx.OpenApiFile != "" {
+
 		return RunCodeGenExternal(ctx)
 	}
 
@@ -1121,6 +1131,25 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 
 	app := xapp
 	modules := GenGetModules(xapp, ctx)
+	exportDir := filepath.Join(ctx.Path)
+
+	if ctx.Catalog.LanguageName == "TypeScript" {
+		sdkFiles := core.FsEmbedToVirtualFile(&tssdk.Content, "sdk")
+		for _, file := range sdkFiles {
+
+			exportPath := filepath.Join(exportDir, file.Location, file.Name)
+			if file.Extension != "" {
+				exportPath += file.Extension
+			}
+
+			os.MkdirAll(filepath.Dir(exportPath), os.ModePerm)
+
+			if err := WriteFileGen(ctx, exportPath, EscapeLines([]byte(file.ActualScript)), 0644); err != nil {
+				log.Fatalln("Failed to write emi sdk static files for typescript", err)
+			}
+		}
+
+	}
 
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
@@ -1686,6 +1715,14 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		exportDir = filepath.Join(ctx.Path, x.Namespace)
 	}
 
+	emiJsContext := core.MicroGenContext{
+		Tags: "react,typescript",
+		Flags: map[string]string{
+			"react-query":     "react-query@^3.39.3",
+			"js-sdk-location": "../../sdk",
+		},
+	}
+
 	tsComplexes := DiscoverJsComplexes(x)
 	goComplexes := DiscoverGoComplexes(x)
 
@@ -1783,10 +1820,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 			result, err := js.JsCommonObjectGenerator(
 				dto.Fields,
-				core.MicroGenContext{
-					Tags:  "react,typescript",
-					Flags: map[string]string{"react-query": "^3.39.3"},
-				},
+				emiJsContext,
 				js.JsCommonObjectContext{
 					RootClassName:       dtoName,
 					RecognizedComplexes: tsComplexes,
@@ -1795,10 +1829,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
 			}
-			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result, core.MicroGenContext{
-				Tags:  "react,typescript",
-				Flags: map[string]string{"react-query": "^3.39.3"},
-			}))
+			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result, emiJsContext))
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
@@ -1816,7 +1847,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		if ctx.Catalog.LanguageName == "TypeScript" {
 			res, err := js.JsActionManifest(
 				action,
-				core.MicroGenContext{Tags: "typescript,react", Flags: map[string]string{"react-query": "^3.39.3"}},
+				emiJsContext,
 				tsComplexes,
 			)
 			if err != nil {
@@ -1824,10 +1855,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			}
 			content = js.AsFullDocument(
 				res,
-				core.MicroGenContext{
-					Tags:  "react,typescript",
-					Flags: map[string]string{"react-query": "^3.39.3"},
-				},
+				emiJsContext,
 			)
 			exportPath = filepath.Join(exportDir, action.Name+".ts")
 		}
