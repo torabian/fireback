@@ -24,22 +24,17 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const { submit: submitCheck, mutation } = usePostWorkspacePassportCheck();
   const canGoBack = state?.canGoBack === false ? false : true;
 
-  // const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
-  //   unauthorized: true,
-  // });
+  const { data } = useCheckPassportMethods2ActionQuery({});
+  let enabledRecaptcha2 = false;
+  let recaptcha2ClientKey = "";
 
-  const { response, data } = useCheckPassportMethods2ActionQuery({});
-
-  console.log(data.data.item);
-
-  // const m = data as any as GResponse<CheckPassportMethods2ActionRes>;
-  // console.log(m.data.item.email);
-
-  const enabledRecaptcha2 = data?.data?.item.enabledRecaptcha2 || false;
-  const recaptcha2ClientKey =
-    data?.data?.item?.recaptcha2ClientKey || undefined;
-
-  console.log(2, data?.data?.item);
+  if (
+    data instanceof GResponse &&
+    data.data.item instanceof CheckPassportMethods2ActionRes
+  ) {
+    enabledRecaptcha2 = data?.data?.item.enabledRecaptcha2;
+    recaptcha2ClientKey = data?.data?.item?.recaptcha2ClientKey;
+  }
 
   const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
     submitCheck(data)

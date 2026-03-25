@@ -800,7 +800,7 @@ export class ResponseDto<T> {
      * needs to satisfy the type requirement fully, otherwise typescript compile would
      * be complaining.
      **/
-    static from(possibleDtoObject: ResponseDtoType.DataType) {
+    static from<T = unknown>(possibleDtoObject: ResponseDtoType.DataType<T>) {
       return new ResponseDto.Data(possibleDtoObject);
     }
     /**
@@ -808,11 +808,13 @@ export class ResponseDto<T> {
      * needs to satisfy the type, but partially, and rest of the content would
      * be constructed according to data types and nullability.
      **/
-    static with(partialDtoObject: PartialDeep<ResponseDtoType.DataType>) {
+    static with<T = unknown>(
+      partialDtoObject: PartialDeep<ResponseDtoType.DataType<T>>,
+    ) {
       return new ResponseDto.Data(partialDtoObject);
     }
     copyWith(
-      partial: PartialDeep<ResponseDtoType.DataType>,
+      partial: PartialDeep<ResponseDtoType.DataType<unknown>>,
     ): InstanceType<typeof ResponseDto.Data> {
       return new ResponseDto.Data({ ...this.toJSON(), ...partial });
     }
@@ -1466,7 +1468,7 @@ export class ResponseDto<T> {
    * needs to satisfy the type requirement fully, otherwise typescript compile would
    * be complaining.
    **/
-  static from(possibleDtoObject: ResponseDtoType) {
+  static from<T = unknown>(possibleDtoObject: ResponseDtoType<T>) {
     return new ResponseDto(possibleDtoObject);
   }
   /**
@@ -1474,11 +1476,11 @@ export class ResponseDto<T> {
    * needs to satisfy the type, but partially, and rest of the content would
    * be constructed according to data types and nullability.
    **/
-  static with(partialDtoObject: PartialDeep<ResponseDtoType>) {
+  static with<T = unknown>(partialDtoObject: PartialDeep<ResponseDtoType<T>>) {
     return new ResponseDto(partialDtoObject);
   }
   copyWith(
-    partial: PartialDeep<ResponseDtoType>,
+    partial: PartialDeep<ResponseDtoType<T>>,
   ): InstanceType<typeof ResponseDto> {
     return new ResponseDto({ ...this.toJSON(), ...partial });
   }
@@ -1499,7 +1501,7 @@ type PartialDeep<T> = {
 /**
  * The base type definition for responseDto
  **/
-export type ResponseDtoType = {
+export type ResponseDtoType<T> = {
   /**
    * Version of the API used for this response.
    * @type {string}
