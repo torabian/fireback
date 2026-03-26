@@ -1148,7 +1148,13 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 
 			os.MkdirAll(filepath.Dir(exportPath), os.ModePerm)
 
-			if err := WriteFileGen(ctx, exportPath, EscapeLines([]byte("// @ts-nocheck\r\n"+file.ActualScript)), 0644); err != nil {
+			data := []byte(file.ActualScript)
+
+			if strings.Contains(exportPath, ".ts") {
+				data = append([]byte("// @ts-nocheck\r\n"), data...)
+			}
+
+			if err := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644); err != nil {
 				log.Fatalln("Failed to write emi sdk static files for typescript", err)
 			}
 		}
