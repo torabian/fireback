@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -449,5 +450,33 @@ func HttpGetXHtml(
 		} else {
 			c.AbortWithStatus(404)
 		}
+	}
+}
+
+func WriteActionResponseToGin(m *gin.Context, resp emigo.EmiActionResult, err error) {
+	if err != nil {
+		m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// If the handler returned nil (and no error), it means the response was handled manually.
+	if resp == nil {
+		return
+	}
+
+	// Apply headers
+	for k, v := range resp.GetRespHeaders() {
+		m.Header(k, v)
+	}
+
+	// Apply status and payload
+	status := resp.GetStatusCode()
+	if status == 0 {
+		status = http.StatusOK
+	}
+	if resp.GetPayload() != nil {
+		m.JSON(status, resp.GetPayload())
+	} else {
+		m.Status(status)
 	}
 }

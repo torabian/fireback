@@ -1,7 +1,8 @@
 name: abac
 acts:
-  - name: CheckPassportMethods18
+  - name: CheckPassportMethods181
     url: /passports/available-methods22
+
     description: 
       Publiclyx available information to create the authentication form, and show users
       how they can signin or signup to the system. Based on the PassportMethod entities,

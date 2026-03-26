@@ -1803,7 +1803,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		var data []byte
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
-			exportPath = filepath.Join(exportDir, dtoName+".go")
+			exportPath = filepath.Join(exportDir, dtoName+".dyno.go")
 			result, err := golang.GoCommonStructGenerator(
 				dto.Fields,
 				core.MicroGenContext{},
@@ -1870,7 +1870,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
 			content = golang.AsFullDocument(res, x.Name)
-			exportPath = filepath.Join(exportDir, action.Name+".go")
+			exportPath = filepath.Join(exportDir, action.Name+".dyno.go")
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)

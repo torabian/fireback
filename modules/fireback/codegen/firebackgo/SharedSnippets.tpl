@@ -3223,9 +3223,31 @@ type {{ $name }}Msgs struct {
 
 {{ end }}
 
-/// For emi, we also need to print the handlers
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 {{ range $acts }} 
 var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query fireback.QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
+
+ 
+
+{{ if .SecurityModel }}
+  var {{ .Name }}SecurityModel = &{{ $wsprefix }}SecurityModel{
+    ActionRequires: []{{ $wsprefix }}PermissionInfo{ 
+        {{ range .SecurityModel.ActionRequires }}
+            {
+              CompleteKey: "{{ .CompleteKey }}",
+            },
+        {{ end }}
+    },
+    {{ if and (.SecurityModel) (.SecurityModel.ResolveStrategy) }}
+      ResolveStrategy: "{{ .SecurityModel.ResolveStrategy }}",
+    {{ end }}
+
+  }
+  {{ else }}
+  var {{ .Name }}SecurityModel *{{ $wsprefix }}SecurityModel = nil
+  {{ end }}
+
 {{ end }}
 
 func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
@@ -3238,6 +3260,7 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
         Name:    {{ .Name }}ActionMeta().Name,
         Method:  {{ .Name }}ActionMeta().Method,
         Url:     {{ .Name }}ActionMeta().URL,
+        SecurityModel: {{ .Name }}SecurityModel,
         Handlers: []gin.HandlerFunc{
           func(m *gin.Context) {
             req := {{ .Name }}ActionRequest{
@@ -3249,11 +3272,11 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
             var query fireback.QueryDSL
             query = fireback.ExtractQueryDslFromGinContext(m)
             resp, err := {{ .Name }}Impl(req, query)
-            emigo.WriteActionResponseToGin(m, resp, err)
+            {{ $wsprefix }}WriteActionResponseToGin(m, resp, err)
           },
         },
         CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
-          query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
+          query := fireback.CommonCliQueryDSLBuilderAuthorize(c, {{ .Name }}SecurityModel)
           req := {{ .Name }}ActionRequest{}
 
           resp, err := {{ .Name }}Impl(req, query)

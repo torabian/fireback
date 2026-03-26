@@ -23,7 +23,10 @@ import (
 type ErrorItem map[string]string
 
 type FirebackEmiAction struct {
-	emi.EmiAction
+	emi.EmiAction `json:",inline" yaml:",inline"`
+
+	// Defines access control similar to middleware checking permissions, tokens, and roles.
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Defines access control similar to middleware checking permissions, tokens, and roles"`
 }
 
 // Module3 struct represents the entire file tree

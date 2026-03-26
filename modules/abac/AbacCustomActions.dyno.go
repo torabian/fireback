@@ -9,7 +9,6 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
@@ -1821,38 +1820,10 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers
-var CheckPassportMethods18Impl func(c CheckPassportMethods18ActionRequest, query fireback.QueryDSL) (*CheckPassportMethods18ActionResponse, error) = nil
-
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
-		{
-			CliName: CheckPassportMethods18ActionMeta().CliName,
-			Name:    CheckPassportMethods18ActionMeta().Name,
-			Method:  CheckPassportMethods18ActionMeta().Method,
-			Url:     CheckPassportMethods18ActionMeta().URL,
-			Handlers: []gin.HandlerFunc{
-				func(m *gin.Context) {
-					req := CheckPassportMethods18ActionRequest{
-						QueryParams: m.Request.URL.Query(),
-						Headers:     m.Request.Header,
-						GinCtx:      m,
-					}
-					var query fireback.QueryDSL
-					query = fireback.ExtractQueryDslFromGinContext(m)
-					resp, err := CheckPassportMethods18Impl(req, query)
-					emigo.WriteActionResponseToGin(m, resp, err)
-				},
-			},
-			CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
-				query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
-				req := CheckPassportMethods18ActionRequest{}
-				resp, err := CheckPassportMethods18Impl(req, query)
-				fireback.HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
-				return nil
-			},
-		},
+
 		/// End for emi actions
 		{
 			Method:        "GET",
