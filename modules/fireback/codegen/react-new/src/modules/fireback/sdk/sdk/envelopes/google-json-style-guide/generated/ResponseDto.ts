@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { withPrefix } from "./sdk/common/withPrefix";
 /**
  * The base class definition for responseDto
