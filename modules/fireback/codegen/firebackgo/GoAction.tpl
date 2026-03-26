@@ -26,7 +26,7 @@ import (
   
 )
 
-{{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut )}}
+{{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut .m.Acts )}}
 
 var {{ .m.Upper }}CustomActionsCli = []cli.Command {
 {{ range .m.Actions }}

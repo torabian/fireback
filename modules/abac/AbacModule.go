@@ -4,8 +4,6 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
@@ -166,9 +164,9 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		GetTimezoneGroupModule3Actions(),
 		GetWorkspaceConfigModule3Actions(),
 		GetRegionalContentModule3Actions(),
-		{
-			AS_FIREBACK_ACTION,
-		},
+		// {
+		// 	AS_FIREBACK_ACTION,
+		// },
 	}
 
 	module.ProvideCliHandlers([]cli.Command{
@@ -176,64 +174,31 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		UserCliFn(),
 		WorkspaceCliFn(),
 		MiscCli,
-		AS_FIREBACK_ACTION.ToCli(),
 	})
+
+	// CheckPassportMethods2Impl = func(c CheckPassportMethods2ActionRequest, query fireback.QueryDSL) (*CheckPassportMethods2ActionResponse, error) {
+
+	// 	resp, err := CheckPassportMethodsAction(query)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+
+	// 	if resp == nil {
+	// 		return nil, nil
+	// 	}
+
+	// 	return &CheckPassportMethods2ActionResponse{
+	// 		Payload: GResponseSingleItem(resp),
+	// 	}, nil
+	// }
 
 	return module
 }
 
-func WrapData(v any) any {
+func GResponseSingleItem(v any) any {
 	return map[string]any{
 		"data": map[string]any{
 			"item": v,
 		},
 	}
-}
-
-var CheckPassportMethods2Impl = func(c CheckPassportMethods2ActionRequest, query fireback.QueryDSL) (*CheckPassportMethods2ActionResponse, error) {
-
-	resp, err := CheckPassportMethodsAction(query)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp == nil {
-		return nil, nil
-	}
-
-	return &CheckPassportMethods2ActionResponse{
-		Payload: WrapData(resp),
-	}, nil
-}
-
-var AS_FIREBACK_ACTION = fireback.Module3Action{
-	CliName: CheckPassportMethods2ActionMeta().CliName,
-	Name:    CheckPassportMethods2ActionMeta().Name,
-	Method:  CheckPassportMethods2ActionMeta().Method,
-	Url:     CheckPassportMethods2ActionMeta().URL,
-	Handlers: []gin.HandlerFunc{
-		func(m *gin.Context) {
-			req := CheckPassportMethods2ActionRequest{
-				QueryParams: m.Request.URL.Query(),
-				Headers:     m.Request.Header,
-				GinCtx:      m,
-			}
-
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
-			resp, err := CheckPassportMethods2Impl(req, query)
-			emigo.WriteActionResponseToGin(m, resp, err)
-		},
-	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
-		req := CheckPassportMethods2ActionRequest{
-			CliCtx: c,
-		}
-
-		resp, err := CheckPassportMethods2Impl(req, query)
-		fireback.HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
-
-		return nil
-	},
 }

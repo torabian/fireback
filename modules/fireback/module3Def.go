@@ -22,6 +22,10 @@ import (
 
 type ErrorItem map[string]string
 
+type FirebackEmiAction struct {
+	emi.EmiAction
+}
+
 // Module3 struct represents the entire file tree
 type Module3 struct {
 

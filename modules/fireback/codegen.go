@@ -1957,6 +1957,34 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 						}
 					}
 				}
+
+				for _, action := range x.Acts {
+					actionImplementationFile := filepath.Join(exportDir, action.Upper()+"Action.go")
+					hasFile := Exists(actionImplementationFile)
+
+					if !hasFile {
+
+						wsPrefix := "fireback."
+						if x.MetaWorkspace {
+							wsPrefix = ""
+							isWorkspace = true
+						}
+
+						params := gin.H{
+							"m":        x,
+							"a":        action,
+							"wsprefix": wsPrefix,
+						}
+						data, err5 := getEmiActionTemplate(params)
+						if err5 != nil {
+							fmt.Println("Error creating action default template:", exportPath, err5)
+						}
+						err4 := WriteFileGen(ctx, actionImplementationFile, EscapeLines(data), 0644)
+						if err4 != nil {
+							fmt.Println("Error creating action default template:", exportPath, err4)
+						}
+					}
+				}
 			}
 		}
 	}
@@ -2213,6 +2241,31 @@ func getActionTemplate(data interface{}) ([]byte, error) {
 		{{ end }}
 
 		return {{ if (eq .a.ActionResDto "string")}} "" {{ else }} nil {{ end }}, {{ if (eq .a.FormatComputed "QUERY") }} nil, {{ end }} nil
+	}
+`
+
+	tmpl, err := template.New("greeting").Parse(tmplStr)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	var result bytes.Buffer
+	err = tmpl.Execute(&result, data)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return result.Bytes(), nil
+}
+
+// When we create emi action, we also need to create a file,
+// so the developer adds the logic in there.
+func getEmiActionTemplate(data interface{}) ([]byte, error) {
+	tmplStr := `package {{ .m.Name }}
+
+	func init() {
+		// Override the implementation with our actual code.
+		// {{ .a.Name }}Impl = // Trigger intelisense, it would auto complete.
 	}
 `
 

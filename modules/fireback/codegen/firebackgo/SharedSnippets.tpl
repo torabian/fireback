@@ -2977,6 +2977,7 @@ type {{ $name }}Msgs struct {
   {{ $remoteQueryChildren := index . 3 }}
   {{ $childrenIn := index . 4 }}
   {{ $childrenOut := index . 5 }}
+  {{ $acts := index . 6 }}
 
 
 
@@ -3222,9 +3223,50 @@ type {{ $name }}Msgs struct {
 
 {{ end }}
 
+/// For emi, we also need to print the handlers
+{{ range $acts }} 
+var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query fireback.QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
+{{ end }}
 
 func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
 	routes := []{{ $wsprefix }}Module3Action{
+  //// Let's add actions for emi acts
+  {{ if $acts}}
+    {{ range $acts}}
+      {
+        CliName: {{ .Name }}ActionMeta().CliName,
+        Name:    {{ .Name }}ActionMeta().Name,
+        Method:  {{ .Name }}ActionMeta().Method,
+        Url:     {{ .Name }}ActionMeta().URL,
+        Handlers: []gin.HandlerFunc{
+          func(m *gin.Context) {
+            req := {{ .Name }}ActionRequest{
+              QueryParams: m.Request.URL.Query(),
+              Headers:     m.Request.Header,
+              GinCtx:      m,
+            }
+
+            var query fireback.QueryDSL
+            query = fireback.ExtractQueryDslFromGinContext(m)
+            resp, err := {{ .Name }}Impl(req, query)
+            emigo.WriteActionResponseToGin(m, resp, err)
+          },
+        },
+        CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+          query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
+          req := {{ .Name }}ActionRequest{}
+
+          resp, err := {{ .Name }}Impl(req, query)
+          fireback.HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
+
+          return nil
+        },
+      },
+    {{ end }}
+  {{ end }}
+  
+  /// End for emi actions
+
         {{ range $actions }}
 		{
 			Method: "{{ .MethodAllUpper }}",
