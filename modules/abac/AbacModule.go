@@ -3,9 +3,9 @@ package abac
 import (
 	"embed"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
@@ -190,36 +190,6 @@ func WrapData(v any) any {
 	}
 }
 
-// func CreateGinCommand() func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
-// 	return func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
-// 		method, url, h := CheckPassportMethods2ActionHandler(CheckPassportMethods2ActionImpl)
-// 		g.Handle(method, url, h)
-// 		return nil
-// 	}
-// }
-// var CheckPassportMethods2ActionImpl = func(c CheckPassportMethods2ActionRequest) (*CheckPassportMethods2ActionResponse, error) {
-// 	var query fireback.QueryDSL
-// 	if c.GinCtx == nil {
-// 		query = fireback.CommonCliQueryDSLBuilderAuthorize(c.CliCtx, CheckPassportMethodsSecurityModel)
-// 	} else {
-// 		query = fireback.ExtractQueryDslFromGinContext(c.GinCtx)
-// 	}
-
-// 	return CheckPassportMethods2Impl(c, query)
-// }
-
-// func CreateCliCommand() cli.Command {
-// 	return cli.Command{
-// 		Name:  "check-passport-methods2",
-// 		Usage: `Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)`,
-// 		Action: func(c *cli.Context) {
-// 			result, err := CheckPassportMethods2ActionImpl(CheckPassportMethods2ActionRequest{CliCtx: c})
-// 			fireback.HandleActionInCli2(c, result, err, map[string]map[string]string{})
-// 		},
-// 	}
-// }
-
-// Developer per action starts from here.
 var CheckPassportMethods2Impl = func(c CheckPassportMethods2ActionRequest, query fireback.QueryDSL) (*CheckPassportMethods2ActionResponse, error) {
 
 	resp, err := CheckPassportMethodsAction(query)
@@ -236,48 +206,11 @@ var CheckPassportMethods2Impl = func(c CheckPassportMethods2ActionRequest, query
 	}, nil
 }
 
-/**
-*	Each result from an action, either can directly access to Gin or Cli
-* Context and handle things over there, or can return an EmiAction Result
-** Which is standard for a quick result.
-**/
-type EmiActionResult interface {
-	GetStatusCode() int
-	GetRespHeaders() map[string]string
-	GetPayload() interface{}
-}
-
-func WriteActionResponseToGin(m *gin.Context, resp EmiActionResult, err error) {
-	if err != nil {
-		m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// If the handler returned nil (and no error), it means the response was handled manually.
-	if resp == nil {
-		return
-	}
-
-	// Apply headers
-	for k, v := range resp.GetRespHeaders() {
-		m.Header(k, v)
-	}
-
-	// Apply status and payload
-	status := resp.GetStatusCode()
-	if status == 0 {
-		status = http.StatusOK
-	}
-	if resp.GetPayload() != nil {
-		m.JSON(status, resp.GetPayload())
-	} else {
-		m.Status(status)
-	}
-}
-
 var AS_FIREBACK_ACTION = fireback.Module3Action{
-	Method: CheckPassportMethods2ActionMeta().Method,
-	Url:    CheckPassportMethods2ActionMeta().URL,
+	CliName: CheckPassportMethods2ActionMeta().CliName,
+	Name:    CheckPassportMethods2ActionMeta().Name,
+	Method:  CheckPassportMethods2ActionMeta().Method,
+	Url:     CheckPassportMethods2ActionMeta().URL,
 	Handlers: []gin.HandlerFunc{
 		func(m *gin.Context) {
 			req := CheckPassportMethods2ActionRequest{
@@ -289,16 +222,13 @@ var AS_FIREBACK_ACTION = fireback.Module3Action{
 			var query fireback.QueryDSL
 			query = fireback.ExtractQueryDslFromGinContext(m)
 			resp, err := CheckPassportMethods2Impl(req, query)
-			WriteActionResponseToGin(m, resp, err)
+			emigo.WriteActionResponseToGin(m, resp, err)
 		},
 	},
 	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
 		req := CheckPassportMethods2ActionRequest{
 			CliCtx: c,
-			// Can be casted from --qp-x-a, --h-aa
-			// QueryParams: ,
-			// Headers: ,
 		}
 
 		resp, err := CheckPassportMethods2Impl(req, query)
@@ -306,7 +236,4 @@ var AS_FIREBACK_ACTION = fireback.Module3Action{
 
 		return nil
 	},
-	CliName:     CheckPassportMethods2ActionMeta().CliName,
-	Name:        CheckPassportMethods2ActionMeta().Name,
-	Description: "new",
 }
