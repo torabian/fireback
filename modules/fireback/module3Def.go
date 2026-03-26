@@ -595,8 +595,13 @@ func (x Module3Entity) HasClickHouse() bool {
 
 func (x Module3Action) ToCli() cli.Command {
 
+	name := x.Name
+	if x.CliName != "" {
+		name = x.CliName
+	}
+
 	return cli.Command{
-		Name:        x.Name,
+		Name:        name,
 		Aliases:     x.ActionAliases,
 		Description: x.Description,
 		Usage:       x.Description,

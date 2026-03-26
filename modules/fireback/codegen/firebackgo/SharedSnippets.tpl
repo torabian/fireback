@@ -3226,27 +3226,60 @@ type {{ $name }}Msgs struct {
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
 {{ range $acts }} 
-var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query fireback.QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
+  var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query fireback.QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
 
- 
 
-{{ if .SecurityModel }}
-  var {{ .Name }}SecurityModel = &{{ $wsprefix }}SecurityModel{
-    ActionRequires: []{{ $wsprefix }}PermissionInfo{ 
-        {{ range .SecurityModel.ActionRequires }}
-            {
-              CompleteKey: "{{ .CompleteKey }}",
-            },
-        {{ end }}
-    },
-    {{ if and (.SecurityModel) (.SecurityModel.ResolveStrategy) }}
-      ResolveStrategy: "{{ .SecurityModel.ResolveStrategy }}",
-    {{ end }}
+  {{ if .SecurityModel }}
+    var {{ .Name }}SecurityModel = &{{ $wsprefix }}SecurityModel{
+      ActionRequires: []{{ $wsprefix }}PermissionInfo{ 
+          {{ range .SecurityModel.ActionRequires }}
+              {
+                CompleteKey: "{{ .CompleteKey }}",
+              },
+          {{ end }}
+      },
+      {{ if and (.SecurityModel) (.SecurityModel.ResolveStrategy) }}
+        ResolveStrategy: "{{ .SecurityModel.ResolveStrategy }}",
+      {{ end }}
 
-  }
+    }
   {{ else }}
-  var {{ .Name }}SecurityModel *{{ $wsprefix }}SecurityModel = nil
+    var {{ .Name }}SecurityModel *{{ $wsprefix }}SecurityModel = nil
   {{ end }}
+
+
+  // This can be both used as cli and http
+  var {{ .Name }}ActionDef {{ $wsprefix }}Module3Action = {{ $wsprefix }}Module3Action{
+    CliName: {{ .Name }}ActionMeta().CliName,
+    Description: {{ .Name }}ActionMeta().Description,
+    Name:    {{ .Name }}ActionMeta().Name,
+    Method:  {{ .Name }}ActionMeta().Method,
+    Url:     {{ .Name }}ActionMeta().URL,
+    SecurityModel: {{ .Name }}SecurityModel,
+    Handlers: []gin.HandlerFunc{
+      func(m *gin.Context) {
+        req := {{ .Name }}ActionRequest{
+          QueryParams: m.Request.URL.Query(),
+          Headers:     m.Request.Header,
+          GinCtx:      m,
+        }
+
+        var query {{ $wsprefix }}QueryDSL
+        query = {{ $wsprefix }}ExtractQueryDslFromGinContext(m)
+        resp, err := {{ .Name }}Impl(req, query)
+        {{ $wsprefix }}WriteActionResponseToGin(m, resp, err)
+      },
+    },
+    CliAction: func(c *cli.Context, security *{{ $wsprefix }}SecurityModel) error {
+      query := {{ $wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Name }}SecurityModel)
+      req := {{ .Name }}ActionRequest{}
+
+      resp, err := {{ .Name }}Impl(req, query)
+      {{ $wsprefix }}HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
+
+      return nil
+    },
+  }
 
 {{ end }}
 
@@ -3255,36 +3288,7 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
   //// Let's add actions for emi acts
   {{ if $acts}}
     {{ range $acts}}
-      {
-        CliName: {{ .Name }}ActionMeta().CliName,
-        Name:    {{ .Name }}ActionMeta().Name,
-        Method:  {{ .Name }}ActionMeta().Method,
-        Url:     {{ .Name }}ActionMeta().URL,
-        SecurityModel: {{ .Name }}SecurityModel,
-        Handlers: []gin.HandlerFunc{
-          func(m *gin.Context) {
-            req := {{ .Name }}ActionRequest{
-              QueryParams: m.Request.URL.Query(),
-              Headers:     m.Request.Header,
-              GinCtx:      m,
-            }
-
-            var query fireback.QueryDSL
-            query = fireback.ExtractQueryDslFromGinContext(m)
-            resp, err := {{ .Name }}Impl(req, query)
-            {{ $wsprefix }}WriteActionResponseToGin(m, resp, err)
-          },
-        },
-        CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
-          query := fireback.CommonCliQueryDSLBuilderAuthorize(c, {{ .Name }}SecurityModel)
-          req := {{ .Name }}ActionRequest{}
-
-          resp, err := {{ .Name }}Impl(req, query)
-          fireback.HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
-
-          return nil
-        },
-      },
+      {{ .Name }}ActionDef,
     {{ end }}
   {{ end }}
   

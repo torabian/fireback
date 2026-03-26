@@ -11,27 +11,30 @@ import (
 )
 
 /**
-* Action to communicate with the action CheckPassportMethods18Action
+* Action to communicate with the action CheckPassportMethodsAction
  */
-func CheckPassportMethods18ActionMeta() struct {
-	Name    string
-	CliName string
-	URL     string
-	Method  string
+func CheckPassportMethodsActionMeta() struct {
+	Name        string
+	CliName     string
+	URL         string
+	Method      string
+	Description string
 } {
 	return struct {
-		Name    string
-		CliName string
-		URL     string
-		Method  string
+		Name        string
+		CliName     string
+		URL         string
+		Method      string
+		Description string
 	}{
-		Name:    "CheckPassportMethods18Action",
-		CliName: "check-passport-methods18-action",
-		URL:     "/passports/available-methods22",
-		Method:  "GET",
+		Name:        "CheckPassportMethodsAction",
+		CliName:     "check-passport-methods",
+		URL:         "/passports/available-methods",
+		Method:      "GET",
+		Description: `Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)`,
 	}
 }
-func GetCheckPassportMethods18ActionResCliFlags(prefix string) []emigo.CliFlag {
+func GetCheckPassportMethodsActionResCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
 			Name: prefix + "email",
@@ -67,8 +70,8 @@ func GetCheckPassportMethods18ActionResCliFlags(prefix string) []emigo.CliFlag {
 		},
 	}
 }
-func CastCheckPassportMethods18ActionResFromCli(c emigo.CliCastable) CheckPassportMethods18ActionRes {
-	data := CheckPassportMethods18ActionRes{}
+func CastCheckPassportMethodsActionResFromCli(c emigo.CliCastable) CheckPassportMethodsActionRes {
+	data := CheckPassportMethodsActionRes{}
 	if c.IsSet("email") {
 		data.Email = bool(c.Bool("email"))
 	}
@@ -96,19 +99,19 @@ func CastCheckPassportMethods18ActionResFromCli(c emigo.CliCastable) CheckPasspo
 	return data
 }
 
-// The base class definition for checkPassportMethods18ActionRes
-type CheckPassportMethods18ActionRes struct {
+// The base class definition for checkPassportMethodsActionRes
+type CheckPassportMethodsActionRes struct {
 	Email                bool   `json:"email" yaml:"email"`
 	Phone                bool   `json:"phone" yaml:"phone"`
 	Google               bool   `json:"google" yaml:"google"`
 	Facebook             bool   `json:"facebook" yaml:"facebook"`
-	GoogleOAuthClientKey string `json:"googleOAuthClientKey" yaml:"googleOAuthClientKey"`
+	GoogleOAuthClientKey string `yaml:"googleOAuthClientKey" json:"googleOAuthClientKey"`
 	FacebookAppId        string `json:"facebookAppId" yaml:"facebookAppId"`
 	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" yaml:"enabledRecaptcha2"`
 	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"`
 }
 
-func (x *CheckPassportMethods18ActionRes) Json() string {
+func (x *CheckPassportMethodsActionRes) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return string(str)
@@ -116,41 +119,41 @@ func (x *CheckPassportMethods18ActionRes) Json() string {
 	return ""
 }
 
-type CheckPassportMethods18ActionResponse struct {
+type CheckPassportMethodsActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
 }
 
-func (x CheckPassportMethods18ActionResponse) GetStatusCode() int {
+func (x CheckPassportMethodsActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x CheckPassportMethods18ActionResponse) GetRespHeaders() map[string]string {
+func (x CheckPassportMethodsActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x CheckPassportMethods18ActionResponse) GetPayload() interface{} {
+func (x CheckPassportMethodsActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// CheckPassportMethods18ActionRaw registers a raw Gin route for the CheckPassportMethods18Action action.
+// CheckPassportMethodsActionRaw registers a raw Gin route for the CheckPassportMethodsAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func CheckPassportMethods18ActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := CheckPassportMethods18ActionMeta()
+func CheckPassportMethodsActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := CheckPassportMethodsActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-type CheckPassportMethods18ActionRequestSig = func(c CheckPassportMethods18ActionRequest) (*CheckPassportMethods18ActionResponse, error)
+type CheckPassportMethodsActionRequestSig = func(c CheckPassportMethodsActionRequest) (*CheckPassportMethodsActionResponse, error)
 
-// CheckPassportMethods18ActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CheckPassportMethods18Action action.
+// CheckPassportMethodsActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CheckPassportMethodsAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func CheckPassportMethods18ActionHandler(
-	handler CheckPassportMethods18ActionRequestSig,
+func CheckPassportMethodsActionHandler(
+	handler CheckPassportMethodsActionRequestSig,
 ) (method, url string, h gin.HandlerFunc) {
-	meta := CheckPassportMethods18ActionMeta()
+	meta := CheckPassportMethodsActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
 		// Build typed request wrapper
-		req := CheckPassportMethods18ActionRequest{
+		req := CheckPassportMethodsActionRequest{
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -181,26 +184,26 @@ func CheckPassportMethods18ActionHandler(
 	}
 }
 
-// CheckPassportMethods18Action is a high-level convenience wrapper around CheckPassportMethods18ActionHandler.
+// CheckPassportMethodsAction is a high-level convenience wrapper around CheckPassportMethodsActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func CheckPassportMethods18Action(r gin.IRoutes, handler CheckPassportMethods18ActionRequestSig) {
-	method, url, h := CheckPassportMethods18ActionHandler(handler)
+func CheckPassportMethodsActionGin(r gin.IRoutes, handler CheckPassportMethodsActionRequestSig) {
+	method, url, h := CheckPassportMethodsActionHandler(handler)
 	r.Handle(method, url, h)
 }
 
 /**
- * Query parameters for CheckPassportMethods18Action
+ * Query parameters for CheckPassportMethodsAction
  */
 // Query wrapper with private fields
-type CheckPassportMethods18ActionQuery struct {
+type CheckPassportMethodsActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
 }
 
-func CheckPassportMethods18ActionQueryFromString(rawQuery string) CheckPassportMethods18ActionQuery {
-	v := CheckPassportMethods18ActionQuery{}
+func CheckPassportMethodsActionQueryFromString(rawQuery string) CheckPassportMethodsActionQuery {
+	v := CheckPassportMethodsActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -218,42 +221,42 @@ func CheckPassportMethods18ActionQueryFromString(rawQuery string) CheckPassportM
 	v.mapped = mapped
 	return v
 }
-func CheckPassportMethods18ActionQueryFromGin(c *gin.Context) CheckPassportMethods18ActionQuery {
-	return CheckPassportMethods18ActionQueryFromString(c.Request.URL.RawQuery)
+func CheckPassportMethodsActionQueryFromGin(c *gin.Context) CheckPassportMethodsActionQuery {
+	return CheckPassportMethodsActionQueryFromString(c.Request.URL.RawQuery)
 }
-func CheckPassportMethods18ActionQueryFromHttp(r *http.Request) CheckPassportMethods18ActionQuery {
-	return CheckPassportMethods18ActionQueryFromString(r.URL.RawQuery)
+func CheckPassportMethodsActionQueryFromHttp(r *http.Request) CheckPassportMethodsActionQuery {
+	return CheckPassportMethodsActionQueryFromString(r.URL.RawQuery)
 }
-func (q CheckPassportMethods18ActionQuery) Values() url.Values {
+func (q CheckPassportMethodsActionQuery) Values() url.Values {
 	return q.values
 }
-func (q CheckPassportMethods18ActionQuery) Mapped() map[string]interface{} {
+func (q CheckPassportMethodsActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *CheckPassportMethods18ActionQuery) SetValues(v url.Values) {
+func (q *CheckPassportMethodsActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *CheckPassportMethods18ActionQuery) SetMapped(m map[string]interface{}) {
+func (q *CheckPassportMethodsActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type CheckPassportMethods18ActionRequest struct {
+type CheckPassportMethodsActionRequest struct {
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context
 }
-type CheckPassportMethods18ActionResult struct {
+type CheckPassportMethodsActionResult struct {
 	resp    *http.Response // embed original response
 	Payload interface{}
 }
 
-func CheckPassportMethods18ActionCall(
-	req CheckPassportMethods18ActionRequest,
+func CheckPassportMethodsActionCall(
+	req CheckPassportMethodsActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*CheckPassportMethods18ActionResult, error) {
+) (*CheckPassportMethodsActionResult, error) {
 	var httpReq *http.Request
 	if config == nil || config.Httpr == nil {
-		meta := CheckPassportMethods18ActionMeta()
+		meta := CheckPassportMethodsActionMeta()
 		baseURL := meta.URL
 		// Build final URL with query string
 		u, err := url.Parse(baseURL)
@@ -277,7 +280,7 @@ func CheckPassportMethods18ActionCall(
 	if err != nil {
 		return nil, err
 	}
-	var result CheckPassportMethods18ActionResult
+	var result CheckPassportMethodsActionResult
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)

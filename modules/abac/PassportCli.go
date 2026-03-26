@@ -127,7 +127,7 @@ var PassportCli cli.Command = cli.Command{
 		OsLoginAuthenticateActionCmd,
 		CreateRootUser,
 		PassportMethodCliFn(),
-		CheckPassportMethodsActionCmd,
+		CheckPassportMethodsActionDef.ToCli(),
 		UserPassportsActionCmd,
 		OauthAuthenticateActionCmd,
 		PassportWipeCmd,
