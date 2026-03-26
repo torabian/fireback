@@ -16,6 +16,7 @@ import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
 import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
+import { GResponse } from "../../sdk/sdk/envelopes";
 
 const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
   data: {
@@ -65,16 +66,18 @@ export class AuthMockServer {
   @method("get")
   async getAvailableMethods(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<CheckPassportMethodsActionRes>>> {
+  ): Promise<GResponse<CheckPassportMethodsActionRes>> {
     return {
       data: {
-        email: true,
-        enabledRecaptcha2: false,
-        google: null,
-        phone: true,
-        recaptcha2ClientKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
-      },
-    };
+        item: {
+          email: true,
+          enabledRecaptcha2: false,
+          google: null,
+          phone: true,
+          recaptcha2ClientKey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+        } as any,
+      } as any,
+    } as any;
   }
 
   @uriMatch("workspace/passport/check")

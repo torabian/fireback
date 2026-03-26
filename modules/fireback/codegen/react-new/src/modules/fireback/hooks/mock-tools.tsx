@@ -1,4 +1,5 @@
 import { withJsonQuery } from "./withJsonQuery";
+import { FetchxContext, TypedRequestInit } from "../sdk/sdk/common/fetchx";
 import { RemoteRequestOption } from "../definitions/JSONStyle";
 const { matchPattern } = require("url-matcher");
 
@@ -24,7 +25,7 @@ export function method(value: string) {
 
 export const mockExecFn = (
   options: RemoteRequestOption,
-  mockServerInstances: any[]
+  mockServerInstances: any[],
 ) => {
   return function (method: string, url: string, body: any) {
     const searchParams = new URLSearchParams(url);
@@ -93,7 +94,7 @@ export const emptyList = { data: { items: [] } } as any;
 export async function getJsonRaw(entity: string, ctx: Context) {
   return fetch(
     process.env.REACT_APP_PUBLIC_URL +
-      `md/${ctx.acceptLanguage || "en"}/${entity}.json`
+      `md/${ctx.acceptLanguage || "en"}/${entity}.json`,
   ).then((t) => t.json());
 }
 
@@ -117,7 +118,7 @@ function applyQueryDSL(items: Array<any>, ctx: Context): Array<any> {
 export async function getJsonList(entity: string, ctx: Context) {
   return fetch(
     process.env.REACT_APP_PUBLIC_URL +
-      `md/${ctx.acceptLanguage || "en"}/${entity}.json`
+      `md/${ctx.acceptLanguage || "en"}/${entity}.json`,
   ).then((t) => t.json());
 }
 export async function getJson(entity: string, ctx: Context) {
@@ -134,3 +135,42 @@ export async function getItemUid(entity: string, ctx: Context) {
     .then((resp) => resp.data.items.find((t: any) => t.uniqueId === uniqueId))
     .then((item) => ({ data: item }));
 }
+
+export const fetchXMock = (mockServer: any) =>
+  async function (
+    url: RequestInfo | URL,
+    init?: TypedRequestInit<any, any>,
+    ctx?: FetchxContext,
+  ): Promise<Response> {
+    console.info("Using mock handler to return response for: ", url);
+
+    try {
+      const res = await mockExecFn({ headers: {} }, mockServer.current)(
+        init.method,
+        `${url}`.replace(process.env.REACT_APP_REMOTE_SERVICE, ""),
+        init.body,
+      );
+      return new Response(JSON.stringify(res), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (err) {
+      console.error(
+        "Failure happen on mock server http request: ",
+        err,
+        "url: ",
+        url,
+      );
+      return new Response(
+        JSON.stringify({ error: { message: err.toString() } }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+    }
+  };

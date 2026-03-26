@@ -20,21 +20,30 @@ export class TypedResponse<T> extends Response {
 export async function fetchx<
   TResponse = unknown,
   TBody = unknown,
-  THeaders = unknown
+  THeaders = unknown,
 >(
   input: RequestInfo | URL,
   init?: TypedRequestInit<TBody, THeaders>,
-  ctx?: FetchxContext
+  ctx?: FetchxContext,
 ): Promise<TypedResponse<TResponse>> {
   let url = input.toString();
   let reqInit: TypedRequestInit<TBody, THeaders> = init || {};
   if (ctx) {
     [url, reqInit] = await ctx.apply(url, reqInit);
   }
-  let res = (await fetch(
+
+  let res: TypedResponse<TResponse>;
+  let fetchFn = fetch;
+  if (ctx.fetchOverrideFn) {
+    fetchFn = ctx.fetchOverrideFn;
+  }
+
+  res = (await fetchFn(
     url,
-    reqInit as RequestInit
+    reqInit as RequestInit,
+    ctx,
   )) as TypedResponse<TResponse>;
+
   if (ctx) {
     res = await ctx.handle(res);
   }
@@ -50,7 +59,7 @@ export async function handleFetchResponse<T>(
   res: TypedResponse<T>,
   dto?: DtoFactory<T>,
   onMessage?: (msg: any) => void,
-  signal?: AbortSignal | null
+  signal?: AbortSignal | null,
 ): Promise<{ done: Promise<void>; response: TypedResponse<T> }> {
   const ct = res.headers.get("content-type") || "";
   const cd = res.headers.get("content-disposition") || "";
@@ -81,7 +90,7 @@ export async function handleFetchResponse<T>(
 export const SSEFetch = <T = string>(
   res: TypedResponse<T>,
   onMessage?: (ev: MessageEvent) => void,
-  signal?: AbortSignal | null
+  signal?: AbortSignal | null,
 ): { response: TypedResponse<T>; done: Promise<void> } => {
   if (!res.body) throw new Error("SSE requires readable body");
   const reader = res.body.getReader();
@@ -127,19 +136,30 @@ export class FetchxContext {
   constructor(
     public baseUrl: string = "",
     public defaultHeaders: Record<string, string> = {},
+
+    /**
+     * Overrides the browser fetch function, for different purposes. It would recieve the same first 2 arguments as fetch,
+     * as well as third one of fetchx context. If you pass the fetch itself to override, it should have no effect.
+     */
+    public fetchOverrideFn: (
+      input: RequestInfo | URL,
+      init?: TypedRequestInit<TBody, THeaders>,
+      ctx?: FetchxContext,
+    ) => Promise<Response> = null,
+
     public requestInterceptor?: (
       url: string,
-      init: TypedRequestInit<any, any>
+      init: TypedRequestInit<any, any>,
     ) =>
       | Promise<[string, TypedRequestInit<any, any>]>
       | [string, TypedRequestInit<any, any>],
     public responseInterceptor?: <T>(
-      res: TypedResponse<T>
-    ) => Promise<TypedResponse<T>>
+      res: TypedResponse<T>,
+    ) => Promise<TypedResponse<T>>,
   ) {}
   async apply<T>(
     url: string,
-    init: TypedRequestInit<any, any>
+    init: TypedRequestInit<any, any>,
   ): Promise<[string, TypedRequestInit<any, any>]> {
     // prefix baseUrl
     if (!/^https?:\/\//.test(url)) {
@@ -167,7 +187,7 @@ export class FetchxContext {
       overrides?.baseUrl ?? this.baseUrl,
       { ...this.defaultHeaders, ...(overrides?.defaultHeaders || {}) },
       overrides?.requestInterceptor ?? this.requestInterceptor,
-      overrides?.responseInterceptor ?? this.responseInterceptor
+      overrides?.responseInterceptor ?? this.responseInterceptor,
     );
   }
 }
