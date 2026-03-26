@@ -283,6 +283,10 @@ func AskForPassword(label string, defaultV string) string {
 	return value
 }
 
+func HandleActionInCli2(c *cli.Context, result any, err error, t map[string]map[string]string) {
+	HandleActionInCli(c, result, CastToIError(err), t)
+}
+
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
 	f := CommonCliQueryDSLBuilder(c)
 

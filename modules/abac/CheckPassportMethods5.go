@@ -3,12 +3,18 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/urfave/cli"
+
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 )
+
+type GON interface {
+}
 
 /**
 * Action to communicate with the action CheckPassportMethods2Action
@@ -122,6 +128,18 @@ type CheckPassportMethods2ActionResponse struct {
 	Payload    interface{}
 }
 
+func (x CheckPassportMethods2ActionResponse) GetStatusCode() int {
+	return x.StatusCode
+}
+
+func (x CheckPassportMethods2ActionResponse) GetRespHeaders() map[string]string {
+	return x.Headers
+}
+
+func (x CheckPassportMethods2ActionResponse) GetPayload() interface{} {
+	return x.Payload
+}
+
 // CheckPassportMethods2ActionRaw registers a raw Gin route for the CheckPassportMethods2Action action.
 // This gives the developer full control over middleware, handlers, and response handling.
 func CheckPassportMethods2ActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
@@ -129,7 +147,7 @@ func CheckPassportMethods2ActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) 
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-type CheckPassportMethods2ActionRequestSig = func(c CheckPassportMethods2ActionRequest, gin *gin.Context) (*CheckPassportMethods2ActionResponse, error)
+type CheckPassportMethods2ActionRequestSig = func(c CheckPassportMethods2ActionRequest) (*CheckPassportMethods2ActionResponse, error)
 
 // CheckPassportMethods2ActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CheckPassportMethods2Action action.
 // Developers implement their business logic as a function that receives a typed request object
@@ -143,8 +161,9 @@ func CheckPassportMethods2ActionHandler(
 		req := CheckPassportMethods2ActionRequest{
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
+			GinCtx:      m,
 		}
-		resp, err := handler(req, m)
+		resp, err := handler(req)
 		if err != nil {
 			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -229,6 +248,8 @@ func (q *CheckPassportMethods2ActionQuery) SetMapped(m map[string]interface{}) {
 type CheckPassportMethods2ActionRequest struct {
 	QueryParams url.Values
 	Headers     http.Header
+	GinCtx      *gin.Context
+	CliCtx      *cli.Context
 }
 type CheckPassportMethods2ActionResult struct {
 	resp    *http.Response // embed original response

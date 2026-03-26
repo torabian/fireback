@@ -5,7 +5,7 @@ acts:
     description: 
       Publicly available information to create the authentication form, and show users
       how they can signin or signup to the system. Based on the PassportMethod entities,
-      it will compute the available methods for the user, considering their region (IP for example)
+      it will compute the available methods for the user, considering their region (IP for example).
     method: get
     out:
       envelope: GResponse
