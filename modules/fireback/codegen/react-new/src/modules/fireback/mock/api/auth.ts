@@ -8,10 +8,10 @@ import {
 } from "../../hooks/mock-tools";
 import {
   CheckClassicPassportActionResDto,
-  CheckPassportMethodsActionResDto,
   ClassicSignupActionResDto,
   ConfirmClassicPassportTotpActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
+import { CheckPassportMethodsActionRes } from "../../sdk/modules/abac/CheckPassportMethods";
 import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
@@ -32,7 +32,7 @@ export class AuthMockServer {
   @uriMatch("passport/authorizeOs")
   @method("post")
   async passportAuthroizeOs(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
   }
@@ -40,7 +40,7 @@ export class AuthMockServer {
   @uriMatch("users/invitations")
   @method("get")
   async getUserInvites(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponseList<DeepPartial<WorkspaceInviteEntity>>> {
     return emptyList;
   }
@@ -48,7 +48,7 @@ export class AuthMockServer {
   @uriMatch("passports/signin/classic")
   @method("post")
   async postSigninClassic(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
   }
@@ -56,7 +56,7 @@ export class AuthMockServer {
   @uriMatch("passport/request-reset-mail-password")
   @method("post")
   async postRequestResetMail(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
   }
@@ -64,8 +64,8 @@ export class AuthMockServer {
   @uriMatch("passports/available-methods")
   @method("get")
   async getAvailableMethods(
-    ctx: Context
-  ): Promise<IResponse<DeepPartial<CheckPassportMethodsActionResDto>>> {
+    ctx: Context,
+  ): Promise<IResponse<DeepPartial<CheckPassportMethodsActionRes>>> {
     return {
       data: {
         email: true,
@@ -80,7 +80,7 @@ export class AuthMockServer {
   @uriMatch("workspace/passport/check")
   @method("post")
   async postWorkspacePassportCheck(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<CheckClassicPassportActionResDto>>> {
     const isEmail = ctx?.body?.value.includes("@");
 
@@ -106,7 +106,7 @@ export class AuthMockServer {
   @uriMatch("passports/signup/classic")
   @method("post")
   async postPassportSignupClassic(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<ClassicSignupActionResDto>>> {
     const isEmail = ctx?.body?.value.includes("@");
 
@@ -125,7 +125,7 @@ export class AuthMockServer {
   @uriMatch("passport/totp/confirm")
   @method("post")
   async postConfirm(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionResDto>>> {
     return {
       data: {
@@ -137,7 +137,7 @@ export class AuthMockServer {
   @uriMatch("workspace/passport/otp")
   @method("post")
   async postOtp(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionResDto>>> {
     return {
       data: {
@@ -149,7 +149,7 @@ export class AuthMockServer {
   @uriMatch("workspace/public/types")
   @method("get")
   async getWorkspaceTypes(
-    ctx: Context
+    ctx: Context,
   ): Promise<IResponseList<DeepPartial<WorkspaceTypeEntity>>> {
     return {
       data: {

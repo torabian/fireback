@@ -16,40 +16,40 @@ import {
 import { useFetchxContext } from "../../sdk/react/useFetchx";
 import { useState } from "react";
 /**
- * Action to communicate with the action CheckPassportMethods2
+ * Action to communicate with the action CheckPassportMethods
  */
-export type CheckPassportMethods2ActionOptions = {
+export type CheckPassportMethodsActionOptions = {
   queryKey?: unknown[];
   qs?: URLSearchParams;
 };
-export type CheckPassportMethods2ActionQueryOptions = Omit<
+export type CheckPassportMethodsActionQueryOptions = Omit<
   UseQueryOptions<
     unknown,
     unknown,
-    GResponse<CheckPassportMethods2ActionRes>,
+    GResponse<CheckPassportMethodsActionRes>,
     unknown[]
   >,
   "queryKey"
 > &
-  CheckPassportMethods2ActionOptions &
+  CheckPassportMethodsActionOptions &
   Partial<{
-    creatorFn: (item: unknown) => CheckPassportMethods2ActionRes;
+    creatorFn: (item: unknown) => CheckPassportMethodsActionRes;
   }> & {
     onMessage?: (ev: MessageEvent) => void;
     overrideUrl?: string;
     headers?: Headers;
     ctx?: FetchxContext;
   };
-export const useCheckPassportMethods2ActionQuery = (
-  options: CheckPassportMethods2ActionQueryOptions,
+export const useCheckPassportMethodsActionQuery = (
+  options: CheckPassportMethodsActionQueryOptions,
 ) => {
   const globalCtx = useFetchxContext();
   const ctx = options?.ctx ?? globalCtx ?? undefined;
   const [isCompleted, setCompleteState] = useState(false);
   const [response, setResponse] = useState<TypedResponse<unknown>>();
-  const fn: any = () => {
+  const fn = () => {
     setCompleteState(false);
-    return CheckPassportMethods2Action.Fetch(
+    return CheckPassportMethodsAction.Fetch(
       {
         headers: options?.headers,
       },
@@ -68,9 +68,8 @@ export const useCheckPassportMethods2ActionQuery = (
       return x.response.result;
     });
   };
-
   const result = useQuery({
-    queryKey: [CheckPassportMethods2Action.NewUrl(options?.qs)],
+    queryKey: [CheckPassportMethodsAction.NewUrl(options?.qs)],
     queryFn: fn,
     ...(options || {}),
   });
@@ -80,20 +79,20 @@ export const useCheckPassportMethods2ActionQuery = (
     response,
   };
 };
-export type CheckPassportMethods2ActionMutationOptions = Omit<
+export type CheckPassportMethodsActionMutationOptions = Omit<
   UseMutationOptions<unknown, unknown, unknown, unknown>,
   "mutationFn"
 > &
-  CheckPassportMethods2ActionOptions & {
+  CheckPassportMethodsActionOptions & {
     ctx?: FetchxContext;
     onMessage?: (ev: MessageEvent) => void;
     overrideUrl?: string;
     headers?: Headers;
   } & Partial<{
-    creatorFn: (item: unknown) => CheckPassportMethods2ActionRes;
+    creatorFn: (item: unknown) => CheckPassportMethodsActionRes;
   }>;
-export const useCheckPassportMethods2Action = (
-  options?: CheckPassportMethods2ActionMutationOptions,
+export const useCheckPassportMethodsAction = (
+  options?: CheckPassportMethodsActionMutationOptions,
 ) => {
   const globalCtx = useFetchxContext();
   const ctx = options?.ctx ?? globalCtx ?? undefined;
@@ -101,7 +100,7 @@ export const useCheckPassportMethods2Action = (
   const [response, setResponse] = useState<TypedResponse<unknown>>();
   const fn = (body: unknown) => {
     setCompleteState(false);
-    return CheckPassportMethods2Action.Fetch(
+    return CheckPassportMethodsAction.Fetch(
       {
         body,
         headers: options?.headers,
@@ -132,13 +131,13 @@ export const useCheckPassportMethods2Action = (
   };
 };
 /**
- * CheckPassportMethods2Action
+ * CheckPassportMethodsAction
  */
-export class CheckPassportMethods2Action {
+export class CheckPassportMethodsAction {
   //
-  static URL = "/passports/available-methods2";
+  static URL = "/passports/available-methods";
   static NewUrl = (qs?: URLSearchParams) =>
-    buildUrl(CheckPassportMethods2Action.URL, undefined, qs);
+    buildUrl(CheckPassportMethodsAction.URL, undefined, qs);
   static Method = "get";
   static Fetch$ = async (
     qs?: URLSearchParams,
@@ -146,10 +145,10 @@ export class CheckPassportMethods2Action {
     init?: TypedRequestInit<unknown, unknown>,
     overrideUrl?: string,
   ) => {
-    return fetchx<GResponse<CheckPassportMethods2ActionRes>, unknown, unknown>(
-      overrideUrl ?? CheckPassportMethods2Action.NewUrl(qs),
+    return fetchx<GResponse<CheckPassportMethodsActionRes>, unknown, unknown>(
+      overrideUrl ?? CheckPassportMethodsAction.NewUrl(qs),
       {
-        method: CheckPassportMethods2Action.Method,
+        method: CheckPassportMethodsAction.Method,
         ...(init || {}),
       },
       ctx,
@@ -165,28 +164,28 @@ export class CheckPassportMethods2Action {
       overrideUrl,
     }: {
       creatorFn?:
-        | ((item: unknown) => CheckPassportMethods2ActionRes)
+        | ((item: unknown) => CheckPassportMethodsActionRes)
         | undefined;
       qs?: URLSearchParams;
       ctx?: FetchxContext;
       onMessage?: (ev: MessageEvent) => void;
       overrideUrl?: string;
     } = {
-      creatorFn: (item) => new CheckPassportMethods2ActionRes(item),
+      creatorFn: (item) => new CheckPassportMethodsActionRes(item),
     },
   ) => {
     creatorFn =
-      creatorFn || ((item) => new CheckPassportMethods2ActionRes(item));
-    const res = await CheckPassportMethods2Action.Fetch$(
+      creatorFn || ((item) => new CheckPassportMethodsActionRes(item));
+    const res = await CheckPassportMethodsAction.Fetch$(
       qs,
       ctx,
       init,
       overrideUrl,
     );
-    const x = handleFetchResponse(
+    return handleFetchResponse(
       res,
       (data) => {
-        const resp = new GResponse<CheckPassportMethods2ActionRes>();
+        const resp = new GResponse<CheckPassportMethodsActionRes>();
         if (creatorFn) {
           resp.setCreator(creatorFn);
         }
@@ -196,12 +195,11 @@ export class CheckPassportMethods2Action {
       onMessage,
       init?.signal,
     );
-
-    return x;
   };
   static Definition = {
-    name: "CheckPassportMethods2",
-    url: "/passports/available-methods2",
+    name: "CheckPassportMethods",
+    cliName: "check-passport-methods",
+    url: "/passports/available-methods",
     method: "get",
     description:
       "Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)",
@@ -250,9 +248,9 @@ export class CheckPassportMethods2Action {
   };
 }
 /**
- * The base class definition for checkPassportMethods2ActionRes
+ * The base class definition for checkPassportMethodsActionRes
  **/
-export class CheckPassportMethods2ActionRes {
+export class CheckPassportMethodsActionRes {
   /**
    *
    * @type {boolean}
@@ -472,7 +470,7 @@ export class CheckPassportMethods2ActionRes {
    * casts the fields of a javascript object into the class properties one by one
    **/
   applyFromObject(data = {}) {
-    const d = data as Partial<CheckPassportMethods2ActionRes>;
+    const d = data as Partial<CheckPassportMethodsActionRes>;
     if (d.email !== undefined) {
       this.email = d.email;
     }
@@ -530,34 +528,34 @@ export class CheckPassportMethods2ActionRes {
     };
   }
   /**
-   * Creates an instance of CheckPassportMethods2ActionRes, and possibleDtoObject
+   * Creates an instance of CheckPassportMethodsActionRes, and possibleDtoObject
    * needs to satisfy the type requirement fully, otherwise typescript compile would
    * be complaining.
    **/
-  static from(possibleDtoObject: CheckPassportMethods2ActionResType) {
-    return new CheckPassportMethods2ActionRes(possibleDtoObject);
+  static from(possibleDtoObject: CheckPassportMethodsActionResType) {
+    return new CheckPassportMethodsActionRes(possibleDtoObject);
   }
   /**
-   * Creates an instance of CheckPassportMethods2ActionRes, and partialDtoObject
+   * Creates an instance of CheckPassportMethodsActionRes, and partialDtoObject
    * needs to satisfy the type, but partially, and rest of the content would
    * be constructed according to data types and nullability.
    **/
   static with(
-    partialDtoObject: PartialDeep<CheckPassportMethods2ActionResType>,
+    partialDtoObject: PartialDeep<CheckPassportMethodsActionResType>,
   ) {
-    return new CheckPassportMethods2ActionRes(partialDtoObject);
+    return new CheckPassportMethodsActionRes(partialDtoObject);
   }
   copyWith(
-    partial: PartialDeep<CheckPassportMethods2ActionResType>,
-  ): InstanceType<typeof CheckPassportMethods2ActionRes> {
-    return new CheckPassportMethods2ActionRes({ ...this.toJSON(), ...partial });
+    partial: PartialDeep<CheckPassportMethodsActionResType>,
+  ): InstanceType<typeof CheckPassportMethodsActionRes> {
+    return new CheckPassportMethodsActionRes({ ...this.toJSON(), ...partial });
   }
-  clone(): InstanceType<typeof CheckPassportMethods2ActionRes> {
-    return new CheckPassportMethods2ActionRes(this.toJSON());
+  clone(): InstanceType<typeof CheckPassportMethodsActionRes> {
+    return new CheckPassportMethodsActionRes(this.toJSON());
   }
 }
-export abstract class CheckPassportMethods2ActionResFactory {
-  abstract create(data: unknown): CheckPassportMethods2ActionRes;
+export abstract class CheckPassportMethodsActionResFactory {
+  abstract create(data: unknown): CheckPassportMethodsActionRes;
 }
 type PartialDeep<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
@@ -567,9 +565,9 @@ type PartialDeep<T> = {
       : T[P];
 };
 /**
- * The base type definition for checkPassportMethods2ActionRes
+ * The base type definition for checkPassportMethodsActionRes
  **/
-export type CheckPassportMethods2ActionResType = {
+export type CheckPassportMethodsActionResType = {
   /**
    *
    * @type {boolean}
@@ -612,4 +610,4 @@ export type CheckPassportMethods2ActionResType = {
   recaptcha2ClientKey: string;
 };
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace CheckPassportMethods2ActionResType {}
+export namespace CheckPassportMethodsActionResType {}

@@ -3,11 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
-import {
-  CheckPassportMethodsActionResDto,
-  ClassicSigninActionReqDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
-import { useCheckPassportMethods2ActionQuery } from "../../sdk/modules/abac/CheckPassportMethods2";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { useCheckPassportMethodsActionQuery } from "../../sdk/modules/abac/CheckPassportMethods";
 import {
   AuthAvailableMethods,
   AuthMethod,
@@ -22,7 +19,7 @@ export const usePresenter = () => {
     Partial<ClassicSigninActionReqDto>
   > | null>();
 
-  const query = useCheckPassportMethods2ActionQuery({});
+  const query = useCheckPassportMethodsActionQuery({});
 
   useTemporaryParamOptions(["redirect_temporary", "workspace_type_id"]);
 
@@ -33,7 +30,7 @@ export const usePresenter = () => {
     ? Object.values(availableOptions).filter(Boolean).length
     : undefined;
 
-  const methodData: CheckPassportMethodsActionResDto = query.data?.data?.item;
+  const methodData = query.data?.data?.item;
 
   const onSelect = (value: AuthMethod, canGoBack = true) => {
     switch (value) {

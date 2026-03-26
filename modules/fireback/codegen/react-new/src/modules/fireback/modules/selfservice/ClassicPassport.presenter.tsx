@@ -7,9 +7,9 @@ import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { CheckClassicPassportActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import {
-  CheckPassportMethods2ActionRes,
-  useCheckPassportMethods2ActionQuery,
-} from "../../sdk/modules/abac/CheckPassportMethods2";
+  CheckPassportMethodsActionRes,
+  useCheckPassportMethodsActionQuery,
+} from "../../sdk/modules/abac/CheckPassportMethods";
 import { usePostWorkspacePassportCheck } from "../../sdk/modules/abac/usePostWorkspacePassportCheck";
 import { GResponse } from "../../sdk/sdk/envelopes";
 import { AuthMethod } from "./auth.common";
@@ -25,11 +25,11 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   let enabledRecaptcha2 = false;
   let recaptcha2ClientKey = "";
 
-  const { data } = useCheckPassportMethods2ActionQuery({});
+  const { data } = useCheckPassportMethodsActionQuery({});
 
   if (
     data instanceof GResponse &&
-    data.data.item instanceof CheckPassportMethods2ActionRes
+    data.data.item instanceof CheckPassportMethodsActionRes
   ) {
     enabledRecaptcha2 = data?.data?.item.enabledRecaptcha2;
     recaptcha2ClientKey = data?.data?.item?.recaptcha2ClientKey;
