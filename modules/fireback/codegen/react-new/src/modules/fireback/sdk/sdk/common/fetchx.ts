@@ -28,22 +28,18 @@ export async function fetchx<
 ): Promise<TypedResponse<TResponse>> {
   let url = input.toString();
   let reqInit: TypedRequestInit<TBody, THeaders> = init || {};
-  if (ctx) {
-    [url, reqInit] = await ctx.apply(url, reqInit);
-  }
-
   let res: TypedResponse<TResponse>;
   let fetchFn = fetch;
-  if (ctx.fetchOverrideFn) {
-    fetchFn = ctx.fetchOverrideFn;
+  if (ctx) {
+    [url, reqInit] = await ctx.apply(url, reqInit);
+    if (ctx.fetchOverrideFn) {
+      fetchFn = ctx.fetchOverrideFn;
+    }
   }
-
   res = (await fetchFn(
     url,
     reqInit as RequestInit,
-    ctx,
   )) as TypedResponse<TResponse>;
-
   if (ctx) {
     res = await ctx.handle(res);
   }
@@ -136,17 +132,6 @@ export class FetchxContext {
   constructor(
     public baseUrl: string = "",
     public defaultHeaders: Record<string, string> = {},
-
-    /**
-     * Overrides the browser fetch function, for different purposes. It would recieve the same first 2 arguments as fetch,
-     * as well as third one of fetchx context. If you pass the fetch itself to override, it should have no effect.
-     */
-    public fetchOverrideFn: (
-      input: RequestInfo | URL,
-      init?: TypedRequestInit<TBody, THeaders>,
-      ctx?: FetchxContext,
-    ) => Promise<Response> = null,
-
     public requestInterceptor?: (
       url: string,
       init: TypedRequestInit<any, any>,
@@ -156,6 +141,14 @@ export class FetchxContext {
     public responseInterceptor?: <T>(
       res: TypedResponse<T>,
     ) => Promise<TypedResponse<T>>,
+    /**
+     * Overrides the browser fetch function, for different purposes. It would recieve the same first 2 arguments as fetch,
+     * as well as third one of fetchx context. If you pass the fetch itself to override, it should have no effect.
+     */
+    public fetchOverrideFn: (
+      input: RequestInfo | URL,
+      init?: TypedRequestInit,
+    ) => Promise<Response> = null,
   ) {}
   async apply<T>(
     url: string,
