@@ -60,7 +60,7 @@ type Module3 struct {
 	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
 
 	// Actions based on Emi compiler - aims to replace the actions from Fireback
-	Acts []*emi.EmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
+	Acts []*FirebackEmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
 
 	// Dtos based on Emi definitions
 	Dtom []*emi.EmiDto `yaml:"dtom,omitempty" json:"dtom,omitempty" jsonschema:"description=Dtos based on Emi definitions"`

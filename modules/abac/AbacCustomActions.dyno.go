@@ -6,12 +6,12 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"reflect"
+
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
-)
-import (
-	"reflect"
 )
 
 // using shared actions here
@@ -1821,7 +1821,7 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-/// For emi, we also need to print the handlers
+// / For emi, we also need to print the handlers
 var CheckPassportMethods18Impl func(c CheckPassportMethods18ActionRequest, query fireback.QueryDSL) (*CheckPassportMethods18ActionResponse, error) = nil
 
 func AbacCustomActions() []fireback.Module3Action {
