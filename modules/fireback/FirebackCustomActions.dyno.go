@@ -108,8 +108,12 @@ var CapabilitiesTreeActionCmd cli.Command = cli.Command{
 	},
 }
 
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
+		//// Let's add actions for emi acts
+		/// End for emi actions
 		{
 			Method:        "REACTIVE",
 			Url:           "/ws",
