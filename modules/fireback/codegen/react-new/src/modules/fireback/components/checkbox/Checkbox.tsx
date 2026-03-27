@@ -1,5 +1,5 @@
-import { IndeterminateCheck } from "../../definitions/definitions";
-import { HTMLProps, useEffect, useRef } from "react";
+import { type IndeterminateCheck } from "../../definitions/definitions";
+import { type HTMLProps, useEffect, useRef } from "react";
 
 export function Checkbox({
   value,

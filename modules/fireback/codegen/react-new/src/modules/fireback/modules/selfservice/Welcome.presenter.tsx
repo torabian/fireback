@@ -1,4 +1,4 @@
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
@@ -6,7 +6,7 @@ import { useT } from "../../hooks/useT";
 import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import { useCheckPassportMethodsActionQuery } from "../../sdk/modules/abac/CheckPassportMethods";
 import {
-  AuthAvailableMethods,
+  type AuthAvailableMethods,
   AuthMethod,
   useTemporaryParamOptions,
 } from "./auth.common";

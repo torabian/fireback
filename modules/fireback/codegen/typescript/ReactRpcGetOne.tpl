@@ -5,22 +5,21 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-import { FormikHelpers } from "formik";
+import { type FormikHelpers } from "formik";
 import React, { useCallback, useContext } from "react";
-import { useMutation, useQuery, useQueryClient, QueryClient , UseQueryOptions} from "react-query";
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions} from "react-query";
 import {
   execApiFn,
-  RemoteRequestOption,
-  IDeleteResponse,
-  IResponse,
-  ExecApi,
+  type RemoteRequestOption,
+  type IDeleteResponse,
+  type IResponse,
   mutationErrorsToFormik,
-  IResponseList
+  type IResponseList
 } from "../../core/http-tools";
 import {
   RemoteQueryContext,
   queryBeforeSend,
-  UseRemoteQuery
+  type UseRemoteQuery
 } from "../../core/react-tools";
 
 export function use{{ .r.GetFuncNameUpper}}({ 

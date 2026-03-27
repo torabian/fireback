@@ -3,17 +3,17 @@ import "react-data-grid/lib/styles.css";
 import { debounce } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 import {
-  CalculatedColumn,
+  type CalculatedColumn,
   DataGrid,
-  DataGridHandle,
+  type DataGridHandle,
   SelectColumn,
 } from "react-data-grid";
-import { UseQueryResult } from "react-query";
+import { type UseQueryResult } from "react-query";
 import { useLocation } from "react-router-dom";
-import { DatatableColumn } from "../../definitions/definitions";
-import { Udf } from "../../hooks/useDatatableFiltering";
+import { type DatatableColumn } from "../../definitions/definitions";
+import { type Udf } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
-import { castColumns, TableColumnWidthInfo } from "./PaginateUtils";
+import { castColumns, type TableColumnWidthInfo } from "./PaginateUtils";
 import { useReindexedContent } from "./useReindex";
 
 export function PaginateTable({

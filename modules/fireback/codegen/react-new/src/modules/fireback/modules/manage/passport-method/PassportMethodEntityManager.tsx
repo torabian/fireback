@@ -1,7 +1,7 @@
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { PassportMethodForm } from "./PassportMethodEditForm";
 import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";

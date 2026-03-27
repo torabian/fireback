@@ -1,25 +1,21 @@
-import { QueryArchiveColumn } from "../../definitions/common";
-import { Filter } from "../../definitions/definitions";
-import { dxFilterToSqlAlike } from "../../hooks/datatabletools";
+import {
+  DataTypeProvider,
+  type Sorting,
+  type TableColumnWidthInfo,
+} from "@devexpress/dx-react-grid";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "react-query";
+import { type QueryArchiveColumn } from "../../definitions/common";
+import { type Filter } from "../../definitions/definitions";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
 import { useGetTableViewSizingByUniqueId } from "../../sdk/modules/abac/useGetTableViewSizingByUniqueId";
 import { usePatchTableViewSizing } from "../../sdk/modules/abac/usePatchTableViewSizing";
-import {
-  DataTypeProvider,
-  Sorting,
-  TableColumnWidthInfo,
-} from "@devexpress/dx-react-grid";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "react-query";
-import { CommonDataTable } from "../common-data-table/CommonDataTable";
+import { PaginateTable } from "../common-data-table/PaginateTable";
 import Link from "../link/Link";
 import { filtersToJsonQuery } from "./EnttityManagerHelper";
-import { CardComponentType, FlatListMode } from "./FlatListMode";
+import { type CardComponentType, FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
-import { CopyCell } from "./CopyCell";
-import { OpenInNewRouter } from "./OpenInNewRouter";
-import { PaginateTable } from "../common-data-table/PaginateTable";
 
 const media = matchMedia("(max-width: 600px)");
 

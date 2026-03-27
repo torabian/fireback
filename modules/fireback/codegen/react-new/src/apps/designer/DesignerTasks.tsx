@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module3Task } from "./defs";
+import { type Module3Task } from "./defs";
 import { TaskEditor } from "./TaskEditor";
 
 import { Arrow } from "./Arrow";

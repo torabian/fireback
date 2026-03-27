@@ -5,7 +5,7 @@
 import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { KeyboardAction, PermissionLevel } from "../../definitions/definitions";
+import { KeyboardAction, type PermissionLevel } from "../../definitions/definitions";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";

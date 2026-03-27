@@ -1,6 +1,6 @@
 import {
   FormDateTimeRange,
-  FormDateTimeRangeProps,
+  type FormDateTimeRangeProps,
 } from "../form-datetime-range/FormDateTimeRange";
 
 export const FormDateRange = (props: FormDateTimeRangeProps) => {

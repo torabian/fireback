@@ -1,4 +1,4 @@
-import { MenuItem } from "../../definitions/common";
+import { type MenuItem } from "../../definitions/common";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
 

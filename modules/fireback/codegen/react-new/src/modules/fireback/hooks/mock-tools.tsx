@@ -1,6 +1,6 @@
 import { withJsonQuery } from "./withJsonQuery";
-import { FetchxContext, TypedRequestInit } from "../sdk/sdk/common/fetchx";
-import { RemoteRequestOption } from "../definitions/JSONStyle";
+import { FetchxContext, type TypedRequestInit } from "../sdk/sdk/common/fetchx";
+import { type RemoteRequestOption } from "../definitions/JSONStyle";
 const { matchPattern } = require("url-matcher");
 
 export type Context = any;

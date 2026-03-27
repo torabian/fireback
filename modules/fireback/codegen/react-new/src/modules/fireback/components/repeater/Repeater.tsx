@@ -1,7 +1,7 @@
 import { uuidv4 } from "../../hooks/api";
 import { source } from "../../hooks/source";
 import { useT } from "../../hooks/useT";
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import { osResources } from "../../resources/resources";
 
 export function Repeater({

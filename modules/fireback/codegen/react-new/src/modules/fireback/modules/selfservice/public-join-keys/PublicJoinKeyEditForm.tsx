@@ -1,5 +1,5 @@
 import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
+import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
 import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";

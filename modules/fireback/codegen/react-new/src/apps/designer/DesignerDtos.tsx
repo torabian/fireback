@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module3Dto } from "./defs";
+import { type Module3Dto } from "./defs";
 import { DtoEditor } from "./DtoEditor";
 
 import { Arrow } from "./Arrow";

@@ -11,35 +11,34 @@ import {
 } from "@devexpress/dx-react-grid-bootstrap4";
 
 import {
-  ChangeSet,
-  Column,
+  type ChangeSet,
+  type Column,
   EditingState,
   FilteringState,
   IntegratedSelection,
-  Row,
+  type Row,
   RowDetailState,
   SelectionState,
   SortingState,
-  TableColumnWidthInfo,
+  type TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
-import { UseQueryResult, useQueryClient } from "react-query";
+import { type UseQueryResult, useQueryClient } from "react-query";
 import { LineLoader } from "../line-loader/LineLoader";
 
+import classNames from "classnames";
+import React, { useRef } from "react";
 import {
-  DatatableColumn,
-  KeyboardAction,
-  NumericKeys,
+  type DatatableColumn,
+  NumericKeys
 } from "../../definitions/definitions";
 import { httpErrorHanlder } from "../../hooks/api";
+import { useKeyCombination } from "../../hooks/useKeyPress";
 import { useT } from "../../hooks/useT";
-import classNames from "classnames";
-import React, { useRef, useState } from "react";
+import { Checkbox } from "../checkbox/Checkbox";
 import { QueryErrorView } from "../error-view/QueryError";
 import { WithPermissions } from "../layouts/WithPermissions";
 import { CustomPageSize } from "./CustomPageSize";
 import { CustomPagination } from "./CustomPagination";
-import { useKeyCombination } from "../../hooks/useKeyPress";
-import { Checkbox } from "../checkbox/Checkbox";
 
 const TableActivityIndicator = ({
   query,

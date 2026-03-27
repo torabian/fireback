@@ -1,5 +1,5 @@
 import { dataMenuToMenu } from "../components/layouts/Sidebar";
-import { MenuItem } from "../definitions/common";
+import { type MenuItem } from "../definitions/common";
 import { useGetCteAppMenus } from "../sdk/modules/abac/useGetCteAppMenus";
 import { useContext, useEffect } from "react";
 import { useQueryClient } from "react-query";

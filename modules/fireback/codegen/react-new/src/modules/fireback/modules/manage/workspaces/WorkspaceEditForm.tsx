@@ -1,5 +1,5 @@
 import { FormText } from "../../../components/forms/form-text/FormText";
-import { EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
 import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
 

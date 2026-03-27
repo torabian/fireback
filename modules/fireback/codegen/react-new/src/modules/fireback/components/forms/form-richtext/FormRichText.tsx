@@ -10,7 +10,7 @@ import { useT } from "../../../hooks/useT";
 import { Blob } from "buffer";
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 import { addKatexSupport } from "./katex";
 

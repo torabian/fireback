@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import { useLocale } from "../../../hooks/useLocale";
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 import "react-datetime/css/react-datetime.css";
 import Datetime from "react-datetime";

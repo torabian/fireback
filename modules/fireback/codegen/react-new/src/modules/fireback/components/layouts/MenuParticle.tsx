@@ -1,7 +1,7 @@
 import {
-  MenuItem,
-  MenuItemRendered,
-  MenuRendered,
+  type MenuItem,
+  type MenuItemRendered,
+  type MenuRendered,
 } from "../../definitions/common";
 import { useLocale } from "../../hooks/useLocale";
 import classNames from "classnames";

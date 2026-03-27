@@ -1,4 +1,4 @@
-import { Filter } from "../../definitions/definitions";
+import { type Filter } from "../../definitions/definitions";
 import { set } from "lodash";
 
 /**

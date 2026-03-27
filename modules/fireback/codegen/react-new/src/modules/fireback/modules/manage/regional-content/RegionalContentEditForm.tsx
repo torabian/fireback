@@ -1,4 +1,4 @@
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
+import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
 import { useContext } from "react";
 import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";

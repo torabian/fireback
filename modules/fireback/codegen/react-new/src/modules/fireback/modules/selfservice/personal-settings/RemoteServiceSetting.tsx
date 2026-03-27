@@ -1,7 +1,7 @@
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useT } from "../../../hooks/useT";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import { ErrorsView } from "../../../components/error-view/ErrorView";
 import { FormText } from "../../../components/forms/form-text/FormText";

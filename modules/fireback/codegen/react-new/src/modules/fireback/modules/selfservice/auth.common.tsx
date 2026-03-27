@@ -1,5 +1,5 @@
 import { useContext, useEffect } from "react";
-import { IResponse } from "../../definitions/JSONStyle";
+import { type IResponse } from "../../definitions/JSONStyle";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";

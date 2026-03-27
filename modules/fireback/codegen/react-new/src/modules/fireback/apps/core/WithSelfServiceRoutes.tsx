@@ -6,7 +6,7 @@ import {
   Routes,
 } from "react-router-dom";
 
-import { ReactNode, useContext, useEffect } from "react";
+import { type ReactNode, useContext, useEffect } from "react";
 import { useCheckAuthentication } from "../../components/layouts/ForcedAuthenticated";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Module3Entity } from "./defs";
+import { type Module3Entity } from "./defs";
 import { FieldsEditor } from "./FieldsEditor";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";

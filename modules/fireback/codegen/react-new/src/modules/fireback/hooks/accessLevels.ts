@@ -1,4 +1,4 @@
-import { DisplayDetectionProps } from "../definitions/common";
+import { type DisplayDetectionProps } from "../definitions/common";
 import { QueryUserRoleWorkspacesActionResDto } from "../sdk/modules/abac/AbacActionsDto";
 import { CapabilityEntity } from "../sdk/modules/fireback/CapabilityEntity";
 

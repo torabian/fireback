@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module3Entity } from "./defs";
+import { type Module3Entity } from "./defs";
 import { EntityEditor } from "./EntityEditor";
 
 import { Arrow } from "./Arrow";
