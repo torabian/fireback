@@ -1,4 +1,4 @@
-import { MenuItem } from "../../definitions/common";
+import { type MenuItem } from "../../definitions/common";
 import classNames from "classnames";
 import React from "react";
 import ActiveLink from "../link/ActiveLink";

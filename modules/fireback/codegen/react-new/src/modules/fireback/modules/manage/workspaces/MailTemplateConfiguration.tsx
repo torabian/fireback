@@ -1,9 +1,9 @@
 import { ModalContext } from "../../../components/modal/Modal";
 import { useT } from "../../../hooks/useT";
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import { useContext, useRef } from "react";
 import {
-  MailTemplateEditor,
+  type MailTemplateEditor,
   MailTemplateEntityManager,
 } from "./MailTemplateEntityManager";
 import { FormEmailSenderPicker } from "./FormEmailSenderPicker";

@@ -1,4 +1,4 @@
-import { AppConfig } from "@/modules/fireback/hooks/appConfigTools";
+import { type AppConfig } from "@/modules/fireback/hooks/appConfigTools";
 
 import React from "react";
 import { QueryClient } from "react-query";

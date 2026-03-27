@@ -1,6 +1,6 @@
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";

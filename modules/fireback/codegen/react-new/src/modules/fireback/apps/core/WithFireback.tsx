@@ -1,4 +1,4 @@
-import { AppConfig } from "../../hooks/appConfigTools";
+import { type AppConfig } from "../../hooks/appConfigTools";
 
 import React, { useRef } from "react";
 import { QueryClient } from "react-query";

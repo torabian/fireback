@@ -4,7 +4,7 @@ import { enUS } from "react-date-range/dist/locale";
 
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 
 import "react-date-range/dist/styles.css"; // main style file

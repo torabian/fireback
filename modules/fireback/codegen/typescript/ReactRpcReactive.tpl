@@ -5,7 +5,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-import { FormikHelpers } from "formik";
+import { type FormikHelpers } from "formik";
 import React, { 
   useCallback,
   useContext,
@@ -18,8 +18,8 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
-  QueryClient,
-  UseQueryOptions
+  type QueryClient,
+  type UseQueryOptions
 } from "react-query";
 
 import { RemoteQueryContext } from "../../core/react-tools";

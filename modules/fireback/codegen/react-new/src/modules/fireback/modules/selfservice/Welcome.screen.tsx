@@ -1,5 +1,5 @@
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { FormikProps, useFormik } from "formik";
+import { type FormikProps, useFormik } from "formik";
 import { useContext } from "react";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
 import { QueryErrorView } from "../../components/error-view/QueryError";
@@ -8,12 +8,12 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import { usePostPassportViaOauth } from "../../sdk/modules/abac/usePostPassportViaOauth";
-import { AuthAvailableMethods, AuthMethod } from "./auth.common";
+import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
+import { FacebookLogin } from "./FacebookLogin";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
-import { FacebookLogin } from "./FacebookLogin";
 
 export const WelcomeScreen = () => {
   const {

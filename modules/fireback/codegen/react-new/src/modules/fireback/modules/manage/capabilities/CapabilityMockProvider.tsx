@@ -1,13 +1,13 @@
 import {
-  Context,
-  DeepPartial,
+  type Context,
+  type DeepPartial,
   emptyList,
   getJson,
   method,
   uriMatch,
   getItemUid,
 } from "@/modules/fireback/hooks/mock-tools";
-import { IResponse } from "@/modules/fireback/sdk/core/http-tools";
+import { type IResponse } from "@/modules/fireback/sdk/core/http-tools";
 export class CapabilityMockProvider {
   @uriMatch("capabilities")
   @method("get")

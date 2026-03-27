@@ -5,18 +5,18 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-import { FormikHelpers } from "formik";
+import { type FormikHelpers } from "formik";
 import React, { useContext } from "react";
 import { useMutation } from "react-query";
 
 import {
   execApiFn,
-  IDeleteResponse,
+  type IDeleteResponse,
   mutationErrorsToFormik,
-  DeleteRequest
+  type DeleteRequest
 } from "../../core/http-tools";
 
-import { DeleteProps, RemoteQueryContext, queryBeforeSend } from "../../core/react-tools";
+import { type DeleteProps, RemoteQueryContext, queryBeforeSend } from "../../core/react-tools";
 
 export function use{{ .r.GetFuncNameUpper}}(props?: DeleteProps) {
 

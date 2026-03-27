@@ -1,4 +1,4 @@
-import { KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../definitions/definitions";
 import { enTranslations } from "../../../translations/en";
 
 export const interfaceLanguages = (t: typeof enTranslations): KeyValue[] => [

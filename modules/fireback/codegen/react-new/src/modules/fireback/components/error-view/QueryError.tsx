@@ -2,7 +2,7 @@ import { useT } from "../../hooks/useT";
 import { enTranslations } from "../../translations/en";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";
-import { UseMutationResult, UseQueryResult } from "react-query";
+import type { UseMutationResult, UseQueryResult } from "react-query";
 import { FormButton } from "../forms/form-button/FormButton";
 
 export function getQueryErrorString(

@@ -1,5 +1,5 @@
-import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
-import { IResponseList } from "../../sdk/core/http-tools";
+import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
+import { type IResponseList } from "../../sdk/core/http-tools";
 import { UserEntity } from "../../sdk/modules/abac/UserEntity";
 import { AppMenuEntities } from "../database/app-menu";
 

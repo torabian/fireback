@@ -1,4 +1,4 @@
-import { QueryArchiveColumn } from "../../definitions/common";
+import { type QueryArchiveColumn } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { useQueryClient } from "react-query";
 import { AutoCardDrawer } from "./AutoCardDrawer";

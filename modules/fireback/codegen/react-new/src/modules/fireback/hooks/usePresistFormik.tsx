@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "./useRouter";
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import qs from "qs";
 
 export const usePersistFormik = (form: FormikProps<unknown>) => {

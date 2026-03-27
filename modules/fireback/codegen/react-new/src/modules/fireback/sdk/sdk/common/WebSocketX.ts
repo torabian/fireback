@@ -1,7 +1,7 @@
 // @ts-nocheck
 type ConstructorWithArg<T = any, R = any> = new (arg: T, ...rest: any[]) => R;
 export class WebSocketX<
-  SendType = string | Blob | BufferSource,
+  SendType = string | ArrayBufferLike | Blob | ArrayBufferView,
   RecieveData = string
 > extends WebSocket {
   public readonly addEventListenerRaw: WebSocket["addEventListener"];

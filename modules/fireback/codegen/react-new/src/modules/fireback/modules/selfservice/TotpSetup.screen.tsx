@@ -1,6 +1,6 @@
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import { QRCodeSVG } from "qrcode.react";
-import { UseMutationResult } from "react-query";
+import { type UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { useS } from "../../hooks/useS";

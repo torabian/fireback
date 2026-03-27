@@ -1,6 +1,6 @@
-import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
-import { IResponse } from "../../definitions/JSONStyle";
-import { IResponseList } from "../../sdk/core/http-tools";
+import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
+import { type IResponse } from "../../definitions/JSONStyle";
+import { type IResponseList } from "../../sdk/core/http-tools";
 import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 import { mdb } from "../database/databases";
 import { QueryToId } from "../database/memory-db";

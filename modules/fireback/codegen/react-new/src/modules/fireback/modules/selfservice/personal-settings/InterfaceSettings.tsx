@@ -1,10 +1,10 @@
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect } from "react";
 import { ErrorsView } from "../../../components/error-view/ErrorView";
 import { FormButton } from "../../../components/forms/form-button/FormButton";
 
 import { PageSection } from "../../../components/page-section/PageSection";
-import { KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../definitions/definitions";
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import { useT } from "../../../hooks/useT";

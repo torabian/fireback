@@ -5,19 +5,19 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 
-import { FormikHelpers } from "formik";
+import { type FormikHelpers } from "formik";
 import { useContext, useState, useRef } from "react";
 import { useMutation } from "react-query";
 import { 
   execApiFn,
-  IResponse,
+  type IResponse,
   mutationErrorsToFormik,
-  IResponseList
+  type IResponseList
 } from "../../core/http-tools";
 
 import {
   RemoteQueryContext,
-  UseRemoteQuery,
+  type UseRemoteQuery,
   queryBeforeSend,
   {{ if eq .r.MethodUpper "WEBRTC" }}
   useWebrtcConnection,

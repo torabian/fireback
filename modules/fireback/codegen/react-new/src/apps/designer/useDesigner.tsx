@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Module3 } from "./defs";
+import { type Module3 } from "./defs";
 
 import { mockYaml } from "./mock";
 const yaml = require("js-yaml");

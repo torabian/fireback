@@ -1,6 +1,6 @@
 import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
+import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
 import { strings } from "./strings/translations";

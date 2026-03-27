@@ -1,6 +1,6 @@
 import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useT } from "../../../hooks/useT";
 import { FormText } from "../../../components/forms/form-text/FormText";
 import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";

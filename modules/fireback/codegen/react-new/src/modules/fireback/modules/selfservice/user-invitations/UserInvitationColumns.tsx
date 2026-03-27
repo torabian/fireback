@@ -1,5 +1,5 @@
 import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
-import { DatatableColumn } from "../../../definitions/definitions";
+import { type DatatableColumn } from "../../../definitions/definitions";
 import { strings } from "./strings/translations";
 
 export const userInvitationColumns = (

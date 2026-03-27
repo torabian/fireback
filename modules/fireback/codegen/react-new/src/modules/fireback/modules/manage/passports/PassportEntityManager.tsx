@@ -6,7 +6,7 @@ import { usePostPassport } from "../../../sdk/modules/abac/usePostPassport";
 
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { PassportEditForm } from "./PassportEditForm";
 import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";

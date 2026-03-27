@@ -1,6 +1,6 @@
 import { FormSelect } from "../../../components/forms/form-select/FormSelect";
 import { FormText } from "../../../components/forms/form-text/FormText";
-import { EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../definitions/definitions";
 import { createQuerySource } from "../../../hooks/useAsQuery";
 import { useS } from "../../../hooks/useS";
 import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";

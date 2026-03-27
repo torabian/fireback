@@ -1,5 +1,5 @@
-import { FormikProps } from "formik";
-import { UseMutationResult } from "react-query";
+import { type FormikProps } from "formik";
+import { type UseMutationResult } from "react-query";
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 

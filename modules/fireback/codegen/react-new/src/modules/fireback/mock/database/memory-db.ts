@@ -1,6 +1,6 @@
 import { get } from "lodash";
 import { uuidv4 } from "../../hooks/api";
-import { Context } from "../../hooks/mock-tools";
+import { type Context } from "../../hooks/mock-tools";
 import { BaseEntity } from "../../sdk/core/definitions";
 
 type Criteria = Record<string, any>;

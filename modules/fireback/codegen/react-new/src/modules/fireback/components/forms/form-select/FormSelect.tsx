@@ -1,20 +1,22 @@
-import { JsonQuery } from "@/modules/fireback/definitions/definitions";
-import { IResponseList } from "@/modules/fireback/sdk/core/http-tools";
-import { UseRemoteQuery } from "@/modules/fireback/sdk/core/react-tools";
+import { type JsonQuery } from "@/modules/fireback/definitions/definitions";
+import { type IResponseList } from "@/modules/fireback/sdk/core/http-tools";
+import { type UseRemoteQuery } from "@/modules/fireback/sdk/core/react-tools";
 import classNames from "classnames";
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import { get, isArray, isObject, set } from "lodash";
 import { useState } from "react";
-import { useQueryClient, UseQueryResult } from "react-query";
+import { useQueryClient, type UseQueryResult } from "react-query";
 import Select from "react-select/async";
 import { useT } from "../../../hooks/useT";
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 
-export interface FormSelectBase<T, ValueIdentifier>
-  extends BaseFormElementProps {
+export interface FormSelectBase<
+  T,
+  ValueIdentifier,
+> extends BaseFormElementProps {
   /**
    * @description label is what user will see as the text on top of the input or near
    * it depenging on the design.
@@ -116,18 +118,26 @@ interface FormSelectEffectBase<TargetType, T, ValueIdentifier> {
   skipFirebackMetaData?: boolean;
 }
 
-interface FormSelectEffect<TargetType, T, ValueIdentifier>
-  extends FormSelectEffectBase<TargetType, T, ValueIdentifier> {
+interface FormSelectEffect<
+  TargetType,
+  T,
+  ValueIdentifier,
+> extends FormSelectEffectBase<TargetType, T, ValueIdentifier> {
   beforeSet?: (item: T) => ValueIdentifier;
 }
 
-interface FormSelectMultipleEffect<TargetType, T, ValueIdentifier>
-  extends FormSelectEffectBase<TargetType, T, ValueIdentifier> {
+interface FormSelectMultipleEffect<
+  TargetType,
+  T,
+  ValueIdentifier,
+> extends FormSelectEffectBase<TargetType, T, ValueIdentifier> {
   beforeSet?: (items: T[]) => ValueIdentifier[];
 }
 
-export interface FormSelectProps<T, ValueIdentifier>
-  extends FormSelectBase<T, ValueIdentifier> {
+export interface FormSelectProps<T, ValueIdentifier> extends FormSelectBase<
+  T,
+  ValueIdentifier
+> {
   /**
    * @description value is the form element actual values which will be read from the form object,
    * regardless of the options type
@@ -153,8 +163,10 @@ export interface FormSelectProps<T, ValueIdentifier>
   formEffect?: FormSelectEffect<any, T, ValueIdentifier>;
 }
 
-export interface FormSelectMultipleProps<T, ValueIdentifier>
-  extends FormSelectBase<T, ValueIdentifier> {
+export interface FormSelectMultipleProps<
+  T,
+  ValueIdentifier,
+> extends FormSelectBase<T, ValueIdentifier> {
   /**
    * @description value is the form element actual values which will be read from the form object,
    * regardless of the options type
@@ -177,7 +189,7 @@ export interface FormSelectMultipleProps<T, ValueIdentifier>
 
 function resolveJsonQuery(
   keyword: string,
-  userInput?: (keyword: string) => JsonQuery
+  userInput?: (keyword: string) => JsonQuery,
 ): JsonQuery {
   if (userInput) {
     return userInput(keyword);
@@ -253,7 +265,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
         set(
           newValue,
           arrayTarget,
-          (value || []).map((t: any) => t.uniqueId)
+          (value || []).map((t: any) => t.uniqueId),
         );
       }
 
@@ -271,7 +283,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
   if (value === undefined && props.formEffect?.form) {
     const possibleValue = get(
       props.formEffect.form.values,
-      props.formEffect.field
+      props.formEffect.field,
     );
     if (possibleValue !== undefined) {
       value = possibleValue;
@@ -302,7 +314,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
           multiple={props.multiple}
           onChange={(e) => {
             const item = options?.find(
-              (t: any) => t.uniqueId === e.target.value
+              (t: any) => t.uniqueId === e.target.value,
             ) as any;
 
             onChange(item);
@@ -310,7 +322,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
           className={classNames(
             "form-select",
             props.errorMessage && "is-invalid",
-            props.validMessage && "is-valid"
+            props.validMessage && "is-valid",
           )}
           disabled={props.disabled}
           aria-label="Default select example"
@@ -340,7 +352,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
                 return classNames(
                   props.errorMessage &&
                     " form-control form-control-no-padding is-invalid",
-                  props.validMessage && "is-valid"
+                  props.validMessage && "is-valid",
                 );
               },
               control(props2: any) {

@@ -1,7 +1,7 @@
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { RegionalContentForm } from "./RegionalContentEditForm";
 import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";

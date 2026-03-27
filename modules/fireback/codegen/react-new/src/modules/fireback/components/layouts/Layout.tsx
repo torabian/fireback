@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { MenuItem } from "../../definitions/common";
+import { type MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { UploaderStatsCard } from "../../modules/manage/drive/UploaderStatsCard";
 import { ActionMenuManager } from "../action-menu/ActionMenu";

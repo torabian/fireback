@@ -1,9 +1,9 @@
 import "react-data-grid/lib/styles.css";
 
 import { get } from "lodash";
-import { ColumnOrColumnGroup } from "react-data-grid";
-import { DatatableColumn } from "../../definitions/definitions";
-import { Udf } from "../../hooks/useDatatableFiltering";
+import { type ColumnOrColumnGroup } from "react-data-grid";
+import { type DatatableColumn } from "../../definitions/definitions";
+import { type Udf } from "../../hooks/useDatatableFiltering";
 import { CopyCell } from "../entity-manager/CopyCell";
 import { OpenInNewRouter } from "../entity-manager/OpenInNewRouter";
 import Link from "../link/Link";

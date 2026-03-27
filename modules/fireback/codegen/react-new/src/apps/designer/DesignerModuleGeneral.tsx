@@ -3,7 +3,7 @@ import {
   ControlledAccordion,
   useAccordionProvider,
 } from "@szhsin/react-accordion";
-import { Module3 } from "./defs";
+import { type Module3 } from "./defs";
 
 import { Arrow } from "./Arrow";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";

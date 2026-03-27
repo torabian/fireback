@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 export const Showcase = ({ children }: { children: ReactNode }) => {
   return <div style={{ marginBottom: "70px" }}>{children}</div>;

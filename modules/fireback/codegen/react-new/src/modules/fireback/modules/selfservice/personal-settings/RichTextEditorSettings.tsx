@@ -2,13 +2,13 @@ import { ErrorsView } from "../../../components/error-view/ErrorView";
 import { FormButton } from "../../../components/forms/form-button/FormButton";
 import { FormSelect } from "../../../components/forms/form-select/FormSelect";
 import { PageSection } from "../../../components/page-section/PageSection";
-import { KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../definitions/definitions";
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { createQuerySource } from "../../../hooks/useAsQuery";
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import { useT } from "../../../hooks/useT";
 import { enTranslations } from "../../../translations/en";
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect } from "react";
 
 interface TextEditorConfig {

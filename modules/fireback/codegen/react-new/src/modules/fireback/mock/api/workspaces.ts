@@ -1,5 +1,5 @@
-import { Context, DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
-import { IResponse, IResponseList } from "../../sdk/core/http-tools";
+import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
+import { type IResponse, type IResponseList } from "../../sdk/core/http-tools";
 import { WorkspaceEntity } from "../../sdk/modules/abac/WorkspaceEntity";
 
 import { QueryToId } from "../database/memory-db";

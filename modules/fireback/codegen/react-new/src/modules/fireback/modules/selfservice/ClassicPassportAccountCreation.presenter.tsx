@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
-import { IResponse } from "../../sdk/core/http-tools";
+import { type IResponse } from "../../sdk/core/http-tools";
 import { useGetWorkspacePublicTypes } from "../../sdk/modules/abac/useGetWorkspacePublicTypes";
 import { usePostPassportsSignupClassic } from "../../sdk/modules/abac/usePostPassportsSignupClassic";
 
