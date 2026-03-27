@@ -1158,7 +1158,7 @@ func PhoneConfirmationCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "phoneconfirmation",
-		Description: "PhoneConfirmations module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

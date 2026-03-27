@@ -1260,7 +1260,7 @@ func PassportCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "passport",
-		Description: "Passports module actions",
+		Description: `Represent a mean to login in into the system, each user could have multiple passport (email, phone) and authenticate into the system.`,
 		Usage:       `Represent a mean to login in into the system, each user could have multiple passport (email, phone) and authenticate into the system.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

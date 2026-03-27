@@ -1243,7 +1243,7 @@ func WorkspaceConfigCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "config",
-		Description: "WorkspaceConfigs module actions",
+		Description: `Contains configuration which would be necessary for application environment to be running. At the moment, a single record is allowed, and only for root workspace. But in theory it could be configured per each workspace independently. For sub projects do not touch this, rather create a custom config entity if workspaces in the product need extra config.`,
 		Usage:       `Contains configuration which would be necessary for application environment to be running. At the moment, a single record is allowed, and only for root workspace. But in theory it could be configured per each workspace independently. For sub projects do not touch this, rather create a custom config entity if workspaces in the product need extra config.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

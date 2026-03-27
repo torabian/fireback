@@ -1111,7 +1111,7 @@ func ContentCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "content",
-		Description: "Contents module actions",
+		Description: `Source of the content which will be indexed by the FTS5 table. Other modules can use this entity to set the content.`,
 		Usage:       `Source of the content which will be indexed by the FTS5 table. Other modules can use this entity to set the content.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

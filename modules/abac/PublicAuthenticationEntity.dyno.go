@@ -1305,7 +1305,7 @@ func PublicAuthenticationCliFn() cli.Command {
 	return cli.Command{
 		Name:        "publicauthentication",
 		ShortName:   "pa",
-		Description: "PublicAuthentications module actions",
+		Description: `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Usage:       `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

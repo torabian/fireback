@@ -1234,7 +1234,7 @@ func AppMenuCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "appmenu",
-		Description: "AppMenus module actions",
+		Description: `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
 		Usage:       `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

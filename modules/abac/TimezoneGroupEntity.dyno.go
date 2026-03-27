@@ -1364,7 +1364,7 @@ func TimezoneGroupCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "tz",
-		Description: "TimezoneGroups module actions",
+		Description: `World timezone information`,
 		Usage:       `World timezone information`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

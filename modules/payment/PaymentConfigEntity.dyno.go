@@ -1110,7 +1110,7 @@ func PaymentConfigCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "paymentconfig",
-		Description: "PaymentConfigs module actions",
+		Description: `Contains the api keys, configuration, urls, callbacks for different payment gateways.`,
 		Usage:       `Contains the api keys, configuration, urls, callbacks for different payment gateways.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

@@ -1315,7 +1315,7 @@ func WorkspaceInviteCliFn() cli.Command {
 	return cli.Command{
 		Name:        "workspaceinvite",
 		ShortName:   "invite",
-		Description: "WorkspaceInvites module actions",
+		Description: `Active invitations for non-users or already users to join an specific workspace, created by administration of the workspace`,
 		Usage:       `Active invitations for non-users or already users to join an specific workspace, created by administration of the workspace`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

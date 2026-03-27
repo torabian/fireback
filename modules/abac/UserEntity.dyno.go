@@ -1392,7 +1392,7 @@ func UserCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "user",
-		Description: "Users module actions",
+		Description: `Manage the users who are in the current app (root only)`,
 		Usage:       `Manage the users who are in the current app (root only)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

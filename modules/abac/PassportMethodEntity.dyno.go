@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -25,6 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var passportMethodSeedersFs = &seeders.ViewsFs
@@ -370,13 +369,11 @@ func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query firebac
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError) {
@@ -1071,9 +1068,10 @@ func PassportMethodCliFn() cli.Command {
 		commands = append(commands, PassportMethodDevCommands...)
 	}
 	return cli.Command{
-		Name:      "passportmethod",
-		ShortName: "method",
-		Usage:     `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
+		Name:        "passportmethod",
+		ShortName:   "method",
+		Description: `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
+		Usage:       `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",

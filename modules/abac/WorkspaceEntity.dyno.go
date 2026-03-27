@@ -1158,7 +1158,7 @@ func WorkspaceCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "ws",
-		Description: "Workspaces module actions",
+		Description: `Fireback general user role, workspaces services.`,
 		Usage:       `Fireback general user role, workspaces services.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

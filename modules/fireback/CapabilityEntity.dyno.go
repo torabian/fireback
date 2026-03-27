@@ -1102,7 +1102,7 @@ func CapabilityCliFn() cli.Command {
 	return cli.Command{
 		Name:        "capability",
 		ShortName:   "cap",
-		Description: "Capabilitys module actions",
+		Description: `Manage the capabilities inside the application, both builtin to core and custom defined ones`,
 		Usage:       `Manage the capabilities inside the application, both builtin to core and custom defined ones`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

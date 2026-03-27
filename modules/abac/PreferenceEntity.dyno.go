@@ -1050,7 +1050,7 @@ func PreferenceCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "preference",
-		Description: "Preferences module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

@@ -1065,7 +1065,7 @@ func WorkspaceRoleCliFn() cli.Command {
 	return cli.Command{
 		Name:        "workspacerole",
 		ShortName:   "role",
-		Description: "WorkspaceRoles module actions",
+		Description: `Manage roles assigned to an specific workspace or created by the workspace itself`,
 		Usage:       `Manage roles assigned to an specific workspace or created by the workspace itself`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

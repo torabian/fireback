@@ -1050,7 +1050,7 @@ func BackupTableMetaCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "backup",
-		Description: "BackupTableMetas module actions",
+		Description: `Keeps information about which tables to be used during backup (mostly internal)`,
 		Usage:       `Keeps information about which tables to be used during backup (mostly internal)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

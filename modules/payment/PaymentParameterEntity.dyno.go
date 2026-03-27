@@ -1364,7 +1364,7 @@ func PaymentParameterCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "param",
-		Description: "PaymentParameters module actions",
+		Description: `Keeps the information about payment Przelewy24 payment provider`,
 		Usage:       `Keeps the information about payment Przelewy24 payment provider`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
