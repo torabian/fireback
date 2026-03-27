@@ -102,7 +102,7 @@ func CastCheckPassportMethodsActionResFromCli(c emigo.CliCastable) CheckPassport
 
 // The base class definition for checkPassportMethodsActionRes
 type CheckPassportMethodsActionRes struct {
-	Email                bool   `yaml:"email" json:"email"`
+	Email                bool   `json:"email" yaml:"email"`
 	Phone                bool   `json:"phone" yaml:"phone"`
 	Google               bool   `json:"google" yaml:"google"`
 	Facebook             bool   `json:"facebook" yaml:"facebook"`
