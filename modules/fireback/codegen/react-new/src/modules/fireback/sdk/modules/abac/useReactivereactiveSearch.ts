@@ -54,7 +54,7 @@ export function useReactivereactiveSearch({
     }
     setConnected(false);
   };
-  const write = (data: string | ArrayBufferLike | Blob | ArrayBufferView) => {
+  const write = (data: string | Blob | BufferSource) => {
     connection.current?.send(data);
   };
   /*
