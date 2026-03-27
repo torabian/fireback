@@ -32,38 +32,7 @@ acts:
           default: false
         - name: recaptcha2ClientKey
           type: string
-actions:
-  # - name: checkPassportMethods
-  #   url: /passports/available-methods
-  #   description: 
-  #     Publicly available information to create the authentication form, and show users
-  #     how they can signin or signup to the system. Based on the PassportMethod entities,
-  #     it will compute the available methods for the user, considering their region (IP for example)
-  #   method: get
-  #   out:
-  #     fields:
-  #       - name: email
-  #         type: bool
-  #         default: false
-  #       - name: phone
-  #         type: bool
-  #         default: false
-  #       - name: google
-  #         type: bool
-  #         default: false
-  #       - name: facebook
-  #         type: bool
-  #         default: false
-  #       - name: googleOAuthClientKey
-  #         type: string
-  #       - name: facebookAppId
-  #         type: string
-  #       - name: enabledRecaptcha2
-  #         type: bool
-  #         default: false
-  #       - name: recaptcha2ClientKey
-  #         type: string
-  - name: osLoginAuthenticate
+  - name: OsLoginAuthenticate
     method: get
     url: /passports/os/login
     cliName: oslogin
@@ -72,6 +41,7 @@ actions:
       for them. Useful for desktop applications.
     out:
       dto: UserSessionDto
+actions:
   - name: acceptInvite
     method: post
     url: /user/invitation/accept

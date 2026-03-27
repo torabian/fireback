@@ -2344,7 +2344,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ if .e.CliShort }}
       ShortName:   "{{ .e.CliShort }}",
       {{ end }}
-      Description: "{{ .e.Upper }}s module actions",
+      Description: `{{ .e.ComputedCliDescription }}`,
       Usage:       `{{ .e.ComputedCliDescription }}`,
       Flags: []cli.Flag{
         &cli.StringFlag{

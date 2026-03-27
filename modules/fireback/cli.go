@@ -346,7 +346,7 @@ func HandleActionInCli2(c *cli.Context, result emigo.EmiActionResult, err error,
 
 	f := CommonCliQueryDSLBuilder(c)
 
-	if err != nil {
+	if !IsNilish(err) {
 
 		err := CastToIError(err)
 		err2 := err.ToPublicEndUser(&f)
@@ -355,6 +355,9 @@ func HandleActionInCli2(c *cli.Context, result emigo.EmiActionResult, err error,
 			log.Panicln("Panic on handle action, without public error: %w", err)
 			return
 		}
+
+		body, _ := json.MarshalIndent(err2, "", "  ")
+		fmt.Println(string(body))
 
 		os.Exit(int(err2.HttpCode))
 	}

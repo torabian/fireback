@@ -1,0 +1,100 @@
+import ActionView from '../ActionView'
+
+# Passport methods
+
+When managing user authentication, passport methods allow a administration of project to
+enable or disable different methods of authentication (such as login via email).
+
+Fireback ABAC module comes with this concept in it's core, and when setting up
+a project developer or administrator needs to set what options are allowed,
+and they might need configuration as well. For example Google Login requires
+a client key to be set.
+
+The logic logic behind this feature is mostly generated via Fireback entity feature,
+and you can look at the specs in:
+
+- AbacModule3.yml
+- modules/abac/PassportMethodEntity.dyno.go
+
+By default, depending on your installation, email method can be enabled, or no method can
+be enabled. In such scenarios, no login publicly is possible via http server, 
+and Fireback React boiler plate shows "No auentication available" message.
+
+## To enable an authentication
+
+You need to create a passport method, called email.
+
+Running the following command:
+
+```bash
+fireback passport method c --help
+```
+
+Which gives a hint of options available.
+
+You can see that there are few options to use. Major item is type, which can be one of following as most recent
+version of ABAC fireback module:
+
+```bash
+OPTIONS:
+   --x-accept value    Return type of the the content, such as json or yaml
+   --wid value         Provide workspace id, if you want to change the data workspace
+   --uid value         Unique Id - external unique hash to query entity
+   --pid value         Parent record id of the same type
+   --type value        One of: 'email', 'phone', 'google', 'facebook' (enum)
+   --region value      One of: 'global' (enum) (default: "global")
+   --client-key value  Client key for those methods such as 'google' which require oauth client key (string)
+```
+
+### Enable email:
+
+To enable email for `global` region, which means every user would access it:
+
+```bash
+fireback passport method c --type email --region global
+```
+
+If record created, you'll be seeing the json response of that both in http, and cli interface.
+
+This is enough to enable the feature. Now if we check the passport methods publicly, there will be `email: true`:
+
+```
+fireback passport check-passport-methods
+```
+
+```json
+{
+  "data": {
+    "item": {
+      "email": true,
+      "phone": false,
+      "google": false,
+      "facebook": false,
+      "googleOAuthClientKey": "",
+      "facebookAppId": "",
+      "enabledRecaptcha2": false,
+      "recaptcha2ClientKey": ""
+    }
+  }
+}
+```
+
+**Note:** Creating, deleting, querying the passport methods is root access. Querying them is public, means no authentication
+is required. This is trivial, because information needs to be availble before any authentication has been happened yet.
+
+## Enable phone authentication
+
+Enabling phone authentication is also simple, with the same principle
+
+<ActionView 
+  cli="passport method c --type phone --region global"
+/>
+
+## Enable google and facebook
+
+For Google Login and Facebook login, it's important that you also add the facebook app id, or google client key.
+Both these values, go under the `--client-key` value, and automatically will be placed in the response json
+later via [CheckPassportMethods](./check-passport-methods) api.
+
+**Note** Enabling recaptcha, and it's client key, is a part of WorkspaceConfig entity, 
+and settings are different that passport methods.
