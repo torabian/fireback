@@ -1876,7 +1876,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
 			content = golang.AsFullDocument(res, x.Name)
-			exportPath = filepath.Join(exportDir, action.Name+".dyno.go")
+			exportPath = filepath.Join(exportDir, action.Name+"Action.dyno.go")
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)

@@ -1776,8 +1776,8 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var CheckPassportMethodsImpl func(c CheckPassportMethodsActionRequest, query fireback.QueryDSL) (*CheckPassportMethodsActionResponse, error) = nil
 var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
 
@@ -1806,7 +1806,7 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
 		req := CheckPassportMethodsActionRequest{}
 		resp, err := CheckPassportMethodsImpl(req, query)
-		fireback.HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
 		return nil
 	},
 }

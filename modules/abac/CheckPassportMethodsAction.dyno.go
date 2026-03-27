@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli"
 	"io"
 	"net/http"
 	"net/url"
@@ -105,7 +106,7 @@ type CheckPassportMethodsActionRes struct {
 	Phone                bool   `json:"phone" yaml:"phone"`
 	Google               bool   `json:"google" yaml:"google"`
 	Facebook             bool   `json:"facebook" yaml:"facebook"`
-	GoogleOAuthClientKey string `yaml:"googleOAuthClientKey" json:"googleOAuthClientKey"`
+	GoogleOAuthClientKey string `json:"googleOAuthClientKey" yaml:"googleOAuthClientKey"`
 	FacebookAppId        string `json:"facebookAppId" yaml:"facebookAppId"`
 	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" yaml:"enabledRecaptcha2"`
 	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"`
@@ -125,6 +126,33 @@ type CheckPassportMethodsActionResponse struct {
 	Payload    interface{}
 }
 
+func (x *CheckPassportMethodsActionResponse) SetContentType(contentType string) *CheckPassportMethodsActionResponse {
+	if x.Headers == nil {
+		x.Headers = make(map[string]string)
+	}
+	x.Headers["Content-Type"] = contentType
+	return x
+}
+func (x *CheckPassportMethodsActionResponse) AsStream(r io.Reader, contentType string) *CheckPassportMethodsActionResponse {
+	x.Payload = r
+	x.SetContentType(contentType)
+	return x
+}
+func (x *CheckPassportMethodsActionResponse) AsJSON(payload any) *CheckPassportMethodsActionResponse {
+	x.Payload = payload
+	x.SetContentType("application/json")
+	return x
+}
+func (x *CheckPassportMethodsActionResponse) AsHTML(payload string) *CheckPassportMethodsActionResponse {
+	x.Payload = payload
+	x.SetContentType("text/html; charset=utf-8")
+	return x
+}
+func (x *CheckPassportMethodsActionResponse) AsBytes(payload []byte) *CheckPassportMethodsActionResponse {
+	x.Payload = payload
+	x.SetContentType("application/octet-stream")
+	return x
+}
 func (x CheckPassportMethodsActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
@@ -244,6 +272,7 @@ type CheckPassportMethodsActionRequest struct {
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context
+	CliCtx      *cli.Context
 }
 type CheckPassportMethodsActionResult struct {
 	resp    *http.Response // embed original response

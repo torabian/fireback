@@ -176,21 +176,5 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		MiscCli,
 	})
 
-	// CheckPassportMethods2Impl = func(c CheckPassportMethods2ActionRequest, query fireback.QueryDSL) (*CheckPassportMethods2ActionResponse, error) {
-
-	// 	resp, err := CheckPassportMethodsAction(query)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-
-	// 	if resp == nil {
-	// 		return nil, nil
-	// 	}
-
-	// 	return &CheckPassportMethods2ActionResponse{
-	// 		Payload: GResponseSingleItem(resp),
-	// 	}, nil
-	// }
-
 	return module
 }

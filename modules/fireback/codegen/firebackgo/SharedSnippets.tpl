@@ -3275,7 +3275,7 @@ type {{ $name }}Msgs struct {
       req := {{ .Name }}ActionRequest{}
 
       resp, err := {{ .Name }}Impl(req, query)
-      {{ $wsprefix }}HandleActionInCli2(c, resp.Payload, err, map[string]map[string]string{})
+      {{ $wsprefix }}HandleActionInCli2(c, resp, err, map[string]map[string]string{})
 
       return nil
     },
