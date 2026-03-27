@@ -1,0 +1,14 @@
+{
+  "name": "sdk",
+  "version": "1.0.0",
+  "description": "Auto-generated package.json",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'build script here'",
+    "test": "echo 'test script here'"
+  },
+  "dependencies": {
+    "@types/qs": "^6.14.0",
+    "qs": "^6.14.0"
+  }
+}
