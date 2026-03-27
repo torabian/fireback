@@ -1,4 +1,4 @@
-export const BUILD_VARIABLES = {
+var BUILD_VARIABLES = {
     /**
      * The location of the api endpoint which will be used to communicate as backend.
      */
@@ -81,3 +81,8 @@ export const BUILD_VARIABLES = {
      */
     NAVIGATE_ON_SIGNOUT: process.env.REACT_APP_NAVIGATE_ON_SIGNOUT
 }
+
+// Do not change. Intentional to work with very old node version.
+module.exports = {
+  BUILD_VARIABLES: BUILD_VARIABLES
+};
