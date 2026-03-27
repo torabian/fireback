@@ -1,3 +1,4 @@
+import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
 import { Upload } from "tus-js-client";
@@ -44,7 +45,7 @@ export function useFileUploader() {
     return new Promise(
       (resolve: (t: string) => void, reject: (err: any) => void) => {
         const upload = new Upload(file, {
-          endpoint: (process.env.REACT_APP_REMOTE_SERVICE || "") + "tus",
+          endpoint: (BUILD_VARIABLES.REMOTE_SERVICE || "") + "tus",
           onBeforeRequest(req: any) {
             req.setHeader("authorization", session.token);
             req.setHeader("workspace-id", selectedUrw?.workspaceId);

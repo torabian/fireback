@@ -12,8 +12,9 @@ import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServic
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { SelectWorkspaceScreen } from "../../modules/selfservice/SelectWorkspace.screen";
 import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
-const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
+const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
 
 export const WithSelfServiceRoutes = ({

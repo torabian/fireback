@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BUILD_VARIABLES } from "./build-variables";
 
 export function localeFromPath(path: string) {
   let locale = "en";
@@ -38,8 +39,8 @@ export function usePureLocale() {
   let region = "us";
   let dir = "ltr";
 
-  if (process.env.REACT_APP_FORCED_LOCALE) {
-    locale = process.env.REACT_APP_FORCED_LOCALE;
+  if (BUILD_VARIABLES.FORCED_LOCALE) {
+    locale = BUILD_VARIABLES.FORCED_LOCALE;
   } else {
     locale = localeFromPath(hash);
   }

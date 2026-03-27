@@ -1,6 +1,9 @@
 const path = require("path");
 const { getLoader, loaderByName } = require("@craco/craco");
 
+const { BUILD_VARIABLES } = require('./src/modules/fireback/hooks/build-variables')
+
+
 const alias = {
   "@": path.resolve(__dirname, "src"),
   "@apps": path.resolve(__dirname, "src", "apps", process.env.TARGET_APP),
@@ -43,11 +46,9 @@ const options = {
             {
               loader: "ifdef-loader",
               options: {
-                TARGET_APP: process.env.TARGET_APP,
-                REACT_APP_SUPPORTED_LANGUAGES:
-                  process.env.REACT_APP_SUPPORTED_LANGUAGES,
-                // env: process.env,
-                // ...process.env,
+                TARGET_APP: BUILD_VARIABLES.TARGET_APP,
+                REACT_APP_SUPPORTED_LANGUAGES: BUILD_VARIABLES.SUPPORTED_LANGUAGES,
+                BUILD_VARIABLES: BUILD_VARIABLES
               },
             },
           ],

@@ -1,30 +1,25 @@
 import { useT } from "../../../hooks/useT";
-import { RemoteServiceSetting } from "./RemoteServiceSetting";
 
-import { useRef, useState } from "react";
-import { InterfaceSettings } from "./InterfaceSettings";
-import { RichTextEditorSettings } from "./RichTextEditorSettings";
-import { DebuggerSettings } from "./DebuggerSettings";
-import { ThemeSettings } from "./ThemeSettings";
-import { AccessiblitySettings } from "./AccessiblitySettings";
 import { usePageTitle } from "../../../components/page-title/PageTitle";
+import { AccessiblitySettings } from "./AccessiblitySettings";
+import { DebuggerSettings } from "./DebuggerSettings";
+import { InterfaceSettings } from "./InterfaceSettings";
 import { NotificationSettings } from "./NotificationSettings";
+import { RichTextEditorSettings } from "./RichTextEditorSettings";
+import { ThemeSettings } from "./ThemeSettings";
+import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
 
 export function SettingsScreen({}: {}) {
   const t = useT();
   usePageTitle(t.menu.settings);
-  const editorRef: any = useRef(null);
-
+ 
   return (
     <div>
-      {/* {process.env.REACT_APP_FORCE_REMOTE_SERVICE !== "true" ? (
-        <RemoteServiceSetting />
-      ) : null} */}
       <NotificationSettings />
-      {process.env.REACT_APP_FORCED_LOCALE ? null : <InterfaceSettings />}
+      {BUILD_VARIABLES.FORCED_LOCALE ? null : <InterfaceSettings />}
       <RichTextEditorSettings />
       <AccessiblitySettings />
-      {process.env.REACT_APP_FORCE_APP_THEME !== "true" ? (
+      {BUILD_VARIABLES.FORCE_APP_THEME !== "true" ? (
         <ThemeSettings />
       ) : null}
       <DebuggerSettings />

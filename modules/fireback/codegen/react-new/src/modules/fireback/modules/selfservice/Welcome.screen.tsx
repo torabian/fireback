@@ -14,6 +14,7 @@ import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { FacebookLogin } from "./FacebookLogin";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 export const WelcomeScreen = () => {
   const {
@@ -79,26 +80,26 @@ const Form = ({
   onSelect: (method: AuthMethod) => void;
   availableOptions: AuthAvailableMethods;
 }) => {
-  const { submit, mutation } = usePostPassportViaOauth({});
+  const { submit } = usePostPassportViaOauth({});
   const { setSession } = useContext(RemoteQueryContext);
   const { locale } = useLocale();
-  const { goBack, state, replace, push } = useRouter();
+  const { replace } = useRouter();
 
   const continueWithResult = (
     token: string,
-    service: "google" | "facebook"
+    service: "google" | "facebook",
   ) => {
     submit({ service, token })
       .then((res) => {
         setSession(res.data.session);
         if ((window as any).ReactNativeWebView) {
           (window as any).ReactNativeWebView.postMessage(
-            JSON.stringify(res.data)
+            JSON.stringify(res.data),
           );
         }
-        if (process.env.REACT_APP_DEFAULT_ROUTE) {
+        if (BUILD_VARIABLES.DEFAULT_ROUTE) {
           const to = (
-            process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
+            BUILD_VARIABLES.DEFAULT_ROUTE || "/{locale}/signin"
           ).replace("{locale}", locale || "en");
           replace(to, to);
         }

@@ -14,7 +14,7 @@ const Link = ({
   const { locale } = useLocale();
   const locale$ = rest.locale || locale || "en";
   const { compiler } = useCompiler();
-  const noPrefix = process.env.REACT_APP_NO_LOCALE_PREFIX === "true";
+  const noPrefix = false;
 
   let href: string = rest?.href || router?.asPath || "";
 

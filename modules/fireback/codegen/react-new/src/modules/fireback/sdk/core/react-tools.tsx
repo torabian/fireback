@@ -11,6 +11,7 @@ import React, {
 } from "react";
 import { Upload } from "tus-js-client";
 import { QueryClient, UseQueryOptions } from "react-query";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 /**
  * Removes the workspace id which is default present everywhere
@@ -520,7 +521,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
       !remote ||
       !token ||
       token === "undefined" ||
-      process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+      BUILD_VARIABLES. INACCURATE_MOCK_MODE == "true"
     ) {
       return;
     }

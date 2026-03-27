@@ -1,5 +1,6 @@
 import { FileEntity } from "../sdk/modules/abac/FileEntity";
 import { replacePossibleMetaPaths } from "../components/helpers/MetaPathAwareContent";
+import { BUILD_VARIABLES } from "./build-variables";
 
 export enum Compiler {
   Nextjs = "nextjs",
@@ -22,11 +23,7 @@ export function useRemoteInformation() {
       return replacePossibleMetaPaths(d.uniqueId);
     }
 
-    if (process.env.REACT_APP_SKIP_INLINE_FILES === "true") {
-      return d?.diskPath;
-    }
-
-    return `${process.env.REACT_APP_REMOTE_SERVICE}files-inline/${d?.diskPath}`;
+    return `${BUILD_VARIABLES.REMOTE_SERVICE}files-inline/${d?.diskPath}`;
   };
 
   const downloadPath = (d?: FileEntity) => {
@@ -34,7 +31,7 @@ export function useRemoteInformation() {
       return replacePossibleMetaPaths(d.uniqueId);
     }
 
-    return `${process.env.REACT_APP_REMOTE_SERVICE}files/${d?.diskPath}`;
+    return `${BUILD_VARIABLES.REMOTE_SERVICE}files/${d?.diskPath}`;
   };
 
   return { directPath, downloadPath };

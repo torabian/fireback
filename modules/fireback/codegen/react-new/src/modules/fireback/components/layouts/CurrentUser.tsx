@@ -1,27 +1,26 @@
-import { useRouter } from "../../hooks/useRouter";
-import { useT } from "../../hooks/useT";
 import { useContext } from "react";
 import { useQueryClient } from "react-query";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { source } from "../../hooks/source";
+import { useRouter } from "../../hooks/useRouter";
+import { useT } from "../../hooks/useT";
+import { osResources } from "../../resources/resources";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import Link from "../link/Link";
-import { source } from "../../hooks/source";
-import { osResources } from "../../resources/resources";
-import { ModalContext } from "../modal/Modal";
 
 export function CurrentUser({ onClick }: { onClick: () => void }) {
   const { isAuthenticated, signout } = useContext(RemoteQueryContext);
   const router = useRouter();
   const t = useT();
   const queryClient = useQueryClient();
-  const useModal = useContext(ModalContext);
   const signout$ = () => {
     onClick();
     signout();
     queryClient.setQueriesData("*fireback.UserRoleWorkspace", []);
-    if (process.env.REACT_APP_NAVIGATE_ON_SIGNOUT) {
+    if (BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT) {
       router.push(
-        process.env.REACT_APP_NAVIGATE_ON_SIGNOUT,
-        process.env.REACT_APP_NAVIGATE_ON_SIGNOUT
+        BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT,
+        BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT
       );
     }
   };
