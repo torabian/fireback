@@ -46,7 +46,7 @@ describe("Logging in with the signin", () => {
       });
     });
 
-    it("on a fresh install, there should be no authentication available at all.", () => {
+    it("should show welcome back when it's email and phone enabled.", () => {
       cy.viewport(400, 750); // Set the window size dynamically
       cy.visit(ui("/manage/#/en/welcome"));
       cy.wait(1000);
