@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac"
+	izaTheme "github.com/torabian/fireback/modules/iza-theme"
 
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
@@ -70,6 +71,8 @@ var xapp = &fireback.FirebackApp{
 				fireback.NewProjectCli(),
 			},
 		},
+
+		izaTheme.IzaThemeModuleSetup(nil),
 	}, abac.AbacCompleteModules()...),
 }
 
