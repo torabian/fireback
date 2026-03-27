@@ -1,12 +1,15 @@
 package fireback
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	reflect "reflect"
 	"slices"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -450,4 +453,82 @@ func HttpGetXHtml(
 			c.AbortWithStatus(404)
 		}
 	}
+}
+
+func toBytes(v any) []byte {
+	switch t := v.(type) {
+	case []byte:
+		return t
+	case string:
+		return []byte(t)
+	default:
+		b, _ := json.Marshal(t)
+		return b
+	}
+}
+
+func WriteResponse(c *gin.Context, status int, resp emigo.EmiActionResult) {
+	payload := resp.GetPayload()
+
+	if payload == nil {
+		c.Status(status)
+		return
+	}
+
+	headers := resp.GetRespHeaders()
+	if headers == nil {
+		c.JSON(status, payload)
+
+		return
+	}
+	switch p := payload.(type) {
+	case func(io.Writer) error:
+		// template streaming
+		if err := p(c.Writer); err != nil {
+			c.Error(err)
+			return
+		}
+
+	case io.Reader:
+		// file or image streaming
+		_, err := io.Copy(c.Writer, p)
+		if err != nil {
+			c.Error(err)
+			return
+		}
+
+	default:
+		// fallback based on content-type
+		ct := headers["Content-Type"]
+		c.Data(status, ct, toBytes(payload))
+
+	}
+}
+
+func WriteActionResponseToGin(m *gin.Context, resp emigo.EmiActionResult, err error) {
+	if err != nil {
+		m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// If the handler returned nil (and no error), it means the response was handled manually.
+	if resp == nil || reflect.ValueOf(resp).IsNil() {
+		return
+	}
+
+	// Apply headers
+	for k, v := range resp.GetRespHeaders() {
+		m.Header(k, v)
+	}
+
+	// Apply status and payload
+	status := resp.GetStatusCode()
+	if status == 0 {
+		status = http.StatusOK
+	}
+
+	// Now here it's a bit weird. Because GetPayload returns an interface, we need to check the content type,
+	// and call appropriate options. How can we extend this function, to easily add text, stream, json, yaml,
+	// based on reading resp.Headers
+	WriteResponse(m, status, resp)
 }

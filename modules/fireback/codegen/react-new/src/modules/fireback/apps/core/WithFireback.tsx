@@ -1,9 +1,11 @@
 import { AppConfig } from "../../hooks/appConfigTools";
 
-import React from "react";
+import React, { useRef } from "react";
 import { QueryClient } from "react-query";
-import { mockExecFn } from "../../hooks/mock-tools";
+import { fetchXMock, mockExecFn } from "../../hooks/mock-tools";
 import { RemoteQueryProvider as FirebackQueryProvider } from "../../sdk/core/react-tools";
+import { FetchxContext } from "../../sdk/sdk/common/fetchx";
+import { FetchxProvider } from "../../sdk/sdk/react/useFetchx";
 
 export function WithFireback({
   children,
@@ -20,6 +22,14 @@ export function WithFireback({
   prefix?: string;
   locale?: string;
 }) {
+  const fetchContext = useRef(
+    new FetchxContext(process.env.REACT_APP_REMOTE_SERVICE?.replace(/\/$/, "")),
+  );
+
+  /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+  fetchContext.current.fetchOverrideFn = fetchXMock(mockServer);
+  /// #endif
+
   return (
     <FirebackQueryProvider
       socket
@@ -36,7 +46,7 @@ export function WithFireback({
       // defaultExecFn={() => (options: any) =>
       //   mockExecFn(options, mockServer.current, t)}
     >
-      {children}
+      <FetchxProvider value={fetchContext.current}>{children}</FetchxProvider>
     </FirebackQueryProvider>
   );
 }

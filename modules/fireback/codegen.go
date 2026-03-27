@@ -24,6 +24,9 @@ import (
 	"strings"
 	"text/template"
 
+	ts_envelopes "github.com/torabian/emi/lib/js/ts-envelopes"
+	tssdk "github.com/torabian/emi/lib/js/ts-sdk"
+
 	"github.com/gertd/go-pluralize"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggest/openapi-go/openapi3"
@@ -638,8 +641,15 @@ func GetMD5Hash(text []byte) string {
 	hash := md5.Sum(text)
 	return hex.EncodeToString(hash[:])
 }
+func normalizeNewlines(data []byte) []byte {
+	// First normalize everything to \n, then to \r\n
+	s := strings.ReplaceAll(string(data), "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\n", "\r\n")
+	return []byte(s)
+}
 
 func WriteFileGen(ctx *CodeGenContext, name string, data []byte, perm os.FileMode) error {
+	data = normalizeNewlines(data)
 
 	gen, okay := generatorHash[name]
 
@@ -1112,6 +1122,7 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 	// Which might need to be fixed.
 
 	if len(ctx.ModulesOnDisk) > 0 || ctx.OpenApiFile != "" {
+
 		return RunCodeGenExternal(ctx)
 	}
 
@@ -1121,6 +1132,34 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 
 	app := xapp
 	modules := GenGetModules(xapp, ctx)
+	exportDir := filepath.Join(ctx.Path)
+
+	if ctx.Catalog.LanguageName == "TypeScript" {
+		sdkFiles := core.FsEmbedToVirtualFile(&tssdk.Content, "sdk")
+		var source *embed.FS = &ts_envelopes.Content
+		sdkFiles = append(sdkFiles, core.FsEmbedToVirtualFile(source, "sdk/envelopes")...)
+
+		for _, file := range sdkFiles {
+
+			exportPath := filepath.Join(exportDir, file.Location, file.Name)
+			if file.Extension != "" {
+				exportPath += file.Extension
+			}
+
+			os.MkdirAll(filepath.Dir(exportPath), os.ModePerm)
+
+			data := []byte(file.ActualScript)
+
+			if strings.Contains(exportPath, ".ts") {
+				data = append([]byte("// @ts-nocheck\r\n"), data...)
+			}
+
+			if err := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644); err != nil {
+				log.Fatalln("Failed to write emi sdk static files for typescript", err)
+			}
+		}
+
+	}
 
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
@@ -1589,6 +1628,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 	}
 	// Now after the queries is created, we need to convert the sql files in that directory into golang query predict files
 	err2 := ReadSQLFiles(DiskFS{Root: filepath.Join(ctx.Path, "queries")}, ".", 1, func(filePath string, data []byte) error {
+		fmt.Println("SQL Path: ", filePath)
 		doc.Queries = append(doc.Queries, querypredict.QuerySpec{
 			Name:  strings.ReplaceAll(path.Base(filePath), ".sql", ""),
 			Query: string(data),
@@ -1686,6 +1726,14 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		exportDir = filepath.Join(ctx.Path, x.Namespace)
 	}
 
+	emiJsContext := core.MicroGenContext{
+		Tags: "react,typescript",
+		Flags: map[string]string{
+			"react-query":     "react-query@^3.39.3",
+			"js-sdk-location": "../../sdk",
+		},
+	}
+
 	tsComplexes := DiscoverJsComplexes(x)
 	goComplexes := DiscoverGoComplexes(x)
 
@@ -1762,7 +1810,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		var data []byte
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
-			exportPath = filepath.Join(exportDir, dtoName+".go")
+			exportPath = filepath.Join(exportDir, dtoName+".dyno.go")
 			result, err := golang.GoCommonStructGenerator(
 				dto.Fields,
 				core.MicroGenContext{},
@@ -1780,9 +1828,10 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 		if ctx.Catalog.LanguageName == "TypeScript" {
 			exportPath = filepath.Join(exportDir, dtoName+".ts")
+
 			result, err := js.JsCommonObjectGenerator(
 				dto.Fields,
-				core.MicroGenContext{},
+				emiJsContext,
 				js.JsCommonObjectContext{
 					RootClassName:       dtoName,
 					RecognizedComplexes: tsComplexes,
@@ -1791,7 +1840,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
 			}
-			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result))
+			data = []byte("// @ts-nocheck \r\n // This no check has been added via fireback. \r\n" + js.AsFullDocument(result, emiJsContext))
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
@@ -1809,13 +1858,16 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		if ctx.Catalog.LanguageName == "TypeScript" {
 			res, err := js.JsActionManifest(
 				action,
-				core.MicroGenContext{Tags: "typescript,react"},
+				emiJsContext,
 				tsComplexes,
 			)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
-			content = js.AsFullDocument(res)
+			content = js.AsFullDocument(
+				res,
+				emiJsContext,
+			)
 			exportPath = filepath.Join(exportDir, action.Name+".ts")
 		}
 
@@ -1825,7 +1877,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
 			content = golang.AsFullDocument(res, x.Name)
-			exportPath = filepath.Join(exportDir, action.Name+".go")
+			exportPath = filepath.Join(exportDir, action.Name+"Action.dyno.go")
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
@@ -1903,6 +1955,34 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 							"wsprefix": wsPrefix,
 						}
 						data, err5 := getActionTemplate(params)
+						if err5 != nil {
+							fmt.Println("Error creating action default template:", exportPath, err5)
+						}
+						err4 := WriteFileGen(ctx, actionImplementationFile, EscapeLines(data), 0644)
+						if err4 != nil {
+							fmt.Println("Error creating action default template:", exportPath, err4)
+						}
+					}
+				}
+
+				for _, action := range x.Acts {
+					actionImplementationFile := filepath.Join(exportDir, action.Upper()+"Action.go")
+					hasFile := Exists(actionImplementationFile)
+
+					if !hasFile {
+
+						wsPrefix := "fireback."
+						if x.MetaWorkspace {
+							wsPrefix = ""
+							isWorkspace = true
+						}
+
+						params := gin.H{
+							"m":        x,
+							"a":        action,
+							"wsprefix": wsPrefix,
+						}
+						data, err5 := getEmiActionTemplate(params)
 						if err5 != nil {
 							fmt.Println("Error creating action default template:", exportPath, err5)
 						}
@@ -2168,6 +2248,31 @@ func getActionTemplate(data interface{}) ([]byte, error) {
 		{{ end }}
 
 		return {{ if (eq .a.ActionResDto "string")}} "" {{ else }} nil {{ end }}, {{ if (eq .a.FormatComputed "QUERY") }} nil, {{ end }} nil
+	}
+`
+
+	tmpl, err := template.New("greeting").Parse(tmplStr)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	var result bytes.Buffer
+	err = tmpl.Execute(&result, data)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return result.Bytes(), nil
+}
+
+// When we create emi action, we also need to create a file,
+// so the developer adds the logic in there.
+func getEmiActionTemplate(data interface{}) ([]byte, error) {
+	tmplStr := `package {{ .m.Name }}
+
+	func init() {
+		// Override the implementation with our actual code.
+		// {{ .a.Name }}Impl = // Trigger intelisense, it would auto complete.
 	}
 `
 

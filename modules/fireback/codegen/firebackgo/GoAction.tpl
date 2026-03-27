@@ -26,7 +26,7 @@ import (
   
 )
 
-{{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut )}}
+{{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut .m.Acts )}}
 
 var {{ .m.Upper }}CustomActionsCli = []cli.Command {
 {{ range .m.Actions }}
@@ -49,6 +49,9 @@ var {{ .m.Upper }}CliActionsBundle = &{{ $.wsprefix }}CliActionsBundle{
 
     // Here we will include entities actions, as well as module level actions
     Subcommands: cli.Commands{
+        {{ range .m.Acts }}
+            {{ .Upper }}ActionDef.ToCli(),
+        {{ end }}
         {{ range .m.Actions }}
             {{ .Upper }}ActionCmd,
         {{ end }}

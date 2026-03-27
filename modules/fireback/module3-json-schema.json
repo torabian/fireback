@@ -29,64 +29,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "EmiAction": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "General name of the action used for generating code and CLI commands"
-        },
-        "cliName": {
-          "type": "string",
-          "description": "Overrides the CLI action name if specified otherwise defaults to Name"
-        },
-        "url": {
-          "type": "string",
-          "description": "HTTP route of the action; if not specified the action is CLI-only"
-        },
-        "method": {
-          "type": "string",
-          "enum": [
-            "post",
-            "patch",
-            "put",
-            "get",
-            "delete",
-            "reactive"
-          ],
-          "description": "HTTP method type including standard and Emi-specific methods"
-        },
-        "binaryType": {
-          "type": "string",
-          "enum": [
-            "text",
-            "arraybuffer",
-            "blob"
-          ],
-          "description": "Text by default for websocket"
-        },
-        "qs": {
-          "items": {
-            "$ref": "#/definitions/EmiQueryField"
-          },
-          "type": "array",
-          "description": "Type-safe query parameters for CLI and HTTP requests"
-        },
-        "description": {
-          "type": "string",
-          "description": "Action description used in API specs and documentation"
-        },
-        "in": {
-          "$ref": "#/definitions/EmiActionBody",
-          "description": "Request body definition similar to HTTP request body"
-        },
-        "out": {
-          "$ref": "#/definitions/EmiActionBody",
-          "description": "Response body definition similar to HTTP response body"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "EmiActionBody": {
       "properties": {
         "headers": {
@@ -402,6 +344,68 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "FirebackEmiAction": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "General name of the action used for generating code and CLI commands"
+        },
+        "cliName": {
+          "type": "string",
+          "description": "Overrides the CLI action name if specified otherwise defaults to Name"
+        },
+        "url": {
+          "type": "string",
+          "description": "HTTP route of the action; if not specified the action is CLI-only"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "post",
+            "patch",
+            "put",
+            "get",
+            "delete",
+            "reactive"
+          ],
+          "description": "HTTP method type including standard and Emi-specific methods"
+        },
+        "binaryType": {
+          "type": "string",
+          "enum": [
+            "text",
+            "arraybuffer",
+            "blob"
+          ],
+          "description": "Text by default for websocket"
+        },
+        "qs": {
+          "items": {
+            "$ref": "#/definitions/EmiQueryField"
+          },
+          "type": "array",
+          "description": "Type-safe query parameters for CLI and HTTP requests"
+        },
+        "description": {
+          "type": "string",
+          "description": "Action description used in API specs and documentation"
+        },
+        "in": {
+          "$ref": "#/definitions/EmiActionBody",
+          "description": "Request body definition similar to HTTP request body"
+        },
+        "out": {
+          "$ref": "#/definitions/EmiActionBody",
+          "description": "Response body definition similar to HTTP response body"
+        },
+        "security": {
+          "$ref": "#/definitions/SecurityModel",
+          "description": "Defines access control similar to middleware checking permissions"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "GormOverrideMap": {
       "properties": {
         "workspaceId": {
@@ -468,7 +472,7 @@
         },
         "acts": {
           "items": {
-            "$ref": "#/definitions/EmiAction"
+            "$ref": "#/definitions/FirebackEmiAction"
           },
           "type": "array",
           "description": "Actions based on Emi compiler - aims to replace the actions from Fireback"

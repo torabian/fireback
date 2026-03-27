@@ -4,11 +4,11 @@ import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
-	CheckPassportMethodsActionImp = CheckPassportMethodsAction
+	CheckPassportMethodsImpl = CheckPassportMethodsActionfunc
 }
 
-func CheckPassportMethodsAction(q fireback.QueryDSL) (*CheckPassportMethodsActionResDto, *fireback.IError) {
-	state := &CheckPassportMethodsActionResDto{}
+func CheckPassportMethodsActionfunc(c CheckPassportMethodsActionRequest, query fireback.QueryDSL) (*CheckPassportMethodsActionResponse, error) {
+	state := &CheckPassportMethodsActionRes{}
 
 	// Get the workspacec configuration as well, for different reasons such as captcha info
 	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
@@ -72,5 +72,5 @@ func CheckPassportMethodsAction(q fireback.QueryDSL) (*CheckPassportMethodsActio
 		}
 	}
 
-	return state, nil
+	return &CheckPassportMethodsActionResponse{Payload: fireback.GResponseSingleItem(state)}, nil
 }

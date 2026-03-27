@@ -510,51 +510,6 @@ var ConfirmClassicPassportTotpActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
-
-type CheckPassportMethodsActionResDto struct {
-	Email                bool   `json:"email" xml:"email" yaml:"email"        `
-	Phone                bool   `json:"phone" xml:"phone" yaml:"phone"        `
-	Google               bool   `json:"google" xml:"google" yaml:"google"        `
-	Facebook             bool   `json:"facebook" xml:"facebook" yaml:"facebook"        `
-	GoogleOAuthClientKey string `json:"googleOAuthClientKey" xml:"googleOAuthClientKey" yaml:"googleOAuthClientKey"        `
-	FacebookAppId        string `json:"facebookAppId" xml:"facebookAppId" yaml:"facebookAppId"        `
-	EnabledRecaptcha2    bool   `json:"enabledRecaptcha2" xml:"enabledRecaptcha2" yaml:"enabledRecaptcha2"        `
-	Recaptcha2ClientKey  string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
-}
-
-func (x *CheckPassportMethodsActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type checkPassportMethodsActionImpSig func(
-	q fireback.QueryDSL) (*CheckPassportMethodsActionResDto,
-	*fireback.IError,
-)
-
-var CheckPassportMethodsActionImp checkPassportMethodsActionImpSig
-
-func CheckPassportMethodsActionFn(
-	q fireback.QueryDSL,
-) (
-	*CheckPassportMethodsActionResDto,
-	*fireback.IError,
-) {
-	if CheckPassportMethodsActionImp == nil {
-		return nil, nil
-	}
-	return CheckPassportMethodsActionImp(q)
-}
-
-var CheckPassportMethodsActionCmd cli.Command = cli.Command{
-	Name:  "check-passport-methods",
-	Usage: `Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)`,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
-		result, err := CheckPassportMethodsActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var QueryWorkspaceTypesPubliclySecurityModel *fireback.SecurityModel = nil
 
 type QueryWorkspaceTypesPubliclyActionResDto struct {
@@ -1821,8 +1776,46 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
+var CheckPassportMethodsImpl func(c CheckPassportMethodsActionRequest, query fireback.QueryDSL) (*CheckPassportMethodsActionResponse, error) = nil
+var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Action{
+	CliName:       CheckPassportMethodsActionMeta().CliName,
+	Description:   CheckPassportMethodsActionMeta().Description,
+	Name:          CheckPassportMethodsActionMeta().Name,
+	Method:        CheckPassportMethodsActionMeta().Method,
+	Url:           CheckPassportMethodsActionMeta().URL,
+	SecurityModel: CheckPassportMethodsSecurityModel,
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := CheckPassportMethodsActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			var query fireback.QueryDSL
+			query = fireback.ExtractQueryDslFromGinContext(m)
+			resp, err := CheckPassportMethodsImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
+		req := CheckPassportMethodsActionRequest{}
+		resp, err := CheckPassportMethodsImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
+		//// Let's add actions for emi acts
+		CheckPassportMethodsActionDef,
+		/// End for emi actions
 		{
 			Method:        "GET",
 			Url:           "/passports/os/login",
@@ -1978,25 +1971,6 @@ func AbacCustomActions() []fireback.Module3Action {
 			RequestEntity: &ConfirmClassicPassportTotpActionReqDto{},
 			In: &fireback.Module3ActionBody{
 				Entity: "ConfirmClassicPassportTotpActionReqDto",
-			},
-		},
-		{
-			Method:        "GET",
-			Url:           "/passports/available-methods",
-			SecurityModel: CheckPassportMethodsSecurityModel,
-			Name:          "checkPassportMethods",
-			Description:   "Publicly available information to create the authentication form, and show users how they can signin or signup to the system. Based on the PassportMethod entities, it will compute the available methods for the user, considering their region (IP for example)",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// GET_ONE - get
-					fireback.HttpGetEntity(c, CheckPassportMethodsActionFn)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         CheckPassportMethodsActionFn,
-			ResponseEntity: &CheckPassportMethodsActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "CheckPassportMethodsActionResDto",
 			},
 		},
 		{
@@ -2367,7 +2341,6 @@ var AbacCustomActionsCli = []cli.Command{
 	ChangePasswordActionCmd,
 	UserInvitationsActionCmd,
 	ConfirmClassicPassportTotpActionCmd,
-	CheckPassportMethodsActionCmd,
 	QueryWorkspaceTypesPubliclyActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
 	SignoutActionCmd,
@@ -2399,6 +2372,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionCmd,
 		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,
@@ -2406,7 +2380,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		ChangePasswordActionCmd,
 		UserInvitationsActionCmd,
 		ConfirmClassicPassportTotpActionCmd,
-		CheckPassportMethodsActionCmd,
 		QueryWorkspaceTypesPubliclyActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
 		SignoutActionCmd,

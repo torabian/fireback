@@ -84,11 +84,6 @@ func GetCliCommands(x *FirebackApp) []cli.Command {
 		for _, module := range modules {
 			if len(module.Children) > 0 {
 				if module.ActionsBundle != nil && module.ActionsBundle.CliAction != nil {
-					// command := cli.Command{
-					// 	Name:        "child2x",
-					// 	Subcommands: collectCommands(module.Children),
-					// }
-					// fmt.Println(module.CliActionsBundle.Subcommands)
 					module.ActionsBundle.CliAction.Subcommands = append(module.ActionsBundle.CliAction.Subcommands, collectCommands(module.Children)...)
 
 				}
@@ -472,6 +467,14 @@ func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 
 	for _, item := range x.Modules {
 		moduleNamespace := g.Group(item.Namespace)
+
+		// Sometimes we need to add custom things to gin.
+		for _, hook := range item.GinWebServerInitHooks {
+			if err := hook(g, x); err != nil {
+				LOG.Error("Error %w", zap.Error(err))
+				LOG.Fatal("Gin server failed to run a hook on module", zap.String("module", item.Name))
+			}
+		}
 
 		for _, actions := range item.Actions {
 			CastRoutes2(actions, moduleNamespace)

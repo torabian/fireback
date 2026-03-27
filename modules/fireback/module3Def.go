@@ -22,6 +22,13 @@ import (
 
 type ErrorItem map[string]string
 
+type FirebackEmiAction struct {
+	emi.EmiAction `json:",inline" yaml:",inline"`
+
+	// Defines access control similar to middleware checking permissions, tokens, and roles.
+	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Defines access control similar to middleware checking permissions, tokens, and roles"`
+}
+
 // Module3 struct represents the entire file tree
 type Module3 struct {
 
@@ -56,7 +63,7 @@ type Module3 struct {
 	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
 
 	// Actions based on Emi compiler - aims to replace the actions from Fireback
-	Acts []*emi.EmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
+	Acts []*FirebackEmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
 
 	// Dtos based on Emi definitions
 	Dtom []*emi.EmiDto `yaml:"dtom,omitempty" json:"dtom,omitempty" jsonschema:"description=Dtos based on Emi definitions"`
@@ -588,8 +595,13 @@ func (x Module3Entity) HasClickHouse() bool {
 
 func (x Module3Action) ToCli() cli.Command {
 
+	name := x.Name
+	if x.CliName != "" {
+		name = x.CliName
+	}
+
 	return cli.Command{
-		Name:        x.Name,
+		Name:        name,
 		Aliases:     x.ActionAliases,
 		Description: x.Description,
 		Usage:       x.Description,

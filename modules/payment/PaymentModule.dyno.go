@@ -121,7 +121,7 @@ var PaymentRemotes paymentRemoteContext = paymentRemoteContext{
 	client: retryablehttp.NewClient(),
 }
 
-// / ProductInventoryAvailability
+/// ProductInventoryAvailability
 type ProductInventoryAvailabilityRemoteResponse struct {
 	Name      string   `json:"name" xml:"name" yaml:"name"        `
 	Platforms []string `json:"platforms" xml:"platforms" yaml:"platforms"        `
@@ -157,7 +157,7 @@ func (x *paymentRemoteContext) ProductInventoryAvailability(
 	return content, resp, nil
 }
 
-// / VerifyTransaction
+/// VerifyTransaction
 type VerifyTransactionRemoteResponse struct {
 	Data  *VerifyTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 	Error string                    `json:"error" xml:"error" yaml:"error"        `
@@ -214,7 +214,7 @@ func (x *paymentRemoteContext) VerifyTransaction(
 	return content, resp, nil
 }
 
-// / RegisterTransaction
+/// RegisterTransaction
 type RegisterTransactionRemoteResponse struct {
 	Data  *RegisterTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 	Error string                      `json:"error" xml:"error" yaml:"error"        `

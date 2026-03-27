@@ -1,15 +1,19 @@
-import { FormikProps, useFormik } from "formik";
-import { useEffect, useRef } from "react";
+import { useFormik } from "formik";
+import { useEffect } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
-import { useRouter } from "../../hooks/useRouter";
-import { useGetPassportsAvailableMethods } from "../../sdk/modules/abac/useGetPassportsAvailableMethods";
-import { usePostWorkspacePassportCheck } from "../../sdk/modules/abac/usePostWorkspacePassportCheck";
-import { AuthMethod } from "./auth.common";
 import { useRecaptcha2 } from "../../hooks/useRecaptcha2";
+import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { strings } from "./strings/translations";
 import { CheckClassicPassportActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import {
+  CheckPassportMethodsActionRes,
+  useCheckPassportMethodsActionQuery,
+} from "../../sdk/modules/abac/CheckPassportMethods";
+import { usePostWorkspacePassportCheck } from "../../sdk/modules/abac/usePostWorkspacePassportCheck";
+import { GResponse } from "../../sdk/sdk/envelopes";
+import { AuthMethod } from "./auth.common";
+import { strings } from "./strings/translations";
 
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const s = useS(strings);
@@ -18,14 +22,21 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const { submit: submitCheck, mutation } = usePostWorkspacePassportCheck();
   const canGoBack = state?.canGoBack === false ? false : true;
 
-  const { query: passportMethodsQuery } = useGetPassportsAvailableMethods({
-    unauthorized: true,
-  });
+  let enabledRecaptcha2 = false;
+  let recaptcha2ClientKey = "";
 
-  const enabledRecaptcha2 =
-    passportMethodsQuery.data?.data?.enabledRecaptcha2 || false;
-  const recaptcha2ClientKey =
-    passportMethodsQuery.data?.data?.recaptcha2ClientKey || undefined;
+  const { data } = useCheckPassportMethodsActionQuery({});
+
+  if (
+    data instanceof GResponse &&
+    data.data.item instanceof CheckPassportMethodsActionRes
+  ) {
+    enabledRecaptcha2 = data?.data?.item.enabledRecaptcha2;
+    recaptcha2ClientKey = data?.data?.item?.recaptcha2ClientKey;
+  } else {
+    // There isn't an error checking or validation mechanism to tell user
+    // that it has been failed.
+  }
 
   const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
     submitCheck(data)
@@ -88,7 +99,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
 
     form.setFieldValue(
       CheckClassicPassportActionReqDto.Fields.securityToken,
-      value
+      value,
     );
   }, [value]);
 

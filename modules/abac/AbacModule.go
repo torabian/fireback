@@ -164,6 +164,9 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		GetTimezoneGroupModule3Actions(),
 		GetWorkspaceConfigModule3Actions(),
 		GetRegionalContentModule3Actions(),
+		// {
+		// 	AS_FIREBACK_ACTION,
+		// },
 	}
 
 	module.ProvideCliHandlers([]cli.Command{

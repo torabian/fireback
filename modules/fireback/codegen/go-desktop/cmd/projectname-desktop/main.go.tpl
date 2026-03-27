@@ -197,14 +197,7 @@ var xapp = &fireback.FirebackApp{
 		 
 	},
 
-	{{ if ne .ctx.IsMonolith true }}
-	/* File uploader is a part of drive module in abac module
-	{{ end }}
-	RunTus: func() {
-		abac.LiftTusServer()
-	},
-	{{ if ne .ctx.IsMonolith true }}
-	*/
+ 
 	{{ end }}
 	InjectSearchEndpoint:     fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{

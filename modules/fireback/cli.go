@@ -2,8 +2,10 @@ package fireback
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"reflect"
@@ -12,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
+	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -281,6 +284,83 @@ func AskForPassword(label string, defaultV string) string {
 		return ""
 	}
 	return value
+}
+
+func WriteResponseCLI(w io.Writer, status int, resp emigo.EmiActionResult) error {
+	payload := resp.GetPayload()
+
+	if payload == nil {
+		return nil
+	}
+
+	headers := resp.GetRespHeaders()
+	ct := ""
+	if headers != nil {
+		ct = headers["Content-Type"]
+	}
+
+	switch p := payload.(type) {
+
+	case func(io.Writer) error:
+		// streaming template
+		return p(w)
+
+	case io.Reader:
+		// streaming file
+		_, err := io.Copy(w, p)
+		return err
+
+	default:
+		switch {
+		case strings.Contains(ct, "application/json"):
+			enc := json.NewEncoder(w)
+			enc.SetIndent("", "  ") // CLI-friendly
+			return enc.Encode(payload)
+
+		case strings.Contains(ct, "application/xml"):
+			out, err := xml.MarshalIndent(payload, "", "  ")
+			if err != nil {
+				return err
+			}
+			_, err = w.Write(out)
+			return err
+
+		case strings.Contains(ct, "text/plain"):
+			_, err := fmt.Fprintf(w, "%v\n", payload)
+			return err
+
+		case strings.Contains(ct, "text/html"):
+			_, err := w.Write(toBytes(payload))
+			return err
+
+		default:
+			// sane default for CLI → JSON
+			enc := json.NewEncoder(w)
+			enc.SetIndent("", "  ")
+			return enc.Encode(payload)
+		}
+	}
+}
+
+func HandleActionInCli2(c *cli.Context, result emigo.EmiActionResult, err error, t map[string]map[string]string) {
+
+	f := CommonCliQueryDSLBuilder(c)
+
+	if err != nil {
+
+		err := CastToIError(err)
+		err2 := err.ToPublicEndUser(&f)
+
+		if err2 == nil {
+			log.Panicln("Panic on handle action, without public error: %w", err)
+			return
+		}
+
+		os.Exit(int(err2.HttpCode))
+	}
+
+	WriteResponseCLI(os.Stdout, result.GetStatusCode(), result)
+
 }
 
 func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {

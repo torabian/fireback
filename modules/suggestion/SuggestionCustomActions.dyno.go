@@ -189,8 +189,12 @@ var ResyncActionCmd cli.Command = cli.Command{
 	},
 }
 
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 func SuggestionCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
+		//// Let's add actions for emi acts
+		/// End for emi actions
 		{
 			Method:        "POST",
 			Url:           "/suggestion/query",
