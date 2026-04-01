@@ -27,9 +27,9 @@ export function WithFireback({
     new FetchxContext(BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, "")),
   );
 
-  /// #if BUILD_VARIABLES.INACCURATE_MOCK_MODE == "true"
-  fetchContext.current.fetchOverrideFn = fetchXMock(mockServer);
-  /// #endif
+  if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
+    fetchContext.current.fetchOverrideFn = fetchXMock(mockServer);
+  }
 
   return (
     <FirebackQueryProvider

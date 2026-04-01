@@ -33,6 +33,7 @@ export default defineConfig(({ command, mode }) => {
   console.log(build_variables)
 
   return {
+    base: (build_variables as any).VITE_PUBLIC_URL,
     define: {
       'import.meta.env.BUILD_VARIABLES': build_variables, 
     },
