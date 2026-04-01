@@ -1,12 +1,12 @@
 {
-  "REACT_APP_REMOTE_SERVICE": "/",
+  "VITE_REMOTE_SERVICE": "/",
   "PUBLIC_URL": "/",
-  "REACT_APP_PUBLIC_URL": "/",
-  "REACT_APP_DEFAULT_ROUTE": "/{locale}/dashboard",
+  "VITE_PUBLIC_URL": "/",
+  "VITE_DEFAULT_ROUTE": "/{locale}/dashboard",
   "VITE_TARGET_APP": "projectname",
-  "REACT_APP_ALLOW_OS_LOGIN": "false",
-  "REACT_APP_SUPPORTED_LANGUAGES": "fa,en",
-  "REACT_APP_USE_HASH_ROUTER": "true",
-  "REACT_APP_INACCURATE_MOCK_MODE": "false",
-  "REACT_APP_TITLE": "projectname"
+  "VITE_ALLOW_OS_LOGIN": "false",
+  "VITE_SUPPORTED_LANGUAGES": "fa,en",
+  "VITE_USE_HASH_ROUTER": "true",
+  "VITE_INACCURATE_MOCK_MODE": "false",
+  "VITE_TITLE": "projectname"
 }

@@ -5,14 +5,14 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="%REACT_APP_DESCRIPTION%" />
+    <meta name="description" content="%VITE_DESCRIPTION%" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <style>
     body.dark-theme {
       background-color: #333;
     }
     </style>
-    <title>%REACT_APP_TITLE%</title>
+    <title>%VITE_TITLE%</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -62,8 +62,8 @@
     }
 
 
-    if ("%REACT_APP_SUPPORTED_LANGUAGES%".includes("fa")) {
-      loadFont("iransans", "%REACT_APP_PUBLIC_URL%fonts/irs/irs.ttf");
+    if ("%VITE_SUPPORTED_LANGUAGES%".includes("fa")) {
+      loadFont("iransans", "%VITE_PUBLIC_URL%fonts/irs/irs.ttf");
     }
 
     var theme = localStorage.getItem("ui_theme") || "mac-theme";

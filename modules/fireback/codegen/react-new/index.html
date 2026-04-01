@@ -55,8 +55,8 @@
     }
 
 
-    if ("%REACT_APP_SUPPORTED_LANGUAGES%".includes("fa")) {
-      loadFont("iransans", "%REACT_APP_PUBLIC_URL%fonts/irs/irs.ttf");
+    if ("%VITE_SUPPORTED_LANGUAGES%".includes("fa")) {
+      loadFont("iransans", "%VITE_PUBLIC_URL%fonts/irs/irs.ttf");
     }
 
     var theme = localStorage.getItem("ui_theme") || "mac-theme";
