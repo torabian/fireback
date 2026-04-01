@@ -14,7 +14,7 @@ dev:
 
 ui2:
 	cd ../../modules/fireback/codegen/react-new && npm run self-service:build && cd - && \
-	rm -rf ../../modules/fireback/codegen/selfservice && cp -R ../../modules/fireback/codegen/react-new/build ../../modules/fireback/codegen/selfservice && \
+	rm -rf ../../modules/fireback/codegen/selfservice && cp -R ../../modules/fireback/codegen/react-new/dist ../../modules/fireback/codegen/selfservice && \
 	git checkout ../../modules/fireback/codegen/selfservice/index.go 
 	cd ../../modules/fireback/codegen/react-new && npm run manage:build && cd - && \
 	rm -rf ../../modules/fireback/codegen/fireback-manage && \
