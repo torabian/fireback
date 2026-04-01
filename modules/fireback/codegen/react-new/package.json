@@ -97,6 +97,7 @@
     "@types/tinymce": "^4.6.5",
     "@vitejs/plugin-react": "^4.3.4",
     "vite": "^6.2.0",
+    "vite-plugin-conditional-compiler": "^0.4.0",
     "vite-tsconfig-paths": "^6.1.1"
   },
   "browserslist": {
