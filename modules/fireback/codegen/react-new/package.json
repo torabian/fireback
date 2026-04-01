@@ -69,7 +69,6 @@
     "react-virtualized-auto-sizer": "^1.0.20",
     "react-window": "^1.8.9",
     "react-window-infinite-loader": "^1.0.9",
-    "reactstrap": "^9.2.2",
     "sass": "^1.84.0",
     "tus-js-client": "^4.1.0",
     "typescript": "^6.0.2",
