@@ -2,19 +2,10 @@ declare module "*.css";
 declare module "*.scss";
 
 interface Window {
-    BUILD_VARIABLES?: {
-        REMOTE_SERVICE?: string;
-        PUBLIC_URL?: string;
-        DEFAULT_ROUTE?: string;
-        TARGET_APP?: string;
-        ALLOW_OS_LOGIN?: string;
-        SUPPORTED_LANGUAGES?: string;
-        USE_HASH_ROUTER?: string;
-        INACCURATE_MOCK_MODE?: string;
-        TITLE?: string;
-        GITHUB_DEMO?: string;
-        FORCED_LOCALE?: string;
-        FORCE_APP_THEME?: string;
-        NAVIGATE_ON_SIGNOUT?: string;
-    };
+    // This is correctly any.
+    // Problem with this is, we never access process.env or import.meta.env directly
+    // in this project, since the build system can change over time.
+    // BUILD_VARIABLES are only accessed in build-variables.tsx,
+    // and there it would become type safe.
+    BUILD_VARIABLES?: any;
 }
