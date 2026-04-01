@@ -1,5 +1,5 @@
-
-import type { CreatorSignature, EnvelopeClass } from "../common/EnvelopeClass";
+// @ts-nocheck
+import { CreatorSignature, EnvelopeClass } from "../common/EnvelopeClass";
 // Some responses are returning a flat array, without any other information
 // regarding the pagination, etc. They start [{},{}...] style.
 // For those which might have a single project which is array but none-standard,

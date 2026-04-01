@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/manage/static/css/main.1738a58c.css",
-    "main.js": "/manage/static/js/main.2c5c989d.js",
-    "static/media/SFNSDisplay-Semibold.otf": "/manage/static/media/SFNSDisplay-Semibold.b1cbfd8df20ade660469.otf",
-    "static/media/SFNSDisplay-Medium.otf": "/manage/static/media/SFNSDisplay-Medium.0d6a447cb6bea27ee045.otf",
-    "index.html": "/manage/index.html",
-    "main.1738a58c.css.map": "/manage/static/css/main.1738a58c.css.map",
-    "main.2c5c989d.js.map": "/manage/static/js/main.2c5c989d.js.map"
+    "main.css": "/static/css/main.d1a28a63.css",
+    "main.js": "/static/js/main.49265791.js",
+    "static/media/SFNSDisplay-Semibold.otf": "/static/media/SFNSDisplay-Semibold.b1cbfd8df20ade660469.otf",
+    "static/media/SFNSDisplay-Medium.otf": "/static/media/SFNSDisplay-Medium.0d6a447cb6bea27ee045.otf",
+    "index.html": "/index.html",
+    "main.d1a28a63.css.map": "/static/css/main.d1a28a63.css.map",
+    "main.49265791.js.map": "/static/js/main.49265791.js.map"
   },
   "entrypoints": [
-    "static/css/main.1738a58c.css",
-    "static/js/main.2c5c989d.js"
+    "static/css/main.d1a28a63.css",
+    "static/js/main.49265791.js"
   ]
 }

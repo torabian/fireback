@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { type ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
+import { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
 import React, {
   useContext,
   useState,
