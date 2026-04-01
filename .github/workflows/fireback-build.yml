@@ -292,10 +292,10 @@ jobs:
         with:
           go-version: 1.21.1
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
 
@@ -354,10 +354,10 @@ jobs:
 
       # - name: Install deps
       #   run: sudo apt-get update -y && sudo apt install -y sshpass
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
       - name: Build and package deb files
@@ -406,10 +406,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       - uses: actions/download-artifact@master
         with:
           name: artifacts-ubuntu
@@ -506,10 +506,10 @@ jobs:
       - run-cypress-sqlite
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
 
       - run: cd docs && npm i --force && npm run build
         name: Build the docs
@@ -545,10 +545,10 @@ jobs:
       - name: Install sshpass
         run: brew install hudochenkov/sshpass/sshpass
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
@@ -580,7 +580,7 @@ jobs:
   #     - name: Install Node.js
   #       uses: actions/setup-node@v4
   #       with:
-  #         node-version: 18  
+  #         node-version: 22  
 
   #     - name: GET PWD
   #       run: pwd
