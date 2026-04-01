@@ -515,10 +515,10 @@ jobs:
         name: Build the docs
 
       - name: Build the front-end
-        run: cd modules/fireback/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
+        run: cd modules/fireback/codegen/react-new && npm i --force && npm run fbgithubpages
 
       - name: Copy docs to front-end build
-        run: cp -R modules/fireback/codegen/react-new/build docs/build/demo
+        run: cp -R modules/fireback/codegen/react-new/dist docs/build/demo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

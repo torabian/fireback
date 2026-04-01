@@ -12,6 +12,7 @@
     "self-service:build": "vite build --mode 'self-service/embed'",
     "manage:start": "vite --mode 'projectname/manage'",
     "manage:build": "vite build --mode 'projectname/manage'",
+    "fbgithubpages": "vite build --mode 'projectname/fbgithubpages'",
     "build": "vite build --mode 'projectname/bundle'",
     "build:bundle:demo": "vite build --mode 'projectname/bundle.demo'",
     "build:lib": "npx tsc --project lib.tsconfig.json --outDir fireback-react-lib",
