@@ -373,7 +373,7 @@ jobs:
       - name: Refresh the fireback dependencies
         run: make refresh
       - name: Clean ui installation logs
-        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock
+        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock && git checkout modules/fireback/codegen/react-new/package-lock.json
 
       - name: 
           Refreshing golang modules should not make a commit.
