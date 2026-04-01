@@ -369,6 +369,12 @@ interface IRemoteQueryProvider {
    * and before the custom API call: remote + prefix + /my/another/function
    */
   prefix?: string;
+
+  /**
+   * socketEnabled enables the legacy common socket enabled.
+   * It's enabled by default
+   */
+  socketEnabled?: boolean;
 }
 
 export function RemoteQueryProvider({
@@ -380,6 +386,7 @@ export function RemoteQueryProvider({
   preferredAcceptLanguage,
   queryClient,
   defaultExecFn,
+  socketEnabled,
   socket,
   credentialStorage,
   prefix,
@@ -471,7 +478,8 @@ export function RemoteQueryProvider({
     remote,
     options.headers?.authorization,
     (options.headers as any)["workspace-id"],
-    queryClient
+    queryClient,
+    socketEnabled
   );
 
   return (
@@ -512,7 +520,7 @@ export interface SocketNotification<T = any> {
   payload: T;
 }
 
-export function useSocket(remote, token, workspaceId, queryClient) {
+export function useSocket(remote, token, workspaceId, queryClient, enabled = true) {
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
@@ -520,7 +528,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
       !remote ||
       !token ||
       token === "undefined" ||
-      process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+      enabled === false
     ) {
       return;
     }

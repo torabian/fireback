@@ -446,7 +446,7 @@ export interface SocketNotification<T = any> {
   payload: T;
 }
 
-export function useSocket(remote, token, workspaceId, queryClient) {
+export function useSocket(remote, token, workspaceId, queryClient, enabled = true) {
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
@@ -454,7 +454,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
       !remote ||
       !token ||
       token === "undefined" ||
-      process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+      enabled === false
     ) {
       return;
     }
