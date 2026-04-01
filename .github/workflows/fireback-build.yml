@@ -477,15 +477,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22'
       
       - name: Remove the android platform, and recreate it. :(
         run: rm -rf e2e/samples/fireback-capacitor/android
       - name: Re-add cap
         run: cd e2e/samples/fireback-capacitor && npm install --save-dev @capacitor/cli && npx cap add android
-
-      - name: npx
-        run: npx
 
       - name: Build front-end
         run: cd modules/fireback/codegen/react-new && npm i --force && npm run build:bundle:demo
