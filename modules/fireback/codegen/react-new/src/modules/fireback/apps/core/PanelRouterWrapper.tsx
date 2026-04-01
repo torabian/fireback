@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from "react";
+import { type ReactNode, useContext } from "react";
 import { Panel } from "react-resizable-panels";
 import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import { useUiState } from "../../hooks/uiStateContext";

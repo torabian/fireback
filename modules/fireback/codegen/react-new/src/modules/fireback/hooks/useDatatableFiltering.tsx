@@ -1,18 +1,18 @@
-import { Filter, Sorting } from "@devexpress/dx-react-grid";
+import { type Filter, type Sorting } from "@devexpress/dx-react-grid";
 import { parse, stringify } from "qs";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  IMenuActionItem,
+  type IMenuActionItem,
   useMenuTools,
 } from "../components/action-menu/ActionMenu";
 import { ModalContext } from "../components/modal/Modal";
 import { commonDialogs } from "../components/overlay/CommonOverlays";
 import { KeyboardAction } from "../definitions/definitions";
-import { Filters } from "../hooks/datatabletools";
+import { type Filters } from "../hooks/datatabletools";
 import { useRouter } from "../hooks/useRouter";
 import { osResources } from "../resources/resources";
-import { DeleteRequest } from "../sdk/core/http-tools";
+import { type DeleteRequest } from "../sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";
 import { useT } from "./useT";

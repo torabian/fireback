@@ -1,13 +1,13 @@
 import React, {
   createContext,
-  FC,
-  ReactNode,
+  type FC,
+  type ReactNode,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
-import {
+import type {
   BaseModalOpenParams,
   DialogResult,
   DrawerOpenParams,

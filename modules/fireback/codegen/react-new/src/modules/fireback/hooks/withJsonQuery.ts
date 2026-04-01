@@ -1,7 +1,7 @@
 import {
-  Context,
-  FilterOperation,
-  JsonQuery,
+  type Context,
+  type FilterOperation,
+  type JsonQuery,
 } from "../definitions/definitions";
 import { flatMapDeep, get } from "lodash";
 

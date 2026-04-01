@@ -5,13 +5,14 @@
 import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { KeyboardAction, PermissionLevel } from "../../definitions/definitions";
+import { KeyboardAction, type PermissionLevel } from "../../definitions/definitions";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
 import { useT } from "../../hooks/useT";
 import { osResources } from "../../resources/resources";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 export function ActionMenuManager({
   filter,
@@ -60,7 +61,7 @@ export function ActionMenuItem({ item }: { item: IMenuActionItem }) {
       {item.icon ? (
         <span>
           <img
-            src={(process.env.REACT_APP_PUBLIC_URL || "") + item.icon}
+            src={(BUILD_VARIABLES.PUBLIC_URL || "") + item.icon}
             title={item.label}
             alt={item.label}
           />

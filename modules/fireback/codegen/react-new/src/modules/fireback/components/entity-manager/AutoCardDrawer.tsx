@@ -1,5 +1,5 @@
 import { createElement } from "react";
-import { QueryArchiveColumn } from "../../definitions/common";
+import { type QueryArchiveColumn } from "../../definitions/common";
 import Link from "../link/Link";
 
 export function AutoCardDrawer({

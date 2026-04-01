@@ -1,0 +1,14 @@
+{
+  "VITE_REMOTE_SERVICE": "/fireback/demo/",
+  "PUBLIC_URL": "/fireback/demo/",
+  "VITE_PUBLIC_URL": "/fireback/demo/",
+  "VITE_DEFAULT_ROUTE": "/{locale}/dashboard",
+  "VITE_TARGET_APP": "projectname",
+  "VITE_ALLOW_OS_LOGIN": "true",
+  "VITE_SUPPORTED_LANGUAGES": "fa,en",
+  "VITE_USE_HASH_ROUTER": "true",
+  "VITE_INACCURATE_MOCK_MODE": "true",
+  "VITE_TITLE": "fireback",
+  "VITE_DESCRIPTION": "fireback",
+  "VITE_GITHUB_DEMO": "true"
+}

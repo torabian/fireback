@@ -1,5 +1,5 @@
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { FormikProps, useFormik } from "formik";
+import { type FormikProps, useFormik } from "formik";
 import { useContext } from "react";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
 import { QueryErrorView } from "../../components/error-view/QueryError";
@@ -8,12 +8,13 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import { usePostPassportViaOauth } from "../../sdk/modules/abac/usePostPassportViaOauth";
-import { AuthAvailableMethods, AuthMethod } from "./auth.common";
+import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
+import { FacebookLogin } from "./FacebookLogin";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
-import { FacebookLogin } from "./FacebookLogin";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 export const WelcomeScreen = () => {
   const {
@@ -79,26 +80,26 @@ const Form = ({
   onSelect: (method: AuthMethod) => void;
   availableOptions: AuthAvailableMethods;
 }) => {
-  const { submit, mutation } = usePostPassportViaOauth({});
+  const { submit } = usePostPassportViaOauth({});
   const { setSession } = useContext(RemoteQueryContext);
   const { locale } = useLocale();
-  const { goBack, state, replace, push } = useRouter();
+  const { replace } = useRouter();
 
   const continueWithResult = (
     token: string,
-    service: "google" | "facebook"
+    service: "google" | "facebook",
   ) => {
     submit({ service, token })
       .then((res) => {
         setSession(res.data.session);
         if ((window as any).ReactNativeWebView) {
           (window as any).ReactNativeWebView.postMessage(
-            JSON.stringify(res.data)
+            JSON.stringify(res.data),
           );
         }
-        if (process.env.REACT_APP_DEFAULT_ROUTE) {
+        if (BUILD_VARIABLES.DEFAULT_ROUTE) {
           const to = (
-            process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
+            BUILD_VARIABLES.DEFAULT_ROUTE || "/{locale}/signin"
           ).replace("{locale}", locale || "en");
           replace(to, to);
         }

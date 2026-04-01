@@ -2,7 +2,7 @@ import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 // import { useGetWorkspaceWorkspaceTypeByUniqueId } from "../../sdk/modules/passports/useGetWorkspaceWorkspaceTypeByUniqueId";
 // import { usePatchWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePatchWorkspaceWorkspaceType";

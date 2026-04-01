@@ -1,7 +1,7 @@
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { InvoiceForm } from "./InvoiceEditForm";
 import { InvoiceEntity } from "@/modules/fireback/sdk/modules/payment/InvoiceEntity";

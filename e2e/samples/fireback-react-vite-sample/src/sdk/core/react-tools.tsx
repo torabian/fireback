@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
+import type { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
 import React, {
   useContext,
   useState,
@@ -10,7 +10,7 @@ import React, {
   useRef,
 } from "react";
 import { Upload } from "tus-js-client";
-import { QueryClient, UseQueryOptions } from "react-query";
+import type { QueryClient, UseQueryOptions } from "react-query";
 
 /**
  * Removes the workspace id which is default present everywhere
@@ -446,7 +446,7 @@ export interface SocketNotification<T = any> {
   payload: T;
 }
 
-export function useSocket(remote, token, workspaceId, queryClient) {
+export function useSocket(remote, token, workspaceId, queryClient, enabled = true) {
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
@@ -454,7 +454,7 @@ export function useSocket(remote, token, workspaceId, queryClient) {
       !remote ||
       !token ||
       token === "undefined" ||
-      process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+      enabled === false
     ) {
       return;
     }

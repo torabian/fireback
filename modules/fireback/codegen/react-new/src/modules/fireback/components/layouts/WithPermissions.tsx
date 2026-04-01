@@ -1,4 +1,5 @@
 import { userMeetsAccess } from "../../hooks/accessLevels";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext, useMemo } from "react";
@@ -21,7 +22,7 @@ export function WithPermissions({
   const { selectedUrw } = useContext(RemoteQueryContext);
 
   const meets = useMemo(() => {
-    if (process.env.REACT_APP_INACCURATE_MOCK_MODE === "true") {
+    if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
       return true;
     }
     if (selectedUrw?.workspaceId !== "root" && onlyRoot) {

@@ -7,7 +7,7 @@ import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import usePresistentState from "@/modules/fireback/hooks/usePresistentState";
 import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
 import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
-import { Formik, FormikProps } from "formik";
+import { Formik, type FormikProps } from "formik";
 import { useMemo, useState } from "react";
 import { CodeViewer } from "./CodeViewer";
 import { snippets } from "./DemoFormSelect.snippets";

@@ -1,5 +1,5 @@
 import { createRef, useEffect, useRef, useState } from "react";
-const ReCAPTCHA2 = require("react-google-recaptcha").default;
+import ReCAPTCHA2 from "react-google-recaptcha"
 
 export const useRecaptcha2 = ({
   sitekey,

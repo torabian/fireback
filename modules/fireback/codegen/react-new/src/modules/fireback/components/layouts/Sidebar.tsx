@@ -1,4 +1,4 @@
-import { MenuItem } from "../../definitions/common";
+import { type MenuItem } from "../../definitions/common";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
 
@@ -12,6 +12,7 @@ import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
 import { detectDeviceType } from "../../hooks/deviceInformation";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
@@ -112,7 +113,7 @@ function Sidebar({
           menu={menu}
         />
       ))}
-      {process.env.REACT_APP_GITHUB_DEMO === "true" && (
+      {BUILD_VARIABLES.GITHUB_DEMO === "true" && (
         <MenuParticle
           onClick={() => {
             sidebarItemSelected();

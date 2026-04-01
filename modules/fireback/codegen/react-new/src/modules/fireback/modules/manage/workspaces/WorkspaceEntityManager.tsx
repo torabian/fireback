@@ -4,7 +4,7 @@ import { usePostWorkspace } from "../../../sdk/modules/abac/usePostWorkspace";
 
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { useT } from "../../../hooks/useT";
 import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceByUniqueId";

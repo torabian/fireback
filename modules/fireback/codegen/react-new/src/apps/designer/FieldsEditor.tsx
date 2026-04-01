@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Module3Field } from "./defs";
+import { type Module3Field } from "./defs";
 import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
 
 interface FieldsEditorProps {

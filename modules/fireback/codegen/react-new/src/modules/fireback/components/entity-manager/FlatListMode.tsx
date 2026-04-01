@@ -1,19 +1,19 @@
-import { QueryArchiveColumn } from "../../definitions/common";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "react-query";
+import AutoSizer from "react-virtualized-auto-sizer";
+import InfiniteLoader from "react-window-infinite-loader";
+import { type QueryArchiveColumn } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
-import { FC, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   PullDownContent,
   PullToRefresh,
   RefreshContent,
   ReleaseContent,
 } from "../../thirdparty/react-pull-to-refresh";
-import { useQueryClient } from "react-query";
-import AutoSizer from "react-virtualized-auto-sizer";
-import InfiniteLoader from "react-window-infinite-loader";
 import { QueryErrorView } from "../error-view/QueryError";
 import { AutoCardDrawer } from "./AutoCardDrawer";
 import { EmptyList } from "./EmptyList";
-const { FixedSizeList } = require("react-window");
+import { FixedSizeList } from "react-window";
 
 // Define the props
 interface CardProps<T> {

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { FormText } from "../../../components/forms/form-text/FormText";
-import { EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { UserEntity } from "../../../sdk/modules/abac/UserEntity";

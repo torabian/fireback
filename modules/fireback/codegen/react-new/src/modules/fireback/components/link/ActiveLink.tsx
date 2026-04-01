@@ -8,7 +8,7 @@ const ActiveLink: any = (prp: any): any => {
   const { locale, asPath } = useLocale();
   const child = Children.only(children);
 
-  const noPrefix = process.env.REACT_APP_NO_LOCALE_PREFIX === "true";
+  const noPrefix = false;
 
   const active =
     asPath === (!noPrefix ? `/${locale}` : "") + props.href ||

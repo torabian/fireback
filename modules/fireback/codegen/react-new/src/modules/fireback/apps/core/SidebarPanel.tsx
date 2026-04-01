@@ -6,6 +6,7 @@ import { Panel } from "react-resizable-panels";
 import { ResizeHandle } from "../../components/layouts/ResizeHandle";
 import Sidebar from "../../components/layouts/Sidebar";
 import { AppConfigProvider } from "../../hooks/appConfigTools";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { detectDeviceType } from "../../hooks/deviceInformation";
 
 const getSize = () => {
@@ -45,7 +46,7 @@ export const SidebarPanel = () => {
     >
       <AppConfigProvider
         initialConfig={{
-          remote: process.env.REACT_APP_REMOTE_SERVICE,
+          remote: BUILD_VARIABLES.REMOTE_SERVICE,
         }}
       >
         <Sidebar miniSize={false} />

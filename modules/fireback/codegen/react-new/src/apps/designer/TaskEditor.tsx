@@ -1,6 +1,6 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { useEffect, useState } from "react";
-import { Module3Task } from "./defs";
+import { type Module3Task } from "./defs";
 import { FieldsEditor } from "./FieldsEditor";
 
 interface TaskEditorProps {

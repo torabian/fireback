@@ -1,4 +1,4 @@
-import { QueryArchiveColumn } from "@/modules/fireback/definitions/common";
+import { type QueryArchiveColumn } from "@/modules/fireback/definitions/common";
 import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
 import { enTranslations } from "@/modules/fireback/translations/en";
 

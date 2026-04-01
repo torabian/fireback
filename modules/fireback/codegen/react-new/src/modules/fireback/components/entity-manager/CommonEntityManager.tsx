@@ -1,13 +1,13 @@
 import { httpErrorHanlder } from "../../hooks/api";
 import { Toast } from "../../hooks/toast";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect, useRef, useState } from "react";
 import { KeyboardAction } from "../../definitions/definitions";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
-import { IResponse } from "../../definitions/JSONStyle";
+import { type IResponse } from "../../definitions/JSONStyle";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { set } from "lodash";
 

@@ -5,7 +5,7 @@ import "react-phone-number-input/style.css";
 
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 import { useLocale } from "../../../hooks/useLocale";
 

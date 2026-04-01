@@ -1,7 +1,8 @@
 import { withJsonQuery } from "./withJsonQuery";
-import { FetchxContext, TypedRequestInit } from "../sdk/sdk/common/fetchx";
-import { RemoteRequestOption } from "../definitions/JSONStyle";
-const { matchPattern } = require("url-matcher");
+import { FetchxContext, type TypedRequestInit } from "../sdk/sdk/common/fetchx";
+import { type RemoteRequestOption } from "../definitions/JSONStyle";
+import { BUILD_VARIABLES } from "./build-variables";
+import { matchPattern } from "url-matcher";
 
 export type Context = any;
 
@@ -93,7 +94,7 @@ export const emptyList = { data: { items: [] } } as any;
 
 export async function getJsonRaw(entity: string, ctx: Context) {
   return fetch(
-    process.env.REACT_APP_PUBLIC_URL +
+    BUILD_VARIABLES.PUBLIC_URL +
       `md/${ctx.acceptLanguage || "en"}/${entity}.json`,
   ).then((t) => t.json());
 }
@@ -117,7 +118,7 @@ function applyQueryDSL(items: Array<any>, ctx: Context): Array<any> {
 
 export async function getJsonList(entity: string, ctx: Context) {
   return fetch(
-    process.env.REACT_APP_PUBLIC_URL +
+    BUILD_VARIABLES.PUBLIC_URL +
       `md/${ctx.acceptLanguage || "en"}/${entity}.json`,
   ).then((t) => t.json());
 }
@@ -147,7 +148,7 @@ export const fetchXMock = (mockServer: any) =>
     try {
       const res = await mockExecFn({ headers: {} }, mockServer.current)(
         init.method,
-        `${url}`.replace(process.env.REACT_APP_REMOTE_SERVICE, ""),
+        `${url}`.replace(BUILD_VARIABLES.REMOTE_SERVICE, ""),
         init.body,
       );
       return new Response(JSON.stringify(res), {

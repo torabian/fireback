@@ -6,7 +6,7 @@
 import { useT } from "../../../hooks/useT";
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
 
 interface FormInlineImageProps extends BaseFormElementProps {
