@@ -10,6 +10,7 @@
     "designer:build": "vite build --mode 'designer/embed'",
     "self-service": "vite --mode 'self-service/embed'",
     "self-service:build": "vite build --mode 'self-service/embed'",
+    "manage:start": "vite --mode 'projectname/manage'",
     "manage:build": "vite build --mode 'projectname/manage'",
     "build": "vite build --mode 'projectname/bundle'",
     "build:bundle:demo": "vite build --mode 'projectname/bundle.demo'",

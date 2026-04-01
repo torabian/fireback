@@ -18,7 +18,7 @@ ui2:
 	git checkout ../../modules/fireback/codegen/selfservice/index.go 
 	cd ../../modules/fireback/codegen/react-new && npm run manage:build && cd - && \
 	rm -rf ../../modules/fireback/codegen/fireback-manage && \
-	cp -R ../../modules/fireback/codegen/react-new/build ../../modules/fireback/codegen/fireback-manage && \
+	cp -R ../../modules/fireback/codegen/react-new/dist ../../modules/fireback/codegen/fireback-manage && \
 	git checkout ../../modules/fireback/codegen/fireback-manage/index.go
 
 
