@@ -34,8 +34,7 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     define: {
-      BUILD_VARIABLES: build_variables,
-      __BUILD_VARIABLES__: build_variables,
+      'import.meta.env.BUILD_VARIABLES': build_variables, 
     },
     plugins: [
       tsconfigPaths(),

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "vite --mode 'projectname/local'",
     "start:mock": "vite --mode 'projectname/local.demo'",
+    "build:mock": "vite build --mode 'projectname/local.demo'",
     "designer": "vite --mode 'designer/embed'",
     "designer:build": "vite build --mode 'designer/embed'",
     "self-service": "vite --mode 'self-service/embed'",
