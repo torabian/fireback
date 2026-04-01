@@ -3,7 +3,7 @@
   "PUBLIC_URL": "/",
   "VITE_PUBLIC_URL": "/",
   "VITE_DEFAULT_ROUTE": "/{locale}/dashboard",
-  "TARGET_APP": "projectname",
+  "VITE_TARGET_APP": "projectname",
   "VITE_ALLOW_OS_LOGIN": "false",
   "VITE_SUPPORTED_LANGUAGES": "fa,en",
   "VITE_FEATURE_DASHBOARD": "true",

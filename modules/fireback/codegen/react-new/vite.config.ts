@@ -1,11 +1,10 @@
 import react from '@vitejs/plugin-react'
 import fs from 'fs'
+import ConditionalCompile from "vite-plugin-conditional-compiler";
 
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
-
-
 
 // https://vite.dev/config/
 export default defineConfig(({ command, mode }) => {
@@ -26,13 +25,21 @@ export default defineConfig(({ command, mode }) => {
     console.log("Build variation does not exists:", jsonFolderPath)
   }
 
+  // Essential so the preprocessor gets the variables as well.
+  for (const item of Object.keys(build_variables)) {
+    process.env[item] = build_variables[item]
+  }
+
+  console.log(build_variables)
+
   return {
     define: {
       BUILD_VARIABLES: build_variables,
-      __BUILD_VARIABLES__: build_variables
+      __BUILD_VARIABLES__: build_variables,
     },
     plugins: [
       tsconfigPaths(),
+      ConditionalCompile(),
       react({
         exclude: [
           'node_modules/**', // exclude everything else in node_modules
@@ -52,7 +59,5 @@ export default defineConfig(({ command, mode }) => {
         { find: "@/", replacement: resolve(__dirname, "./src/") }
       ]
     },
-    // Optional: change envDir based on mode
-    envDir: mode === 'staging' ? './config/staging-envs' : './config/env',
   }
 })

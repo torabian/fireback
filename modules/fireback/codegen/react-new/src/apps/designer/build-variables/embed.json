@@ -1,3 +1,3 @@
 {
-    "TARGET_APP": "designer"
+    "VITE_TARGET_APP": "designer"
 }

@@ -3,7 +3,7 @@
   "PUBLIC_URL": "/",
   "REACT_APP_PUBLIC_URL": "/",
   "REACT_APP_DEFAULT_ROUTE": "/{locale}/dashboard",
-  "TARGET_APP": "projectname",
+  "VITE_TARGET_APP": "projectname",
   "REACT_APP_ALLOW_OS_LOGIN": "false",
   "REACT_APP_SUPPORTED_LANGUAGES": "fa,en",
   "REACT_APP_USE_HASH_ROUTER": "true",
