@@ -10,9 +10,9 @@ export enum Compiler {
 }
 
 export function useCompiler(): { compiler: Compiler } {
-  if (process.env.RUNNING_ON_NEXT) {
-    return { compiler: Compiler.Nextjs };
-  }
+  // if (process.env.RUNNING_ON_NEXT) {
+  //   return { compiler: Compiler.Nextjs };
+  // }
 
   return { compiler: Compiler.Unknown };
 }

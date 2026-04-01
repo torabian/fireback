@@ -34,7 +34,7 @@ export function CurrentUser({ onClick }: { onClick: () => void }) {
   if (!isAuthenticated) {
     return (
       <Link className="user-signin-section" href="/signin" onClick={onClick}>
-        <img src={process.env.PUBLIC_URL + "/common/user.svg"} />
+        <img src={BUILD_VARIABLES.PUBLIC_URL + "/common/user.svg"} />
         {t.currentUser.signin}
       </Link>
     );

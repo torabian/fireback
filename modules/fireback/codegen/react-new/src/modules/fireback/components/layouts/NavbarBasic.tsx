@@ -8,7 +8,7 @@ function Navbar({ menu }: { menu?: MenuItem }) {
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
         <a className="navbar-brand" href="#">
-          {process.env.productName}
+          Fireback
         </a>
         <button
           className="navbar-toggler"

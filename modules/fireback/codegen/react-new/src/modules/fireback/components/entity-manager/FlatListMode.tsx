@@ -13,7 +13,7 @@ import {
 import { QueryErrorView } from "../error-view/QueryError";
 import { AutoCardDrawer } from "./AutoCardDrawer";
 import { EmptyList } from "./EmptyList";
-const { FixedSizeList } = require("react-window");
+import { FixedSizeList } from "react-window";
 
 // Define the props
 interface CardProps<T> {

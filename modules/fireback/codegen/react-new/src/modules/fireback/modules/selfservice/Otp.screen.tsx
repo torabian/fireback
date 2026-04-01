@@ -4,7 +4,7 @@ import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 
 import { useS } from "../../hooks/useS";
-import ReactCodeInput from "../../thirdparty/react-verification-code-input";
+import ReactCodeInput from "../../thirdparty/react-verification-code-input/index";
 import { usePresenter } from "./Otp.presenter";
 import { strings } from "./strings/translations";
 import { ClassicPassportOtpActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";

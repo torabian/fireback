@@ -15,15 +15,15 @@ import App from "./apps/projectname/App";
 
 /// #endif
 
-/// #if TARGET_APP == 'designer'
-import App from "./apps/designer/App";
+// /// #if TARGET_APP == 'designer'
+// import App from "./apps/designer/App";
 
-/// #endif
+// /// #endif
 
-/// #if TARGET_APP == 'self-service'
-import App from "./apps/self-service/App";
+// /// #if TARGET_APP == 'self-service'
+// import App from "./apps/self-service/App";
 
-/// #endif
+// /// #endif
 
 // @fireback-append-app
 

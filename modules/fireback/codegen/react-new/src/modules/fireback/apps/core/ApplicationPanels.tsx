@@ -47,7 +47,7 @@ export function SidebarMultiRouterSetup({
           <router.Router
             key={router.id}
             future={{ v7_startTransition: true }}
-            basename={useHashRouter ? undefined : process.env.PUBLIC_URL}
+            basename={useHashRouter ? undefined : BUILD_VARIABLES.PUBLIC_URL}
             initialEntries={router.initialEntries}
           >
             <router.Wrapper showHandle={router.showHandle} routerId={router.id}>

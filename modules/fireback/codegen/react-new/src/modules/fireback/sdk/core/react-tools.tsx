@@ -1,16 +1,15 @@
-// @ts-nocheck
-
-import { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
+ 
+import { type ExecApi, type IResponse, type RemoteRequestOption, type Query } from "./http-tools";
 import React, {
   useContext,
   useState,
   useEffect,
-  Dispatch,
-  SetStateAction,
+ type Dispatch,
+  type SetStateAction,
   useRef,
 } from "react";
 import { Upload } from "tus-js-client";
-import { QueryClient, UseQueryOptions } from "react-query";
+import { QueryClient, type UseQueryOptions } from "react-query";
 
 /**
  * Removes the workspace id which is default present everywhere
