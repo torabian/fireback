@@ -17,7 +17,6 @@
     "github": "vite build --mode 'projectname/githubpages'"
   },
   "dependencies": {
-    "@craco/craco": "^7.0.0",
     "@devexpress/dx-react-core": "^4.0.3",
     "@devexpress/dx-react-grid": "^4.0.3",
     "@devexpress/dx-react-grid-bootstrap4": "^4.0.3",

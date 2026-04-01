@@ -20,7 +20,7 @@ export default defineConfig(({ command, mode }) => {
   // Check if folder exists
   if (fs.existsSync(jsonFolderPath)) {
     console.log("Build variation selected:", jsonFolderPath)
-    build_variables = require(jsonFolderPath)
+    build_variables = JSON.parse(fs.readFileSync(jsonFolderPath).toString())
   } else {
     console.log("Build variation does not exists:", jsonFolderPath)
   }
