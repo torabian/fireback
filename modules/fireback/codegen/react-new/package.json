@@ -3,10 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "vite": "vite",
+    "vite": "vite --mode 'projectname/local'",
     "build:vite": "vite build",
-
-
     "start": "env-cmd -f ./src/apps/projectname/.env.local craco start",
     "start:mock": "env-cmd -f ./src/apps/projectname/.env.local.demo craco start",
     "designer": "env-cmd -f ./src/apps/designer/.env.embed craco start",
