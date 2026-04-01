@@ -46,7 +46,7 @@ function renderMenu(
     // // INACCURATE_MOCK_MODE is a feature I've added to show as much as content of the app,
     // // for demo purposes. It does not mean the app runs, we just show as much as things we can
     // // useful for github account. Could be fully replaced by a great mock system.
-    // if (process.env.REACT_APP_INACCURATE_MOCK_MODE === "true") {
+    // if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
     //   hasChildren = true;
     //   isVisible = true;
     // }

@@ -15,6 +15,7 @@ import { useMobileKitRoutes } from "../../modules/mobile-kit/dashboard/ManageRou
 import { SettingsScreen } from "../../modules/selfservice/personal-settings/SettingsScreen";
 import { useSelfServiceAuthenticateRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 import { AnimatedRouteWrapper } from "./SwipeTransition";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 export function FirebackEssentialRouterManager({
   children,
@@ -35,6 +36,7 @@ export function FirebackEssentialRouterManager({
 
   // ~ auto:useRouteDefs
 
+  
   return (
     <PageTitleProvider affix={t.productName}>
       <Routes>
@@ -43,7 +45,7 @@ export function FirebackEssentialRouterManager({
           element={
             <Navigate
               to={(
-                process.env.REACT_APP_DEFAULT_ROUTE || "/{locale}/signin"
+                BUILD_VARIABLES.DEFAULT_ROUTE || "/{locale}/signin"
               ).replace("{locale}", config.interfaceLanguage || locale || "en")}
               replace
             />

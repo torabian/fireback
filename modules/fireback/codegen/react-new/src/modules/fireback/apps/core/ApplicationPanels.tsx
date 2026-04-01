@@ -10,8 +10,9 @@ import {
 } from "./PanelRouterWrapper";
 import classNames from "classnames";
 import { detectDeviceType } from "../../hooks/deviceInformation";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
-const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
+const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
 
 export function SidebarMultiRouterSetup({
@@ -46,7 +47,7 @@ export function SidebarMultiRouterSetup({
           <router.Router
             key={router.id}
             future={{ v7_startTransition: true }}
-            basename={useHashRouter ? undefined : process.env.PUBLIC_URL}
+            basename={useHashRouter ? undefined : BUILD_VARIABLES.PUBLIC_URL}
             initialEntries={router.initialEntries}
           >
             <router.Wrapper showHandle={router.showHandle} routerId={router.id}>

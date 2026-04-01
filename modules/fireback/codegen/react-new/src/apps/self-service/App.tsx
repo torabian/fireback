@@ -24,8 +24,9 @@ import {
   useSelfServiceAuthenticateRoutes,
   useSelfServicePublicRoutes,
 } from "@/modules/fireback/modules/selfservice/SelfServiceRoutes";
+import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
 
-const useHashRouter = process.env.REACT_APP_USE_HASH_ROUTER === "true";
+const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
 
 function App() {

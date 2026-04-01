@@ -27,8 +27,8 @@ export function WithSdk({
   //     preferredAcceptLanguage={locale || config.interfaceLanguage}
   //     identifier="projectname"
   //     queryClient={queryClient}
-  //     remote={process.env.REACT_APP_REMOTE_SERVICE}
-  //     /// #if process.env.REACT_APP_INACCURATE_MOCK_MODE == "true"
+  //     remote={BUILD_VARIABLES.REMOTE_SERVICE}
+  //     /// #if BUILD_VARIABLESINACCURATE_MOCK_MODE == "true"
   //     defaultExecFn={() => {
   //       return (options: any) => mockExecFn(options, mockServer.current);
   //     }}

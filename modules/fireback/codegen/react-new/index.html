@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fireback</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+
+  <script>
+    function getOS() {
+      let userAgent = window.navigator.userAgent,
+        platform = window.navigator.platform,
+        macosPlatforms = ["Macintosh", "MacIntel", "MacPPC", "Mac68K"],
+        windowsPlatforms = ["Win32", "Win64", "Windows", "WinCE"],
+        iosPlatforms = ["iPhone", "iPad", "iPod"],
+        os = "mac";
+
+      if (macosPlatforms.indexOf(platform) !== -1) {
+        os = "mac";
+      } else if (iosPlatforms.indexOf(platform) !== -1) {
+        os = "ios";
+      } else if (windowsPlatforms.indexOf(platform) !== -1) {
+        os = "windows";
+      } else if (/Android/.test(userAgent)) {
+        os = "android";
+      } else if (!os && /Linux/.test(platform)) {
+        os = "linux";
+      } else {
+        os = "web";
+      }
+      return os;
+    }
+
+    function loadFont(name, url, weight) {
+      return new Promise((resolve, reject) => {
+        const myFont = new FontFace(name, `url(${url})`);
+        if (weight) myFont.weight = weight;
+        myFont
+          .load()
+          .then(() => {
+            document.fonts.add(myFont);
+            const el = document.createElement("DIV");
+            el.style.fontFamily = name;
+            resolve(true);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+    }
+
+    alert("   ")
+
+    if ("%VITE_SUPPORTED_LANGUAGES%".includes("fa")) {
+      loadFont("iransans", "%VITE_PUBLIC_URL%fonts/irs/irs.ttf");
+    }
+
+    var theme = localStorage.getItem("ui_theme") || "mac-theme";
+    for (let th of theme.split(" ")) {
+      document.getElementsByTagName("body")[0].classList.add(th);
+    }
+  </script>
+</html>

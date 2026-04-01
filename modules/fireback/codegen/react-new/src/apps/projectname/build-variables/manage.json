@@ -1,0 +1,12 @@
+{
+  "VITE_REMOTE_SERVICE": "/",
+  "PUBLIC_URL": "/manage/",
+  "VITE_PUBLIC_URL": "/manage/",
+  "VITE_DEFAULT_ROUTE": "/{locale}/dashboard",
+  "VITE_TARGET_APP": "projectname",
+  "VITE_ALLOW_OS_LOGIN": "false",
+  "VITE_SUPPORTED_LANGUAGES": "fa,en",
+  "VITE_USE_HASH_ROUTER": "true",
+  "VITE_INACCURATE_MOCK_MODE": "false",
+  "VITE_TITLE": "projectname"
+}
