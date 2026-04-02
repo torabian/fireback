@@ -28,19 +28,20 @@ func ConfirmClassicPassportTotpAction(
 		return nil, signinError
 	}
 
-	if singinResult.Session.Passport.Value.TotpSecret == "" {
+	passport, _ := singinResult.Session.Passport.Get()
+	if passport.TotpSecret == "" {
 		return nil, fireback.Create401Error(&AbacMessages.TotpIsNotAvailableForThisPassport, []string{})
 	}
 
-	if !totp.Validate(req.TotpCode, singinResult.Session.Passport.Value.TotpSecret) {
+	if !totp.Validate(req.TotpCode, passport.TotpSecret) {
 		return nil, fireback.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
 	}
 
 	// Update the passport entity that it's confirmed
 	if _, err := PassportActions.Update(fireback.QueryDSL{
 		WorkspaceId: ROOT_VAR,
-		UniqueId:    singinResult.Session.Passport.Value.UniqueId,
-	}, &PassportEntity{TotpConfirmed: fireback.NewBool(true), UniqueId: singinResult.Session.Passport.Value.UniqueId}); err != nil {
+		UniqueId:    passport.UniqueId,
+	}, &PassportEntity{TotpConfirmed: fireback.NewBool(true), UniqueId: passport.UniqueId}); err != nil {
 		return nil, fireback.Create401Error(&AbacMessages.PassportTotpNotConfirmed, []string{})
 	}
 

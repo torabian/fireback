@@ -177,13 +177,14 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 		}
 
 		// For creating a user, we need at least the user to be available
-		if session.User.Value == nil {
+		user, _ := session.User.Get()
+		if user == nil {
 			return errors.New("USER_IS_MISSING")
 		}
 
 		// Token for the session is essential, a session without a token
 		// has absolutely no use.
-		if token, err := session.User.Value.AuthorizeWithToken(q); err != nil {
+		if token, err := user.AuthorizeWithToken(q); err != nil {
 			return err
 		} else {
 			session.Token = token
