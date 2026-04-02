@@ -58,7 +58,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.0.20
+	github.com/torabian/emi v1.0.21
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli v1.22.17
 	github.com/wk8/go-ordered-map/v2 v2.1.8
@@ -203,5 +203,3 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.46.1 // indirect
 )
-
-replace github.com/torabian/emi => ../emi
