@@ -358,6 +358,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
+      - name: install prettier, so compiler would pick it up
+        run: sudo npm i -g prettier
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
       - name: Build and package deb files
@@ -416,6 +418,8 @@ jobs:
           path: artifacts-ubuntu
       - name: check artifacts
         run: cd artifacts-ubuntu/fireback-server-all && ls -la
+      - name: install prettier, so compiler would pick it up
+        run: sudo npm i -g prettier
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
       - name: generate-sdk
