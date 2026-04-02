@@ -56,7 +56,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 	}
 
 	passport, _ := session.Passport.Get()
-	if passport != nil {
+	if passport == nil {
 		return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
 	}
 
