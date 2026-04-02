@@ -993,8 +993,14 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 	if c.IsSet("totp-secret") {
 		template.TotpSecret = c.String("totp-secret")
 	}
+	if c.IsSet("totp-confirmed") {
+		template.TotpConfirmed = fireback.NewBoolAutoNull(c.String("totp-confirmed"))
+	}
 	if c.IsSet("password") {
 		template.Password = c.String("password")
+	}
+	if c.IsSet("confirmed") {
+		template.Confirmed = fireback.NewBoolAutoNull(c.String("confirmed"))
 	}
 	if c.IsSet("access-token") {
 		template.AccessToken = c.String("access-token")

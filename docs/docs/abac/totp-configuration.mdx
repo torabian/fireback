@@ -1,0 +1,15 @@
+import ActionView from '../ActionView'
+
+# TOTP (Time-based One-Time Password)
+
+Fireback ABAC comes with a sophisticated totp feature, if enabled, requires all user authenitcation mechanism to follow enable
+totp for their account, either when account is being created, or forced later on.
+
+The at current version covers general requirements, but obviously it can be extended to be even more precise. In this document
+we are going to explore that what is required to enable and manage users with totp. Fireback react project, such as 'self-service'
+project already covers this behavior, and if enabled, it would guide user to enable.
+
+<ActionView 
+  cli="passport method c --type phone --region global"
+/>
+

@@ -1034,6 +1034,9 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 	if c.IsSet("passport-value") {
 		template.PassportValue = c.String("passport-value")
 	}
+	if c.IsSet("is-in-creation-process") {
+		template.IsInCreationProcess = fireback.NewBoolAutoNull(c.String("is-in-creation-process"))
+	}
 	if c.IsSet("status") {
 		template.Status = c.String("status")
 	}

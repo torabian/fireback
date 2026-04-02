@@ -1917,6 +1917,11 @@ type x{{$prefix}}{{ .PublicName}} struct {
         template.{{ .PublicName }} = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
       }
 	  {{ end }}
+    {{ if or (eq .Type "bool?") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        template.{{ .PublicName }} = {{ $wsprefix }}NewBoolAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
+      }
+	  {{ end }}
     {{ if or (eq .Type "xfile?") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         template.{{ .PublicName }} = {{ $wsprefix }}NewXFileAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
