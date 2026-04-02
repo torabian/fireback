@@ -1,4 +1,24 @@
 name: abac
+
+dtom:
+  - name: userSession
+    fields:
+      - name: passport
+        type: one?
+        target: PassportEntity
+      - name: token
+        type: string
+      - name: exchangeKey
+        type: string
+      - name: userWorkspaces
+        type: collection
+        target: UserWorkspaceEntity
+      - name: user
+        type: one?
+        target: UserEntity
+      - name: userId
+        type: string?
+
 acts:
   - name: CheckPassportMethods
     url: /passports/available-methods
@@ -700,23 +720,23 @@ dtos:
     fields:
       - name: phoneNumber
         type: string
-  - name: userSession
-    fields:
-      - name: passport
-        type: one
-        target: PassportEntity
-      - name: token
-        type: string
-      - name: exchangeKey
-        type: string
-      - name: userWorkspaces
-        type: many2many
-        target: UserWorkspaceEntity
-      - name: user
-        type: one
-        target: UserEntity
-      - name: userId
-        type: string?
+  # - name: userSession
+  #   fields:
+  #     - name: passport
+  #       type: one
+  #       target: PassportEntity
+  #     - name: token
+  #       type: string
+  #     - name: exchangeKey
+  #       type: string
+  #     - name: userWorkspaces
+  #       type: many2many
+  #       target: UserWorkspaceEntity
+  #     - name: user
+  #       type: one
+  #       target: UserEntity
+  #     - name: userId
+  #       type: string?
   - name: otpAuthenticate
     fields:
       - name: value

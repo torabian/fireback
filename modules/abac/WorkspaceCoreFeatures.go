@@ -85,7 +85,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 		}
 	}
 	if userWorkspace != nil {
-		session.UserWorkspaces = []*UserWorkspaceEntity{userWorkspace}
+		session.UserWorkspaces = []UserWorkspaceEntity{*userWorkspace}
 	}
 
 	return nil
@@ -125,7 +125,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 					return err
 				}
 			} else {
-				session.Passport = passportdb
+				session.Passport.Set(passportdb)
 				// dto.user.PassportsListId = []string{passportdb.UniqueId}
 			}
 		}
@@ -138,7 +138,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 				}
 			}
 
-			session.User = dto.user
+			session.User.Set(dto.user)
 		}
 
 		if dto.createWorkspace && dto.workspace != nil {
@@ -177,13 +177,13 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 		}
 
 		// For creating a user, we need at least the user to be available
-		if session.User == nil {
+		if session.User.Value == nil {
 			return errors.New("USER_IS_MISSING")
 		}
 
 		// Token for the session is essential, a session without a token
 		// has absolutely no use.
-		if token, err := session.User.AuthorizeWithToken(q); err != nil {
+		if token, err := session.User.Value.AuthorizeWithToken(q); err != nil {
 			return err
 		} else {
 			session.Token = token

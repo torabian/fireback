@@ -57,8 +57,8 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 
 	// if user doesn't have totp setup, then move him
 	if config != nil && config.ForceTotp.Bool {
-		if session.Passport.TotpSecret == "" ||
-			!session.Passport.TotpConfirmed.Bool {
+		if session.Passport.Value.TotpSecret == "" ||
+			!session.Passport.Value.TotpConfirmed.Bool {
 
 			// Let's create and assign to passport
 			key, _ := totp.Generate(totp.GenerateOpts{
@@ -70,7 +70,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 			totpLink := key.URL()
 
 			if _, err := PassportActions.Update(q, &PassportEntity{
-				UniqueId:   session.Passport.UniqueId,
+				UniqueId:   session.Passport.Value.UniqueId,
 				TotpSecret: totpSecret,
 			}); err != nil {
 				return nil, err
@@ -83,7 +83,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 		}
 	}
 
-	if session.Passport.TotpSecret != "" && config != nil && config.EnableTotp.Bool {
+	if session.Passport.Value.TotpSecret != "" && config != nil && config.EnableTotp.Bool {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
 			return &ClassicSigninActionResDto{
@@ -91,7 +91,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 			}, nil
 		}
 
-		if !totp.Validate(req.TotpCode, session.Passport.TotpSecret) {
+		if !totp.Validate(req.TotpCode, session.Passport.Value.TotpSecret) {
 			return nil, fireback.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
 		}
 	}
@@ -103,6 +103,16 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 	return &ClassicSigninActionResDto{
 		Session: session,
 	}, nil
+}
+
+func convertPointersToValuesUserWorkspaceEntity(pointers []*UserWorkspaceEntity) []UserWorkspaceEntity {
+	values := make([]UserWorkspaceEntity, 0, len(pointers)) // preallocate
+	for _, ptr := range pointers {
+		if ptr != nil {
+			values = append(values, *ptr) // dereference pointer and append
+		}
+	}
+	return values
 }
 
 // Can be used to authenticate only using value and passport.
@@ -121,16 +131,16 @@ func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q fireback.Quer
 
 func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 	// Get the user workspaces as well
-	q.UserId = session.User.UniqueId
+	q.UserId = session.User.Value.UniqueId
 	q.ResolveStrategy = "user"
 	workspacesItems, _, err := UserWorkspaceActions.Query(q)
 	if err != nil {
 		return fireback.GormErrorToIError(err)
 	}
-	session.UserWorkspaces = workspacesItems
+	session.UserWorkspaces = convertPointersToValuesUserWorkspaceEntity(workspacesItems)
 
 	// Authorize the session, put the token
-	if token, err := session.User.AuthorizeWithToken(q); err != nil {
+	if token, err := session.User.Value.AuthorizeWithToken(q); err != nil {
 		return fireback.CastToIError(err)
 	} else {
 		session.Token = token
@@ -172,12 +182,14 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback
 	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
 		return nil, err
 	} else {
-		session.User = user
-		session.Passport = passport
+		session.User.Value = user
+		session.User.IsSet = true
+
+		session.Passport.Set(passport)
 		passportPassword = passport.Password
 	}
 
-	if session.User == nil {
+	if session.User.Value == nil {
 		return nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 
