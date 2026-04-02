@@ -1052,6 +1052,12 @@ func CastWorkspaceInviteFromCli(c *cli.Context) *WorkspaceInviteEntity {
 	if c.IsSet("last-name") {
 		template.LastName = c.String("last-name")
 	}
+	if c.IsSet("force-email-address") {
+		template.ForceEmailAddress = fireback.NewBoolAutoNull(c.String("force-email-address"))
+	}
+	if c.IsSet("force-phone-number") {
+		template.ForcePhoneNumber = fireback.NewBoolAutoNull(c.String("force-phone-number"))
+	}
 	if c.IsSet("role-id") {
 		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
 	}
@@ -1315,7 +1321,7 @@ func WorkspaceInviteCliFn() cli.Command {
 	return cli.Command{
 		Name:        "workspaceinvite",
 		ShortName:   "invite",
-		Description: "WorkspaceInvites module actions",
+		Description: `Active invitations for non-users or already users to join an specific workspace, created by administration of the workspace`,
 		Usage:       `Active invitations for non-users or already users to join an specific workspace, created by administration of the workspace`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

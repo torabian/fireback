@@ -1113,7 +1113,7 @@ func WorkspaceTypeCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "type",
-		Description: "WorkspaceTypes module actions",
+		Description: `Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users.`,
 		Usage:       `Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

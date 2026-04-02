@@ -1158,7 +1158,7 @@ func EmailConfirmationCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "emailconfirmation",
-		Description: "EmailConfirmations module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

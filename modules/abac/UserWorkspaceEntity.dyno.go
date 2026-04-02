@@ -1092,7 +1092,7 @@ func UserWorkspaceCliFn() cli.Command {
 	return cli.Command{
 		Name:        "userworkspace",
 		ShortName:   "user",
-		Description: "UserWorkspaces module actions",
+		Description: `Manage the workspaces that user belongs to (either its himselves or adding by invitation)`,
 		Usage:       `Manage the workspaces that user belongs to (either its himselves or adding by invitation)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

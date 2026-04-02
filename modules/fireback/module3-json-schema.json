@@ -176,14 +176,23 @@
           ],
           "description": "Type of the field based on Emi types."
         },
-        "mapKey": {
+        "mapKeyOf": {
           "type": "string",
           "enum": [
             "string",
             "int",
             "any"
           ],
-          "description": "When the field type is map or map? you can modify the key type."
+          "description": "In case of type map this is the map key type"
+        },
+        "mapPairOf": {
+          "type": "string",
+          "enum": [
+            "string",
+            "int",
+            "any"
+          ],
+          "description": "In case of type map this is the map key type"
         },
         "primitive": {
           "type": "string",

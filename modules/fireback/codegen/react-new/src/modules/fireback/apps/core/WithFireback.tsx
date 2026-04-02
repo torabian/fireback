@@ -28,6 +28,9 @@ export function WithFireback({
   );
 
   if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
+    console.log(
+      "Inaccurate mock mode is enabled. All requests are being routed out.",
+    );
     fetchContext.current.fetchOverrideFn = fetchXMock(mockServer);
   }
 
@@ -39,13 +42,14 @@ export function WithFireback({
       prefix={prefix}
       queryClient={queryClient}
       remote={BUILD_VARIABLES.REMOTE_SERVICE}
-      /// #if BUILD_VARIABLES.INACCURATE_MOCK_MODE == "true"
-      defaultExecFn={() => {
-        return (options: any) => mockExecFn(options, mockServer.current);
-      }}
-      /// #endif
-      // defaultExecFn={() => (options: any) =>
-      //   mockExecFn(options, mockServer.current, t)}
+      defaultExecFn={
+        BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true"
+          ? () => {
+              console.log("Mock mode enabled on legacy code gen");
+              return (options: any) => mockExecFn(options, mockServer.current);
+            }
+          : undefined
+      }
     >
       <FetchxProvider value={fetchContext.current}>{children}</FetchxProvider>
     </FirebackQueryProvider>

@@ -1080,7 +1080,7 @@ func TableViewSizingCliFn() cli.Command {
 	return cli.Command{
 		Name:        "tableviewsizing",
 		ShortName:   "tvs",
-		Description: "TableViewSizings module actions",
+		Description: `Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns`,
 		Usage:       `Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

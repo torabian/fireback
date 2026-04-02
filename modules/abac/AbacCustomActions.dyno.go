@@ -29,36 +29,6 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
-var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
-
-type osLoginAuthenticateActionImpSig func(
-	q fireback.QueryDSL) (*UserSessionDto,
-	*fireback.IError,
-)
-
-var OsLoginAuthenticateActionImp osLoginAuthenticateActionImpSig
-
-func OsLoginAuthenticateActionFn(
-	q fireback.QueryDSL,
-) (
-	*UserSessionDto,
-	*fireback.IError,
-) {
-	if OsLoginAuthenticateActionImp == nil {
-		return nil, nil
-	}
-	return OsLoginAuthenticateActionImp(q)
-}
-
-var OsLoginAuthenticateActionCmd cli.Command = cli.Command{
-	Name:  "oslogin",
-	Usage: `Logins into the system using operating system (current) user, and store the information for them. Useful for desktop applications.`,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OsLoginAuthenticateSecurityModel)
-		result, err := OsLoginAuthenticateActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var AcceptInviteSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
@@ -1810,31 +1780,45 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 		return nil
 	},
 }
+var OsLoginAuthenticateImpl func(c OsLoginAuthenticateActionRequest, query fireback.QueryDSL) (*OsLoginAuthenticateActionResponse, error) = nil
+var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action{
+	CliName:       OsLoginAuthenticateActionMeta().CliName,
+	Description:   OsLoginAuthenticateActionMeta().Description,
+	Name:          OsLoginAuthenticateActionMeta().Name,
+	Method:        OsLoginAuthenticateActionMeta().Method,
+	Url:           OsLoginAuthenticateActionMeta().URL,
+	SecurityModel: OsLoginAuthenticateSecurityModel,
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := OsLoginAuthenticateActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			var query fireback.QueryDSL
+			query = fireback.ExtractQueryDslFromGinContext(m)
+			resp, err := OsLoginAuthenticateImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OsLoginAuthenticateSecurityModel)
+		req := OsLoginAuthenticateActionRequest{}
+		resp, err := OsLoginAuthenticateImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
 		CheckPassportMethodsActionDef,
+		OsLoginAuthenticateActionDef,
 		/// End for emi actions
-		{
-			Method:        "GET",
-			Url:           "/passports/os/login",
-			SecurityModel: OsLoginAuthenticateSecurityModel,
-			Name:          "osLoginAuthenticate",
-			Description:   "Logins into the system using operating system (current) user, and store the information for them. Useful for desktop applications.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// GET_ONE - get
-					fireback.HttpGetEntity(c, OsLoginAuthenticateActionFn)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         OsLoginAuthenticateActionFn,
-			ResponseEntity: &UserSessionDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "UserSessionDto",
-			},
-		},
 		{
 			Method:        "POST",
 			Url:           "/user/invitation/accept",
@@ -2334,7 +2318,6 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
-	OsLoginAuthenticateActionCmd,
 	AcceptInviteActionCmd,
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
@@ -2373,7 +2356,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		CheckPassportMethodsActionDef.ToCli(),
-		OsLoginAuthenticateActionCmd,
+		OsLoginAuthenticateActionDef.ToCli(),
 		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,
 		UserPassportsActionCmd,

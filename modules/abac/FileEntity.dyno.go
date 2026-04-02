@@ -1364,7 +1364,7 @@ func FileCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "file",
-		Description: "Files module actions",
+		Description: `Tus file uploading reference of the content. Every files being uploaded using tus will be stored in this table.`,
 		Usage:       `Tus file uploading reference of the content. Every files being uploaded using tus will be stored in this table.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

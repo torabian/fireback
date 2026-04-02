@@ -1,4 +1,148 @@
 name: abac
+
+dtom:
+
+  - name: resetEmail
+    fields:
+      - name: password
+        type: string
+  - name: phoneNumberAccountCreation
+    fields:
+      - name: phoneNumber
+        type: string
+  - name: emailAccountSignin
+    fields:
+      - name: email
+        type: string
+        tags:
+          validate: required
+      - name: password
+        tags:
+          validate: required
+        type: string
+  - name: classicAuth
+    fields:
+      - name: value
+        type: string
+        tags:
+          validate: required
+      - name: password
+        type: string
+        tags:
+          validate: required
+      - name: firstName
+        type: string
+        tags:
+          validate: required
+      - name: lastName
+        type: string
+        tags:
+          validate: required
+      - name: inviteId
+        type: string
+      - name: publicJoinKeyId
+        type: string
+      - name: workspaceTypeId
+        type: string
+  - name: reactiveSearchResult
+    fields:
+      - type: string
+        name: uniqueId
+      - type: string
+        name: phrase
+      - type: string
+        name: icon
+      - type: string
+        name: description
+      - type: string
+        name: group
+      - type: string
+        name: uiLocation
+      - type: string
+        name: actionFn
+  - name: assignRole
+    fields:
+      - name: roleId
+        type: string
+      - name: userId
+        type: string
+      - name: visibility
+        type: string
+      - name: updated
+        type: int64
+      - name: created
+        type: int64
+  - name: exchangeKeyInformation
+    fields:
+      - name: key
+        type: string
+      - name: visibility
+        type: string
+  - name: testMail
+    fields:
+      - name: senderId
+        type: string
+      - name: toName
+        type: string
+      - name: toEmail
+        type: string
+      - name: subject
+        type: string
+      - name: content
+        type: string
+  - name: importRequest
+    fields:
+      - name: file
+        type: string
+  - name: permissionInfo
+    fields:
+      - name: name
+        type: string
+      - name: description
+        type: string
+      - name: completeKey
+        type: string
+  - name: userRoleWorkspace
+    fields:
+      - name: roleId
+        type: string
+      - name: capabilities
+        type: slice
+        primitive: string
+  - name: otpAuthenticate
+    fields:
+      - name: value
+        type: string
+        tags:
+          validate: required
+      - name: otp
+        type: string
+      - name: type
+        type: string
+        tags:
+          validate: required
+      - name: password
+        type: string
+        tags:
+          validate: required
+  - name: userSession
+    fields:
+      - name: passport
+        type: one?
+        target: PassportEntity
+      - name: token
+        type: string
+      - name: exchangeKey
+        type: string
+      - name: userWorkspaces
+        type: collection
+        target: UserWorkspaceEntity
+      - name: user
+        type: one?
+        target: UserEntity
+      - name: userId
+        type: string?
+
 acts:
   - name: CheckPassportMethods
     url: /passports/available-methods
@@ -32,38 +176,7 @@ acts:
           default: false
         - name: recaptcha2ClientKey
           type: string
-actions:
-  # - name: checkPassportMethods
-  #   url: /passports/available-methods
-  #   description: 
-  #     Publicly available information to create the authentication form, and show users
-  #     how they can signin or signup to the system. Based on the PassportMethod entities,
-  #     it will compute the available methods for the user, considering their region (IP for example)
-  #   method: get
-  #   out:
-  #     fields:
-  #       - name: email
-  #         type: bool
-  #         default: false
-  #       - name: phone
-  #         type: bool
-  #         default: false
-  #       - name: google
-  #         type: bool
-  #         default: false
-  #       - name: facebook
-  #         type: bool
-  #         default: false
-  #       - name: googleOAuthClientKey
-  #         type: string
-  #       - name: facebookAppId
-  #         type: string
-  #       - name: enabledRecaptcha2
-  #         type: bool
-  #         default: false
-  #       - name: recaptcha2ClientKey
-  #         type: string
-  - name: osLoginAuthenticate
+  - name: OsLoginAuthenticate
     method: get
     url: /passports/os/login
     cliName: oslogin
@@ -72,6 +185,7 @@ actions:
       for them. Useful for desktop applications.
     out:
       dto: UserSessionDto
+actions:
   - name: acceptInvite
     method: post
     url: /user/invitation/accept
@@ -631,147 +745,11 @@ dtos:
             type: string
           - name: country
             type: string
-  - name: permissionInfo
-    fields:
-      - name: name
-        type: string
-      - name: description
-        type: string
-      - name: completeKey
-        type: string
-  - name: userRoleWorkspace
-    fields:
-      - name: roleId
-        type: string
-      - name: capabilities
-        type: arrayP
-        primitive: string
-  - name: importRequest
-    fields:
-      - name: file
-        type: string
-  - name: okayResponse
-  - name: testMail
-    fields:
-      - name: senderId
-        type: string
-      - name: toName
-        type: string
-      - name: toEmail
-        type: string
-      - name: subject
-        type: string
-      - name: content
-        type: string
-  - name: assignRole
-    fields:
-      - name: roleId
-        type: string
-      - name: userId
-        type: string
-      - name: visibility
-        type: string
-      - name: updated
-        type: int64
-      - name: created
-        type: int64
-  - name: exchangeKeyInformation
-    fields:
-      - name: key
-        type: string
-      - name: visibility
-        type: string
 
-  - name: reactiveSearchResult
-    fields:
-      - type: string
-        name: uniqueId
-      - type: string
-        name: phrase
-      - type: string
-        name: icon
-      - type: string
-        name: description
-      - type: string
-        name: group
-      - type: string
-        name: uiLocation
-      - type: string
-        name: actionFn
-  - name: classicAuth
-    fields:
-      - name: value
-        type: string
-        validate: required
-      - name: password
-        type: string
-        validate: required
-      - name: firstName
-        type: string
-        validate: required
-      - name: lastName
-        type: string
-        validate: required
-      - name: inviteId
-        type: string
-      - name: publicJoinKeyId
-        type: string
-      - name: workspaceTypeId
-        type: string
-  - name: emailAccountSignin
-    fields:
-      - name: email
-        type: string
-        validate: required
-      - name: password
-        validate: required
-        type: string
-  - name: phoneNumberAccountCreation
-    fields:
-      - name: phoneNumber
-        type: string
-  - name: userSession
-    fields:
-      - name: passport
-        type: one
-        target: PassportEntity
-      - name: token
-        type: string
-      - name: exchangeKey
-        type: string
-      - name: userWorkspaces
-        type: many2many
-        target: UserWorkspaceEntity
-      - name: user
-        type: one
-        target: UserEntity
-      - name: userId
-        type: string?
-  - name: otpAuthenticate
-    fields:
-      - name: value
-        type: string
-        validate: required
-      - name: otp
-        type: string
-      - name: type
-        type: string
-        validate: required
-      - name: password
-        type: string
-        validate: required
-  - name: emailOtpResponse
-    fields:
-      - name: request
-        type: one
-        target: PublicAuthenticationEntity
-      - name: userSession
-        type: one
-        target: UserSessionDto
-  - name: resetEmail
-    fields:
-      - name: password
-        type: string
+  - name: okayResponse
+ 
+
+
 entities:
   - name: timezoneGroup
     description: World timezone information

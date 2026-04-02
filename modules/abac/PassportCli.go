@@ -124,7 +124,7 @@ var PassportCli cli.Command = cli.Command{
 	Subcommands: append([]cli.Command{
 		AppendEmailPassportToUser,
 		PassportUpdateCmd,
-		OsLoginAuthenticateActionCmd,
+		OsLoginAuthenticateActionDef.ToCli(),
 		CreateRootUser,
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionDef.ToCli(),

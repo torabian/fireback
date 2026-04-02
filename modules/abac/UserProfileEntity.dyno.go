@@ -1079,7 +1079,7 @@ func UserProfileCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "userprofile",
-		Description: "UserProfiles module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

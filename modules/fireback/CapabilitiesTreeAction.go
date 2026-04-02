@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -14,6 +15,10 @@ func CapabilitiesTreeAction(query QueryDSL) (*CapabilitiesTreeActionResDto, *IEr
 
 	// Read the comments inside CapabilityActionQuery
 	items, _, err := CapabilityActions.Query(query)
+	if err != nil {
+		return nil, GormErrorToIError(err)
+	}
+
 	itemsFiltered := []*CapabilityEntity{}
 
 	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(query)
@@ -45,10 +50,12 @@ func CapabilitiesTreeAction(query QueryDSL) (*CapabilitiesTreeActionResDto, *IEr
 	}
 	itemsa := tree.ToObject(true)
 
+	fmt.Println(itemsFiltered)
+
 	return &CapabilitiesTreeActionResDto{
 		Capabilities: itemsFiltered,
 		Nested:       treeToCapabilityChild(itemsa),
-	}, GormErrorToIError(err)
+	}, nil
 
 }
 

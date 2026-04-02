@@ -1070,7 +1070,7 @@ func PassportMethodCliFn() cli.Command {
 	return cli.Command{
 		Name:        "passportmethod",
 		ShortName:   "method",
-		Description: "PassportMethods module actions",
+		Description: `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
 		Usage:       `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

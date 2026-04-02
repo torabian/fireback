@@ -1084,7 +1084,7 @@ func TokenCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "token",
-		Description: "Tokens module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

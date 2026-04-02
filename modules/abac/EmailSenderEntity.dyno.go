@@ -1142,7 +1142,7 @@ func EmailSenderCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "emailsender",
-		Description: "EmailSenders module actions",
+		Description: `All emails going from the system need to have a virtual sender (nick name, email address, etc)`,
 		Usage:       `All emails going from the system need to have a virtual sender (nick name, email address, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

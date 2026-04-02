@@ -1181,7 +1181,7 @@ func RegionalContentCliFn() cli.Command {
 	return cli.Command{
 		Name:        "regionalcontent",
 		ShortName:   "rc",
-		Description: "RegionalContents module actions",
+		Description: `Email templates, sms templates or other textual content which can be accessed.`,
 		Usage:       `Email templates, sms templates or other textual content which can be accessed.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

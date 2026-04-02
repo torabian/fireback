@@ -1084,7 +1084,7 @@ func EmailProviderCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "emailprovider",
-		Description: "EmailProviders module actions",
+		Description: `Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers`,
 		Usage:       `Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

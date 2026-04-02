@@ -364,13 +364,14 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 		workspaceAs := session.UserWorkspaces[0].WorkspaceId.String
 
 		if setForRoot {
+			user, _ := session.User.Get()
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = session.User.UserId.String
+			query.UserId = user.UserId.String
 			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
-				UserId:      session.User.UserId,
+				UserId:      user.UserId,
 				WorkspaceId: fireback.NewString(ROOT_VAR),
 			}, query)
 

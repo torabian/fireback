@@ -1163,7 +1163,7 @@ func InvoiceCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "invoice",
-		Description: "Invoices module actions",
+		Description: `Invoice is a billable value, which a party recieves, and needs to pay it by different means. Invoice keeps information such as reason, total amount, tax amount and other details. An invoice can be payed via different payment methods.`,
 		Usage:       `Invoice is a billable value, which a party recieves, and needs to pay it by different means. Invoice keeps information such as reason, total amount, tax amount and other details. An invoice can be payed via different payment methods.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

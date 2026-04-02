@@ -1166,7 +1166,7 @@ func GsmProviderCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "gsmprovider",
-		Description: "GsmProviders module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
