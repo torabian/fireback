@@ -1,10 +1,7 @@
 package abac
 
-import (
-	"encoding/json"
-
-	emigo "github.com/torabian/emi/emigo"
-)
+import "encoding/json"
+import emigo "github.com/torabian/emi/emigo"
 
 func GetUserImportDtoCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
