@@ -47,15 +47,18 @@ func OnInitEnvHook() error {
 		return nil
 	}
 
-	if r := fireback.AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := fireback.CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
-		}
-		AppMenuSyncSeeders()
-	} else {
-		return nil
-	}
+	// if fireback.FIREBACK_INIT {
+	// 	if r := fireback.AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
+	// 		db, dbErr := fireback.CreateDatabasePool()
+	// 		if db == nil && dbErr != nil {
+	// 			log.Fatalln("Database error on initialize connection:", dbErr)
+	// 		}
+	// 		AppMenuSyncSeeders()
+	// 	} else {
+	// 		return nil
+	// 	}
+
+	// }
 
 	if r := fireback.AskForSelect("Do you want to create a root admin for project?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := fireback.CreateDatabasePool()

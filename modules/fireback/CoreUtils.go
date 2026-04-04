@@ -976,13 +976,13 @@ func ExecuteSeeders(xapp *FirebackApp) error {
 }
 
 func EnvRunMigration(xapp *FirebackApp) error {
-	if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
+	if r := AskForSelect("Do you want to run migration, adding tables or columns to database (both automigrate, and manual)?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := CreateDatabasePool()
 		if db == nil && dbErr != nil {
 			log.Fatalln("Database error on initialize connection:", dbErr)
 		}
 
-		ApplyMigration(xapp, 2)
+		ApplyMigration(xapp, 0)
 	}
 
 	return nil
