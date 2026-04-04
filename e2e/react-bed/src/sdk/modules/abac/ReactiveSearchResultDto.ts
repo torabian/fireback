@@ -1,5 +1,6 @@
 // @ts-nocheck 
  // This no check has been added via fireback. 
+import { type PartialDeep } from "../../sdk/common/fetchx";
 /**
  * The base class definition for reactiveSearchResultDto
  **/
@@ -280,13 +281,6 @@ export class ReactiveSearchResultDto {
 export abstract class ReactiveSearchResultDtoFactory {
   abstract create(data: unknown): ReactiveSearchResultDto;
 }
-type PartialDeep<T> = {
-  [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<PartialDeep<U>>
-    : T[P] extends object
-      ? PartialDeep<T[P]>
-      : T[P];
-};
 /**
  * The base type definition for reactiveSearchResultDto
  **/

@@ -1,5 +1,6 @@
 // @ts-nocheck 
  // This no check has been added via fireback. 
+import { type PartialDeep } from "../../sdk/common/fetchx";
 /**
  * The base class definition for importRequestDto
  **/
@@ -112,13 +113,6 @@ export class ImportRequestDto {
 export abstract class ImportRequestDtoFactory {
   abstract create(data: unknown): ImportRequestDto;
 }
-type PartialDeep<T> = {
-  [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<PartialDeep<U>>
-    : T[P] extends object
-      ? PartialDeep<T[P]>
-      : T[P];
-};
 /**
  * The base type definition for importRequestDto
  **/

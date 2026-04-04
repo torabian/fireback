@@ -1,7 +1,35 @@
 name: abac
-
+description: 
+  Fireback ABAC module provides user authentication, basic support for most projects,
+  including advanced role, permission module on top of fireback core module.
+  Using this module is not essential to create fireback projects, but provides a great
+  possibility to avoid building most user management flow.
+  Some other helpers, such as timezone are added here.
 dtom:
-
+  - name: userImport
+    fields:
+      - name: avatar
+        type: string
+      - name: passports
+        type: array
+        fields:
+          - name: value
+            type: string
+          - name: password
+            type: string
+      - name: address
+        type: object
+        fields:
+          - name: street
+            type: string
+          - name: zipCode
+            type: string
+          - name: city
+            type: string
+          - name: country
+            type: string
+  - name: okayResponse
+    description: General okay response
   - name: resetEmail
     fields:
       - name: password
@@ -193,7 +221,7 @@ actions:
       Use it when user accepts an invitation, and it will complete the joining process
     security:
       resolveStrategy: user
-        
+
     in:
       fields:
         - name: invitationUniqueId
@@ -722,31 +750,8 @@ actions:
         - name: secondsToUnblock
           type: int64
           description: The amount of time left to unblock for next request
-dtos:
-  - name: userImport
-    fields:
-      - name: avatar
-        type: string
-      - name: passports
-        type: array
-        fields:
-          - name: value
-            type: string
-          - name: password
-            type: string
-      - name: address
-        type: object
-        fields:
-          - name: street
-            type: string
-          - name: zipCode
-            type: string
-          - name: city
-            type: string
-          - name: country
-            type: string
 
-  - name: okayResponse
+
  
 
 
@@ -756,26 +761,11 @@ entities:
     queryScope: public
     cliName: tz
     fields:
-      - name: value
+      - name: title
         type: string
+        description: Title which is shown to the user and allows them to select.
         translate: true
-      - name: abbr
-        type: string
-      - name: offset
-        type: int64
-      - name: isdst
-        type: bool
-      - name: text
-        type: string
-        translate: true
-      - name: utcItems
-        type: array
-        fields:
-          - name: name
-            type: string
-            translate: true
-            validate: required
-
+      
   - name: file
     description: 
       Tus file uploading reference of the content.
@@ -1728,7 +1718,7 @@ messages:
   invitationNotFound:
     en: Invitation not found or expired.
 
-description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed
+
 queries:
   - name: userInvitations
     description: 
