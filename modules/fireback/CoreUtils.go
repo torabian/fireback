@@ -480,8 +480,8 @@ func askProjectDatabase(projectName string) (Database, error) {
 	promptVariable := promptui.Select{
 		Label: "Database type",
 		Items: []string{
-			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_SQLITE,
+			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_MYSQL,
 			DATABASE_TYPE_MARIADB,
 			// Postgres is not well tested yet, we are not adding production ready
@@ -1028,13 +1028,13 @@ func InitEnvironment(xapp *FirebackApp, envFileName string) error {
 
 	AskSSL(&config)
 
+	config.Save(".env")
+
 	for _, module := range xapp.Modules {
 		if module.OnEnvInit != nil {
 			module.OnEnvInit()
 		}
 	}
-
-	config.Save(".env")
 
 	return nil
 }

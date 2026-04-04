@@ -47,32 +47,23 @@ func OnInitEnvHook() error {
 		return nil
 	}
 
-	// if fireback.FIREBACK_INIT {
-	// 	if r := fireback.AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
-	// 		db, dbErr := fireback.CreateDatabasePool()
-	// 		if db == nil && dbErr != nil {
-	// 			log.Fatalln("Database error on initialize connection:", dbErr)
-	// 		}
-	// 		AppMenuSyncSeeders()
-	// 	} else {
-	// 		return nil
-	// 	}
-
-	// }
-
-	if r := fireback.AskForSelect("Do you want to create a root admin for project?", []string{"yes", "no"}); r == "yes" {
+	if r := fireback.AskForSelect("Do you want to create a root admin for project, and authenticate?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := fireback.CreateDatabasePool()
 		if db == nil && dbErr != nil {
 			log.Fatalln("Database error on initialize connection:", dbErr)
 		}
 
-		if err := InteractiveUserAdmin(fireback.QueryDSL{
+		if result, err := InteractiveUserAdmin(fireback.QueryDSL{
 			WorkspaceHas: []string{ROOT_ALL_ACCESS},
 			WorkspaceId:  "system",
 			ItemsPerPage: 10,
 		}); err != nil {
 			fmt.Println(err)
 			return err
+		} else {
+
+			appConfig.CliToken = result.Token
+			appConfig.Save(".env")
 		}
 	}
 
