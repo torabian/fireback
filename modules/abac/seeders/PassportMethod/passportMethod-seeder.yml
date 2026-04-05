@@ -1,6 +1,7 @@
 items:
-- workspaceId: "system"
+- workspaceId: "root"
   uniqueId: "email"
+  visibility: A
   translations: []
   name: "E-Mail"
   type: "email"

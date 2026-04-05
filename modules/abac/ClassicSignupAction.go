@@ -14,8 +14,15 @@ func init() {
 
 // Responsible for user creation from public flows in the application.
 func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*ClassicSignupActionResDto, *fireback.IError) {
-	if err := ClassicSignupActionReqValidator(dto); err != nil {
-		return nil, err
+
+	// For anonymous account creation, actually, no validation is needed.
+	// There is a small question though, what would be the workspace type, in such scenarios
+	// For example, a system has student and teacher workspace types. Someone enters website,
+	// and surfs around, is having which type of the workspace type? We need to figure this out.
+	if !strings.HasPrefix(dto.Value, "anonymous_") {
+		if err := ClassicSignupActionReqValidator(dto); err != nil {
+			return nil, err
+		}
 	}
 
 	ClearPassportValue(&dto.Value)
@@ -92,6 +99,11 @@ func completeClassicSignupProcess(
 			passport.TotpSecret = secret
 			totpLink = link
 		}
+	}
+
+	if passport.Type == ANONYMOUS_AUTHENTICATION {
+		user.FirstName = "Anonymous"
+		user.LastName = "Anonymous"
 	}
 
 	session, sessionError := UnsafeGenerateUser(&GenerateUserDto{
