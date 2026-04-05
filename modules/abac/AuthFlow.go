@@ -314,7 +314,7 @@ func UNSAFE_allow_selection_of_workspace_type() *QueryWorkspaceTypesPubliclyActi
 		}
 	} else {
 		for _, item := range workspaceTypes {
-			workspacesChoises = append(workspacesChoises, fmt.Sprint("%v >>> %v (%v)", item.UniqueId, item.Title, item.Slug))
+			workspacesChoises = append(workspacesChoises, fmt.Sprintf("%v >>> %v (%v)", item.UniqueId, item.Title, item.Slug))
 		}
 		selectedWTId := fireback.AskForSelect("Which workspace type (account type) you are going to create?", workspacesChoises)
 		for _, item := range workspaceTypes {
