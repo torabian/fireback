@@ -62,6 +62,7 @@ func OnInitEnvHook() error {
 			return err
 		} else {
 
+			appConfig.CliWorkspace = result.WorkspaceAs
 			appConfig.CliToken = result.Token
 			appConfig.Save(".env")
 		}

@@ -139,6 +139,7 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.Quer
 	// Get the user workspaces as well
 	q.UserId = user.UniqueId
 	q.ResolveStrategy = "user"
+
 	workspacesItems, _, err := UserWorkspaceActions.Query(q)
 	if err != nil {
 		return fireback.GormErrorToIError(err)

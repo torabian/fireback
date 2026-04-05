@@ -105,6 +105,7 @@ func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceT
 	query.UserId = "root"
 
 	items, qr, err := WorkspaceTypeActions.Query(query)
+
 	var all []*QueryWorkspaceTypesPubliclyActionResDto
 
 	for _, item := range items {
@@ -121,11 +122,4 @@ func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceT
 	}
 
 	return all, qr, err
-}
-
-func init() {
-	QueryWorkspaceTypesPubliclyActionImp = func(q fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
-		res, qrm, err := WorkspaceTypeActionPublicQuery(q)
-		return res, qrm, fireback.CastToIError(err)
-	}
 }
