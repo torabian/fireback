@@ -27,9 +27,7 @@ export interface RemoteRequestOption {
  * Converts all errors, network, api into an object that can
  * be passed to setErrors of formik ref.
  */
-export function mutationErrorsToFormik(errors: any): {
-  [key: string]: string;
-} {
+export function mutationErrorsToFormik(errors: any): any {
   const err: { [key: string]: string } = {};
 
   if (errors.error && Array.isArray(errors.error?.errors)) {
