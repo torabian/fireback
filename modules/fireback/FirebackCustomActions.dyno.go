@@ -6,45 +6,28 @@ package fireback
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
 )
-import (
-	"reflect"
-)
 
 // using shared actions here
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 var EventBusSubscriptionSecurityModel = &SecurityModel{
-	ActionRequires:  []PermissionInfo{},
-	ResolveStrategy: "workspace",
-}
-var EventBusSubscriptionActionImp = DefaultEmptyReactiveAction
-
-// Reactive action does not have that
-var EventBusSubscriptionActionCmd cli.Command = cli.Command{
-	Name:  "event-bus-subscription",
-	Usage: ``,
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilderAuthorize(c, EventBusSubscriptionSecurityModel)
-		CliReactivePipeHandler(query, EventBusSubscriptionActionImp)
-	},
-}
-
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
-var EventBusSubscription2SecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "workspace",
 }
 
 // This can be both used as cli and http
-var EventBusSubscription2ActionDef Module3Action = Module3Action{
-	CliName:       EventBusSubscription2ActionMeta().CliName,
-	Description:   EventBusSubscription2ActionMeta().Description,
-	Name:          EventBusSubscription2ActionMeta().Name,
-	Method:        EventBusSubscription2ActionMeta().Method,
-	Url:           EventBusSubscription2ActionMeta().URL,
-	SecurityModel: EventBusSubscription2SecurityModel,
+var EventBusSubscriptionActionDef Module3Action = Module3Action{
+	CliName:       EventBusSubscriptionActionMeta().CliName,
+	Description:   EventBusSubscriptionActionMeta().Description,
+	Name:          EventBusSubscriptionActionMeta().Name,
+	Method:        EventBusSubscriptionActionMeta().Method,
+	Url:           EventBusSubscriptionActionMeta().URL,
+	SecurityModel: EventBusSubscriptionSecurityModel,
 	// reactive
 }
 var CapabilitiesTreeImpl func(c CapabilitiesTreeActionRequest, query QueryDSL) (*CapabilitiesTreeActionResponse, error) = nil
@@ -93,28 +76,11 @@ func FirebackCustomActions() []Module3Action {
 		//// Let's add actions for emi acts
 		CapabilitiesTreeActionDef,
 		/// End for emi actions
-		{
-			Method:        "REACTIVE",
-			Url:           "/ws",
-			SecurityModel: EventBusSubscriptionSecurityModel,
-			Name:          "eventBusSubscription",
-			Description:   "",
-			Handlers: []gin.HandlerFunc{
-				ReactiveSocketHandler(EventBusSubscriptionActionImp),
-			},
-			Format:         "REACTIVE",
-			ResponseEntity: string(""),
-			Out: &Module3ActionBody{
-				Entity: "",
-			},
-		},
 	}
 	return routes
 }
 
-var FirebackCustomActionsCli = []cli.Command{
-	EventBusSubscriptionActionCmd,
-}
+var FirebackCustomActionsCli = []cli.Command{}
 
 // Only to include some headers
 func FirebackJsonInclude() {
@@ -129,9 +95,8 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
-		EventBusSubscription2ActionDef.ToCli(),
+		EventBusSubscriptionActionDef.ToCli(),
 		CapabilitiesTreeActionDef.ToCli(),
-		EventBusSubscriptionActionCmd,
 		WebPushConfigCliFn(),
 		CapabilityCliFn(),
 	},

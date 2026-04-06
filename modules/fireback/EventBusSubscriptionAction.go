@@ -9,7 +9,7 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	EventBusSubscriptionActionImp = EventBusSubscriptionAction
+	// EventBusSubscriptionActionImp = EventBusSubscriptionAction
 }
 
 func cleanUserFromSocketPool(query QueryDSL) {
@@ -70,7 +70,7 @@ func addUserToEventBus(query QueryDSL) {
 
 }
 
-func EventBusSubscriptionAction(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error) {
+func EventBusSubscriptionActionSig(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error) {
 	LOG.Debug(
 		"Event bus subscription has been started",
 		zap.String("workspace-id", query.WorkspaceId),

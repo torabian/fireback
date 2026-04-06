@@ -10,9 +10,9 @@ import (
 )
 
 /**
-* Action to communicate with the action EventBusSubscription2Action
+* Action to communicate with the action EventBusSubscriptionAction
  */
-func EventBusSubscription2ActionMeta() struct {
+func EventBusSubscriptionActionMeta() struct {
 	Name        string
 	URL         string
 	Method      string
@@ -26,8 +26,8 @@ func EventBusSubscription2ActionMeta() struct {
 		CliName     string
 		Description string
 	}{
-		Name:        "EventBusSubscription2Action",
-		URL:         "/ws2",
+		Name:        "EventBusSubscriptionAction",
+		URL:         "/ws",
 		Method:      "REACTIVE",
 		CliName:     "",
 		Description: "Connects a client to all events related to their user profile, or workspace they are in",
@@ -35,17 +35,17 @@ func EventBusSubscription2ActionMeta() struct {
 }
 
 /**
- * Query parameters for EventBusSubscription2Action
+ * Query parameters for EventBusSubscriptionAction
  */
 // Query wrapper with private fields
-type EventBusSubscription2ActionQuery struct {
+type EventBusSubscriptionActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
 }
 
-func EventBusSubscription2ActionQueryFromString(rawQuery string) EventBusSubscription2ActionQuery {
-	v := EventBusSubscription2ActionQuery{}
+func EventBusSubscriptionActionQueryFromString(rawQuery string) EventBusSubscriptionActionQuery {
+	v := EventBusSubscriptionActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -63,46 +63,46 @@ func EventBusSubscription2ActionQueryFromString(rawQuery string) EventBusSubscri
 	v.mapped = mapped
 	return v
 }
-func EventBusSubscription2ActionQueryFromGin(c *gin.Context) EventBusSubscription2ActionQuery {
-	return EventBusSubscription2ActionQueryFromString(c.Request.URL.RawQuery)
+func EventBusSubscriptionActionQueryFromGin(c *gin.Context) EventBusSubscriptionActionQuery {
+	return EventBusSubscriptionActionQueryFromString(c.Request.URL.RawQuery)
 }
-func EventBusSubscription2ActionQueryFromHttp(r *http.Request) EventBusSubscription2ActionQuery {
-	return EventBusSubscription2ActionQueryFromString(r.URL.RawQuery)
+func EventBusSubscriptionActionQueryFromHttp(r *http.Request) EventBusSubscriptionActionQuery {
+	return EventBusSubscriptionActionQueryFromString(r.URL.RawQuery)
 }
-func (q EventBusSubscription2ActionQuery) Values() url.Values {
+func (q EventBusSubscriptionActionQuery) Values() url.Values {
 	return q.values
 }
-func (q EventBusSubscription2ActionQuery) Mapped() map[string]interface{} {
+func (q EventBusSubscriptionActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *EventBusSubscription2ActionQuery) SetValues(v url.Values) {
+func (q *EventBusSubscriptionActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *EventBusSubscription2ActionQuery) SetMapped(m map[string]interface{}) {
+func (q *EventBusSubscriptionActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
 // WebSocket upgrader
-var upgraderEventBusSubscription2Action = websocket.Upgrader{
+var upgraderEventBusSubscriptionAction = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
 }
 
-type EventBusSubscription2ActionMessage struct {
+type EventBusSubscriptionActionMessage struct {
 	Raw         []byte
 	Conn        *websocket.Conn
 	MessageType int
 	Error       error
-	QueryParams EventBusSubscription2ActionQuery
+	QueryParams EventBusSubscriptionActionQuery
 }
 
 // Developer handler type
-type EventBusSubscription2ActionHandler func(msg EventBusSubscription2ActionMessage) error
+type EventBusSubscriptionActionHandler func(msg EventBusSubscriptionActionMessage) error
 
 // Generated handler
-func EventBusSubscription2Action(r *gin.Engine, handler EventBusSubscription2ActionHandler) {
-	meta := EventBusSubscription2ActionMeta()
+func EventBusSubscriptionAction(r *gin.Engine, handler EventBusSubscriptionActionHandler) {
+	meta := EventBusSubscriptionActionMeta()
 	r.GET(meta.URL, func(c *gin.Context) {
-		ws, err := upgraderEventBusSubscription2Action.Upgrade(c.Writer, c.Request, nil)
+		ws, err := upgraderEventBusSubscriptionAction.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot upgrade websocket"})
 			return
@@ -110,13 +110,13 @@ func EventBusSubscription2Action(r *gin.Engine, handler EventBusSubscription2Act
 		defer ws.Close()
 		for {
 			mt, raw, err := ws.ReadMessage()
-			msg := EventBusSubscription2ActionMessage{
+			msg := EventBusSubscriptionActionMessage{
 				Conn:        ws,
 				Raw:         raw,
 				Error:       err,
 				MessageType: mt,
 			}
-			msg.QueryParams = EventBusSubscription2ActionQueryFromGin(c)
+			msg.QueryParams = EventBusSubscriptionActionQueryFromGin(c)
 			// Provide raw message to developer handler
 			if err := handler(msg); err != nil {
 				errMsg := fmt.Sprintf("handler error: %v", err)
@@ -128,18 +128,18 @@ func EventBusSubscription2Action(r *gin.Engine, handler EventBusSubscription2Act
 	})
 }
 
-type EventBusSubscription2ActionSession struct {
-	In          <-chan EventBusSubscription2ActionMessage
-	Out         chan<- EventBusSubscription2ActionMessage
+type EventBusSubscriptionActionSession struct {
+	In          <-chan EventBusSubscriptionActionMessage
+	Out         chan<- EventBusSubscriptionActionMessage
 	Done        <-chan struct{}
 	Close       func(err error)
-	QueryParams EventBusSubscription2ActionQuery
+	QueryParams EventBusSubscriptionActionQuery
 	G           *gin.Context
 	Socket      *websocket.Conn
 }
-type EventBusSubscription2ActionHandlerDuplex func(*EventBusSubscription2ActionSession)
+type EventBusSubscriptionActionHandlerDuplex func(*EventBusSubscriptionActionSession)
 
-// EventBusSubscription2ActionDuplex upgrades the HTTP connection to a WebSocket and
+// EventBusSubscriptionActionDuplex upgrades the HTTP connection to a WebSocket and
 // exposes it as a full-duplex, blocking session.
 //
 // The provided handler owns the lifetime of the connection.
@@ -153,14 +153,14 @@ type EventBusSubscription2ActionHandlerDuplex func(*EventBusSubscription2ActionS
 //
 // Usage pattern:
 //
-//	external.EventBusSubscription2ActionDuplex(r, func(ctx *external.EventBusSubscription2ActionSession) {
+//	external.EventBusSubscriptionActionDuplex(r, func(ctx *external.EventBusSubscriptionActionSession) {
 //		for {
 //			select {
 //			case msg, ok := <-ctx.In:
 //				if !ok {
 //					return // client disconnected
 //				}
-//				ctx.Out <- external.EventBusSubscription2ActionMessage{
+//				ctx.Out <- external.EventBusSubscriptionActionMessage{
 //					MessageType: websocket.TextMessage,
 //					Raw:         msg.Raw,
 //				}
@@ -177,23 +177,23 @@ type EventBusSubscription2ActionHandlerDuplex func(*EventBusSubscription2ActionS
 //   - The handler MUST block (typically via a loop).
 //   - Returning from the handler closes the WebSocket.
 //   - Do not treat this as a per-message callback.
-func EventBusSubscription2ActionDuplex(r *gin.Engine, handler EventBusSubscription2ActionHandlerDuplex) {
-	meta := EventBusSubscription2ActionMeta()
+func EventBusSubscriptionActionDuplex(r *gin.Engine, handler EventBusSubscriptionActionHandlerDuplex) {
+	meta := EventBusSubscriptionActionMeta()
 	// The actual callback is extracted, in case you need to handle multiple handlers or customize, use it directly.
 	r.GET(meta.URL, func(ctx *gin.Context) {
-		EventBusSubscription2ActionDuplexGinHandler(ctx, handler)
+		EventBusSubscriptionActionDuplexGinHandler(ctx, handler)
 	})
 }
-func EventBusSubscription2ActionDuplexGinHandler(c *gin.Context, handler EventBusSubscription2ActionHandlerDuplex) {
-	ws, err := upgraderEventBusSubscription2Action.Upgrade(c.Writer, c.Request, nil)
+func EventBusSubscriptionActionDuplexGinHandler(c *gin.Context, handler EventBusSubscriptionActionHandlerDuplex) {
+	ws, err := upgraderEventBusSubscriptionAction.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot upgrade websocket"})
 		return
 	}
-	in := make(chan EventBusSubscription2ActionMessage)
-	out := make(chan EventBusSubscription2ActionMessage)
+	in := make(chan EventBusSubscriptionActionMessage)
+	out := make(chan EventBusSubscriptionActionMessage)
 	done := make(chan struct{})
-	session := &EventBusSubscription2ActionSession{
+	session := &EventBusSubscriptionActionSession{
 		In:     in,
 		Out:    out,
 		Done:   done,
@@ -204,13 +204,13 @@ func EventBusSubscription2ActionDuplexGinHandler(c *gin.Context, handler EventBu
 			ws.Close()
 		},
 	}
-	session.QueryParams = EventBusSubscription2ActionQueryFromGin(c)
+	session.QueryParams = EventBusSubscriptionActionQueryFromGin(c)
 	// Read loop
 	go func() {
 		defer close(in)
 		for {
 			mt, raw, err := ws.ReadMessage()
-			in <- EventBusSubscription2ActionMessage{MessageType: mt, Raw: raw, Error: err}
+			in <- EventBusSubscriptionActionMessage{MessageType: mt, Raw: raw, Error: err}
 		}
 	}()
 	// Write loop
@@ -218,7 +218,7 @@ func EventBusSubscription2ActionDuplexGinHandler(c *gin.Context, handler EventBu
 		for msg := range out {
 			if err := ws.WriteMessage(msg.MessageType, msg.Raw); err != nil {
 				// When message is -1, means it's internal error coming out
-				in <- EventBusSubscription2ActionMessage{MessageType: -1, Error: err}
+				in <- EventBusSubscriptionActionMessage{MessageType: -1, Error: err}
 				return
 			}
 		}
