@@ -6,10 +6,11 @@ package fireback
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"reflect"
-
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
+)
+import (
+	"reflect"
 )
 
 // using shared actions here
@@ -59,8 +60,8 @@ var ListCapabilitiesActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var CapabilitiesTreeImpl func(c CapabilitiesTreeActionRequest, query QueryDSL) (*CapabilitiesTreeActionResponse, error) = nil
 var CapabilitiesTreeSecurityModel = &SecurityModel{
 	ActionRequires: []PermissionInfo{

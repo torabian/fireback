@@ -54,19 +54,19 @@ export class CapabilityInfoDto {
   }
   /**
    *
-   * @type {}
+   * @type {CapabilityInfoDto}
    **/
   #children: CapabilityInfoDto[] = [];
   /**
    *
-   * @returns {}
+   * @returns {CapabilityInfoDto}
    **/
   get children() {
     return this.#children;
   }
   /**
    *
-   * @type {}
+   * @type {CapabilityInfoDto}
    **/
   set children(value: CapabilityInfoDto[]) {
     // For arrays, you only can pass arrays to the object
