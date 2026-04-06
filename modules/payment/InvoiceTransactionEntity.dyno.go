@@ -1204,7 +1204,7 @@ func InvoiceTransactionCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "invoicetransaction",
-		Description: "InvoiceTransactions module actions",
+		Description: `Transactions history occured for an specific invoice`,
 		Usage:       `Transactions history occured for an specific invoice`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

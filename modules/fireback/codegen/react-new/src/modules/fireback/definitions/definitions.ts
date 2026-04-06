@@ -1,5 +1,5 @@
-import { IResponse } from "../sdk/core/http-tools";
-import { FormikProps } from "formik";
+import { type IResponse } from "../sdk/core/http-tools";
+import { type FormikProps } from "formik";
 
 export enum KeyboardAction {
   NewEntity = "new_entity",

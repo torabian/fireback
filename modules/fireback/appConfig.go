@@ -318,6 +318,7 @@ func structToEnvMap(config interface{}) (map[string]string, error) {
 func SaveEnvFile(config interface{}, filename string) error {
 
 	envMap, err := structToEnvMap(config)
+
 	if err != nil {
 		return err
 	}
@@ -329,6 +330,10 @@ func SaveEnvFile(config interface{}, filename string) error {
 	defer file.Close()
 
 	for key, value := range envMap {
+		if value == "" {
+			continue
+		}
+
 		_, err := file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
 		if err != nil {
 			return err

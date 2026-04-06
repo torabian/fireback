@@ -841,6 +841,9 @@ func CastPaymentConfigFromCli(c *cli.Context) *PaymentConfigEntity {
 	if c.IsSet("pid") {
 		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
+	if c.IsSet("enable-stripe") {
+		template.EnableStripe = fireback.NewBoolAutoNull(c.String("enable-stripe"))
+	}
 	if c.IsSet("stripe-secret-key") {
 		template.StripeSecretKey = c.String("stripe-secret-key")
 	}
@@ -1110,7 +1113,7 @@ func PaymentConfigCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "paymentconfig",
-		Description: "PaymentConfigs module actions",
+		Description: `Contains the api keys, configuration, urls, callbacks for different payment gateways.`,
 		Usage:       `Contains the api keys, configuration, urls, callbacks for different payment gateways.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

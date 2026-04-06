@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -47,8 +46,9 @@ func GetExePath() string {
 		panic(err)
 	}
 
-	exPath := filepath.Dir(ex)
-	return exPath + fmt.Sprintf("%c", os.PathSeparator)
+	return ex
+	// exPath := filepath.Dir(ex)
+	// return exPath + fmt.Sprintf("%c", os.PathSeparator)
 }
 
 /*

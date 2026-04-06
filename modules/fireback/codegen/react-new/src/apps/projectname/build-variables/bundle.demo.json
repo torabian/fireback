@@ -1,0 +1,13 @@
+{
+  "VITE_REMOTE_SERVICE": "/",
+  "PUBLIC_URL": "/",
+  "VITE_PUBLIC_URL": "/",
+  "VITE_DEFAULT_ROUTE": "/{locale}/dashboard",
+  "VITE_TARGET_APP": "projectname",
+  "VITE_ALLOW_OS_LOGIN": "true",
+  "VITE_SUPPORTED_LANGUAGES": "fa,en",
+  "VITE_USE_HASH_ROUTER": "true",
+  "VITE_INACCURATE_MOCK_MODE": "true",
+  "VITE_TITLE": "projectname",
+  "VITE_DESCRIPTION": "Sample Fireback UI"
+}

@@ -103,7 +103,6 @@ func init() {
 	UserCliCommands = append(
 		UserCliCommands,
 		TokenCliFn(),
-		CreateRootUser,
 		AcceptInviteActionCmd,
 		UserInvitationsActionCmd,
 	)

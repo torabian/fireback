@@ -6,7 +6,7 @@ import { usePostUser } from "../../../sdk/modules/abac/usePostUser";
 
 import {
   CommonEntityManager,
-  DtoEntity,
+  type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { UserEditForm } from "./UserEditForm";
 import { UserEntity } from "../../../sdk/modules/abac/UserEntity";

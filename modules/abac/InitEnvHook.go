@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli"
 )
 
-func OnInitEnvHook() error {
+func OnInitEnvHook(c *cli.Context) error {
 
 	appConfig := fireback.GetConfig()
 	workingDirectory, err := os.Getwd()
@@ -47,30 +48,27 @@ func OnInitEnvHook() error {
 		return nil
 	}
 
-	if r := fireback.AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := fireback.CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
-		}
-		AppMenuSyncSeeders()
-	} else {
-		return nil
-	}
-
-	if r := fireback.AskForSelect("Do you want to create a root admin for project?", []string{"yes", "no"}); r == "yes" {
+	if r := fireback.AskForSelect("Do you want to authorize the cli, by creating possible root account?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := fireback.CreateDatabasePool()
 		if db == nil && dbErr != nil {
 			log.Fatalln("Database error on initialize connection:", dbErr)
 		}
 
-		if err := InteractiveUserAdmin(fireback.QueryDSL{
-			WorkspaceHas: []string{ROOT_ALL_ACCESS},
-			WorkspaceId:  "system",
-			ItemsPerPage: 10,
-		}); err != nil {
-			fmt.Println(err)
-			return err
-		}
+		IntegrateAuthFlow(c)
+
+		// if result, err := InteractiveUserAdmin(fireback.QueryDSL{
+		// 	WorkspaceHas: []string{ROOT_ALL_ACCESS},
+		// 	WorkspaceId:  "system",
+		// 	ItemsPerPage: 10,
+		// }); err != nil {
+		// 	fmt.Println(err)
+		// 	return err
+		// } else {
+
+		// 	appConfig.CliWorkspace = result.WorkspaceAs
+		// 	appConfig.CliToken = result.Token
+		// 	appConfig.Save(".env")
+		// }
 	}
 
 	return nil

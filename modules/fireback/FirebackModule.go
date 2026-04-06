@@ -31,7 +31,7 @@ func workspaceModuleCore(module *ModuleProvider) {
 
 		for _, item := range items2 {
 
-			if err := dbref.Debug().AutoMigrate(item); err != nil {
+			if err := dbref.AutoMigrate(item); err != nil {
 				fmt.Println("Migrating entity issue:", GetInterfaceName(item))
 				return err
 			}

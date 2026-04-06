@@ -3,8 +3,8 @@ const { exec, spawn } = require("child_process");
 const cypressFailFast = require("cypress-fail-fast/plugin.js");
 let firebackProcess; // Store the Fireback process reference
 
-let BINARY = "/Users/ali/work/fireback/app";
-let CWD = "/Users/ali/work/fireback";
+let BINARY = "/home/ali/work/fireback/app";
+let CWD = "/home/ali/work/fireback";
 const PORT = 7793;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;

@@ -1,15 +1,17 @@
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
+
 /**
  * Transforms the fbtusid___ and other kind of meta path into real accessible path
  */
 export function replacePossibleMetaPaths(data?: string): string {
   let value = (data || "").replaceAll(
     /fbtusid_____(.*)_____/g,
-    process.env.REACT_APP_REMOTE_SERVICE + "files/$1"
+    BUILD_VARIABLES.REMOTE_SERVICE + "files/$1"
   );
 
   value = (value || "").replaceAll(
     /directasset_____(.*)_____/g,
-    process.env.REACT_APP_REMOTE_SERVICE + "$1"
+    BUILD_VARIABLES.REMOTE_SERVICE + "$1"
   );
 
   return value;
@@ -21,5 +23,5 @@ export function MetaPathAwareContent({ data }: { data?: string }) {
 }
 
 export function getFileUrlFromTusId(tusId: string) {
-  return process.env.REACT_APP_REMOTE_SERVICE + "files/" + tusId;
+  return BUILD_VARIABLES.REMOTE_SERVICE + "files/" + tusId;
 }

@@ -1,6 +1,6 @@
 import {
-  Context,
-  DeepPartial,
+  type Context,
+  type DeepPartial,
   emptyList,
   getItemUid,
   getJson,
@@ -9,7 +9,7 @@ import {
   method,
   uriMatch,
 } from "../../hooks/mock-tools";
-import { IResponse, IResponseList } from "../../sdk/core/http-tools";
+import { type IResponse, type IResponseList } from "../../sdk/core/http-tools";
 import { PublicJoinKeyEntity } from "../../sdk/modules/abac/PublicJoinKeyEntity";
 import { RoleEntity } from "../../sdk/modules/abac/RoleEntity";
 import { UserEntity } from "../../sdk/modules/abac/UserEntity";

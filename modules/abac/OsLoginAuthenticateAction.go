@@ -6,12 +6,16 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	OsLoginAuthenticateActionImp = OsLoginAuthenticateAction
+	OsLoginAuthenticateImpl = OsLoginAuthenticateAction
 }
-func OsLoginAuthenticateAction(
-	q fireback.QueryDSL) (*UserSessionDto,
-	*fireback.IError,
-) {
-	return SigninWithOsUser2(q)
 
+func OsLoginAuthenticateAction(
+	c OsLoginAuthenticateActionRequest, query fireback.QueryDSL,
+) (*OsLoginAuthenticateActionResponse, error) {
+
+	res, err := SigninWithOsUser2(query)
+
+	return &OsLoginAuthenticateActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, err
 }

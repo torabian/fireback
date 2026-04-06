@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IReactiveSearchResult } from "./ReactiveSearchDefinition";
+import { type IReactiveSearchResult } from "./ReactiveSearchDefinition";
 
 export interface IReactiveSearchContext {
   result: Array<IReactiveSearchResult>;

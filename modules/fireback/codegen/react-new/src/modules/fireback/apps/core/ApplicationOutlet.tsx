@@ -5,6 +5,7 @@ import { OverlayProvider } from "../../components/overlay/OverlayProvider";
 import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
 import { AppConfigProvider } from "../../hooks/appConfigTools";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 /**
  * Shows routes of the application, can be independently used,
@@ -24,7 +25,7 @@ export const ApplicationOutlet = ({
   return (
     <AppConfigProvider
       initialConfig={{
-        remote: process.env.REACT_APP_REMOTE_SERVICE,
+        remote: BUILD_VARIABLES.REMOTE_SERVICE,
       }}
     >
       <ReactiveSearchProvider>

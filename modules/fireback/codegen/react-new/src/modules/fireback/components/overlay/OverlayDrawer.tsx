@@ -1,8 +1,8 @@
 import Drawer from "react-modern-drawer";
 import "react-modern-drawer/dist/index.css";
 import {
-  DrawerOpenParams,
-  OverlayInstanceComponentProps,
+  type DrawerOpenParams,
+  type OverlayInstanceComponentProps,
 } from "./OverlayDefinitions";
 
 export const OverlayDrawerImp = ({

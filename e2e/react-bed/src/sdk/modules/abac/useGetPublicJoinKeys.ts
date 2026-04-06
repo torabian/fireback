@@ -8,11 +8,11 @@ import { useContext } from "react";
 import { useQuery } from "react-query";
 import { 
   RemoteQueryContext,
-  UseRemoteQuery,
+  type UseRemoteQuery,
   queryBeforeSend,
 } from "../../core/react-tools";
 import { stringify } from "qs";
-import { execApiFn, IResponseList } from "../../core/http-tools";
+import { execApiFn, type IResponseList } from "../../core/http-tools";
     import {
         PublicJoinKeyEntity,
     } from "../abac/PublicJoinKeyEntity"

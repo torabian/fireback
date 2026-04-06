@@ -1063,7 +1063,7 @@ func PublicJoinKeyCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "publicjoinkey",
-		Description: "PublicJoinKeys module actions",
+		Description: `Joining to different workspaces using a public link directly`,
 		Usage:       `Joining to different workspaces using a public link directly`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

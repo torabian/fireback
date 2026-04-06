@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/pquerna/otp/totp"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
@@ -190,6 +192,37 @@ var MiscCli cli.Command = cli.Command{
 		RegionalContentCliFn(),
 		AppMenuCliFn(),
 		getCssMinCombineCli(),
+		cli.Command{
+			Name:        "totp",
+			Description: "Generates a time based code (6 digit) from a totp secret, simulates the mobile app",
+			Usage:       "Generates a time based code (6 digit) from a totp secret, simulates the mobile app",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "secret",
+					Value:    "",
+					Usage:    "The secret from the totp system which is given.",
+					Required: true,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				secret := c.String("secret")
+
+				for {
+					now := time.Now()
+
+					code, err := totp.GenerateCode(secret, now)
+					if err != nil {
+						return err
+					}
+
+					remaining := 30 - now.Second()%30
+
+					fmt.Printf("\rCode: %s (expires in %2ds)", code, remaining)
+
+					time.Sleep(1 * time.Second)
+				}
+			},
+		},
 	},
 }
 

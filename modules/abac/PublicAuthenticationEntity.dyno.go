@@ -1034,6 +1034,9 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 	if c.IsSet("passport-value") {
 		template.PassportValue = c.String("passport-value")
 	}
+	if c.IsSet("is-in-creation-process") {
+		template.IsInCreationProcess = fireback.NewBoolAutoNull(c.String("is-in-creation-process"))
+	}
 	if c.IsSet("status") {
 		template.Status = c.String("status")
 	}
@@ -1305,7 +1308,7 @@ func PublicAuthenticationCliFn() cli.Command {
 	return cli.Command{
 		Name:        "publicauthentication",
 		ShortName:   "pa",
-		Description: "PublicAuthentications module actions",
+		Description: `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Usage:       `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

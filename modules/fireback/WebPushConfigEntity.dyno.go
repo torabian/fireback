@@ -1046,7 +1046,7 @@ func WebPushConfigCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "webpushconfig",
-		Description: "WebPushConfigs module actions",
+		Description: `Keep the web push notification configuration for each user`,
 		Usage:       `Keep the web push notification configuration for each user`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

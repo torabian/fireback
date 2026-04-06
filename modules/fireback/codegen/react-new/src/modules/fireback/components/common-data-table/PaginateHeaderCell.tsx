@@ -1,8 +1,8 @@
 import { get } from "lodash";
 import { ArrowDownAZ, ArrowDownWideNarrow, ArrowDownZA } from "lucide-react";
 import { useEffect, useState } from "react";
-import { RenderHeaderCellProps } from "react-data-grid";
-import { Udf } from "../../hooks/useDatatableFiltering";
+import { type RenderHeaderCellProps } from "react-data-grid";
+import { type Udf } from "../../hooks/useDatatableFiltering";
 
 export function FilterRenderer<R>({
   tabIndex,

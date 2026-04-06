@@ -34,6 +34,16 @@ export class BaseEntity {
     updatedFormatted: "updatedFormatted",
     createdFormatted: "createdFormatted",
   };
+  // @ts-ignore: intentional unused constructor params
+  constructor(..._props) {
+    // Intentional accepting params.
+  }
 }
 
-export class BaseDto {}
+export class BaseDto {
+  
+  // @ts-ignore: intentional unused constructor params
+  constructor(..._props) {
+    // Intentional accepting params.
+  }
+}

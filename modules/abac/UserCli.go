@@ -325,10 +325,16 @@ func CreateUserInteractiveQuestions(query fireback.QueryDSL) (*ClassicSignupActi
 	return dto, setForRoot, nil
 }
 
-func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, query fireback.QueryDSL) error {
-	appConfig := fireback.GetConfig()
+type AdminCreationInfo struct {
+	Token       string
+	WorkspaceAs string
+}
 
-	return fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
+func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, query fireback.QueryDSL) (AdminCreationInfo, error) {
+
+	result := AdminCreationInfo{}
+
+	err := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
 
 		query.Tx = tx
 
@@ -364,13 +370,14 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 		workspaceAs := session.UserWorkspaces[0].WorkspaceId.String
 
 		if setForRoot {
+			user, _ := session.User.Get()
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = session.User.UserId.String
+			query.UserId = user.UserId.String
 			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
-				UserId:      session.User.UserId,
+				UserId:      user.UserId,
 				WorkspaceId: fireback.NewString(ROOT_VAR),
 			}, query)
 
@@ -393,15 +400,16 @@ func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, que
 			fmt.Println("Workspace changed to :::", workspaceAs, " run `"+exePath+" ws view` to see the access scope")
 		}
 
-		appConfig.CliWorkspace = workspaceAs
-		appConfig.CliToken = session.Token
-		appConfig.Save(".env")
+		result.WorkspaceAs = workspaceAs
+		result.Token = session.Token
 
 		return nil
 	})
+
+	return result, err
 }
 
-func InteractiveUserAdmin(query fireback.QueryDSL) error {
+func InteractiveUserAdmin(query fireback.QueryDSL) (AdminCreationInfo, error) {
 	dto, setForRoot, _ := CreateUserInteractiveQuestions(query)
 	return CreateAdminTransaction(dto, setForRoot, query)
 }

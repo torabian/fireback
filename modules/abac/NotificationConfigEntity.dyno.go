@@ -1770,7 +1770,7 @@ func NotificationConfigCliFn() cli.Command {
 	return cli.Command{
 		Name:        "notificationconfig",
 		ShortName:   "config",
-		Description: "NotificationConfigs module actions",
+		Description: `Configuration for the notifications used in the app, such as default gsm number, email senders, and many more`,
 		Usage:       `Configuration for the notifications used in the app, such as default gsm number, email senders, and many more`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

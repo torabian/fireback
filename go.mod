@@ -58,7 +58,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.0.17
+	github.com/torabian/emi v1.0.24
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli v1.22.17
 	github.com/wk8/go-ordered-map/v2 v2.1.8
@@ -108,7 +108,7 @@ require (
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/goccy/go-json v0.10.5 // indirect
+	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect

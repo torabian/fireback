@@ -993,8 +993,14 @@ func CastPassportFromCli(c *cli.Context) *PassportEntity {
 	if c.IsSet("totp-secret") {
 		template.TotpSecret = c.String("totp-secret")
 	}
+	if c.IsSet("totp-confirmed") {
+		template.TotpConfirmed = fireback.NewBoolAutoNull(c.String("totp-confirmed"))
+	}
 	if c.IsSet("password") {
 		template.Password = c.String("password")
+	}
+	if c.IsSet("confirmed") {
+		template.Confirmed = fireback.NewBoolAutoNull(c.String("confirmed"))
 	}
 	if c.IsSet("access-token") {
 		template.AccessToken = c.String("access-token")
@@ -1260,7 +1266,7 @@ func PassportCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "passport",
-		Description: "Passports module actions",
+		Description: `Represent a mean to login in into the system, each user could have multiple passport (email, phone) and authenticate into the system.`,
 		Usage:       `Represent a mean to login in into the system, each user could have multiple passport (email, phone) and authenticate into the system.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

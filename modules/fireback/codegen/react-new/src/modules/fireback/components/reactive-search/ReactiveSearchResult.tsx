@@ -1,10 +1,8 @@
+import { groupBy } from "lodash";
 import { source } from "../../hooks/source";
 import { useT } from "../../hooks/useT";
-import { groupBy } from "lodash";
-import { useContext } from "react";
 import Link from "../link/Link";
-import { ReactiveSearchContext } from "./ReactiveSearchContext";
-import { IReactiveSearchResult } from "./ReactiveSearchDefinition";
+import { type IReactiveSearchResult } from "./ReactiveSearchDefinition";
 
 export function ReactiveSearchResult({
   result,

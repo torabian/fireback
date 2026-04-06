@@ -1070,7 +1070,7 @@ func PassportMethodCliFn() cli.Command {
 	return cli.Command{
 		Name:        "passportmethod",
 		ShortName:   "method",
-		Description: "PassportMethods module actions",
+		Description: `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
 		Usage:       `Login/Signup methods which are available in the app for different regions (Email, Phone Number, Google, etc)`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -1103,6 +1103,7 @@ var PASSPORT_METHOD_ACTION_QUERY = fireback.Module3Action{
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1138,6 +1139,7 @@ var PASSPORT_METHOD_ACTION_EXPORT = fireback.Module3Action{
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1157,6 +1159,7 @@ var PASSPORT_METHOD_ACTION_GET_ONE = fireback.Module3Action{
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_QUERY},
 		ResolveStrategy: "workspace",
+		AllowOnRoot:     true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1382,6 +1385,7 @@ func NewPassportMethodCreatedEvent(
 				PERM_ROOT_PASSPORT_METHOD_QUERY,
 			},
 			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		},
 		CacheKey: "*abac.PassportMethodEntity",
 	}
@@ -1401,6 +1405,7 @@ func NewPassportMethodUpdatedEvent(
 				PERM_ROOT_PASSPORT_METHOD_QUERY,
 			},
 			ResolveStrategy: "workspace",
+			AllowOnRoot:     true,
 		},
 		CacheKey: "*abac.PassportMethodEntity",
 	}

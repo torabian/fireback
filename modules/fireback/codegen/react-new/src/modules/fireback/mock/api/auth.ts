@@ -1,7 +1,7 @@
-import { IResponse, IResponseList } from "../../definitions/JSONStyle";
+import { type IResponse, type IResponseList } from "../../definitions/JSONStyle";
 import {
-  Context,
-  DeepPartial,
+  type Context,
+  type DeepPartial,
   emptyList,
   method,
   uriMatch,

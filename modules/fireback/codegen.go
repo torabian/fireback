@@ -1628,6 +1628,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 	}
 	// Now after the queries is created, we need to convert the sql files in that directory into golang query predict files
 	err2 := ReadSQLFiles(DiskFS{Root: filepath.Join(ctx.Path, "queries")}, ".", 1, func(filePath string, data []byte) error {
+		fmt.Println("SQL Path: ", filePath)
 		doc.Queries = append(doc.Queries, querypredict.QuerySpec{
 			Name:  strings.ReplaceAll(path.Base(filePath), ".sql", ""),
 			Query: string(data),
@@ -1876,7 +1877,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
 			content = golang.AsFullDocument(res, x.Name)
-			exportPath = filepath.Join(exportDir, action.Name+"Action.dyno.go")
+			exportPath = filepath.Join(exportDir, ToUpper(action.Name)+"Action.dyno.go")
 		}
 
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)

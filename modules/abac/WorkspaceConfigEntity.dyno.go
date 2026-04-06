@@ -974,11 +974,35 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 	if c.IsSet("pid") {
 		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
+	if c.IsSet("enable-recaptcha2") {
+		template.EnableRecaptcha2 = fireback.NewBoolAutoNull(c.String("enable-recaptcha2"))
+	}
+	if c.IsSet("enable-otp") {
+		template.EnableOtp = fireback.NewBoolAutoNull(c.String("enable-otp"))
+	}
+	if c.IsSet("require-otp-on-signup") {
+		template.RequireOtpOnSignup = fireback.NewBoolAutoNull(c.String("require-otp-on-signup"))
+	}
+	if c.IsSet("require-otp-on-signin") {
+		template.RequireOtpOnSignin = fireback.NewBoolAutoNull(c.String("require-otp-on-signin"))
+	}
 	if c.IsSet("recaptcha2-server-key") {
 		template.Recaptcha2ServerKey = c.String("recaptcha2-server-key")
 	}
 	if c.IsSet("recaptcha2-client-key") {
 		template.Recaptcha2ClientKey = c.String("recaptcha2-client-key")
+	}
+	if c.IsSet("enable-totp") {
+		template.EnableTotp = fireback.NewBoolAutoNull(c.String("enable-totp"))
+	}
+	if c.IsSet("force-totp") {
+		template.ForceTotp = fireback.NewBoolAutoNull(c.String("force-totp"))
+	}
+	if c.IsSet("force-password-on-phone") {
+		template.ForcePasswordOnPhone = fireback.NewBoolAutoNull(c.String("force-password-on-phone"))
+	}
+	if c.IsSet("force-person-name-on-phone") {
+		template.ForcePersonNameOnPhone = fireback.NewBoolAutoNull(c.String("force-person-name-on-phone"))
 	}
 	return template
 }
@@ -1243,7 +1267,7 @@ func WorkspaceConfigCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "config",
-		Description: "WorkspaceConfigs module actions",
+		Description: `Contains configuration which would be necessary for application environment to be running. At the moment, a single record is allowed, and only for root workspace. But in theory it could be configured per each workspace independently. For sub projects do not touch this, rather create a custom config entity if workspaces in the product need extra config.`,
 		Usage:       `Contains configuration which would be necessary for application environment to be running. At the moment, a single record is allowed, and only for root workspace. But in theory it could be configured per each workspace independently. For sub projects do not touch this, rather create a custom config entity if workspaces in the product need extra config.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

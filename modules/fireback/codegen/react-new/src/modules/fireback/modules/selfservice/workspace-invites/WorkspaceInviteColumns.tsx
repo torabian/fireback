@@ -1,4 +1,4 @@
-import { DatatableColumn } from "@/modules/fireback/definitions/definitions";
+import { type DatatableColumn } from "@/modules/fireback/definitions/definitions";
 import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 import { enTranslations } from "@/modules/fireback/translations/en";
 

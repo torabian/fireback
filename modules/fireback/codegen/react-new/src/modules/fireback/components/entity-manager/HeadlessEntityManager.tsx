@@ -1,6 +1,6 @@
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
-import { IResponse } from "../../sdk/core/http-tools";
-import { Formik, FormikHelpers, FormikProps } from "formik";
+import { type IResponse } from "../../sdk/core/http-tools";
+import { Formik, type FormikHelpers, type FormikProps } from "formik";
 
 import { useEffect } from "react";
 import { toast } from "react-toastify";

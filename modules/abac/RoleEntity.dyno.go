@@ -1116,7 +1116,7 @@ func RoleCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "role",
-		Description: "Roles module actions",
+		Description: `Manage roles within the workspaces, or root configuration`,
 		Usage:       `Manage roles within the workspaces, or root configuration`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

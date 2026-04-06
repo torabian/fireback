@@ -1,4 +1,4 @@
-import { IconOsMap } from "../definitions/definitions";
+import { type IconOsMap } from "../definitions/definitions";
 import { getOS } from "../hooks/useHtmlClass";
 const OS = getOS();
 

@@ -2,7 +2,7 @@ import { ModalContext } from "../../../components/modal/Modal";
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useT } from "../../../hooks/useT";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
-import { FormikProps } from "formik";
+import { type FormikProps } from "formik";
 import { useContext } from "react";
 import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
 import { EmailProviderEditForm } from "../mail-providers/EmailProviderEditForm";

@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
-  BaseModalOpenParams,
-  OverlayInstanceComponentProps,
+  type BaseModalOpenParams,
+  type OverlayInstanceComponentProps,
 } from "./OverlayDefinitions";
 import classNames from "classnames";
 

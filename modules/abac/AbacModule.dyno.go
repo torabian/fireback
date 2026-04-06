@@ -75,6 +75,7 @@ const (
 	Recaptcha2Error                           abacCode = "Recaptcha2Error"
 	Recaptcha2Needed                          abacCode = "Recaptcha2Needed"
 	ResetNotFound                             abacCode = "ResetNotFound"
+	RootWorkspaceTypeIsNotAllowed             abacCode = "RootWorkspaceTypeIsNotAllowed"
 	SelectWorkspaceId                         abacCode = "SelectWorkspaceId"
 	SessionSecretIsNeeded                     abacCode = "SessionSecretIsNeeded"
 	SessionSecretIsNotAvailable               abacCode = "SessionSecretIsNotAvailable"
@@ -251,6 +252,10 @@ func newAbacMessageCode() *abacMsgs {
 			"$":  "ResetNotFound",
 			"en": "Reset not found",
 		},
+		RootWorkspaceTypeIsNotAllowed: fireback.ErrorItem{
+			"$":  "RootWorkspaceTypeIsNotAllowed",
+			"en": "Root workspace type creation is not allowed on the web.",
+		},
 		SelectWorkspaceId: fireback.ErrorItem{
 			"$":  "SelectWorkspaceId",
 			"en": "You need to select a correct workspace-id in header section",
@@ -345,6 +350,7 @@ type abacMsgs struct {
 	Recaptcha2Error                           fireback.ErrorItem
 	Recaptcha2Needed                          fireback.ErrorItem
 	ResetNotFound                             fireback.ErrorItem
+	RootWorkspaceTypeIsNotAllowed             fireback.ErrorItem
 	SelectWorkspaceId                         fireback.ErrorItem
 	SessionSecretIsNeeded                     fireback.ErrorItem
 	SessionSecretIsNotAvailable               fireback.ErrorItem

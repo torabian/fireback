@@ -1,0 +1,40 @@
+import ActionView from '../ActionView'
+
+# Check Passport Methods
+
+**Before reading this, it’s useful to review:** [Passport Methods](./passport-methods)  
+This will help you understand how to enable or disable a passport method.
+
+<ActionView 
+  cli="passport check-passport-methods"
+  url="/passports/available-methods"
+  method="get"
+/>
+
+When building login interfaces, the first step is often to publicly retrieve information about the authentication methods available for a user. For example, you might allow users to log in via Gmail, email and password, or other methods.
+
+Typically, the client interface does not have this information by default. Hardcoding login methods in the front-end is not ideal, especially if you need to adjust them based on geolocation or temporarily enable/disable a method.
+
+The **Fireback ABAC module** provides an endpoint that allows you to query this information publicly. Your UI framework can then decide which elements to display. While the features can be generic, a typical response might look like this:
+
+This API combines the information from WorkspaceConfig and PassportMethods entities (tables from database) and return a unified
+object to make client side implementation with a single API call.
+
+```json
+{
+  "data": {
+    "item": {
+      "email": true,
+      "phone": true,
+      "google": false,
+      "facebook": false,
+      "googleOAuthClientKey": "",
+      "facebookAppId": "",
+      "enabledRecaptcha2": false,
+      "recaptcha2ClientKey": ""
+    }
+  }
+}
+
+You can extend this data in the ABAC module if needed, but currently only email, phone, Facebook, and Gmail login are supported. The structure can also be extended to support more generic content, such as OAuth-based logins, where additional information would then become available.
+

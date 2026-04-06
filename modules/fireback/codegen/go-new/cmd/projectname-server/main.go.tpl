@@ -61,15 +61,7 @@ var xapp = &fireback.FirebackApp{
 		{{ end }}
 	},
 
-	{{ if ne .ctx.IsMonolith true }}
-	/* File uploader is a part of drive module in abac module
-	{{ end }}
-	RunTus: func() {
-		abac.LiftTusServer()
-	},
-	{{ if ne .ctx.IsMonolith true }}
-	*/
-	{{ end }}
+ 
 	InjectSearchEndpoint:     fireback.InjectReactiveSearch,
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.

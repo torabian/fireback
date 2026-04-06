@@ -10,7 +10,7 @@ export const RouterLink = (props: any) => {
 };
 
 export function useRouter() {
-  const noPrefix = process.env.REACT_APP_NO_LOCALE_PREFIX === "true";
+  const noPrefix = false;
   const navigate = useNavigate();
   const params = useParams();
   const location$ = useLocation();

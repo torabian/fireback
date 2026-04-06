@@ -1159,7 +1159,7 @@ func PendingWorkspaceInviteCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "pendingworkspaceinvite",
-		Description: "PendingWorkspaceInvites module actions",
+		Description: ``,
 		Usage:       ``,
 		Flags: []cli.Flag{
 			&cli.StringFlag{

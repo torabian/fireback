@@ -3,7 +3,7 @@ import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { IResponse } from "../../sdk/core/http-tools";
+import { type IResponse } from "../../sdk/core/http-tools";
 import { usePostWorkspacePassportOtp } from "../../sdk/modules/abac/usePostWorkspacePassportOtp";
 
 import { useCompleteAuth } from "./auth.common";

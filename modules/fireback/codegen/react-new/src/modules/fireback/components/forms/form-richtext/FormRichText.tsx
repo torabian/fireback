@@ -10,9 +10,9 @@ import { useT } from "../../../hooks/useT";
 import { Blob } from "buffer";
 import {
   BaseFormElement,
-  BaseFormElementProps,
+  type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
-import { addKatexSupport } from "./katex";
+import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
 
 export interface FormRichTextProps extends BaseFormElementProps {
   placeholder?: string;
@@ -117,14 +117,13 @@ export const FormRichText = (props: FormRichTextProps) => {
           onEditorChange={(e, editor) => {
             onChange && onChange(editor.getContent({ format: "raw" }));
           }}
-          onScriptsLoad={() => addKatexSupport(t)}
           onLoadContent={() => {
             isTinyMceLoaded.current = true;
           }}
           apiKey="4dh1g4gxp1gbmxi3hnkro4wf9lfgmqr86khygey2bwb7ps74"
           onBlur={() => setFocused(false)}
           tinymceScriptSrc={
-            (process.env.REACT_APP_PUBLIC_URL || "") +
+            (BUILD_VARIABLES.PUBLIC_URL || "") +
             "plugins/js/tinymce/tinymce.min.js"
           }
           onFocus={() => setFocused(true)}

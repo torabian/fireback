@@ -1,6 +1,6 @@
-import { QueryObserverResult, UseQueryResult } from "react-query";
-import { IResponseList } from "../sdk/core/http-tools";
-import { UseRemoteQuery } from "../sdk/core/react-tools";
+import { type QueryObserverResult, type UseQueryResult } from "react-query";
+import { type IResponseList } from "../sdk/core/http-tools";
+import { type UseRemoteQuery } from "../sdk/core/react-tools";
 import { jsonQueryFilter } from "./withJsonQuery";
 
 export function createQuerySource<T>(items: T[]): (

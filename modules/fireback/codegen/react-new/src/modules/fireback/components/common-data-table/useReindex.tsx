@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Udf } from "../../hooks/useDatatableFiltering";
+import { type Udf } from "../../hooks/useDatatableFiltering";
 
 export function useReindexedContent(udf: Udf) {
   const previousQuery = useRef<any>();

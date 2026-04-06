@@ -1,5 +1,5 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
+import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
 import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";

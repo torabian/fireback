@@ -1,6 +1,6 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { useEffect, useState } from "react";
-import { Module3Action } from "./defs";
+import { type Module3Action } from "./defs";
 
 interface ActionEditorProps {
   action: Module3Action;

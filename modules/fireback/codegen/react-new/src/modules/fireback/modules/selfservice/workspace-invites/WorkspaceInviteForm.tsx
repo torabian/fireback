@@ -1,4 +1,4 @@
-import { EntityFormProps } from "@/modules/fireback/definitions/definitions";
+import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { strings } from "./strings/translations";
 import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
 import { useT } from "@/modules/fireback/hooks/useT";

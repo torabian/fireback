@@ -1,4 +1,4 @@
-import { Filter, Sorting } from "@devexpress/dx-react-grid";
+import { type Filter, type Sorting } from "@devexpress/dx-react-grid";
 
 export interface Filters {
   itemsPerPage: number;

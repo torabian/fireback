@@ -1,5 +1,5 @@
 import React from "react";
-import { KeyValue } from "../../definitions/definitions";
+import { type KeyValue } from "../../definitions/definitions";
 
 export const RowValue = (props: KeyValue) => {
   return (

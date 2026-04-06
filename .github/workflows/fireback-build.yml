@@ -292,10 +292,10 @@ jobs:
         with:
           go-version: 1.21.1
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
 
@@ -354,10 +354,12 @@ jobs:
 
       # - name: Install deps
       #   run: sudo apt-get update -y && sudo apt install -y sshpass
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
+      - name: install prettier, so compiler would pick it up
+        run: sudo npm i -g prettier
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
       - name: Build and package deb files
@@ -373,7 +375,7 @@ jobs:
       - name: Refresh the fireback dependencies
         run: make refresh
       - name: Clean ui installation logs
-        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock
+        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock && git checkout modules/fireback/codegen/react-new/package-lock.json
 
       - name: 
           Refreshing golang modules should not make a commit.
@@ -406,16 +408,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       - uses: actions/download-artifact@master
         with:
           name: artifacts-ubuntu
           path: artifacts-ubuntu
       - name: check artifacts
         run: cd artifacts-ubuntu/fireback-server-all && ls -la
+      - name: install prettier, so compiler would pick it up
+        run: sudo npm i -g prettier
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
       - name: generate-sdk
@@ -477,18 +481,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22'
       
       - name: Remove the android platform, and recreate it. :(
         run: rm -rf e2e/samples/fireback-capacitor/android
       - name: Re-add cap
         run: cd e2e/samples/fireback-capacitor && npm install --save-dev @capacitor/cli && npx cap add android
 
-      - name: npx
-        run: npx
-
       - name: Build front-end
-        run: cd modules/fireback/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.bundle.demo ./node_modules/.bin/craco build
+        run: cd modules/fireback/codegen/react-new && npm i --force && npm run build:bundle:demo
       
       - name: Build Cordova Android App
         run: cd e2e/samples/fireback-capacitor && npm i --force && make rebuild
@@ -509,19 +510,19 @@ jobs:
       - run-cypress-sqlite
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
 
       - run: cd docs && npm i --force && npm run build
         name: Build the docs
 
       - name: Build the front-end
-        run: cd modules/fireback/codegen/react-new && npm i --force && ./node_modules/.bin/env-cmd -f ./src/apps/projectname/.env.fbgithubpages ./node_modules/.bin/craco build
+        run: cd modules/fireback/codegen/react-new && npm i --force && npm run fbgithubpages
 
       - name: Copy docs to front-end build
-        run: cp -R modules/fireback/codegen/react-new/build docs/build/demo
+        run: cp -R modules/fireback/codegen/react-new/dist docs/build/demo
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -548,10 +549,10 @@ jobs:
       - name: Install sshpass
         run: brew install hudochenkov/sshpass/sshpass
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
       
       - name: Install the dependencies
         run: cd modules/fireback/codegen/react-new && npm i --force
@@ -583,7 +584,7 @@ jobs:
   #     - name: Install Node.js
   #       uses: actions/setup-node@v4
   #       with:
-  #         node-version: 18  
+  #         node-version: 22  
 
   #     - name: GET PWD
   #       run: pwd
@@ -601,7 +602,7 @@ jobs:
   #     - name: Init and run the fireback
   #       run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
   #     - name: Add the admin account
-  #       run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
+  #       run: fireback auth --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
   #     - name: Query the passports
   #       run: fireback passport q
   #     - name: Login on cli

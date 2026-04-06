@@ -10,7 +10,7 @@ func init() {
 func UserPassportsAction(q fireback.QueryDSL) ([]*UserPassportsActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
 
 	passports := []PassportEntity{}
-	err := fireback.GetRef(q).Debug().Where(PassportEntity{UserId: fireback.NewString(q.UserId)}).Find(&passports).Error
+	err := fireback.GetRef(q).Where(PassportEntity{UserId: fireback.NewString(q.UserId)}).Find(&passports).Error
 	if err != nil {
 		return nil, nil, fireback.CastToIError(err)
 	}

@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
-import { IResponse } from "../../sdk/core/http-tools";
+import { type IResponse } from "../../sdk/core/http-tools";
 import { usePostPassportTotpConfirm } from "../../sdk/modules/abac/usePostPassportTotpConfirm";
 import { useCompleteAuth } from "./auth.common";
 import {

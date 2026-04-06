@@ -32,80 +32,8 @@ func ResetTimezoneGroupSeeders(fs *embed.FS) {
 	timezoneGroupSeedersFs = fs
 }
 
-type TimezoneGroupUtcItems struct {
-	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
-	// by default, visibility of record are 0, means they are protected by the workspace
-	// which are being created, and visible to every member of the workspace
-	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
-	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
-	// to the selected workspace by user, if they have write access. You can change this value
-	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
-	// The unique-id of the parent table, which this record is being linked to.
-	// used internally for making relations in fireback, generally does not need manual changes
-	// or modification by the developer or user. For example, if you have a object inside an object
-	// the unique-id of the parent will be written in the child.
-	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
-	// Used for recursive or parent-child operations. Some tables, are having nested relations,
-	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
-	// creating of modifying a record.
-	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
-	// Makes a field deletable. Some records should not be deletable at all.
-	// default it's true.
-	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
-	// Makes a field updatable. Some records should not be updatable at all.
-	// default it's true.
-	IsUpdatable *bool `json:"isUpdatable,omitempty" xml:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
-	// The unique-id of the user which is creating the record, or the record belongs to.
-	// Administration might want to change this to any user, by default Fireback fills
-	// it to the current authenticated user.
-	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
-	// General mechanism to rank the elements. From code perspective, it's just a number,
-	// but you can sort it based on any logic for records to make a ranking, sorting.
-	// they should not be unique across a table.
-	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
-	// Primary numeric key in the database. This value is not meant to be exported to public
-	// or be used to access data at all. Rather a mechanism of indexing columns internally
-	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-" xml:"-"`
-	// Unique id of the record across the table. This value will be accessed from public APIs,
-	// and many other places intead of numeric ID property.
-	// Upon generation, a UUID automatically is being assigned, and if user has specified the
-	// Unique id in the post body, it will be used. This mechanism allows to manage unsaved
-	// content on front-end much easier than requiring parent to exists first.
-	UniqueId string `json:"uniqueId,omitempty" xml:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
-	// The time that the record has been updated in datetime.
-	// the field will be automatically populated by gorm orm.
-	UpdatedAt *time.Time `json:"updatedAt,omitempty" xml:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
-	// The time that the record has been created in datetime.
-	// the field will be automatically populated by gorm orm.
-	CreatedAt *time.Time `json:"createdAt,omitempty" xml:"createdAt,omitempty" yaml:"createdAt,omitempty"`
-	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
-	// you need to make sure check this field if writing custom sql queries.
-	// the field will be automatically populated by gorm orm.
-	DeletedAt *time.Time `json:"deletedAt,omitempty" xml:"deletedAt,omitempty" yaml:"deletedAt,omitempty"`
-	// Record creation date time formatting based on locale of the headers, or other
-	// possible factors.
-	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	// Record update date time formatting based on locale of the headers, or other
-	// possible factors.
-	UpdatedFormatted string               `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             string               `json:"name" xml:"name" yaml:"name"  validate:"required"        translate:"true"  `
-	LinkedTo         *TimezoneGroupEntity `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
-}
-
-func (x *TimezoneGroupUtcItems) RootObjectName() string {
-	return "TimezoneGroupEntity"
-}
-
 type TimezoneGroupEntityQs struct {
-	Value    fireback.QueriableField `cli:"value" table:"timezone_group" typeof:"string" column:"value" qs:"value"`
-	Abbr     fireback.QueriableField `cli:"abbr" table:"timezone_group" typeof:"string" column:"abbr" qs:"abbr"`
-	Offset   fireback.QueriableField `cli:"offset" table:"timezone_group" typeof:"int64" column:"offset" qs:"offset"`
-	Isdst    fireback.QueriableField `cli:"isdst" table:"timezone_group" typeof:"bool" column:"isdst" qs:"isdst"`
-	Text     fireback.QueriableField `cli:"text" table:"timezone_group" typeof:"string" column:"text" qs:"text"`
-	UtcItems fireback.QueriableField `cli:"utc-items" table:"timezone_group" typeof:"array" column:"utc_items" qs:"utcItems"`
+	Title fireback.QueriableField `cli:"title" table:"timezone_group" typeof:"string" column:"title" qs:"title"`
 }
 
 func (x *TimezoneGroupEntityQs) GetQuery() string {
@@ -114,28 +42,8 @@ func (x *TimezoneGroupEntityQs) GetQuery() string {
 
 var TimezoneGroupQsFlags = []cli.Flag{
 	&cli.StringFlag{
-		Name:  "value",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "abbr",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "offset",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "isdst",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "text",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "utc-items",
-		Usage: "",
+		Name:  "title",
+		Usage: "Title which is shown to the user and allows them to select.",
 	},
 }
 
@@ -197,16 +105,12 @@ type TimezoneGroupEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                         `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Value            string                         `json:"value" xml:"value" yaml:"value"        translate:"true"  `
-	Abbr             string                         `json:"abbr" xml:"abbr" yaml:"abbr"        `
-	Offset           int64                          `json:"offset" xml:"offset" yaml:"offset"        `
-	Isdst            bool                           `json:"isdst" xml:"isdst" yaml:"isdst"        `
-	Text             string                         `json:"text" xml:"text" yaml:"text"        translate:"true"  `
-	UtcItems         []*TimezoneGroupUtcItems       `json:"utcItems" xml:"utcItems" yaml:"utcItems"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Translations     []*TimezoneGroupEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*TimezoneGroupEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *TimezoneGroupEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	// Title which is shown to the user and allows them to select.
+	Title        string                         `json:"title" xml:"title" yaml:"title"        translate:"true"  `
+	Translations []*TimezoneGroupEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*TimezoneGroupEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *TimezoneGroupEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func TimezoneGroupEntityStream(q fireback.QueryDSL) (chan []*TimezoneGroupEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -300,12 +204,7 @@ var TIMEZONE_GROUP_EVENTS = []string{
 }
 
 type TimezoneGroupFieldMap struct {
-	Value    fireback.TranslatedString `yaml:"value"`
-	Abbr     fireback.TranslatedString `yaml:"abbr"`
-	Offset   fireback.TranslatedString `yaml:"offset"`
-	Isdst    fireback.TranslatedString `yaml:"isdst"`
-	Text     fireback.TranslatedString `yaml:"text"`
-	UtcItems fireback.TranslatedString `yaml:"utcItems"`
+	Title fireback.TranslatedString `yaml:"title"`
 }
 
 var TimezoneGroupEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -314,60 +213,9 @@ var TimezoneGroupEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf
 type TimezoneGroupEntityPolyglot struct {
 	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
 	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
-	Value      string `yaml:"value,omitempty" xml:"value,omitempty" json:"value,omitempty"`
-	Text       string `yaml:"text,omitempty" xml:"text,omitempty" json:"text,omitempty"`
+	Title      string `yaml:"title,omitempty" xml:"title,omitempty" json:"title,omitempty"`
 }
 
-func TimezoneGroupUtcItemsActionCreate(
-	dto *TimezoneGroupUtcItems,
-	query fireback.QueryDSL,
-) (*TimezoneGroupUtcItems, *fireback.IError) {
-	dto.LinkerId = fireback.NewString(query.LinkerId)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = fireback.GetDbRef()
-	} else {
-		dbref = query.Tx
-	}
-	query.Tx = dbref
-	if dto.UniqueId == "" {
-		dto.UniqueId = fireback.UUID()
-	}
-	err := dbref.Create(&dto).Error
-	if err != nil {
-		err := fireback.GormErrorToIError(err)
-		return nil, err
-	}
-	return dto, nil
-}
-func TimezoneGroupUtcItemsActionUpdate(
-	query fireback.QueryDSL,
-	dto *TimezoneGroupUtcItems,
-) (*TimezoneGroupUtcItems, *fireback.IError) {
-	dto.LinkerId = fireback.NewString(query.LinkerId)
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = fireback.GetDbRef()
-	} else {
-		dbref = query.Tx
-	}
-	query.Tx = dbref
-	cond2 := &TimezoneGroupUtcItems{LinkerId: fireback.NewString(query.LinkerId), UniqueId: query.UniqueId}
-	q := query.Tx.Where(cond2)
-	err := q.UpdateColumns(&dto).Error
-	if err != nil {
-		err := fireback.GormErrorToIError(err)
-		return nil, err
-	}
-	return dto, nil
-}
-func TimezoneGroupUtcItemsActionGetOne(
-	query fireback.QueryDSL,
-) (*TimezoneGroupUtcItems, *fireback.IError) {
-	refl := reflect.ValueOf(&TimezoneGroupUtcItems{})
-	item, err := fireback.GetOneEntity[TimezoneGroupUtcItems](query, refl)
-	return item, err
-}
 func entityTimezoneGroupFormatter(dto *TimezoneGroupEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
@@ -417,21 +265,11 @@ func TimezoneGroupActionSeeder(query fireback.QueryDSL, count int) {
 	}
 	fmt.Println("Success", successInsert, "Failure", failureInsert)
 }
-func (x *TimezoneGroupEntity) GetValueTranslated(language string) string {
+func (x *TimezoneGroupEntity) GetTitleTranslated(language string) string {
 	if x.Translations != nil && len(x.Translations) > 0 {
 		for _, item := range x.Translations {
 			if item.LanguageId == language {
-				return item.Value
-			}
-		}
-	}
-	return ""
-}
-func (x *TimezoneGroupEntity) GetTextTranslated(language string) string {
-	if x.Translations != nil && len(x.Translations) > 0 {
-		for _, item := range x.Translations {
-			if item.LanguageId == language {
-				return item.Text
+				return item.Title
 			}
 		}
 	}
@@ -443,9 +281,7 @@ func (x *TimezoneGroupEntity) Seeder() string {
 	return string(v)
 }
 func TimezoneGroupActionSeederInitFn() *TimezoneGroupEntity {
-	entity := &TimezoneGroupEntity{
-		UtcItems: []*TimezoneGroupUtcItems{{}},
-	}
+	entity := &TimezoneGroupEntity{}
 	return entity
 }
 func TimezoneGroupAssociationCreate(dto *TimezoneGroupEntity, query fireback.QueryDSL) error {
@@ -476,9 +312,6 @@ func TimezoneGroupPolyglotUpdateHandler(dto *TimezoneGroupEntity, query fireback
  */
 func TimezoneGroupValidator(dto *TimezoneGroupEntity, isPatch bool) *fireback.IError {
 	err := fireback.CommonStructValidatorPointer(dto, isPatch)
-	if dto != nil && dto.UtcItems != nil {
-		fireback.AppendSliceErrors(dto.UtcItems, isPatch, "utcItems", err)
-	}
 	return err
 }
 
@@ -511,12 +344,7 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-Value: (type: string) Description: 
-Abbr: (type: string) Description: 
-Offset: (type: int64) Description: 
-Isdst: (type: bool) Description: 
-Text: (type: string) Description: 
-UtcItems: (type: array) Description: 
+Title: (type: string) Description: Title which is shown to the user and allows them to select.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -538,13 +366,6 @@ func TimezoneGroupEntityBeforeCreateAppend(dto *TimezoneGroupEntity, query fireb
 	TimezoneGroupRecursiveAddUniqueId(dto, query)
 }
 func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query fireback.QueryDSL) {
-	if dto.UtcItems != nil && len(dto.UtcItems) > 0 {
-		for index0 := range dto.UtcItems {
-			if dto.UtcItems[index0].UniqueId == "" {
-				dto.UtcItems[index0].UniqueId = fireback.UUID()
-			}
-		}
-	}
 }
 
 /*
@@ -716,17 +537,6 @@ func TimezoneGroupUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Ti
 		return nil, ero
 	}
 	// @meta(update has many)
-	if fields.UtcItems != nil {
-		linkerId := uniqueId
-		dbref.
-			Where(&TimezoneGroupUtcItems{LinkerId: fireback.NewString(linkerId)}).
-			Delete(&TimezoneGroupUtcItems{})
-		for _, newItem := range fields.UtcItems {
-			newItem.UniqueId = fireback.UUID()
-			newItem.LinkerId = fireback.NewString(linkerId)
-			dbref.Create(&newItem)
-		}
-	}
 	err = dbref.
 		Preload(clause.Associations).
 		Where(&TimezoneGroupEntity{UniqueId: uniqueId}).
@@ -800,15 +610,6 @@ func TimezoneGroupActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IErr
 func TimezoneGroupActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
 	var count int64 = 0
-	{
-		subCount, subErr := fireback.WipeCleanEntity[TimezoneGroupUtcItems]()
-		if subErr != nil {
-			fmt.Println("Error while wiping 'TimezoneGroupUtcItems'", subErr)
-			return count, subErr
-		} else {
-			count += subCount
-		}
-	}
 	{
 		subCount, subErr := fireback.WipeCleanEntity[TimezoneGroupEntity]()
 		if subErr != nil {
@@ -904,75 +705,18 @@ var TimezoneGroupCommonCliFlags = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "value",
+		Name:     "title",
 		Required: false,
-		Usage:    `value (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "abbr",
-		Required: false,
-		Usage:    `abbr (string)`,
-	},
-	&cli.Int64Flag{
-		Name:     "offset",
-		Required: false,
-		Usage:    `offset (int64)`,
-	},
-	&cli.BoolFlag{
-		Name:     "isdst",
-		Required: false,
-		Usage:    `isdst (bool)`,
-	},
-	&cli.StringFlag{
-		Name:     "text",
-		Required: false,
-		Usage:    `text (string)`,
-	},
-	&cli.StringSliceFlag{
-		Name:     "utc-items",
-		Required: false,
-		Usage:    `utcItems (array)`,
+		Usage:    `Title which is shown to the user and allows them to select. (string)`,
 	},
 }
 var TimezoneGroupCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
-		Name:        "value",
-		StructField: "Value",
+		Name:        "title",
+		StructField: "Title",
 		Required:    false,
 		Recommended: false,
-		Usage:       `value`,
-		Type:        "string",
-	},
-	{
-		Name:        "abbr",
-		StructField: "Abbr",
-		Required:    false,
-		Recommended: false,
-		Usage:       `abbr`,
-		Type:        "string",
-	},
-	{
-		Name:        "offset",
-		StructField: "Offset",
-		Required:    false,
-		Recommended: false,
-		Usage:       `offset`,
-		Type:        "int64",
-	},
-	{
-		Name:        "isdst",
-		StructField: "Isdst",
-		Required:    false,
-		Recommended: false,
-		Usage:       `isdst`,
-		Type:        "bool",
-	},
-	{
-		Name:        "text",
-		StructField: "Text",
-		Required:    false,
-		Recommended: false,
-		Usage:       `text`,
+		Usage:       `Title which is shown to the user and allows them to select.`,
 		Type:        "string",
 	},
 }
@@ -1002,34 +746,9 @@ var TimezoneGroupCommonCliFlagsOptional = []cli.Flag{
 		Usage:    " Parent record id of the same type",
 	},
 	&cli.StringFlag{
-		Name:     "value",
+		Name:     "title",
 		Required: false,
-		Usage:    `value (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "abbr",
-		Required: false,
-		Usage:    `abbr (string)`,
-	},
-	&cli.Int64Flag{
-		Name:     "offset",
-		Required: false,
-		Usage:    `offset (int64)`,
-	},
-	&cli.BoolFlag{
-		Name:     "isdst",
-		Required: false,
-		Usage:    `isdst (bool)`,
-	},
-	&cli.StringFlag{
-		Name:     "text",
-		Required: false,
-		Usage:    `text (string)`,
-	},
-	&cli.StringSliceFlag{
-		Name:     "utc-items",
-		Required: false,
-		Usage:    `utcItems (array)`,
+		Usage:    `Title which is shown to the user and allows them to select. (string)`,
 	},
 }
 var TimezoneGroupCreateCmd cli.Command = TIMEZONE_GROUP_ACTION_POST_ONE.ToCli()
@@ -1088,22 +807,8 @@ func CastTimezoneGroupFromCli(c *cli.Context) *TimezoneGroupEntity {
 	if c.IsSet("pid") {
 		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
 	}
-	if c.IsSet("value") {
-		template.Value = c.String("value")
-	}
-	if c.IsSet("abbr") {
-		template.Abbr = c.String("abbr")
-	}
-	if c.IsSet("offset") {
-		value := c.Int64("offset")
-		template.Offset = value
-	}
-	if c.IsSet("isdst") {
-		value := c.Bool("isdst")
-		template.Isdst = value
-	}
-	if c.IsSet("text") {
-		template.Text = c.String("text")
+	if c.IsSet("title") {
+		template.Title = c.String("title")
 	}
 	return template
 }
@@ -1364,7 +1069,7 @@ func TimezoneGroupCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "tz",
-		Description: "TimezoneGroups module actions",
+		Description: `World timezone information`,
 		Usage:       `World timezone information`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -1555,68 +1260,6 @@ var TIMEZONE_GROUP_ACTION_DELETE = fireback.Module3Action{
 	ResponseEntity: &fireback.DeleteResponse{},
 	TargetEntity:   &TimezoneGroupEntity{},
 }
-var TIMEZONE_GROUP_UTC_ITEMS_ACTION_PATCH = fireback.Module3Action{
-	Method:        "PATCH",
-	Url:           "/timezone-group/:linkerId/utc_items/:uniqueId",
-	SecurityModel: &fireback.SecurityModel{},
-	Handlers: []gin.HandlerFunc{
-		func(
-			c *gin.Context,
-		) {
-			fireback.HttpUpdateEntity(c, TimezoneGroupUtcItemsActionUpdate)
-		},
-	},
-	Action:         TimezoneGroupUtcItemsActionUpdate,
-	Format:         "PATCH_ONE",
-	RequestEntity:  &TimezoneGroupUtcItems{},
-	ResponseEntity: &TimezoneGroupUtcItems{},
-	Out: &fireback.Module3ActionBody{
-		Entity: "TimezoneGroupUtcItems",
-	},
-	In: &fireback.Module3ActionBody{
-		Entity: "TimezoneGroupUtcItems",
-	},
-}
-var TIMEZONE_GROUP_UTC_ITEMS_ACTION_GET = fireback.Module3Action{
-	Method:        "GET",
-	Url:           "/timezone-group/utc_items/:linkerId/:uniqueId",
-	SecurityModel: &fireback.SecurityModel{},
-	Handlers: []gin.HandlerFunc{
-		func(
-			c *gin.Context,
-		) {
-			fireback.HttpGetEntity(c, TimezoneGroupUtcItemsActionGetOne)
-		},
-	},
-	Action:         TimezoneGroupUtcItemsActionGetOne,
-	Format:         "GET_ONE",
-	ResponseEntity: &TimezoneGroupUtcItems{},
-	Out: &fireback.Module3ActionBody{
-		Entity: "TimezoneGroupUtcItems",
-	},
-}
-var TIMEZONE_GROUP_UTC_ITEMS_ACTION_POST = fireback.Module3Action{
-	Method:        "POST",
-	Url:           "/timezone-group/:linkerId/utc_items",
-	SecurityModel: &fireback.SecurityModel{},
-	Handlers: []gin.HandlerFunc{
-		func(
-			c *gin.Context,
-		) {
-			fireback.HttpPostEntity(c, TimezoneGroupUtcItemsActionCreate)
-		},
-	},
-	Action:         TimezoneGroupUtcItemsActionCreate,
-	Format:         "POST_ONE",
-	RequestEntity:  &TimezoneGroupUtcItems{},
-	ResponseEntity: &TimezoneGroupUtcItems{},
-	Out: &fireback.Module3ActionBody{
-		Entity: "TimezoneGroupUtcItems",
-	},
-	In: &fireback.Module3ActionBody{
-		Entity: "TimezoneGroupUtcItems",
-	},
-}
 
 /**
  *	Override this function on TimezoneGroupEntityHttp.go,
@@ -1633,9 +1276,6 @@ func GetTimezoneGroupModule3Actions() []fireback.Module3Action {
 		TIMEZONE_GROUP_ACTION_PATCH,
 		TIMEZONE_GROUP_ACTION_PATCH_BULK,
 		TIMEZONE_GROUP_ACTION_DELETE,
-		TIMEZONE_GROUP_UTC_ITEMS_ACTION_PATCH,
-		TIMEZONE_GROUP_UTC_ITEMS_ACTION_GET,
-		TIMEZONE_GROUP_UTC_ITEMS_ACTION_POST,
 	}
 	// Append user defined functions
 	AppendTimezoneGroupRouter(&routes)
@@ -1724,7 +1364,6 @@ var TimezoneGroupEntityBundle = fireback.EntityBundle{
 	MockProvider: TimezoneGroupImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&TimezoneGroupEntity{},
-		&TimezoneGroupUtcItems{},
 		&TimezoneGroupEntityPolyglot{},
 	},
 	MigrationScripts: []fireback.MigrationScript{},

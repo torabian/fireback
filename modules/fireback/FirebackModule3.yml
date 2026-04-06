@@ -229,7 +229,7 @@ actions:
         - name: nested
           target: CapabilityEntity
           type: many2many
-dtos:
+dtom:
   - name: okayResponse
 entities:
   - name: webPushConfig
