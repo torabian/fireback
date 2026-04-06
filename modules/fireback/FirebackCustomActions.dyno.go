@@ -38,7 +38,8 @@ var EventBusSubscription2SecurityModel = &SecurityModel{
 
 // This can be both used as cli and http
 var EventBusSubscription2ActionDef Module3Action = Module3Action{
-
+	CliName:       EventBusSubscription2ActionMeta().CliName,
+	Description:   EventBusSubscription2ActionMeta().Description,
 	Name:          EventBusSubscription2ActionMeta().Name,
 	Method:        EventBusSubscription2ActionMeta().Method,
 	Url:           EventBusSubscription2ActionMeta().URL,

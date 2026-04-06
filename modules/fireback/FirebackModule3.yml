@@ -207,6 +207,7 @@ actions:
 
 acts:
   - name: EventBusSubscription2
+    description: Connects a client to all events related to their user profile, or workspace they are in
     method: reactive
     url: /ws2
     security:

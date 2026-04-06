@@ -30,7 +30,7 @@ func EventBusSubscription2ActionMeta() struct {
 		URL:         "/ws2",
 		Method:      "REACTIVE",
 		CliName:     "",
-		Description: "",
+		Description: "Connects a client to all events related to their user profile, or workspace they are in",
 	}
 }
 
