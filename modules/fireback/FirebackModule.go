@@ -74,7 +74,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 							query = ExtractQueryDslFromGinContext(ctx.G)
 
 							query.RawSocketConnection = ctx.Socket
-							fmt.Println(1, query.WorkspaceId, query.UserAccessPerWorkspace)
+
 							// Adapt incoming messages
 							read := make(chan SocketReadChan)
 
@@ -95,7 +95,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 							for {
 								select {
 								case data, ok := <-out:
-									fmt.Println(1, data, ok)
 									if !ok {
 										return
 									}

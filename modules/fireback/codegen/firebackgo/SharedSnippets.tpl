@@ -3261,6 +3261,8 @@ type {{ $name }}Msgs struct {
     Method:  {{ .Name }}ActionMeta().Method,
     Url:     {{ .Name }}ActionMeta().URL,
     SecurityModel: {{ .Name }}SecurityModel,
+    // {{ .Method }}
+    {{ if ne .Method "reactive" }}
     Handlers: []gin.HandlerFunc{
       func(m *gin.Context) {
         req := {{ .Name }}ActionRequest{
@@ -3284,6 +3286,7 @@ type {{ $name }}Msgs struct {
 
       return nil
     },
+    {{ end }}
   }
 
 {{ end }}
