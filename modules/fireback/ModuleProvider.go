@@ -76,7 +76,7 @@ type ModuleProvider struct {
 
 	// A set of functions that you can add, when project is being initialised then they will be called.
 	// each module can have those hook inits, for example abac adds some other questions.
-	OnEnvInit func() error
+	OnEnvInit func(c *cli.Context) error
 
 	// When a gin web server is being created, the group for this module
 	// will be looking for this function. Could be used to manually add routes or other configuration

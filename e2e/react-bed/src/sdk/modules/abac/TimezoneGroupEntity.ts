@@ -8,20 +8,15 @@
         BaseEntity,
     } from "../../core/definitions"
 // In this section we have sub entities related to this object
-export class TimezoneGroupUtcItems extends BaseEntity {
-  public name?: string | null;
-}
 // Class body
 export type TimezoneGroupEntityKeys =
   keyof typeof TimezoneGroupEntity.Fields;
 export class TimezoneGroupEntity extends BaseEntity {
   public children?: TimezoneGroupEntity[] | null;
-  public value?: string | null;
-  public abbr?: string | null;
-  public offset?: number | null;
-  public isdst?: boolean | null;
-  public text?: string | null;
-  public utcItems?: TimezoneGroupUtcItems[] | null;
+  /**
+  Title which is shown to the user and allows them to select.
+  */
+  public title?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/timezone-group/edit/${uniqueId}`;
@@ -43,14 +38,6 @@ export class TimezoneGroupEntity extends BaseEntity {
       Rcreate: "timezone-group/new",
       Rsingle: "timezone-group/:uniqueId",
       Rquery: "timezone-groups",
-      rUtcItemsCreate: "timezone-group/:linkerId/utc_items/new",
-      rUtcItemsEdit: "timezone-group/:linkerId/utc_items/edit/:uniqueId",
-      editUtcItems(linkerId: string, uniqueId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/timezone-group/${linkerId}/utc_items/edit/${uniqueId}`;
-      },
-      createUtcItems(linkerId: string, locale?: string) {
-          return `${locale ? '/' + locale : ''}/timezone-group/${linkerId}/utc_items/new`;
-      },
   };
   public static definition = {
   "rpc": {
@@ -62,54 +49,12 @@ export class TimezoneGroupEntity extends BaseEntity {
   "gormMap": {},
   "fields": [
     {
-      "name": "value",
+      "name": "title",
+      "description": "Title which is shown to the user and allows them to select.",
       "type": "string",
       "translate": true,
       "computedType": "string",
       "gormMap": {}
-    },
-    {
-      "name": "abbr",
-      "type": "string",
-      "computedType": "string",
-      "gormMap": {}
-    },
-    {
-      "name": "offset",
-      "type": "int64",
-      "computedType": "number",
-      "gormMap": {}
-    },
-    {
-      "name": "isdst",
-      "type": "bool",
-      "computedType": "boolean",
-      "gormMap": {}
-    },
-    {
-      "name": "text",
-      "type": "string",
-      "translate": true,
-      "computedType": "string",
-      "gormMap": {}
-    },
-    {
-      "name": "utcItems",
-      "type": "array",
-      "computedType": "TimezoneGroupUtcItems[]",
-      "gormMap": {},
-      "-": "TimezoneGroupUtcItems",
-      "fields": [
-        {
-          "name": "name",
-          "type": "string",
-          "validate": "required",
-          "translate": true,
-          "computedType": "string",
-          "gormMap": {}
-        }
-      ],
-      "linkedTo": "TimezoneGroupEntity"
     }
   ],
   "cliName": "tz",
@@ -117,18 +62,6 @@ export class TimezoneGroupEntity extends BaseEntity {
 }
 public static Fields = {
   ...BaseEntity.Fields,
-      value: `value`,
-      abbr: `abbr`,
-      offset: `offset`,
-      isdst: `isdst`,
-      text: `text`,
-      utcItems$: `utcItems`,
-      utcItemsAt: (index: number) => {
-        return {
-          $: `utcItems[${index}]`,
-  ...BaseEntity.Fields,
-      name: `utcItems[${index}].name`,
-        };
-      },
+      title: `title`,
 }
 }

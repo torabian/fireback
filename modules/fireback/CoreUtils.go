@@ -480,8 +480,8 @@ func askProjectDatabase(projectName string) (Database, error) {
 	promptVariable := promptui.Select{
 		Label: "Database type",
 		Items: []string{
-			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_SQLITE,
+			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_MYSQL,
 			DATABASE_TYPE_MARIADB,
 			// Postgres is not well tested yet, we are not adding production ready
@@ -918,7 +918,7 @@ func CLIInit(xapp *FirebackApp) cli.Command {
 
 				config.Save(".env")
 			} else {
-				InitEnvironment(xapp, ".env")
+				InitEnvironment(xapp, ".env", c)
 			}
 			return nil
 		},
@@ -976,19 +976,19 @@ func ExecuteSeeders(xapp *FirebackApp) error {
 }
 
 func EnvRunMigration(xapp *FirebackApp) error {
-	if r := AskForSelect("Do you want to run migration, adding tables or columns to database?", []string{"yes", "no"}); r == "yes" {
+	if r := AskForSelect("Do you want to run migration, adding tables or columns to database (both automigrate, and manual)?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := CreateDatabasePool()
 		if db == nil && dbErr != nil {
 			log.Fatalln("Database error on initialize connection:", dbErr)
 		}
 
-		ApplyMigration(xapp, 2)
+		ApplyMigration(xapp, 0)
 	}
 
 	return nil
 }
 
-func InitEnvironment(xapp *FirebackApp, envFileName string) error {
+func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Context) error {
 
 	datum := ""
 	var err error
@@ -1028,13 +1028,13 @@ func InitEnvironment(xapp *FirebackApp, envFileName string) error {
 
 	AskSSL(&config)
 
+	config.Save(".env")
+
 	for _, module := range xapp.Modules {
 		if module.OnEnvInit != nil {
-			module.OnEnvInit()
+			module.OnEnvInit(c)
 		}
 	}
-
-	config.Save(".env")
 
 	return nil
 }

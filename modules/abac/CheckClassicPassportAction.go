@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
 )
@@ -143,6 +144,11 @@ func validateRecaptcha(token string, RECAPTCHA_SECRET_KEY string) error {
 
 // checks if value is email or phone number
 func validatePassportType(input string) (bool, string) {
+
+	if strings.HasPrefix(input, "anonymous_") {
+		return true, "anonymous"
+	}
+
 	// Phone: Only numbers and optional leading +
 	phoneRegex := regexp.MustCompile(`^\+?[0-9]+$`)
 

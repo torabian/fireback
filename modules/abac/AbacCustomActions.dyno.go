@@ -2352,7 +2352,7 @@ func AbacJsonInclude() {
 // and it would gather all actions in the module level
 var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "abac",
-	Usage: `This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed`,
+	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
 		CheckPassportMethodsActionDef.ToCli(),

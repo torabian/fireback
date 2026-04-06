@@ -18,13 +18,7 @@ When initializing a new environment with `fireback init` or `./app init`, the in
 To create a new account via CLI and authenticate:
 
 ```bash
-fireback passport new
-```
-
-Alternatively, you can use:
-
-```bash
-fireback user new
+fireback auth
 ```
 
 This command creates a new user, assigns it to the root workspace, and authenticates the CLI with the generated workspace and token.
@@ -87,10 +81,4 @@ OPTIONS:
    --wid value       Workspace ID (if the user belongs to multiple workspaces). If not set, the CLI will prompt for selection.
 ```
 
-## Difference Between `passport up` and `passport in`
-
-Fireback provides two CLI commands: `passport up` and `passport in`. These commands create an account or sign in, respectively. However, they differ from `passport auth` and `passport new`:
-
-- `passport up` and `passport in` are designed for public HTTP requests and include additional details.
-- These commands **do not** change the CLI state; they only facilitate Fireback's HTTP request handling within the CLI.
 

@@ -59,6 +59,7 @@ export class PassportMethodEntity extends BaseEntity {
   },
   "security": {
     "writeOnRoot": true,
+    "readOnRoot": true,
     "resolveStrategy": "workspace"
   },
   "gormMap": {},
