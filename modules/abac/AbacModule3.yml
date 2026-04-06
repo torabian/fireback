@@ -761,25 +761,10 @@ entities:
     queryScope: public
     cliName: tz
     fields:
-      - name: value
+      - name: title
         type: string
+        description: Title which is shown to the user and allows them to select.
         translate: true
-      - name: abbr
-        type: string
-      - name: offset
-        type: int64
-      - name: isdst
-        type: bool
-      - name: text
-        type: string
-        translate: true
-      - name: utcItems
-        type: array
-        fields:
-          - name: name
-            type: string
-            translate: true
-            validate: required
 
   - name: file
     description: 

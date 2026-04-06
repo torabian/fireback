@@ -46,6 +46,7 @@ func workspaceModuleCore(module *fireback.ModuleProvider) {
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_PERMISSIONS,
 		ALL_PERM_ABAC_MODULE,
+		ALL_TIMEZONE_GROUP_PERMISSIONS,
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
@@ -69,7 +70,6 @@ func workspaceModuleCore(module *fireback.ModuleProvider) {
 			&AppMenuEntityPolyglot{},
 			&TimezoneGroupEntity{},
 			&TimezoneGroupEntityPolyglot{},
-			&TimezoneGroupUtcItems{},
 		}
 
 		items2 := []interface{}{}
@@ -77,7 +77,7 @@ func workspaceModuleCore(module *fireback.ModuleProvider) {
 
 		for _, item := range items2 {
 
-			if err := dbref.Debug().AutoMigrate(item); err != nil {
+			if err := dbref.AutoMigrate(item); err != nil {
 				fmt.Println("Migrating entity issue:", fireback.GetInterfaceName(item))
 				return err
 			}
@@ -174,7 +174,16 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		UserCliFn(),
 		WorkspaceCliFn(),
 		MiscCli,
+		TimezoneGroupCliFn(),
 	})
 
+	module.ProvideCliHandlers([]cli.Command{AuthFlow, AbacActions})
+
 	return module
+}
+
+var AbacActions cli.Command = cli.Command{
+	Name:        "abac",
+	Usage:       "All actions which are available for abac module",
+	Subcommands: GetAbacActionsCli(),
 }

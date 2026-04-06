@@ -237,6 +237,9 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 }
 
 func DetectSignupMechanismOverValue(value string) (string, *fireback.IError) {
+	if strings.HasPrefix(value, "anonymous_") {
+		return ANONYMOUS_AUTHENTICATION, nil
+	}
 	if strings.Contains(value, "@") {
 		return PASSPORT_METHOD_EMAIL, nil
 	}
