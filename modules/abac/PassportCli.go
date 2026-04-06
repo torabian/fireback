@@ -10,70 +10,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var CreateRootUser cli.Command = cli.Command{
-	Name:  "new",
-	Usage: "Creates a user interactively, and sets that credential into the workspace config",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "in-root",
-			Usage: "Append this user to root group",
-		},
-		&cli.StringFlag{
-			Name:  "value",
-			Usage: "value",
-		},
-		&cli.StringFlag{
-			Name:  "workspace-type-id",
-			Usage: "The workspace type id, you can use 'root'",
-		},
-		&cli.StringFlag{
-			Name:  "session-secrent",
-			Usage: "The secret generated through the otp authentication process.",
-		},
-		&cli.StringFlag{
-			Name:  "type",
-			Usage: "One of: 'phonenumber', 'email'",
-		},
-		&cli.StringFlag{
-			Name:  "password",
-			Usage: "password",
-		},
-		&cli.StringFlag{
-			Name:  "first-name",
-			Usage: "firstName",
-		},
-		&cli.StringFlag{
-			Name:  "last-name",
-			Usage: "lastName",
-		},
-	},
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilder(c)
-		appConfig := fireback.GetConfig()
-		if c.NumFlags() == 0 {
-			// This is gonna be an interactive, there are no flags
-			if result, err := InteractiveUserAdmin(query); err != nil {
-				log.Fatalln(err)
-			} else {
-				appConfig.CliWorkspace = result.WorkspaceAs
-				appConfig.CliToken = result.Token
-				appConfig.Save(".env")
-			}
-
-		} else {
-			dto := CastClassicSignupFromCli(c)
-			if result, err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
-				log.Fatalln(err)
-			} else {
-				appConfig.CliWorkspace = result.WorkspaceAs
-				appConfig.CliToken = result.Token
-				appConfig.Save(".env")
-			}
-		}
-
-	},
-}
-
 var AppendEmailPassportToUser cli.Command = cli.Command{
 
 	Name:  "append-email",
@@ -133,7 +69,6 @@ var PassportCli cli.Command = cli.Command{
 		AppendEmailPassportToUser,
 		PassportUpdateCmd,
 		OsLoginAuthenticateActionDef.ToCli(),
-		CreateRootUser,
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionDef.ToCli(),
 		UserPassportsActionCmd,
