@@ -210,7 +210,9 @@ actions:
       Lists all of the capabilities in database as a array of string as root access
     out:
       primitive: "[]string"
-  - name: capabilitiesTree
+
+acts:
+  - name: CapabilitiesTree
     cliName: treex
     url: /capabilitiesTree
     method: get
@@ -218,18 +220,30 @@ actions:
       requires:
         - completeKey: root.manage.fireback.capability.query
       resolveStrategy: workspace
-    format: GET_ONE
     description: 
       dLists all of the capabilities in database as a array of string as root access
     out:
+      envelope: GResponse
       fields:
         - name: capabilities
-          target: CapabilityEntity
-          type: many2many
+          type: collection
+          target: CapabilityInfoDto
         - name: nested
-          target: CapabilityEntity
-          type: many2many
+          type: collection
+          target: CapabilityInfoDto
 dtom:
+  - name: capabilityInfo
+    description: 
+      Capability and permission level which is suitable for front-end application to interact.
+    fields:
+    - name: uniqueId
+      type: string
+    - name: name
+      type: string
+    - name: children
+      type: collection
+      target: CapabilityInfoDto
+  
   - name: okayResponse
 entities:
   - name: webPushConfig

@@ -63,6 +63,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 	module.ProvideCliHandlers([]cli.Command{
 		CapabilityCliFn(),
 		PushNotificationCmd,
+		CapabilitiesTreeActionDef.ToCli(),
 	})
 
 	workspaceModuleCore(module)
