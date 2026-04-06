@@ -390,17 +390,13 @@ func UNSAFE_allow_selection_of_workspace_type() *QueryWorkspaceTypesPubliclyActi
 
 	workspacesChoises := []string{ROOT_VAR}
 
-	if len(workspaceTypes) == 0 {
-		fmt.Println("There are no workspace types available, it means only you can create a root account via this tool.")
-	} else {
-		for _, item := range workspaceTypes {
-			workspacesChoises = append(workspacesChoises, fmt.Sprintf("%v >>> %v (%v)", item.UniqueId, item.Title, item.Slug))
-		}
-		selectedWTId := fireback.AskForSelect("Which workspace type (account type) you are going to create?", workspacesChoises)
-		for _, item := range workspaceTypes {
-			if item.UniqueId == selectedWTId {
-				selectedWorkspace = item
-			}
+	for _, item := range workspaceTypes {
+		workspacesChoises = append(workspacesChoises, fmt.Sprintf("%v >>> %v (%v)", item.UniqueId, item.Title, item.Slug))
+	}
+	selectedWTId := fireback.AskForSelect("Which workspace type (account type) you are going to create?", workspacesChoises)
+	for _, item := range workspaceTypes {
+		if item.UniqueId == selectedWTId {
+			selectedWorkspace = item
 		}
 	}
 
