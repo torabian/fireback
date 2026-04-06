@@ -1,8 +1,6 @@
 package fireback
 
 import (
-	"fmt"
-
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -15,8 +13,6 @@ func init() {
 func cleanUserFromSocketPool(query QueryDSL) {
 	workspaceId := query.WorkspaceId
 	userId := query.UserId
-
-	fmt.Println("Deleing::::", workspaceId, userId)
 
 	// Automatically happens, perhaps should not be called anymore.
 	query.RawSocketConnection.Close()
@@ -54,8 +50,6 @@ func addUserToEventBus(query QueryDSL) {
 		Connection: query.RawSocketConnection,
 		UniqueId:   UUID_SHORT(),
 	}
-
-	fmt.Println("Adding socket:", socket)
 
 	if query.UserAccessPerWorkspace != nil {
 		socket.URW = *query.UserAccessPerWorkspace
