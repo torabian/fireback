@@ -3231,7 +3231,7 @@ type {{ $name }}Msgs struct {
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
 {{ range $acts }} 
-  var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query fireback.QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
+  var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query {{ $wsprefix }}QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
 
 
   {{ if .SecurityModel }}

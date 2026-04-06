@@ -8,7 +8,7 @@
   "VITE_SUPPORTED_LANGUAGES": "fa,en",
   "VITE_FEATURE_DASHBOARD": "true",
   "VITE_USE_HASH_ROUTER": "true",
-  "VITE_INACCURATE_MOCK_MODE": "true",
+  "VITE_INACCURATE_MOCK_MODE": "false",
   "VITE_TITLE": "projectname",
   "VITE_ALLOW_REMOTE_LOGIN": "true",
   "VITE_FORCE_AUTHENTICATION": "true",

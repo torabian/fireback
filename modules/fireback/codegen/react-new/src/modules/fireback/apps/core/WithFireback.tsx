@@ -1,9 +1,12 @@
 import { type AppConfig } from "../../hooks/appConfigTools";
 
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import { QueryClient } from "react-query";
 import { fetchXMock, mockExecFn } from "../../hooks/mock-tools";
-import { RemoteQueryProvider as FirebackQueryProvider } from "../../sdk/core/react-tools";
+import {
+  RemoteQueryProvider as FirebackQueryProvider,
+  RemoteQueryContext,
+} from "../../sdk/core/react-tools";
 import { FetchxContext } from "../../sdk/sdk/common/fetchx";
 import { FetchxProvider } from "../../sdk/sdk/react/useFetchx";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
@@ -23,17 +26,6 @@ export function WithFireback({
   prefix?: string;
   locale?: string;
 }) {
-  const fetchContext = useRef(
-    new FetchxContext(BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, "")),
-  );
-
-  if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
-    console.log(
-      "Inaccurate mock mode is enabled. All requests are being routed out.",
-    );
-    fetchContext.current.fetchOverrideFn = fetchXMock(mockServer);
-  }
-
   return (
     <FirebackQueryProvider
       socket
@@ -51,7 +43,31 @@ export function WithFireback({
           : undefined
       }
     >
-      <FetchxProvider value={fetchContext.current}>{children}</FetchxProvider>
+      <WithFetchX children={children} mockServer={mockServer} />
     </FirebackQueryProvider>
   );
 }
+
+const WithFetchX = ({ children, mockServer }: { children: any, mockServer: any }) => {
+  const {options, session} = useContext(RemoteQueryContext);
+
+ 
+  const fetchContext = useRef(
+    new FetchxContext(BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, "")),
+  );
+  fetchContext.current.defaultHeaders = {
+    'authorization': session?.token,
+    'workspace-id': options?.headers["workspace-id"]
+  }
+
+  if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
+    console.log(
+      "Inaccurate mock mode is enabled. All requests are being routed out.",
+    );
+    fetchContext.current.fetchOverrideFn = fetchXMock(mockServer);
+  }
+
+  return (
+    <FetchxProvider value={fetchContext.current}>{children}</FetchxProvider>
+  );
+};

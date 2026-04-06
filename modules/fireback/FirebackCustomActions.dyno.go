@@ -59,6 +59,10 @@ var ListCapabilitiesActionCmd cli.Command = cli.Command{
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
+
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
+var CapabilitiesTreeImpl func(c CapabilitiesTreeActionRequest, query QueryDSL) (*CapabilitiesTreeActionResponse, error) = nil
 var CapabilitiesTreeSecurityModel = &SecurityModel{
 	ActionRequires: []PermissionInfo{
 		{
@@ -68,51 +72,40 @@ var CapabilitiesTreeSecurityModel = &SecurityModel{
 	ResolveStrategy: "workspace",
 }
 
-type CapabilitiesTreeActionResDto struct {
-	Capabilities       []*CapabilityEntity `json:"capabilities" xml:"capabilities" yaml:"capabilities"    gorm:"many2many:_capabilities;foreignKey:UniqueId;references:UniqueId"      `
-	CapabilitiesListId []string            `json:"capabilitiesListId" yaml:"capabilitiesListId" xml:"capabilitiesListId" gorm:"-" sql:"-"`
-	Nested             []*CapabilityEntity `json:"nested" xml:"nested" yaml:"nested"    gorm:"many2many:_nested;foreignKey:UniqueId;references:UniqueId"      `
-	NestedListId       []string            `json:"nestedListId" yaml:"nestedListId" xml:"nestedListId" gorm:"-" sql:"-"`
-}
-
-func (x *CapabilitiesTreeActionResDto) RootObjectName() string {
-	return "Fireback"
-}
-
-type capabilitiesTreeActionImpSig func(
-	q QueryDSL) (*CapabilitiesTreeActionResDto,
-	*IError,
-)
-
-var CapabilitiesTreeActionImp capabilitiesTreeActionImpSig
-
-func CapabilitiesTreeActionFn(
-	q QueryDSL,
-) (
-	*CapabilitiesTreeActionResDto,
-	*IError,
-) {
-	if CapabilitiesTreeActionImp == nil {
-		return nil, nil
-	}
-	return CapabilitiesTreeActionImp(q)
-}
-
-var CapabilitiesTreeActionCmd cli.Command = cli.Command{
-	Name:  "treex",
-	Usage: `dLists all of the capabilities in database as a array of string as root access`,
-	Action: func(c *cli.Context) {
+// This can be both used as cli and http
+var CapabilitiesTreeActionDef Module3Action = Module3Action{
+	CliName:       CapabilitiesTreeActionMeta().CliName,
+	Description:   CapabilitiesTreeActionMeta().Description,
+	Name:          CapabilitiesTreeActionMeta().Name,
+	Method:        CapabilitiesTreeActionMeta().Method,
+	Url:           CapabilitiesTreeActionMeta().URL,
+	SecurityModel: CapabilitiesTreeSecurityModel,
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := CapabilitiesTreeActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			var query QueryDSL
+			query = ExtractQueryDslFromGinContext(m)
+			resp, err := CapabilitiesTreeImpl(req, query)
+			WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *SecurityModel) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, CapabilitiesTreeSecurityModel)
-		result, err := CapabilitiesTreeActionFn(query)
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
+		req := CapabilitiesTreeActionRequest{}
+		resp, err := CapabilitiesTreeImpl(req, query)
+		HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
 	},
 }
 
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
 func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		//// Let's add actions for emi acts
+		CapabilitiesTreeActionDef,
 		/// End for emi actions
 		{
 			Method:        "REACTIVE",
@@ -147,25 +140,6 @@ func FirebackCustomActions() []Module3Action {
 				Entity: "OkayResponseDto",
 			},
 		},
-		{
-			Method:        "GET",
-			Url:           "/capabilitiesTree",
-			SecurityModel: CapabilitiesTreeSecurityModel,
-			Name:          "capabilitiesTree",
-			Description:   "dLists all of the capabilities in database as a array of string as root access",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// GET_ONE - get
-					HttpGetEntity(c, CapabilitiesTreeActionFn)
-				},
-			},
-			Format:         "GET_ONE",
-			Action:         CapabilitiesTreeActionFn,
-			ResponseEntity: &CapabilitiesTreeActionResDto{},
-			Out: &Module3ActionBody{
-				Entity: "CapabilitiesTreeActionResDto",
-			},
-		},
 	}
 	return routes
 }
@@ -173,7 +147,6 @@ func FirebackCustomActions() []Module3Action {
 var FirebackCustomActionsCli = []cli.Command{
 	EventBusSubscriptionActionCmd,
 	ListCapabilitiesActionCmd,
-	CapabilitiesTreeActionCmd,
 }
 
 // Only to include some headers
@@ -189,9 +162,9 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		CapabilitiesTreeActionDef.ToCli(),
 		EventBusSubscriptionActionCmd,
 		ListCapabilitiesActionCmd,
-		CapabilitiesTreeActionCmd,
 		WebPushConfigCliFn(),
 		CapabilityCliFn(),
 	},

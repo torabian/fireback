@@ -1,25 +1,25 @@
 package fireback
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 )
 
 func init() {
 	// Override the implementation with our actual code.
-	CapabilitiesTreeActionImp = CapabilitiesTreeAction
+	CapabilitiesTreeImpl = CapabilitiesTreeAction
 }
 
-func CapabilitiesTreeAction(query QueryDSL) (*CapabilitiesTreeActionResDto, *IError) {
+func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest, query QueryDSL) (*CapabilitiesTreeActionResponse, error) {
 
 	// Read the comments inside CapabilityActionQuery
+	query.ItemsPerPage = 9999
 	items, _, err := CapabilityActions.Query(query)
 	if err != nil {
 		return nil, GormErrorToIError(err)
 	}
 
-	itemsFiltered := []*CapabilityEntity{}
+	itemsFiltered := []CapabilityInfoDto{}
 
 	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(query)
 	sort.Slice(items, func(i, j int) bool {
@@ -29,7 +29,7 @@ func CapabilitiesTreeAction(query QueryDSL) (*CapabilitiesTreeActionResDto, *IEr
 	tree := Tree{}
 
 	for _, item := range items {
-		if item.UniqueId == "" {
+		if item == nil || item.UniqueId == "" {
 			continue
 		}
 
@@ -41,36 +41,41 @@ func CapabilitiesTreeAction(query QueryDSL) (*CapabilitiesTreeActionResDto, *IEr
 			continue
 		}
 
-		itemsFiltered = append(itemsFiltered, item)
+		itemsFiltered = append(itemsFiltered, CapabilityInfoDto{
+			UniqueId: item.UniqueId,
+			Name:     item.Name,
+		})
+
 		if strings.HasSuffix(item.UniqueId, ".*") {
 			tree.Add(strings.TrimRight(item.UniqueId, ".*"), ".")
 		} else {
 			tree.Add(item.UniqueId, ".")
 		}
 	}
+
 	itemsa := tree.ToObject(true)
 
-	fmt.Println(itemsFiltered)
-
-	return &CapabilitiesTreeActionResDto{
-		Capabilities: itemsFiltered,
-		Nested:       treeToCapabilityChild(itemsa),
+	return &CapabilitiesTreeActionResponse{
+		Payload: GResponseSingleItem(CapabilitiesTreeActionRes{
+			Capabilities: itemsFiltered,
+			Nested:       treeToCapabilityChild(itemsa),
+		}),
 	}, nil
 
 }
 
-func treeToCapabilityChild(items []NestedNode) []*CapabilityEntity {
-	data := []*CapabilityEntity{}
+func treeToCapabilityChild(items []NestedNode) []CapabilityInfoDto {
+	data := []CapabilityInfoDto{}
 
 	for _, item := range items {
 
-		children := []*CapabilityEntity{}
+		children := []CapabilityInfoDto{}
 
 		if len(item.Children) > 0 {
 			children = treeToCapabilityChild(item.Children)
 		}
 
-		data = append(data, &CapabilityEntity{
+		data = append(data, CapabilityInfoDto{
 			UniqueId: item.UniqueId,
 			Children: children,
 		})

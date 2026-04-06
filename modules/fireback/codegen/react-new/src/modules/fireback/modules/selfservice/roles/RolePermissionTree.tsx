@@ -1,8 +1,8 @@
 import { Checkbox } from "@/modules/fireback/components/checkbox/Checkbox";
+import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
 import { type IndeterminateCheck } from "@/modules/fireback/definitions/definitions";
 import { type CapabilityChild } from "@/modules/fireback/sdk/core/react-tools";
-import { useGetCapabilitiesTree } from "@/modules/fireback/sdk/modules/fireback/useGetCapabilitiesTree";
-import { useQueryClient } from "react-query";
+import { useCapabilitiesTreeActionQuery } from "@/modules/fireback/sdk/modules/fireback/CapabilitiesTree";
 
 type NodeChangeFn = (node: string, value: IndeterminateCheck) => void;
 
@@ -15,13 +15,10 @@ export function RolePermissionTree({
   onChange?: (value: string[]) => void;
   prefix?: string;
 }) {
-  const queryClient = useQueryClient();
-  const { query: queryCapabilities } = useGetCapabilitiesTree({
-    queryClient,
-    query: { uniqueId: "all", itemsPerPage: 999 },
-  });
 
-  const items = queryCapabilities.data?.data?.nested || [];
+  const {data, error} = useCapabilitiesTreeActionQuery({});
+  
+  const items = data?.data?.item?.nested || [];
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {
     let newValue: string[] = [...(value || [])];
@@ -36,6 +33,7 @@ export function RolePermissionTree({
 
   return (
     <nav className="tree-nav">
+      <ErrorsView error={error} />
       <ul className="list">
         <PermissionTree
           items={items}
