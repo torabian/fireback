@@ -19,7 +19,7 @@ export function withFirebackServer() {
     // cy.task("dbcon");
     cy.task(
       "exec",
-      ` passport new --in-root=true --value test@${Math.random()
+      ` auth --in-root=true --value test@${Math.random()
         .toString()
         .replace(
           ".",

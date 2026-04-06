@@ -6,7 +6,7 @@ describe("Logging in with the signin", () => {
     cy.task("dbcon");
     cy.task(
       "exec",
-      ` passport new --in-root=true --value test@${Math.random()
+      ` auth --in-root=true --value test@${Math.random()
         .toString()
         .replace(
           ".",

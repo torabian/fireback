@@ -764,7 +764,6 @@ entities:
         type: string
         description: Title which is shown to the user and allows them to select.
         translate: true
-      
   - name: file
     description: 
       Tus file uploading reference of the content.
@@ -1719,7 +1718,6 @@ messages:
     en: Failed to decode the google token, it's not available at this moment.
   invitationNotFound:
     en: Invitation not found or expired.
-
 
 queries:
   - name: userInvitations

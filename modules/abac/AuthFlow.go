@@ -345,7 +345,60 @@ var AuthFlow cli.Command = cli.Command{
 	ShortName: "auth",
 	Usage:     "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
 	Action: func(c *cli.Context) error {
+
+		// In case that there are flags, means the interactive operation is not needed
+		// this is useful to create an account in one go.
+		if c.NumFlags() > 0 {
+			appConfig := fireback.GetConfig()
+			dto := CastClassicSignupFromCli(c)
+			query := fireback.CommonCliQueryDSLBuilder(c)
+
+			fmt.Println("Type", dto.Type)
+			if result, err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
+				log.Fatalln(err)
+			} else {
+				appConfig.CliWorkspace = result.WorkspaceAs
+				appConfig.CliToken = result.Token
+				appConfig.Save(".env")
+			}
+			return nil
+		}
+
 		return IntegrateAuthFlow(c)
+	},
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "in-root",
+			Usage: "Append this user to root group",
+		},
+		&cli.StringFlag{
+			Name:  "value",
+			Usage: "value",
+		},
+		&cli.StringFlag{
+			Name:  "workspace-type-id",
+			Usage: "The workspace type id, you can use 'root'",
+		},
+		&cli.StringFlag{
+			Name:  "session-secrent",
+			Usage: "The secret generated through the otp authentication process.",
+		},
+		&cli.StringFlag{
+			Name:  "type",
+			Usage: "One of: 'phonenumber', 'email'",
+		},
+		&cli.StringFlag{
+			Name:  "password",
+			Usage: "password",
+		},
+		&cli.StringFlag{
+			Name:  "first-name",
+			Usage: "firstName",
+		},
+		&cli.StringFlag{
+			Name:  "last-name",
+			Usage: "lastName",
+		},
 	},
 }
 
@@ -390,17 +443,13 @@ func UNSAFE_allow_selection_of_workspace_type() *QueryWorkspaceTypesPubliclyActi
 
 	workspacesChoises := []string{ROOT_VAR}
 
-	if len(workspaceTypes) == 0 {
-		fmt.Println("There are no workspace types available, it means only you can create a root account via this tool.")
-	} else {
-		for _, item := range workspaceTypes {
-			workspacesChoises = append(workspacesChoises, fmt.Sprintf("%v >>> %v (%v)", item.UniqueId, item.Title, item.Slug))
-		}
-		selectedWTId := fireback.AskForSelect("Which workspace type (account type) you are going to create?", workspacesChoises)
-		for _, item := range workspaceTypes {
-			if item.UniqueId == selectedWTId {
-				selectedWorkspace = item
-			}
+	for _, item := range workspaceTypes {
+		workspacesChoises = append(workspacesChoises, fmt.Sprintf("%v >>> %v (%v)", item.UniqueId, item.Title, item.Slug))
+	}
+	selectedWTId := fireback.AskForSelect("Which workspace type (account type) you are going to create?", workspacesChoises)
+	for _, item := range workspaceTypes {
+		if item.UniqueId == selectedWTId {
+			selectedWorkspace = item
 		}
 	}
 
