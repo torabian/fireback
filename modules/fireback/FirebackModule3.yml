@@ -204,12 +204,6 @@ actions:
     url: /ws
     security:
       resolveStrategy: workspace
-  - name: listCapabilities
-    cliName: list
-    description: 
-      Lists all of the capabilities in database as a array of string as root access
-    out:
-      primitive: "[]string"
 
 acts:
   - name: CapabilitiesTree

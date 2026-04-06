@@ -29,36 +29,6 @@ var EventBusSubscriptionActionCmd cli.Command = cli.Command{
 		CliReactivePipeHandler(query, EventBusSubscriptionActionImp)
 	},
 }
-var ListCapabilitiesSecurityModel *SecurityModel = nil
-
-type listCapabilitiesActionImpSig func(
-	q QueryDSL) ([]string,
-	*IError,
-)
-
-var ListCapabilitiesActionImp listCapabilitiesActionImpSig
-
-func ListCapabilitiesActionFn(
-	q QueryDSL,
-) (
-	[]string,
-	*IError,
-) {
-	if ListCapabilitiesActionImp == nil {
-		return nil, nil
-	}
-	return ListCapabilitiesActionImp(q)
-}
-
-var ListCapabilitiesActionCmd cli.Command = cli.Command{
-	Name:  "list",
-	Usage: `Lists all of the capabilities in database as a array of string as root access`,
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilderAuthorize(c, ListCapabilitiesSecurityModel)
-		result, err := ListCapabilitiesActionFn(query)
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
@@ -122,31 +92,12 @@ func FirebackCustomActions() []Module3Action {
 				Entity: "",
 			},
 		},
-		{
-			Method:        "",
-			Url:           "/list-capabilities",
-			SecurityModel: ListCapabilitiesSecurityModel,
-			Name:          "listCapabilities",
-			Description:   "Lists all of the capabilities in database as a array of string as root access",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE -
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ListCapabilitiesActionFn,
-			ResponseEntity: &OkayResponseDto{},
-			Out: &Module3ActionBody{
-				Entity: "OkayResponseDto",
-			},
-		},
 	}
 	return routes
 }
 
 var FirebackCustomActionsCli = []cli.Command{
 	EventBusSubscriptionActionCmd,
-	ListCapabilitiesActionCmd,
 }
 
 // Only to include some headers
@@ -164,7 +115,6 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Subcommands: cli.Commands{
 		CapabilitiesTreeActionDef.ToCli(),
 		EventBusSubscriptionActionCmd,
-		ListCapabilitiesActionCmd,
 		WebPushConfigCliFn(),
 		CapabilityCliFn(),
 	},
