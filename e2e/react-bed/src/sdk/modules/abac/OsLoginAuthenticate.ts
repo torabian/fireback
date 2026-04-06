@@ -1,12 +1,12 @@
+import { UserSessionDto } from "./UserSessionDto";
+import { buildUrl } from "../../sdk/common/buildUrl";
 import {
-  FetchxContext,
   fetchx,
   handleFetchResponse,
+  type FetchxContext,
   type TypedRequestInit,
   type TypedResponse,
 } from "../../sdk/common/fetchx";
-import { UserSessionDto } from "./UserSessionDto";
-import { buildUrl } from "../../sdk/common/buildUrl";
 import {
   type UseMutationOptions,
   type UseQueryOptions,

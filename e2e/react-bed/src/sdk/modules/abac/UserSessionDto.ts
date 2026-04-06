@@ -3,6 +3,7 @@
 import { PassportEntity } from "./PassportEntity";
 import { UserEntity } from "./UserEntity";
 import { UserWorkspaceEntity } from "./UserWorkspaceEntity";
+import { type PartialDeep } from "../../sdk/common/fetchx";
 import { withPrefix } from "../../sdk/common/withPrefix";
 /**
  * The base class definition for userSessionDto
@@ -279,13 +280,6 @@ export class UserSessionDto {
 export abstract class UserSessionDtoFactory {
   abstract create(data: unknown): UserSessionDto;
 }
-type PartialDeep<T> = {
-  [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<PartialDeep<U>>
-    : T[P] extends object
-      ? PartialDeep<T[P]>
-      : T[P];
-};
 /**
  * The base type definition for userSessionDto
  **/
