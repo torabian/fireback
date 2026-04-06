@@ -234,7 +234,7 @@ acts:
 dtom:
   - name: capabilityInfo
     description: 
-      Capability and permission level which is suitable for front-end application to interact.
+      Capability and permission level which is suitable for front-end application to interact...
     fields:
     - name: uniqueId
       type: string
@@ -242,7 +242,7 @@ dtom:
       type: string
     - name: children
       type: collection
-      target: CapabilityInfoDto
+      target: self@
   
   - name: okayResponse
 entities:

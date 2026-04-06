@@ -1,5 +1,5 @@
- 
-// This no check has been added via fireback. 
+// @ts-nocheck 
+ // This no check has been added via fireback. 
 import { type PartialDeep } from "../../sdk/common/fetchx";
 import { withPrefix } from "../../sdk/common/withPrefix";
 /**
@@ -54,19 +54,19 @@ export class CapabilityInfoDto {
   }
   /**
    *
-   * @type {CapabilityInfoDto[]}
+   * @type {}
    **/
   #children: CapabilityInfoDto[] = [];
   /**
    *
-   * @returns {CapabilityInfoDto[]}
+   * @returns {}
    **/
   get children() {
     return this.#children;
   }
   /**
    *
-   * @type {CapabilityInfoDto[]}
+   * @type {}
    **/
   set children(value: CapabilityInfoDto[]) {
     // For arrays, you only can pass arrays to the object
@@ -197,9 +197,9 @@ export type CapabilityInfoDtoType = {
   name: string;
   /**
    *
-   * @type {CapabilityInfoDto[]}
+   * @type {CapabilityInfoDtoType[]}
    **/
-  children: CapabilityInfoDto[];
+  children: CapabilityInfoDtoType[];
 };
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace CapabilityInfoDtoType {}
