@@ -61,7 +61,7 @@ jobs:
 
 
       # - name: Add admin account
-      #   run: fireback passport new --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
+      #   run: fireback auth --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
       # - name: Check the passport
       #   run: fireback passport check-passport-methods
 
