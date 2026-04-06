@@ -18,7 +18,7 @@ export function RolePermissionTree({
 
   const {data, error} = useCapabilitiesTreeActionQuery({});
   
-  const items = data.data?.item?.nested || [];
+  const items = data?.data?.item?.nested || [];
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {
     let newValue: string[] = [...(value || [])];
