@@ -21,7 +21,7 @@ func discoverPassportMethodsAndPrint(c *cli.Context) []string {
 	fmt.Println("On such authorization, there is no security model, since all actions are accessible publicly.")
 
 	methods := []string{
-		fmt.Sprintf("%v >>> %v", ANONYMOUS_AUTHENTICATION, "Anonymous authentication"),
+		fmt.Sprintf("%v >>> %v", ANONYMOUS_AUTHENTICATION, "Anonymous, can be also created as root, with a unique identifier"),
 	}
 
 	// Since it's public, no need for any query dsl creation
@@ -44,7 +44,7 @@ func discoverPassportMethodsAndPrint(c *cli.Context) []string {
 	fmt.Print("Authentication with email: ")
 	if passport.Email {
 		green.Print(passport.Email, "\n")
-		methods = append(methods, "email")
+		methods = append(methods, "email >>> Create or sign-in with an email address, otp, totp might be required.")
 	} else {
 		red.Print(passport.Email, "\n")
 	}
@@ -52,7 +52,7 @@ func discoverPassportMethodsAndPrint(c *cli.Context) []string {
 	fmt.Print("Authentication with phone: ")
 	if passport.Phone {
 		green.Print(passport.Phone, "\n")
-		methods = append(methods, "phone")
+		methods = append(methods, "phone >>> Phone number sign-in or create account, otp, totp might be required.")
 	} else {
 		red.Print(passport.Phone, "\n")
 	}
@@ -341,8 +341,9 @@ func IntegrateAuthFlow(c *cli.Context) error {
 }
 
 var AuthFlow cli.Command = cli.Command{
-	Name:  "authorize",
-	Usage: "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
+	Name:      "authorize",
+	ShortName: "auth",
+	Usage:     "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
 	Action: func(c *cli.Context) error {
 		return IntegrateAuthFlow(c)
 	},
