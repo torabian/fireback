@@ -1,5 +1,10 @@
 name: abac
-
+description: 
+  Fireback ABAC module provides user authentication, basic support for most projects,
+  including advanced role, permission module on top of fireback core module.
+  Using this module is not essential to create fireback projects, but provides a great
+  possibility to avoid building most user management flow.
+  Some other helpers, such as timezone are added here.
 dtom:
 
   - name: resetEmail
@@ -967,6 +972,7 @@ entities:
       msync: false
     security:
       writeOnRoot: true
+      readOnRoot: true
       resolveStrategy: workspace
     description: >-
       Login/Signup methods which are available in the app for different regions
@@ -1701,6 +1707,8 @@ messages:
     en: This type of account does not have any otp method for authentication.
   sessionSecretIsNeeded:
     en: Session secret is needed to continue creating a user. Use checkClassicPassport first with value, to get the required steps for account creation.
+  rootWorkspaceTypeIsNotAllowed:
+    en: Root workspace type creation is not allowed on the web.
   totpIsNotAvailableForThisPassport:
     en: This passport doesn't have totp setup. Contact the administrator to set it up for you.
   totpCodeIsNotValid:
@@ -1728,7 +1736,6 @@ messages:
   invitationNotFound:
     en: Invitation not found or expired.
 
-description: This is the fireback core module, which includes everything. In fact you could say workspaces is fireback itself. Maybe in the future that would be changed
 queries:
   - name: userInvitations
     description: 

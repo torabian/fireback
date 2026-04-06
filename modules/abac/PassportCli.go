@@ -49,17 +49,25 @@ var CreateRootUser cli.Command = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		query := fireback.CommonCliQueryDSLBuilder(c)
-
+		appConfig := fireback.GetConfig()
 		if c.NumFlags() == 0 {
 			// This is gonna be an interactive, there are no flags
-			if err := InteractiveUserAdmin(query); err != nil {
+			if result, err := InteractiveUserAdmin(query); err != nil {
 				log.Fatalln(err)
+			} else {
+				appConfig.CliWorkspace = result.WorkspaceAs
+				appConfig.CliToken = result.Token
+				appConfig.Save(".env")
 			}
 
 		} else {
 			dto := CastClassicSignupFromCli(c)
-			if err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
+			if result, err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
 				log.Fatalln(err)
+			} else {
+				appConfig.CliWorkspace = result.WorkspaceAs
+				appConfig.CliToken = result.Token
+				appConfig.Save(".env")
 			}
 		}
 

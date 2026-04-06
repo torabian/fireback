@@ -14,8 +14,52 @@ func init() {
 
 // Responsible for user creation from public flows in the application.
 func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*ClassicSignupActionResDto, *fireback.IError) {
+
 	if err := ClassicSignupActionReqValidator(dto); err != nil {
 		return nil, err
+	}
+
+	// If the account creation is anonymous, the password, first name and name is not required.
+	if dto.WorkspaceTypeId.String != ANONYMOUS_AUTHENTICATION {
+		errors := []*fireback.IErrorItem{}
+
+		if strings.TrimSpace(dto.FirstName) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "firstName",
+				ErrorParam: "firstName",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if strings.TrimSpace(dto.LastName) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "lastName",
+				ErrorParam: "lastName",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if strings.TrimSpace(dto.Password) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "password",
+				ErrorParam: "password",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if len(errors) > 0 {
+			return nil, &fireback.IError{
+				Message: fireback.FirebackMessages.ValidationFailedOnSomeFields,
+				Errors:  errors,
+			}
+		}
+	}
+
+	if q.WorkspaceId != ROOT_VAR && dto.WorkspaceTypeId.String == ROOT_VAR {
+		return nil, fireback.Create401Error(&AbacMessages.RootWorkspaceTypeIsNotAllowed, []string{})
 	}
 
 	ClearPassportValue(&dto.Value)
@@ -92,6 +136,11 @@ func completeClassicSignupProcess(
 			passport.TotpSecret = secret
 			totpLink = link
 		}
+	}
+
+	if passport.Type == ANONYMOUS_AUTHENTICATION {
+		user.FirstName = "Anonymous"
+		user.LastName = "Anonymous"
 	}
 
 	session, sessionError := UnsafeGenerateUser(&GenerateUserDto{
