@@ -206,6 +206,11 @@ actions:
       resolveStrategy: workspace
 
 acts:
+  - name: EventBusSubscription2
+    method: reactive
+    url: /ws2
+    security:
+      resolveStrategy: workspace
   - name: CapabilitiesTree
     cliName: treex
     url: /capabilitiesTree

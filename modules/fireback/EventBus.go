@@ -104,7 +104,10 @@ func HandleEventForSocketConnections(event Event) {
 						}
 					}
 
-					connection.Connection.WriteJSON(event.ToNotification())
+					if connection.Connection != nil {
+						connection.Connection.WriteJSON(event.ToNotification())
+					}
+
 				}
 			}
 		}

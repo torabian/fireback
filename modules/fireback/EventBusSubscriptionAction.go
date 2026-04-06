@@ -52,8 +52,13 @@ func addUserToEventBus(query QueryDSL) {
 	socket := &SocketConnection{
 		UserId:     userId,
 		Connection: query.RawSocketConnection,
-		URW:        *query.UserAccessPerWorkspace,
 		UniqueId:   UUID_SHORT(),
+	}
+
+	fmt.Println("Adding socket:", socket)
+
+	if query.UserAccessPerWorkspace != nil {
+		socket.URW = *query.UserAccessPerWorkspace
 	}
 
 	socketMutex.Lock()
