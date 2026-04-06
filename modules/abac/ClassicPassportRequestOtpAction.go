@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pquerna/otp/totp"
@@ -130,6 +131,9 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 			return nil, fireback.GormErrorToIError(err2)
 		}
 
+	} else if passportType == ANONYMOUS_AUTHENTICATION && q.C != nil && q.G == nil {
+		// If only, in cli mode, we print the otp information on the cli screen
+		fmt.Println("Your otp code for anonymous login on cli only: ", otp)
 	} else {
 		return nil, &fireback.IError{Message: AbacMessages.OtpNotAvailableForThisType}
 	}

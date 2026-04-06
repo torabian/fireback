@@ -1225,7 +1225,7 @@ type ClassicSignupActionReqDto struct {
 	// Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup.
 	SessionSecret   string          `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
 	Type            string          `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	Password        string          `json:"password" xml:"password" yaml:"password"  validate:"required"        `
+	Password        string          `json:"password" xml:"password" yaml:"password"        `
 	FirstName       string          `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
 	LastName        string          `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
 	InviteId        fireback.String `json:"inviteId" xml:"inviteId" yaml:"inviteId"        `
@@ -1264,7 +1264,7 @@ var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:     "password",
-		Required: true,
+		Required: false,
 		Usage:    `password (string)`,
 	},
 	&cli.StringFlag{

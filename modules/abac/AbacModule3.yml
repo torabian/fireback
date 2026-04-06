@@ -595,7 +595,6 @@ actions:
           validate: required
         - name: password
           type: string
-          validate: required
         - name: firstName
           type: string
           validate: required
@@ -1692,6 +1691,8 @@ messages:
     en: This type of account does not have any otp method for authentication.
   sessionSecretIsNeeded:
     en: Session secret is needed to continue creating a user. Use checkClassicPassport first with value, to get the required steps for account creation.
+  rootWorkspaceTypeIsNotAllowed:
+    en: Root workspace type creation is not allowed on the web.
   totpIsNotAvailableForThisPassport:
     en: This passport doesn't have totp setup. Contact the administrator to set it up for you.
   totpCodeIsNotValid:

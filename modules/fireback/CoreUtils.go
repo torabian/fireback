@@ -918,7 +918,7 @@ func CLIInit(xapp *FirebackApp) cli.Command {
 
 				config.Save(".env")
 			} else {
-				InitEnvironment(xapp, ".env")
+				InitEnvironment(xapp, ".env", c)
 			}
 			return nil
 		},
@@ -988,7 +988,7 @@ func EnvRunMigration(xapp *FirebackApp) error {
 	return nil
 }
 
-func InitEnvironment(xapp *FirebackApp, envFileName string) error {
+func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Context) error {
 
 	datum := ""
 	var err error
@@ -1032,7 +1032,7 @@ func InitEnvironment(xapp *FirebackApp, envFileName string) error {
 
 	for _, module := range xapp.Modules {
 		if module.OnEnvInit != nil {
-			module.OnEnvInit()
+			module.OnEnvInit(c)
 		}
 	}
 

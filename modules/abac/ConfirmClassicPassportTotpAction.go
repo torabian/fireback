@@ -12,7 +12,8 @@ func init() {
 
 func ConfirmClassicPassportTotpAction(
 	req *ConfirmClassicPassportTotpActionReqDto,
-	q fireback.QueryDSL) (*ConfirmClassicPassportTotpActionResDto,
+	q fireback.QueryDSL,
+) (*ConfirmClassicPassportTotpActionResDto,
 	*fireback.IError,
 ) {
 	if err := ConfirmClassicPassportTotpActionReqValidator(req); err != nil {

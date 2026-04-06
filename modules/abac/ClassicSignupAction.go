@@ -15,14 +15,51 @@ func init() {
 // Responsible for user creation from public flows in the application.
 func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*ClassicSignupActionResDto, *fireback.IError) {
 
-	// For anonymous account creation, actually, no validation is needed.
-	// There is a small question though, what would be the workspace type, in such scenarios
-	// For example, a system has student and teacher workspace types. Someone enters website,
-	// and surfs around, is having which type of the workspace type? We need to figure this out.
-	if !strings.HasPrefix(dto.Value, "anonymous_") {
-		if err := ClassicSignupActionReqValidator(dto); err != nil {
-			return nil, err
+	if err := ClassicSignupActionReqValidator(dto); err != nil {
+		return nil, err
+	}
+
+	// If the account creation is anonymous, the password, first name and name is not required.
+	if dto.WorkspaceTypeId.String != ANONYMOUS_AUTHENTICATION {
+		errors := []*fireback.IErrorItem{}
+
+		if strings.TrimSpace(dto.FirstName) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "firstName",
+				ErrorParam: "firstName",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
 		}
+
+		if strings.TrimSpace(dto.LastName) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "lastName",
+				ErrorParam: "lastName",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if strings.TrimSpace(dto.Password) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "password",
+				ErrorParam: "password",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if len(errors) > 0 {
+			return nil, &fireback.IError{
+				Message: fireback.FirebackMessages.ValidationFailedOnSomeFields,
+				Errors:  errors,
+			}
+		}
+	}
+
+	if q.WorkspaceId != ROOT_VAR && dto.WorkspaceTypeId.String == ROOT_VAR {
+		return nil, fireback.Create401Error(&AbacMessages.RootWorkspaceTypeIsNotAllowed, []string{})
 	}
 
 	ClearPassportValue(&dto.Value)
