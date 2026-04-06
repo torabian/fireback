@@ -172,7 +172,7 @@ type EventBusSubscription2ActionHandlerDuplex func(*EventBusSubscription2ActionS
 //   - The handler MUST block (typically via a loop).
 //   - Returning from the handler closes the WebSocket.
 //   - Do not treat this as a per-message callback.
-func EventBusSubscription2ActionDuplex(r *gin.RouterGroup, handler EventBusSubscription2ActionHandlerDuplex) {
+func EventBusSubscription2ActionDuplex(r *gin.Engine, handler EventBusSubscription2ActionHandlerDuplex) {
 	meta := EventBusSubscription2ActionMeta()
 	// The actual callback is extracted, in case you need to handle multiple handlers or customize, use it directly.
 	r.GET(meta.URL, func(ctx *gin.Context) {
