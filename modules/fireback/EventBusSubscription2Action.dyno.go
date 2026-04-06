@@ -2,30 +2,35 @@ package fireback
 
 import (
 	"fmt"
-	"net/http"
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
+	"net/http"
+	"net/url"
 )
 
 /**
 * Action to communicate with the action EventBusSubscription2Action
  */
 func EventBusSubscription2ActionMeta() struct {
-	Name   string
-	URL    string
-	Method string
+	Name        string
+	URL         string
+	Method      string
+	CliName     string
+	Description string
 } {
 	return struct {
-		Name   string
-		URL    string
-		Method string
+		Name        string
+		URL         string
+		Method      string
+		CliName     string
+		Description string
 	}{
-		Name:   "EventBusSubscription2Action",
-		URL:    "/ws2",
-		Method: "REACTIVE",
+		Name:        "EventBusSubscription2Action",
+		URL:         "/ws2",
+		Method:      "REACTIVE",
+		CliName:     "",
+		Description: "",
 	}
 }
 
