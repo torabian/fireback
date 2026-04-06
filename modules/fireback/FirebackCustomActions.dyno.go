@@ -6,10 +6,11 @@ package fireback
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"reflect"
-
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli"
+)
+import (
+	"reflect"
 )
 
 // using shared actions here
@@ -29,8 +30,8 @@ var EventBusSubscriptionActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var EventBusSubscription2SecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "workspace",
@@ -44,6 +45,7 @@ var EventBusSubscription2ActionDef Module3Action = Module3Action{
 	Method:        EventBusSubscription2ActionMeta().Method,
 	Url:           EventBusSubscription2ActionMeta().URL,
 	SecurityModel: EventBusSubscription2SecurityModel,
+	// reactive
 }
 var CapabilitiesTreeImpl func(c CapabilitiesTreeActionRequest, query QueryDSL) (*CapabilitiesTreeActionResponse, error) = nil
 var CapabilitiesTreeSecurityModel = &SecurityModel{
@@ -63,6 +65,7 @@ var CapabilitiesTreeActionDef Module3Action = Module3Action{
 	Method:        CapabilitiesTreeActionMeta().Method,
 	Url:           CapabilitiesTreeActionMeta().URL,
 	SecurityModel: CapabilitiesTreeSecurityModel,
+	// get
 	Handlers: []gin.HandlerFunc{
 		func(m *gin.Context) {
 			req := CapabilitiesTreeActionRequest{
@@ -88,7 +91,6 @@ var CapabilitiesTreeActionDef Module3Action = Module3Action{
 func FirebackCustomActions() []Module3Action {
 	routes := []Module3Action{
 		//// Let's add actions for emi acts
-		// EventBusSubscription2ActionDef,
 		CapabilitiesTreeActionDef,
 		/// End for emi actions
 		{
