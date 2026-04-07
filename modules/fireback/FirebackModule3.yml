@@ -198,20 +198,15 @@ messages:
     en: The form data submitted is malformed or contains invalid fields. Please check the form and ensure all required fields are properly filled out.
   invalidFormDataContentType:
     en: The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.
-actions:
-  - name: eventBusSubscription
+ 
+
+acts:
+  - name: EventBusSubscription
+    description: Connects a client to all events related to their user profile, or workspace they are in
     method: reactive
     url: /ws
     security:
       resolveStrategy: workspace
-  - name: listCapabilities
-    cliName: list
-    description: 
-      Lists all of the capabilities in database as a array of string as root access
-    out:
-      primitive: "[]string"
-
-acts:
   - name: CapabilitiesTree
     cliName: treex
     url: /capabilitiesTree

@@ -3231,7 +3231,9 @@ type {{ $name }}Msgs struct {
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
 {{ range $acts }} 
+  {{ if ne .Method "reactive" }}
   var {{ .Name}}Impl func(c {{ .Name}}ActionRequest, query {{ $wsprefix }}QueryDSL) (*{{ .Name}}ActionResponse, error) = nil
+  {{ end }}
 
 
   {{ if .SecurityModel }}
@@ -3261,6 +3263,8 @@ type {{ $name }}Msgs struct {
     Method:  {{ .Name }}ActionMeta().Method,
     Url:     {{ .Name }}ActionMeta().URL,
     SecurityModel: {{ .Name }}SecurityModel,
+    // {{ .Method }}
+    {{ if ne .Method "reactive" }}
     Handlers: []gin.HandlerFunc{
       func(m *gin.Context) {
         req := {{ .Name }}ActionRequest{
@@ -3284,6 +3288,7 @@ type {{ $name }}Msgs struct {
 
       return nil
     },
+    {{ end }}
   }
 
 {{ end }}
@@ -3293,7 +3298,9 @@ func {{ $name }}CustomActions() []{{ $wsprefix }}Module3Action {
   //// Let's add actions for emi acts
   {{ if $acts}}
     {{ range $acts}}
+      {{ if ne .Method "reactive" }}
       {{ .Name }}ActionDef,
+      {{ end }}
     {{ end }}
   {{ end }}
   

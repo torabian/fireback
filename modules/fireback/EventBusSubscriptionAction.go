@@ -1,22 +1,18 @@
 package fireback
 
 import (
-	"fmt"
-
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
 
 func init() {
 	// Override the implementation with our actual code.
-	EventBusSubscriptionActionImp = EventBusSubscriptionAction
+	// EventBusSubscriptionActionImp = EventBusSubscriptionAction
 }
 
 func cleanUserFromSocketPool(query QueryDSL) {
 	workspaceId := query.WorkspaceId
 	userId := query.UserId
-
-	fmt.Println("Deleing::::", workspaceId, userId)
 
 	// Automatically happens, perhaps should not be called anymore.
 	query.RawSocketConnection.Close()
@@ -52,8 +48,11 @@ func addUserToEventBus(query QueryDSL) {
 	socket := &SocketConnection{
 		UserId:     userId,
 		Connection: query.RawSocketConnection,
-		URW:        *query.UserAccessPerWorkspace,
 		UniqueId:   UUID_SHORT(),
+	}
+
+	if query.UserAccessPerWorkspace != nil {
+		socket.URW = *query.UserAccessPerWorkspace
 	}
 
 	socketMutex.Lock()
@@ -65,7 +64,7 @@ func addUserToEventBus(query QueryDSL) {
 
 }
 
-func EventBusSubscriptionAction(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error) {
+func EventBusSubscriptionActionSig(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error) {
 	LOG.Debug(
 		"Event bus subscription has been started",
 		zap.String("workspace-id", query.WorkspaceId),

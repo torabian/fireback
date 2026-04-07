@@ -53,7 +53,8 @@ rebuild-sdks:
 	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
 	./app gen react --path e2e/react-bed/src/sdk --no-cache true && \
 	./app gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/fireback/codegen/react-new && npm run build
+	cd modules/fireback/codegen/react-new && npm run build && cd - && \
+	cd e2e/react-bed && npm run build
 
 ## This is different because we use the fireback built on ci-cd for this purpose.
 rebuild-sdks-ci:

@@ -1759,6 +1759,7 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 	Method:        CheckPassportMethodsActionMeta().Method,
 	Url:           CheckPassportMethodsActionMeta().URL,
 	SecurityModel: CheckPassportMethodsSecurityModel,
+	// get
 	Handlers: []gin.HandlerFunc{
 		func(m *gin.Context) {
 			req := CheckPassportMethodsActionRequest{
@@ -1791,6 +1792,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 	Method:        OsLoginAuthenticateActionMeta().Method,
 	Url:           OsLoginAuthenticateActionMeta().URL,
 	SecurityModel: OsLoginAuthenticateSecurityModel,
+	// get
 	Handlers: []gin.HandlerFunc{
 		func(m *gin.Context) {
 			req := OsLoginAuthenticateActionRequest{

@@ -14,54 +14,23 @@ import (
 )
 
 // using shared actions here
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var EventBusSubscriptionSecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "workspace",
 }
-var EventBusSubscriptionActionImp = DefaultEmptyReactiveAction
 
-// Reactive action does not have that
-var EventBusSubscriptionActionCmd cli.Command = cli.Command{
-	Name:  "event-bus-subscription",
-	Usage: ``,
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilderAuthorize(c, EventBusSubscriptionSecurityModel)
-		CliReactivePipeHandler(query, EventBusSubscriptionActionImp)
-	},
+// This can be both used as cli and http
+var EventBusSubscriptionActionDef Module3Action = Module3Action{
+	CliName:       EventBusSubscriptionActionMeta().CliName,
+	Description:   EventBusSubscriptionActionMeta().Description,
+	Name:          EventBusSubscriptionActionMeta().Name,
+	Method:        EventBusSubscriptionActionMeta().Method,
+	Url:           EventBusSubscriptionActionMeta().URL,
+	SecurityModel: EventBusSubscriptionSecurityModel,
+	// reactive
 }
-var ListCapabilitiesSecurityModel *SecurityModel = nil
-
-type listCapabilitiesActionImpSig func(
-	q QueryDSL) ([]string,
-	*IError,
-)
-
-var ListCapabilitiesActionImp listCapabilitiesActionImpSig
-
-func ListCapabilitiesActionFn(
-	q QueryDSL,
-) (
-	[]string,
-	*IError,
-) {
-	if ListCapabilitiesActionImp == nil {
-		return nil, nil
-	}
-	return ListCapabilitiesActionImp(q)
-}
-
-var ListCapabilitiesActionCmd cli.Command = cli.Command{
-	Name:  "list",
-	Usage: `Lists all of the capabilities in database as a array of string as root access`,
-	Action: func(c *cli.Context) {
-		query := CommonCliQueryDSLBuilderAuthorize(c, ListCapabilitiesSecurityModel)
-		result, err := ListCapabilitiesActionFn(query)
-		HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
 var CapabilitiesTreeImpl func(c CapabilitiesTreeActionRequest, query QueryDSL) (*CapabilitiesTreeActionResponse, error) = nil
 var CapabilitiesTreeSecurityModel = &SecurityModel{
 	ActionRequires: []PermissionInfo{
@@ -80,6 +49,7 @@ var CapabilitiesTreeActionDef Module3Action = Module3Action{
 	Method:        CapabilitiesTreeActionMeta().Method,
 	Url:           CapabilitiesTreeActionMeta().URL,
 	SecurityModel: CapabilitiesTreeSecurityModel,
+	// get
 	Handlers: []gin.HandlerFunc{
 		func(m *gin.Context) {
 			req := CapabilitiesTreeActionRequest{
@@ -107,47 +77,11 @@ func FirebackCustomActions() []Module3Action {
 		//// Let's add actions for emi acts
 		CapabilitiesTreeActionDef,
 		/// End for emi actions
-		{
-			Method:        "REACTIVE",
-			Url:           "/ws",
-			SecurityModel: EventBusSubscriptionSecurityModel,
-			Name:          "eventBusSubscription",
-			Description:   "",
-			Handlers: []gin.HandlerFunc{
-				ReactiveSocketHandler(EventBusSubscriptionActionImp),
-			},
-			Format:         "REACTIVE",
-			ResponseEntity: string(""),
-			Out: &Module3ActionBody{
-				Entity: "",
-			},
-		},
-		{
-			Method:        "",
-			Url:           "/list-capabilities",
-			SecurityModel: ListCapabilitiesSecurityModel,
-			Name:          "listCapabilities",
-			Description:   "Lists all of the capabilities in database as a array of string as root access",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE -
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ListCapabilitiesActionFn,
-			ResponseEntity: &OkayResponseDto{},
-			Out: &Module3ActionBody{
-				Entity: "OkayResponseDto",
-			},
-		},
 	}
 	return routes
 }
 
-var FirebackCustomActionsCli = []cli.Command{
-	EventBusSubscriptionActionCmd,
-	ListCapabilitiesActionCmd,
-}
+var FirebackCustomActionsCli = []cli.Command{}
 
 // Only to include some headers
 func FirebackJsonInclude() {
@@ -162,9 +96,8 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		EventBusSubscriptionActionDef.ToCli(),
 		CapabilitiesTreeActionDef.ToCli(),
-		EventBusSubscriptionActionCmd,
-		ListCapabilitiesActionCmd,
 		WebPushConfigCliFn(),
 		CapabilityCliFn(),
 	},

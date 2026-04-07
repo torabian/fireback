@@ -8,7 +8,7 @@ package {{ .m.Name }}
 
 import (
 
-    {{ if .m.Actions}}
+    {{ if or (.m.Actions) (.m.Acts)}}
 	"github.com/gin-gonic/gin"
     {{ end }}
 
