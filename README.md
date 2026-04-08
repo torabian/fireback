@@ -17,8 +17,8 @@ and continue from there. Make sure you have installed necessary vscode extension
 
 Or you can go deeper, and install CLI:
 
-- [Download and install fireback](./download-and-install-fireback)
-- [Your first fireback project](./first-fireback-project)
+- [Download and install fireback](https://torabian.github.io/fireback/docs/intro/)
+- [Your first fireback project](https://torabian.github.io/fireback/docs/first-fireback-project)
 
 
 ### Microservices Made Easy
