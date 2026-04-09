@@ -2226,18 +2226,24 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
+  
 	cli.Command{
 		Name:  "slist",
-		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
-		Action: func(c *cli.Context) error {
-			if entity, err := {{ .wsprefix }}GetSeederFilenames({{ .e.Name }}SeedersFs, ""); err != nil {
-				fmt.Println(err.Error())
+		Usage: "Prints list of seeders bundled, which can be inserted into database.",
+    Action: func(c *cli.Context) error {
+			if seeders, err := {{ .wsprefix }}GetSeederFilenames({{ .e.Name }}SeedersFs, ""); err != nil {
+				return err
 			} else {
+				if len(seeders) == 0 {
+					fmt.Println("There are no seeders associated with this entity. You can add yaml or json files in module folder, inside seeders folder and after another round of compile they will appear here.")
 
-				f, _ := json.MarshalIndent(entity, "", "  ")
-				fmt.Println(string(f))
+					return nil
+				}
+				fmt.Printf("There are %d seeders for this entity:\r\n", len(seeders))
+				for _, seeder := range seeders {
+					fmt.Println(seeder)
+				}
 			}
-
 			return nil
 		},
 	},

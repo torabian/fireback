@@ -82,7 +82,7 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Comman
 
 		Name:    "remove",
 		Aliases: []string{"r", "del", "delete"},
-		Usage:   "Deletes an entity with given id (uniqueid)",
+		Usage:   "Deletes a given record using it's unique_id string hash field from database",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "uid",
