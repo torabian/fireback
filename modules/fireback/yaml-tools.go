@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	reflect "reflect"
 	"regexp"
 	"strings"
@@ -291,4 +292,102 @@ func BindYamlStringWithDetails(yamlInput []byte, target any) *IError {
 	}
 
 	return nil
+}
+
+func ReadYamlFileEmbed[T any](fsRef *embed.FS, path string, data *T) error {
+
+	f, err := fsRef.Open(path)
+	if err != nil {
+		return errors.New("cannot read file")
+	}
+
+	defer f.Close()
+
+	decoder := yaml.NewDecoder(f)
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Default().Println("Yaml file is broken", path)
+		return err
+	}
+
+	return nil
+}
+
+func ReadYamlFile[T any](path string, data *T) error {
+
+	f, err := os.Open(path)
+	if err != nil {
+		return errors.New("cannot read file")
+	}
+
+	defer f.Close()
+
+	decoder := yaml.NewDecoder(f)
+	err = decoder.Decode(&data)
+	if err != nil {
+		log.Default().Println("Yaml file is broken", path)
+		return err
+	}
+
+	return nil
+}
+
+func YamlExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
+	progress := make(chan ProgressUpdate) // Channel to send progress updates
+
+	writer, err := os.Create(fp)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		defer writer.Close()
+
+		batchSize := 100
+
+		var batch []*T
+
+		for record := range source {
+
+			batch = append(batch, record...)
+
+			if len(batch) >= batchSize {
+
+				if res, err := yaml.Marshal(batch); err == nil {
+					if _, err := writer.Write([]byte(res)); err != nil {
+						progress <- ProgressUpdate{
+							ItemsProcessed: 0,
+							Error:          err,
+						}
+					} else {
+
+						progress <- ProgressUpdate{
+							ItemsProcessed: len(batch),
+						}
+					}
+				}
+				batch = nil
+			}
+		}
+
+		if len(batch) > 0 {
+			if res, err := yaml.Marshal(batch); err == nil {
+				if _, err := writer.Write([]byte(res)); err != nil {
+					progress <- ProgressUpdate{
+						ItemsProcessed: 0,
+						Error:          err,
+					}
+				} else {
+					progress <- ProgressUpdate{
+						ItemsProcessed: len(batch),
+					}
+				}
+			}
+		}
+
+		close(progress)
+
+	}()
+
+	return progress, nil
 }

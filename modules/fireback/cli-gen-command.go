@@ -12,6 +12,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Fireback generates a lot of code, this file contains fireback gen command, and combines
+// different operation into a single one.
+
 var fbGoModuleFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "name",
@@ -25,31 +28,6 @@ var fbGoModuleFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "auto-import",
 		Usage: "It would add the module, into a server or desktop main app file in fireback if file path is given, also the magic comment exists as well",
-	},
-}
-
-var reconfigFlag = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "binary-name",
-		Usage:    "Binary name that will be used to access final binary",
-		Required: true,
-	},
-
-	&cli.StringFlag{
-		Name:     "project",
-		Usage:    "Project name on files and disks",
-		Required: true,
-	},
-
-	&cli.StringFlag{
-		Name:  "description",
-		Usage: "Description of the project",
-	},
-
-	&cli.StringFlag{
-		Name:  "languages",
-		Usage: "Languages that this support",
-		Value: "en, fa",
 	},
 }
 
@@ -377,60 +355,6 @@ func taskServerLifter(xapp *FirebackApp) {
 
 	liftAsyncqWorkerServer(tasks)
 }
-
-// func GetApplicationTests(xapp *FirebackApp) cli.Command {
-// 	return cli.Command{
-// 		Name:  "tests",
-// 		Usage: "Tools and actions related to the products testing",
-// 		Subcommands: cli.Commands{
-
-// 			{
-// 				Name: "run",
-// 				Flags: []cli.Flag{
-// 					cli.StringFlag{
-// 						Name:     "n",
-// 						Usage:    "Run specific test - by default we run all tests",
-// 						Required: false,
-// 					},
-// 				},
-// 				Usage: "Runs the tests on the product.",
-// 				Action: func(c *cli.Context) error {
-// 					query := CommonCliQueryDSLBuilder(c)
-// 					ctx := TestContext{F: query}
-// 					for _, m := range xapp.Modules {
-// 						tests := m.Tests
-// 						for _, test := range tests {
-// 							if c.IsSet("n") && test.Name != c.String("n") {
-// 								continue
-// 							}
-// 							err := test.Function(&ctx)
-// 							if err == nil {
-// 								c := color.New(color.FgGreen)
-// 								fmt.Print("\u2713 Test \"")
-// 								c.Print(test.Name)
-// 								fmt.Print("\" Has passed successfully")
-// 							}
-// 							fmt.Println("")
-// 						}
-// 					}
-// 					return nil
-// 				},
-// 			},
-// 			{
-// 				Name:  "list",
-// 				Usage: "Lists all of the tests in the app",
-// 				Action: func(c *cli.Context) error {
-// 					for _, m := range xapp.Modules {
-// 						for _, t := range m.Tests {
-// 							fmt.Println(t.Name)
-// 						}
-// 					}
-// 					return nil
-// 				},
-// 			},
-// 		},
-// 	}
-// }
 
 func CodeGenTools(xapp *FirebackApp) cli.Command {
 	return cli.Command{

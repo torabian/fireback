@@ -1,107 +1,18 @@
 package fireback
 
 import (
-	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	reflect "reflect"
 	"runtime"
-	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
 )
-
-var UNIQUE_MACHINE_ID string = ""
-var UNIQUE_APP_PUBLIC_KEY string = ""
-
-func DashedString(input string) string {
-	out := ""
-	for index, char := range input {
-		out += string(char)
-		if index != 0 && (index+1)%4 == 0 && len(input) != index+1 {
-			out += "-"
-		}
-	}
-
-	return out
-}
-
-type NpmPackageJson struct {
-	Name string `json:"name"`
-}
-
-func ReadJsonFile[T any](path string, data *T) error {
-	jsonFile, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-
-	defer jsonFile.Close()
-
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-
-	// we unmarshal our byteArray which contains our
-	// jsonFile's content into 'users' which we defined above
-	json.Unmarshal(byteValue, &data)
-
-	return nil
-}
-
-func ReadYamlFile[T any](path string, data *T) error {
-
-	f, err := os.Open(path)
-	if err != nil {
-		return errors.New("cannot read file")
-	}
-
-	defer f.Close()
-
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&data)
-	if err != nil {
-		log.Default().Println("Yaml file is broken", path)
-		return err
-	}
-
-	return nil
-}
-
-func ReadEmbedFileContent(fsRef *embed.FS, path string) (string, error) {
-
-	data, err := fsRef.ReadFile(path)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(data), nil
-}
-
-func ReadYamlFileEmbed[T any](fsRef *embed.FS, path string, data *T) error {
-
-	f, err := fsRef.Open(path)
-	if err != nil {
-		return errors.New("cannot read file")
-	}
-
-	defer f.Close()
-
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(&data)
-	if err != nil {
-		log.Default().Println("Yaml file is broken", path)
-		return err
-	}
-
-	return nil
-}
 
 type EnvironmentUris struct {
 	CurrentDirectory       string `json:"currentDirectory" yaml:"currentDirectory"`
@@ -250,7 +161,7 @@ func EssentialVariablesMap() map[string]string {
 	}
 }
 
-func LoadXappConfiguration() {
+func LoadFirebackAppConfiguration() {
 
 	uri, err3 := ResolveConfigurationUri()
 	if err3 != nil {
@@ -266,79 +177,6 @@ func LoadXappConfiguration() {
 	envconfig.MustProcess("", &config)
 }
 
-func HandleEnvVars(spec interface{}) {
-	env := os.Getenv("ENV")
-	if env == "" {
-		env = "local"
-	}
-
-	filename := ".env." + env
-	err := godotenv.Load(filename)
-	if err != nil {
-		log.Printf("environment variable file expected: %s was not loaded. Error: %v", filename, err)
-	}
-
-	envconfig.MustProcess("", spec)
-}
-
 func init() {
-	LoadXappConfiguration()
-}
-
-func structToEnvMap(config interface{}) (map[string]string, error) {
-	envMap := make(map[string]string)
-	val := reflect.ValueOf(config).Elem()
-	typ := val.Type()
-
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		envKey := field.Tag.Get("envconfig")
-
-		if envKey != "" {
-			value := val.Field(i).Interface()
-
-			switch v := value.(type) {
-			case string:
-				envMap[envKey] = v
-			case bool:
-				envMap[envKey] = strconv.FormatBool(v)
-			case int, int64:
-				envMap[envKey] = strconv.FormatInt(reflect.ValueOf(v).Int(), 10)
-			case float64:
-				envMap[envKey] = strconv.FormatFloat(reflect.ValueOf(v).Float(), 'f', -1, 64)
-			default:
-				return nil, fmt.Errorf("unsupported type: %s", reflect.TypeOf(v))
-			}
-		}
-	}
-
-	return envMap, nil
-}
-
-func SaveEnvFile(config interface{}, filename string) error {
-
-	envMap, err := structToEnvMap(config)
-
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	for key, value := range envMap {
-		if value == "" {
-			continue
-		}
-
-		_, err := file.WriteString(fmt.Sprintf("%s=%s\n", key, value))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	LoadFirebackAppConfiguration()
 }

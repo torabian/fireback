@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// Concurrent update is a toolset, to write into the same data
+// via multiple connections.
+
 type ConcurrentUpdater[T any] struct {
 	ID    string
 	mu    sync.RWMutex

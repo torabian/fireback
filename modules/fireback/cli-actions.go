@@ -19,6 +19,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Fireback actions run in cli as well. In this file, we place tools and helpers for that.
+
 var CommonQueryFlags = []cli.Flag{
 	&cli.BoolFlag{
 		Name:  "verbose",
