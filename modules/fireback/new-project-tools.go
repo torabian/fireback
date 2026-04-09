@@ -12,11 +12,9 @@ import (
 	"text/template"
 
 	"github.com/gin-gonic/gin"
-	tmplAndroid "github.com/torabian/fireback/modules/fireback/codegen/android"
 	tmplCordova "github.com/torabian/fireback/modules/fireback/codegen/capacitor"
 	tmplGoDesktop "github.com/torabian/fireback/modules/fireback/codegen/go-desktop"
 	tmpl "github.com/torabian/fireback/modules/fireback/codegen/go-new"
-	tmplIos "github.com/torabian/fireback/modules/fireback/codegen/ios"
 	tmplReact "github.com/torabian/fireback/modules/fireback/codegen/react-new"
 	"github.com/urfave/cli"
 )
@@ -364,14 +362,6 @@ func NewProjectCli() cli.Command {
 
 			if ctx.IncludeWailsDesktop {
 				newProjectContentWriter(tmplGoDesktop.FbGoDesktopNewTemplate, ctx, "")
-			}
-
-			if ctx.CreateIOSProject {
-				newProjectContentWriter(tmplIos.IosProjectTmpl, ctx, "ios")
-			}
-
-			if ctx.CreateAndroidProject {
-				newProjectContentWriter(tmplAndroid.AndroidProjectTmpl, ctx, "android")
 			}
 
 			if ctx.CreateCapacitorProject {
