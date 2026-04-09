@@ -990,6 +990,10 @@ func EnvRunMigration(xapp *FirebackApp) error {
 
 func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Context) error {
 
+	if AskForSelect("This command is to generate a .env file, for existing project, or standalone fireback installation. You need to use `fireback new` to create new project. Agree?", []string{"yes", "no"}) == "no" {
+		return nil
+	}
+
 	datum := ""
 	var err error
 
@@ -1078,7 +1082,7 @@ var CLIAboutCommand cli.Command = cli.Command{
 
 	Action: func(c *cli.Context) error {
 
-		fmt.Println("Written by passion by Ali Torabi, distributed under torabi.io - reach me on 0048783538796 or https://github.com/torabian")
+		fmt.Println("Written with passion by Ali Torabi, distributed under torabian.github.io, use this to build something which lasts for decades.")
 
 		fmt.Println(",.. .     /  .(  (                 .,/***/(%#(#####%&&%@@@@@@&&&&&&&&&&&&&&&&@@@")
 		fmt.Println(",.. , (/ **,. , ,      .  ..  ,. ./(#((%###((((###(&&#@@@@@  ,&&&&&&&&&&&&&@@@@&")

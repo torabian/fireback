@@ -23,10 +23,6 @@ It also includes tools for common backend needs, such as authentication, ABAC, a
 
 This project is licensed under the [GNU Affero General Public License (AGPL)](https://github.com/torabian/fireback/blob/main/LICENSE.md). Contributions and modifications must be shared under the same terms. 
 
-## Documents
-
-The original documents are provided in https://torabi.io/fireback but for quick understanding you
-can continue reading this document.
 
 ## Initial Web UI
 

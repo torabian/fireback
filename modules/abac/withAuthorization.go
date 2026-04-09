@@ -2,7 +2,6 @@ package abac
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -209,9 +208,7 @@ func WithAuthorizationFn(securityModel *fireback.SecurityModel) gin.HandlerFunc 
 		result, err := WithAuthorizationPureDefault(context)
 
 		if err != nil {
-			fmt.Println("Aborting: ", err.ToPublicEndUser(&q))
 			c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
-			fmt.Println("Aborted")
 			return
 		}
 
