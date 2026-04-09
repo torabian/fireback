@@ -45,8 +45,3 @@ type OkayResponseData struct {
 type OkayResponse struct {
 	Data *OkayResponseData `json:"data,omitempty"`
 }
-
-type RemoveReply struct {
-	RowsAffected int64   `json:"rowsAffected,omitempty"`
-	Error        *IError `json:"error,omitempty"`
-}
