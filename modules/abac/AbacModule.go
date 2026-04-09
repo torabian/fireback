@@ -183,7 +183,19 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 }
 
 var AbacActions cli.Command = cli.Command{
-	Name:        "abac",
-	Usage:       "All actions which are available for abac module",
-	Subcommands: GetAbacActionsCli(),
+	Name:  "abac",
+	Usage: "All actions which are available for abac module",
+	Subcommands: append(
+		[]cli.Command{
+			{
+				Name:  "internal",
+				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",
+				Subcommands: []cli.Command{
+					PublicJoinKeyCliFn(),
+					PublicAuthenticationCliFn(),
+				},
+			},
+		},
+		GetAbacActionsCli()...,
+	),
 }

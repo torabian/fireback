@@ -59,8 +59,6 @@ func PassportsModuleSetup() *fireback.ModuleProvider {
 
 	module.ProvideCliHandlers([]cli.Command{
 		PassportCli,
-		PublicJoinKeyCliFn(),
-		PublicAuthenticationCliFn(),
 	})
 
 	return module
