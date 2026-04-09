@@ -49,7 +49,7 @@ This project is licensed under the [GNU Affero General Public License (AGPL)](LI
 
 ## Documents
 
-The original documents are provided in https://torabi.io/fireback but for quick understanding you
+The original documents are provided in https://torabian.github.io/fireback but for quick understanding you
 can continue reading this document.
 
 
