@@ -36,7 +36,8 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 		}),
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),
-		GetReportsTool(xapp),
+		// Report tools is not really ever used.
+		// GetReportsTool(xapp),
 		GetCapabilityRefreshCommand(xapp),
 		ClickHouseTestConnectionCli,
 
@@ -59,7 +60,9 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) cli.Commands {
 		}),
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),
-		GetReportsTool(xapp),
+
+		// Report tools is not really ever used.
+		// GetReportsTool(xapp),
 	}
 }
 
