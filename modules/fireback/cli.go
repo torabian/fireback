@@ -85,19 +85,31 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Comman
 		Usage:   "Deletes an entity with given id (uniqueid)",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "id",
+				Name:     "uid",
 				Value:    "",
-				Usage:    "id of the record to be deleted",
+				Usage:    "String unique id of the record which will be deleted.",
 				Required: true,
 			},
 		},
 		Action: func(c *cli.Context) error {
 
 			f := QueryDSL{
-				UniqueId: c.String("id"),
+				UniqueId: c.String("uid"),
 				Query:    "unique_id = " + c.String("id"),
 			}
-			fmt.Println(fn(f))
+
+			count, err := fn(f)
+			if err != nil {
+				fmt.Println("Delete operation encountered an error on database level: %w", err)
+				return err
+			}
+
+			if count == 0 {
+				fmt.Println("Query executed successfully, but no Rows have been deleted.")
+			} else {
+				fmt.Printf("Deleted rows by delete operation: %d\r\n", count)
+			}
+
 			return nil
 
 		},

@@ -734,7 +734,7 @@ func RemoveEntity[T any](query QueryDSL, reflectVal reflect.Value) (int64, *IErr
 			event.MustFire(query.TriggerEventName, event.M{
 				"entity":   dto,
 				"target":   "workspace",
-				"unqiueId": query.WorkspaceId,
+				"uniqueId": query.WorkspaceId,
 			})
 		}
 

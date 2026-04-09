@@ -842,7 +842,7 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 		"entity":   dto,
 		"entityKey": {{ .wsprefix }}GetTypeString(&{{ .e.EntityName }}{}),
 		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"uniqueId": query.WorkspaceId,
 	})
   */
 
@@ -1308,7 +1308,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     event.MustFire(query.TriggerEventName, event.M{
       "entity":   &item,
       "target":   "workspace",
-      "unqiueId": query.WorkspaceId,
+      "uniqueId": query.WorkspaceId,
     })*/
 
     return &itemRefetched, nil
@@ -1806,6 +1806,16 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
       entity := &{{ .e.EntityName }}{}
       {{ .wsprefix }}PopulateInteractively(entity, c, {{ .e.Upper }}CommonInteractiveCliFlags)
 
+
+      {{ range .e.CompleteFields }}
+        {{ if or (eq .Type "many2many") }}
+        entity.{{ .PublicName }}ListId = {{ $.wsprefix }}CliInteractiveSearchAndSelect(
+          "Select {{ .PublicName }}",
+          {{ .TargetWithModuleWithoutEntityPluralize }}ActionQueryString,
+        )
+        {{ end }}
+      {{ end }}
+
       if entity, err := {{ .e.Upper }}Actions.Create(entity, query); err != nil {
         fmt.Println(err.Error())
       } else {
@@ -2192,24 +2202,27 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "file",
-				Usage: "Validates an import file, such as yaml, json, csv, and gives some insights how the after import it would look like",
+				Usage: "Validates shallowly a yaml file, to see if there are content in it, and counts the number.",
 				Value: "{{ .e.Template }}-seeder-{{ .e.Template }}.yml",
-				// Uncomment before publish, they need to specify
-				// Required: true,
-			},
-			&cli.StringFlag{
-				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
-				Value: "yaml",
+				Required: true,
 			},
 		},
 		Usage: "Reads a yaml file containing an array of {{ .e.DashedPluralName }}, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
+			data := {{ .wsprefix }}ContentImport[{{ .e.EntityName }}]{}
 
-			data := &[]{{ .e.EntityName }}{}
-			{{ .wsprefix }}ReadYamlFile(c.String("file"), data)
+			if err := {{ .wsprefix }}ReadYamlFile(c.String("file"), &data); err != nil {
+				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
+				return err
+			}
 
-			fmt.Println(data)
+			fmt.Printf("Total items found: %d \r\n", len(data.Items))
+
+			if len(data.Items) == 0 {
+				fmt.Println("Kind reminder, that array of files, needs to be wrapped in `items` key in any resource file, and flat array won't be read.")
+			} else {
+				fmt.Println("Please note that validation is very general, doesn't indicate if the imported content will be match perfectly.")
+			}
 			return nil
 		},
 	},

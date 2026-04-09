@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var productSeedersFs = &seeders.ViewsFs
@@ -414,11 +415,13 @@ func ProductRecursiveAddUniqueId(dto *ProductEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func ProductMultiInsertFn(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError) {
@@ -498,7 +501,7 @@ func ProductActionCreateFn(dto *ProductEntity, query fireback.QueryDSL) (*Produc
 			"entity":   dto,
 			"entityKey": fireback.GetTypeString(&ProductEntity{}),
 			"target":   "workspace",
-			"unqiueId": query.WorkspaceId,
+			"uniqueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
@@ -598,7 +601,7 @@ func ProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ProductE
 	   event.MustFire(query.TriggerEventName, event.M{
 	     "entity":   &item,
 	     "target":   "workspace",
-	     "unqiueId": query.WorkspaceId,
+	     "uniqueId": query.WorkspaceId,
 	   })*/
 	return &itemRefetched, nil
 }
@@ -1119,6 +1122,7 @@ var ProductImportExportCommands = []cli.Command{
 		},
 		Usage: "Reads a yaml file containing an array of products, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
+
 			data := &[]ProductEntity{}
 			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)

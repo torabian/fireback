@@ -490,7 +490,7 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query fireback.QueryD
 			"entity":   dto,
 			"entityKey": fireback.GetTypeString(&WorkspaceTypeEntity{}),
 			"target":   "workspace",
-			"unqiueId": query.WorkspaceId,
+			"uniqueId": query.WorkspaceId,
 		})
 	*/
 	return dto, nil
@@ -590,7 +590,7 @@ func WorkspaceTypeUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Wo
 	   event.MustFire(query.TriggerEventName, event.M{
 	     "entity":   &item,
 	     "target":   "workspace",
-	     "unqiueId": query.WorkspaceId,
+	     "uniqueId": query.WorkspaceId,
 	   })*/
 	return &itemRefetched, nil
 }
@@ -996,23 +996,25 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		Aliases: []string{"v"},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "file",
-				Usage: "Validates an import file, such as yaml, json, csv, and gives some insights how the after import it would look like",
-				Value: "workspace-type-seeder-workspace-type.yml",
-				// Uncomment before publish, they need to specify
-				// Required: true,
-			},
-			&cli.StringFlag{
-				Name:  "format",
-				Usage: "Format of the export or import file. Can be 'yaml', 'yml', 'json'",
-				Value: "yaml",
+				Name:     "file",
+				Usage:    "Validates shallowly a yaml file, to see if there are content in it, and counts the number.",
+				Value:    "workspace-type-seeder-workspace-type.yml",
+				Required: true,
 			},
 		},
 		Usage: "Reads a yaml file containing an array of workspace-types, you can run this to validate if your import file is correct, and how it would look like after import",
 		Action: func(c *cli.Context) error {
-			data := &[]WorkspaceTypeEntity{}
-			fireback.ReadYamlFile(c.String("file"), data)
-			fmt.Println(data)
+			data := fireback.ContentImport[WorkspaceTypeEntity]{}
+			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
+				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
+				return err
+			}
+			fmt.Printf("Total items found: %d \r\n", len(data.Items))
+			if len(data.Items) == 0 {
+				fmt.Println("Kind reminder, that array of files, needs to be wrapped in `items` key in any resource file, and flat array won't be read.")
+			} else {
+				fmt.Println("Please note that validation is very general, doesn't indicate if the imported content will be match perfectly.")
+			}
 			return nil
 		},
 	},

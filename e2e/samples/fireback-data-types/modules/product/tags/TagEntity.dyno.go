@@ -452,7 +452,7 @@ func TagActionCreateFn(dto *TagEntity, query fireback.QueryDSL) (*TagEntity, *fi
 		"entity":    dto,
 		"entityKey": fireback.GetTypeString(&TagEntity{}),
 		"target":    "workspace",
-		"unqiueId":  query.WorkspaceId,
+		"uniqueId":  query.WorkspaceId,
 	})
 	return dto, nil
 }
@@ -544,7 +544,7 @@ func TagUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TagEntity) (
 	event.MustFire(query.TriggerEventName, event.M{
 		"entity":   &item,
 		"target":   "workspace",
-		"unqiueId": query.WorkspaceId,
+		"uniqueId": query.WorkspaceId,
 	})
 	return &itemRefetched, nil
 }
