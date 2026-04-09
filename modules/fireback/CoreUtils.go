@@ -990,6 +990,10 @@ func EnvRunMigration(xapp *FirebackApp) error {
 
 func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Context) error {
 
+	if AskForSelect("This command is to generate a .env file, for existing project, or standalone fireback installation. You need to use `fireback new` to create new project. Agree?", []string{"yes", "no"}) == "no" {
+		return nil
+	}
+
 	datum := ""
 	var err error
 

@@ -2,6 +2,7 @@ package fireback
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -219,8 +220,9 @@ func NewProjectCli() cli.Command {
 			}
 
 			if c.NumFlags() == 0 {
-				ctx.Name = AskForInput("Give the project a name", "newapp")
-				ctx.ModuleName = AskForInput("What is the golang module name?", "github.com/torabian/testapp")
+				ctx.Name = AskForInput("Give the project a name", "new-app")
+				githubAccount := AskForInput("Your github account (for prefixing the module location)", "torabian")
+				ctx.ModuleName = AskForInput("What is the golang module name?", fmt.Sprintf("github.com/%v/%v", githubAccount, ctx.Name))
 				if r := AskForSelect("Architecture type of the project?", []string{"monolith", "microservice"}); r == "monolith" {
 					ctx.IsMonolith = true
 				}
@@ -376,6 +378,9 @@ func NewProjectCli() cli.Command {
 				newProjectContentWriter(tmplCordova.FbReactCapacitorNewTemplate, ctx, "capacitor")
 			}
 
+			fmt.Println("Make sure you cd to your project folder, and then, you call make.")
+			fmt.Println("Fireback auto completion for vscode appears after that.")
+			fmt.Println("Also few extensions are required to work better and compile definition upon save.")
 			return nil
 		},
 	}
