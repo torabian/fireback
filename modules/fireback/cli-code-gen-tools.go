@@ -732,17 +732,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 			},
 			{
 				Flags: commonFlags,
-				Name:  "swiftui",
-				Usage: "Generates the ios related codes, classes, http calls to build apps easier",
-				Action: func(c *cli.Context) error {
-
-					RunCodeGen(xapp, GenContextFromCli(c, SwiftGenCatalog))
-
-					return nil
-				},
-			},
-			{
-				Flags: commonFlags,
 				Name:  "gof",
 				Usage: "Generates the fireback module as golang (backend)",
 				Action: func(c *cli.Context) error {
@@ -845,29 +834,6 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					fmt.Println(4, moduleName)
 					return NewGoNativeModule(moduleName, dirname, autoImport)
 
-				},
-			},
-
-			{
-				Flags: commonFlags,
-				Name:  "android",
-				Usage: "Generates the android class definitions of the project in Java",
-				Action: func(c *cli.Context) error {
-
-					RunCodeGen(xapp, GenContextFromCli(c, JavaGenCatalog))
-
-					return nil
-				},
-			},
-			{
-				Flags: commonFlags,
-				Name:  "andkot",
-				Usage: "Generate Android Kotlin client sdk",
-				Action: func(c *cli.Context) error {
-
-					RunCodeGen(xapp, GenContextFromCli(c, KotlinGenCatalog))
-
-					return nil
 				},
 			},
 			{

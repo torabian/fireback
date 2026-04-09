@@ -22,10 +22,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-/*
-FirebackApp is representing a fireback application, generally
-a wrapper around modules, and some configuration for the project web server instance.
-*/
+// Fireback app, is a wrapper, of actions, and configuration which will be needed to create
+// a gin server simply.
 type FirebackApp struct {
 
 	// application title, or name. it will be used only on cli or other descriptive places

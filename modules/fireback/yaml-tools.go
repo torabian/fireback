@@ -1,8 +1,14 @@
 package fireback
 
+// Place all the yaml related functionality both pure and fireback
+// into this file, including embed files, reading writing, manipulation.
+// avoid other code here.
+// place more general functions on the top, and more fireback related below them.
+
 import (
 	"embed"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log"
@@ -13,7 +19,7 @@ import (
 
 	"github.com/schollz/progressbar/v3"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 /*
@@ -253,4 +259,36 @@ var ImportYamlFromFsResources func(fs *embed.FS, filePath string) []ResourceMap 
 	fmt.Println("Importing file:", filePath, " is skipped. You need to override this function with a storage module")
 
 	return []ResourceMap{}
+}
+
+func BindYamlStringWithDetails(yamlInput []byte, target any) *IError {
+	var node yaml.Node
+	err := yaml.Unmarshal(yamlInput, &node)
+	if err != nil {
+		if syntaxErr, ok := err.(*yaml.TypeError); ok && len(syntaxErr.Errors) > 0 {
+			return Create401ParamOnly(&FirebackMessages.YamlTypeError, map[string]interface{}{
+				"errors": syntaxErr.Errors,
+			})
+		}
+		return Create401ParamOnly(&FirebackMessages.YamlDecodingError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	err = node.Decode(target)
+
+	if err != nil {
+		var yamlNodeErr *yaml.TypeError
+		if errors.As(err, &yamlNodeErr) && len(yamlNodeErr.Errors) > 0 {
+			return Create401ParamOnly(&FirebackMessages.YamlTypeError, map[string]interface{}{
+				"errors": yamlNodeErr.Errors,
+			})
+		}
+
+		return Create401ParamOnly(&FirebackMessages.YamlDecodingError, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
+
+	return nil
 }

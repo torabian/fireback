@@ -41,6 +41,7 @@ func GetExactLanguageFromAcceptLanguage(languages string, supportedLanguages []s
 	}
 	return d[0]
 }
+
 func ParseAcceptLanguage2(languages string, supportedLanguages []string) []string {
 	preferredLanguages := strings.Split(languages, ",")
 	preferredLanguagesLen := len(preferredLanguages)
