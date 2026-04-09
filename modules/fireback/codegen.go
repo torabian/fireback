@@ -856,6 +856,23 @@ func writeGenCache(ctx *CodeGenContext) {
 	os.WriteFile(cacheMapFile, cache, 0644)
 }
 
+func ReadJsonFile[T any](path string, data *T) error {
+	jsonFile, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	// we unmarshal our byteArray which contains our
+	// jsonFile's content into 'users' which we defined above
+	json.Unmarshal(byteValue, &data)
+
+	return nil
+}
+
 func ReadGenCache(ctx *CodeGenContext) {
 	cacheMapFile := filepath.Join(ctx.Path, "cachemap.json")
 	if !ctx.NoCache {

@@ -222,6 +222,17 @@ type CommonCountSqlResult struct {
 	TotalItems int64 `gorm:"totalItems"`
 }
 
+func ReadEmbedFileContent(fsRef *embed.FS, path string) (string, error) {
+
+	data, err := fsRef.ReadFile(path)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
 func UnsafeQuerySqlFromFs[T any](fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, *IError) {
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
@@ -734,7 +745,7 @@ func RemoveEntity[T any](query QueryDSL, reflectVal reflect.Value) (int64, *IErr
 			event.MustFire(query.TriggerEventName, event.M{
 				"entity":   dto,
 				"target":   "workspace",
-				"unqiueId": query.WorkspaceId,
+				"uniqueId": query.WorkspaceId,
 			})
 		}
 

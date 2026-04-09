@@ -9,6 +9,15 @@ var ctx = context.Background()
 var instance InstanceUserSocketManager
 var EVENT_BUS_TOPIC string = "workspace.notifications"
 
+type InstanceUserSocketManager interface {
+	AddUser(instanceId, userId string) error
+	RemoveUser(instanceId, userId string) error
+	ListUsers(instanceId string) ([]string, error)
+	IsUserIn(instanceId string, userId string) (bool, error)
+	FireEvent(q QueryDSL, event Event)
+	Subscribe(ctx context.Context, channel string)
+}
+
 func GetEventBusInstance() InstanceUserSocketManager {
 	return instance
 }
