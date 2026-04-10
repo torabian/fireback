@@ -52,8 +52,9 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*
 
 		if len(errors) > 0 {
 			return nil, &fireback.IError{
-				Message: fireback.FirebackMessages.ValidationFailedOnSomeFields,
-				Errors:  errors,
+				Message:  fireback.FirebackMessages.ValidationFailedOnSomeFields,
+				Errors:   errors,
+				HttpCode: 403,
 			}
 		}
 	}

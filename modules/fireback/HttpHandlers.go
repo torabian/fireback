@@ -231,7 +231,12 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 	}
 
 	if err != nil {
-		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
+		code := int(err.HttpCode)
+		if code == 0 {
+			code = 403
+		}
+
+		GinWriteContent(c, code, gin.H{"error": err.ToPublicEndUser(&f), "data": entity})
 		return
 	}
 
