@@ -7,6 +7,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	"net/http"
 	"net/url"
+	"unicode/utf8"
 )
 
 /**
@@ -92,7 +93,6 @@ type EventBusSubscriptionActionMessage struct {
 	Conn        *websocket.Conn
 	MessageType int
 	Error       error
-	QueryParams EventBusSubscriptionActionQuery
 }
 
 // Developer handler type
@@ -116,7 +116,6 @@ func EventBusSubscriptionAction(r *gin.Engine, handler EventBusSubscriptionActio
 				Error:       err,
 				MessageType: mt,
 			}
-			msg.QueryParams = EventBusSubscriptionActionQueryFromGin(c)
 			// Provide raw message to developer handler
 			if err := handler(msg); err != nil {
 				errMsg := fmt.Sprintf("handler error: %v", err)
@@ -129,103 +128,78 @@ func EventBusSubscriptionAction(r *gin.Engine, handler EventBusSubscriptionActio
 }
 
 type EventBusSubscriptionActionSession struct {
-	In          <-chan EventBusSubscriptionActionMessage
-	Out         chan<- EventBusSubscriptionActionMessage
-	Done        <-chan struct{}
-	Close       func(err error)
-	QueryParams EventBusSubscriptionActionQuery
-	G           *gin.Context
+	Ctx         *gin.Context
 	Socket      *websocket.Conn
+	Done        chan bool
+	Read        chan EventBusSubscriptionActionReadChan
+	QueryParams EventBusSubscriptionActionQuery
 }
 type EventBusSubscriptionActionHandlerDuplex func(*EventBusSubscriptionActionSession)
-
-// EventBusSubscriptionActionDuplex upgrades the HTTP connection to a WebSocket and
-// exposes it as a full-duplex, blocking session.
-//
-// The provided handler owns the lifetime of the connection.
-// The WebSocket remains open as long as the handler is running.
-// Returning from the handler will close the connection.
-//
-// Session channels:
-//   - ctx.In   : incoming messages from the client (closed on disconnect)
-//   - ctx.Out  : outgoing messages to the client (blocking send)
-//   - ctx.Done : closed when the server terminates the session
-//
-// Usage pattern:
-//
-//	external.EventBusSubscriptionActionDuplex(r, func(ctx *external.EventBusSubscriptionActionSession) {
-//		for {
-//			select {
-//			case msg, ok := <-ctx.In:
-//				if !ok {
-//					return // client disconnected
-//				}
-//				ctx.Out <- external.EventBusSubscriptionActionMessage{
-//					MessageType: websocket.TextMessage,
-//					Raw:         msg.Raw,
-//				}
-//
-//			case <-ctx.Done:
-//				return // server-side close
-//			}
-//		}
-//	})
-//
-// Important:
-//   - Always read the generated code, don't use blindly.
-//   - If there is an error on write, you'll get a message back, with message type -1 (instead of default websocket message type int.)
-//   - The handler MUST block (typically via a loop).
-//   - Returning from the handler closes the WebSocket.
-//   - Do not treat this as a per-message callback.
-func EventBusSubscriptionActionDuplex(r *gin.Engine, handler EventBusSubscriptionActionHandlerDuplex) {
-	meta := EventBusSubscriptionActionMeta()
-	// The actual callback is extracted, in case you need to handle multiple handlers or customize, use it directly.
-	r.GET(meta.URL, func(ctx *gin.Context) {
-		EventBusSubscriptionActionDuplexGinHandler(ctx, handler)
-	})
+type EventBusSubscriptionActionReadChan struct {
+	Data  []byte
+	Error error
 }
-func EventBusSubscriptionActionDuplexGinHandler(c *gin.Context, handler EventBusSubscriptionActionHandlerDuplex) {
-	ws, err := upgraderEventBusSubscriptionAction.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot upgrade websocket"})
-		return
-	}
-	in := make(chan EventBusSubscriptionActionMessage)
-	out := make(chan EventBusSubscriptionActionMessage)
-	done := make(chan struct{})
-	session := &EventBusSubscriptionActionSession{
-		In:     in,
-		Out:    out,
-		Done:   done,
-		Socket: ws,
-		G:      c,
-		Close: func(err error) {
-			close(done)
-			ws.Close()
-		},
-	}
-	session.QueryParams = EventBusSubscriptionActionQueryFromGin(c)
-	// Read loop
-	go func() {
-		defer close(in)
-		for {
-			mt, raw, err := ws.ReadMessage()
-			in <- EventBusSubscriptionActionMessage{MessageType: mt, Raw: raw, Error: err}
+
+func EventBusSubscriptionActionReactiveHandler(factory func(
+	session EventBusSubscriptionActionSession,
+) (chan []byte, error)) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		read := make(chan EventBusSubscriptionActionReadChan)
+		done := make(chan bool)
+		c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			c.Close()
+			return
 		}
-	}()
-	// Write loop
-	go func() {
-		for msg := range out {
-			if err := ws.WriteMessage(msg.MessageType, msg.Raw); err != nil {
-				// When message is -1, means it's internal error coming out
-				in <- EventBusSubscriptionActionMessage{MessageType: -1, Error: err}
-				return
+		session := EventBusSubscriptionActionSession{
+			Ctx:    ctx,
+			Socket: c,
+			Done:   done,
+			Read:   read,
+		}
+		session.QueryParams = EventBusSubscriptionActionQueryFromGin(ctx)
+		write, err := factory(session)
+		if err != nil {
+			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		}
+		go func() {
+			for {
+				_, data, err := c.ReadMessage()
+				read <- EventBusSubscriptionActionReadChan{
+					Data:  data,
+					Error: err,
+				}
+				if err != nil {
+					return
+				}
 			}
-		}
-	}()
-	// Run developer code (blocking)
-	handler(session)
-	// Cleanup
-	close(out)
-	ws.Close()
+		}()
+		go func() {
+			for {
+				select {
+				case msg, ok := <-write:
+					if !ok {
+						// Channel closed; shutdown
+						c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+						done <- true
+						return
+					}
+					msgType := websocket.TextMessage
+					if !utf8.Valid(msg) {
+						msgType = websocket.BinaryMessage
+					}
+					err := c.WriteMessage(msgType, msg)
+					if err != nil {
+						// Optionally log the error or send to a logger
+						done <- true
+						return
+					}
+				case <-done:
+					c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+					return
+				}
+			}
+		}()
+	}
 }
