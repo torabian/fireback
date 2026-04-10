@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -23,19 +24,31 @@ type ExtendStrategy struct {
 }
 
 type TranslationResource struct {
-	Extends []ExtendStrategy            `json:"extends" yaml:"extends"`
-	Content map[interface{}]interface{} `json:"content" yaml:"content"`
+	Extends []ExtendStrategy       `json:"extends" yaml:"extends"`
+	Content map[string]interface{} `json:"content" yaml:"content"`
 }
 
-func convertToTypeScript(content map[interface{}]interface{}, indent string) string {
+func convertToTypeScript(content map[string]interface{}, indent string) string {
 	var result strings.Builder
 	result.WriteString("{\n")
 
-	for key, value := range content {
+	// 1. Collect keys
+	keys := make([]string, 0, len(content))
+	for k := range content {
+		keys = append(keys, k)
+	}
+
+	// 2. Sort keys
+	sort.Strings(keys)
+
+	// 3. Iterate in order
+	for _, key := range keys {
+		value := content[key]
+
 		result.WriteString(fmt.Sprintf("%s%s: ", indent, key))
 
 		switch v := value.(type) {
-		case map[interface{}]interface{}:
+		case map[string]interface{}:
 			result.WriteString(convertToTypeScript(v, indent+"  "))
 		case string:
 			result.WriteString(fmt.Sprintf("\"%s\"", v))
@@ -44,7 +57,7 @@ func convertToTypeScript(content map[interface{}]interface{}, indent string) str
 		case float64:
 			result.WriteString(fmt.Sprintf("%f", v))
 		default:
-			fmt.Printf("%T\n", value)
+
 			result.WriteString("null")
 		}
 
@@ -57,7 +70,7 @@ func convertToTypeScript(content map[interface{}]interface{}, indent string) str
 	return result.String()
 }
 
-func addMissingKeysRecursive(english, persian map[interface{}]interface{}) {
+func addMissingKeysRecursive(english, persian map[string]interface{}) {
 	for key, value := range english {
 		_, exists := persian[key]
 		if !exists {
@@ -65,8 +78,8 @@ func addMissingKeysRecursive(english, persian map[interface{}]interface{}) {
 			continue
 		}
 
-		if englishMap, englishIsMap := english[key].(map[interface{}]interface{}); englishIsMap {
-			if persianMap, persianIsMap := persian[key].(map[interface{}]interface{}); persianIsMap {
+		if englishMap, englishIsMap := english[key].(map[string]interface{}); englishIsMap {
+			if persianMap, persianIsMap := persian[key].(map[string]interface{}); persianIsMap {
 				addMissingKeysRecursive(englishMap, persianMap)
 			}
 		}
@@ -164,8 +177,8 @@ func ReadResource(ctx *TranslationResourceCatalog, lang string, cwd string) *Tra
 	return &resource
 }
 
-func mergeMaps2(map1, map2 map[interface{}]interface{}) map[interface{}]interface{} {
-	result := make(map[interface{}]interface{})
+func mergeMaps2(map1, map2 map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
 
 	// Copy map1 to result
 	for k, v := range map1 {
@@ -177,10 +190,10 @@ func mergeMaps2(map1, map2 map[interface{}]interface{}) map[interface{}]interfac
 		if existingVal, ok := result[k]; ok {
 			// If key already exists in result
 			switch existingVal.(type) {
-			case map[interface{}]interface{}:
+			case map[string]interface{}:
 				// If value is a map, recursively merge
-				if vMap, vIsMap := v.(map[interface{}]interface{}); vIsMap {
-					result[k] = mergeMaps2(existingVal.(map[interface{}]interface{}), vMap)
+				if vMap, vIsMap := v.(map[string]interface{}); vIsMap {
+					result[k] = mergeMaps2(existingVal.(map[string]interface{}), vMap)
 				}
 			default:
 				// If value is not a map, overwrite with value from map2
@@ -195,7 +208,7 @@ func mergeMaps2(map1, map2 map[interface{}]interface{}) map[interface{}]interfac
 	return result
 }
 
-func getResourceAsInterface(ctx *TranslationResourceCatalog, cwd string, lang string) map[interface{}]interface{} {
+func getResourceAsInterface(ctx *TranslationResourceCatalog, cwd string, lang string) map[string]interface{} {
 	resource := ReadResource(ctx, lang, cwd)
 	var content = resource.Content
 	if len(resource.Extends) > 0 {
