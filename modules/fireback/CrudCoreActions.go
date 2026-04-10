@@ -211,7 +211,9 @@ func UnsafeQuerySqlStatement[T any](sql string, values ...interface{}) ([]*T, er
 	err := GetDbRef().Raw(sql, values...).Scan(&items).Error
 
 	if err != nil {
-		return items, err
+		fmt.Print("Original failed sql:", sql)
+
+		return nil, err
 	}
 
 	return items, nil
@@ -348,6 +350,23 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 	return UnsafeQuerySql[T](sqlQuery, sqlQueryCounter, query, extraCondition, values...)
 }
 
+func replaceQueryPlaceHolders(query QueryDSL, sqlQuery string, sqlCondition string, extraCondition string) string {
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@internalCondition", sqlCondition)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(internalCondition)", " and ("+sqlCondition+")")
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(extraCondition)", " and ("+extraCondition+")")
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(language)", query.Language)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(workspaceId)", query.WorkspaceId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(userId)", query.UserId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(id)", query.UniqueId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@id", query.UniqueId)
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@offset", fmt.Sprintf("%v", query.StartIndex))
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(offset)", fmt.Sprintf("%v", query.StartIndex))
+	sqlQuery = strings.ReplaceAll(sqlQuery, "(limit)", fmt.Sprintf("%v", query.ItemsPerPage))
+	sqlQuery = strings.ReplaceAll(sqlQuery, "@limit", fmt.Sprintf("%v", query.ItemsPerPage))
+
+	return sqlQuery
+}
+
 func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryDSL, extraCondition string, values ...interface{}) ([]*T, *QueryResultMeta, *IError) {
 	qrm := &QueryResultMeta{
 		TotalItems:          -1,
@@ -363,20 +382,8 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 		extraCondition = "1"
 	}
 
-	sqlQuery = strings.ReplaceAll(sqlQuery, "@internalCondition", sqlCondition)
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(internalCondition)", " and ("+sqlCondition+")")
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(extraCondition)", " and ("+extraCondition+")")
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(language)", query.Language)
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(workspaceId)", query.WorkspaceId)
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(userId)", query.UserId)
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(id)", query.UniqueId)
-	sqlQuery = strings.ReplaceAll(sqlQuery, "@id", query.UniqueId)
-	sqlQuery = strings.ReplaceAll(sqlQuery, "@offset", fmt.Sprintf("%v", query.StartIndex))
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(offset)", fmt.Sprintf("%v", query.StartIndex))
-	sqlQuery = strings.ReplaceAll(sqlQuery, "(limit)", fmt.Sprintf("%v", query.ItemsPerPage))
-	sqlQuery = strings.ReplaceAll(sqlQuery, "@limit", fmt.Sprintf("%v", query.ItemsPerPage))
-
 	if sqlQueryCounter != "" {
+		sqlQueryCounter = replaceQueryPlaceHolders(query, sqlQueryCounter, sqlCondition, extraCondition)
 
 		resultCount, err := UnsafeQuerySqlStatement[CommonCountSqlResult](sqlQueryCounter)
 
@@ -391,6 +398,7 @@ func UnsafeQuerySql[T any](sqlQuery string, sqlQueryCounter string, query QueryD
 
 	}
 
+	sqlQuery = replaceQueryPlaceHolders(query, sqlQuery, sqlCondition, extraCondition)
 	result, err := UnsafeQuerySqlStatement[T](sqlQuery, values...)
 
 	if err != nil {
