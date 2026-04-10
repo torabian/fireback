@@ -6,7 +6,30 @@ description:
   possibility to avoid building most user management flow.
   Some other helpers, such as timezone are added here.
 dtom:
-
+  - name: userImport
+    fields:
+      - name: avatar
+        type: string
+      - name: passports
+        type: array
+        fields:
+          - name: value
+            type: string
+          - name: password
+            type: string
+      - name: address
+        type: object
+        fields:
+          - name: street
+            type: string
+          - name: zipCode
+            type: string
+          - name: city
+            type: string
+          - name: country
+            type: string
+  - name: okayResponse
+ 
   - name: resetEmail
     fields:
       - name: password
@@ -727,32 +750,9 @@ actions:
         - name: secondsToUnblock
           type: int64
           description: The amount of time left to unblock for next request
-dtos:
-  - name: userImport
-    fields:
-      - name: avatar
-        type: string
-      - name: passports
-        type: array
-        fields:
-          - name: value
-            type: string
-          - name: password
-            type: string
-      - name: address
-        type: object
-        fields:
-          - name: street
-            type: string
-          - name: zipCode
-            type: string
-          - name: city
-            type: string
-          - name: country
-            type: string
 
-  - name: okayResponse
- 
+
+
 
 
 entities:
