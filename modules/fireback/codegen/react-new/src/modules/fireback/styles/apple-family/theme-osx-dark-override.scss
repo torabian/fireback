@@ -1,4 +1,11 @@
+/**
+* Anything you paste inside the osx dark, would become available both in dark theme, and automatic theme.
+**/
 @mixin osx-dark() {
+
+  .bottom-nav-tabbar {
+    background: #46414f;
+  }
 
 
   .panel-resize-handle {

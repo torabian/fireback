@@ -65,6 +65,27 @@ export const WorkspaceConfigSingleScreen = () => {
               elem: d?.forcePersonNameOnPhone,
               label: t.workspaceConfigs.forcePersonNameOnPhone,
             },
+
+            {
+              elem: d?.generalEmailProviderId,
+              label: t.workspaceConfigs.generalEmailProviderLabel,
+            },
+            {
+              elem: d?.generalGsmProviderId,
+              label: t.workspaceConfigs.generalGsmProviderLabel,
+            },
+            {
+              elem: d?.inviteToWorkspaceContentId,
+              label: t.workspaceConfigs.inviteToWorkspaceContentLabel,
+            },
+            {
+              elem: d?.emailOtpContentId,
+              label: t.workspaceConfigs.emailOtpContentLabel,
+            },
+            {
+              elem: d?.smsOtpContentId,
+              label: t.workspaceConfigs.smsOtpContentLabel,
+            },
           ]}
         />
       </CommonSingleManager>

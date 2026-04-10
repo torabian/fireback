@@ -5,6 +5,10 @@ import { useS } from "@/modules/fireback/hooks/useS";
 import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
 import { strings } from "./strings/translations";
 import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
+import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
+import { useGetEmailProviders } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviders";
+import { useGetGsmProviders } from "@/modules/fireback/sdk/modules/abac/useGetGsmProviders";
+import { useGetRegionalContents } from "@/modules/fireback/sdk/modules/abac/useGetRegionalContents";
 
 export const WorkspaceConfigForm = ({
   form,
@@ -159,6 +163,91 @@ export const WorkspaceConfigForm = ({
           label={s.workspaceConfigs.forcePersonNameOnPhone}
           hint={s.workspaceConfigs.forcePersonNameOnPhoneHint}
         />
+      </PageSection>
+      <PageSection
+        title={s.workspaceConfigs.passwordSectionTitle}
+        description={s.workspaceConfigs.passwordSectionDescription}
+      >
+
+        <FormSelect
+          keyExtractor={(t) => t.uniqueId}
+          formEffect={{
+            form,
+            field: WorkspaceConfigEntity.Fields.generalEmailProviderId,
+            beforeSet(item) {
+              return item.uniqueId;
+            },
+          }}
+          fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
+          querySource={useGetEmailProviders}
+          errorMessage={errors.generalEmailProviderId}
+          label={s.workspaceConfigs.generalEmailProviderLabel}
+          hint={s.workspaceConfigs.generalEmailProviderHint}
+        />
+
+        <FormSelect
+          keyExtractor={(t) => t.uniqueId}
+          formEffect={{
+            form,
+            field: WorkspaceConfigEntity.Fields.generalGsmProviderId,
+            beforeSet(item) {
+              return item.uniqueId;
+            },
+          }}
+          fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
+          querySource={useGetGsmProviders}
+          errorMessage={errors.generalGsmProviderId}
+          label={s.workspaceConfigs.generalGsmProviderLabel}
+          hint={s.workspaceConfigs.generalGsmProviderHint}
+        />
+
+        <FormSelect
+          keyExtractor={(t) => t.uniqueId}
+          formEffect={{
+            form,
+            field: WorkspaceConfigEntity.Fields.inviteToWorkspaceContentId,
+            beforeSet(item) {
+              return item.uniqueId;
+            },
+          }}
+          fnLabelFormat={e => `${e.title})`}
+          querySource={useGetRegionalContents}
+          errorMessage={errors.inviteToWorkspaceContentId}
+          label={s.workspaceConfigs.inviteToWorkspaceContentLabel}
+          hint={s.workspaceConfigs.inviteToWorkspaceContentHint}
+        />
+
+        <FormSelect
+          keyExtractor={(t) => t.uniqueId}
+          formEffect={{
+            form,
+            field: WorkspaceConfigEntity.Fields.emailOtpContentId,
+            beforeSet(item) {
+              return item.uniqueId;
+            },
+          }}
+          fnLabelFormat={e => `${e.title})`}
+          querySource={useGetRegionalContents}
+          errorMessage={errors.emailOtpContentId}
+          label={s.workspaceConfigs.emailOtpContentLabel}
+          hint={s.workspaceConfigs.emailOtpContentHint}
+        />
+        <FormSelect
+          keyExtractor={(t) => t.uniqueId}
+          formEffect={{
+            form,
+            field: WorkspaceConfigEntity.Fields.smsOtpContentId,
+            beforeSet(item) {
+              return item.uniqueId;
+            },
+          }}
+          fnLabelFormat={e => `${e.title})`}
+          querySource={useGetRegionalContents}
+          errorMessage={errors.smsOtpContentId}
+          label={s.workspaceConfigs.smsOtpContentLabel}
+          hint={s.workspaceConfigs.smsOtpContentHint}
+        />
+
       </PageSection>
     </>
   );
