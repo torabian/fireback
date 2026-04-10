@@ -41,5 +41,3 @@ LEFT JOIN role_entities re
 LEFT JOIN capability_entities ce 
     ON ce.unique_id = rc.capability_entity_unique_id
 WHERE uwe.user_id = "(userId)"
-
-ORDER BY type DESC;
