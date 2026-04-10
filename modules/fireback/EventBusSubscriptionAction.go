@@ -1,7 +1,6 @@
 package fireback
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -65,9 +64,9 @@ func addUserToEventBus(query QueryDSL) {
 
 }
 
-func EventBusSubscriptionActionSig(ctx *gin.Context, socket *websocket.Conn, done chan bool, read chan SocketReadChan) (chan []byte, error) {
-	query := ExtractQueryDslFromGinContext(ctx)
-	query.RawSocketConnection = socket
+func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (chan []byte, error) {
+	query := ExtractQueryDslFromGinContext(session.Ctx)
+	query.RawSocketConnection = session.Socket
 
 	LOG.Debug(
 		"Event bus subscription has been started",
@@ -85,7 +84,7 @@ func EventBusSubscriptionActionSig(ctx *gin.Context, socket *websocket.Conn, don
 
 		for {
 			select {
-			case msg, ok := <-read:
+			case msg, ok := <-session.Read:
 				if !ok {
 					return
 				}
@@ -108,7 +107,7 @@ func EventBusSubscriptionActionSig(ctx *gin.Context, socket *websocket.Conn, don
 					out <- []byte("Socket interaction with webserver only supports json at this moment.")
 				}
 
-			case <-done:
+			case <-session.Done:
 				return
 			}
 		}

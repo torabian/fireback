@@ -131,14 +131,12 @@ func EventBusSubscriptionAction(r *gin.Engine, handler EventBusSubscriptionActio
 }
 
 type EventBusSubscriptionActionSession struct {
-	In          <-chan EventBusSubscriptionActionMessage
-	Out         chan<- EventBusSubscriptionActionMessage
-	Done        <-chan struct{}
-	Close       func(err error)
-	QueryParams EventBusSubscriptionActionQuery
-	G           *gin.Context
-	Socket      *websocket.Conn
+	Ctx    *gin.Context
+	Socket *websocket.Conn
+	Done   chan bool
+	Read   chan EventBusSubscriptionActionReadChan2
 }
+
 type EventBusSubscriptionActionHandlerDuplex func(*EventBusSubscriptionActionSession)
 
 // EventBusSubscriptionActionDuplex upgrades the HTTP connection to a WebSocket and
@@ -179,79 +177,23 @@ type EventBusSubscriptionActionHandlerDuplex func(*EventBusSubscriptionActionSes
 //   - The handler MUST block (typically via a loop).
 //   - Returning from the handler closes the WebSocket.
 //   - Do not treat this as a per-message callback.
-func EventBusSubscriptionActionDuplex(r *gin.Engine, handler EventBusSubscriptionActionHandlerDuplex) {
-	meta := EventBusSubscriptionActionMeta()
-	// The actual callback is extracted, in case you need to handle multiple handlers or customize, use it directly.
-	r.GET(meta.URL, func(ctx *gin.Context) {
-		EventBusSubscriptionActionDuplexGinHandler(ctx, handler)
-	})
-}
-func EventBusSubscriptionActionDuplexGinHandler(c *gin.Context, handler EventBusSubscriptionActionHandlerDuplex) {
-	ws, err := upgraderEventBusSubscriptionAction.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot upgrade websocket"})
-		return
-	}
-	in := make(chan EventBusSubscriptionActionMessage)
-	out := make(chan EventBusSubscriptionActionMessage)
-	done := make(chan struct{})
-	session := &EventBusSubscriptionActionSession{
-		In:     in,
-		Out:    out,
-		Done:   done,
-		Socket: ws,
-		G:      c,
-		Close: func(err error) {
-			close(done)
-			ws.Close()
-		},
-	}
-	session.QueryParams = EventBusSubscriptionActionQueryFromGin(c)
-	// Read loop
-	go func() {
-		defer close(in)
-		for {
-			mt, raw, err := ws.ReadMessage()
-			if err != nil {
-				in <- EventBusSubscriptionActionMessage{MessageType: mt, Error: err}
-				return // 🔴 STOP HERE
-			}
-			in <- EventBusSubscriptionActionMessage{MessageType: mt, Raw: raw}
-		}
-	}()
-	// Write loop
-	go func() {
-		defer close(out)
-		for msg := range out {
-			if err := ws.WriteMessage(msg.MessageType, msg.Raw); err != nil {
-				return // exit writer
-			}
-		}
-	}()
-	// Run developer code (blocking)
-	handler(session)
-	// Cleanup
-	close(out)
-	ws.Close()
-}
 
-type SocketReadChan2 struct {
+type EventBusSubscriptionActionReadChan2 struct {
 	Data  []byte
 	Error error
 }
 
 type ReactiveFactory2 = func(
-	ctx *gin.Context,
-	socket *websocket.Conn,
-	done chan bool,
-	read chan SocketReadChan,
+	session EventBusSubscriptionActionSession,
 ) (chan []byte, error)
 
-func ReactiveSocketHandler22(factory ReactiveFactory2) gin.HandlerFunc {
+func EventBusSubscriptionActionReactiveHandler(factory func(
+	session EventBusSubscriptionActionSession,
+) (chan []byte, error)) gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 
-		read := make(chan SocketReadChan)
+		read := make(chan EventBusSubscriptionActionReadChan2)
 		done := make(chan bool)
 
 		c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -262,7 +204,15 @@ func ReactiveSocketHandler22(factory ReactiveFactory2) gin.HandlerFunc {
 			return
 		}
 
-		write, err := factory(ctx, c, done, read)
+		session := EventBusSubscriptionActionSession{
+			Ctx:    ctx,
+			Socket: c,
+			Done:   done,
+			Read:   read,
+		}
+
+		write, err := factory(session)
+
 		if err != nil {
 			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 		}
@@ -270,7 +220,7 @@ func ReactiveSocketHandler22(factory ReactiveFactory2) gin.HandlerFunc {
 		go func() {
 			for {
 				_, data, err := c.ReadMessage()
-				read <- SocketReadChan{
+				read <- EventBusSubscriptionActionReadChan2{
 					Data:  data,
 					Error: err,
 				}
