@@ -5,6 +5,8 @@ import { useS } from "@/modules/fireback/hooks/useS";
 import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
 import { strings } from "./strings/translations";
 import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
+import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
+import { useGetEmailProviders } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviders";
 
 export const WorkspaceConfigForm = ({
   form,
@@ -159,6 +161,28 @@ export const WorkspaceConfigForm = ({
           label={s.workspaceConfigs.forcePersonNameOnPhone}
           hint={s.workspaceConfigs.forcePersonNameOnPhoneHint}
         />
+      </PageSection>
+      <PageSection
+        title={s.workspaceConfigs.passwordSectionTitle}
+        description={s.workspaceConfigs.passwordSectionDescription}
+      >
+
+        <FormSelect
+          keyExtractor={(t) => t.uniqueId}
+          formEffect={{
+            form,
+            field: WorkspaceConfigEntity.Fields.generalEmailProvider$,
+            beforeSet(item) {
+              return item.uniqueId;
+            },
+          }}
+          fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
+          querySource={useGetEmailProviders}
+          errorMessage={errors.generalEmailProviderId}
+          label={''}
+          hint={''}
+        />
+
       </PageSection>
     </>
   );

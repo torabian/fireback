@@ -44,6 +44,7 @@ func convertToTypeScript(content map[interface{}]interface{}, indent string) str
 		case float64:
 			result.WriteString(fmt.Sprintf("%f", v))
 		default:
+			fmt.Printf("%T\n", value)
 			result.WriteString("null")
 		}
 

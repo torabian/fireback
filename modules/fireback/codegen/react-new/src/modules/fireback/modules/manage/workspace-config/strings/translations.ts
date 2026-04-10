@@ -2,40 +2,11 @@
 * Auto generated file by fireback language & translation manager.
 */
 export const en = {
-  workspaceConfigs: {
-    recaptchaSectionDescription: "Configurate the recaptcha 2 related options for the application.",
-    totpSectionDescription: "Usage of the authenticator app as a second security step for the password.",
-    enableRecaptcha2Hint: "Enables reCAPTCHA2 from google integration into the project selfservice. You need to provide Server Key and Client Key to make it effective.",
-    forcePasswordOnPhone: "Force password on phone",
-    forceTotp: "Force totp",
-    newWorkspaceConfig: "New workspace config",
-    description: "Configurate how the workspaces work in terms of totp, forced otp, recaptcha and how the user can interact with the application.",
-    forcePasswordOnPhoneHint: "Force password on phone",
-    requireOtpOnSigninHint: "Forces passports such as phone and email to approve signin with 6 digit code, even if the passport has a password. OAuth is exempted.",
-    enableTotpHint: "Enables time based otp for account creation and signin.",
-    otpSectionDescription: "Manage the user authentication using single time password over sms/email",
-    totpSectionTitle: "TOTP (Time based Dual Factor)",
-    archiveTitle: "Workspace configs",
-    forcePersonNameOnPhone: "Force person name on phone",
-    recaptcha2ServerKey: "Server key",
-    passwordSectionDescription: "Configurate the usage of password by users",
-    enableTotp: "Enable totp",
-    forcePersonNameOnPhoneHint: "Force person name on phone",
-    recaptchaSectionTitle: "Recaptcha section",
-    passwordSectionTitle: "Password management",
-    editWorkspaceConfig: "Edit workspace config",
-    enableRecaptcha2: "Enable reCAPTCHA2",
-    requireOtpOnSignin: "Require otp on signin",
-    title: "Workspace Config",
-    recaptcha2ClientKeyHint: "Client key for reCAPTCHA2",
-    recaptcha2ServerKeyHint: "Server key for reCAPTCHA2",
-    requireOtpOnSignupHint: "It would force account creation to first make a one time password verification and then continue the process.",
-    otpSectionTitle: "OTP (One time password)",
-    enableOtp: "Enable otp",
-    enableOtpHint: "Enables the one time password for the selfservice. It would allow email or phone numbers to bypass password and recieve a 6 digit code on their inbox or phone.",
-    forceTotpHint: "Forces the totp for account creation. If an account doesn't have it, they need to setup before they can login.",
-    recaptcha2ClientKey: "Client key",
-    requireOtpOnSignup: "Require otp on signup",
-  },
+  workspaceConfigs: null,
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  workspaceConfigs: null,
 };
- export const strings = {...en, };
+ export const strings = {...en, $pl:pl};

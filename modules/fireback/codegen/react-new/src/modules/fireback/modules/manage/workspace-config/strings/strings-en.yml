@@ -48,3 +48,5 @@ content:
     requireOtpOnSignupHint:
       It would force account creation to first make a one time password verification and then continue
       the process.
+    generalEmailProviderLabel: General Email Provider
+    generalEmailProviderHint: Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.

@@ -1314,8 +1314,45 @@ entities:
       - name: forcePersonNameOnPhone
         type: bool?
         description: 
-          Forces the creation of account using phone number to ask for user firstname and lastname
+          Forces the creation of account using phone number to ask for user first name and last name
+      - name: generalEmailProvider
+        type: one
+        target: EmailProviderEntity
+        allowCreate: false
+        description: 
+          Email provider service, which will be used to send the messages using it's service. It doesn't
+          affect the message content, rather, you can choose via which third-party service, or even your own
+          smtp service to send emails.
         
+      - name: generalGsmProvider
+        type: one
+        target: GsmProviderEntity
+        allowCreate: false
+        description: 
+          General service which would be used to send text messages (sms) using it's services or API.
+
+      - name: inviteToWorkspaceContent
+        type: one
+        target: RegionalContentEntity
+        allowCreate: false
+        description: 
+          This template would be used, as default when a user is inviting a third-party into their own workspace.
+
+      - name: emailOtpContent
+        type: one
+        target: RegionalContentEntity
+        allowCreate: false
+        description: 
+          Upon one time password request for email, the content will be read to fill the message which will go to user.
+
+      - name: smsOtpContent
+        type: one
+        target: RegionalContentEntity
+        allowCreate: false
+        description: 
+          Upon OTP text messages, this template will be used to create such text message, including the one time password code.
+ 
+
   - name: gsmProvider
     permRewrite:
       replace: root.modules

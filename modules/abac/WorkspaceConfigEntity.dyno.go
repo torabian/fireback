@@ -33,16 +33,21 @@ func ResetWorkspaceConfigSeeders(fs *embed.FS) {
 }
 
 type WorkspaceConfigEntityQs struct {
-	EnableRecaptcha2       fireback.QueriableField `cli:"enable-recaptcha2" table:"workspace_config" typeof:"bool?" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
-	EnableOtp              fireback.QueriableField `cli:"enable-otp" table:"workspace_config" typeof:"bool?" column:"enable_otp" qs:"enableOtp"`
-	RequireOtpOnSignup     fireback.QueriableField `cli:"require-otp-on-signup" table:"workspace_config" typeof:"bool?" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
-	RequireOtpOnSignin     fireback.QueriableField `cli:"require-otp-on-signin" table:"workspace_config" typeof:"bool?" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
-	Recaptcha2ServerKey    fireback.QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" typeof:"string" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
-	Recaptcha2ClientKey    fireback.QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" typeof:"string" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
-	EnableTotp             fireback.QueriableField `cli:"enable-totp" table:"workspace_config" typeof:"bool?" column:"enable_totp" qs:"enableTotp"`
-	ForceTotp              fireback.QueriableField `cli:"force-totp" table:"workspace_config" typeof:"bool?" column:"force_totp" qs:"forceTotp"`
-	ForcePasswordOnPhone   fireback.QueriableField `cli:"force-password-on-phone" table:"workspace_config" typeof:"bool?" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
-	ForcePersonNameOnPhone fireback.QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" typeof:"bool?" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
+	EnableRecaptcha2         fireback.QueriableField `cli:"enable-recaptcha2" table:"workspace_config" typeof:"bool?" column:"enable_recaptcha2" qs:"enableRecaptcha2"`
+	EnableOtp                fireback.QueriableField `cli:"enable-otp" table:"workspace_config" typeof:"bool?" column:"enable_otp" qs:"enableOtp"`
+	RequireOtpOnSignup       fireback.QueriableField `cli:"require-otp-on-signup" table:"workspace_config" typeof:"bool?" column:"require_otp_on_signup" qs:"requireOtpOnSignup"`
+	RequireOtpOnSignin       fireback.QueriableField `cli:"require-otp-on-signin" table:"workspace_config" typeof:"bool?" column:"require_otp_on_signin" qs:"requireOtpOnSignin"`
+	Recaptcha2ServerKey      fireback.QueriableField `cli:"recaptcha2-server-key" table:"workspace_config" typeof:"string" column:"recaptcha2_server_key" qs:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey      fireback.QueriableField `cli:"recaptcha2-client-key" table:"workspace_config" typeof:"string" column:"recaptcha2_client_key" qs:"recaptcha2ClientKey"`
+	EnableTotp               fireback.QueriableField `cli:"enable-totp" table:"workspace_config" typeof:"bool?" column:"enable_totp" qs:"enableTotp"`
+	ForceTotp                fireback.QueriableField `cli:"force-totp" table:"workspace_config" typeof:"bool?" column:"force_totp" qs:"forceTotp"`
+	ForcePasswordOnPhone     fireback.QueriableField `cli:"force-password-on-phone" table:"workspace_config" typeof:"bool?" column:"force_password_on_phone" qs:"forcePasswordOnPhone"`
+	ForcePersonNameOnPhone   fireback.QueriableField `cli:"force-person-name-on-phone" table:"workspace_config" typeof:"bool?" column:"force_person_name_on_phone" qs:"forcePersonNameOnPhone"`
+	GeneralEmailProvider     fireback.QueriableField `cli:"general-email-provider" table:"workspace_config" typeof:"one" column:"general_email_provider" qs:"generalEmailProvider"`
+	GeneralGsmProvider       fireback.QueriableField `cli:"general-gsm-provider" table:"workspace_config" typeof:"one" column:"general_gsm_provider" qs:"generalGsmProvider"`
+	InviteToWorkspaceContent fireback.QueriableField `cli:"invite-to-workspace-content" table:"workspace_config" typeof:"one" column:"invite_to_workspace_content" qs:"inviteToWorkspaceContent"`
+	EmailOtpContent          fireback.QueriableField `cli:"email-otp-content" table:"workspace_config" typeof:"one" column:"email_otp_content" qs:"emailOtpContent"`
+	SmsOtpContent            fireback.QueriableField `cli:"sms-otp-content" table:"workspace_config" typeof:"one" column:"sms_otp_content" qs:"smsOtpContent"`
 }
 
 func (x *WorkspaceConfigEntityQs) GetQuery() string {
@@ -88,7 +93,27 @@ var WorkspaceConfigQsFlags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Name:  "force-person-name-on-phone",
-		Usage: "Forces the creation of account using phone number to ask for user firstname and lastname",
+		Usage: "Forces the creation of account using phone number to ask for user first name and last name",
+	},
+	&cli.StringFlag{
+		Name:  "general-email-provider",
+		Usage: "Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.",
+	},
+	&cli.StringFlag{
+		Name:  "general-gsm-provider",
+		Usage: "General service which would be used to send text messages (sms) using it's services or API.",
+	},
+	&cli.StringFlag{
+		Name:  "invite-to-workspace-content",
+		Usage: "This template would be used, as default when a user is inviting a third-party into their own workspace.",
+	},
+	&cli.StringFlag{
+		Name:  "email-otp-content",
+		Usage: "Upon one time password request for email, the content will be read to fill the message which will go to user.",
+	},
+	&cli.StringFlag{
+		Name:  "sms-otp-content",
+		Usage: "Upon OTP text messages, this template will be used to create such text message, including the one time password code.",
 	},
 }
 
@@ -169,10 +194,25 @@ type WorkspaceConfigEntity struct {
 	ForceTotp fireback.Bool `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
 	// Forces users who want to create account using phone number to also set a password on their account
 	ForcePasswordOnPhone fireback.Bool `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
-	// Forces the creation of account using phone number to ask for user firstname and lastname
-	ForcePersonNameOnPhone fireback.Bool            `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
-	Children               []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo               *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	// Forces the creation of account using phone number to ask for user first name and last name
+	ForcePersonNameOnPhone fireback.Bool `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
+	// Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
+	GeneralEmailProvider   *EmailProviderEntity `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
+	GeneralEmailProviderId fireback.String      `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
+	// General service which would be used to send text messages (sms) using it's services or API.
+	GeneralGsmProvider   *GsmProviderEntity `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
+	GeneralGsmProviderId fireback.String    `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
+	// This template would be used, as default when a user is inviting a third-party into their own workspace.
+	InviteToWorkspaceContent   *RegionalContentEntity `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"foreignKey:InviteToWorkspaceContentId;references:UniqueId"      `
+	InviteToWorkspaceContentId fireback.String        `json:"inviteToWorkspaceContentId" yaml:"inviteToWorkspaceContentId" xml:"inviteToWorkspaceContentId"  `
+	// Upon one time password request for email, the content will be read to fill the message which will go to user.
+	EmailOtpContent   *RegionalContentEntity `json:"emailOtpContent" xml:"emailOtpContent" yaml:"emailOtpContent"    gorm:"foreignKey:EmailOtpContentId;references:UniqueId"      `
+	EmailOtpContentId fireback.String        `json:"emailOtpContentId" yaml:"emailOtpContentId" xml:"emailOtpContentId"  `
+	// Upon OTP text messages, this template will be used to create such text message, including the one time password code.
+	SmsOtpContent   *RegionalContentEntity   `json:"smsOtpContent" xml:"smsOtpContent" yaml:"smsOtpContent"    gorm:"foreignKey:SmsOtpContentId;references:UniqueId"      `
+	SmsOtpContentId fireback.String          `json:"smsOtpContentId" yaml:"smsOtpContentId" xml:"smsOtpContentId"  `
+	Children        []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo        *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func WorkspaceConfigEntityStream(q fireback.QueryDSL) (chan []*WorkspaceConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -266,16 +306,21 @@ var WORKSPACE_CONFIG_EVENTS = []string{
 }
 
 type WorkspaceConfigFieldMap struct {
-	EnableRecaptcha2       fireback.TranslatedString `yaml:"enableRecaptcha2"`
-	EnableOtp              fireback.TranslatedString `yaml:"enableOtp"`
-	RequireOtpOnSignup     fireback.TranslatedString `yaml:"requireOtpOnSignup"`
-	RequireOtpOnSignin     fireback.TranslatedString `yaml:"requireOtpOnSignin"`
-	Recaptcha2ServerKey    fireback.TranslatedString `yaml:"recaptcha2ServerKey"`
-	Recaptcha2ClientKey    fireback.TranslatedString `yaml:"recaptcha2ClientKey"`
-	EnableTotp             fireback.TranslatedString `yaml:"enableTotp"`
-	ForceTotp              fireback.TranslatedString `yaml:"forceTotp"`
-	ForcePasswordOnPhone   fireback.TranslatedString `yaml:"forcePasswordOnPhone"`
-	ForcePersonNameOnPhone fireback.TranslatedString `yaml:"forcePersonNameOnPhone"`
+	EnableRecaptcha2         fireback.TranslatedString `yaml:"enableRecaptcha2"`
+	EnableOtp                fireback.TranslatedString `yaml:"enableOtp"`
+	RequireOtpOnSignup       fireback.TranslatedString `yaml:"requireOtpOnSignup"`
+	RequireOtpOnSignin       fireback.TranslatedString `yaml:"requireOtpOnSignin"`
+	Recaptcha2ServerKey      fireback.TranslatedString `yaml:"recaptcha2ServerKey"`
+	Recaptcha2ClientKey      fireback.TranslatedString `yaml:"recaptcha2ClientKey"`
+	EnableTotp               fireback.TranslatedString `yaml:"enableTotp"`
+	ForceTotp                fireback.TranslatedString `yaml:"forceTotp"`
+	ForcePasswordOnPhone     fireback.TranslatedString `yaml:"forcePasswordOnPhone"`
+	ForcePersonNameOnPhone   fireback.TranslatedString `yaml:"forcePersonNameOnPhone"`
+	GeneralEmailProvider     fireback.TranslatedString `yaml:"generalEmailProvider"`
+	GeneralGsmProvider       fireback.TranslatedString `yaml:"generalGsmProvider"`
+	InviteToWorkspaceContent fireback.TranslatedString `yaml:"inviteToWorkspaceContent"`
+	EmailOtpContent          fireback.TranslatedString `yaml:"emailOtpContent"`
+	SmsOtpContent            fireback.TranslatedString `yaml:"smsOtpContent"`
 }
 
 var WorkspaceConfigEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -407,7 +452,12 @@ Recaptcha2ClientKey: (type: string) Description: Secret which would be used for 
 EnableTotp: (type: bool?) Description: Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
 ForceTotp: (type: bool?) Description: Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
 ForcePasswordOnPhone: (type: bool?) Description: Forces users who want to create account using phone number to also set a password on their account
-ForcePersonNameOnPhone: (type: bool?) Description: Forces the creation of account using phone number to ask for user firstname and lastname
+ForcePersonNameOnPhone: (type: bool?) Description: Forces the creation of account using phone number to ask for user first name and last name
+GeneralEmailProvider: (type: one) Description: Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
+GeneralGsmProvider: (type: one) Description: General service which would be used to send text messages (sms) using it's services or API.
+InviteToWorkspaceContent: (type: one) Description: This template would be used, as default when a user is inviting a third-party into their own workspace.
+EmailOtpContent: (type: one) Description: Upon one time password request for email, the content will be read to fill the message which will go to user.
+SmsOtpContent: (type: one) Description: Upon OTP text messages, this template will be used to create such text message, including the one time password code.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -817,7 +867,32 @@ var WorkspaceConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "force-person-name-on-phone",
 		Required: false,
-		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool?)`,
+		Usage:    `Forces the creation of account using phone number to ask for user first name and last name (bool?)`,
+	},
+	&cli.StringFlag{
+		Name:     "general-email-provider-id",
+		Required: false,
+		Usage:    `Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "general-gsm-provider-id",
+		Required: false,
+		Usage:    `General service which would be used to send text messages (sms) using it's services or API. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-id",
+		Required: false,
+		Usage:    `This template would be used, as default when a user is inviting a third-party into their own workspace. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "email-otp-content-id",
+		Required: false,
+		Usage:    `Upon one time password request for email, the content will be read to fill the message which will go to user. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "sms-otp-content-id",
+		Required: false,
+		Usage:    `Upon OTP text messages, this template will be used to create such text message, including the one time password code. (one)`,
 	},
 }
 var WorkspaceConfigCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
@@ -911,7 +986,32 @@ var WorkspaceConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "force-person-name-on-phone",
 		Required: false,
-		Usage:    `Forces the creation of account using phone number to ask for user firstname and lastname (bool?)`,
+		Usage:    `Forces the creation of account using phone number to ask for user first name and last name (bool?)`,
+	},
+	&cli.StringFlag{
+		Name:     "general-email-provider-id",
+		Required: false,
+		Usage:    `Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "general-gsm-provider-id",
+		Required: false,
+		Usage:    `General service which would be used to send text messages (sms) using it's services or API. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "invite-to-workspace-content-id",
+		Required: false,
+		Usage:    `This template would be used, as default when a user is inviting a third-party into their own workspace. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "email-otp-content-id",
+		Required: false,
+		Usage:    `Upon one time password request for email, the content will be read to fill the message which will go to user. (one)`,
+	},
+	&cli.StringFlag{
+		Name:     "sms-otp-content-id",
+		Required: false,
+		Usage:    `Upon OTP text messages, this template will be used to create such text message, including the one time password code. (one)`,
 	},
 }
 var WorkspaceConfigCreateCmd cli.Command = WORKSPACE_CONFIG_ACTION_POST_ONE.ToCli()
@@ -1003,6 +1103,21 @@ func CastWorkspaceConfigFromCli(c *cli.Context) *WorkspaceConfigEntity {
 	}
 	if c.IsSet("force-person-name-on-phone") {
 		template.ForcePersonNameOnPhone = fireback.NewBoolAutoNull(c.String("force-person-name-on-phone"))
+	}
+	if c.IsSet("general-email-provider-id") {
+		template.GeneralEmailProviderId = fireback.NewStringAutoNull(c.String("general-email-provider-id"))
+	}
+	if c.IsSet("general-gsm-provider-id") {
+		template.GeneralGsmProviderId = fireback.NewStringAutoNull(c.String("general-gsm-provider-id"))
+	}
+	if c.IsSet("invite-to-workspace-content-id") {
+		template.InviteToWorkspaceContentId = fireback.NewStringAutoNull(c.String("invite-to-workspace-content-id"))
+	}
+	if c.IsSet("email-otp-content-id") {
+		template.EmailOtpContentId = fireback.NewStringAutoNull(c.String("email-otp-content-id"))
+	}
+	if c.IsSet("sms-otp-content-id") {
+		template.SmsOtpContentId = fireback.NewStringAutoNull(c.String("sms-otp-content-id"))
 	}
 	return template
 }

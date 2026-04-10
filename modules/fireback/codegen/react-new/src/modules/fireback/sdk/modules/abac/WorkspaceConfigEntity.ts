@@ -7,6 +7,15 @@
         BaseDto,
         BaseEntity,
     } from "../../core/definitions"
+    import {
+        EmailProviderEntity,
+    } from "./EmailProviderEntity"
+    import {
+        GsmProviderEntity,
+    } from "./GsmProviderEntity"
+    import {
+        RegionalContentEntity,
+    } from "./RegionalContentEntity"
 // In this section we have sub entities related to this object
 // Class body
 export type WorkspaceConfigEntityKeys =
@@ -50,9 +59,34 @@ export class WorkspaceConfigEntity extends BaseEntity {
   */
   public forcePasswordOnPhone?: boolean | null;
   /**
-  Forces the creation of account using phone number to ask for user firstname and lastname
+  Forces the creation of account using phone number to ask for user first name and last name
   */
   public forcePersonNameOnPhone?: boolean | null;
+  /**
+  Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
+  */
+  public generalEmailProvider?: EmailProviderEntity | null;
+      generalEmailProviderId?: string | null;
+  /**
+  General service which would be used to send text messages (sms) using it's services or API.
+  */
+  public generalGsmProvider?: GsmProviderEntity | null;
+      generalGsmProviderId?: string | null;
+  /**
+  This template would be used, as default when a user is inviting a third-party into their own workspace.
+  */
+  public inviteToWorkspaceContent?: RegionalContentEntity | null;
+      inviteToWorkspaceContentId?: string | null;
+  /**
+  Upon one time password request for email, the content will be read to fill the message which will go to user.
+  */
+  public emailOtpContent?: RegionalContentEntity | null;
+      emailOtpContentId?: string | null;
+  /**
+  Upon OTP text messages, this template will be used to create such text message, including the one time password code.
+  */
+  public smsOtpContent?: RegionalContentEntity | null;
+      smsOtpContentId?: string | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/workspace-config/edit/${uniqueId}`;
@@ -164,9 +198,49 @@ export class WorkspaceConfigEntity extends BaseEntity {
     },
     {
       "name": "forcePersonNameOnPhone",
-      "description": "Forces the creation of account using phone number to ask for user firstname and lastname",
+      "description": "Forces the creation of account using phone number to ask for user first name and last name",
       "type": "bool?",
       "computedType": "boolean",
+      "gormMap": {}
+    },
+    {
+      "name": "generalEmailProvider",
+      "description": "Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.",
+      "type": "one",
+      "target": "EmailProviderEntity",
+      "computedType": "EmailProviderEntity",
+      "gormMap": {}
+    },
+    {
+      "name": "generalGsmProvider",
+      "description": "General service which would be used to send text messages (sms) using it's services or API.",
+      "type": "one",
+      "target": "GsmProviderEntity",
+      "computedType": "GsmProviderEntity",
+      "gormMap": {}
+    },
+    {
+      "name": "inviteToWorkspaceContent",
+      "description": "This template would be used, as default when a user is inviting a third-party into their own workspace.",
+      "type": "one",
+      "target": "RegionalContentEntity",
+      "computedType": "RegionalContentEntity",
+      "gormMap": {}
+    },
+    {
+      "name": "emailOtpContent",
+      "description": "Upon one time password request for email, the content will be read to fill the message which will go to user.",
+      "type": "one",
+      "target": "RegionalContentEntity",
+      "computedType": "RegionalContentEntity",
+      "gormMap": {}
+    },
+    {
+      "name": "smsOtpContent",
+      "description": "Upon OTP text messages, this template will be used to create such text message, including the one time password code.",
+      "type": "one",
+      "target": "RegionalContentEntity",
+      "computedType": "RegionalContentEntity",
       "gormMap": {}
     }
   ],
@@ -185,5 +259,20 @@ public static Fields = {
       forceTotp: `forceTotp`,
       forcePasswordOnPhone: `forcePasswordOnPhone`,
       forcePersonNameOnPhone: `forcePersonNameOnPhone`,
+          generalEmailProviderId: `generalEmailProviderId`,
+      generalEmailProvider$: `generalEmailProvider`,
+        generalEmailProvider: EmailProviderEntity.Fields,
+          generalGsmProviderId: `generalGsmProviderId`,
+      generalGsmProvider$: `generalGsmProvider`,
+        generalGsmProvider: GsmProviderEntity.Fields,
+          inviteToWorkspaceContentId: `inviteToWorkspaceContentId`,
+      inviteToWorkspaceContent$: `inviteToWorkspaceContent`,
+        inviteToWorkspaceContent: RegionalContentEntity.Fields,
+          emailOtpContentId: `emailOtpContentId`,
+      emailOtpContent$: `emailOtpContent`,
+        emailOtpContent: RegionalContentEntity.Fields,
+          smsOtpContentId: `smsOtpContentId`,
+      smsOtpContent$: `smsOtpContent`,
+        smsOtpContent: RegionalContentEntity.Fields,
 }
 }
