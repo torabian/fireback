@@ -79,11 +79,11 @@ export const CommonEntityManager = ({
       formik.current?.setValues(
         beforeSetValues
           ? beforeSetValues({
-              ...getQuery.data.data,
-            })
+            ...getQuery.data.data,
+          })
           : {
-              ...getQuery.data.data,
-            }
+            ...getQuery.data.data,
+          }
       );
 
       setInitialData(getQuery.data?.data);
@@ -172,25 +172,33 @@ export const CommonEntityManager = ({
                   postHook?.mutation?.isError
                     ? postHook.mutation
                     : patchHook?.mutation?.isError
-                    ? patchHook.mutation
-                    : getSingleHook?.query?.isError
-                    ? getSingleHook.query
-                    : null
+                      ? patchHook.mutation
+                      : getSingleHook?.query?.isError
+                        ? getSingleHook.query
+                        : null
                 }
               />
             </div>
             {disableOnGetFailed === true &&
-            getSingleHook?.query?.isError ? null : (
+              getSingleHook?.query?.isError ? null : (
               <Form
                 isEditing={isEditing}
                 initialData={initialData}
                 form={{
                   ...form,
+                  setValues: (values: React.SetStateAction<any>, shouldValidate?: boolean) => {
+
+                    for (const key in values) {
+                      set(touchedData.current, key, values[key])
+                    }
+                    return form.setValues(values)
+                  },
                   setFieldValue: (
                     field: string,
                     value: any,
                     shouldValidate?: boolean
                   ) => {
+
                     set(touchedData.current, field, value);
                     return form.setFieldValue(field, value, shouldValidate);
                   },

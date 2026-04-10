@@ -248,8 +248,9 @@ func CommonStructValidatorPointer[T any](dto *T, isPatch bool) *IError {
 
 	if len(errors) > 0 {
 		var result IError = IError{
-			Message: FirebackMessages.ValidationFailedOnSomeFields,
-			Errors:  errors,
+			Message:  FirebackMessages.ValidationFailedOnSomeFields,
+			Errors:   errors,
+			HttpCode: 403,
 		}
 		return &result
 	}
