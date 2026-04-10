@@ -2,13 +2,12 @@ package fireback
 
 import (
 	"fmt"
-	"net/http"
-	"net/url"
-	"unicode/utf8"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
+	"net/http"
+	"net/url"
+	"unicode/utf8"
 )
 
 /**
@@ -94,7 +93,6 @@ type EventBusSubscriptionActionMessage struct {
 	Conn        *websocket.Conn
 	MessageType int
 	Error       error
-	QueryParams EventBusSubscriptionActionQuery
 }
 
 // Developer handler type
@@ -118,7 +116,6 @@ func EventBusSubscriptionAction(r *gin.Engine, handler EventBusSubscriptionActio
 				Error:       err,
 				MessageType: mt,
 			}
-			msg.QueryParams = EventBusSubscriptionActionQueryFromGin(c)
 			// Provide raw message to developer handler
 			if err := handler(msg); err != nil {
 				errMsg := fmt.Sprintf("handler error: %v", err)
@@ -131,106 +128,53 @@ func EventBusSubscriptionAction(r *gin.Engine, handler EventBusSubscriptionActio
 }
 
 type EventBusSubscriptionActionSession struct {
-	Ctx    *gin.Context
-	Socket *websocket.Conn
-	Done   chan bool
-	Read   chan EventBusSubscriptionActionReadChan2
+	Ctx         *gin.Context
+	Socket      *websocket.Conn
+	Done        chan bool
+	Read        chan EventBusSubscriptionActionReadChan
+	QueryParams EventBusSubscriptionActionQuery
 }
-
 type EventBusSubscriptionActionHandlerDuplex func(*EventBusSubscriptionActionSession)
-
-// EventBusSubscriptionActionDuplex upgrades the HTTP connection to a WebSocket and
-// exposes it as a full-duplex, blocking session.
-//
-// The provided handler owns the lifetime of the connection.
-// The WebSocket remains open as long as the handler is running.
-// Returning from the handler will close the connection.
-//
-// Session channels:
-//   - ctx.In   : incoming messages from the client (closed on disconnect)
-//   - ctx.Out  : outgoing messages to the client (blocking send)
-//   - ctx.Done : closed when the server terminates the session
-//
-// Usage pattern:
-//
-//	external.EventBusSubscriptionActionDuplex(r, func(ctx *external.EventBusSubscriptionActionSession) {
-//		for {
-//			select {
-//			case msg, ok := <-ctx.In:
-//				if !ok {
-//					return // client disconnected
-//				}
-//				ctx.Out <- external.EventBusSubscriptionActionMessage{
-//					MessageType: websocket.TextMessage,
-//					Raw:         msg.Raw,
-//				}
-//
-//			case <-ctx.Done:
-//				return // server-side close
-//			}
-//		}
-//	})
-//
-// Important:
-//   - Always read the generated code, don't use blindly.
-//   - If there is an error on write, you'll get a message back, with message type -1 (instead of default websocket message type int.)
-//   - The handler MUST block (typically via a loop).
-//   - Returning from the handler closes the WebSocket.
-//   - Do not treat this as a per-message callback.
-
-type EventBusSubscriptionActionReadChan2 struct {
+type EventBusSubscriptionActionReadChan struct {
 	Data  []byte
 	Error error
 }
 
-type ReactiveFactory2 = func(
-	session EventBusSubscriptionActionSession,
-) (chan []byte, error)
-
 func EventBusSubscriptionActionReactiveHandler(factory func(
 	session EventBusSubscriptionActionSession,
 ) (chan []byte, error)) gin.HandlerFunc {
-
 	return func(ctx *gin.Context) {
-
-		read := make(chan EventBusSubscriptionActionReadChan2)
+		read := make(chan EventBusSubscriptionActionReadChan)
 		done := make(chan bool)
-
 		c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
-
 			c.Close()
 			return
 		}
-
 		session := EventBusSubscriptionActionSession{
 			Ctx:    ctx,
 			Socket: c,
 			Done:   done,
 			Read:   read,
 		}
-
+		session.QueryParams = EventBusSubscriptionActionQueryFromGin(ctx)
 		write, err := factory(session)
-
 		if err != nil {
 			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 		}
-
 		go func() {
 			for {
 				_, data, err := c.ReadMessage()
-				read <- EventBusSubscriptionActionReadChan2{
+				read <- EventBusSubscriptionActionReadChan{
 					Data:  data,
 					Error: err,
 				}
-
 				if err != nil {
 					return
 				}
 			}
 		}()
-
 		go func() {
 			for {
 				select {
@@ -246,7 +190,6 @@ func EventBusSubscriptionActionReactiveHandler(factory func(
 						msgType = websocket.BinaryMessage
 					}
 					err := c.WriteMessage(msgType, msg)
-
 					if err != nil {
 						// Optionally log the error or send to a logger
 						done <- true
