@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -64,7 +65,10 @@ func addUserToEventBus(query QueryDSL) {
 
 }
 
-func EventBusSubscriptionActionSig(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error) {
+func EventBusSubscriptionActionSig(ctx *gin.Context, socket *websocket.Conn, done chan bool, read chan SocketReadChan) (chan []byte, error) {
+	query := ExtractQueryDslFromGinContext(ctx)
+	query.RawSocketConnection = socket
+
 	LOG.Debug(
 		"Event bus subscription has been started",
 		zap.String("workspace-id", query.WorkspaceId),

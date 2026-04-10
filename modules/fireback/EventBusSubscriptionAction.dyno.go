@@ -2,11 +2,13 @@ package fireback
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+	"unicode/utf8"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
-	"net/http"
-	"net/url"
 )
 
 /**
@@ -210,16 +212,19 @@ func EventBusSubscriptionActionDuplexGinHandler(c *gin.Context, handler EventBus
 		defer close(in)
 		for {
 			mt, raw, err := ws.ReadMessage()
-			in <- EventBusSubscriptionActionMessage{MessageType: mt, Raw: raw, Error: err}
+			if err != nil {
+				in <- EventBusSubscriptionActionMessage{MessageType: mt, Error: err}
+				return // 🔴 STOP HERE
+			}
+			in <- EventBusSubscriptionActionMessage{MessageType: mt, Raw: raw}
 		}
 	}()
 	// Write loop
 	go func() {
+		defer close(out)
 		for msg := range out {
 			if err := ws.WriteMessage(msg.MessageType, msg.Raw); err != nil {
-				// When message is -1, means it's internal error coming out
-				in <- EventBusSubscriptionActionMessage{MessageType: -1, Error: err}
-				return
+				return // exit writer
 			}
 		}
 	}()
@@ -228,4 +233,80 @@ func EventBusSubscriptionActionDuplexGinHandler(c *gin.Context, handler EventBus
 	// Cleanup
 	close(out)
 	ws.Close()
+}
+
+type SocketReadChan2 struct {
+	Data  []byte
+	Error error
+}
+
+type ReactiveFactory2 = func(
+	ctx *gin.Context,
+	socket *websocket.Conn,
+	done chan bool,
+	read chan SocketReadChan,
+) (chan []byte, error)
+
+func ReactiveSocketHandler22(factory ReactiveFactory2) gin.HandlerFunc {
+
+	return func(ctx *gin.Context) {
+
+		read := make(chan SocketReadChan)
+		done := make(chan bool)
+
+		c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+
+			c.Close()
+			return
+		}
+
+		write, err := factory(ctx, c, done, read)
+		if err != nil {
+			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		}
+
+		go func() {
+			for {
+				_, data, err := c.ReadMessage()
+				read <- SocketReadChan{
+					Data:  data,
+					Error: err,
+				}
+
+				if err != nil {
+					return
+				}
+			}
+		}()
+
+		go func() {
+			for {
+				select {
+				case msg, ok := <-write:
+					if !ok {
+						// Channel closed; shutdown
+						c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+						done <- true
+						return
+					}
+					msgType := websocket.TextMessage
+					if !utf8.Valid(msg) {
+						msgType = websocket.BinaryMessage
+					}
+					err := c.WriteMessage(msgType, msg)
+
+					if err != nil {
+						// Optionally log the error or send to a logger
+						done <- true
+						return
+					}
+				case <-done:
+					c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+					return
+				}
+			}
+		}()
+	}
 }
