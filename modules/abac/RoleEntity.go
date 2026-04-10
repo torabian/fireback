@@ -23,6 +23,29 @@ func init() {
 		return RoleActionUpdateFn(query, dto)
 	}
 
+	RoleActions.Remove = func(query fireback.QueryDSL) (int64, *fireback.IError) {
+		if query.InternalQuery != "" {
+			query.InternalQuery += " and unique_id != 'root'"
+		}
+		return RoleActionRemoveFn(query)
+	}
+
+	RoleActions.Query = func(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
+		roles, qrm, err := RoleActionQueryFn(query)
+
+		if len(roles) > 0 {
+			for _, role := range roles {
+				if role.UniqueId == ROOT_VAR {
+					f := false
+					role.IsDeletable = &f
+					role.IsUpdatable = &f
+				}
+			}
+		}
+
+		return roles, qrm, err
+	}
+
 }
 
 func filterPermissions(dto *RoleEntity, query fireback.QueryDSL) {
