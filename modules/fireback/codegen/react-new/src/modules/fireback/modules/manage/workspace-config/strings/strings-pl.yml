@@ -5,6 +5,9 @@ content:
     description: Configurate how the workspaces work in terms of totp, forced otp,
       recaptcha and how the user can interact with the application.
     editWorkspaceConfig: Edit workspace config
+    emailOtpContentHint: Upon one time password request for email, the content will
+      be read to fill the message which will go to user.
+    emailOtpContentLabel: Email Otp Content
     enableOtp: Enable otp
     enableOtpHint: Enables the one time password for the selfservice. It would allow
       email or phone numbers to bypass password and recieve a 6 digit code on their
@@ -26,6 +29,12 @@ content:
       you can choose via which third-party service, or even your own smtp service
       to send emails.
     generalEmailProviderLabel: General Email Provider
+    generalGsmProviderHint: General service which would be used to send text messages
+      (sms) using it's services or API.
+    generalGsmProviderLabel: General Gsm Provider
+    inviteToWorkspaceContentHint: This template would be used, as default when a user
+      is inviting a third-party into their own workspace.
+    inviteToWorkspaceContentLabel: Invite To Workspace Content
     newWorkspaceConfig: New workspace config
     otpSectionDescription: Manage the user authentication using single time password
       over sms/email
@@ -45,6 +54,9 @@ content:
     requireOtpOnSignup: Require otp on signup
     requireOtpOnSignupHint: It would force account creation to first make a one time
       password verification and then continue the process.
+    smsOtpContentHint: Upon one time password request for email, the content will
+      be read to fill the message which will go to user.
+    smsOtpContentLabel: SMS Otp Content
     title: Workspace Config
     totpSectionDescription: Usage of the authenticator app as a second security step
       for the password.

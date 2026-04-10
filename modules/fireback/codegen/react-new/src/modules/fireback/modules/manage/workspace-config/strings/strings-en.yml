@@ -50,3 +50,18 @@ content:
       the process.
     generalEmailProviderLabel: General Email Provider
     generalEmailProviderHint: Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
+    generalGsmProviderLabel: General Gsm Provider
+    generalGsmProviderHint: 
+      General service which would be used to send text messages (sms) using it's services or API.
+    inviteToWorkspaceContentLabel:
+      Invite To Workspace Content
+    inviteToWorkspaceContentHint:   
+      This template would be used, as default when a user is inviting a third-party into their own workspace.
+    emailOtpContentLabel:
+      Email Otp Content
+    emailOtpContentHint:
+      Upon one time password request for email, the content will be read to fill the message which will go to user.
+    smsOtpContentLabel:
+      SMS Otp Content
+    smsOtpContentHint:
+      Upon OTP text messages, this template will be used to create such text message, including the one time password code.
