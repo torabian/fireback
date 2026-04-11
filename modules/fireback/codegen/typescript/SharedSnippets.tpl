@@ -54,7 +54,7 @@
   {{ end }}
 
 
-  {{ if eq .Type "many2many" }}
+  {{ if eq .Type "collection" }}
     {{ .PrivateName }}ListId?: string[] | null;
   {{ end }}
 
@@ -104,14 +104,14 @@
       {{ .PrivateName }}: {
         {{ template "stringfield" (arr . $root $newPrefix) }}
       },
-    {{ else if or (eq .Type "one") (eq .Type "many2many") }}
+    {{ else if or (eq .Type "one") (eq .Type "collection") }}
 
       {{ if eq .Type "one" }}
         {{ if and (ne .PrivateName "user") (ne .PrivateName "workspace") }}
           {{ .PrivateName }}Id: `{{ $prefix}}{{ .PrivateName }}Id`,
         {{ end }}
       {{ end }}
-      {{ if eq .Type "many2many" }}
+      {{ if eq .Type "collection" }}
         {{ .PrivateName }}ListId: `{{ $prefix}}{{ .PrivateName }}ListId`,
       {{ end }}
       
@@ -202,14 +202,14 @@ public static Fields = {
       {{ .PrivateName }}: {
         {{ template "actionStringFields" .Fields }}
       },
-    {{ else if or (eq .Type "one") (eq .Type "many2many") }}
+    {{ else if or (eq .Type "one") (eq .Type "collection") }}
 
       {{ if eq .Type "one" }}
         {{ if and (ne .PrivateName "user") (ne .PrivateName "workspace") }}
           {{ .PrivateName }}Id: '{{ .PrivateName }}Id',
         {{ end }}
       {{ end }}
-      {{ if eq .Type "many2many" }}
+      {{ if eq .Type "collection" }}
         {{ .PrivateName }}ListId: '{{ .PrivateName }}ListId',
       {{ end }}
 

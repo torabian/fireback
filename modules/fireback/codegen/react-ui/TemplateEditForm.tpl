@@ -18,9 +18,9 @@ export const {{ .Template }}Form = ({
     <>
       {{ range .e.CompleteFields }}
         
-      {{ if or (eq .Type "one") (eq .Type "many2many")  }}
+      {{ if or (eq .Type "one") (eq .Type "collection")  }}
         <FormEntitySelect
-          {{ if eq .Type "many2many"}}
+          {{ if eq .Type "collection"}}
           multiple
           {{ end }}
           formEffect={ { form, field: {{ $.Template }}Entity.Fields.{{ .Name }}$ } }

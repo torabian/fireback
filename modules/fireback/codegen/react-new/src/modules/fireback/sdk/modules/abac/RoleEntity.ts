@@ -63,7 +63,7 @@ export class RoleEntity extends BaseEntity {
     },
     {
       "name": "capabilities",
-      "type": "many2many",
+      "type": "collection",
       "target": "CapabilityEntity",
       "module": "fireback",
       "computedType": "CapabilityEntity[]",

@@ -10,7 +10,7 @@ import  "{{ $key}}"
 {{ end }}
 
 
-{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "many2many") }} []* {{ end }}{{ if or (eq .Type "embed")  (eq .Type "object") (eq .Type "one") }} * {{ end }}{{ end }}
+{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "collection") }} []* {{ end }}{{ if or (eq .Type "embed")  (eq .Type "object") (eq .Type "one") }} * {{ end }}{{ end }}
 
 {{ define "validaterow" }}{{ if and (.Validate) (ne .Type "one") }} validate:"{{ .Validate }}" {{ end }}{{ end }}
 
@@ -67,7 +67,7 @@ import  "{{ $key}}"
         {{ end }}
     {{ end }}
     
-    {{ if eq .Type "many2many" }}
+    {{ if eq .Type "collection" }}
     {{ .PublicName }}ListId []string `json:"{{ .PrivateName }}ListId" yaml:"{{ .PrivateName }}ListId" xml:"{{ .PrivateName }}ListId" gorm:"-" sql:"-"`
     {{ end }}
     
@@ -425,7 +425,7 @@ func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
         {{ .UpperPlural }}: []*{{ $.e.Upper}}{{ .PublicName }}{{"{{}}"}},
       {{ end }}
 
-      {{ if  eq .Type "many2many"  }}
+      {{ if  eq .Type "collection"  }}
         {{ .PublicName }}ListId: []string{"~"},
         {{ .PublicName }}: []*{{ .TargetWithModule }}{{"{{}}"}},
       {{ end }}
@@ -441,7 +441,7 @@ func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
   func {{ .e.Upper }}AssociationCreate(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) error {
 
   {{ range .e.CompleteFields }}
-    {{ if or (eq .Type "many2many") }}
+    {{ if or (eq .Type "collection") }}
       {
         if dto.{{ .PublicName }}ListId != nil && len(dto.{{ .PublicName }}ListId) > 0 {
           var items []{{ .TargetWithModule }}
@@ -491,7 +491,7 @@ func {{ .e.Upper }}RelationContentCreate(dto *{{ .e.EntityName }}, query {{ .wsp
   }
   {{ end }}
       
-  {{ if and (eq .Type  "many2many") (eq .AllowCreate  true) (ne .Name  "") }}
+  {{ if and (eq .Type  "collection") (eq .AllowCreate  true) (ne .Name  "") }}
   {
     if dto.{{ .PublicName }} != nil {
       
@@ -528,7 +528,7 @@ func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wspr
 			}
 		}
 		{{ end }}
-    {{ if and (eq .Type "many2many") (eq .AllowCreate  true) (ne .Name  "") }}
+    {{ if and (eq .Type "collection") (eq .AllowCreate  true) (ne .Name  "") }}
 		{
 			if dto.{{ .PublicName }} != nil {
 
@@ -1193,7 +1193,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     // @meta(update has many)
 
     {{ range .e.CompleteFields }}
-      {{ if or (eq .Type "many2many") }}
+      {{ if or (eq .Type "collection") }}
 
         if fields.{{ .PublicName }}ListId  != nil {
           var items []{{.TargetWithModule}}
@@ -1714,7 +1714,7 @@ func {{ .e.Upper }}ActionImport(
     },
     {{ end }}
     
-    {{ if or (eq .Type "array") (eq .Type "many2many")}}
+    {{ if or (eq .Type "array") (eq .Type "collection")}}
     &cli.StringSliceFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
@@ -1808,7 +1808,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 
 
       {{ range .e.CompleteFields }}
-        {{ if or (eq .Type "many2many") }}
+        {{ if or (eq .Type "collection") }}
         entity.{{ .PublicName }}ListId = {{ $.wsprefix }}CliInteractiveSearchAndSelect(
           "Select {{ .PublicName }}",
           {{ .TargetWithModuleWithoutEntityPluralize }}ActionQueryString,
@@ -1992,7 +1992,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
         template.{{ .PublicName }}.Scan(value)
       }
 	  {{ end }}
-    {{ if or (eq .Type "many2many") }}
+    {{ if or (eq .Type "collection") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
         template.{{ .PublicName }}ListId = strings.Split(value, ",")

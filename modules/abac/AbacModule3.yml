@@ -1243,7 +1243,7 @@ entities:
         type: string
         validate: 'required,omitempty,min=1,max=200'
       - name: capabilities
-        type: many2many
+        type: collection
         target: CapabilityEntity
         allowCreate: false
         module: fireback

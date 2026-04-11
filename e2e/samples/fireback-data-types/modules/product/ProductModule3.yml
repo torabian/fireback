@@ -26,8 +26,8 @@ entities:
       #   target: TagEntity
       #   module: tags
       #   validate: required
-      #   provider: github.com/torabian/fireback/fireback-data-types/modules/product
-      #   type: many2many
+      #   provider: github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product
+      #   type: collection
       - type: string
         name: name
         description: "Name of the product"
@@ -73,7 +73,7 @@ entities:
       #     - k: active
       #     - k: "inactive"
       #     - k: "discontinued"
-      # - type: many2many
+      # - type: collection
       #   name: relatedProducts
       #   description: "List of related products to this product. It's self refrencing"
       #   target: ProductEntity

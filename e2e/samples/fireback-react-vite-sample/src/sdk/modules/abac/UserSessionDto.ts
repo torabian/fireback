@@ -67,7 +67,7 @@ public static Fields = {
     },
     {
       "name": "userWorkspaces",
-      "type": "many2many",
+      "type": "collection",
       "target": "UserWorkspaceEntity",
       "computedType": "UserWorkspaceEntity[]",
       "gormMap": {}

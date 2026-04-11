@@ -382,7 +382,7 @@ dtos:
     - name: workspaceId
       type: string
     - name: userRoleWorkspacePermissions
-      type: many2many
+      type: collection
       target: UserRoleWorkspacePermissionDto
     - name: internalSql
       type: string
@@ -435,7 +435,7 @@ dtos:
       type: arrayP
       primitive: string
     - name: userRoleWorkspacePermissions
-      type: many2many
+      type: collection
       target: UserRoleWorkspacePermissionDto
     - name: workspaces
       type: arrayP
@@ -496,7 +496,7 @@ dtos:
     - name: exchangeKey
       type: string
     - name: userWorkspaces
-      type: many2many
+      type: collection
       target: UserWorkspaceEntity
     - name: user
       type: one
@@ -830,7 +830,7 @@ entities:
       type: string
       
     # - name: passports
-    #   type: many2many
+    #   type: collection
     #   target: PassportEntity
   - name: userProfile
     fields:
@@ -860,7 +860,7 @@ entities:
       type: string
       validate: required,omitempty,min=1,max=200
     - name: capabilities
-      type: many2many
+      type: collection
       target: CapabilityEntity
       allowCreate: false
 

@@ -11,7 +11,7 @@ export const columns = (t: typeof strings) => [
 
   {{ range .e.CompleteFields }}
 
-  {{ if or (eq .Type "object") (eq .Type "array") (eq .Type "many2many") (eq .Type "one") }}
+  {{ if or (eq .Type "object") (eq .Type "array") (eq .Type "collection") (eq .Type "one") }}
   {
     name: {{ $.Template }}Entity.Fields.{{ .Name }}$,
     title: t.{{ $.templates}}.{{ .Name }},
