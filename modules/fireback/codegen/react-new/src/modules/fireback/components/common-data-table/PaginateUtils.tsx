@@ -62,8 +62,10 @@ export const castColumns = (
               >
                 {row.uniqueId}
               </Link>
-              <CopyCell value={row.uniqueId} />
-              <OpenInNewRouter value={loc} />
+              <div className="cell-actions">
+                <CopyCell value={row.uniqueId} />
+                <OpenInNewRouter value={loc} />
+              </div>
             </div>
           );
         }

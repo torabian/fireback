@@ -467,13 +467,32 @@ html[dir="rtl"] {
   position: absolute;
   cursor: pointer;
   opacity: 1;
-  margin-top: 2px;
   transition: 0.3s opacity ease-in-out;
 }
+
 
 .table-copy-btn {
   right: 0;
 }
+
+.cell-actions {
+  position: absolute;
+  display: none;
+  right: -8px;
+  top: -6px;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.95);
+  height: 33px;
+  width: 36px;
+}
+
+.rdg-cell:hover {
+  .cell-actions {
+    display: flex;
+  }
+}
+
 .table-open-in-new-router {
   right: 15px;
 }
