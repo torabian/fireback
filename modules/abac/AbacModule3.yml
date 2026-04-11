@@ -172,6 +172,24 @@ dtom:
         type: string?
 
 acts:
+
+  - name: AcceptInvite
+    method: post
+    url: /user/invitation/accept
+    cliName: accept-invite
+    description: 
+      Use it when user accepts an invitation, and it will complete the joining process
+    security:
+      resolveStrategy: user
+    in:
+      fields:
+        - name: invitationUniqueId
+          type: string
+          tags:
+            validate: required
+          description: 
+            The invitation id which will be used to process
+
   - name: CheckPassportMethods
     url: /passports/available-methods
     cliName: check-passport-methods
@@ -214,21 +232,6 @@ acts:
     out:
       dto: UserSessionDto
 actions:
-  - name: acceptInvite
-    method: post
-    url: /user/invitation/accept
-    description: 
-      Use it when user accepts an invitation, and it will complete the joining process
-    security:
-      resolveStrategy: user
-        
-    in:
-      fields:
-        - name: invitationUniqueId
-          type: string
-          validate: required
-          description: 
-            The invitation id which will be used to process
 
 
   - name: oauthAuthenticate
@@ -489,6 +492,8 @@ actions:
       entity: WorkspaceInviteEntity
     out:
       entity: WorkspaceInviteEntity
+    security:
+      resolveStrategy: workspace
   - name: gsmSendSms
     url: /gsm/send/sms
     cliName: sms

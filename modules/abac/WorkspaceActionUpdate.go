@@ -22,21 +22,29 @@ func WorkspaceActionUpdate(query fireback.QueryDSL, fields *WorkspaceEntity) (*W
 
 func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fireback.IError {
 
+	subject := "Workspace invitation"
+	fromName := "Account service"
+	fromEmail := "account@service.com"
+	provider := &EmailProviderEntity{
+		Type: EmailProviderType.Terminal,
+	}
+	content := `
+	Hello FULL_NAME,
+	You are invited to workspace WORKSPACE_NAME.
+
+	You can continue on: INVITE_URL
+	`
+
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 
-	if err != nil {
-		return err
+	if err == nil && config != nil {
+		subject = config.InviteToWorkspaceTitle
+		fromName = config.InviteToWorkspaceSender.FromName
+		fromEmail = config.InviteToWorkspaceSender.FromEmailAddress
+		provider = config.GeneralEmailProvider
+		content = config.InviteToWorkspaceContent
 	}
 
-	if config == nil {
-		return fireback.Create401Error(&AbacMessages.EmailConfigurationIsNotAvailable, []string{})
-	}
-
-	if config.InviteToWorkspaceSender == nil {
-		return fireback.Create401Error(&AbacMessages.UserWhichHasThisTokenDoesNotExist, []string{})
-	}
-
-	content := config.InviteToWorkspaceContent
 	content = strings.ReplaceAll(content, "FULL_NAME", invite.FirstName+" "+invite.LastName)
 	content = strings.ReplaceAll(content, "INVITE_URL", "http://localhost:3000/en/join/"+invite.UniqueId)
 	content = strings.ReplaceAll(content, "WORKSPACE_NAME", query.WorkspaceId)
@@ -45,13 +53,13 @@ func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fi
 	content = strings.ReplaceAll(content, "ROLE_NAME", invite.Role.Name)
 
 	err3 := SendMail(EmailMessageContent{
-		FromName:  config.InviteToWorkspaceSender.FromName,
-		FromEmail: config.InviteToWorkspaceSender.FromEmailAddress,
+		FromName:  fromName,
+		FromEmail: fromEmail,
 		ToName:    invite.FirstName,
 		ToEmail:   invite.Email,
-		Subject:   config.InviteToWorkspaceTitle,
+		Subject:   subject,
 		Content:   content,
-	}, config.GeneralEmailProvider)
+	}, provider)
 
 	if err3 != nil {
 		return fireback.GormErrorToIError(err3)
