@@ -34,7 +34,7 @@ func ResetRoleSeeders(fs *embed.FS) {
 
 type RoleEntityQs struct {
 	Name         fireback.QueriableField `cli:"name" table:"role" typeof:"string" column:"name" qs:"name"`
-	Capabilities fireback.QueriableField `cli:"capabilities" table:"role" typeof:"many2many" column:"capabilities" qs:"capabilities"`
+	Capabilities fireback.QueriableField `cli:"capabilities" table:"role" typeof:"collection" column:"capabilities" qs:"capabilities"`
 }
 
 func (x *RoleEntityQs) GetQuery() string {
@@ -355,7 +355,7 @@ with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 Name: (type: string) Description: 
-Capabilities: (type: many2many) Description: 
+Capabilities: (type: collection) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -740,7 +740,7 @@ var RoleCommonCliFlags = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:     "capabilities",
 		Required: false,
-		Usage:    `capabilities (many2many)`,
+		Usage:    `capabilities (collection)`,
 	},
 }
 var RoleCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
@@ -786,7 +786,7 @@ var RoleCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringSliceFlag{
 		Name:     "capabilities",
 		Required: false,
-		Usage:    `capabilities (many2many)`,
+		Usage:    `capabilities (collection)`,
 	},
 }
 var RoleCreateCmd cli.Command = ROLE_ACTION_POST_ONE.ToCli()

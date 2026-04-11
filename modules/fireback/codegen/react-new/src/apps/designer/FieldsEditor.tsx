@@ -80,7 +80,7 @@ export function FieldsEditor({ fields, onChange }: FieldsEditorProps) {
                     <option value="float64">float64</option>
                     <option value="bool">bool</option>
                     <option value="one">one</option>
-                    <option value="many2many">many2many</option>
+                    <option value="collection">collection</option>
                     <option value="array">array</option>
                     <option value="object">object</option>
                     <option value="html">html</option>
@@ -98,7 +98,7 @@ export function FieldsEditor({ fields, onChange }: FieldsEditorProps) {
                 </div>
               ) : null}
 
-              {field.type === "many2many" || field.type === "one" ? (
+              {field.type === "collection" || field.type === "one" ? (
                 <div className="col-md-4">
                   <div className="form-group">
                     <label>Module</label>

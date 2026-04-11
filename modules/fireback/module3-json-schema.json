@@ -1061,7 +1061,7 @@
             "text",
             "date",
             "daterange",
-            "many2many",
+            "collection",
             "arrayP",
             "enum",
             "bool",
@@ -1081,7 +1081,7 @@
         },
         "target": {
           "type": "string",
-          "description": "The entity in golang which will be operated on in case of type: one or type: many2many"
+          "description": "The entity in golang which will be operated on in case of type: one or type: collection"
         },
         "validate": {
           "type": "string",
@@ -1104,15 +1104,15 @@
         },
         "allowCreate": {
           "type": "boolean",
-          "description": "Allow create is a useful option to set true if the type one or many2many could be allowed to crea"
+          "description": "Allow create is a useful option to set true if the type one or collection could be allowed to crea"
         },
         "module": {
           "type": "string",
-          "description": "When using one or many2many types you need to set the module name here to import tha"
+          "description": "When using one or collection types you need to set the module name here to import tha"
         },
         "provider": {
           "type": "string",
-          "description": "The go project module of the important target for one or many2many fields if its from exte"
+          "description": "The go project module of the important target for one or collection fields if its from external library"
         },
         "json": {
           "type": "string",

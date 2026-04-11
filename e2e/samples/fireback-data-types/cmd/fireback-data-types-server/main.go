@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/torabian/fireback/fireback-data-types/modules/product/tags"
+	"github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product"
+	"github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product/tags"
 	"github.com/urfave/cli"
-
-	"github.com/torabian/fireback/fireback-data-types/modules/product"
 
 	"os"
 
