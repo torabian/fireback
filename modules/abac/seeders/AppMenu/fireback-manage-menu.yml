@@ -111,6 +111,21 @@ items:
   parentId: root-actions
   capabilityId: root.manage.abac.email-provider.query
 
+- href: "/manage/gsm-providers"
+  workspaceId: system
+  icon: common/emailprovider.svg
+  uniqueId: gsm_provider
+  visibility: A
+  label: gsm Provider
+  activeMatcher: gsm-provider
+  translations:
+    - languageId: fa
+      label: سرویس پیامک
+    - languageId: en
+      label: gsm Provider
+  parentId: root-actions
+  capabilityId: root.manage.abac.gsm-provider.query
+
 - href: "/manage/drive"
   workspaceId: system
   icon: common/drive.svg

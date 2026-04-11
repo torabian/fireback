@@ -18,11 +18,13 @@ import { useUserRoutes } from "./users/UserRoutes";
 import { useWorkspaceConfigRoutes } from "./workspace-config/WorkspaceConfigRoutes";
 import { useWorkspaceTypeRoutes } from "./workspace-types/WorkspaceTypeRoutes";
 import { useWorkspaceRoutes } from "./workspaces/WorkspaceRoutes";
+import { useGsmProviderRoutes } from "./gsm-provider/GsmProviderRoutes";
 
 export function useManageRoutes() {
   const capabilityRoutes = useCapabilityRoutes();
   const driveRoutes = useDriveRoutes();
   const mailProviderRoutes = useEmailProviderRoutes();
+  const gsmProviderRoutes = useGsmProviderRoutes();
   const mailSenderRoutes = useEmailSenderRoutes();
   const passportMethodRoutes = usePassportMethodRoutes();
   const userRoutes = useUserRoutes();
@@ -41,6 +43,7 @@ export function useManageRoutes() {
       {mailSenderRoutes}
       {passportMethodRoutes}
       {userRoutes}
+      {gsmProviderRoutes}
       {workspaceConfigRoutes}
       {workspaceTypeRoutes}
       {workspaceRoutes}
