@@ -26,7 +26,7 @@ entities:
       #   target: TagEntity
       #   module: tags
       #   validate: required
-      #   provider: github.com/torabian/fireback/fireback-data-types/modules/product
+      #   provider: github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product
       #   type: collection
       - type: string
         name: name
