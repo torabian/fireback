@@ -1,0 +1,16 @@
+extends: []
+content:
+  gsmProviders:
+    apiKey: Api key
+    apiKeyHint: Api key
+    archiveTitle: Gsm providers
+    editGsmProvider: Edit gsm provider
+    invokeBody: Invoke body
+    invokeBodyHint: Invoke body
+    invokeUrl: Invoke url
+    invokeUrlHint: Invoke url
+    mainSenderNumber: Main sender number
+    mainSenderNumberHint: Main sender number
+    newGsmProvider: New gsm provider
+    type: Type
+    typeHint: Type
