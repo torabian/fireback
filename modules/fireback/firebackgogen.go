@@ -32,7 +32,7 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return prefix + "XDate"
 	case "any":
 		return "interface{}"
-	case "many2many":
+	case "collection":
 		if field.Module != "" {
 			return field.Module + "." + field.Target
 		}

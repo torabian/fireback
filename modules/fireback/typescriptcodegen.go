@@ -60,7 +60,7 @@ func TsComputedField(field *Module3Field, isWorkspace bool) string {
 		return strings.Join(items, " | ")
 	case "json":
 		return TsCalcJsonField(field)
-	case "many2many":
+	case "collection":
 		return field.Target + "[]"
 	case "int64?", "int32?", "int?", "float64?", "float32?":
 		return "number"

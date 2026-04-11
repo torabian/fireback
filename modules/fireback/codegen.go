@@ -43,7 +43,7 @@ var FIELD_TYPE_ARRAYP string = "arrayP"
 var FIELD_TYPE_JSON string = "json"
 var FIELD_TYPE_ONE string = "one"
 var FIELD_TYPE_DATE string = "date"
-var FIELD_TYPE_MANY2MANY string = "many2many"
+var FIELD_TYPE_COLLECTION string = "collection"
 var FIELD_TYPE_OBJECT string = "object"
 var FIELD_TYPE_EMBED string = "embed"
 var FIELD_TYPE_MONEY string = "money?"
@@ -313,7 +313,7 @@ func (x *Module3Field) ComputedGormTag() string {
 		return "text"
 	}
 
-	if x.Type == FIELD_TYPE_MANY2MANY {
+	if x.Type == FIELD_TYPE_COLLECTION {
 		return "many2many:" + x.BelongingEntityName + "_" + x.PrivateName() + ";foreignKey:UniqueId;references:UniqueId"
 	}
 
@@ -536,7 +536,7 @@ func (x *Module3Field) DefaultEmptySymbol() string {
 		return `""`
 	case "one":
 		return x.Target + "?"
-	case "array", "many2many":
+	case "array", "collection":
 		return "nil"
 	case "int64", "int32", "int":
 		return "0"
@@ -2582,7 +2582,7 @@ func ImportDependecies(fields []*Module3Field) []ImportDependencyStrategy {
 			items = append(items, ImportDependecies(field.Fields)...)
 		}
 
-		if field.Type != FIELD_TYPE_ONE && field.Type != FIELD_TYPE_MANY2MANY {
+		if field.Type != FIELD_TYPE_ONE && field.Type != FIELD_TYPE_COLLECTION {
 			continue
 		}
 
@@ -2683,7 +2683,7 @@ func ImportGoDependencies(fields []*Module3Field, importGroupPrefix string) []Im
 			items = append(items, ImportGoDependencies(field.Fields, actualPrefix)...)
 		}
 
-		if field.Type != FIELD_TYPE_ONE && field.Type != FIELD_TYPE_MANY2MANY {
+		if field.Type != FIELD_TYPE_ONE && field.Type != FIELD_TYPE_COLLECTION {
 			continue
 		}
 
