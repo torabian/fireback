@@ -31,7 +31,7 @@ func InviteToWorkspaceActionMeta() struct {
 	}{
 		Name:        "InviteToWorkspaceAction",
 		CliName:     "invite",
-		URL:         "/workspace/invite",
+		URL:         "/invite/to/workspace",
 		Method:      "POST",
 		Description: `Invite a new person (either a user, with passport or without passport)`,
 	}

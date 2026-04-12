@@ -173,7 +173,7 @@ dtom:
 
 acts:
   - name: InviteToWorkspace
-    url: /workspace/invite
+    url: /invite/to/workspace
     cliName: invite
     method: post
     description: "Invite a new person (either a user, with passport or without passport)"

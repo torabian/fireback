@@ -71,7 +71,7 @@ export const useInviteToWorkspaceAction = (
  */
 export class InviteToWorkspaceAction {
   //
-  static URL = "/workspace/invite";
+  static URL = "/invite/to/workspace";
   static NewUrl = (qs?: URLSearchParams) =>
     buildUrl(InviteToWorkspaceAction.URL, undefined, qs);
   static Method = "post";
@@ -115,7 +115,7 @@ export class InviteToWorkspaceAction {
   static Definition = {
     name: "InviteToWorkspace",
     cliName: "invite",
-    url: "/workspace/invite",
+    url: "/invite/to/workspace",
     method: "post",
     description:
       "Invite a new person (either a user, with passport or without passport)",
