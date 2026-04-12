@@ -566,7 +566,7 @@ type Module3Action struct {
 	// How the qs is being handled.
 	QsMode string `yaml:"qsMode,omitempty" json:"qsMode,omitempty" jsonschema:"enum=reflect"`
 
-	Skip bool
+	Skip bool `yaml:"-" json:"-" jsonschema:"-"`
 }
 
 func (x Module3Action) MethodUpper() string {
