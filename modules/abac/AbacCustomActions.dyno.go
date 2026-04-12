@@ -2245,6 +2245,8 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
+	InviteToWorkspaceActionDef.ToCli(),
+	AcceptInviteActionDef.ToCli(),
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
 	ChangePasswordActionCmd,

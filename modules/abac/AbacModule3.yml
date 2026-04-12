@@ -198,10 +198,6 @@ acts:
         - name: phonenumber
           type: string
           description: The phone number of the person which is invited.
-        - name: workspace
-          type: one
-          target: WorkspaceEntity
-          description: Workspace which user is being invite to.
         - name: firstName
           type: string
           tags:
@@ -218,12 +214,11 @@ acts:
         - name: forcePhoneNumber
           type: bool?
           description: If forced, user cannot change the phone number and needs to complete signup.
-        - name: role
-          type: one
+        - name: roleId
+          type: string
           description: The role which invitee get if they accept the request.
           tags:
             validate: required
-          target: RoleEntity
 
     security:
       resolveStrategy: workspace

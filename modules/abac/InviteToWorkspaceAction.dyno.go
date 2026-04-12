@@ -59,10 +59,6 @@ func GetInviteToWorkspaceActionReqCliFlags(prefix string) []emigo.CliFlag {
 			Type: "string",
 		},
 		{
-			Name: prefix + "workspace",
-			Type: "one",
-		},
-		{
 			Name: prefix + "first-name",
 			Type: "string",
 		},
@@ -79,8 +75,8 @@ func GetInviteToWorkspaceActionReqCliFlags(prefix string) []emigo.CliFlag {
 			Type: "bool?",
 		},
 		{
-			Name: prefix + "role",
-			Type: "one",
+			Name: prefix + "role-id",
+			Type: "string",
 		},
 	}
 }
@@ -113,6 +109,9 @@ func CastInviteToWorkspaceActionReqFromCli(c emigo.CliCastable) InviteToWorkspac
 	if c.IsSet("force-phone-number") {
 		emigo.ParseNullable(c.String("force-phone-number"), &data.ForcePhoneNumber)
 	}
+	if c.IsSet("role-id") {
+		data.RoleId = c.String("role-id")
+	}
 	return data
 }
 
@@ -128,8 +127,6 @@ type InviteToWorkspaceActionReq struct {
 	Email string `json:"email" yaml:"email"`
 	// The phone number of the person which is invited.
 	Phonenumber string `json:"phonenumber" yaml:"phonenumber"`
-	// Workspace which user is being invite to.
-	Workspace WorkspaceEntity `json:"workspace" yaml:"workspace"`
 	// First name of the person which is invited
 	FirstName string `json:"firstName" validate:"required" yaml:"firstName"`
 	// Last name of the person which is invited.
@@ -139,7 +136,7 @@ type InviteToWorkspaceActionReq struct {
 	// If forced, user cannot change the phone number and needs to complete signup.
 	ForcePhoneNumber emigo.Nullable[bool] `json:"forcePhoneNumber" yaml:"forcePhoneNumber"`
 	// The role which invitee get if they accept the request.
-	Role RoleEntity `json:"role" validate:"required" yaml:"role"`
+	RoleId string `json:"roleId" validate:"required" yaml:"roleId"`
 }
 
 func (x *InviteToWorkspaceActionReq) Json() string {
