@@ -84,10 +84,10 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 			}
 
 			return &ClassicSigninActionResponse{
-				Payload: ClassicSigninActionRes{
+				Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
 					TotpUrl: totpLink,
 					Next:    []string{"setup-totp"},
-				},
+				}),
 			}, nil
 		}
 	}
@@ -96,9 +96,9 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
 			return &ClassicSigninActionResponse{
-				Payload: ClassicSigninActionRes{
+				Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
 					Next: []string{"enter-totp"},
-				},
+				}),
 			}, nil
 		}
 

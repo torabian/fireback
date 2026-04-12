@@ -312,12 +312,13 @@ func IntegrateAuthFlow(c *cli.Context) error {
 				return err
 			} else {
 
-				signin, ok := result.Payload.(ClassicSigninActionRes)
+				resEnvelope, ok := result.Payload.(fireback.GoogleResponse[ClassicSigninActionRes])
 				if !ok {
 					fmt.Println("Critical internal error on casting signin result")
 					os.Exit(1)
 				}
 
+				signin := resEnvelope.Data.Item
 				fmt.Println("Signin next steps: ", signin.Next)
 
 				// In case the session is available, it's successful and checking further steps
