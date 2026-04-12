@@ -19,8 +19,8 @@ import {
   queryBeforeSend,
 } from "../../core/react-tools";
     import {
-        AcceptInviteActionReqDto,
-    } from "../abac/AbacActionsDto"
+        any,
+    } from "./any"
 export function usePostUserInvitationAccept(
   props?: UseRemoteQuery & { 
   }
@@ -47,7 +47,7 @@ export function usePostUserInvitationAccept(
   const mutation = useMutation<
     IResponse<any>,
     IResponse<any>,
-    Partial<AcceptInviteActionReqDto>
+    any
   >(fn);
   // Only entities are having a store in front-end
   const fnUpdater = (
@@ -68,14 +68,14 @@ export function usePostUserInvitationAccept(
     return data;
   };
   const submit = (
-    values: Partial<AcceptInviteActionReqDto>,
+    values: any,
     formikProps?: FormikHelpers<Partial<any>>
   ): Promise<IResponse<any>> => {
     return new Promise((resolve, reject) => {
       mutation.mutate(values, {
         onSuccess(response: IResponse<any>) {
           queryClient?.setQueryData<IResponseList<any>>(
-            "string",
+            "any",
             (data) => fnUpdater(data, response) as any
           );
           resolve(response);
