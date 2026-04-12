@@ -50,7 +50,7 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 	if passport == nil {
 
 		firstName, lastName := SplitName(info.Name, info.Email)
-		res, err := completeClassicSignupProcess(&ClassicSignupActionReqDto{
+		res, err := completeClassicSignupProcess(ClassicSignupActionReq{
 			Value:     info.Email,
 			Type:      PASSPORT_METHOD_EMAIL,
 			FirstName: firstName,
@@ -65,7 +65,7 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 		}
 
 		return &OauthAuthenticateActionResDto{
-			Session: res.Session,
+			Session: &res.Session,
 		}, nil
 	} else {
 		session := &UserSessionDto{}

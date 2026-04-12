@@ -8,13 +8,13 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import { usePostPassportViaOauth } from "../../sdk/modules/abac/usePostPassportViaOauth";
 import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { FacebookLogin } from "./FacebookLogin";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
 
 export const WelcomeScreen = () => {
   const {
@@ -24,7 +24,7 @@ export const WelcomeScreen = () => {
     isLoadingMethods,
     passportMethodsQuery,
   } = usePresenter();
-  const form = useFormik({ initialValues: {}, onSubmit: () => {} });
+  const form = useFormik({ initialValues: {}, onSubmit: () => { } });
 
   if (passportMethodsQuery.isError || passportMethodsQuery.error) {
     return (
@@ -76,7 +76,7 @@ const Form = ({
   onSelect,
   availableOptions,
 }: {
-  form: FormikProps<Partial<ClassicSigninActionReqDto>>;
+  form: FormikProps<Partial<ClassicSigninActionReq>>;
   onSelect: (method: AuthMethod) => void;
   availableOptions: AuthAvailableMethods;
 }) => {

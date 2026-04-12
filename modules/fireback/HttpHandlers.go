@@ -521,7 +521,7 @@ func (x *GinLanguageTmp) GetLanguage() string {
 func WriteActionResponseToGin(m *gin.Context, resp emigo.EmiActionResult, err error) {
 	j := GinLanguageTmp{g: m}
 
-	if err != nil && !reflect.ValueOf(resp).IsNil() {
+	if err != nil && !reflect.ValueOf(err).IsNil() {
 
 		if ierr, ok := err.(*IError); ok {
 			code := int(ierr.HttpCode)

@@ -208,3 +208,5 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.46.1 // indirect
 )
+
+replace github.com/torabian/emi => ../emi

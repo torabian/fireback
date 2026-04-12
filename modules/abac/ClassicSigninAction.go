@@ -8,16 +8,18 @@ import (
 )
 
 func init() {
-	ClassicSigninActionImp = ClassicSigninAction
+	// ClassicSigninActionImp = ClassicSigninAction
+	ClassicSigninImpl = ClassicSigninAction
 }
 
-func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*ClassicSigninActionResDto, *fireback.IError) {
-
-	if err := ClassicSigninActionReqValidator(req); err != nil {
+func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) (*ClassicSigninActionResponse, error) {
+	dto := c.Body
+	req := dto
+	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
 		return nil, err
 	}
 
-	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
+	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: query.Tx})
 	if err2 != nil {
 		if err2.HttpCode != 404 {
 			return nil, err2
@@ -51,7 +53,7 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 
 	session := &UserSessionDto{}
 
-	if err := fetchPureUserAndPassToSession(req.Value, req.Password, session, q); err != nil {
+	if err := fetchPureUserAndPassToSession(req.Value, req.Password, session, query); err != nil {
 		return nil, err
 	}
 
@@ -74,16 +76,18 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 			totpSecret := key.Secret()
 			totpLink := key.URL()
 
-			if _, err := PassportActions.Update(q, &PassportEntity{
+			if _, err := PassportActions.Update(query, &PassportEntity{
 				UniqueId:   passport.UniqueId,
 				TotpSecret: totpSecret,
 			}); err != nil {
 				return nil, err
 			}
 
-			return &ClassicSigninActionResDto{
-				TotpUrl: totpLink,
-				Next:    []string{"setup-totp"},
+			return &ClassicSigninActionResponse{
+				Payload: ClassicSigninActionRes{
+					TotpUrl: totpLink,
+					Next:    []string{"setup-totp"},
+				},
 			}, nil
 		}
 	}
@@ -91,8 +95,10 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 	if passport.TotpSecret != "" && config != nil && config.EnableTotp.Bool {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
-			return &ClassicSigninActionResDto{
-				Next: []string{"enter-totp"},
+			return &ClassicSigninActionResponse{
+				Payload: ClassicSigninActionRes{
+					Next: []string{"enter-totp"},
+				},
 			}, nil
 		}
 
@@ -101,12 +107,14 @@ func ClassicSigninAction(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*
 		}
 	}
 
-	if err := applyUserTokenAndWorkspacesToToken(session, q); err != nil {
+	if err := applyUserTokenAndWorkspacesToToken(session, query); err != nil {
 		return nil, err
 	}
 
-	return &ClassicSigninActionResDto{
-		Session: session,
+	return &ClassicSigninActionResponse{
+		Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
+			Session: *session,
+		}),
 	}, nil
 }
 
@@ -122,15 +130,15 @@ func convertPointersToValuesUserWorkspaceEntity(pointers []*UserWorkspaceEntity)
 
 // Can be used to authenticate only using value and passport.
 // Do not expose this publicly, by passes recaptcha and all other securities.
-func classicSinginInternalUnsafe(req *ClassicSigninActionReqDto, q fireback.QueryDSL) (*ClassicSigninActionResDto, *fireback.IError) {
+func classicSinginInternalUnsafe(req *ClassicSigninActionReq, q fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
 
 	session := &UserSessionDto{}
 
 	fetchPureUserAndPassToSession(req.Value, req.Password, session, q)
 	applyUserTokenAndWorkspacesToToken(session, q)
 
-	return &ClassicSigninActionResDto{
-		Session: session,
+	return &ClassicSigninActionRes{
+		Session: *session,
 	}, nil
 }
 

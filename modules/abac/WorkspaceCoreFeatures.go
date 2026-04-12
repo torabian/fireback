@@ -251,7 +251,7 @@ func DetectSignupMechanismOverValue(value string) (string, *fireback.IError) {
 
 }
 
-func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
+func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
 
 	userId := fireback.UUID()
 	workspaceId := fireback.UUID()
@@ -270,7 +270,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReqDto) (*UserEntit
 		Name:     wname,
 		LinkerId: fireback.NewString(ROOT_VAR),
 		ParentId: fireback.NewString(ROOT_VAR),
-		TypeId:   dto.WorkspaceTypeId,
+		TypeId:   fireback.NewString(dto.WorkspaceTypeId.OrDefault("")),
 	}
 
 	osRole := "Admin"

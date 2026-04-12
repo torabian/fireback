@@ -3,15 +3,13 @@ import { useEffect } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
-import { type IResponse } from "../../sdk/core/http-tools";
-import { usePostPassportsSigninClassic } from "../../sdk/modules/abac/usePostPassportsSigninClassic";
+
 import { usePostWorkspacePassportRequestOtp } from "../../sdk/modules/abac/usePostWorkspacePassportRequestOtp";
 
 import { useS } from "../../hooks/useS";
-import {
-  ClassicSigninActionReqDto,
-  ClassicSigninActionResDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
+
+import { ClassicSigninActionReq, ClassicSigninActionRes, useClassicSigninAction } from "../../sdk/modules/abac/ClassicSignin";
+import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
 
@@ -20,19 +18,19 @@ export const usePresenter = () => {
   const { goBack, state, push } = useRouter();
   const { locale } = useLocale();
   const { onComplete } = useCompleteAuth();
-  const { submit: singin, mutation } = usePostPassportsSigninClassic();
+  const mutation = useClassicSigninAction();
   const otpEnabled = state?.canContinueOnOtp;
   const { submit: requestOtp } = usePostWorkspacePassportRequestOtp();
 
-  const submit = (values: Partial<ClassicSigninActionReqDto>) => {
-    singin({ value: values.value, password: values.password })
+  const submit = (values: Partial<ClassicSigninActionReq>) => {
+    mutation.mutateAsync(new ClassicSigninActionReq({ value: values.value, password: values.password }))
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
       });
   };
 
-  const form = useFormik<Partial<ClassicSigninActionReqDto>>({
+  const form = useFormik<Partial<ClassicSigninActionReq>>({
     initialValues: {},
     onSubmit: submit,
   });
@@ -63,22 +61,22 @@ export const usePresenter = () => {
       return;
     }
 
-    form.setFieldValue(ClassicSigninActionReqDto.Fields.value, state.value);
+    form.setFieldValue(ClassicSigninActionReq.Fields.value, state.value);
   }, [state?.value]);
 
-  const successful = (res: IResponse<ClassicSigninActionResDto>) => {
+  const successful = (res: GResponse<ClassicSigninActionRes>) => {
     // here we need to also check if there is another step!!!
 
-    if (res.data.session) {
+    if (res.data.item.session) {
       onComplete(res);
-    } else if (res.data.next?.includes("enter-totp")) {
+    } else if (res.data.item.next?.includes("enter-totp")) {
       push(`/${locale}/selfservice/totp-enter`, undefined, {
         value: form.values.value,
         password: form.values.password,
       });
-    } else if (res.data.next?.includes("setup-totp")) {
+    } else if (res.data.item.next?.includes("setup-totp")) {
       push(`/${locale}/selfservice/totp-setup`, undefined, {
-        totpUrl: res.data.totpUrl,
+        totpUrl: res.data.item.totpUrl,
 
         // since we do not allow user to join, it means it's forced :)
         forcedTotp: true,

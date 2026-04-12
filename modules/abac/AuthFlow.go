@@ -10,6 +10,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/pquerna/otp/totp"
+	emigo "github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 )
@@ -182,10 +183,10 @@ func IntegrateAuthFlow(c *cli.Context) error {
 
 			workspaceType := UNSAFE_allow_selection_of_workspace_type()
 
-			dto := ClassicSignupActionReqDto{
+			dto := ClassicSignupActionReq{
 				Value:           value,
 				Type:            selectedMethod,
-				WorkspaceTypeId: fireback.NewString(workspaceType.UniqueId),
+				WorkspaceTypeId: emigo.NullableOf(workspaceType.UniqueId),
 				SessionSecret:   sessionSecret,
 			}
 
@@ -213,10 +214,21 @@ func IntegrateAuthFlow(c *cli.Context) error {
 			}
 
 			query.WorkspaceId = ROOT_VAR
-			res2, err := ClassicSignupAction(&dto, query)
+			result, err := ClassicSignupAction(ClassicSignupActionRequest{
+				Body:   dto,
+				CliCtx: c,
+			}, query)
+
 			if err != nil {
 				return err
 			}
+
+			resEnvelope, ok := result.Payload.(fireback.GoogleResponse[ClassicSignupActionRes])
+			if !ok {
+				fmt.Println("Internal error on getting account creation results")
+				os.Exit(4)
+			}
+			res2 := resEnvelope.Data.Item
 
 			if res2.ContinueToTotp {
 				fmt.Println("You need to setup time based token (totp) for this account.")
@@ -254,7 +266,7 @@ func IntegrateAuthFlow(c *cli.Context) error {
 
 			}
 
-			if workspaceType.UniqueId == ROOT_VAR && res2.Session != nil {
+			if workspaceType.UniqueId == ROOT_VAR && res2.Session.Token != "" {
 				user, _ := res2.Session.User.Get()
 
 				query.WorkspaceId = ROOT_VAR
@@ -279,8 +291,8 @@ func IntegrateAuthFlow(c *cli.Context) error {
 				}
 			}
 
-			if res2.Session != nil {
-				authenticateCliWithSession(res2.Session, workspaceType.UniqueId)
+			if res2.Session.Token != "" {
+				authenticateCliWithSession(&res2.Session, workspaceType.UniqueId)
 			}
 
 		}
@@ -291,46 +303,53 @@ func IntegrateAuthFlow(c *cli.Context) error {
 				password = result
 			}
 
-			if signin, err := ClassicSigninAction(&ClassicSigninActionReqDto{
-				Value:    value,
-				Password: password,
+			if result, err := ClassicSigninAction(ClassicSigninActionRequest{
+				Body: ClassicSigninActionReq{
+					Value:    value,
+					Password: password,
+				},
 			}, query); err != nil {
 				return err
 			} else {
+
+				signin, ok := result.Payload.(ClassicSigninActionRes)
+				if !ok {
+					fmt.Println("Critical internal error on casting signin result")
+					os.Exit(1)
+				}
+
 				fmt.Println("Signin next steps: ", signin.Next)
 
 				// In case the session is available, it's successful and checking further steps
 				// is not required.
-				if signin.Session != nil {
-					var selectedWorkspace = ""
-					if signin.Session.User.IsSet() && !signin.Session.User.IsNull() {
-						fmt.Println("Signin successful as: ", signin.Session.User.Ptr().FirstName, signin.Session.User.Ptr().LastName)
-					} else {
-						fmt.Println("Successful signin, but no user is associated with this session")
-					}
-
-					// Check the workspaces. If there are more than 1, we ask user to choose.
-					if len(signin.Session.UserWorkspaces) > 1 {
-						var workspaces = []string{}
-						for _, item := range signin.Session.UserWorkspaces {
-							workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.String))
-						}
-
-						selectedWorkspace = fireback.AskForSelect("You have more than one workspace assigned to your account. Choose which one to continue", workspaces)
-					}
-
-					fmt.Println("Completed with:")
-					fmt.Println("Token:", signin.Session.Token)
-					if selectedWorkspace != "" {
-						fmt.Println("Workspace Id:", selectedWorkspace)
-					}
-
-					config := fireback.GetConfig()
-					config.CliToken = signin.Session.Token
-					config.CliWorkspace = selectedWorkspace
-
-					config.Save(".env")
+				var selectedWorkspace = ""
+				if signin.Session.User.IsSet() && !signin.Session.User.IsNull() {
+					fmt.Println("Signin successful as: ", signin.Session.User.Ptr().FirstName, signin.Session.User.Ptr().LastName)
+				} else {
+					fmt.Println("Successful signin, but no user is associated with this session")
 				}
+
+				// Check the workspaces. If there are more than 1, we ask user to choose.
+				if len(signin.Session.UserWorkspaces) > 1 {
+					var workspaces = []string{}
+					for _, item := range signin.Session.UserWorkspaces {
+						workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.String))
+					}
+
+					selectedWorkspace = fireback.AskForSelect("You have more than one workspace assigned to your account. Choose which one to continue", workspaces)
+				}
+
+				fmt.Println("Completed with:")
+				fmt.Println("Token:", signin.Session.Token)
+				if selectedWorkspace != "" {
+					fmt.Println("Workspace Id:", selectedWorkspace)
+				}
+
+				config := fireback.GetConfig()
+				config.CliToken = signin.Session.Token
+				config.CliWorkspace = selectedWorkspace
+
+				config.Save(".env")
 
 			}
 		}
@@ -350,11 +369,11 @@ var AuthFlow cli.Command = cli.Command{
 		// this is useful to create an account in one go.
 		if c.NumFlags() > 0 {
 			appConfig := fireback.GetConfig()
-			dto := CastClassicSignupFromCli(c)
+			dto := CastClassicSignupActionReqFromCli(c)
 			query := fireback.CommonCliQueryDSLBuilder(c)
 
 			fmt.Println("Type", dto.Type)
-			if result, err := CreateAdminTransaction(dto, c.Bool("in-root"), query); err != nil {
+			if result, err := CreateAdminTransaction(&dto, c.Bool("in-root"), query); err != nil {
 				log.Fatalln(err)
 			} else {
 				appConfig.CliWorkspace = result.WorkspaceAs
