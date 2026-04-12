@@ -1662,8 +1662,7 @@ var InviteToWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
 			var query fireback.QueryDSL
 			query = fireback.ExtractQueryDslFromGinContext(m)
 
-			body := InviteToWorkspaceActionReq{}
-			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &body, query)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 
 			resp, err := InviteToWorkspaceImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
@@ -1702,8 +1701,7 @@ var AcceptInviteActionDef fireback.Module3Action = fireback.Module3Action{
 			var query fireback.QueryDSL
 			query = fireback.ExtractQueryDslFromGinContext(m)
 
-			body := InviteToWorkspaceActionReq{}
-			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &body, query)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 
 			resp, err := AcceptInviteImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)

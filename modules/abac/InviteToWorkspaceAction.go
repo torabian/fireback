@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
@@ -14,11 +15,13 @@ func init() {
 func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) {
 	req := c.Body
 
+	fmt.Println(req.Json())
+
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
-	_, roleErrors := ValidateRoleAndItsExistence(fireback.NewString(req.RoleId))
+	role, roleErrors := ValidateRoleAndItsExistence(fireback.NewString(req.RoleId))
 	if len(roleErrors) != 0 {
 		return nil, &fireback.IError{
 			Errors: roleErrors,
@@ -44,6 +47,7 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.Qu
 		FirstName:         req.FirstName,
 		LastName:          req.LastName,
 		ForceEmailAddress: fireback.NewBool(forceEmailAddress),
+		Role:              role,
 	}
 
 	invite.WorkspaceId = fireback.NewString(query.WorkspaceId)
