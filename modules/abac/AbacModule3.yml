@@ -1,5 +1,5 @@
 name: abac
-description: 
+description:
   Fireback ABAC module provides user authentication, basic support for most projects,
   including advanced role, permission module on top of fireback core module.
   Using this module is not essential to create fireback projects, but provides a great
@@ -29,7 +29,7 @@ dtom:
           - name: country
             type: string
   - name: okayResponse
- 
+
   - name: resetEmail
     fields:
       - name: password
@@ -172,13 +172,66 @@ dtom:
         type: string?
 
 acts:
+  - name: InviteToWorkspace
+    url: /workspace/invite
+    cliName: invite
+    method: post
+    description: "Invite a new person (either a user, with passport or without passport)"
+    in:
+      fields:
+        - name: publicKey
+          type: string
+          description:
+            A long hash to get the user into the confirm or signup page without sending
+            the email or phone number, for example if an administrator wants to copy the link.
+        - name: coverLetter
+          type: string
+          description: The content that user will receive to understand the reason of the letter.
+        - name: targetUserLocale
+          type: string
+          description:
+            If the invited person has a different language, then you can define
+            that so the interface for him will be automatically translated.
+        - name: email
+          type: string
+          description: The email address of the person which is invited.
+        - name: phonenumber
+          type: string
+          description: The phone number of the person which is invited.
+        - name: workspace
+          type: one
+          target: WorkspaceEntity
+          description: Workspace which user is being invite to.
+        - name: firstName
+          type: string
+          tags:
+            validate: required
+          description: First name of the person which is invited
+        - name: lastName
+          tags:
+            validate: required
+          type: string
+          description: Last name of the person which is invited.
+        - name: forceEmailAddress
+          type: bool?
+          description: If forced, the email address cannot be changed by the user which has been invited.
+        - name: forcePhoneNumber
+          type: bool?
+          description: If forced, user cannot change the phone number and needs to complete signup.
+        - name: role
+          type: one
+          description: The role which invitee get if they accept the request.
+          tags:
+            validate: required
+          target: RoleEntity
 
+    security:
+      resolveStrategy: workspace
   - name: AcceptInvite
     method: post
     url: /user/invitation/accept
     cliName: accept-invite
-    description: 
-      Use it when user accepts an invitation, and it will complete the joining process
+    description: Use it when user accepts an invitation, and it will complete the joining process
     security:
       resolveStrategy: user
     in:
@@ -187,13 +240,12 @@ acts:
           type: string
           tags:
             validate: required
-          description: 
-            The invitation id which will be used to process
+          description: The invitation id which will be used to process
 
   - name: CheckPassportMethods
     url: /passports/available-methods
     cliName: check-passport-methods
-    description: 
+    description:
       Publicly available information to create the authentication form, and show users
       how they can signin or signup to the system. Based on the PassportMethod entities,
       it will compute the available methods for the user, considering their region (IP for example)
@@ -226,17 +278,14 @@ acts:
     method: get
     url: /passports/os/login
     cliName: oslogin
-    description: 
+    description:
       Logins into the system using operating system (current) user, and store the information
       for them. Useful for desktop applications.
     out:
       dto: UserSessionDto
 actions:
-
-
   - name: oauthAuthenticate
-    description: 
-      When a token is got from a oauth service such as google,
+    description: When a token is got from a oauth service such as google,
       we send the token here to authenticate the user.
       To me seems this doesn't need to have 2FA or anything, so we return
       the session directly, or maybe there needs to be next step.
@@ -244,27 +293,26 @@ actions:
     method: post
     in:
       fields:
-      - name: token
-        type: string
-        description: 
-          The token that Auth2 provider returned to the front-end, which will
-          be used to validate the backend
-      - name: service
-        type: string
-        description: 
-          The service name, such as 'google' which later backend will use to authorize the token
-          and create the user.
+        - name: token
+          type: string
+          description:
+            The token that Auth2 provider returned to the front-end, which will
+            be used to validate the backend
+        - name: service
+          type: string
+          description:
+            The service name, such as 'google' which later backend will use to authorize the token
+            and create the user.
     out:
       fields:
-      - name: session
-        type: one
-        target: UserSessionDto
-      - name: next
-        type: arrayP
-        primitive: string
-        description: 
-          The next possible action which is suggested.
-  
+        - name: session
+          type: one
+          target: UserSessionDto
+        - name: next
+          type: arrayP
+          primitive: string
+          description: The next possible action which is suggested.
+
   # - name: addPassport
   #   url: /users/passports/add
   #   security:
@@ -273,15 +321,14 @@ actions:
   #   in:
   #     fields:
   #       - name: value
-  #         description: 
+  #         description:
   #           The new passport value
-      
+
   - name: userPassports
     url: /user/passports
     security:
       resolveStrategy: user
-    description: 
-      Returns list of passports belongs to an specific user.
+    description: Returns list of passports belongs to an specific user.
     actionAliases:
       - upass
     format: query
@@ -290,26 +337,23 @@ actions:
       fields:
         - name: value
           type: string
-          description: 
-            The passport value, such as email address or phone number
+          description: The passport value, such as email address or phone number
         - name: uniqueId
           type: string
-          description: 
-            Unique identifier of the passport to operate some action on top of it
+          description: Unique identifier of the passport to operate some action on top of it
         - name: type
           type: string
-          description: 
-            The type of the passport, such as email, phone number
+          description: The type of the passport, such as email, phone number
         - name: totpConfirmed
           type: bool
-          description: 
+          description:
             Regardless of the secret, user needs to confirm his secret. There is an extra action
             to confirm user totp, could be used after signup or prior to login.
   - name: changePassword
     url: /passport/change-password
     security:
       resolveStrategy: user
-    description: 
+    description:
       Change the password for a given passport of the user. User needs to be authenticated in
       order to be able to change the password for a given account.
     actionAliases:
@@ -320,17 +364,16 @@ actions:
       fields:
         - name: password
           type: string
-          description: 
-            New password meeting the security requirements.
+          description: New password meeting the security requirements.
           validate: required
         - name: uniqueId
           validate: required
-          description: 
+          description:
             The passport uniqueId (not the email or phone number) which password would be applied to.
             Don't confuse with value.
           type: string
   - name: userInvitations
-    description: 
+    description:
       Shows the invitations for an specific user, if the invited member already has a account.
       It's based on the passports, so if the passport is authenticated we will show them.
     format: query
@@ -341,7 +384,7 @@ actions:
     out:
       dto: UserInvitationsQueryColumns
   - name: confirmClassicPassportTotp
-    description: 
+    description:
       When user requires to setup the totp for an specifc passport, they can use this endpoint to confirm
       it.
     method: post
@@ -351,44 +394,42 @@ actions:
         - name: value
           type: string
           validate: required
-          description: 
-            Passport value, email or phone number which is already successfully registered.
+          description: Passport value, email or phone number which is already successfully registered.
         - name: password
           type: string
           validate: required
-          description: 
+          description:
             Password related to the passport. Totp is only available for passports with a password.
             Basically totp is protecting passport, not otp over email or sms.
         - name: totpCode
           type: string
           validate: required
-          description: 
-            The totp code generated by authenticator such as google or microsft apps.
+          description: The totp code generated by authenticator such as google or microsft apps.
     out:
       fields:
-      - name: session
-        type: one
-        target: UserSessionDto
+        - name: session
+          type: one
+          target: UserSessionDto
 
   - name: queryWorkspaceTypesPublicly
     format: query
     method: get
     url: /workspace/public/types
     cliName: public-types
-    description: 
+    description:
       Returns the workspaces types available in the project publicly without authentication,
       and the value could be used upon signup to go different route.
     out:
       fields:
-      - name: title
-        type: string
-      - name: description
-        type: string
-      - name: uniqueId
-        type: string
-      - name: slug
-        type: string
-  
+        - name: title
+          type: string
+        - name: description
+          type: string
+        - name: uniqueId
+          type: string
+        - name: slug
+          type: string
+
   - name: queryUserRoleWorkspaces
     format: query
     method: get
@@ -396,40 +437,38 @@ actions:
     cliName: urw
     security:
       resolveStrategy: user
-    description: 
+    description:
       Returns the workspaces that user belongs to, as well as his role in there,
       and the permissions for each role
     out:
       fields:
-      - name: name
-        type: string
-      - name: capabilities
-        type: arrayP
-        description: 
-          Workspace level capabilities which are available
-        primitive: string
-      - name: uniqueId
-        type: string
-      - name: roles
-        type: array
-        fields:
         - name: name
-          type: string
-        - name: uniqueId
           type: string
         - name: capabilities
           type: arrayP
-          description: 
-            Capabilities related to this role which are available
+          description: Workspace level capabilities which are available
           primitive: string
+        - name: uniqueId
+          type: string
+        - name: roles
+          type: array
+          fields:
+            - name: name
+              type: string
+            - name: uniqueId
+              type: string
+            - name: capabilities
+              type: arrayP
+              description: Capabilities related to this role which are available
+              primitive: string
 
   - name: signout
     url: /passport/signout
     description: Signout the user, clears cookies or does anything else if needed.
     method: post
-    
+
   - name: reactiveSearch
-    description: 
+    description:
       Reactive search is a general purpose search mechanism for different modules,
       and could be used in mobile apps or front-end to quickly search for a entity.
     url: reactive-search
@@ -438,8 +477,8 @@ actions:
   - name: importUser
     url: /user/import
     method: post
-    
-    description: 'Imports users, and creates their passports, and all details'
+
+    description: "Imports users, and creates their passports, and all details"
     in:
       fields:
         - name: path
@@ -461,8 +500,8 @@ actions:
           type: string
     out:
       fields:
-      - name: queueId
-        type: string
+        - name: queueId
+          type: string
   - name: sendEmailWithProvider
     url: /emailProvider/send
     cliName: emailp
@@ -483,17 +522,7 @@ actions:
       fields:
         - name: queueId
           type: string
-  - name: inviteToWorkspace
-    url: /workspace/invite
-    cliName: invite
-    method: post
-    description: 'Invite a new person (either a user, with passport or without passport)'
-    in:
-      entity: WorkspaceInviteEntity
-    out:
-      entity: WorkspaceInviteEntity
-    security:
-      resolveStrategy: workspace
+
   - name: gsmSendSms
     url: /gsm/send/sms
     cliName: sms
@@ -534,7 +563,7 @@ actions:
   - name: classicSignin
     url: /passports/signin/classic
     cliName: in
-    description: 'Signin publicly to and account using class passports (email, password)'
+    description: "Signin publicly to and account using class passports (email, password)"
     method: post
     in:
       fields:
@@ -546,34 +575,32 @@ actions:
           validate: required
         - name: totpCode
           type: string
-          description: 
+          description:
             Accepts login with totp code. If enabled, first login would return a success response
             with next[enter-totp] value and ui can understand that user needs to be navigated
             into the screen other screen.
         - name: sessionSecret
           type: string
-          description: 
+          description:
             Session secret when logging in to the application requires
             more steps to complete.
     out:
       fields:
-      - name: session
-        type: one
-        target: UserSessionDto
-      - name: next
-        type: arrayP
-        primitive: string
-        description: 
-          The next possible action which is suggested.
-      - name: totpUrl
-        type: string
-        description: 
-          In case the account doesn't have totp, but enforced by installation,
-          this value will contain the link
-      - name: sessionSecret
-        type: string
-        description: 
-          Returns a secret session if the authentication requires more steps.
+        - name: session
+          type: one
+          target: UserSessionDto
+        - name: next
+          type: arrayP
+          primitive: string
+          description: The next possible action which is suggested.
+        - name: totpUrl
+          type: string
+          description:
+            In case the account doesn't have totp, but enforced by installation,
+            this value will contain the link
+        - name: sessionSecret
+          type: string
+          description: Returns a secret session if the authentication requires more steps.
   - name: classicSignup
     url: /passports/signup/classic
     cliName: up
@@ -588,7 +615,7 @@ actions:
           type: string
         - name: sessionSecret
           type: string
-          description: 
+          description:
             Required when the account creation requires recaptcha, or otp approval
             first. If such requirements are there, you first need to follow the otp
             apis, get the session secret and pass it here to complete the setup.
@@ -616,25 +643,23 @@ actions:
           validate: required
     out:
       fields:
-      - name: session
-        type: one
-        target: UserSessionDto
-        description: 
-          Returns the user session in case that signup is completely successful.
-      - name: totpUrl
-        type: string
-        description: 
-          If time based otp is available, we add it response to make it easier for ui.
-      - name: continueToTotp
-        type: bool
-        description: 
-          Returns true and session will be empty if, the totp is required by the installation.
-          In such scenario, you need to forward user to setup totp screen.
-      - name: forcedTotp
-        type: bool
-        description: 
-          Determines if user must complete totp in order to continue based on workspace
-          or installation
+        - name: session
+          type: one
+          target: UserSessionDto
+          description: Returns the user session in case that signup is completely successful.
+        - name: totpUrl
+          type: string
+          description: If time based otp is available, we add it response to make it easier for ui.
+        - name: continueToTotp
+          type: bool
+          description:
+            Returns true and session will be empty if, the totp is required by the installation.
+            In such scenario, you need to forward user to setup totp screen.
+        - name: forcedTotp
+          type: bool
+          description:
+            Determines if user must complete totp in order to continue based on workspace
+            or installation
   - name: createWorkspace
     method: post
     url: /workspaces/create
@@ -663,7 +688,7 @@ actions:
           validate: required
         - name: securityToken
           type: string
-          description: 
+          description:
             This can be the value of recaptcha2, recaptch3, or generate security image or voice
             for verification. Will be used based on the configuration.
     out:
@@ -671,17 +696,16 @@ actions:
         - name: next
           type: arrayP
           primitive: string
-          description: 
-            The next possible action which is suggested.
+          description: The next possible action which is suggested.
         - name: flags
           type: arrayP
           primitive: string
-          description: 
+          description:
             Extra information that can be useful actually when doing onboarding.
             Make sure sensetive information doesn't go out.
         - name: otpInfo
           type: object
-          description: 
+          description:
             If the endpoint automatically triggers a send otp, then it would be holding that information,
             Also the otp information can become available.
           fields:
@@ -719,14 +743,13 @@ actions:
           target: UserSessionDto
         - name: totpUrl
           type: string
-          description: 
-            If time based otp is available, we add it response to make it easier for ui.
+          description: If time based otp is available, we add it response to make it easier for ui.
         - name: sessionSecret
           type: string
           description: The session secret will be used to call complete user registeration api.
         - name: continueWithCreation
           type: bool
-          description: 
+          description:
             If return true, means the OTP is correct and user needs to be created
             before continue the authentication processs.
   - name: classicPassportRequestOtp
@@ -742,8 +765,7 @@ actions:
         - name: value
           type: string
           validate: required
-          description: 
-            Passport value (email, phone number) which would be recieving the otp code.
+          description: Passport value (email, phone number) which would be recieving the otp code.
     out:
       fields:
         - name: suspendUntil
@@ -755,10 +777,6 @@ actions:
         - name: secondsToUnblock
           type: int64
           description: The amount of time left to unblock for next request
-
-
-
-
 
 entities:
   - name: timezoneGroup
@@ -772,8 +790,7 @@ entities:
         translate: true
 
   - name: file
-    description: 
-      Tus file uploading reference of the content.
+    description: Tus file uploading reference of the content.
       Every files being uploaded using tus will be stored in this table.
     permRewrite:
       replace: root.modules
@@ -783,7 +800,7 @@ entities:
         type: string
       - name: operationId
         type: string
-        description: 
+        description:
           For each upload, we need to assign a operation id, so if the operation
           has been cancelled, it would be cleared automatically, and there won't be orphant
           files in the database.
@@ -813,35 +830,30 @@ entities:
         type: string
   - name: appMenu
     cte: true
-    description: 'Manages the menus in the app, (for example tab views, sidebar items, etc.)'
+    description: "Manages the menus in the app, (for example tab views, sidebar items, etc.)"
     fields:
       - name: label
         type: string
         translate: true
         recommended: true
-        description: 
-          Label that will be visible to user
+        description: Label that will be visible to user
       - name: href
         type: string
         recommended: true
-        description: 
-          Location that will be navigated in case of click or selection on ui
+        description: Location that will be navigated in case of click or selection on ui
       - name: icon
         type: string
         recommended: true
-        description: 
-          Icon string address which matches the resources on the front-end apps.
+        description: Icon string address which matches the resources on the front-end apps.
       - name: activeMatcher
         type: string
-        description: 
-          Custom window location url matchers, for inner screens.
+        description: Custom window location url matchers, for inner screens.
       - name: capability
         type: one
         target: CapabilityEntity
         fields: []
         module: fireback
-        description: 
-          The permission which is required for the menu to be visible.
+        description: The permission which is required for the menu to be visible.
   - name: backupTableMeta
     cliName: backup
     permRewrite:
@@ -886,16 +898,16 @@ entities:
         type: string
       - name: inviteToWorkspaceContentDefault
         gorm: text
-        sql: '-'
+        sql: "-"
         type: string
       - name: inviteToWorkspaceContentDefaultExcerpt
         type: string
         gorm: text
-        sql: '-'
+        sql: "-"
       - name: inviteToWorkspaceTitle
         type: string
       - name: inviteToWorkspaceTitleDefault
-        sql: '-'
+        sql: "-"
         type: string
       - name: inviteToWorkspaceSender
         type: one
@@ -912,17 +924,17 @@ entities:
       - name: forgetPasswordContentDefault
         gorm: text
         type: string
-        sql: '-'
+        sql: "-"
       - name: forgetPasswordContentDefaultExcerpt
         gorm: text
-        sql: '-'
+        sql: "-"
         type: string
       - name: forgetPasswordTitle
         gorm: text
         type: string
       - name: forgetPasswordTitleDefault
         gorm: text
-        sql: '-'
+        sql: "-"
         type: string
       - name: forgetPasswordSender
         type: one
@@ -942,16 +954,16 @@ entities:
       - name: confirmEmailContentDefault
         type: string
         gorm: text
-        sql: '-'
+        sql: "-"
       - name: confirmEmailContentDefaultExcerpt
         gorm: text
-        sql: '-'
+        sql: "-"
         type: string
       - name: confirmEmailTitle
         type: string
       - name: confirmEmailTitleDefault
         type: string
-        sql: '-'
+        sql: "-"
   - name: passportMethod
     cliShort: method
     permRewrite:
@@ -983,7 +995,7 @@ entities:
       - name: region
         type: enum
         default: global
-        description: 
+        description:
           The region which would be using this method of passports for authentication.
           In Fireback open-source, only 'global' is available.
         of:
@@ -1004,58 +1016,50 @@ entities:
     fields:
       - name: publicKey
         type: string
-        description: 
+        description:
           A long hash to get the user into the confirm or signup page without sending
           the email or phone number, for example if an administrator wants to copy the link.
       - name: coverLetter
         type: string
-        description: 
-          The content that user will receive to understand the reason of the letter.
+        description: The content that user will receive to understand the reason of the letter.
       - name: targetUserLocale
         type: string
-        description: 
+        description:
           If the invited person has a different language, then you can define
           that so the interface for him will be automatically translated.
       - name: email
         type: string
-        description: 
-          The email address of the person which is invited.
+        description: The email address of the person which is invited.
       - name: phonenumber
         type: string
-        description: 
-          The phone number of the person which is invited.
+        description: The phone number of the person which is invited.
       - name: workspace
         type: one
         target: WorkspaceEntity
         allowCreate: false
-        description: 
-          Workspace which user is being invite to.
+        description: Workspace which user is being invite to.
       - name: firstName
         type: string
         validate: required
-        description: 
-          First name of the person which is invited
+        description: First name of the person which is invited
       - name: lastName
         validate: required
         type: string
-        description: 
-          Last name of the person which is invited.
+        description: Last name of the person which is invited.
       - name: forceEmailAddress
         type: bool?
-        description: 
-          If forced, the email address cannot be changed by the user which has been invited.
+        description: If forced, the email address cannot be changed by the user which has been invited.
       - name: forcePhoneNumber
         type: bool?
-        description: 
-          If forced, user cannot change the phone number and needs to complete signup.
+        description: If forced, user cannot change the phone number and needs to complete signup.
       - name: role
         type: one
-        description: 
-          The role which invitee get if they accept the request.
+        description: The role which invitee get if they accept the request.
         validate: required
         target: RoleEntity
         allowCreate: false
         fields: []
+
   - name: pendingWorkspaceInvite
     fields:
       - name: value
@@ -1102,8 +1106,8 @@ entities:
     security:
       resolveStrategy: user
     gormMap:
-      workspaceId: 'index:userworkspace_idx,unique'
-      userId: 'index:userworkspace_idx,unique'
+      workspaceId: "index:userworkspace_idx,unique"
+      userId: "index:userworkspace_idx,unique"
     fields:
       - name: user
         type: one
@@ -1113,18 +1117,18 @@ entities:
         target: WorkspaceEntity
         fields: []
       - name: userPermissions
-        gorm: '-'
-        sql: '-'
+        gorm: "-"
+        sql: "-"
         type: arrayP
         primitive: string
       - name: rolePermission
-        gorm: '-'
-        sql: '-'
+        gorm: "-"
+        sql: "-"
         type: arrayP
         primitive: UserRoleWorkspaceDto
       - name: workspacePermissions
-        gorm: '-'
-        sql: '-'
+        gorm: "-"
+        sql: "-"
         type: arrayP
         primitive: string
   - name: workspaceRole
@@ -1139,11 +1143,11 @@ entities:
       - name: userWorkspace
         type: one
         target: UserWorkspaceEntity
-        idFieldGorm: 'index:workspacerole_idx,unique'
+        idFieldGorm: "index:workspacerole_idx,unique"
       - name: role
         type: one
         target: RoleEntity
-        idFieldGorm: 'index:workspacerole_idx,unique'
+        idFieldGorm: "index:workspacerole_idx,unique"
         fields: []
   - name: user
     permRewrite:
@@ -1158,12 +1162,12 @@ entities:
             type: bool?
     description: Manage the users who are in the current app (root only)
     events:
-    - name: Googoli2
-      description: Googlievent
-      payload:
-        fields:
-          - name: entity
-            type: string
+      - name: Googoli2
+        description: Googlievent
+        payload:
+          fields:
+            - name: entity
+              type: string
     fields:
       - name: firstName
         type: string
@@ -1183,33 +1187,31 @@ entities:
         type: string
       - name: lastIpAddress
         type: string
-        description: 
-          User last connecting ip address
+        description: User last connecting ip address
       - name: primaryAddress
         type: embed
-        description: 
+        description:
           User primary address location. Can be useful for simple projects that a user is associated
-          with a single address. 
+          with a single address.
         fields:
-        - name: addressLine1       
-          description: Street address, building number
-          type: string
-        - name: addressLine2       
-          description: Apartment, suite, floor (optional)
-          type: string?
-        - name: city             
-          description: City or locality
-          type: string?
-        - name: stateOrProvince   
-          description: State, region, or province
-          type: string?
-        - name: postalCode         
-          description: ZIP or postal code
-          type: string?
-        - name: countryCode        
-          description: ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")
-          type: string?
-
+          - name: addressLine1
+            description: Street address, building number
+            type: string
+          - name: addressLine2
+            description: Apartment, suite, floor (optional)
+            type: string?
+          - name: city
+            description: City or locality
+            type: string?
+          - name: stateOrProvince
+            description: State, region, or province
+            type: string?
+          - name: postalCode
+            description: ZIP or postal code
+            type: string?
+          - name: countryCode
+            description: ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\")
+            type: string?
 
   - name: userProfile
     fields:
@@ -1226,7 +1228,7 @@ entities:
     permRewrite:
       replace: root.modules
       with: root.manage
-    description: 'Fireback general user role, workspaces services.'
+    description: "Fireback general user role, workspaces services."
     fields:
       - name: description
         type: string
@@ -1239,14 +1241,14 @@ entities:
         validate: required
         fields: []
   - name: role
-    description: 'Manage roles within the workspaces, or root configuration'
+    description: "Manage roles within the workspaces, or root configuration"
     messages:
       roleNeedsOneCapability:
         en: Role atleast needs one capability to be selected.
     fields:
       - name: name
         type: string
-        validate: 'required,omitempty,min=1,max=200'
+        validate: "required,omitempty,min=1,max=200"
       - name: capabilities
         type: collection
         target: CapabilityEntity
@@ -1258,7 +1260,7 @@ entities:
       replace: root.modules
       with: root.manage
     distinctBy: workspace
-    description: 
+    description:
       Contains configuration which would be necessary for application environment to be running.
       At the moment, a single record is allowed, and only for root workspace. But in theory
       it could be configured per each workspace independently.
@@ -1275,88 +1277,80 @@ entities:
       - name: enableOtp
         recommended: true
         type: bool?
-        description: 
-          Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
+        description: Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
       - name: requireOtpOnSignup
         type: bool?
         recommended: true
-        description: 
+        description:
           Forces the user to have otp verification before can create an account.
           They can define their password still.
       - name: requireOtpOnSignin
         type: bool?
         recommended: true
-        description: 
+        description:
           Forces the user to use otp when signing in. Even if they have password set,
           they won't use it and only will be able to signin using that otp.
         default: false
       - name: recaptcha2ServerKey
         type: string
-        description: 
+        description:
           Secret which would be used to decrypt if the recaptcha is correct.
           Should not be available publicly.
       - name: recaptcha2ClientKey
         type: string
-        description: 
+        description:
           Secret which would be used for recaptcha2 on the client side. Can be publicly visible,
           and upon authenticating users it would be sent to front-end.
       - name: enableTotp
         type: bool?
         recommended: true
-        description: 
-          Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
+        description: Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
       - name: forceTotp
         type: bool?
         recommended: true
-        description: 
-          Forces the user to setup a 2FA in order to access their account. 
+        description:
+          Forces the user to setup a 2FA in order to access their account.
           Users which did not setup this won't be affected.
       - name: forcePasswordOnPhone
         type: bool?
-        description: 
-          Forces users who want to create account using phone number to 
+        description:
+          Forces users who want to create account using phone number to
           also set a password on their account
       - name: forcePersonNameOnPhone
         type: bool?
-        description: 
-          Forces the creation of account using phone number to ask for user first name and last name
+        description: Forces the creation of account using phone number to ask for user first name and last name
       - name: generalEmailProvider
         type: one
         target: EmailProviderEntity
         allowCreate: false
-        description: 
+        description:
           Email provider service, which will be used to send the messages using it's service. It doesn't
           affect the message content, rather, you can choose via which third-party service, or even your own
           smtp service to send emails.
-        
+
       - name: generalGsmProvider
         type: one
         target: GsmProviderEntity
         allowCreate: false
-        description: 
-          General service which would be used to send text messages (sms) using it's services or API.
+        description: General service which would be used to send text messages (sms) using it's services or API.
 
       - name: inviteToWorkspaceContent
         type: one
         target: RegionalContentEntity
         allowCreate: false
-        description: 
-          This template would be used, as default when a user is inviting a third-party into their own workspace.
+        description: This template would be used, as default when a user is inviting a third-party into their own workspace.
 
       - name: emailOtpContent
         type: one
         target: RegionalContentEntity
         allowCreate: false
-        description: 
-          Upon one time password request for email, the content will be read to fill the message which will go to user.
+        description: Upon one time password request for email, the content will be read to fill the message which will go to user.
 
       - name: smsOtpContent
         type: one
         target: RegionalContentEntity
         allowCreate: false
-        description: 
-          Upon OTP text messages, this template will be used to create such text message, including the one time password code.
- 
+        description: Upon OTP text messages, this template will be used to create such text message, including the one time password code.
 
   - name: gsmProvider
     permRewrite:
@@ -1404,20 +1398,21 @@ entities:
       cannotModifyWorkspaceType:
         en: You cannot modify workspace type due to some validation errors.
 
-    description: Defines a type for workspace, and the role which it can have as a whole.
+    description:
+      Defines a type for workspace, and the role which it can have as a whole.
       In systems with multiple types of services, e.g. student, teachers, schools
       this is useful to set those default types and limit the access of the users.
     fields:
       - name: title
         translate: true
         type: string
-        validate: 'required,omitempty,min=1,max=250'
+        validate: "required,omitempty,min=1,max=250"
       - name: description
         translate: true
         type: string
       - name: slug
         type: string
-        validate: 'required,omitempty,min=2,max=50'
+        validate: "required,omitempty,min=2,max=50"
       - name: role
         type: one
         target: RoleEntity
@@ -1431,7 +1426,8 @@ entities:
     permRewrite:
       replace: root.modules
       with: root.manage
-    description: Thirdparty services which will send email, allows each workspace graphically
+    description:
+      Thirdparty services which will send email, allows each workspace graphically
       configure their token without the need of restarting servers
     security:
       writeOnRoot: true
@@ -1525,8 +1521,8 @@ entities:
       - name: thirdPartyVerifier
         type: string
         default: false
-        description: 
-          When user creates account via oauth services such as google, 
+        description:
+          When user creates account via oauth services such as google,
           it's essential to set the provider and do not allow passwordless logins
           if it's not via that specific provider.
       - name: type
@@ -1542,18 +1538,18 @@ entities:
         gorm: unique
       - name: totpSecret
         type: string
-        description: 
+        description:
           Store the secret of 2FA using time based dual factor authentication here for this specific
           passport. If set, during authorization will be asked.
       - name: totpConfirmed
         type: bool?
-        description: 
+        description:
           Regardless of the secret, user needs to confirm his secret. There is an extra action
           to confirm user totp, could be used after signup or prior to login.
       - name: password
         type: string
-        json: '-'
-        yaml: '-'
+        json: "-"
+        yaml: "-"
       - name: confirmed
         type: bool?
       - name: accessToken
@@ -1579,7 +1575,7 @@ entities:
         type: string
       - name: languageId
         validate: required
-        gorm: 'index:regional_content_index,unique'
+        gorm: "index:regional_content_index,unique"
         type: string
       - name: keyGroup
         validate: required
@@ -1589,7 +1585,7 @@ entities:
             description: Used when an email would be sent with one time password
           - k: EMAIL_OTP
             description: Used when an sms would be sent with one time password
-        gorm: 'index:regional_content_index,unique'
+        gorm: "index:regional_content_index,unique"
   - name: publicAuthentication
     cliShort: pa
     security:
@@ -1597,7 +1593,7 @@ entities:
     permRewrite:
       replace: root.modules
       with: root.manage
-    description: 
+    description:
       Keeps information about user onboarding, otp state, and other things
       which are necessary for onboarding new users in multiple endpoints
     fields:
@@ -1607,13 +1603,12 @@ entities:
         type: one
       - name: totpSecret
         type: string
-        description: 
+        description:
           If the application requires totp dual factor upon account creation,
           we create a secret here and pass the link
       - name: totpLink
         type: string
-        description: 
-          The url which will be converted into QR code on client side to scan
+        description: The url which will be converted into QR code on client side to scan
       - name: passport
         target: PassportEntity
         allowCreate: false
@@ -1621,8 +1616,8 @@ entities:
         fields: []
       - name: sessionSecret
         type: string
-        description: 
-          This is a long hash generated and will be used to authenticate user after 
+        description:
+          This is a long hash generated and will be used to authenticate user after
           he confirmed the otp to finish the signup process and add more information
           before creating an account
       - name: passportValue
@@ -1637,7 +1632,7 @@ entities:
         type: string
       - name: recoveryAbsoluteUrl
         type: string
-        sql: '-'
+        sql: "-"
 messages:
   recaptcha2Error:
     en: Recaptcha is not correct. Try again to solve the recaptcha.
@@ -1662,10 +1657,10 @@ messages:
       Request requires authroization, please make sure you are logged in, and
       have enough access level
     fa: شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید
-  
+
   tokenNotFound:
     en: Token not found or no longer valid.
-  
+
   userNotFoundOrDeleted:
     en: >-
       User not found, your account might be deleted, or access level has been
@@ -1765,7 +1760,7 @@ messages:
 
 queries:
   - name: userInvitations
-    description: 
+    description:
       Gets the invitations necessary for the specific user, so he can reject or accept
       them and join the fireback.
     columns:
@@ -1790,8 +1785,7 @@ queries:
           description: The method of the invitation, such as email.
         - name: coverLetter
           type: string
-          description: 
-            The content that user will receive to understand the reason of the letter.
+          description: The content that user will receive to understand the reason of the letter.
 
     query: |
       {{ define "content" }}
@@ -1812,8 +1806,7 @@ queries:
       WHERE passport_entities.user_id = "(userId)"
 
       {{ end }}
-      
+
       {{ template "content" "email" }}
       union
       {{ template "content" "phonenumber" }}
-     
