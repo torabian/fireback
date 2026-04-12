@@ -1,8 +1,6 @@
 package abac
 
 import (
-	"fmt"
-
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 )
@@ -15,12 +13,11 @@ func init() {
 func AcceptInviteAction(c AcceptInviteActionRequest, q fireback.QueryDSL) (*AcceptInviteActionResponse, error) {
 
 	// First of all, we will find the invitation and gather some information.
-	fmt.Println(1, c.Body.Json())
+
 	q.UniqueId = c.Body.InvitationUniqueId
 	q.Deep = true
 	invite, err := WorkspaceInviteActions.GetOne(q)
 
-	fmt.Println("Invitation:", invite.UniqueId, c.Body.InvitationUniqueId)
 	if err != nil {
 		return nil, err
 	}

@@ -279,6 +279,12 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 // and cast it to the 'body'. Make sure calling this with &body, not body
 // Extend this function if you want to support different formats.
 func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any, f QueryDSL) (aborted bool) {
+
+	// Only following request methods do have a body
+	if c.Request.Method != "POST" && c.Request.Method != "PATCH" && c.Request.Method != "PUT" {
+		return false
+	}
+
 	bodyBytes, err := ginBodyToBytes(c)
 	if err != nil {
 		return abortWithError(c, err, f)
