@@ -3292,8 +3292,10 @@ type {{ $name }}Msgs struct {
           GinCtx:      m,
         }
 
-        var query {{ $wsprefix }}QueryDSL
-        query = {{ $wsprefix }}ExtractQueryDslFromGinContext(m)
+        query := {{ $wsprefix }}ExtractQueryDslFromGinContext(m)
+
+			  {{ $wsprefix }}ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+
         resp, err := {{ .Name }}Impl(req, query)
         {{ $wsprefix }}WriteActionResponseToGin(m, resp, err)
       },

@@ -1659,11 +1659,8 @@ var InviteToWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
-
+			query := fireback.ExtractQueryDslFromGinContext(m)
 			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
-
 			resp, err := InviteToWorkspaceImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1698,11 +1695,8 @@ var AcceptInviteActionDef fireback.Module3Action = fireback.Module3Action{
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
-
+			query := fireback.ExtractQueryDslFromGinContext(m)
 			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
-
 			resp, err := AcceptInviteImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1734,8 +1728,8 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			// fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := CheckPassportMethodsImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1767,8 +1761,8 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			// fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := OsLoginAuthenticateImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -2243,8 +2237,6 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
-	InviteToWorkspaceActionDef.ToCli(),
-	AcceptInviteActionDef.ToCli(),
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
 	ChangePasswordActionCmd,

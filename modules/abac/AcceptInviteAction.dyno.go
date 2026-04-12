@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli"
+	"io"
+	"net/http"
+	"net/url"
 )
 
 /**
@@ -118,20 +117,6 @@ func AcceptInviteActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
 }
 
 type AcceptInviteActionRequestSig = func(c AcceptInviteActionRequest) (*AcceptInviteActionResponse, error)
-
-func AcceptInviteActionFromGin(m *gin.Context) (AcceptInviteActionRequest, error) {
-	var body AcceptInviteActionReq
-	if err := m.ShouldBindJSON(&body); err != nil {
-		return AcceptInviteActionRequest{}, err
-	}
-
-	return AcceptInviteActionRequest{
-		Body:        body,
-		QueryParams: m.Request.URL.Query(),
-		Headers:     m.Request.Header,
-		GinCtx:      m,
-	}, nil
-}
 
 // AcceptInviteActionHandler returns the HTTP method, route URL, and a typed Gin handler for the AcceptInviteAction action.
 // Developers implement their business logic as a function that receives a typed request object
