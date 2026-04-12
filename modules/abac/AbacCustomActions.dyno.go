@@ -805,7 +805,7 @@ var SendEmailWithProviderActionCmd cli.Command = cli.Command{
 }
 var InviteToWorkspaceSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
-	ResolveStrategy: "workspace",
+	ResolveStrategy: "user",
 }
 
 type inviteToWorkspaceActionImpSig func(
@@ -1691,13 +1691,18 @@ var AcceptInviteActionDef fireback.Module3Action = fireback.Module3Action{
 	// post
 	Handlers: []gin.HandlerFunc{
 		func(m *gin.Context) {
-			req, err := AcceptInviteActionFromGin(m)
-			if err != nil {
-				m.String(500, "Parsing json error")
-				return
+			req := AcceptInviteActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
 			}
+
 			var query fireback.QueryDSL
 			query = fireback.ExtractQueryDslFromGinContext(m)
+
+			body := AcceptInviteActionReq{}
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &body, query)
+
 			resp, err := AcceptInviteImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},

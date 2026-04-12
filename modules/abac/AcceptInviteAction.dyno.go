@@ -122,7 +122,6 @@ type AcceptInviteActionRequestSig = func(c AcceptInviteActionRequest) (*AcceptIn
 func AcceptInviteActionFromGin(m *gin.Context) (AcceptInviteActionRequest, error) {
 	var body AcceptInviteActionReq
 	if err := m.ShouldBindJSON(&body); err != nil {
-		fmt.Println("Failed!")
 		return AcceptInviteActionRequest{}, err
 	}
 
