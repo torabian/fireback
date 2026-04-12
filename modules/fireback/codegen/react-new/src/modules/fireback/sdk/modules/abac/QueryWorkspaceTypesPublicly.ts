@@ -17,32 +17,32 @@ import {
 import { useFetchxContext } from "../../sdk/react/useFetchx";
 import { useState } from "react";
 /**
- * Action to communicate with the action QueryWorkspaceTypesPublicly2
+ * Action to communicate with the action QueryWorkspaceTypesPublicly
  */
-export type QueryWorkspaceTypesPublicly2ActionOptions = {
+export type QueryWorkspaceTypesPubliclyActionOptions = {
   queryKey?: unknown[];
   qs?: URLSearchParams;
 };
-export type QueryWorkspaceTypesPublicly2ActionQueryOptions = Omit<
+export type QueryWorkspaceTypesPubliclyActionQueryOptions = Omit<
   UseQueryOptions<
     unknown,
     unknown,
-    GResponse<QueryWorkspaceTypesPublicly2ActionRes>,
+    GResponse<QueryWorkspaceTypesPubliclyActionRes>,
     unknown[]
   >,
   "queryKey"
 > &
-  QueryWorkspaceTypesPublicly2ActionOptions &
+  QueryWorkspaceTypesPubliclyActionOptions &
   Partial<{
-    creatorFn: (item: unknown) => QueryWorkspaceTypesPublicly2ActionRes;
+    creatorFn: (item: unknown) => QueryWorkspaceTypesPubliclyActionRes;
   }> & {
     onMessage?: (ev: MessageEvent) => void;
     overrideUrl?: string;
     headers?: Headers;
     ctx?: FetchxContext;
   };
-export const useQueryWorkspaceTypesPublicly2ActionQuery = (
-  options: QueryWorkspaceTypesPublicly2ActionQueryOptions,
+export const useQueryWorkspaceTypesPubliclyActionQuery = (
+  options: QueryWorkspaceTypesPubliclyActionQueryOptions,
 ) => {
   const globalCtx = useFetchxContext();
   const ctx = options?.ctx ?? globalCtx ?? undefined;
@@ -50,7 +50,7 @@ export const useQueryWorkspaceTypesPublicly2ActionQuery = (
   const [response, setResponse] = useState<TypedResponse<unknown>>();
   const fn = () => {
     setCompleteState(false);
-    return QueryWorkspaceTypesPublicly2Action.Fetch(
+    return QueryWorkspaceTypesPubliclyAction.Fetch(
       {
         headers: options?.headers,
       },
@@ -70,7 +70,7 @@ export const useQueryWorkspaceTypesPublicly2ActionQuery = (
     });
   };
   const result = useQuery({
-    queryKey: [QueryWorkspaceTypesPublicly2Action.NewUrl(options?.qs)],
+    queryKey: [QueryWorkspaceTypesPubliclyAction.NewUrl(options?.qs)],
     queryFn: fn,
     ...(options || {}),
   });
@@ -80,20 +80,20 @@ export const useQueryWorkspaceTypesPublicly2ActionQuery = (
     response,
   };
 };
-export type QueryWorkspaceTypesPublicly2ActionMutationOptions = Omit<
+export type QueryWorkspaceTypesPubliclyActionMutationOptions = Omit<
   UseMutationOptions<unknown, unknown, unknown, unknown>,
   "mutationFn"
 > &
-  QueryWorkspaceTypesPublicly2ActionOptions & {
+  QueryWorkspaceTypesPubliclyActionOptions & {
     ctx?: FetchxContext;
     onMessage?: (ev: MessageEvent) => void;
     overrideUrl?: string;
     headers?: Headers;
   } & Partial<{
-    creatorFn: (item: unknown) => QueryWorkspaceTypesPublicly2ActionRes;
+    creatorFn: (item: unknown) => QueryWorkspaceTypesPubliclyActionRes;
   }>;
-export const useQueryWorkspaceTypesPublicly2Action = (
-  options?: QueryWorkspaceTypesPublicly2ActionMutationOptions,
+export const useQueryWorkspaceTypesPubliclyAction = (
+  options?: QueryWorkspaceTypesPubliclyActionMutationOptions,
 ) => {
   const globalCtx = useFetchxContext();
   const ctx = options?.ctx ?? globalCtx ?? undefined;
@@ -101,7 +101,7 @@ export const useQueryWorkspaceTypesPublicly2Action = (
   const [response, setResponse] = useState<TypedResponse<unknown>>();
   const fn = (body: unknown) => {
     setCompleteState(false);
-    return QueryWorkspaceTypesPublicly2Action.Fetch(
+    return QueryWorkspaceTypesPubliclyAction.Fetch(
       {
         body,
         headers: options?.headers,
@@ -132,13 +132,13 @@ export const useQueryWorkspaceTypesPublicly2Action = (
   };
 };
 /**
- * QueryWorkspaceTypesPublicly2Action
+ * QueryWorkspaceTypesPubliclyAction
  */
-export class QueryWorkspaceTypesPublicly2Action {
+export class QueryWorkspaceTypesPubliclyAction {
   //
-  static URL = "/workspace/public/types2";
+  static URL = "/workspace/public/types";
   static NewUrl = (qs?: URLSearchParams) =>
-    buildUrl(QueryWorkspaceTypesPublicly2Action.URL, undefined, qs);
+    buildUrl(QueryWorkspaceTypesPubliclyAction.URL, undefined, qs);
   static Method = "get";
   static Fetch$ = async (
     qs?: URLSearchParams,
@@ -147,13 +147,13 @@ export class QueryWorkspaceTypesPublicly2Action {
     overrideUrl?: string,
   ) => {
     return fetchx<
-      GResponse<QueryWorkspaceTypesPublicly2ActionRes>,
+      GResponse<QueryWorkspaceTypesPubliclyActionRes>,
       unknown,
       unknown
     >(
-      overrideUrl ?? QueryWorkspaceTypesPublicly2Action.NewUrl(qs),
+      overrideUrl ?? QueryWorkspaceTypesPubliclyAction.NewUrl(qs),
       {
-        method: QueryWorkspaceTypesPublicly2Action.Method,
+        method: QueryWorkspaceTypesPubliclyAction.Method,
         ...(init || {}),
       },
       ctx,
@@ -169,19 +169,19 @@ export class QueryWorkspaceTypesPublicly2Action {
       overrideUrl,
     }: {
       creatorFn?:
-        | ((item: unknown) => QueryWorkspaceTypesPublicly2ActionRes)
+        | ((item: unknown) => QueryWorkspaceTypesPubliclyActionRes)
         | undefined;
       qs?: URLSearchParams;
       ctx?: FetchxContext;
       onMessage?: (ev: MessageEvent) => void;
       overrideUrl?: string;
     } = {
-      creatorFn: (item) => new QueryWorkspaceTypesPublicly2ActionRes(item),
+      creatorFn: (item) => new QueryWorkspaceTypesPubliclyActionRes(item),
     },
   ) => {
     creatorFn =
-      creatorFn || ((item) => new QueryWorkspaceTypesPublicly2ActionRes(item));
-    const res = await QueryWorkspaceTypesPublicly2Action.Fetch$(
+      creatorFn || ((item) => new QueryWorkspaceTypesPubliclyActionRes(item));
+    const res = await QueryWorkspaceTypesPubliclyAction.Fetch$(
       qs,
       ctx,
       init,
@@ -190,7 +190,7 @@ export class QueryWorkspaceTypesPublicly2Action {
     return handleFetchResponse(
       res,
       (data) => {
-        const resp = new GResponse<QueryWorkspaceTypesPublicly2ActionRes>();
+        const resp = new GResponse<QueryWorkspaceTypesPubliclyActionRes>();
         if (creatorFn) {
           resp.setCreator(creatorFn);
         }
@@ -202,9 +202,9 @@ export class QueryWorkspaceTypesPublicly2Action {
     );
   };
   static Definition = {
-    name: "QueryWorkspaceTypesPublicly2",
+    name: "QueryWorkspaceTypesPublicly",
     cliName: "public-types",
-    url: "/workspace/public/types2",
+    url: "/workspace/public/types",
     method: "get",
     description:
       "Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.",
@@ -232,9 +232,9 @@ export class QueryWorkspaceTypesPublicly2Action {
   };
 }
 /**
- * The base class definition for queryWorkspaceTypesPublicly2ActionRes
+ * The base class definition for queryWorkspaceTypesPubliclyActionRes
  **/
-export class QueryWorkspaceTypesPublicly2ActionRes {
+export class QueryWorkspaceTypesPubliclyActionRes {
   /**
    *
    * @type {string}
@@ -362,7 +362,7 @@ export class QueryWorkspaceTypesPublicly2ActionRes {
    * casts the fields of a javascript object into the class properties one by one
    **/
   applyFromObject(data = {}) {
-    const d = data as Partial<QueryWorkspaceTypesPublicly2ActionRes>;
+    const d = data as Partial<QueryWorkspaceTypesPubliclyActionRes>;
     if (d.title !== undefined) {
       this.title = d.title;
     }
@@ -400,42 +400,42 @@ export class QueryWorkspaceTypesPublicly2ActionRes {
     };
   }
   /**
-   * Creates an instance of QueryWorkspaceTypesPublicly2ActionRes, and possibleDtoObject
+   * Creates an instance of QueryWorkspaceTypesPubliclyActionRes, and possibleDtoObject
    * needs to satisfy the type requirement fully, otherwise typescript compile would
    * be complaining.
    **/
-  static from(possibleDtoObject: QueryWorkspaceTypesPublicly2ActionResType) {
-    return new QueryWorkspaceTypesPublicly2ActionRes(possibleDtoObject);
+  static from(possibleDtoObject: QueryWorkspaceTypesPubliclyActionResType) {
+    return new QueryWorkspaceTypesPubliclyActionRes(possibleDtoObject);
   }
   /**
-   * Creates an instance of QueryWorkspaceTypesPublicly2ActionRes, and partialDtoObject
+   * Creates an instance of QueryWorkspaceTypesPubliclyActionRes, and partialDtoObject
    * needs to satisfy the type, but partially, and rest of the content would
    * be constructed according to data types and nullability.
    **/
   static with(
-    partialDtoObject: PartialDeep<QueryWorkspaceTypesPublicly2ActionResType>,
+    partialDtoObject: PartialDeep<QueryWorkspaceTypesPubliclyActionResType>,
   ) {
-    return new QueryWorkspaceTypesPublicly2ActionRes(partialDtoObject);
+    return new QueryWorkspaceTypesPubliclyActionRes(partialDtoObject);
   }
   copyWith(
-    partial: PartialDeep<QueryWorkspaceTypesPublicly2ActionResType>,
-  ): InstanceType<typeof QueryWorkspaceTypesPublicly2ActionRes> {
-    return new QueryWorkspaceTypesPublicly2ActionRes({
+    partial: PartialDeep<QueryWorkspaceTypesPubliclyActionResType>,
+  ): InstanceType<typeof QueryWorkspaceTypesPubliclyActionRes> {
+    return new QueryWorkspaceTypesPubliclyActionRes({
       ...this.toJSON(),
       ...partial,
     });
   }
-  clone(): InstanceType<typeof QueryWorkspaceTypesPublicly2ActionRes> {
-    return new QueryWorkspaceTypesPublicly2ActionRes(this.toJSON());
+  clone(): InstanceType<typeof QueryWorkspaceTypesPubliclyActionRes> {
+    return new QueryWorkspaceTypesPubliclyActionRes(this.toJSON());
   }
 }
-export abstract class QueryWorkspaceTypesPublicly2ActionResFactory {
-  abstract create(data: unknown): QueryWorkspaceTypesPublicly2ActionRes;
+export abstract class QueryWorkspaceTypesPubliclyActionResFactory {
+  abstract create(data: unknown): QueryWorkspaceTypesPubliclyActionRes;
 }
 /**
- * The base type definition for queryWorkspaceTypesPublicly2ActionRes
+ * The base type definition for queryWorkspaceTypesPubliclyActionRes
  **/
-export type QueryWorkspaceTypesPublicly2ActionResType = {
+export type QueryWorkspaceTypesPubliclyActionResType = {
   /**
    *
    * @type {string}
@@ -458,4 +458,4 @@ export type QueryWorkspaceTypesPublicly2ActionResType = {
   slug: string;
 };
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace QueryWorkspaceTypesPublicly2ActionResType {}
+export namespace QueryWorkspaceTypesPubliclyActionResType {}

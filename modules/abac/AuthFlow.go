@@ -430,8 +430,8 @@ func authenticateCliWithSession(session *UserSessionDto, workspaceTypeId string)
 	}
 }
 
-func UNSAFE_allow_selection_of_workspace_type() *QueryWorkspaceTypesPubliclyActionResDto {
-	var selectedWorkspace *QueryWorkspaceTypesPubliclyActionResDto = &QueryWorkspaceTypesPubliclyActionResDto{
+func UNSAFE_allow_selection_of_workspace_type() *QueryWorkspaceTypesPubliclyActionRes {
+	var selectedWorkspace *QueryWorkspaceTypesPubliclyActionRes = &QueryWorkspaceTypesPubliclyActionRes{
 		UniqueId: ROOT_VAR,
 		Title:    "ROOT",
 	}

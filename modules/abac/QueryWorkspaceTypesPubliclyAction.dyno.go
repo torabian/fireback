@@ -3,18 +3,19 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli"
 )
 
 /**
-* Action to communicate with the action QueryWorkspaceTypesPublicly2Action
+* Action to communicate with the action QueryWorkspaceTypesPubliclyAction
  */
-func QueryWorkspaceTypesPublicly2ActionMeta() struct {
+func QueryWorkspaceTypesPubliclyActionMeta() struct {
 	Name        string
 	CliName     string
 	URL         string
@@ -28,14 +29,14 @@ func QueryWorkspaceTypesPublicly2ActionMeta() struct {
 		Method      string
 		Description string
 	}{
-		Name:        "QueryWorkspaceTypesPublicly2Action",
+		Name:        "QueryWorkspaceTypesPubliclyAction",
 		CliName:     "public-types",
-		URL:         "/workspace/public/types2",
+		URL:         "/workspace/public/types",
 		Method:      "GET",
 		Description: `Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.`,
 	}
 }
-func GetQueryWorkspaceTypesPublicly2ActionResCliFlags(prefix string) []emigo.CliFlag {
+func GetQueryWorkspaceTypesPubliclyActionResCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
 			Name: prefix + "title",
@@ -55,8 +56,8 @@ func GetQueryWorkspaceTypesPublicly2ActionResCliFlags(prefix string) []emigo.Cli
 		},
 	}
 }
-func CastQueryWorkspaceTypesPublicly2ActionResFromCli(c emigo.CliCastable) QueryWorkspaceTypesPublicly2ActionRes {
-	data := QueryWorkspaceTypesPublicly2ActionRes{}
+func CastQueryWorkspaceTypesPubliclyActionResFromCli(c emigo.CliCastable) QueryWorkspaceTypesPubliclyActionRes {
+	data := QueryWorkspaceTypesPubliclyActionRes{}
 	if c.IsSet("title") {
 		data.Title = c.String("title")
 	}
@@ -72,15 +73,15 @@ func CastQueryWorkspaceTypesPublicly2ActionResFromCli(c emigo.CliCastable) Query
 	return data
 }
 
-// The base class definition for queryWorkspaceTypesPublicly2ActionRes
-type QueryWorkspaceTypesPublicly2ActionRes struct {
+// The base class definition for queryWorkspaceTypesPubliclyActionRes
+type QueryWorkspaceTypesPubliclyActionRes struct {
 	Title       string `json:"title" yaml:"title"`
 	Description string `json:"description" yaml:"description"`
 	UniqueId    string `json:"uniqueId" yaml:"uniqueId"`
 	Slug        string `json:"slug" yaml:"slug"`
 }
 
-func (x *QueryWorkspaceTypesPublicly2ActionRes) Json() string {
+func (x *QueryWorkspaceTypesPubliclyActionRes) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return string(str)
@@ -88,68 +89,68 @@ func (x *QueryWorkspaceTypesPublicly2ActionRes) Json() string {
 	return ""
 }
 
-type QueryWorkspaceTypesPublicly2ActionResponse struct {
+type QueryWorkspaceTypesPubliclyActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
 }
 
-func (x *QueryWorkspaceTypesPublicly2ActionResponse) SetContentType(contentType string) *QueryWorkspaceTypesPublicly2ActionResponse {
+func (x *QueryWorkspaceTypesPubliclyActionResponse) SetContentType(contentType string) *QueryWorkspaceTypesPubliclyActionResponse {
 	if x.Headers == nil {
 		x.Headers = make(map[string]string)
 	}
 	x.Headers["Content-Type"] = contentType
 	return x
 }
-func (x *QueryWorkspaceTypesPublicly2ActionResponse) AsStream(r io.Reader, contentType string) *QueryWorkspaceTypesPublicly2ActionResponse {
+func (x *QueryWorkspaceTypesPubliclyActionResponse) AsStream(r io.Reader, contentType string) *QueryWorkspaceTypesPubliclyActionResponse {
 	x.Payload = r
 	x.SetContentType(contentType)
 	return x
 }
-func (x *QueryWorkspaceTypesPublicly2ActionResponse) AsJSON(payload any) *QueryWorkspaceTypesPublicly2ActionResponse {
+func (x *QueryWorkspaceTypesPubliclyActionResponse) AsJSON(payload any) *QueryWorkspaceTypesPubliclyActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
 }
-func (x *QueryWorkspaceTypesPublicly2ActionResponse) AsHTML(payload string) *QueryWorkspaceTypesPublicly2ActionResponse {
+func (x *QueryWorkspaceTypesPubliclyActionResponse) AsHTML(payload string) *QueryWorkspaceTypesPubliclyActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
 	return x
 }
-func (x *QueryWorkspaceTypesPublicly2ActionResponse) AsBytes(payload []byte) *QueryWorkspaceTypesPublicly2ActionResponse {
+func (x *QueryWorkspaceTypesPubliclyActionResponse) AsBytes(payload []byte) *QueryWorkspaceTypesPubliclyActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/octet-stream")
 	return x
 }
-func (x QueryWorkspaceTypesPublicly2ActionResponse) GetStatusCode() int {
+func (x QueryWorkspaceTypesPubliclyActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x QueryWorkspaceTypesPublicly2ActionResponse) GetRespHeaders() map[string]string {
+func (x QueryWorkspaceTypesPubliclyActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x QueryWorkspaceTypesPublicly2ActionResponse) GetPayload() interface{} {
+func (x QueryWorkspaceTypesPubliclyActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// QueryWorkspaceTypesPublicly2ActionRaw registers a raw Gin route for the QueryWorkspaceTypesPublicly2Action action.
+// QueryWorkspaceTypesPubliclyActionRaw registers a raw Gin route for the QueryWorkspaceTypesPubliclyAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func QueryWorkspaceTypesPublicly2ActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := QueryWorkspaceTypesPublicly2ActionMeta()
+func QueryWorkspaceTypesPubliclyActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := QueryWorkspaceTypesPubliclyActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-type QueryWorkspaceTypesPublicly2ActionRequestSig = func(c QueryWorkspaceTypesPublicly2ActionRequest) (*QueryWorkspaceTypesPublicly2ActionResponse, error)
+type QueryWorkspaceTypesPubliclyActionRequestSig = func(c QueryWorkspaceTypesPubliclyActionRequest) (*QueryWorkspaceTypesPubliclyActionResponse, error)
 
-// QueryWorkspaceTypesPublicly2ActionHandler returns the HTTP method, route URL, and a typed Gin handler for the QueryWorkspaceTypesPublicly2Action action.
+// QueryWorkspaceTypesPubliclyActionHandler returns the HTTP method, route URL, and a typed Gin handler for the QueryWorkspaceTypesPubliclyAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func QueryWorkspaceTypesPublicly2ActionHandler(
-	handler QueryWorkspaceTypesPublicly2ActionRequestSig,
+func QueryWorkspaceTypesPubliclyActionHandler(
+	handler QueryWorkspaceTypesPubliclyActionRequestSig,
 ) (method, url string, h gin.HandlerFunc) {
-	meta := QueryWorkspaceTypesPublicly2ActionMeta()
+	meta := QueryWorkspaceTypesPubliclyActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
 		// Build typed request wrapper
-		req := QueryWorkspaceTypesPublicly2ActionRequest{
+		req := QueryWorkspaceTypesPubliclyActionRequest{
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -180,26 +181,26 @@ func QueryWorkspaceTypesPublicly2ActionHandler(
 	}
 }
 
-// QueryWorkspaceTypesPublicly2Action is a high-level convenience wrapper around QueryWorkspaceTypesPublicly2ActionHandler.
+// QueryWorkspaceTypesPubliclyAction is a high-level convenience wrapper around QueryWorkspaceTypesPubliclyActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func QueryWorkspaceTypesPublicly2ActionGin(r gin.IRoutes, handler QueryWorkspaceTypesPublicly2ActionRequestSig) {
-	method, url, h := QueryWorkspaceTypesPublicly2ActionHandler(handler)
+func QueryWorkspaceTypesPubliclyActionGin(r gin.IRoutes, handler QueryWorkspaceTypesPubliclyActionRequestSig) {
+	method, url, h := QueryWorkspaceTypesPubliclyActionHandler(handler)
 	r.Handle(method, url, h)
 }
 
 /**
- * Query parameters for QueryWorkspaceTypesPublicly2Action
+ * Query parameters for QueryWorkspaceTypesPubliclyAction
  */
 // Query wrapper with private fields
-type QueryWorkspaceTypesPublicly2ActionQuery struct {
+type QueryWorkspaceTypesPubliclyActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
 }
 
-func QueryWorkspaceTypesPublicly2ActionQueryFromString(rawQuery string) QueryWorkspaceTypesPublicly2ActionQuery {
-	v := QueryWorkspaceTypesPublicly2ActionQuery{}
+func QueryWorkspaceTypesPubliclyActionQueryFromString(rawQuery string) QueryWorkspaceTypesPubliclyActionQuery {
+	v := QueryWorkspaceTypesPubliclyActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -217,43 +218,43 @@ func QueryWorkspaceTypesPublicly2ActionQueryFromString(rawQuery string) QueryWor
 	v.mapped = mapped
 	return v
 }
-func QueryWorkspaceTypesPublicly2ActionQueryFromGin(c *gin.Context) QueryWorkspaceTypesPublicly2ActionQuery {
-	return QueryWorkspaceTypesPublicly2ActionQueryFromString(c.Request.URL.RawQuery)
+func QueryWorkspaceTypesPubliclyActionQueryFromGin(c *gin.Context) QueryWorkspaceTypesPubliclyActionQuery {
+	return QueryWorkspaceTypesPubliclyActionQueryFromString(c.Request.URL.RawQuery)
 }
-func QueryWorkspaceTypesPublicly2ActionQueryFromHttp(r *http.Request) QueryWorkspaceTypesPublicly2ActionQuery {
-	return QueryWorkspaceTypesPublicly2ActionQueryFromString(r.URL.RawQuery)
+func QueryWorkspaceTypesPubliclyActionQueryFromHttp(r *http.Request) QueryWorkspaceTypesPubliclyActionQuery {
+	return QueryWorkspaceTypesPubliclyActionQueryFromString(r.URL.RawQuery)
 }
-func (q QueryWorkspaceTypesPublicly2ActionQuery) Values() url.Values {
+func (q QueryWorkspaceTypesPubliclyActionQuery) Values() url.Values {
 	return q.values
 }
-func (q QueryWorkspaceTypesPublicly2ActionQuery) Mapped() map[string]interface{} {
+func (q QueryWorkspaceTypesPubliclyActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *QueryWorkspaceTypesPublicly2ActionQuery) SetValues(v url.Values) {
+func (q *QueryWorkspaceTypesPubliclyActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *QueryWorkspaceTypesPublicly2ActionQuery) SetMapped(m map[string]interface{}) {
+func (q *QueryWorkspaceTypesPubliclyActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type QueryWorkspaceTypesPublicly2ActionRequest struct {
+type QueryWorkspaceTypesPubliclyActionRequest struct {
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context
 	CliCtx      *cli.Context
 }
-type QueryWorkspaceTypesPublicly2ActionResult struct {
+type QueryWorkspaceTypesPubliclyActionResult struct {
 	resp    *http.Response // embed original response
 	Payload interface{}
 }
 
-func QueryWorkspaceTypesPublicly2ActionCall(
-	req QueryWorkspaceTypesPublicly2ActionRequest,
+func QueryWorkspaceTypesPubliclyActionCall(
+	req QueryWorkspaceTypesPubliclyActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*QueryWorkspaceTypesPublicly2ActionResult, error) {
+) (*QueryWorkspaceTypesPubliclyActionResult, error) {
 	var httpReq *http.Request
 	if config == nil || config.Httpr == nil {
-		meta := QueryWorkspaceTypesPublicly2ActionMeta()
+		meta := QueryWorkspaceTypesPubliclyActionMeta()
 		baseURL := meta.URL
 		// Build final URL with query string
 		u, err := url.Parse(baseURL)
@@ -277,7 +278,7 @@ func QueryWorkspaceTypesPublicly2ActionCall(
 	if err != nil {
 		return nil, err
 	}
-	var result QueryWorkspaceTypesPublicly2ActionResult
+	var result QueryWorkspaceTypesPubliclyActionResult
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)

@@ -11,7 +11,7 @@ import {
   ClassicSignupActionReqDto,
   ClassicSignupActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
-import { QueryWorkspaceTypesPublicly2ActionRes, useQueryWorkspaceTypesPublicly2ActionQuery } from "../../sdk/modules/abac/QueryWorkspaceTypesPublicly2";
+import { QueryWorkspaceTypesPubliclyActionRes, useQueryWorkspaceTypesPubliclyActionQuery } from "../../sdk/modules/abac/QueryWorkspaceTypesPublicly";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
 
@@ -25,8 +25,8 @@ export const usePresenter = () => {
   //   unauthorized: true,
   // });
 
-  const { data, isLoading } = useQueryWorkspaceTypesPublicly2ActionQuery({});
-  const workspaceTypes: QueryWorkspaceTypesPublicly2ActionRes[] = data?.data?.items || []
+  const { data, isLoading } = useQueryWorkspaceTypesPubliclyActionQuery({});
+  const workspaceTypes: QueryWorkspaceTypesPubliclyActionRes[] = data?.data?.items || []
 
   const s = useS(strings);
 

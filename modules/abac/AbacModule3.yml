@@ -172,9 +172,9 @@ dtom:
         type: string?
 
 acts:
-  - name: QueryWorkspaceTypesPublicly2
+  - name: QueryWorkspaceTypesPublicly
     method: get
-    url: /workspace/public/types2
+    url: /workspace/public/types
     cliName: public-types
     description:
       Returns the workspaces types available in the project publicly without authentication,
@@ -372,25 +372,6 @@ actions:
         - name: session
           type: one
           target: UserSessionDto
-
-  - name: queryWorkspaceTypesPublicly
-    format: query
-    method: get
-    url: /workspace/public/types
-    cliName: public-types
-    description:
-      Returns the workspaces types available in the project publicly without authentication,
-      and the value could be used upon signup to go different route.
-    out:
-      fields:
-        - name: title
-          type: string
-        - name: description
-          type: string
-        - name: uniqueId
-          type: string
-        - name: slug
-          type: string
 
   - name: queryUserRoleWorkspaces
     format: query
