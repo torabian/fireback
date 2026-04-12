@@ -510,8 +510,31 @@ func WriteResponse(c *gin.Context, status int, resp emigo.EmiActionResult) {
 	}
 }
 
+type GinLanguageTmp struct {
+	g *gin.Context
+}
+
+func (x *GinLanguageTmp) GetLanguage() string {
+	return GetAcceptFromGinHeaders(x.g)
+}
+
 func WriteActionResponseToGin(m *gin.Context, resp emigo.EmiActionResult, err error) {
-	if err != nil {
+	j := GinLanguageTmp{g: m}
+
+	if err != nil && !reflect.ValueOf(resp).IsNil() {
+
+		if ierr, ok := err.(*IError); ok {
+			code := int(ierr.HttpCode)
+			if code == 0 {
+				code = 403
+			}
+
+			m.JSON(http.StatusInternalServerError, gin.H{
+				"error": ierr.ToPublicEndUser(&j),
+			})
+			return
+		}
+
 		m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

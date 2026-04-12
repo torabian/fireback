@@ -29,82 +29,6 @@ type CheckClassicPassportResDtoOtpInfo struct {
 	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
 }
 
-var AcceptInviteSecurityModel = &fireback.SecurityModel{
-	ActionRequires:  []fireback.PermissionInfo{},
-	ResolveStrategy: "user",
-}
-
-type AcceptInviteActionReqDto struct {
-	// The invitation id which will be used to process
-	InvitationUniqueId string `json:"invitationUniqueId" xml:"invitationUniqueId" yaml:"invitationUniqueId"  validate:"required"        `
-}
-
-func (x *AcceptInviteActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var AcceptInviteCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "invitation-unique-id",
-		Required: true,
-		Usage:    `The invitation id which will be used to process (string)`,
-	},
-}
-
-func AcceptInviteActionReqValidator(dto *AcceptInviteActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastAcceptInviteFromCli(c *cli.Context) *AcceptInviteActionReqDto {
-	template := &AcceptInviteActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("invitation-unique-id") {
-		template.InvitationUniqueId = c.String("invitation-unique-id")
-	}
-	return template
-}
-
-type acceptInviteActionImpSig func(
-	req *AcceptInviteActionReqDto,
-	q fireback.QueryDSL) (string,
-	*fireback.IError,
-)
-
-var AcceptInviteActionImp acceptInviteActionImpSig
-
-func AcceptInviteActionFn(
-	req *AcceptInviteActionReqDto,
-	q fireback.QueryDSL,
-) (
-	string,
-	*fireback.IError,
-) {
-	if AcceptInviteActionImp == nil {
-		return "", nil
-	}
-	return AcceptInviteActionImp(req, q)
-}
-
-var AcceptInviteActionCmd cli.Command = cli.Command{
-	Name:  "accept-invite",
-	Usage: `Use it when user accepts an invitation, and it will complete the joining process`,
-	Flags: AcceptInviteCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, AcceptInviteSecurityModel)
-		dto := CastAcceptInviteFromCli(c)
-		result, err := AcceptInviteActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var OauthAuthenticateSecurityModel *fireback.SecurityModel = nil
 
 type OauthAuthenticateActionReqDto struct {
@@ -877,40 +801,6 @@ var SendEmailWithProviderActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
 		dto := CastSendEmailWithProviderFromCli(c)
 		result, err := SendEmailWithProviderActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-var InviteToWorkspaceSecurityModel *fireback.SecurityModel = nil
-
-type inviteToWorkspaceActionImpSig func(
-	req *WorkspaceInviteEntity,
-	q fireback.QueryDSL) (*WorkspaceInviteEntity,
-	*fireback.IError,
-)
-
-var InviteToWorkspaceActionImp inviteToWorkspaceActionImpSig
-
-func InviteToWorkspaceActionFn(
-	req *WorkspaceInviteEntity,
-	q fireback.QueryDSL,
-) (
-	*WorkspaceInviteEntity,
-	*fireback.IError,
-) {
-	if InviteToWorkspaceActionImp == nil {
-		return nil, nil
-	}
-	return InviteToWorkspaceActionImp(req, q)
-}
-
-var InviteToWorkspaceActionCmd cli.Command = cli.Command{
-	Name:  "invite",
-	Usage: `Invite a new person (either a user, with passport or without passport)`,
-	Flags: WorkspaceInviteCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
-		dto := CastWorkspaceInviteFromCli(c)
-		result, err := InviteToWorkspaceActionFn(dto, query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
@@ -1748,11 +1638,89 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var InviteToWorkspaceImpl func(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) = nil
+var InviteToWorkspaceSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
+	ResolveStrategy: "workspace",
+}
+
+// This can be both used as cli and http
+var InviteToWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       InviteToWorkspaceActionMeta().CliName,
+	Description:   InviteToWorkspaceActionMeta().Description,
+	Name:          InviteToWorkspaceActionMeta().Name,
+	Method:        InviteToWorkspaceActionMeta().Method,
+	Url:           InviteToWorkspaceActionMeta().URL,
+	SecurityModel: InviteToWorkspaceSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := InviteToWorkspaceActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := InviteToWorkspaceImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
+		req := InviteToWorkspaceActionRequest{}
+		resp, err := InviteToWorkspaceImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var AcceptInviteImpl func(c AcceptInviteActionRequest, query fireback.QueryDSL) (*AcceptInviteActionResponse, error) = nil
+var AcceptInviteSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+// This can be both used as cli and http
+var AcceptInviteActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       AcceptInviteActionMeta().CliName,
+	Description:   AcceptInviteActionMeta().Description,
+	Name:          AcceptInviteActionMeta().Name,
+	Method:        AcceptInviteActionMeta().Method,
+	Url:           AcceptInviteActionMeta().URL,
+	SecurityModel: AcceptInviteSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := AcceptInviteActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := AcceptInviteImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, AcceptInviteSecurityModel)
+		req := AcceptInviteActionRequest{}
+		resp, err := AcceptInviteImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var CheckPassportMethodsImpl func(c CheckPassportMethodsActionRequest, query fireback.QueryDSL) (*CheckPassportMethodsActionResponse, error) = nil
 var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       CheckPassportMethodsActionMeta().CliName,
 	Description:   CheckPassportMethodsActionMeta().Description,
 	Name:          CheckPassportMethodsActionMeta().Name,
@@ -1767,8 +1735,8 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := CheckPassportMethodsImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1786,6 +1754,8 @@ var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       OsLoginAuthenticateActionMeta().CliName,
 	Description:   OsLoginAuthenticateActionMeta().Description,
 	Name:          OsLoginAuthenticateActionMeta().Name,
@@ -1800,8 +1770,8 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := OsLoginAuthenticateImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1818,32 +1788,11 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		InviteToWorkspaceActionDef,
+		AcceptInviteActionDef,
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
 		/// End for emi actions
-		{
-			Method:        "POST",
-			Url:           "/user/invitation/accept",
-			SecurityModel: AcceptInviteSecurityModel,
-			Name:          "acceptInvite",
-			Description:   "Use it when user accepts an invitation, and it will complete the joining process",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, AcceptInviteActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         AcceptInviteActionFn,
-			ResponseEntity: string(""),
-			Out: &fireback.Module3ActionBody{
-				Entity: "",
-			},
-			RequestEntity: &AcceptInviteActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "AcceptInviteActionReqDto",
-			},
-		},
 		{
 			Method:        "POST",
 			Url:           "/passport/via-oauth",
@@ -2110,29 +2059,6 @@ func AbacCustomActions() []fireback.Module3Action {
 		},
 		{
 			Method:        "POST",
-			Url:           "/workspace/invite",
-			SecurityModel: InviteToWorkspaceSecurityModel,
-			Name:          "inviteToWorkspace",
-			Description:   "Invite a new person (either a user, with passport or without passport)",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, InviteToWorkspaceActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         InviteToWorkspaceActionFn,
-			ResponseEntity: &WorkspaceInviteEntity{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "WorkspaceInviteEntity",
-			},
-			RequestEntity: &WorkspaceInviteEntity{},
-			In: &fireback.Module3ActionBody{
-				Entity: "WorkspaceInviteEntity",
-			},
-		},
-		{
-			Method:        "POST",
 			Url:           "/gsm/send/sms",
 			SecurityModel: GsmSendSmsSecurityModel,
 			Name:          "gsmSendSms",
@@ -2320,7 +2246,6 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
-	AcceptInviteActionCmd,
 	OauthAuthenticateActionCmd,
 	UserPassportsActionCmd,
 	ChangePasswordActionCmd,
@@ -2333,7 +2258,6 @@ var AbacCustomActionsCli = []cli.Command{
 	ImportUserActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
-	InviteToWorkspaceActionCmd,
 	GsmSendSmsActionCmd,
 	GsmSendSmsWithProviderActionCmd,
 	ClassicSigninActionCmd,
@@ -2357,9 +2281,10 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		InviteToWorkspaceActionDef.ToCli(),
+		AcceptInviteActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
-		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,
 		UserPassportsActionCmd,
 		ChangePasswordActionCmd,
@@ -2372,7 +2297,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		ImportUserActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,
-		InviteToWorkspaceActionCmd,
 		GsmSendSmsActionCmd,
 		GsmSendSmsWithProviderActionCmd,
 		ClassicSigninActionCmd,

@@ -128,6 +128,7 @@ func CapabilitiesTreeActionHandler(
 	return meta.Method, meta.URL, func(m *gin.Context) {
 		// Build typed request wrapper
 		req := CapabilitiesTreeActionRequest{
+			Body:        nil,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -215,6 +216,7 @@ func (q *CapabilitiesTreeActionQuery) SetMapped(m map[string]interface{}) {
 }
 
 type CapabilitiesTreeActionRequest struct {
+	Body        interface{}
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context

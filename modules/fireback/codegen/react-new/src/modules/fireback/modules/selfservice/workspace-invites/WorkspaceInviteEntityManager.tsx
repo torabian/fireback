@@ -25,6 +25,7 @@ export const WorkspaceInviteEntityManager = ({
     queryClient,
   });
 
+
   const postHook = usePostWorkspaceInvite({
     queryClient,
   });

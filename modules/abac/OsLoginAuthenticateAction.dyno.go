@@ -98,6 +98,7 @@ func OsLoginAuthenticateActionHandler(
 	return meta.Method, meta.URL, func(m *gin.Context) {
 		// Build typed request wrapper
 		req := OsLoginAuthenticateActionRequest{
+			Body:        nil,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -185,6 +186,7 @@ func (q *OsLoginAuthenticateActionQuery) SetMapped(m map[string]interface{}) {
 }
 
 type OsLoginAuthenticateActionRequest struct {
+	Body        interface{}
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context
