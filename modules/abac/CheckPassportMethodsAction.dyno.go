@@ -182,6 +182,7 @@ func CheckPassportMethodsActionHandler(
 	return meta.Method, meta.URL, func(m *gin.Context) {
 		// Build typed request wrapper
 		req := CheckPassportMethodsActionRequest{
+			Body:        nil,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -269,6 +270,7 @@ func (q *CheckPassportMethodsActionQuery) SetMapped(m map[string]interface{}) {
 }
 
 type CheckPassportMethodsActionRequest struct {
+	Body        interface{}
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context

@@ -6,11 +6,12 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"reflect"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
+)
+import (
+	"reflect"
 )
 
 // using shared actions here
@@ -1635,8 +1636,8 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var InviteToWorkspaceImpl func(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) = nil
 var InviteToWorkspaceSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
@@ -1729,7 +1730,7 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 				GinCtx:      m,
 			}
 			query := fireback.ExtractQueryDslFromGinContext(m)
-			// fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := CheckPassportMethodsImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1762,7 +1763,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 				GinCtx:      m,
 			}
 			query := fireback.ExtractQueryDslFromGinContext(m)
-			// fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := OsLoginAuthenticateImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
