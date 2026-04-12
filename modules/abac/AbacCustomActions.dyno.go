@@ -1753,6 +1753,8 @@ var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       CheckPassportMethodsActionMeta().CliName,
 	Description:   CheckPassportMethodsActionMeta().Description,
 	Name:          CheckPassportMethodsActionMeta().Name,
@@ -1767,8 +1769,8 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := CheckPassportMethodsImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1786,6 +1788,8 @@ var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       OsLoginAuthenticateActionMeta().CliName,
 	Description:   OsLoginAuthenticateActionMeta().Description,
 	Name:          OsLoginAuthenticateActionMeta().Name,
@@ -1800,8 +1804,8 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := OsLoginAuthenticateImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
