@@ -65,6 +65,34 @@ func (x *AcceptInviteActionReq) Json() string {
 	}
 	return ""
 }
+func GetAcceptInviteActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "accepted",
+			Type: "bool",
+		},
+	}
+}
+func CastAcceptInviteActionResFromCli(c emigo.CliCastable) AcceptInviteActionRes {
+	data := AcceptInviteActionRes{}
+	if c.IsSet("accepted") {
+		data.Accepted = bool(c.Bool("accepted"))
+	}
+	return data
+}
+
+// The base class definition for acceptInviteActionRes
+type AcceptInviteActionRes struct {
+	Accepted bool `json:"accepted" yaml:"accepted"`
+}
+
+func (x *AcceptInviteActionRes) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
 
 type AcceptInviteActionResponse struct {
 	StatusCode int

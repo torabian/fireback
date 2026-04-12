@@ -236,7 +236,10 @@ acts:
           tags:
             validate: required
           description: The invitation id which will be used to process
-
+    out:
+      fields:
+        - name: accepted
+          type: bool
   - name: CheckPassportMethods
     url: /passports/available-methods
     cliName: check-passport-methods
