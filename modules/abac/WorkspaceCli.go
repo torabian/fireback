@@ -232,7 +232,7 @@ func init() {
 		GetUserAccessScope,
 		CliConfigCmd,
 		ViewAuthorize,
-		QueryWorkspaceTypesPubliclyActionCmd,
+		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		QueryUserRoleWorkspacesActionCmd,
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,

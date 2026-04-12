@@ -139,18 +139,6 @@ public static Fields = {
       session: UserSessionDto.Fields,
 }
 }
-export class QueryWorkspaceTypesPubliclyActionResDto {
-  public title?: string | null;
-  public description?: string | null;
-  public uniqueId?: string | null;
-  public slug?: string | null;
-public static Fields = {
-      title: 'title',
-      description: 'description',
-      uniqueId: 'uniqueId',
-      slug: 'slug',
-}
-}
 export class QueryUserRoleWorkspacesActionResDto {
   public name?: string | null;
   /**

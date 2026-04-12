@@ -4,8 +4,15 @@ import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
-	QueryWorkspaceTypesPubliclyActionImp = func(q fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
+	QueryWorkspaceTypesPubliclyImpl = func(c QueryWorkspaceTypesPubliclyActionRequest, q fireback.QueryDSL) (*QueryWorkspaceTypesPubliclyActionResponse, error) {
+
 		res, qrm, err := WorkspaceTypeActionPublicQuery(q)
-		return res, qrm, fireback.CastToIError(err)
+		if err != nil {
+			return nil, err
+		}
+
+		return &QueryWorkspaceTypesPubliclyActionResponse{
+			Payload: fireback.GResponseQuery(res, qrm, &q),
+		}, nil
 	}
 }

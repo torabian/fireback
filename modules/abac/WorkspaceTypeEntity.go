@@ -97,7 +97,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IEr
 	return items
 }
 
-func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
+func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionRes, *fireback.QueryResultMeta, *fireback.IError) {
 	// Make this API public, so the signup screen can get it.
 	// At this moment, we just move things back as are, but maybe later we need
 	// to add some limits on what kind of information is going out.
@@ -106,14 +106,14 @@ func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceT
 
 	items, qr, err := WorkspaceTypeActions.Query(query)
 
-	var all []*QueryWorkspaceTypesPubliclyActionResDto
+	var all []*QueryWorkspaceTypesPubliclyActionRes
 
 	for _, item := range items {
 		if item.UniqueId == "root" {
 			continue
 		}
 
-		all = append(all, &QueryWorkspaceTypesPubliclyActionResDto{
+		all = append(all, &QueryWorkspaceTypesPubliclyActionRes{
 			Title:       item.Title,
 			Description: item.Description,
 			UniqueId:    item.UniqueId,
