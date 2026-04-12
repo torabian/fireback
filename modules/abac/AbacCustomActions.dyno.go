@@ -6,12 +6,11 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
-)
-import (
-	"reflect"
 )
 
 // using shared actions here
@@ -1055,283 +1054,6 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicSigninSecurityModel *fireback.SecurityModel = nil
-
-type ClassicSigninActionReqDto struct {
-	Value    string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
-	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
-	// Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.
-	TotpCode string `json:"totpCode" xml:"totpCode" yaml:"totpCode"        `
-	// Session secret when logging in to the application requires more steps to complete.
-	SessionSecret string `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
-}
-
-func (x *ClassicSigninActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var ClassicSigninCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    `value (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "password",
-		Required: true,
-		Usage:    `password (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "totp-code",
-		Required: false,
-		Usage:    `Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen. (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "session-secret",
-		Required: false,
-		Usage:    `Session secret when logging in to the application requires more steps to complete. (string)`,
-	},
-}
-
-func ClassicSigninActionReqValidator(dto *ClassicSigninActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastClassicSigninFromCli(c *cli.Context) *ClassicSigninActionReqDto {
-	template := &ClassicSigninActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("value") {
-		template.Value = c.String("value")
-	}
-	if c.IsSet("password") {
-		template.Password = c.String("password")
-	}
-	if c.IsSet("totp-code") {
-		template.TotpCode = c.String("totp-code")
-	}
-	if c.IsSet("session-secret") {
-		template.SessionSecret = c.String("session-secret")
-	}
-	return template
-}
-
-type ClassicSigninActionResDto struct {
-	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
-	// The next possible action which is suggested.
-	Next []string `json:"next" xml:"next" yaml:"next"        `
-	// In case the account doesn't have totp, but enforced by installation, this value will contain the link
-	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
-	// Returns a secret session if the authentication requires more steps.
-	SessionSecret string `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
-}
-
-func (x *ClassicSigninActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type classicSigninActionImpSig func(
-	req *ClassicSigninActionReqDto,
-	q fireback.QueryDSL) (*ClassicSigninActionResDto,
-	*fireback.IError,
-)
-
-var ClassicSigninActionImp classicSigninActionImpSig
-
-func ClassicSigninActionFn(
-	req *ClassicSigninActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*ClassicSigninActionResDto,
-	*fireback.IError,
-) {
-	if ClassicSigninActionImp == nil {
-		return nil, nil
-	}
-	return ClassicSigninActionImp(req, q)
-}
-
-var ClassicSigninActionCmd cli.Command = cli.Command{
-	Name:  "in",
-	Usage: `Signin publicly to and account using class passports (email, password)`,
-	Flags: ClassicSigninCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
-		dto := CastClassicSigninFromCli(c)
-		result, err := ClassicSigninActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-var ClassicSignupSecurityModel *fireback.SecurityModel = nil
-
-type ClassicSignupActionReqDto struct {
-	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
-	// Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup.
-	SessionSecret   string          `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
-	Type            string          `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	Password        string          `json:"password" xml:"password" yaml:"password"  validate:"required"        `
-	FirstName       string          `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName        string          `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
-	InviteId        fireback.String `json:"inviteId" xml:"inviteId" yaml:"inviteId"        `
-	PublicJoinKeyId fireback.String `json:"publicJoinKeyId" xml:"publicJoinKeyId" yaml:"publicJoinKeyId"        `
-	WorkspaceTypeId fireback.String `json:"workspaceTypeId" xml:"workspaceTypeId" yaml:"workspaceTypeId"  validate:"required"        `
-}
-
-func (x *ClassicSignupActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var ClassicSignupCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    `value (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "session-secret",
-		Required: false,
-		Usage:    `Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup. (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "type",
-		Required: true,
-		Usage:    `One of: 'phonenumber', 'email' (enum)`,
-	},
-	&cli.StringFlag{
-		Name:     "password",
-		Required: true,
-		Usage:    `password (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "first-name",
-		Required: true,
-		Usage:    `firstName (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "last-name",
-		Required: true,
-		Usage:    `lastName (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "invite-id",
-		Required: false,
-		Usage:    `inviteId (string?)`,
-	},
-	&cli.StringFlag{
-		Name:     "public-join-key-id",
-		Required: false,
-		Usage:    `publicJoinKeyId (string?)`,
-	},
-	&cli.StringFlag{
-		Name:     "workspace-type-id",
-		Required: true,
-		Usage:    `workspaceTypeId (string?)`,
-	},
-}
-
-func ClassicSignupActionReqValidator(dto *ClassicSignupActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastClassicSignupFromCli(c *cli.Context) *ClassicSignupActionReqDto {
-	template := &ClassicSignupActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("value") {
-		template.Value = c.String("value")
-	}
-	if c.IsSet("session-secret") {
-		template.SessionSecret = c.String("session-secret")
-	}
-	if c.IsSet("type") {
-		template.Type = c.String("type")
-	}
-	if c.IsSet("password") {
-		template.Password = c.String("password")
-	}
-	if c.IsSet("first-name") {
-		template.FirstName = c.String("first-name")
-	}
-	if c.IsSet("last-name") {
-		template.LastName = c.String("last-name")
-	}
-	if c.IsSet("invite-id") {
-		template.InviteId = fireback.NewStringAutoNull(c.String("invite-id"))
-	}
-	if c.IsSet("public-join-key-id") {
-		template.PublicJoinKeyId = fireback.NewStringAutoNull(c.String("public-join-key-id"))
-	}
-	if c.IsSet("workspace-type-id") {
-		template.WorkspaceTypeId = fireback.NewStringAutoNull(c.String("workspace-type-id"))
-	}
-	return template
-}
-
-type ClassicSignupActionResDto struct {
-	// Returns the user session in case that signup is completely successful.
-	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
-	// If time based otp is available, we add it response to make it easier for ui.
-	TotpUrl string `json:"totpUrl" xml:"totpUrl" yaml:"totpUrl"        `
-	// Returns true and session will be empty if, the totp is required by the installation. In such scenario, you need to forward user to setup totp screen.
-	ContinueToTotp bool `json:"continueToTotp" xml:"continueToTotp" yaml:"continueToTotp"        `
-	// Determines if user must complete totp in order to continue based on workspace or installation
-	ForcedTotp bool `json:"forcedTotp" xml:"forcedTotp" yaml:"forcedTotp"        `
-}
-
-func (x *ClassicSignupActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type classicSignupActionImpSig func(
-	req *ClassicSignupActionReqDto,
-	q fireback.QueryDSL) (*ClassicSignupActionResDto,
-	*fireback.IError,
-)
-
-var ClassicSignupActionImp classicSignupActionImpSig
-
-func ClassicSignupActionFn(
-	req *ClassicSignupActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*ClassicSignupActionResDto,
-	*fireback.IError,
-) {
-	if ClassicSignupActionImp == nil {
-		return nil, nil
-	}
-	return ClassicSignupActionImp(req, q)
-}
-
-var ClassicSignupActionCmd cli.Command = cli.Command{
-	Name:  "up",
-	Usage: `Signup a user into system via public access (aka website visitors) using either email or phone number.`,
-	Flags: ClassicSignupCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
-		dto := CastClassicSignupFromCli(c)
-		result, err := ClassicSignupActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var CreateWorkspaceSecurityModel *fireback.SecurityModel = nil
 
 type CreateWorkspaceActionReqDto struct {
@@ -1699,13 +1421,86 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
+var ClassicSignupImpl func(c ClassicSignupActionRequest, query fireback.QueryDSL) (*ClassicSignupActionResponse, error) = nil
+var ClassicSignupSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var ClassicSignupActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       ClassicSignupActionMeta().CliName,
+	Description:   ClassicSignupActionMeta().Description,
+	Name:          ClassicSignupActionMeta().Name,
+	Method:        ClassicSignupActionMeta().Method,
+	Url:           ClassicSignupActionMeta().URL,
+	SecurityModel: ClassicSignupSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := ClassicSignupActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := ClassicSignupImpl(req, query)
+
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
+		req := ClassicSignupActionRequest{}
+		resp, err := ClassicSignupImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var ClassicSigninImpl func(c ClassicSigninActionRequest, query fireback.QueryDSL) (*ClassicSigninActionResponse, error) = nil
+var ClassicSigninSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var ClassicSigninActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       ClassicSigninActionMeta().CliName,
+	Description:   ClassicSigninActionMeta().Description,
+	Name:          ClassicSigninActionMeta().Name,
+	Method:        ClassicSigninActionMeta().Method,
+	Url:           ClassicSigninActionMeta().URL,
+	SecurityModel: ClassicSigninSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := ClassicSigninActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := ClassicSigninImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
+		req := ClassicSigninActionRequest{}
+		resp, err := ClassicSigninImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var QueryWorkspaceTypesPubliclyImpl func(c QueryWorkspaceTypesPubliclyActionRequest, query fireback.QueryDSL) (*QueryWorkspaceTypesPubliclyActionResponse, error) = nil
 var QueryWorkspaceTypesPubliclySecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var QueryWorkspaceTypesPubliclyActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       QueryWorkspaceTypesPubliclyActionMeta().CliName,
 	Description:   QueryWorkspaceTypesPubliclyActionMeta().Description,
 	Name:          QueryWorkspaceTypesPubliclyActionMeta().Name,
@@ -1720,8 +1515,8 @@ var QueryWorkspaceTypesPubliclyActionDef fireback.Module3Action = fireback.Modul
 				Headers:     m.Request.Header,
 				GinCtx:      m,
 			}
-			var query fireback.QueryDSL
-			query = fireback.ExtractQueryDslFromGinContext(m)
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := QueryWorkspaceTypesPubliclyImpl(req, query)
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
@@ -1808,6 +1603,8 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		ClassicSignupActionDef,
+		ClassicSigninActionDef,
 		QueryWorkspaceTypesPubliclyActionDef,
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
@@ -2147,52 +1944,6 @@ func AbacCustomActions() []fireback.Module3Action {
 		},
 		{
 			Method:        "POST",
-			Url:           "/passports/signin/classic",
-			SecurityModel: ClassicSigninSecurityModel,
-			Name:          "classicSignin",
-			Description:   "Signin publicly to and account using class passports (email, password)",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, ClassicSigninActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ClassicSigninActionFn,
-			ResponseEntity: &ClassicSigninActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "ClassicSigninActionResDto",
-			},
-			RequestEntity: &ClassicSigninActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "ClassicSigninActionReqDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/passports/signup/classic",
-			SecurityModel: ClassicSignupSecurityModel,
-			Name:          "classicSignup",
-			Description:   "Signup a user into system via public access (aka website visitors) using either email or phone number.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, ClassicSignupActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ClassicSignupActionFn,
-			ResponseEntity: &ClassicSignupActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "ClassicSignupActionResDto",
-			},
-			RequestEntity: &ClassicSignupActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "ClassicSignupActionReqDto",
-			},
-		},
-		{
-			Method:        "POST",
 			Url:           "/workspaces/create",
 			SecurityModel: CreateWorkspaceSecurityModel,
 			Name:          "createWorkspace",
@@ -2303,8 +2054,6 @@ var AbacCustomActionsCli = []cli.Command{
 	InviteToWorkspaceActionCmd,
 	GsmSendSmsActionCmd,
 	GsmSendSmsWithProviderActionCmd,
-	ClassicSigninActionCmd,
-	ClassicSignupActionCmd,
 	CreateWorkspaceActionCmd,
 	CheckClassicPassportActionCmd,
 	ClassicPassportOtpActionCmd,
@@ -2324,6 +2073,8 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		ClassicSignupActionDef.ToCli(),
+		ClassicSigninActionDef.ToCli(),
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
@@ -2342,8 +2093,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		InviteToWorkspaceActionCmd,
 		GsmSendSmsActionCmd,
 		GsmSendSmsWithProviderActionCmd,
-		ClassicSigninActionCmd,
-		ClassicSignupActionCmd,
 		CreateWorkspaceActionCmd,
 		CheckClassicPassportActionCmd,
 		ClassicPassportOtpActionCmd,

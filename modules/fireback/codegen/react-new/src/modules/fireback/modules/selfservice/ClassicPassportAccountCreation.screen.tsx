@@ -7,7 +7,7 @@ import { useS } from "../../hooks/useS";
 import { usePresenter } from "./ClassicPassportAccountCreation.presenter";
 import { strings } from "./strings/translations";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
-import { ClassicSignupActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { ClassicSignupActionReq } from "../../sdk/modules/abac/ClassicSignup";
 
 export const ClassicPassportAccountCreation = ({ }: {}) => {
   const {
@@ -96,7 +96,7 @@ const Form = ({
   form,
   mutation,
 }: {
-  form: FormikProps<Partial<ClassicSignupActionReqDto>>;
+  form: FormikProps<Partial<ClassicSignupActionReq>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
 }) => {
   const s = useS(strings);
@@ -121,7 +121,7 @@ const Form = ({
         errorMessage={form.errors.firstName}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicSignupActionReqDto.Fields.firstName,
+            ClassicSignupActionReq.Fields.firstName,
             value,
             false
           )
@@ -134,7 +134,7 @@ const Form = ({
         errorMessage={form.errors.lastName}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicSignupActionReqDto.Fields.lastName,
+            ClassicSignupActionReq.Fields.lastName,
             value,
             false
           )
@@ -149,7 +149,7 @@ const Form = ({
         errorMessage={form.errors.password}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicSignupActionReqDto.Fields.password,
+            ClassicSignupActionReq.Fields.password,
             value,
             false
           )

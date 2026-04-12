@@ -19,7 +19,7 @@ func ConfirmClassicPassportTotpAction(
 		return nil, err
 	}
 
-	singinResult, signinError := classicSinginInternalUnsafe(&ClassicSigninActionReqDto{
+	singinResult, signinError := classicSinginInternalUnsafe(&ClassicSigninActionReq{
 		Value:    req.Value,
 		Password: req.Password,
 	}, q)
@@ -47,6 +47,6 @@ func ConfirmClassicPassportTotpAction(
 
 	// Implement the logic here.
 	return &ConfirmClassicPassportTotpActionResDto{
-		Session: singinResult.Session,
+		Session: &singinResult.Session,
 	}, nil
 }
