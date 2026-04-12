@@ -907,8 +907,12 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 		// Reading the custom actions is missing
 
 		for _, actions := range actions {
+
 			if mode == "disk" {
 				for _, action := range actions {
+					if action.Skip {
+						fmt.Println("Skipping action:", action.Skip)
+					}
 					action.RootModule = &m
 					GenerateRpcCodeOnDisk(ctx, &action, exportDir)
 				}
@@ -922,6 +926,9 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 					content := []byte("")
 
 					for _, action := range actions {
+						if action.Skip {
+							fmt.Println("Skipping action:", action.Skip)
+						}
 
 						action.RootModule = &m
 						maps := actions[0].ImportDependecies()
@@ -980,6 +987,9 @@ func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module3, mode string) {
 				content := []byte("")
 
 				for _, action := range item.Actions {
+					if action.Skip {
+						fmt.Println("Skipping action:", action.Skip)
+					}
 					action.RootModule = item
 					maps := action.ImportDependecies()
 					importMap = mergeImportMaps(importMap, maps)
