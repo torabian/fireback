@@ -1748,6 +1748,39 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var QueryWorkspaceTypesPublicly2Impl func(c QueryWorkspaceTypesPublicly2ActionRequest, query fireback.QueryDSL) (*QueryWorkspaceTypesPublicly2ActionResponse, error) = nil
+var QueryWorkspaceTypesPublicly2SecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var QueryWorkspaceTypesPublicly2ActionDef fireback.Module3Action = fireback.Module3Action{
+	CliName:       QueryWorkspaceTypesPublicly2ActionMeta().CliName,
+	Description:   QueryWorkspaceTypesPublicly2ActionMeta().Description,
+	Name:          QueryWorkspaceTypesPublicly2ActionMeta().Name,
+	Method:        QueryWorkspaceTypesPublicly2ActionMeta().Method,
+	Url:           QueryWorkspaceTypesPublicly2ActionMeta().URL,
+	SecurityModel: QueryWorkspaceTypesPublicly2SecurityModel,
+	// get
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := QueryWorkspaceTypesPublicly2ActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			var query fireback.QueryDSL
+			query = fireback.ExtractQueryDslFromGinContext(m)
+			resp, err := QueryWorkspaceTypesPublicly2Impl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPublicly2SecurityModel)
+		req := QueryWorkspaceTypesPublicly2ActionRequest{}
+		resp, err := QueryWorkspaceTypesPublicly2Impl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var CheckPassportMethodsImpl func(c CheckPassportMethodsActionRequest, query fireback.QueryDSL) (*CheckPassportMethodsActionResponse, error) = nil
 var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
 
@@ -1818,6 +1851,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		QueryWorkspaceTypesPublicly2ActionDef,
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
 		/// End for emi actions
@@ -2357,6 +2391,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		QueryWorkspaceTypesPublicly2ActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
 		AcceptInviteActionCmd,

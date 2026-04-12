@@ -4,7 +4,6 @@ import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { type IResponse } from "../../sdk/core/http-tools";
-import { useGetWorkspacePublicTypes } from "../../sdk/modules/abac/useGetWorkspacePublicTypes";
 import { usePostPassportsSignupClassic } from "../../sdk/modules/abac/usePostPassportsSignupClassic";
 
 import { useS } from "../../hooks/useS";
@@ -12,6 +11,7 @@ import {
   ClassicSignupActionReqDto,
   ClassicSignupActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
+import { QueryWorkspaceTypesPublicly2ActionRes, useQueryWorkspaceTypesPublicly2ActionQuery } from "../../sdk/modules/abac/QueryWorkspaceTypesPublicly2";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
 
@@ -21,9 +21,13 @@ export const usePresenter = () => {
   const { onComplete } = useCompleteAuth();
   const { submit: signup, mutation } = usePostPassportsSignupClassic();
   const totpUrl = state?.totpUrl;
-  const { items: workspaceTypes, query } = useGetWorkspacePublicTypes({
-    unauthorized: true,
-  });
+  // const { items: workspaceTypes, query } = useGetWorkspacePublicTypes({
+  //   unauthorized: true,
+  // });
+
+  const { data, isLoading } = useQueryWorkspaceTypesPublicly2ActionQuery({});
+  const workspaceTypes: QueryWorkspaceTypesPublicly2ActionRes[] = data?.data?.items || []
+
   const s = useS(strings);
 
   // The external service requests specific workspace type.
@@ -48,7 +52,6 @@ export const usePresenter = () => {
     onSubmit: submit,
   });
 
-  const isLoading = query.isLoading;
 
   // Previous screen sends the email/phone here
   useEffect(() => {

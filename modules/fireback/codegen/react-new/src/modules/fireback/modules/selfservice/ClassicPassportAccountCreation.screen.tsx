@@ -9,7 +9,7 @@ import { strings } from "./strings/translations";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
 import { ClassicSignupActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 
-export const ClassicPassportAccountCreation = ({}: {}) => {
+export const ClassicPassportAccountCreation = ({ }: {}) => {
   const {
     goBack,
     submit,
@@ -53,7 +53,7 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
         <p>{s.completeYourAccountDescription}</p>
         <div className=" ">
           {workspaceTypes.map((workspaceType) => (
-            <div className="mt-3">
+            <div className="mt-3" key={workspaceType.uniqueId}>
               <h2>{workspaceType.title}</h2>
               <p>{workspaceType.description}</p>
               <button
