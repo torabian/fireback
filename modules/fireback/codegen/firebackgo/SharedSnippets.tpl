@@ -3276,6 +3276,9 @@ type {{ $name }}Msgs struct {
 
   // This can be both used as cli and http
   var {{ .Name }}ActionDef {{ $wsprefix }}Module3Action = {{ $wsprefix }}Module3Action{
+
+    // Temporary until fireback code gen is deleted.
+    Skip: true,
     CliName: {{ .Name }}ActionMeta().CliName,
     Description: {{ .Name }}ActionMeta().Description,
     Name:    {{ .Name }}ActionMeta().Name,
@@ -3292,8 +3295,10 @@ type {{ $name }}Msgs struct {
           GinCtx:      m,
         }
 
-        var query {{ $wsprefix }}QueryDSL
-        query = {{ $wsprefix }}ExtractQueryDslFromGinContext(m)
+        query := {{ $wsprefix }}ExtractQueryDslFromGinContext(m)
+
+			  {{ $wsprefix }}ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+
         resp, err := {{ .Name }}Impl(req, query)
         {{ $wsprefix }}WriteActionResponseToGin(m, resp, err)
       },

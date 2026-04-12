@@ -16,7 +16,7 @@ func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q fireback.QueryDSL) (*
 		return nil, err
 	}
 
-	_, roleErrors := ValidateRoleAndItsExsitence(req.RoleId)
+	_, roleErrors := ValidateRoleAndItsExistence(req.RoleId)
 	if len(roleErrors) != 0 {
 		return nil, &fireback.IError{
 			Errors: roleErrors,

@@ -35,7 +35,7 @@ func WorkspaceTypeActionUpdate(
 	return WorkspaceTypeActionUpdateFn(query, fields)
 }
 
-func ValidateRoleAndItsExsitence(roleId fireback.String) (*RoleEntity, []*fireback.IErrorItem) {
+func ValidateRoleAndItsExistence(roleId fireback.String) (*RoleEntity, []*fireback.IErrorItem) {
 	items := []*fireback.IErrorItem{}
 
 	if !roleId.Valid {
@@ -80,7 +80,7 @@ func ValidateRoleAndItsExsitence(roleId fireback.String) (*RoleEntity, []*fireba
 // before making it available
 func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IErrorItem {
 	items := []*fireback.IErrorItem{}
-	role, roleErrors := ValidateRoleAndItsExsitence(fields.RoleId)
+	role, roleErrors := ValidateRoleAndItsExistence(fields.RoleId)
 	if len(roleErrors) != 0 {
 		return roleErrors
 	}

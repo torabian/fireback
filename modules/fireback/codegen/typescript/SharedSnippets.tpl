@@ -3,12 +3,15 @@
     {{ range $key, $value := .imports }}
     {{ if $value.Items}}
     {{ if ne $key "..//" }}
+    {{ if ne $key "./any" }}
+
     import {
       {{ range $value.Items }}
         {{ .}},
       {{ end }}
 
     } from "{{ $key}}"
+    {{ end }}
     {{ end }}
     {{ end }}
     {{ end }}
