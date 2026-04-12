@@ -643,10 +643,16 @@
           "enum": [
             "reflect"
           ]
+        },
+        "Skip": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "Skip"
+      ]
     },
     "Module3ActionBody": {
       "properties": {

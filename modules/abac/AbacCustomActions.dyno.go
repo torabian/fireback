@@ -6,11 +6,12 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"reflect"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
+)
+import (
+	"reflect"
 )
 
 // using shared actions here
@@ -1635,8 +1636,8 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var InviteToWorkspaceImpl func(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) = nil
 var InviteToWorkspaceSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
@@ -1645,12 +1646,13 @@ var InviteToWorkspaceSecurityModel = &fireback.SecurityModel{
 
 // This can be both used as cli and http
 var InviteToWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       InviteToWorkspaceActionMeta().CliName,
 	Description:   InviteToWorkspaceActionMeta().Description,
 	Name:          InviteToWorkspaceActionMeta().Name,
 	Method:        InviteToWorkspaceActionMeta().Method,
 	Url:           InviteToWorkspaceActionMeta().URL,
-	Skip:          true,
 	SecurityModel: InviteToWorkspaceSecurityModel,
 	// post
 	Handlers: []gin.HandlerFunc{
@@ -1682,6 +1684,7 @@ var AcceptInviteSecurityModel = &fireback.SecurityModel{
 
 // This can be both used as cli and http
 var AcceptInviteActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
 	Skip:          true,
 	CliName:       AcceptInviteActionMeta().CliName,
 	Description:   AcceptInviteActionMeta().Description,
@@ -1716,6 +1719,7 @@ var CheckPassportMethodsSecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
 	Skip:          true,
 	CliName:       CheckPassportMethodsActionMeta().CliName,
 	Description:   CheckPassportMethodsActionMeta().Description,
@@ -1750,6 +1754,7 @@ var OsLoginAuthenticateSecurityModel *fireback.SecurityModel = nil
 
 // This can be both used as cli and http
 var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
 	Skip:          true,
 	CliName:       OsLoginAuthenticateActionMeta().CliName,
 	Description:   OsLoginAuthenticateActionMeta().Description,

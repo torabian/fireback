@@ -23,6 +23,8 @@ var EventBusSubscriptionSecurityModel = &SecurityModel{
 
 // This can be both used as cli and http
 var EventBusSubscriptionActionDef Module3Action = Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       EventBusSubscriptionActionMeta().CliName,
 	Description:   EventBusSubscriptionActionMeta().Description,
 	Name:          EventBusSubscriptionActionMeta().Name,
@@ -43,6 +45,8 @@ var CapabilitiesTreeSecurityModel = &SecurityModel{
 
 // This can be both used as cli and http
 var CapabilitiesTreeActionDef Module3Action = Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
 	CliName:       CapabilitiesTreeActionMeta().CliName,
 	Description:   CapabilitiesTreeActionMeta().Description,
 	Name:          CapabilitiesTreeActionMeta().Name,
