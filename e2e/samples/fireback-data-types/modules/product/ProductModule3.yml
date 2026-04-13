@@ -62,7 +62,7 @@ entities:
       # - type: daterange
       #   name: promotionPeriod
       #   description: "Promotion period for discounts"
-      # - type: arrayP
+      # - type: slice
       #   name: tags
       #   primitive: string
       #   description: "Array of tags related to the product"

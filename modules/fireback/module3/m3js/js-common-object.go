@@ -235,7 +235,7 @@ func TsComputedField(field *mcore.Module3Field, isWorkspace bool) string {
 		return "boolean"
 	case "array":
 		return field.PublicName() + "[]"
-	case "arrayP":
+	case "slice":
 		return TsPrimitve(field.Primitive) + "[]"
 	case "html":
 		return "string"

@@ -37,7 +37,7 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 			return field.Module + "." + field.Target
 		}
 		return field.Target
-	case "arrayP":
+	case "slice":
 		return "[]" + field.Primitive
 	case "int64", "int32", "int", "float64", "float32", "bool":
 		return field.Type

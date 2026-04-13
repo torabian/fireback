@@ -238,7 +238,7 @@ remotes:
       - name: name
         type: string
       - name: platforms
-        type: arrayP
+        type: slice
         primitive: string
 
   - url: https://sandbox.przelewy24.pl/api/v1/transaction/verify

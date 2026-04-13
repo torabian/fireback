@@ -30,7 +30,7 @@ public static Fields = {
     },
     {
       "name": "capabilities",
-      "type": "arrayP",
+      "type": "slice",
       "primitive": "string",
       "computedType": "string[]",
       "gormMap": {}

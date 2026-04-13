@@ -80,7 +80,7 @@ export class UserWorkspaceEntity extends BaseEntity {
     },
     {
       "name": "userPermissions",
-      "type": "arrayP",
+      "type": "slice",
       "primitive": "string",
       "computedType": "string[]",
       "gorm": "-",
@@ -89,7 +89,7 @@ export class UserWorkspaceEntity extends BaseEntity {
     },
     {
       "name": "rolePermission",
-      "type": "arrayP",
+      "type": "slice",
       "primitive": "UserRoleWorkspaceDto",
       "computedType": "unknown[]",
       "gorm": "-",
@@ -98,7 +98,7 @@ export class UserWorkspaceEntity extends BaseEntity {
     },
     {
       "name": "workspacePermissions",
-      "type": "arrayP",
+      "type": "slice",
       "primitive": "string",
       "computedType": "string[]",
       "gorm": "-",

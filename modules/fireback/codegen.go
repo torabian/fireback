@@ -39,7 +39,7 @@ import (
 )
 
 var FIELD_TYPE_ARRAY string = "array"
-var FIELD_TYPE_ARRAYP string = "arrayP"
+var FIELD_TYPE_SLICE string = "slice"
 var FIELD_TYPE_JSON string = "json"
 var FIELD_TYPE_ONE string = "one"
 var FIELD_TYPE_DATE string = "date"

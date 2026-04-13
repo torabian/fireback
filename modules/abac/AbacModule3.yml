@@ -496,7 +496,7 @@ actions:
           type: one
           target: UserSessionDto
         - name: next
-          type: arrayP
+          type: slice
           primitive: string
           description: The next possible action which is suggested.
 
@@ -613,7 +613,7 @@ actions:
         - name: name
           type: string
         - name: capabilities
-          type: arrayP
+          type: slice
           description: Workspace level capabilities which are available
           primitive: string
         - name: uniqueId
@@ -626,7 +626,7 @@ actions:
             - name: uniqueId
               type: string
             - name: capabilities
-              type: arrayP
+              type: slice
               description: Capabilities related to this role which are available
               primitive: string
 
@@ -1092,17 +1092,17 @@ entities:
       - name: userPermissions
         gorm: "-"
         sql: "-"
-        type: arrayP
+        type: slice
         primitive: string
       - name: rolePermission
         gorm: "-"
         sql: "-"
-        type: arrayP
+        type: slice
         primitive: UserRoleWorkspaceDto
       - name: workspacePermissions
         gorm: "-"
         sql: "-"
-        type: arrayP
+        type: slice
         primitive: string
   - name: workspaceRole
     permRewrite:

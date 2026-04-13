@@ -103,14 +103,14 @@ For example, see array example, and instead of `type: array` use `type: object`.
 The type one, is a specific type to Fireback. It means, you are targeting another table as a `one-to-one` relationship. The different with `object` is, in this type managing the data, deleting it is not depending 
 on the parent entity, they are just being related over a loose relation.
 
-## Type: arrayp
+## Type: slice
 
-Arrayp, is an array type which would store primitives in Fireback. For example, if you decided to use array strings
-in a DTO, then you can define the `type: arrayP`. Now, the primitive itself needs to be defined on a separate property called: `primitive`. For example:
+slice, is an array type which would store primitives in Fireback. For example, if you decided to use array strings
+in a DTO, then you can define the `type: slice`. Now, the primitive itself needs to be defined on a separate property called: `primitive`. For example:
 
 ```
 - name: capabilities
-  type: arrayP
+  type: slice
   primitive: string
 
 ```
