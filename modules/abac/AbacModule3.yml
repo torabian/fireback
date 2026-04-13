@@ -172,6 +172,34 @@ dtom:
         type: string?
 
 acts:
+  - name: ClassicPassportRequestOtp
+    description: >-
+      Triggers an otp request, and will send an sms or email to the passport.
+      This endpoint is not used for login, but rather makes a request at initial
+      step. Later you can call classicPassportOtp to get in.
+    method: post
+    cliName: otp-request
+    url: /workspace/passport/request-otp
+    in:
+      fields:
+        - name: value
+          type: string
+          tags:
+            validate: required
+          description: Passport value (email, phone number) which would be receiving the otp code.
+    out:
+      envelope: GResponse
+      fields:
+        - name: suspendUntil
+          type: int64
+        - name: validUntil
+          type: int64
+        - name: blockedUntil
+          type: int64
+        - name: secondsToUnblock
+          type: int64
+          description: The amount of time left to unblock for next request
+
   - name: ClassicPassportOtp
     description: >-
       Authenticate the user publicly for classic methods using communication
@@ -723,32 +751,6 @@ actions:
           type: string?
     out:
       entity: WorkspaceEntity
-
-  - name: classicPassportRequestOtp
-    description: >-
-      Triggers an otp request, and will send an sms or email to the passport.
-      This endpoint is not used for login, but rather makes a request at initial
-      step. Later you can call classicPassportOtp to get in.
-    method: post
-    cliName: otp-request
-    url: /workspace/passport/request-otp
-    in:
-      fields:
-        - name: value
-          type: string
-          validate: required
-          description: Passport value (email, phone number) which would be recieving the otp code.
-    out:
-      fields:
-        - name: suspendUntil
-          type: int64
-        - name: validUntil
-          type: int64
-        - name: blockedUntil
-          type: int64
-        - name: secondsToUnblock
-          type: int64
-          description: The amount of time left to unblock for next request
 
 entities:
   - name: timezoneGroup

@@ -1138,94 +1138,44 @@ var CreateWorkspaceActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ClassicPassportRequestOtpSecurityModel *fireback.SecurityModel = nil
-
-type ClassicPassportRequestOtpActionReqDto struct {
-	// Passport value (email, phone number) which would be recieving the otp code.
-	Value string `json:"value" xml:"value" yaml:"value"  validate:"required"        `
-}
-
-func (x *ClassicPassportRequestOtpActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var ClassicPassportRequestOtpCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "value",
-		Required: true,
-		Usage:    `Passport value (email, phone number) which would be recieving the otp code. (string)`,
-	},
-}
-
-func ClassicPassportRequestOtpActionReqValidator(dto *ClassicPassportRequestOtpActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastClassicPassportRequestOtpFromCli(c *cli.Context) *ClassicPassportRequestOtpActionReqDto {
-	template := &ClassicPassportRequestOtpActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("value") {
-		template.Value = c.String("value")
-	}
-	return template
-}
-
-type ClassicPassportRequestOtpActionResDto struct {
-	SuspendUntil int64 `json:"suspendUntil" xml:"suspendUntil" yaml:"suspendUntil"        `
-	ValidUntil   int64 `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
-	BlockedUntil int64 `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
-	// The amount of time left to unblock for next request
-	SecondsToUnblock int64 `json:"secondsToUnblock" xml:"secondsToUnblock" yaml:"secondsToUnblock"        `
-}
-
-func (x *ClassicPassportRequestOtpActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type classicPassportRequestOtpActionImpSig func(
-	req *ClassicPassportRequestOtpActionReqDto,
-	q fireback.QueryDSL) (*ClassicPassportRequestOtpActionResDto,
-	*fireback.IError,
-)
-
-var ClassicPassportRequestOtpActionImp classicPassportRequestOtpActionImpSig
-
-func ClassicPassportRequestOtpActionFn(
-	req *ClassicPassportRequestOtpActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*ClassicPassportRequestOtpActionResDto,
-	*fireback.IError,
-) {
-	if ClassicPassportRequestOtpActionImp == nil {
-		return nil, nil
-	}
-	return ClassicPassportRequestOtpActionImp(req, q)
-}
-
-var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
-	Name:  "otp-request",
-	Usage: `Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.`,
-	Flags: ClassicPassportRequestOtpCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportRequestOtpSecurityModel)
-		dto := CastClassicPassportRequestOtpFromCli(c)
-		result, err := ClassicPassportRequestOtpActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var ClassicPassportRequestOtpImpl func(c ClassicPassportRequestOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionResponse, error) = nil
+var ClassicPassportRequestOtpSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var ClassicPassportRequestOtpActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       ClassicPassportRequestOtpActionMeta().CliName,
+	Description:   ClassicPassportRequestOtpActionMeta().Description,
+	Name:          ClassicPassportRequestOtpActionMeta().Name,
+	Method:        ClassicPassportRequestOtpActionMeta().Method,
+	Url:           ClassicPassportRequestOtpActionMeta().URL,
+	SecurityModel: ClassicPassportRequestOtpSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := ClassicPassportRequestOtpActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := ClassicPassportRequestOtpImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportRequestOtpSecurityModel)
+		req := ClassicPassportRequestOtpActionRequest{}
+		resp, err := ClassicPassportRequestOtpImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var ClassicPassportOtpImpl func(c ClassicPassportOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportOtpActionResponse, error) = nil
 var ClassicPassportOtpSecurityModel *fireback.SecurityModel = nil
 
@@ -1475,6 +1425,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		ClassicPassportRequestOtpActionDef,
 		ClassicPassportOtpActionDef,
 		CheckClassicPassportActionDef,
 		ClassicSignupActionDef,
@@ -1839,29 +1790,6 @@ func AbacCustomActions() []fireback.Module3Action {
 				Entity: "CreateWorkspaceActionReqDto",
 			},
 		},
-		{
-			Method:        "POST",
-			Url:           "/workspace/passport/request-otp",
-			SecurityModel: ClassicPassportRequestOtpSecurityModel,
-			Name:          "classicPassportRequestOtp",
-			Description:   "Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, ClassicPassportRequestOtpActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ClassicPassportRequestOtpActionFn,
-			ResponseEntity: &ClassicPassportRequestOtpActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "ClassicPassportRequestOtpActionResDto",
-			},
-			RequestEntity: &ClassicPassportRequestOtpActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "ClassicPassportRequestOtpActionReqDto",
-			},
-		},
 	}
 	return routes
 }
@@ -1883,7 +1811,6 @@ var AbacCustomActionsCli = []cli.Command{
 	GsmSendSmsActionCmd,
 	GsmSendSmsWithProviderActionCmd,
 	CreateWorkspaceActionCmd,
-	ClassicPassportRequestOtpActionCmd,
 }
 
 // Only to include some headers
@@ -1899,6 +1826,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		ClassicPassportRequestOtpActionDef.ToCli(),
 		ClassicPassportOtpActionDef.ToCli(),
 		CheckClassicPassportActionDef.ToCli(),
 		ClassicSignupActionDef.ToCli(),
@@ -1922,7 +1850,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		GsmSendSmsActionCmd,
 		GsmSendSmsWithProviderActionCmd,
 		CreateWorkspaceActionCmd,
-		ClassicPassportRequestOtpActionCmd,
 		TimezoneGroupCliFn(),
 		FileCliFn(),
 		TableViewSizingCliFn(),

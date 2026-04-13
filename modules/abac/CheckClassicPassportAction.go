@@ -49,7 +49,16 @@ func wrapCheckPassportResult(res *CheckClassicPassportActionRes, err *fireback.I
 // in some operations, the only option is otp either on signin or signup.
 // so we send the otp anyway, and next step can be immediately signup.
 func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckClassicPassportActionResOtpInfo, *fireback.IError) {
-	otpInfo, otpFailed := ClassicPassportRequestOtpAction(&ClassicPassportRequestOtpActionReqDto{Value: passportValue}, q)
+	otpResponse, err := ClassicPassportRequestOtpAction(ClassicPassportRequestOtpActionRequest{
+		Body:   ClassicPassportRequestOtpActionReq{Value: passportValue},
+		CliCtx: q.C,
+	}, q)
+
+	var otpFailed *fireback.IError
+
+	if err != nil {
+		otpFailed = fireback.CastToIError(otpFailed)
+	}
 
 	// No point of continuing if the type doesn't support otp
 	if otpFailed != nil {
@@ -58,7 +67,12 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 		}
 	}
 
-	if otpInfo != nil {
+	if otpResponse != nil && otpResponse.Payload != nil {
+		var otpInfo *CheckClassicPassportActionResOtpInfo
+
+		if casted, ok := otpResponse.Payload.(fireback.GoogleResponse[CheckClassicPassportActionResOtpInfo]); ok {
+			otpInfo = &casted.Data.Item
+		}
 
 		// if request is blocked, we actually did not sent the otp.
 		if otpFailed != nil {

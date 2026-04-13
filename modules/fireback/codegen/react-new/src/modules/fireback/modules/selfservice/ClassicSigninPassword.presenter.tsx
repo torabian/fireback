@@ -3,15 +3,13 @@ import { useEffect } from "react";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
-
-import { usePostWorkspacePassportRequestOtp } from "../../sdk/modules/abac/usePostWorkspacePassportRequestOtp";
-
 import { useS } from "../../hooks/useS";
 
 import { ClassicSigninActionReq, ClassicSigninActionRes, useClassicSigninAction } from "../../sdk/modules/abac/ClassicSignin";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
+import { ClassicPassportRequestOtpActionReq, useClassicPassportRequestOtpAction } from "../../sdk/modules/abac/ClassicPassportRequestOtp";
 
 export const usePresenter = () => {
   const s = useS(strings);
@@ -20,7 +18,7 @@ export const usePresenter = () => {
   const { onComplete } = useCompleteAuth();
   const mutation = useClassicSigninAction();
   const otpEnabled = state?.canContinueOnOtp;
-  const { submit: requestOtp } = usePostWorkspacePassportRequestOtp();
+  const requestOtpMutation = useClassicPassportRequestOtpAction();
 
   const submit = (values: Partial<ClassicSigninActionReq>) => {
     mutation.mutateAsync(new ClassicSigninActionReq({ value: values.value, password: values.password }))
@@ -36,7 +34,7 @@ export const usePresenter = () => {
   });
 
   const continueWithOtp = () => {
-    requestOtp({ value: form.values.value })
+    requestOtpMutation.mutateAsync(new ClassicPassportRequestOtpActionReq({ value: form.values.value }))
       .then((res) => {
         push(`../otp`, undefined, {
           value: form.values.value,

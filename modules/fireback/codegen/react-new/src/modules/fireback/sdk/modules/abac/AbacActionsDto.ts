@@ -233,27 +233,3 @@ public static Fields = {
       workspaceId: 'workspaceId',
 }
 }
-export class ClassicPassportRequestOtpActionReqDto {
-  /**
-  Passport value (email, phone number) which would be recieving the otp code.
-  */
-  public value?: string | null;
-public static Fields = {
-      value: 'value',
-}
-}
-export class ClassicPassportRequestOtpActionResDto {
-  public suspendUntil?: number | null;
-  public validUntil?: number | null;
-  public blockedUntil?: number | null;
-  /**
-  The amount of time left to unblock for next request
-  */
-  public secondsToUnblock?: number | null;
-public static Fields = {
-      suspendUntil: 'suspendUntil',
-      validUntil: 'validUntil',
-      blockedUntil: 'blockedUntil',
-      secondsToUnblock: 'secondsToUnblock',
-}
-}
