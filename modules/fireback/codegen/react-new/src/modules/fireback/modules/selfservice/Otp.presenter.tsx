@@ -3,45 +3,43 @@ import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { type IResponse } from "../../sdk/core/http-tools";
-import { usePostWorkspacePassportOtp } from "../../sdk/modules/abac/usePostWorkspacePassportOtp";
 
+
+
+import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
-import {
-  ClassicPassportOtpActionReqDto,
-  ClassicPassportOtpActionResDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
+import { ClassicPassportOtpActionReq, useClassicPassportOtpAction, type ClassicPassportOtpActionRes } from "../../sdk/modules/abac/ClassicPassportOtp";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
   const { locale } = useLocale();
   const s = useS(strings);
-  const { submit: signin, mutation } = usePostWorkspacePassportOtp();
+  const mutation = useClassicPassportOtpAction({});
   const { onComplete } = useCompleteAuth();
 
-  const submit = (values: Partial<ClassicPassportOtpActionReqDto>) => {
-    signin({ ...values, value: state.value })
+  const submit = (values: Partial<ClassicPassportOtpActionReq>) => {
+    mutation.mutateAsync(new ClassicPassportOtpActionReq({ ...values, value: state.value }))
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
       });
   };
 
-  const form = useFormik<Partial<ClassicPassportOtpActionReqDto>>({
+  const form = useFormik<Partial<ClassicPassportOtpActionReq>>({
     initialValues: {},
     onSubmit: submit,
   });
 
-  const successful = (res: IResponse<ClassicPassportOtpActionResDto>) => {
-    if (res.data?.session) {
+  const successful = (res: GResponse<ClassicPassportOtpActionRes>) => {
+    if (res.data?.item.session) {
       onComplete(res);
-    } else if (res.data.continueWithCreation) {
+    } else if (res.data?.item?.continueWithCreation) {
       push(`/${locale}/selfservice/complete`, undefined, {
         value: state.value,
         type: state.type,
-        sessionSecret: res.data.sessionSecret,
-        totpUrl: res.data.totpUrl,
+        sessionSecret: res.data.item?.sessionSecret,
+        totpUrl: res.data.item?.totpUrl,
       });
     }
   };

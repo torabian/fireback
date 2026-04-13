@@ -10,11 +10,13 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	ClassicPassportRequestOtpActionImp = ClassicPassportRequestOtpAction
+	ClassicPassportRequestOtpImpl = ClassicPassportRequestOtpAction
 }
 
-func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto, q fireback.QueryDSL) (*ClassicPassportRequestOtpActionResDto, *fireback.IError) {
-	if err := ClassicPassportRequestOtpActionReqValidator(req); err != nil {
+func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionResponse, error) {
+	req := c.Body
+
+	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
@@ -25,16 +27,18 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 
 	if olderEntity != nil && time.Now().UnixNano() < olderEntity.BlockedUntil {
 		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
-		return &ClassicPassportRequestOtpActionResDto{
-			BlockedUntil:     olderEntity.BlockedUntil,
-			SecondsToUnblock: remaining,
+		return &ClassicPassportRequestOtpActionResponse{
+			Payload: fireback.GResponseSingleItem(ClassicPassportRequestOtpActionRes{
+				BlockedUntil:     olderEntity.BlockedUntil,
+				SecondsToUnblock: remaining,
+			}),
 		}, fireback.Create401Error(&AbacMessages.OtaRequestBlockedUntil, []string{})
 	} else {
 		// Let's delete the record, to start the process fresh
 		fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&PublicAuthenticationEntity{})
 	}
 
-	passport, user, err := UnsafeGetUserByPassportValue(req.Value, q)
+	passport, user, err := UnsafeGetUserByPassportValue(req.Value, query)
 
 	// We only throw error if passport not available, other errors we need to throw
 	if err != nil {
@@ -92,7 +96,7 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 
 	if passportType == PASSPORT_METHOD_PHONE {
 
-		result := QuickGetOtpMessage(q, SMS_OTP)
+		result := QuickGetOtpMessage(query, SMS_OTP)
 		body, err3 := result.CompileContent(map[string]string{"Otp": otp})
 		if err3 != nil {
 			return nil, fireback.CastToIError(err3)
@@ -103,7 +107,7 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 		}
 
 	} else if passportType == PASSPORT_METHOD_EMAIL {
-		result := QuickGetOtpMessage(q, EMAIL_OTP)
+		result := QuickGetOtpMessage(query, EMAIL_OTP)
 		var body = ""
 		var title = ""
 		if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
@@ -131,15 +135,17 @@ func ClassicPassportRequestOtpAction(req *ClassicPassportRequestOtpActionReqDto,
 			return nil, fireback.GormErrorToIError(err2)
 		}
 
-	} else if passportType == ANONYMOUS_AUTHENTICATION && q.C != nil && q.G == nil {
+	} else if passportType == ANONYMOUS_AUTHENTICATION && query.C != nil && query.G == nil {
 		// If only, in cli mode, we print the otp information on the cli screen
 		fmt.Println("Your otp code for anonymous login on cli only: ", otp)
 	} else {
 		return nil, &fireback.IError{Message: AbacMessages.OtpNotAvailableForThisType}
 	}
 
-	return &ClassicPassportRequestOtpActionResDto{
-		SecondsToUnblock: secondsToUnblock,
+	return &ClassicPassportRequestOtpActionResponse{
+		Payload: fireback.GResponseSingleItem(ClassicPassportRequestOtpActionRes{
+			SecondsToUnblock: secondsToUnblock,
+		}),
 	}, nil
 
 }

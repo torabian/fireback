@@ -172,6 +172,120 @@ dtom:
         type: string?
 
 acts:
+  - name: ClassicPassportRequestOtp
+    description: >-
+      Triggers an otp request, and will send an sms or email to the passport.
+      This endpoint is not used for login, but rather makes a request at initial
+      step. Later you can call classicPassportOtp to get in.
+    method: post
+    cliName: otp-request
+    url: /workspace/passport/request-otp
+    in:
+      fields:
+        - name: value
+          type: string
+          tags:
+            validate: required
+          description: Passport value (email, phone number) which would be receiving the otp code.
+    out:
+      envelope: GResponse
+      fields:
+        - name: suspendUntil
+          type: int64
+        - name: validUntil
+          type: int64
+        - name: blockedUntil
+          type: int64
+        - name: secondsToUnblock
+          type: int64
+          description: The amount of time left to unblock for next request
+
+  - name: ClassicPassportOtp
+    description: >-
+      Authenticate the user publicly for classic methods using communication
+      service, such as sms, call, or email. You need to call classicPassportRequestOtp
+      beforehand to send a otp code, and then validate it with this API.
+      Also checkClassicPassport action might already sent the otp, so make sure you don't
+      send it twice.
+    method: post
+    cliName: otp
+    url: /workspace/passport/otp
+    in:
+      fields:
+        - name: value
+          type: string
+          tags:
+            validate: required
+        - name: otp
+          tags:
+            validate: required
+          type: string
+    out:
+      envelope: GResponse
+      fields:
+        - name: session
+          type: one?
+          target: UserSessionDto
+          description:
+            Upon successful authentication, there will be a session dto generated,
+            which is a ground information of authorized user and can be stored in front-end.
+        - name: totpUrl
+          type: string
+          description: If time based otp is available, we add it response to make it easier for ui.
+        - name: sessionSecret
+          type: string
+          description: The session secret will be used to call complete user registration api.
+        - name: continueWithCreation
+          type: bool
+          description:
+            If return true, means the OTP is correct and user needs to be created
+            before continue the authentication process.
+  - name: CheckClassicPassport
+    method: post
+    cliName: ccp
+    description: >-
+      Checks if a classic passport (email, phone) exists or not, used in multi
+      step authentication
+    url: /workspace/passport/check
+    in:
+      fields:
+        - name: value
+          type: string
+          tags:
+            validate: required
+        - name: securityToken
+          type: string
+          description:
+            This can be the value of ReCaptcha2, ReCaptcha3, or generate security image or voice
+            for verification. Will be used based on the configuration.
+    out:
+      envelope: GResponse
+      fields:
+        - name: next
+          type: slice
+          primitive: string
+          description: The next possible action which is suggested.
+        - name: flags
+          type: slice
+          primitive: string
+          description:
+            Extra information that can be useful actually when doing onboarding.
+            Make sure sensitive information doesn't go out.
+        - name: otpInfo
+          type: object?
+          description:
+            If the endpoint automatically triggers a send otp, then it would be holding that information,
+            Also the otp information can become available.
+          fields:
+            - name: suspendUntil
+              type: int64
+            - name: validUntil
+              type: int64
+            - name: blockedUntil
+              type: int64
+            - name: secondsToUnblock
+              type: int64
+              description: The amount of time left to unblock for next request
   - name: ClassicSignup
     url: /passports/signup/classic
     cliName: up
@@ -637,109 +751,6 @@ actions:
           type: string?
     out:
       entity: WorkspaceEntity
-  - name: checkClassicPassport
-    method: post
-    cliName: ccp
-    description: >-
-      Checks if a classic passport (email, phone) exists or not, used in multi
-      step authentication
-    url: /workspace/passport/check
-    in:
-      fields:
-        - name: value
-          type: string
-          validate: required
-        - name: securityToken
-          type: string
-          description:
-            This can be the value of recaptcha2, recaptch3, or generate security image or voice
-            for verification. Will be used based on the configuration.
-    out:
-      fields:
-        - name: next
-          type: arrayP
-          primitive: string
-          description: The next possible action which is suggested.
-        - name: flags
-          type: arrayP
-          primitive: string
-          description:
-            Extra information that can be useful actually when doing onboarding.
-            Make sure sensetive information doesn't go out.
-        - name: otpInfo
-          type: object
-          description:
-            If the endpoint automatically triggers a send otp, then it would be holding that information,
-            Also the otp information can become available.
-          fields:
-            - name: suspendUntil
-              type: int64
-            - name: validUntil
-              type: int64
-            - name: blockedUntil
-              type: int64
-            - name: secondsToUnblock
-              type: int64
-              description: The amount of time left to unblock for next request
-  - name: classicPassportOtp
-    description: >-
-      Authenticate the user publicly for classic methods using communication
-      service, such as sms, call, or email. You need to call classicPassportRequestOtp
-      beforehand to send a otp code, and then validate it with this API.
-      Also checkClassicPassport action might already sent the otp, so make sure you don't
-      send it twice.
-    method: post
-    cliName: otp
-    url: /workspace/passport/otp
-    in:
-      fields:
-        - name: value
-          type: string
-          validate: required
-        - name: otp
-          validate: required
-          type: string
-    out:
-      fields:
-        - name: session
-          type: one
-          target: UserSessionDto
-        - name: totpUrl
-          type: string
-          description: If time based otp is available, we add it response to make it easier for ui.
-        - name: sessionSecret
-          type: string
-          description: The session secret will be used to call complete user registeration api.
-        - name: continueWithCreation
-          type: bool
-          description:
-            If return true, means the OTP is correct and user needs to be created
-            before continue the authentication processs.
-  - name: classicPassportRequestOtp
-    description: >-
-      Triggers an otp request, and will send an sms or email to the passport.
-      This endpoint is not used for login, but rather makes a request at initial
-      step. Later you can call classicPassportOtp to get in.
-    method: post
-    cliName: otp-request
-    url: /workspace/passport/request-otp
-    in:
-      fields:
-        - name: value
-          type: string
-          validate: required
-          description: Passport value (email, phone number) which would be recieving the otp code.
-    out:
-      fields:
-        - name: suspendUntil
-          type: int64
-        - name: validUntil
-          type: int64
-        - name: blockedUntil
-          type: int64
-        - name: secondsToUnblock
-          type: int64
-          description: The amount of time left to unblock for next request
 
 entities:
   - name: timezoneGroup

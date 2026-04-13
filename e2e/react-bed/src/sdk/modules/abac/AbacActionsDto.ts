@@ -27,15 +27,6 @@ import {
   */
   public capabilities?: string[] | null;
   }
-  export class CheckClassicPassportResDtoOtpInfo {
-  public suspendUntil?: number | null;
-  public validUntil?: number | null;
-  public blockedUntil?: number | null;
-  /**
-  The amount of time left to unblock for next request
-  */
-  public secondsToUnblock?: number | null;
-  }
 export class AcceptInviteActionReqDto {
   /**
   The invitation id which will be used to process
@@ -240,97 +231,5 @@ public static Fields = {
       workspace$: 'workspace',
       workspace: WorkspaceEntity.Fields,
       workspaceId: 'workspaceId',
-}
-}
-export class CheckClassicPassportActionReqDto {
-  public value?: string | null;
-  /**
-  This can be the value of recaptcha2, recaptch3, or generate security image or voice for verification. Will be used based on the configuration.
-  */
-  public securityToken?: string | null;
-public static Fields = {
-      value: 'value',
-      securityToken: 'securityToken',
-}
-}
-export class CheckClassicPassportActionResDto {
-  /**
-  The next possible action which is suggested.
-  */
-  public next?: string[] | null;
-  /**
-  Extra information that can be useful actually when doing onboarding. Make sure sensetive information doesn't go out.
-  */
-  public flags?: string[] | null;
-  /**
-  If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.
-  */
-  public otpInfo?: CheckClassicPassportResDtoOtpInfo | null;
-public static Fields = {
-      next: 'next',
-      flags: 'flags',
-      otpInfo$: 'otpInfo',
-      otpInfo: {
-      suspendUntil: 'suspendUntil',
-      validUntil: 'validUntil',
-      blockedUntil: 'blockedUntil',
-      secondsToUnblock: 'secondsToUnblock',
-      },
-}
-}
-export class ClassicPassportOtpActionReqDto {
-  public value?: string | null;
-  public otp?: string | null;
-public static Fields = {
-      value: 'value',
-      otp: 'otp',
-}
-}
-export class ClassicPassportOtpActionResDto {
-  public session?: UserSessionDto | null;
-      sessionId?: string | null;
-  /**
-  If time based otp is available, we add it response to make it easier for ui.
-  */
-  public totpUrl?: string | null;
-  /**
-  The session secret will be used to call complete user registeration api.
-  */
-  public sessionSecret?: string | null;
-  /**
-  If return true, means the OTP is correct and user needs to be created before continue the authentication processs.
-  */
-  public continueWithCreation?: boolean | null;
-public static Fields = {
-          sessionId: 'sessionId',
-      session$: 'session',
-      session: UserSessionDto.Fields,
-      totpUrl: 'totpUrl',
-      sessionSecret: 'sessionSecret',
-      continueWithCreation: 'continueWithCreation',
-}
-}
-export class ClassicPassportRequestOtpActionReqDto {
-  /**
-  Passport value (email, phone number) which would be recieving the otp code.
-  */
-  public value?: string | null;
-public static Fields = {
-      value: 'value',
-}
-}
-export class ClassicPassportRequestOtpActionResDto {
-  public suspendUntil?: number | null;
-  public validUntil?: number | null;
-  public blockedUntil?: number | null;
-  /**
-  The amount of time left to unblock for next request
-  */
-  public secondsToUnblock?: number | null;
-public static Fields = {
-      suspendUntil: 'suspendUntil',
-      validUntil: 'validUntil',
-      blockedUntil: 'blockedUntil',
-      secondsToUnblock: 'secondsToUnblock',
 }
 }

@@ -7,9 +7,9 @@ import {
   uriMatch,
 } from "../../hooks/mock-tools";
 import {
-  CheckClassicPassportActionResDto,
   ConfirmClassicPassportTotpActionResDto,
 } from "../../sdk/modules/abac/AbacActionsDto";
+import type { CheckClassicPassportActionRes } from "../../sdk/modules/abac/CheckClassicPassport";
 import { CheckPassportMethodsActionRes } from "../../sdk/modules/abac/CheckPassportMethods";
 import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
 import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
@@ -84,7 +84,7 @@ export class AuthMockServer {
   @method("post")
   async postWorkspacePassportCheck(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<CheckClassicPassportActionResDto>>> {
+  ): Promise<IResponse<DeepPartial<CheckClassicPassportActionRes>>> {
     const isEmail = ctx?.body?.value.includes("@");
 
     if (isEmail) {

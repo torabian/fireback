@@ -122,22 +122,32 @@ func IntegrateAuthFlow(c *cli.Context) error {
 
 		value := fireback.AskForInput(label, prefix)
 		query.C = c
-		m, e := CheckClassicPassportAction(&CheckClassicPassportActionReqDto{
-			Value: value,
+		mresponse, e := CheckClassicPassportAction(CheckClassicPassportActionRequest{
+			Body: CheckClassicPassportActionReq{
+				Value: value,
+			},
+			CliCtx: c,
 		}, query)
 
 		if e != nil {
 			return e
 		}
 
+		var m *CheckClassicPassportActionRes
+
+		if mf, ok := mresponse.Payload.(fireback.GoogleResponse[*CheckClassicPassportActionRes]); ok {
+			m = mf.Data.Item
+		}
+
 		fmt.Println("Flags we got: ", strings.Join(m.Flags, ","))
 		fmt.Println("Next steps: ", strings.Join(m.Next, ","))
-		if m.OtpInfo != nil {
+		if m.OtpInfo.IsSet() {
+			otp := m.OtpInfo.Ptr()
 			fmt.Println("Also otp information are present.")
-			fmt.Println("Blocked until:", m.OtpInfo.BlockedUntil)
-			fmt.Println("Second to unblock:", m.OtpInfo.SecondsToUnblock)
-			fmt.Println("SuspendUntil:", m.OtpInfo.SuspendUntil)
-			fmt.Println("Valid until:", m.OtpInfo.ValidUntil)
+			fmt.Println("Blocked until:", otp.BlockedUntil)
+			fmt.Println("Second to unblock:", otp.SecondsToUnblock)
+			fmt.Println("SuspendUntil:", otp.SuspendUntil)
+			fmt.Println("Valid until:", otp.ValidUntil)
 		}
 
 		if len(m.Next) == 0 {
@@ -156,20 +166,25 @@ func IntegrateAuthFlow(c *cli.Context) error {
 		if nextStep == "otp" {
 			otpCode := fireback.AskForInput("Enter the otp code. You might see it a bit above this command.", "")
 
-			res, err := ClassicPassportOtpAction(&ClassicPassportOtpActionReqDto{
-				Value: value, Otp: otpCode,
-			}, query)
-
-			if err != nil {
+			var res *ClassicPassportOtpActionRes = nil
+			if result, err := ClassicPassportOtpAction(ClassicPassportOtpActionRequest{
+				Body: ClassicPassportOtpActionReq{
+					Value: value, Otp: otpCode,
+				},
+			}, query); err != nil {
 				fmt.Println("Not nil")
 				return err
+			} else {
+				if casted, ok := result.Payload.(fireback.GoogleResponse[ClassicPassportOtpActionRes]); ok {
+					res = &casted.Data.Item
+				}
 			}
 
 			if res.ContinueWithCreation {
 				fmt.Println("We continue to create account.")
 				nextStep = "create-with-password"
 				sessionSecret = res.SessionSecret
-			} else if res.Session != nil {
+			} else if res.Session.IsSet() {
 
 				/// Now we need to set the session here, but code is duplicated multiple times
 			}

@@ -3,20 +3,20 @@ package abac
 import (
 	"time"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
 	// Override the implementation with our actual code.
-	ClassicPassportOtpActionImp = ClassicPassportOtpAction
+	ClassicPassportOtpImpl = ClassicPassportOtpAction
 }
 
-func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q fireback.QueryDSL) (
-	*ClassicPassportOtpActionResDto, *fireback.IError,
-) {
-
+func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportOtpActionResponse, error) {
+	req := c.Body
 	ClearPassportValue(&req.Value)
-	if err := ClassicPassportOtpActionReqValidator(req); err != nil {
+
+	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
@@ -65,14 +65,16 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q fireback.Qu
 		// 	}
 		// }
 
-		return &ClassicPassportOtpActionResDto{
-			ContinueWithCreation: true,
-			SessionSecret:        olderEntity.SessionSecret,
-			TotpUrl:              olderEntity.TotpLink,
+		return &ClassicPassportOtpActionResponse{
+			Payload: fireback.GResponseSingleItem(ClassicPassportOtpActionRes{
+				ContinueWithCreation: true,
+				SessionSecret:        olderEntity.SessionSecret,
+				TotpUrl:              olderEntity.TotpLink,
+			}),
 		}, nil
 	}
 
-	passport, user, err := UnsafeGetUserByPassportValue(req.Value, q)
+	passport, user, err := UnsafeGetUserByPassportValue(req.Value, query)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +85,7 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q fireback.Qu
 			if req.Otp == olderEntity.Otp {
 				session := &UserSessionDto{}
 
-				if token, err := user.AuthorizeWithToken(q); err != nil {
+				if token, err := user.AuthorizeWithToken(query); err != nil {
 					return nil, fireback.CastToIError(err)
 				} else {
 					session.Token = token
@@ -102,8 +104,10 @@ func ClassicPassportOtpAction(req *ClassicPassportOtpActionReqDto, q fireback.Qu
 					return nil, fireback.GormErrorToIError(err)
 				}
 
-				return &ClassicPassportOtpActionResDto{
-					Session: session,
+				return &ClassicPassportOtpActionResponse{
+					Payload: fireback.GResponseSingleItem(ClassicPassportOtpActionRes{
+						Session: emigo.NullableOf(*session),
+					}),
 				}, nil
 			}
 		}

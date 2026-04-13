@@ -7,9 +7,9 @@ import { useS } from "../../hooks/useS";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input/index";
 import { usePresenter } from "./Otp.presenter";
 import { strings } from "./strings/translations";
-import { ClassicPassportOtpActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { ClassicPassportOtpActionReq } from "../../sdk/modules/abac/ClassicPassportOtp";
 
-export const OtpScreen = ({}: {}) => {
+export const OtpScreen = ({ }: {}) => {
   const { goBack, submit, mutation, form, s } = usePresenter();
 
   return (
@@ -34,7 +34,7 @@ const Form = ({
   form,
   mutation,
 }: {
-  form: FormikProps<Partial<ClassicPassportOtpActionReqDto>>;
+  form: FormikProps<Partial<ClassicPassportOtpActionReq>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
 }) => {
   const disabled = !form.values.otp;
@@ -51,7 +51,7 @@ const Form = ({
         values={form.values.otp?.split("")}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicPassportOtpActionReqDto.Fields.otp,
+            ClassicPassportOtpActionReq.Fields.otp,
             value,
             false
           )

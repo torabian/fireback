@@ -5,21 +5,20 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRecaptcha2 } from "../../hooks/useRecaptcha2";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { CheckClassicPassportActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import {
   CheckPassportMethodsActionRes,
   useCheckPassportMethodsActionQuery,
 } from "../../sdk/modules/abac/CheckPassportMethods";
-import { usePostWorkspacePassportCheck } from "../../sdk/modules/abac/usePostWorkspacePassportCheck";
 import { GResponse } from "../../sdk/sdk/envelopes";
 import { AuthMethod } from "./auth.common";
 import { strings } from "./strings/translations";
+import { CheckClassicPassportActionReq, useCheckClassicPassportAction } from "../../sdk/modules/abac/CheckClassicPassport";
 
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const s = useS(strings);
   const { goBack, push, state } = useRouter();
   const { locale } = useLocale();
-  const { submit: submitCheck, mutation } = usePostWorkspacePassportCheck();
+  const mutation = useCheckClassicPassportAction();
   const canGoBack = state?.canGoBack === false ? false : true;
 
   let enabledRecaptcha2 = false;
@@ -38,10 +37,10 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
     // that it has been failed.
   }
 
-  const submit = (data: Partial<CheckClassicPassportActionReqDto>) => {
-    submitCheck(data)
-      .then((res) => {
-        const { next, flags } = res.data as any;
+  const submit = (data: Partial<CheckClassicPassportActionReq>) => {
+    mutation.mutateAsync(new CheckClassicPassportActionReq(data))
+      .then((res: any) => {
+        const { next, flags } = res?.data?.item;
 
         // this condition means there is only otp available. So no other chance.
         if (next.includes("otp") && next.length === 1) {
@@ -70,7 +69,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
       });
   };
 
-  const form = useFormik<Partial<CheckClassicPassportActionReqDto>>({
+  const form = useFormik<Partial<CheckClassicPassportActionReq>>({
     initialValues: {},
     onSubmit: submit,
   });
@@ -98,7 +97,7 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
     }
 
     form.setFieldValue(
-      CheckClassicPassportActionReqDto.Fields.securityToken,
+      CheckClassicPassportActionReq.Fields.securityToken,
       value,
     );
   }, [value]);
