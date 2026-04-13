@@ -172,6 +172,46 @@ dtom:
         type: string?
 
 acts:
+  - name: ClassicPassportOtp
+    description: >-
+      Authenticate the user publicly for classic methods using communication
+      service, such as sms, call, or email. You need to call classicPassportRequestOtp
+      beforehand to send a otp code, and then validate it with this API.
+      Also checkClassicPassport action might already sent the otp, so make sure you don't
+      send it twice.
+    method: post
+    cliName: otp
+    url: /workspace/passport/otp
+    in:
+      fields:
+        - name: value
+          type: string
+          tags:
+            validate: required
+        - name: otp
+          tags:
+            validate: required
+          type: string
+    out:
+      envelope: GResponse
+      fields:
+        - name: session
+          type: one?
+          target: UserSessionDto
+          description:
+            Upon successful authentication, there will be a session dto generated,
+            which is a ground information of authorized user and can be stored in front-end.
+        - name: totpUrl
+          type: string
+          description: If time based otp is available, we add it response to make it easier for ui.
+        - name: sessionSecret
+          type: string
+          description: The session secret will be used to call complete user registration api.
+        - name: continueWithCreation
+          type: bool
+          description:
+            If return true, means the OTP is correct and user needs to be created
+            before continue the authentication process.
   - name: CheckClassicPassport
     method: post
     cliName: ccp
@@ -684,40 +724,6 @@ actions:
     out:
       entity: WorkspaceEntity
 
-  - name: classicPassportOtp
-    description: >-
-      Authenticate the user publicly for classic methods using communication
-      service, such as sms, call, or email. You need to call classicPassportRequestOtp
-      beforehand to send a otp code, and then validate it with this API.
-      Also checkClassicPassport action might already sent the otp, so make sure you don't
-      send it twice.
-    method: post
-    cliName: otp
-    url: /workspace/passport/otp
-    in:
-      fields:
-        - name: value
-          type: string
-          validate: required
-        - name: otp
-          validate: required
-          type: string
-    out:
-      fields:
-        - name: session
-          type: one
-          target: UserSessionDto
-        - name: totpUrl
-          type: string
-          description: If time based otp is available, we add it response to make it easier for ui.
-        - name: sessionSecret
-          type: string
-          description: The session secret will be used to call complete user registration api.
-        - name: continueWithCreation
-          type: bool
-          description:
-            If return true, means the OTP is correct and user needs to be created
-            before continue the authentication process.
   - name: classicPassportRequestOtp
     description: >-
       Triggers an otp request, and will send an sms or email to the passport.

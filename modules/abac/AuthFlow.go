@@ -166,20 +166,25 @@ func IntegrateAuthFlow(c *cli.Context) error {
 		if nextStep == "otp" {
 			otpCode := fireback.AskForInput("Enter the otp code. You might see it a bit above this command.", "")
 
-			res, err := ClassicPassportOtpAction(&ClassicPassportOtpActionReqDto{
-				Value: value, Otp: otpCode,
-			}, query)
-
-			if err != nil {
+			var res *ClassicPassportOtpActionRes = nil
+			if result, err := ClassicPassportOtpAction(ClassicPassportOtpActionRequest{
+				Body: ClassicPassportOtpActionReq{
+					Value: value, Otp: otpCode,
+				},
+			}, query); err != nil {
 				fmt.Println("Not nil")
 				return err
+			} else {
+				if casted, ok := result.Payload.(fireback.GoogleResponse[ClassicPassportOtpActionRes]); ok {
+					res = &casted.Data.Item
+				}
 			}
 
 			if res.ContinueWithCreation {
 				fmt.Println("We continue to create account.")
 				nextStep = "create-with-password"
 				sessionSecret = res.SessionSecret
-			} else if res.Session != nil {
+			} else if res.Session.IsSet() {
 
 				/// Now we need to set the session here, but code is duplicated multiple times
 			}

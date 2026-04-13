@@ -3,37 +3,35 @@ import { mutationErrorsToFormik } from "../../hooks/api";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { usePostWorkspacePassportOtp } from "../../sdk/modules/abac/usePostWorkspacePassportOtp";
 
-import {
-  ClassicPassportOtpActionReqDto,
-  ClassicPassportOtpActionResDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
+
+
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
+import { ClassicPassportOtpActionReq, useClassicPassportOtpAction, type ClassicPassportOtpActionRes } from "../../sdk/modules/abac/ClassicPassportOtp";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
   const { locale } = useLocale();
   const s = useS(strings);
-  const { submit: signin, mutation } = usePostWorkspacePassportOtp();
+  const mutation = useClassicPassportOtpAction({});
   const { onComplete } = useCompleteAuth();
 
-  const submit = (values: Partial<ClassicPassportOtpActionReqDto>) => {
-    signin({ ...values, value: state.value })
+  const submit = (values: Partial<ClassicPassportOtpActionReq>) => {
+    mutation.mutateAsync(new ClassicPassportOtpActionReq({ ...values, value: state.value }))
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
       });
   };
 
-  const form = useFormik<Partial<ClassicPassportOtpActionReqDto>>({
+  const form = useFormik<Partial<ClassicPassportOtpActionReq>>({
     initialValues: {},
     onSubmit: submit,
   });
 
-  const successful = (res: GResponse<ClassicPassportOtpActionResDto>) => {
+  const successful = (res: GResponse<ClassicPassportOtpActionRes>) => {
     if (res.data?.item.session) {
       onComplete(res);
     } else if (res.data?.item?.continueWithCreation) {

@@ -233,38 +233,6 @@ public static Fields = {
       workspaceId: 'workspaceId',
 }
 }
-export class ClassicPassportOtpActionReqDto {
-  public value?: string | null;
-  public otp?: string | null;
-public static Fields = {
-      value: 'value',
-      otp: 'otp',
-}
-}
-export class ClassicPassportOtpActionResDto {
-  public session?: UserSessionDto | null;
-      sessionId?: string | null;
-  /**
-  If time based otp is available, we add it response to make it easier for ui.
-  */
-  public totpUrl?: string | null;
-  /**
-  The session secret will be used to call complete user registeration api.
-  */
-  public sessionSecret?: string | null;
-  /**
-  If return true, means the OTP is correct and user needs to be created before continue the authentication processs.
-  */
-  public continueWithCreation?: boolean | null;
-public static Fields = {
-          sessionId: 'sessionId',
-      session$: 'session',
-      session: UserSessionDto.Fields,
-      totpUrl: 'totpUrl',
-      sessionSecret: 'sessionSecret',
-      continueWithCreation: 'continueWithCreation',
-}
-}
 export class ClassicPassportRequestOtpActionReqDto {
   /**
   Passport value (email, phone number) which would be recieving the otp code.
