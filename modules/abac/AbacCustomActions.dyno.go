@@ -6,11 +6,12 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"reflect"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
+)
+import (
+	"reflect"
 )
 
 // using shared actions here
@@ -1421,8 +1422,8 @@ var ClassicPassportRequestOtpActionCmd cli.Command = cli.Command{
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 var ClassicSignupImpl func(c ClassicSignupActionRequest, query fireback.QueryDSL) (*ClassicSignupActionResponse, error) = nil
 var ClassicSignupSecurityModel *fireback.SecurityModel = nil
 
@@ -1447,7 +1448,6 @@ var ClassicSignupActionDef fireback.Module3Action = fireback.Module3Action{
 			query := fireback.ExtractQueryDslFromGinContext(m)
 			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
 			resp, err := ClassicSignupImpl(req, query)
-
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
