@@ -82,7 +82,7 @@ func OpenApiTypeToFirebackType(fieldName string, t *openapi3.Schema) Module3Fiel
 
 		// This is scenario when the field is a primitive, not dto
 		if t.Items.Schema != nil && t.Items.Schema.Type != nil {
-			field.Type = FIELD_TYPE_ARRAYP
+			field.Type = FIELD_TYPE_SLICE
 			field.Primitive = OpenApiPrimitveToFireback(string(*t.Items.Schema.Type))
 		} else if t.Items.SchemaReferenceEns() != nil {
 			ref := t.Items.SchemaReferenceEns().Ref

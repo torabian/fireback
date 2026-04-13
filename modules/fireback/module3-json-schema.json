@@ -1062,7 +1062,7 @@
             "date",
             "daterange",
             "collection",
-            "arrayP",
+            "slice",
             "enum",
             "bool",
             "one",
@@ -1077,7 +1077,7 @@
         },
         "primitive": {
           "type": "string",
-          "description": "Primitive type in golang when type: arrayP is set"
+          "description": "Primitive type in golang when type: slice is set"
         },
         "target": {
           "type": "string",

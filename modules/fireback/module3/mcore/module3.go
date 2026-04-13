@@ -17,7 +17,7 @@ import (
 )
 
 var FIELD_TYPE_ARRAY string = "array"
-var FIELD_TYPE_ARRAYP string = "arrayP"
+var FIELD_TYPE_SLICE string = "slice"
 var FIELD_TYPE_JSON string = "json"
 var FIELD_TYPE_ONE string = "one"
 var FIELD_TYPE_DATE string = "date"
@@ -706,10 +706,10 @@ type Module3Field struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the field for developers and generated documents."`
 
 	// Type of the field based on Fireback types.
-	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=string?,enum=int?,enum=float64?,enum=money?,enum=xfile?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=int,enum=datetime,enum=json,enum=embed,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=collection,enum=arrayP,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=duration?,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=string?,enum=int?,enum=float64?,enum=money?,enum=xfile?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=int,enum=datetime,enum=json,enum=embed,enum=datenano,enum=html,enum=text,enum=date,enum=daterange,enum=collection,enum=slice,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=duration?,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
 
-	// Primitive type in golang when type: arrayP is set
-	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"description=Primitive type in golang when type: arrayP is set"`
+	// Primitive type in golang when type: slice is set
+	Primitive string `yaml:"primitive,omitempty" json:"primitive,omitempty" jsonschema:"description=Primitive type in golang when type: slice is set"`
 
 	// The entity in golang which will be operated on in case of type: one or type: collection
 	Target string `yaml:"target,omitempty" json:"target,omitempty" jsonschema:"description=The entity in golang which will be operated on in case of type: one or type: collection"`

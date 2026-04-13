@@ -35,9 +35,9 @@ func ResetUserWorkspaceSeeders(fs *embed.FS) {
 type UserWorkspaceEntityQs struct {
 	User                 fireback.QueriableField `cli:"user" table:"user_workspace" typeof:"one" column:"user" qs:"user"`
 	Workspace            fireback.QueriableField `cli:"workspace" table:"user_workspace" typeof:"one" column:"workspace" qs:"workspace"`
-	UserPermissions      fireback.QueriableField `cli:"user-permissions" table:"user_workspace" typeof:"arrayP" column:"user_permissions" qs:"userPermissions"`
-	RolePermission       fireback.QueriableField `cli:"role-permission" table:"user_workspace" typeof:"arrayP" column:"role_permission" qs:"rolePermission"`
-	WorkspacePermissions fireback.QueriableField `cli:"workspace-permissions" table:"user_workspace" typeof:"arrayP" column:"workspace_permissions" qs:"workspacePermissions"`
+	UserPermissions      fireback.QueriableField `cli:"user-permissions" table:"user_workspace" typeof:"slice" column:"user_permissions" qs:"userPermissions"`
+	RolePermission       fireback.QueriableField `cli:"role-permission" table:"user_workspace" typeof:"slice" column:"role_permission" qs:"rolePermission"`
+	WorkspacePermissions fireback.QueriableField `cli:"workspace-permissions" table:"user_workspace" typeof:"slice" column:"workspace_permissions" qs:"workspacePermissions"`
 }
 
 func (x *UserWorkspaceEntityQs) GetQuery() string {
@@ -355,9 +355,9 @@ based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 User: (type: one) Description: 
 Workspace: (type: one) Description: 
-UserPermissions: (type: arrayP) Description: 
-RolePermission: (type: arrayP) Description: 
-WorkspacePermissions: (type: arrayP) Description: 
+UserPermissions: (type: slice) Description: 
+RolePermission: (type: slice) Description: 
+WorkspacePermissions: (type: slice) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
 `

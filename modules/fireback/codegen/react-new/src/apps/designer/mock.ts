@@ -335,7 +335,7 @@ dtos:
     - name: roleId
       type: string  
     - name: capabilities
-      type: arrayP
+      type: slice
       primitive: string
 
   - name: importRequest
@@ -389,10 +389,10 @@ dtos:
     - name: userId
       type: string
     - name: userHas
-      type: arrayP
+      type: slice
       primitive: string
     - name: workspaceHas
-      type: arrayP
+      type: slice
       primitive: string
     - name: user
       type: one
@@ -410,7 +410,7 @@ dtos:
       type: string
     - name: capabilities
       primitive: PermissionInfo
-      type: arrayP
+      type: slice
 
   - name: reactiveSearchResult
     fields:
@@ -432,13 +432,13 @@ dtos:
   - name: userAccessLevel
     fields:
     - name: capabilities
-      type: arrayP
+      type: slice
       primitive: string
     - name: userRoleWorkspacePermissions
       type: collection
       target: UserRoleWorkspacePermissionDto
     - name: workspaces
-      type: arrayP
+      type: slice
       primitive: string
     - name: SQL
       type: string
@@ -792,17 +792,17 @@ entities:
     - name: userPermissions
       gorm: "-"
       sql: "-"
-      type: arrayP
+      type: slice
       primitive: string
     - name: rolePermission
       gorm: "-"
       sql: "-"
-      type: arrayP
+      type: slice
       primitive: UserRoleWorkspaceDto
     - name: workspacePermissions
       gorm: "-"
       sql: "-"
-      type: arrayP
+      type: slice
       primitive: string
 
   - name: workspaceRole
