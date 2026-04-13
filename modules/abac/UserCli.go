@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli"
 	"gorm.io/gorm"
@@ -281,8 +282,8 @@ func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
 	return result
 }
 
-func CreateUserInteractiveQuestions(query fireback.QueryDSL) (*ClassicSignupActionReqDto, bool, error) {
-	dto := &ClassicSignupActionReqDto{}
+func CreateUserInteractiveQuestions(query fireback.QueryDSL) (*ClassicSignupActionReq, bool, error) {
+	dto := &ClassicSignupActionReq{}
 	setForRoot := true
 	defaultValue := "a@a.com"
 
@@ -311,7 +312,7 @@ func CreateUserInteractiveQuestions(query fireback.QueryDSL) (*ClassicSignupActi
 
 	items, _, _ := WorkspaceTypeActions.Query(query)
 	if result := fireback.AskForSelect("Workspace Type", WorkpaceTypeToString(items)); result != "" {
-		dto.WorkspaceTypeId = fireback.NewString(result)
+		dto.WorkspaceTypeId = emigo.NullableOf(result)
 	}
 
 	if result := fireback.AskForSelect("Add to root group? (workspace, role)", []string{"yes", "no"}); result != "" {
@@ -330,7 +331,7 @@ type AdminCreationInfo struct {
 	WorkspaceAs string
 }
 
-func CreateAdminTransaction(dto *ClassicSignupActionReqDto, setForRoot bool, query fireback.QueryDSL) (AdminCreationInfo, error) {
+func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query fireback.QueryDSL) (AdminCreationInfo, error) {
 
 	result := AdminCreationInfo{}
 

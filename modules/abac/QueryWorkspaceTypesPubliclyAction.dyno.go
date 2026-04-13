@@ -150,6 +150,7 @@ func QueryWorkspaceTypesPubliclyActionHandler(
 	return meta.Method, meta.URL, func(m *gin.Context) {
 		// Build typed request wrapper
 		req := QueryWorkspaceTypesPubliclyActionRequest{
+			Body:        nil,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -237,6 +238,7 @@ func (q *QueryWorkspaceTypesPubliclyActionQuery) SetMapped(m map[string]interfac
 }
 
 type QueryWorkspaceTypesPubliclyActionRequest struct {
+	Body        interface{}
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context

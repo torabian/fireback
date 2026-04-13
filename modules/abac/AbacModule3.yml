@@ -172,6 +172,117 @@ dtom:
         type: string?
 
 acts:
+  - name: ClassicSignup
+    url: /passports/signup/classic
+    cliName: up
+    description: >-
+      Signup a user into system via public access (aka website visitors) using
+      either email or phone number.
+    method: post
+    in:
+      fields:
+        - name: value
+          tags:
+            validate: required
+          type: string
+        - name: sessionSecret
+          type: string
+          description:
+            Required when the account creation requires recaptcha, or otp approval
+            first. If such requirements are there, you first need to follow the otp
+            apis, get the session secret and pass it here to complete the setup.
+        - name: type
+          type: enum
+          of:
+            - k: phonenumber
+            - k: email
+          tags:
+            validate: required
+        - name: password
+          type: string
+          tags:
+            validate: required
+        - name: firstName
+          type: string
+          tags:
+            validate: required
+        - name: lastName
+          type: string
+          tags:
+            validate: required
+        - name: inviteId
+          type: string?
+        - name: publicJoinKeyId
+          type: string?
+        - name: workspaceTypeId
+          type: string?
+          tags:
+            validate: required
+    out:
+      envelope: GResponse
+      fields:
+        - name: session
+          type: one
+          target: UserSessionDto
+          description: Returns the user session in case that signup is completely successful.
+        - name: totpUrl
+          type: string
+          description: If time based otp is available, we add it response to make it easier for ui.
+        - name: continueToTotp
+          type: bool
+          description:
+            Returns true and session will be empty if, the totp is required by the installation.
+            In such scenario, you need to forward user to setup totp screen.
+        - name: forcedTotp
+          type: bool
+          description:
+            Determines if user must complete totp in order to continue based on workspace
+            or installation
+
+  - name: ClassicSignin
+    url: /passports/signin/classic
+    cliName: in
+    description: "Signin publicly to and account using class passports (email, password)"
+    method: post
+    in:
+      fields:
+        - name: value
+          type: string
+          tags:
+            validate: required
+        - name: password
+          type: string
+          tags:
+            validate: required
+        - name: totpCode
+          type: string
+          description:
+            Accepts login with totp code. If enabled, first login would return a success response
+            with next[enter-totp] value and ui can understand that user needs to be navigated
+            into the screen other screen.
+        - name: sessionSecret
+          type: string
+          description:
+            Session secret when logging in to the application requires
+            more steps to complete.
+    out:
+      envelope: GResponse
+      fields:
+        - name: session
+          type: one
+          target: UserSessionDto
+        - name: next
+          type: slice
+          primitive: string
+          description: The next possible action which is suggested.
+        - name: totpUrl
+          type: string
+          description:
+            In case the account doesn't have totp, but enforced by installation,
+            this value will contain the link
+        - name: sessionSecret
+          type: string
+          description: Returns a secret session if the authentication requires more steps.
   - name: QueryWorkspaceTypesPublicly
     method: get
     url: /workspace/public/types
@@ -511,106 +622,7 @@ actions:
       fields:
         - name: queueId
           type: string
-  - name: classicSignin
-    url: /passports/signin/classic
-    cliName: in
-    description: "Signin publicly to and account using class passports (email, password)"
-    method: post
-    in:
-      fields:
-        - name: value
-          type: string
-          validate: required
-        - name: password
-          type: string
-          validate: required
-        - name: totpCode
-          type: string
-          description:
-            Accepts login with totp code. If enabled, first login would return a success response
-            with next[enter-totp] value and ui can understand that user needs to be navigated
-            into the screen other screen.
-        - name: sessionSecret
-          type: string
-          description:
-            Session secret when logging in to the application requires
-            more steps to complete.
-    out:
-      fields:
-        - name: session
-          type: one
-          target: UserSessionDto
-        - name: next
-          type: arrayP
-          primitive: string
-          description: The next possible action which is suggested.
-        - name: totpUrl
-          type: string
-          description:
-            In case the account doesn't have totp, but enforced by installation,
-            this value will contain the link
-        - name: sessionSecret
-          type: string
-          description: Returns a secret session if the authentication requires more steps.
-  - name: classicSignup
-    url: /passports/signup/classic
-    cliName: up
-    description: >-
-      Signup a user into system via public access (aka website visitors) using
-      either email or phone number.
-    method: post
-    in:
-      fields:
-        - name: value
-          validate: required
-          type: string
-        - name: sessionSecret
-          type: string
-          description:
-            Required when the account creation requires recaptcha, or otp approval
-            first. If such requirements are there, you first need to follow the otp
-            apis, get the session secret and pass it here to complete the setup.
-        - name: type
-          type: enum
-          of:
-            - k: phonenumber
-            - k: email
-          validate: required
-        - name: password
-          type: string
-          validate: required
-        - name: firstName
-          type: string
-          validate: required
-        - name: lastName
-          type: string
-          validate: required
-        - name: inviteId
-          type: string?
-        - name: publicJoinKeyId
-          type: string?
-        - name: workspaceTypeId
-          type: string?
-          validate: required
-    out:
-      fields:
-        - name: session
-          type: one
-          target: UserSessionDto
-          description: Returns the user session in case that signup is completely successful.
-        - name: totpUrl
-          type: string
-          description: If time based otp is available, we add it response to make it easier for ui.
-        - name: continueToTotp
-          type: bool
-          description:
-            Returns true and session will be empty if, the totp is required by the installation.
-            In such scenario, you need to forward user to setup totp screen.
-        - name: forcedTotp
-          type: bool
-          description:
-            Determines if user must complete totp in order to continue based on workspace
-            or installation
+
   - name: createWorkspace
     method: post
     url: /workspaces/create

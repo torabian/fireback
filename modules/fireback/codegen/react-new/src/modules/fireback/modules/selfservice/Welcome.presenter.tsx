@@ -3,20 +3,20 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
 import { useCheckPassportMethodsActionQuery } from "../../sdk/modules/abac/CheckPassportMethods";
 import {
   type AuthAvailableMethods,
   AuthMethod,
   useTemporaryParamOptions,
 } from "./auth.common";
+import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
 
 export const usePresenter = () => {
   const t = useT();
   const { locale } = useLocale();
   const { push } = useRouter();
   const formik = useRef<FormikProps<
-    Partial<ClassicSigninActionReqDto>
+    Partial<ClassicSigninActionReq>
   > | null>();
 
   const query = useCheckPassportMethodsActionQuery({});

@@ -3,7 +3,10 @@ import { type IResponse } from "../../definitions/JSONStyle";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { ClassicSigninActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
+import type { ClassicSigninActionRes } from "../../sdk/modules/abac/ClassicSignin";
+import type { GResponse } from "../../sdk/sdk/envelopes";
+import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
+
 
 export enum AuthMethod {
   Email = "email",
@@ -26,8 +29,8 @@ export const useCompleteAuth = () => {
   const { locale } = useLocale();
   const { replace } = useRouter();
 
-  const onComplete = (res: IResponse<ClassicSigninActionResDto>) => {
-    setSession(res.data.session);
+  const onComplete = (res: GResponse<ClassicSigninActionRes | ClassicSignupActionRes>) => {
+    setSession(res.data.item.session);
     // Handle React Native WebView
     if ((window as any).ReactNativeWebView) {
       (window as any).ReactNativeWebView.postMessage(JSON.stringify(res.data));
@@ -41,7 +44,7 @@ export const useCompleteAuth = () => {
     const redirect2 = sessionStorage.getItem("redirect_temporary");
 
     // Get the token from session response
-    const token = res.data?.session?.token; // Adjust based on your API response
+    const token = res.data?.item.session?.token; // Adjust based on your API response
 
     if (!token) {
       alert("Authentication has failed.");
@@ -57,7 +60,7 @@ export const useCompleteAuth = () => {
     } else if (redirectUrl) {
       // Append the token to the redirect URL
       const finalUrl = new URL(redirectUrl);
-      finalUrl.searchParams.set("session", JSON.stringify(res.data.session));
+      finalUrl.searchParams.set("session", JSON.stringify(res.data.item.session));
 
       // Redirect to the final URL
       window.location.href = finalUrl.toString();

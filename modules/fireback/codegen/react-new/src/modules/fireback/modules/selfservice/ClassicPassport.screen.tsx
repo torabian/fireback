@@ -7,7 +7,8 @@ import { useS } from "../../hooks/useS";
 import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicPassport.presenter";
 import { strings } from "./strings/translations";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
+
 
 export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
   const {
@@ -59,7 +60,7 @@ const Form = ({
   mutation,
   method,
 }: {
-  form: FormikProps<Partial<ClassicSigninActionReqDto>>;
+  form: FormikProps<Partial<ClassicSigninActionReq>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
   method: AuthMethod;
   disabled?: boolean;
@@ -92,7 +93,7 @@ const Form = ({
         errorMessage={form?.errors.value}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicSigninActionReqDto.Fields.value,
+            ClassicSigninActionReq.Fields.value,
             value,
             false
           )

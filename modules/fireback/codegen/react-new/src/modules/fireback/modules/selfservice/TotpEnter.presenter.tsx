@@ -1,17 +1,15 @@
 import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
-import { type IResponse } from "../../sdk/core/http-tools";
-import { usePostPassportsSigninClassic } from "../../sdk/modules/abac/usePostPassportsSigninClassic";
+
+import { ClassicSigninActionReq, ClassicSigninActionRes, useClassicSigninAction } from "../../sdk/modules/abac/ClassicSignin";
+import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
-import {
-  ClassicSigninActionReqDto,
-  ClassicSigninActionResDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
+
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
-  const { submit: signin, mutation } = usePostPassportsSigninClassic();
+  const mutation = useClassicSigninAction();
   const { onComplete } = useCompleteAuth();
 
   const totpUrl = state?.totpUrl;
@@ -19,21 +17,23 @@ export const usePresenter = () => {
   const password = state?.password;
   const value = state?.value;
 
-  const submit = (values: Partial<ClassicSigninActionReqDto>) => {
-    signin({ ...values, password, value })
+  const submit = (values: Partial<ClassicSigninActionReq>) => {
+    mutation.mutateAsync(new ClassicSigninActionReq({ ...values, password, value }))
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
       });
   };
 
-  const form = useFormik<Partial<ClassicSigninActionReqDto>>({
+  const form = useFormik<Partial<ClassicSigninActionReq>>({
     initialValues: {},
-    onSubmit: signin,
+    onSubmit: (values, helpers) => {
+      mutation.mutateAsync(new ClassicSigninActionReq(values))
+    },
   });
 
-  const successful = (res: IResponse<ClassicSigninActionResDto>) => {
-    if (res.data?.session) {
+  const successful = (res: GResponse<ClassicSigninActionRes>) => {
+    if (res.data?.item?.session) {
       onComplete(res);
     }
   };

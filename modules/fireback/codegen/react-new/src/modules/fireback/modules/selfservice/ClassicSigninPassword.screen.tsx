@@ -6,9 +6,10 @@ import { FormText } from "../../components/forms/form-text/FormText";
 import { useS } from "../../hooks/useS";
 import { usePresenter } from "./ClassicSigninPassword.presenter";
 import { strings } from "./strings/translations";
-import { ClassicSigninActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
 
-export const ClassicSigninPassword = ({}: {}) => {
+
+export const ClassicSigninPassword = ({ }: {}) => {
   const { goBack, mutation, form, continueWithOtp, otpEnabled, s } =
     usePresenter();
 
@@ -42,7 +43,7 @@ const Form = ({
   otpEnabled,
   continueWithOtp,
 }: {
-  form: FormikProps<Partial<ClassicSigninActionReqDto>>;
+  form: FormikProps<Partial<ClassicSigninActionReq>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
   continueWithOtp: () => void;
   otpEnabled: boolean;
@@ -66,7 +67,7 @@ const Form = ({
         errorMessage={form.errors.password}
         onChange={(value) =>
           form.setFieldValue(
-            ClassicSigninActionReqDto.Fields.password,
+            ClassicSigninActionReq.Fields.password,
             value,
             false
           )

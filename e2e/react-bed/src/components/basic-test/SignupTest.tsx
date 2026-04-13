@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { usePostPassportsSigninClassic } from "../../sdk/modules/abac/usePostPassportsSigninClassic";
-import { ClassicSignupActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+
+import { useClassicSigninAction, ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
 
 export function SignupTest() {
-  const [dto, setDto] = useState<ClassicSignupActionReqDto>(
-    new ClassicSignupActionReqDto()
+  const [dto, setDto] = useState<ClassicSigninActionReq>(
+    new ClassicSigninActionReq()
   );
 
-  const { submit } = usePostPassportsSigninClassic({});
+
+
+  const { mutateAsync } = useClassicSigninAction({});
 
   const onComplete = () => {
-    submit(dto)
+    mutateAsync(dto)
       .then((res) => {
         alert("User has been created");
       })
@@ -26,7 +28,7 @@ export function SignupTest() {
           value={dto.value || ""}
           type="text"
           onChange={(e) =>
-            setDto((dto) => {
+            setDto((dto: any) => {
               return {
                 ...dto,
                 value: e.target.value,
@@ -40,7 +42,7 @@ export function SignupTest() {
           value={dto.password || ""}
           type="password"
           onChange={(e) =>
-            setDto((dto) => {
+            setDto((dto: any) => {
               return {
                 ...dto,
                 password: e.target.value,

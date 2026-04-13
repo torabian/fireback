@@ -1,7 +1,7 @@
 package abac
 
 import (
-	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/pquerna/otp/totp"
@@ -9,18 +9,26 @@ import (
 )
 
 func init() {
-	ClassicSignupActionImp = ClassicSignupAction
+	ClassicSignupImpl = ClassicSignupAction
 }
 
 // Responsible for user creation from public flows in the application.
-func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*ClassicSignupActionResDto, *fireback.IError) {
+func ClassicSignupAction(c ClassicSignupActionRequest, query fireback.QueryDSL) (*ClassicSignupActionResponse, error) {
 
-	if err := ClassicSignupActionReqValidator(dto); err != nil {
+	dto := c.Body
+
+	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
+		fmt.Println(err)
 		return nil, err
+	}
+	workspaceTypeId := dto.WorkspaceTypeId.OrDefault("")
+
+	if workspaceTypeId == "" {
+		return nil, fireback.Create401Error(&AbacMessages.RootWorkspaceTypeIsNotAllowed, []string{})
 	}
 
 	// If the account creation is anonymous, the password, first name and name is not required.
-	if dto.WorkspaceTypeId.String != ANONYMOUS_AUTHENTICATION {
+	if workspaceTypeId != ANONYMOUS_AUTHENTICATION {
 		errors := []*fireback.IErrorItem{}
 
 		if strings.TrimSpace(dto.FirstName) == "" {
@@ -59,14 +67,14 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*
 		}
 	}
 
-	if q.WorkspaceId != ROOT_VAR && dto.WorkspaceTypeId.String == ROOT_VAR {
+	if query.WorkspaceId != ROOT_VAR && workspaceTypeId == ROOT_VAR {
 		return nil, fireback.Create401Error(&AbacMessages.RootWorkspaceTypeIsNotAllowed, []string{})
 	}
 
 	ClearPassportValue(&dto.Value)
 
 	// Look for the configuration to check if the session secret is needed
-	config, err := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: q.Tx})
+	config, err := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: query.Tx})
 	if err != nil {
 		if err.HttpCode != 404 {
 			return nil, err
@@ -97,7 +105,14 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*
 		}
 	}
 
-	return completeClassicSignupProcess(dto, q, publicSession, config, nil)
+	res, err := completeClassicSignupProcess(dto, query, publicSession, config, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClassicSignupActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
 }
 
 // This function will complete the signup process.
@@ -106,14 +121,14 @@ func ClassicSignupAction(dto *ClassicSignupActionReqDto, q fireback.QueryDSL) (*
 // In case we neeed to change the config slightly, you can get the config
 // and change it for this specific function
 func completeClassicSignupProcess(
-	dto *ClassicSignupActionReqDto,
+	dto ClassicSignupActionReq,
 	q fireback.QueryDSL,
 	publicSession *PublicAuthenticationEntity,
 	config *WorkspaceConfigEntity,
 	beforeProcess func(*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity),
-) (*ClassicSignupActionResDto, *fireback.IError) {
+) (ClassicSignupActionRes, *fireback.IError) {
 
-	user, role, workspace, passport := GetEmailPassportSignupMechanism(dto)
+	user, role, workspace, passport := GetEmailPassportSignupMechanism(&dto)
 
 	// A callback to modify things.
 	if beforeProcess != nil {
@@ -161,13 +176,13 @@ func completeClassicSignupProcess(
 	}, q)
 
 	if sessionError != nil {
-		return nil, sessionError
+		return ClassicSignupActionRes{}, sessionError
 	}
 
 	forcedTotp := config != nil && config.ForceTotp.Bool
 	// let's check for totp setup, if the session is successful.
 	if config != nil && config.ForceTotp.Bool && session != nil {
-		return &ClassicSignupActionResDto{
+		return ClassicSignupActionRes{
 			ContinueToTotp: true,
 			TotpUrl:        totpLink,
 			ForcedTotp:     forcedTotp,
@@ -184,17 +199,9 @@ func completeClassicSignupProcess(
 		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
 	}
 
-	return &ClassicSignupActionResDto{
-		Session:        session,
+	return ClassicSignupActionRes{
+		Session:        *session,
 		ContinueToTotp: false,
 		ForcedTotp:     forcedTotp,
 	}, sessionError
-}
-
-func (x *ClassicSignupActionResDto) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return (string(str))
-	}
-	return ""
 }

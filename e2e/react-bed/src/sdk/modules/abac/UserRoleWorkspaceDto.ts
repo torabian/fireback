@@ -44,7 +44,9 @@ export class UserRoleWorkspaceDto {
    *
    * @type {string[]}
    **/
-  set capabilities(value: string[]) {}
+  set capabilities(value: string[]) {
+    this.#capabilities = value;
+  }
   setCapabilities(value: string[]) {
     this.capabilities = value;
     return this;
