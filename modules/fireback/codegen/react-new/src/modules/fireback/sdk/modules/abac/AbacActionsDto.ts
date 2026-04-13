@@ -27,15 +27,6 @@ import {
   */
   public capabilities?: string[] | null;
   }
-  export class CheckClassicPassportResDtoOtpInfo {
-  public suspendUntil?: number | null;
-  public validUntil?: number | null;
-  public blockedUntil?: number | null;
-  /**
-  The amount of time left to unblock for next request
-  */
-  public secondsToUnblock?: number | null;
-  }
 export class AcceptInviteActionReqDto {
   /**
   The invitation id which will be used to process
@@ -240,42 +231,6 @@ public static Fields = {
       workspace$: 'workspace',
       workspace: WorkspaceEntity.Fields,
       workspaceId: 'workspaceId',
-}
-}
-export class CheckClassicPassportActionReqDto {
-  public value?: string | null;
-  /**
-  This can be the value of recaptcha2, recaptch3, or generate security image or voice for verification. Will be used based on the configuration.
-  */
-  public securityToken?: string | null;
-public static Fields = {
-      value: 'value',
-      securityToken: 'securityToken',
-}
-}
-export class CheckClassicPassportActionResDto {
-  /**
-  The next possible action which is suggested.
-  */
-  public next?: string[] | null;
-  /**
-  Extra information that can be useful actually when doing onboarding. Make sure sensetive information doesn't go out.
-  */
-  public flags?: string[] | null;
-  /**
-  If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.
-  */
-  public otpInfo?: CheckClassicPassportResDtoOtpInfo | null;
-public static Fields = {
-      next: 'next',
-      flags: 'flags',
-      otpInfo$: 'otpInfo',
-      otpInfo: {
-      suspendUntil: 'suspendUntil',
-      validUntil: 'validUntil',
-      blockedUntil: 'blockedUntil',
-      secondsToUnblock: 'secondsToUnblock',
-      },
 }
 }
 export class ClassicPassportOtpActionReqDto {

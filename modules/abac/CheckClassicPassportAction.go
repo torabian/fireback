@@ -9,38 +9,46 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
 func init() {
-	CheckClassicPassportActionImp = CheckClassicPassportAction
+	CheckClassicPassportImpl = CheckClassicPassportAction
 }
 
-func CheckClassicPassportAction(req *CheckClassicPassportActionReqDto, q fireback.QueryDSL) (*CheckClassicPassportActionResDto, *fireback.IError) {
+func CheckClassicPassportAction(c CheckClassicPassportActionRequest, query fireback.QueryDSL) (*CheckClassicPassportActionResponse, error) {
 
+	req := c.Body
 	if err := validateValueFormat(req.Value); err != nil {
 		return nil, err
 	}
 
 	// get the configuration, also check for the recaptcha or captcha service here.
-	config, prepareErr := prepareTheClassicPassport(req, q)
+	config, prepareErr := prepareTheClassicPassport(&req, query)
 	if prepareErr != nil {
 		return nil, prepareErr
 	}
 
-	passport := findPassport(req.Value, q)
+	passport := findPassport(req.Value, query)
 
-	// from here we devide the work flow to existing and non exists passport
+	// from here we divide the work flow to existing and non exists passport
 	if passport == nil {
-		return checkStepsForNonExistingAccount(req.Value, config, q)
+		return wrapCheckPassportResult(checkStepsForNonExistingAccount(req.Value, config, query))
 	} else {
-		return checkStepsForExistingAccount(passport, config, q)
+		return wrapCheckPassportResult(checkStepsForExistingAccount(passport, config, query))
 	}
+}
+
+func wrapCheckPassportResult(res *CheckClassicPassportActionRes, err *fireback.IError) (*CheckClassicPassportActionResponse, error) {
+	return &CheckClassicPassportActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, err
 }
 
 // in some operations, the only option is otp either on signin or signup.
 // so we send the otp anyway, and next step can be immediately signup.
-func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckClassicPassportResDtoOtpInfo, *fireback.IError) {
+func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckClassicPassportActionResOtpInfo, *fireback.IError) {
 	otpInfo, otpFailed := ClassicPassportRequestOtpAction(&ClassicPassportRequestOtpActionReqDto{Value: passportValue}, q)
 
 	// No point of continuing if the type doesn't support otp
@@ -59,7 +67,7 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 			}
 		}
 
-		return &CheckClassicPassportResDtoOtpInfo{
+		return &CheckClassicPassportActionResOtpInfo{
 			SuspendUntil:     otpInfo.SuspendUntil,
 			ValidUntil:       otpInfo.ValidUntil,
 			BlockedUntil:     otpInfo.BlockedUntil,
@@ -96,8 +104,8 @@ func validateValueFormat(value string) *fireback.IError {
 }
 
 // Some general tests and preparation which doesn't affect logic much
-func prepareTheClassicPassport(req *CheckClassicPassportActionReqDto, q fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
-	if err := CheckClassicPassportActionReqValidator(req); err != nil {
+func prepareTheClassicPassport(req *CheckClassicPassportActionReq, q fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
+	if err := fireback.CommonStructValidatorPointer(req, false); err != nil {
 		return nil, err
 	}
 
@@ -162,8 +170,8 @@ func validatePassportType(input string) (bool, string) {
 }
 
 // used when a passport (email/phone) exists and they want to authenticate
-func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionResDto, *fireback.IError) {
-	res := &CheckClassicPassportActionResDto{}
+func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
+	res := &CheckClassicPassportActionRes{}
 
 	// if otp is forced, then user can only authenticate using otp.
 	// basically password and 2FA for signin will become useless, because the otp
@@ -171,7 +179,12 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	envForcedOtp := config != nil && config.RequireOtpOnSignin.Bool
 	if envForcedOtp {
 		res.Next = []string{"otp"}
-		res.OtpInfo, _ = implicitlyRequestForOtp(passport.Value, q)
+		if otpInfo, err := implicitlyRequestForOtp(passport.Value, q); err != nil {
+			return nil, err
+		} else {
+			res.OtpInfo = emigo.NullableOf(*otpInfo)
+		}
+
 		return res, nil
 	}
 
@@ -203,14 +216,18 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	// if the otp is only option, then we send the otp request implicitly to help the next steps on ui
 	// be directly showing form to fullfill the otp and signin.
 	if envEnabledOtp && !userHasPassword {
-		res.OtpInfo, _ = implicitlyRequestForOtp(passport.Value, q)
+		if otpInfo, err := implicitlyRequestForOtp(passport.Value, q); err != nil {
+			return nil, err
+		} else {
+			res.OtpInfo = emigo.NullableOf(*otpInfo)
+		}
 	}
 
 	return res, nil
 }
 
-func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionResDto, *fireback.IError) {
-	res := &CheckClassicPassportActionResDto{}
+func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
+	res := &CheckClassicPassportActionRes{}
 
 	enableTotp := config != nil && config.EnableTotp.Bool
 	forceTotp := config != nil && config.ForceTotp.Bool
@@ -228,13 +245,14 @@ func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity
 	envForcedOtp := config != nil && config.RequireOtpOnSignup.Bool
 	if envForcedOtp {
 		res.Next = []string{"otp"}
-		info, errMsg := implicitlyRequestForOtp(value, q)
-		res.OtpInfo = info
-
-		// since the otp is only option, and if it has been failed then we should tell client
-		if res.OtpInfo == nil {
-			log.Default().Println("Failed to send otp:", errMsg)
+		if otpInfo, err := implicitlyRequestForOtp(value, q); err != nil {
+			return nil, err
+		} else if otpInfo == nil {
+			// since the otp is only option, and if it has been failed then we should tell client
+			log.Default().Println("Failed to send otp:", err)
 			return nil, fireback.Create401Error(&AbacMessages.OtpFailed, []string{})
+		} else {
+			res.OtpInfo = emigo.NullableOf(*otpInfo)
 		}
 
 		return res, nil

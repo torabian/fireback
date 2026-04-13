@@ -122,22 +122,32 @@ func IntegrateAuthFlow(c *cli.Context) error {
 
 		value := fireback.AskForInput(label, prefix)
 		query.C = c
-		m, e := CheckClassicPassportAction(&CheckClassicPassportActionReqDto{
-			Value: value,
+		mresponse, e := CheckClassicPassportAction(CheckClassicPassportActionRequest{
+			Body: CheckClassicPassportActionReq{
+				Value: value,
+			},
+			CliCtx: c,
 		}, query)
 
 		if e != nil {
 			return e
 		}
 
+		var m *CheckClassicPassportActionRes
+
+		if mf, ok := mresponse.Payload.(fireback.GoogleResponse[*CheckClassicPassportActionRes]); ok {
+			m = mf.Data.Item
+		}
+
 		fmt.Println("Flags we got: ", strings.Join(m.Flags, ","))
 		fmt.Println("Next steps: ", strings.Join(m.Next, ","))
-		if m.OtpInfo != nil {
+		if m.OtpInfo.IsSet() {
+			otp := m.OtpInfo.Ptr()
 			fmt.Println("Also otp information are present.")
-			fmt.Println("Blocked until:", m.OtpInfo.BlockedUntil)
-			fmt.Println("Second to unblock:", m.OtpInfo.SecondsToUnblock)
-			fmt.Println("SuspendUntil:", m.OtpInfo.SuspendUntil)
-			fmt.Println("Valid until:", m.OtpInfo.ValidUntil)
+			fmt.Println("Blocked until:", otp.BlockedUntil)
+			fmt.Println("Second to unblock:", otp.SecondsToUnblock)
+			fmt.Println("SuspendUntil:", otp.SuspendUntil)
+			fmt.Println("Valid until:", otp.ValidUntil)
 		}
 
 		if len(m.Next) == 0 {

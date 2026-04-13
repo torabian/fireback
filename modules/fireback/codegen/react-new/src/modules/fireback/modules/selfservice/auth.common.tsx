@@ -6,6 +6,7 @@ import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import type { ClassicSigninActionRes } from "../../sdk/modules/abac/ClassicSignin";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
+import type { ClassicPassportOtpActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 
 export enum AuthMethod {
@@ -29,7 +30,7 @@ export const useCompleteAuth = () => {
   const { locale } = useLocale();
   const { replace } = useRouter();
 
-  const onComplete = (res: GResponse<ClassicSigninActionRes | ClassicSignupActionRes>) => {
+  const onComplete = (res: GResponse<ClassicSigninActionRes | ClassicSignupActionRes | ClassicPassportOtpActionResDto>) => {
     setSession(res.data.item.session);
     // Handle React Native WebView
     if ((window as any).ReactNativeWebView) {
