@@ -4,10 +4,10 @@ import { QueryErrorView } from "../../components/error-view/QueryError";
 import { FormButton } from "../../components/forms/form-button/FormButton";
 import { FormText } from "../../components/forms/form-text/FormText";
 import { useS } from "../../hooks/useS";
-import { ChangePasswordDto, usePresenter } from "./ChangePassword.presenter";
+import { usePresenter } from "./ChangePassword.presenter";
 import { strings } from "./strings/translations";
 
-export const ChangePasswordScreen = ({}: {}) => {
+export const ChangePasswordScreen = ({ }: {}) => {
   const { mutation, form, s } = usePresenter();
 
   return (
@@ -20,11 +20,16 @@ export const ChangePasswordScreen = ({}: {}) => {
   );
 };
 
+interface form {
+  password: string;
+  password2: string;
+}
+
 const Form = ({
   form,
   mutation,
 }: {
-  form: FormikProps<Partial<ChangePasswordDto>>;
+  form: FormikProps<Partial<form>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
 }) => {
   const s = useS(strings);
@@ -45,7 +50,7 @@ const Form = ({
         id="password-input"
         errorMessage={form.errors.password}
         onChange={(value) =>
-          form.setFieldValue(ChangePasswordDto.Fields.password, value, false)
+          form.setFieldValue('password', value, false)
         }
       />
 
@@ -56,7 +61,7 @@ const Form = ({
         id="password-input-2"
         errorMessage={form.errors.password}
         onChange={(value) =>
-          form.setFieldValue(ChangePasswordDto.Fields.password2, value, false)
+          form.setFieldValue('password2', value, false)
         }
       />
 

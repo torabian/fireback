@@ -3,21 +3,20 @@ package abac
 import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
-	// Override the implementation with our actual code.
-
-	UserPassportsActionImp = UserPassportsAction
+	UserPassportsImpl = UserPassportsAction
 }
-func UserPassportsAction(q fireback.QueryDSL) ([]*UserPassportsActionResDto, *fireback.QueryResultMeta, *fireback.IError) {
+
+func UserPassportsAction(c UserPassportsActionRequest, q fireback.QueryDSL) (*UserPassportsActionResponse, error) {
 
 	passports := []PassportEntity{}
 	err := fireback.GetRef(q).Where(PassportEntity{UserId: fireback.NewString(q.UserId)}).Find(&passports).Error
 	if err != nil {
-		return nil, nil, fireback.CastToIError(err)
+		return nil, fireback.CastToIError(err)
 	}
 
-	result := []*UserPassportsActionResDto{}
+	result := []UserPassportsActionRes{}
 	for _, item := range passports {
-		result = append(result, &UserPassportsActionResDto{
+		result = append(result, UserPassportsActionRes{
 			Value:         item.Value,
 			Type:          item.Type,
 			UniqueId:      item.UniqueId,
@@ -25,5 +24,7 @@ func UserPassportsAction(q fireback.QueryDSL) ([]*UserPassportsActionResDto, *fi
 		})
 	}
 
-	return result, nil, nil
+	return &UserPassportsActionResponse{
+		Payload: fireback.GResponseQuery(result, nil, &q),
+	}, nil
 }

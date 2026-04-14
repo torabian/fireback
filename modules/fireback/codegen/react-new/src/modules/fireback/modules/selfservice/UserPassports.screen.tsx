@@ -1,12 +1,13 @@
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import ActiveLink from "../../components/link/ActiveLink";
 import { useS } from "../../hooks/useS";
-import { UserPassportsActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
+import type { UserPassportsActionRes } from "../../sdk/modules/abac/UserPassports";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./UserPassports.presenter";
 
-export const UserPassportsScreen = ({}: {}) => {
-  const { query, items, s, goBack, signout } = usePresenter();
+export const UserPassportsScreen = ({ }: {}) => {
+  const { query, s, signout } = usePresenter();
+  const items = query?.data?.data?.items || []
 
   return (
     <div className="signin-form-container">
@@ -26,7 +27,7 @@ export const UserPassportsScreen = ({}: {}) => {
 const PassportList = ({
   passports,
 }: {
-  passports: UserPassportsActionResDto[];
+  passports: UserPassportsActionRes[];
 }) => {
   const s = useS(strings);
   return (
