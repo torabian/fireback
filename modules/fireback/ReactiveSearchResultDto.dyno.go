@@ -1,10 +1,7 @@
 package fireback
 
-import (
-	"encoding/json"
-
-	emigo "github.com/torabian/emi/emigo"
-)
+import "encoding/json"
+import emigo "github.com/torabian/emi/emigo"
 
 func GetReactiveSearchResultDtoCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
