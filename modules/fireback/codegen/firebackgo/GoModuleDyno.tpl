@@ -453,10 +453,6 @@ func {{ upper .Name }}Query(query {{ $.wsprefix}}QueryDSL) ([]*{{ template "quer
     {{ if or (eq .Type "int32") }}
       {{ upper $prefix }}{{ upper .Name }} int32 `envconfig:"{{- if .Env -}}{{ .Env }}{{else}}{{ snakeUpper .Name }}{{end}}" description:"{{ escape .Description}}"`
     {{ end }}
-    {{ if or (eq .Type "object")}}
-      {{ $newPrefix := print $prefix .Name  }}
-      {{ template "configFields" (arr .Fields $newPrefix)}}
-    {{ end }}
   {{ end }}
 {{ end }}
 

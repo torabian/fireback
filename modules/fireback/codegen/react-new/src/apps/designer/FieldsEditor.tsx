@@ -82,7 +82,6 @@ export function FieldsEditor({ fields, onChange }: FieldsEditorProps) {
                     <option value="one">one</option>
                     <option value="collection">collection</option>
                     <option value="array">array</option>
-                    <option value="object">object</option>
                     <option value="html">html</option>
                   </select>
                 </div>

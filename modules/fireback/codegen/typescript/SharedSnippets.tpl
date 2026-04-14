@@ -102,7 +102,7 @@
           {{ template "stringfield" (arr . $root $newPrefix) }}
         };
       },
-    {{ else if or (eq .Type "object") (eq .Type "embed") }}
+    {{ else if or (eq .Type "object") }}
       {{ .PrivateName }}$: '{{ $prefix}}{{ .PrivateName }}',
       {{ .PrivateName }}: {
         {{ template "stringfield" (arr . $root $newPrefix) }}
@@ -171,7 +171,7 @@
 
 
       {{ range .e.CompleteFields }}
-      {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed")  }}
+      {{ if or (eq .Type "array") (eq .Type "object")  }}
 
       r{{ .PublicName}}Create: "{{ $.e.DashedName }}/:linkerId/{{ .DashedName}}/new",
       r{{ .PublicName}}Edit: "{{ $.e.DashedName }}/:linkerId/{{ .DashedName}}/edit/:uniqueId",
@@ -200,7 +200,7 @@ public static Fields = {
 {{ define "actionStringFields" }}
   {{ range . }}
 
-    {{ if or (eq .Type "array") (eq .Type "object") (eq .Type "embed") }}
+    {{ if or (eq .Type "array") (eq .Type "object") }}
       {{ .PrivateName }}$: '{{ .PrivateName }}',
       {{ .PrivateName }}: {
         {{ template "actionStringFields" .Fields }}

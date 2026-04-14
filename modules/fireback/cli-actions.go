@@ -533,7 +533,7 @@ func DatabaseColumnsResolver(
 		}
 
 		// Nested struct
-		if typeof == "one" || typeof == "object" || typeof == "array" || typeof == "collection" {
+		if typeof == "one" || typeof == "array" || typeof == "collection" {
 			if slices.Contains(requestedFields, qs) {
 				if preload != "" {
 					value.Preloads = append(value.Preloads, preload)
@@ -541,7 +541,7 @@ func DatabaseColumnsResolver(
 			}
 
 			value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, false)
-		} else if typeof == "embed" {
+		} else if typeof == FIELD_TYPE_OBJECT {
 			if slices.Contains(requestedFields, qs) {
 				value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, true)
 			}

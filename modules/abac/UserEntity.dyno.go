@@ -68,7 +68,7 @@ type UserEntityQs struct {
 		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" typeof:"string?" column:"state_or_province" qs:"stateOrProvince"`
 		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" typeof:"string?" column:"postal_code" qs:"postalCode"`
 		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" typeof:"string?" column:"country_code" qs:"countryCode"`
-	} `cli:"primary-address" table:"user" column:"primary_address" typeof:"embed" qs:"primaryAddress" preload:"PrimaryAddress"`
+	} `cli:"primary-address" table:"user" column:"primary_address" typeof:"object" qs:"primaryAddress" preload:"PrimaryAddress"`
 }
 
 func (x *UserEntityQs) GetQuery() string {
@@ -443,7 +443,7 @@ Title: (type: string) Description:
 BirthDate: (type: date) Description: 
 Avatar: (type: string) Description: 
 LastIpAddress: (type: string) Description: User last connecting ip address
-PrimaryAddress: (type: embed) Description: User primary address location. Can be useful for simple projects that a user is associated with a single address.
+PrimaryAddress: (type: object) Description: User primary address location. Can be useful for simple projects that a user is associated with a single address.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `

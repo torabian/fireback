@@ -202,7 +202,7 @@ var PayInvoiceSecurityModel *fireback.SecurityModel = nil
 type PayInvoiceQuery struct {
 	// Created invoice to be payed via strip
 	InvoiceId  string                     `json:"invoiceId" xml:"invoiceId" yaml:"invoiceId"  validate:"required"          url:"invoiceId"  `
-	PathParams *PayInvoiceQueryPathParams `json:"pathParams" xml:"pathParams" yaml:"pathParams"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"        url:"pathParams"  `
+	PathParams *PayInvoiceQueryPathParams `json:"pathParams" xml:"pathParams" yaml:"pathParams"    gorm:"embedded"        url:"pathParams"  `
 }
 type payInvoiceActionImpSig func(
 	q fireback.QueryDSL) (string,

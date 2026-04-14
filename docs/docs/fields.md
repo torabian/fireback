@@ -85,19 +85,6 @@ For example from license module:
 You see that `permissions` is an array. **Important** It's important that, every array field to end
 in plural english form. Some code might end up in mismatch for singular fields as a bug until 1.1.27.
 
-
-## Type: object
-
-Type on is also a nested field, which you can define `fields` very similarly in an array.
-The difference is, there will be a one-2-one relation created on this type of data, besides
-there will be an Addtional *Id field which would link them by a unique string id. At the moment,
-Fireback is creating `id` auto incremental numeric for each table, as well as `uniqueId` as a unique
-string identifier. `id` is intended to be used internally only for Fireback, and any external relationship
-between data, needs to use `uniqueId` field instead (`unique_id` on database level). This might change,
-as in large projects it causes large indexing tables.
-
-For example, see array example, and instead of `type: array` use `type: object`. Other details are exactly the same.
-
 ## Type: one
 
 The type one, is a specific type to Fireback. It means, you are targeting another table as a `one-to-one` relationship. The different with `object` is, in this type managing the data, deleting it is not depending 

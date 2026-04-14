@@ -10,7 +10,7 @@ import  "{{ $key}}"
 {{ end }}
 
 
-{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "collection") }} []* {{ end }}{{ if or (eq .Type "embed")  (eq .Type "object") (eq .Type "one") }} * {{ end }}{{ end }}
+{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "collection") }} []* {{ end }}{{ if or (eq .Type "object")  (eq .Type "one") }} * {{ end }}{{ end }}
 
 {{ define "validaterow" }}{{ if and (.Validate) (ne .Type "one") }} validate:"{{ .Validate }}" {{ end }}{{ end }}
 
@@ -202,7 +202,7 @@ import  "{{ $key}}"
 {{/* Array or object operations */}}
 {{ define "entitychildactions" }}
   {{ range .e.CompleteFields }}
-    {{ if or (eq .Type "object") (eq .Type "array")}}
+    {{ if or  (eq .Type "array")}}
   
 func {{ $.e.Upper }}{{ .PublicName }}ActionCreate(
   dto *{{ $.e.Upper }}{{ .PublicName }} ,
@@ -413,14 +413,10 @@ func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
 
     {{ range .e.CompleteFields }}
 
-      {{ if  eq .Type "embed"  }}
-        {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
-      {{ end }}
-
       {{ if  eq .Type "object"  }}
         {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
       {{ end }}
-
+ 
       {{ if  eq .Type "array"  }}
         {{ .UpperPlural }}: []*{{ $.e.Upper}}{{ .PublicName }}{{"{{}}"}},
       {{ end }}
@@ -704,11 +700,7 @@ func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefi
         }
     }
     {{ end }} 
-    {{ if  eq .Type "object"  }}
-        if dto.{{ $fx }}{{ .PublicName }} != nil {
-          dto.{{ $fx }}{{ .PublicName }}.UniqueId = {{ $wsprefix }}UUID()
-        }
-    {{ end }} 
+ 
   {{ end }}
 {{ end }}
 
@@ -1157,39 +1149,6 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
       return nil, ero
     }
 
-
-    {{ range .e.CompleteFields }}
-        {{ if or (eq .Type "object") }}
-   
-        if fields.{{ .PublicName }} != nil {
-
-          linkerId := uniqueId
-
-          q := dbref.
-            Model(&item.{{ .PublicName }}).
-            Where(&{{ $.e.Upper }}{{ .PublicName }}{LinkerId: {{ $.wsprefix }}NewString(linkerId) }).
-            UpdateColumns(fields.{{ .PublicName }})
-
-          err := q.Error
-          if err != nil {
-            return &item, {{ $.wsprefix }}GormErrorToIError(err)
-          }
-
-          if q.RowsAffected == 0 {
-            fields.{{ .PublicName }}.UniqueId = {{ $.wsprefix }}UUID()
-            fields.{{ .PublicName }}.LinkerId = {{ $.wsprefix }}NewString(linkerId)
-            err := dbref.
-              Model(&item.{{ .PublicName }}).Create(fields.{{ .PublicName }}).Error
-
-            if err != nil {
-              return &item, {{ $.wsprefix }}GormErrorToIError(err)
-            }
-          }
-        }
-
-      {{ end }}
-    {{ end }}
-
     // @meta(update has many)
 
     {{ range .e.CompleteFields }}
@@ -1242,18 +1201,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
             
         
             for _, item := range items {
-              
-              {{ range .Fields }}
-                {{ if or (eq .Type "object") }}
-
-                  if item3.<%- toUpper(c) %> != nil {
-                    item3.<%- toUpper(c) %>.UniqueId = {{ .wsprefix }}UUID()
-                  }
-
-                
-                {{ end }}
-              {{ end }}
-
+           
               dbref.
               Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: {{ $.wsprefix }}NewString(item.UniqueId)}).
               Delete(&{{ $entityName }}{{ $m }}{{ .PublicName }} {})
@@ -1268,15 +1216,6 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
           Delete(&{{ $entityName }}{{ .PublicName }} {})
   
         for _, newItem := range fields.{{ .PublicName }} {
-
-          {{ range .Fields }}
-            {{ if or (eq .Type "object") }}
-              if newItem.{{ .PublicName }} != nil {
-                newItem.{{ .PublicName }}.UniqueId =  {{ $.wsprefix }}UUID()
-              }
-            {{ end }}
-          {{ end }}
-
           newItem.UniqueId = {{ $.wsprefix }}UUID()
           newItem.LinkerId = {{ $.wsprefix }}NewString(linkerId)
           dbref.Create(&newItem)
@@ -1357,7 +1296,7 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
 	var count int64 = 0;
 	
 	  {{ range .e.CompleteFields }}
-        {{ if or (eq .Type "object") (eq .Type "array")}}
+        {{ if or (eq .Type "array")}}
 			{
 				subCount, subErr := {{ $.wsprefix }}WipeCleanEntity[{{ $.e.Upper }}{{ .PublicName }}]()
 				if (subErr != nil) {
@@ -1605,7 +1544,7 @@ func {{ .e.Upper }}ActionImport(
   {{ $prefix := index . 1}}
 
   {{ range $fields }}
-    {{ if or (eq .Type "object") (eq .Type "embed")}}
+    {{ if or (eq .Type "object")}}
       {{ $newPrefix := print $prefix .Name "-" }}
       {{ template "entityCommonCliFlag" (arr .Fields $newPrefix)}}
     {{ end }}
@@ -2762,7 +2701,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
 {{ end }}
 
 {{ range .e.CompleteFields }}
-  {{ if or (eq .Type "object") (eq .Type "array")}}
+  {{ if or (eq .Type "array")}}
     var {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_PATCH = {{ $.wsprefix }}Module3Action{
       Method: "PATCH",
       Url:    "/{{ $.e.Template }}/:linkerId/{{ .DashedName }}/:uniqueId",
@@ -2897,7 +2836,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
       {{ end }}
 
       {{ range .e.CompleteFields }}
-        {{ if or (eq .Type "object") (eq .Type "array")}}
+        {{ if or (eq .Type "array")}}
           {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_PATCH,
           {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_GET,
           {{ $.e.AllUpper }}_{{ .AllUpper }}_ACTION_POST,
@@ -3705,7 +3644,7 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 	{{ $wsprefix := index . 2}}
 	{{ $table := index . 3}}
 	{{ range $fields }}
-		{{ if or (eq .Type "object") (eq .Type "embed")}}
+		{{ if or (eq .Type "object")}}
 			{{ .PublicName }} struct {
 				{{ $newPrefix := print $prefix .ComputedCliName "." }}
 				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
@@ -3724,7 +3663,7 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 
 	{{ range $fields }}
 
-		{{ if or (eq .Type "object") (eq .Type "embed")}}
+		{{ if or (eq .Type "object")}}
 			{{ $newPrefix := print $prefix .ComputedCliName "-" }}
 			{{ template "qsFlags" (arr .Fields $newPrefix )}}
 		{{ else }}

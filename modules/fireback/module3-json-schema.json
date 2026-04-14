@@ -1055,7 +1055,6 @@
             "int",
             "datetime",
             "json",
-            "embed",
             "datenano",
             "html",
             "text",

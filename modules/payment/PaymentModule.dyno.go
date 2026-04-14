@@ -159,7 +159,7 @@ func (x *paymentRemoteContext) ProductInventoryAvailability(
 
 /// VerifyTransaction
 type VerifyTransactionRemoteResponse struct {
-	Data  *VerifyTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Data  *VerifyTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"embedded"      `
 	Error string                    `json:"error" xml:"error" yaml:"error"        `
 }
 type VerifyTransactionRemoteBody struct {
@@ -216,7 +216,7 @@ func (x *paymentRemoteContext) VerifyTransaction(
 
 /// RegisterTransaction
 type RegisterTransactionRemoteResponse struct {
-	Data  *RegisterTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
+	Data  *RegisterTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"embedded"      `
 	Error string                      `json:"error" xml:"error" yaml:"error"        `
 }
 type RegisterTransactionRemoteBody struct {
