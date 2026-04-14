@@ -177,7 +177,7 @@ export class UserEntity extends BaseEntity {
     {
       "name": "primaryAddress",
       "description": "User primary address location. Can be useful for simple projects that a user is associated with a single address.",
-      "type": "embed",
+      "type": "object",
       "computedType": "UserPrimaryAddress",
       "gormMap": {},
       "-": "UserPrimaryAddress",

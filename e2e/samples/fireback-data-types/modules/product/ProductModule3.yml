@@ -97,7 +97,7 @@ entities:
       #     name: barcode
       #     description: "Product barcode"
       # - name: meta
-      #   type: embed
+      #   type: object
       #   fields:
       #     - type: bool
       #       name: isEcoFriendly
@@ -111,7 +111,7 @@ entities:
       #     - type: bool
       #       name: isPreOrder
       #       description: "Marks if the product is available for pre-order"
-      #     - type: embed
+      #     - type: object
       #       name: more
       #       fields:
       #       - type: bool
@@ -132,6 +132,3 @@ entities:
       #       - type: bool
       #         name: isHandmade
       #         description: "Indicates if the product is handmade or artisan-crafted"
-
-      
-      
