@@ -541,7 +541,7 @@ func DatabaseColumnsResolver(
 			}
 
 			value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, false)
-		} else if typeof == "embed" {
+		} else if typeof == FIELD_TYPE_OBJECT {
 			if slices.Contains(requestedFields, qs) {
 				value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, true)
 			}

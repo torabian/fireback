@@ -10,7 +10,7 @@ import  "{{ $key}}"
 {{ end }}
 
 
-{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "collection") }} []* {{ end }}{{ if or (eq .Type "embed")  (eq .Type "one") }} * {{ end }}{{ end }}
+{{ define "golangtype" }}{{ if or (eq .Type "array") (eq .Type "collection") }} []* {{ end }}{{ if or (eq .Type "object")  (eq .Type "one") }} * {{ end }}{{ end }}
 
 {{ define "validaterow" }}{{ if and (.Validate) (ne .Type "one") }} validate:"{{ .Validate }}" {{ end }}{{ end }}
 
@@ -413,7 +413,7 @@ func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
 
     {{ range .e.CompleteFields }}
 
-      {{ if  eq .Type "embed"  }}
+      {{ if  eq .Type "object"  }}
         {{ .PublicName }}: &{{ $.e.Upper}}{{ .PublicName }}{},
       {{ end }}
  
@@ -1544,7 +1544,7 @@ func {{ .e.Upper }}ActionImport(
   {{ $prefix := index . 1}}
 
   {{ range $fields }}
-    {{ if or (eq .Type "embed")}}
+    {{ if or (eq .Type "object")}}
       {{ $newPrefix := print $prefix .Name "-" }}
       {{ template "entityCommonCliFlag" (arr .Fields $newPrefix)}}
     {{ end }}
@@ -3644,7 +3644,7 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 	{{ $wsprefix := index . 2}}
 	{{ $table := index . 3}}
 	{{ range $fields }}
-		{{ if or (eq .Type "embed")}}
+		{{ if or (eq .Type "object")}}
 			{{ .PublicName }} struct {
 				{{ $newPrefix := print $prefix .ComputedCliName "." }}
 				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
@@ -3663,7 +3663,7 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 
 	{{ range $fields }}
 
-		{{ if or (eq .Type "embed")}}
+		{{ if or (eq .Type "object")}}
 			{{ $newPrefix := print $prefix .ComputedCliName "-" }}
 			{{ template "qsFlags" (arr .Fields $newPrefix )}}
 		{{ else }}

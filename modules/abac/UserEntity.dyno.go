@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var userSeedersFs = &seeders.ViewsFs
@@ -68,7 +69,7 @@ type UserEntityQs struct {
 		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" typeof:"string?" column:"state_or_province" qs:"stateOrProvince"`
 		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" typeof:"string?" column:"postal_code" qs:"postalCode"`
 		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" typeof:"string?" column:"country_code" qs:"countryCode"`
-	} `cli:"primary-address" table:"user" column:"primary_address" typeof:"embed" qs:"primaryAddress" preload:"PrimaryAddress"`
+	} `cli:"primary-address" table:"user" column:"primary_address" typeof:"object" qs:"primaryAddress" preload:"PrimaryAddress"`
 }
 
 func (x *UserEntityQs) GetQuery() string {
@@ -443,7 +444,7 @@ Title: (type: string) Description:
 BirthDate: (type: date) Description: 
 Avatar: (type: string) Description: 
 LastIpAddress: (type: string) Description: User last connecting ip address
-PrimaryAddress: (type: embed) Description: User primary address location. Can be useful for simple projects that a user is associated with a single address.
+PrimaryAddress: (type: object) Description: User primary address location. Can be useful for simple projects that a user is associated with a single address.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -469,11 +470,13 @@ func UserRecursiveAddUniqueId(dto *UserEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserMultiInsertFn(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError) {

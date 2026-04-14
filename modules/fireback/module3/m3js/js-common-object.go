@@ -251,7 +251,7 @@ func TsComputedField(field *mcore.Module3Field, isWorkspace bool) string {
 		return "Date"
 	case "double":
 		return "number"
-	case "embed":
+	case mcore.FIELD_TYPE_OBJECT:
 		return field.PublicName()
 	case "money?":
 		return "{amount: number, currency: string, formatted?: string}"

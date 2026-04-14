@@ -1162,7 +1162,7 @@ entities:
         type: string
         description: User last connecting ip address
       - name: primaryAddress
-        type: embed
+        type: object
         description:
           User primary address location. Can be useful for simple projects that a user is associated
           with a single address.
