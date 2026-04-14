@@ -18,31 +18,6 @@ var EverRunEntities []interface{} = []interface{}{
 	&CapabilityEntityPolyglot{},
 }
 
-func workspaceModuleCore(module *ModuleProvider) {
-
-	module.ProvidePermissionHandler(
-
-		ALL_CAPABILITY_PERMISSIONS,
-	)
-
-	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
-
-		items2 := []interface{}{}
-		items2 = append(items2, EverRunEntities...)
-
-		for _, item := range items2 {
-
-			if err := dbref.AutoMigrate(item); err != nil {
-				fmt.Println("Migrating entity issue:", GetInterfaceName(item))
-				return err
-			}
-		}
-
-		return nil
-	})
-
-}
-
 type FirebackModuleConfig struct{}
 
 type X = func(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error)
@@ -92,7 +67,26 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		CapabilitiesTreeActionDef.ToCli(),
 	})
 
-	workspaceModuleCore(module)
+	module.ProvidePermissionHandler(
+
+		ALL_CAPABILITY_PERMISSIONS,
+	)
+
+	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+
+		items2 := []interface{}{}
+		items2 = append(items2, EverRunEntities...)
+
+		for _, item := range items2 {
+
+			if err := dbref.AutoMigrate(item); err != nil {
+				fmt.Println("Migrating entity issue:", GetInterfaceName(item))
+				return err
+			}
+		}
+
+		return nil
+	})
 
 	return module
 }

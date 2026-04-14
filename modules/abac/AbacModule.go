@@ -26,7 +26,33 @@ func AppMenuWriteQueryCteMock(ctx fireback.MockQueryContext) {
 	}
 }
 
-func workspaceModuleCore(module *fireback.ModuleProvider) {
+type MicroserviceSetupConfig struct {
+	AuthorizationResolver WithAuthorizationPureImpl
+}
+
+// Inject this into any project as a complete solution
+func AbacCompleteModules() []*fireback.ModuleProvider {
+	return []*fireback.ModuleProvider{
+		WorkspaceModuleSetup(),
+		DriveModuleSetup(),
+		NotificationModuleSetup(),
+		PassportsModuleSetup(),
+	}
+}
+
+func WorkspaceModuleSetup() *fireback.ModuleProvider {
+
+	// Default Fireback authorization. You can Override this on microservices
+	fireback.WithAuthorizationPure = WithAuthorizationPureDefault
+	fireback.WithAuthorizationFn = WithAuthorizationFn
+	fireback.WithSocketAuthorization = WithSocketAuthorization
+
+	module := &fireback.ModuleProvider{
+		Name:               "abac",
+		Definitions:        &Module3Definitions,
+		OnEnvInit:          OnInitEnvHook,
+		GoMigrateDirectory: &migrations.MigrationsFs,
+	}
 
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
@@ -87,38 +113,6 @@ func workspaceModuleCore(module *fireback.ModuleProvider) {
 		// root workspaces is the only, main workspace, which has every other workspace under it.
 		return RepairTheWorkspaces()
 	})
-
-}
-
-type MicroserviceSetupConfig struct {
-	AuthorizationResolver WithAuthorizationPureImpl
-}
-
-// Inject this into any project as a complete solution
-func AbacCompleteModules() []*fireback.ModuleProvider {
-	return []*fireback.ModuleProvider{
-		WorkspaceModuleSetup(),
-		DriveModuleSetup(),
-		NotificationModuleSetup(),
-		PassportsModuleSetup(),
-	}
-}
-
-func WorkspaceModuleSetup() *fireback.ModuleProvider {
-
-	// Default Fireback authorization. You can Override this on microservices
-	fireback.WithAuthorizationPure = WithAuthorizationPureDefault
-	fireback.WithAuthorizationFn = WithAuthorizationFn
-	fireback.WithSocketAuthorization = WithSocketAuthorization
-
-	module := &fireback.ModuleProvider{
-		Name:               "abac",
-		Definitions:        &Module3Definitions,
-		OnEnvInit:          OnInitEnvHook,
-		GoMigrateDirectory: &migrations.MigrationsFs,
-	}
-
-	workspaceModuleCore(module)
 
 	module.ProvideMockWriterHandler(func(languages []string) {
 		// WorkspaceTypeWriteQueryMock(MockQueryContext{Languages: languages})
