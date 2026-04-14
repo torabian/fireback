@@ -112,78 +112,6 @@ var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
 		)
 	},
 }
-var ImportUserSecurityModel *fireback.SecurityModel = nil
-
-type ImportUserActionReqDto struct {
-	Path string `json:"path" xml:"path" yaml:"path"        `
-}
-
-func (x *ImportUserActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var ImportUserCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "path",
-		Required: false,
-		Usage:    `path (string)`,
-	},
-}
-
-func ImportUserActionReqValidator(dto *ImportUserActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastImportUserFromCli(c *cli.Context) *ImportUserActionReqDto {
-	template := &ImportUserActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("path") {
-		template.Path = c.String("path")
-	}
-	return template
-}
-
-type importUserActionImpSig func(
-	req *ImportUserActionReqDto,
-	q fireback.QueryDSL) (*OkayResponseDto,
-	*fireback.IError,
-)
-
-var ImportUserActionImp importUserActionImpSig
-
-func ImportUserActionFn(
-	req *ImportUserActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*OkayResponseDto,
-	*fireback.IError,
-) {
-	if ImportUserActionImp == nil {
-		return nil, nil
-	}
-	return ImportUserActionImp(req, q)
-}
-
-var ImportUserActionCmd cli.Command = cli.Command{
-	Name:  "import-user",
-	Usage: `Imports users, and creates their passports, and all details`,
-	Flags: ImportUserCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ImportUserSecurityModel)
-		dto := CastImportUserFromCli(c)
-		result, err := ImportUserActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var SendEmailSecurityModel *fireback.SecurityModel = nil
 
 type SendEmailActionReqDto struct {
@@ -1199,29 +1127,6 @@ func AbacCustomActions() []fireback.Module3Action {
 		},
 		{
 			Method:        "POST",
-			Url:           "/user/import",
-			SecurityModel: ImportUserSecurityModel,
-			Name:          "importUser",
-			Description:   "Imports users, and creates their passports, and all details",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, ImportUserActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ImportUserActionFn,
-			ResponseEntity: &OkayResponseDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "OkayResponseDto",
-			},
-			RequestEntity: &ImportUserActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "ImportUserActionReqDto",
-			},
-		},
-		{
-			Method:        "POST",
 			Url:           "/email/send",
 			SecurityModel: SendEmailSecurityModel,
 			Name:          "sendEmail",
@@ -1342,7 +1247,6 @@ func AbacCustomActions() []fireback.Module3Action {
 var AbacCustomActionsCli = []cli.Command{
 	UserInvitationsActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
-	ImportUserActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
 	InviteToWorkspaceActionCmd,
@@ -1380,7 +1284,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		OsLoginAuthenticateActionDef.ToCli(),
 		UserInvitationsActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
-		ImportUserActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,
 		InviteToWorkspaceActionCmd,

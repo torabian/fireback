@@ -645,17 +645,6 @@ actions:
               description: Capabilities related to this role which are available
               primitive: string
 
-  - name: importUser
-    url: /user/import
-    method: post
-
-    description: "Imports users, and creates their passports, and all details"
-    in:
-      fields:
-        - name: path
-          type: string
-    out:
-      dto: OkayResponseDto
   - name: sendEmail
     url: /email/send
     cliName: email
