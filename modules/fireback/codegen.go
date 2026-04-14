@@ -44,7 +44,6 @@ var FIELD_TYPE_JSON string = "json"
 var FIELD_TYPE_ONE string = "one"
 var FIELD_TYPE_DATE string = "date"
 var FIELD_TYPE_COLLECTION string = "collection"
-var FIELD_TYPE_OBJECT string = "object"
 var FIELD_TYPE_EMBED string = "embed"
 var FIELD_TYPE_MONEY string = "money?"
 var FIELD_TYPE_XFILE string = "xfile?"
@@ -321,7 +320,7 @@ func (x *Module3Field) ComputedGormTag() string {
 		return "embedded"
 	}
 
-	if x.Type == FIELD_TYPE_ARRAY || x.Type == FIELD_TYPE_OBJECT {
+	if x.Type == FIELD_TYPE_ARRAY {
 		return "foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"
 	}
 
@@ -362,7 +361,7 @@ func CalcAllPolyglotEntities(m []*Module3Field) []string {
 			items = append(items, item.Name)
 		}
 
-		if item.Type == FIELD_TYPE_OBJECT || item.Type == FIELD_TYPE_ARRAY {
+		if item.Type == FIELD_TYPE_ARRAY {
 			items = append(items, CalcAllPolyglotEntities(item.Fields)...)
 		}
 	}
@@ -1375,7 +1374,7 @@ func ComputeComplexGormField(entity *Module3Entity, fields []*Module3Field) {
 	for _, field := range fields {
 		field.BelongingEntityName = entity.Name
 
-		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
+		if field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
 			ComputeComplexGormField(entity, field.Fields)
 		}
 	}
@@ -1390,7 +1389,7 @@ func ComputeFieldTypes(fields []*Module3Field, isWorkspace bool, fn func(field *
 	for _, field := range fields {
 		field.ComputedType = fn(field, isWorkspace)
 
-		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
+		if field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
 			ComputeFieldTypes(field.Fields, isWorkspace, fn)
 		}
 	}
@@ -1406,7 +1405,7 @@ func ComputeFieldTypesAbsolute(fields []*Module3Field, isWorkspace bool, fn func
 	for _, field := range fields {
 		field.ComputedType = strings.ReplaceAll(fn(field, isWorkspace), "*", "")
 
-		if field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
+		if field.Type == FIELD_TYPE_EMBED || field.Type == FIELD_TYPE_ARRAY {
 			ComputeFieldTypesAbsolute(field.Fields, isWorkspace, fn)
 		}
 	}
@@ -2414,7 +2413,7 @@ func GetArrayOrObjectFieldsFlatten(depth int, parentType string, depthName strin
 			item.IsVirtualObject = true
 		}
 
-		if item.Type != FIELD_TYPE_OBJECT && item.Type != FIELD_TYPE_ARRAY && item.Type != FIELD_TYPE_EMBED {
+		if item.Type != FIELD_TYPE_ARRAY && item.Type != FIELD_TYPE_EMBED {
 			item.ComputedType = ctx.Catalog.ComputeField(item, isWorkspace)
 			continue
 		} else {
@@ -2591,7 +2590,7 @@ func ImportDependecies(fields []*Module3Field) []ImportDependencyStrategy {
 			}
 		}
 
-		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED {
+		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_EMBED {
 			items = append(items, ImportDependecies(field.Fields)...)
 		}
 
@@ -2691,7 +2690,7 @@ func ImportGoDependencies(fields []*Module3Field, importGroupPrefix string) []Im
 		// 	})
 		// }
 
-		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_OBJECT || field.Type == FIELD_TYPE_EMBED {
+		if field.Type == FIELD_TYPE_ARRAY || field.Type == FIELD_TYPE_EMBED {
 
 			items = append(items, ImportGoDependencies(field.Fields, actualPrefix)...)
 		}
@@ -3446,9 +3445,7 @@ func (x *Module3Entity) GetSqlFields() []string {
 		"template_entities.created_at",
 	}
 	for _, field := range x.Fields {
-		if field.Type == "object" {
-			continue
-		}
+
 		if field.Type == "one" {
 			items = append(items, "template_entities."+ToSnakeCase(field.Name)+"_id")
 		} else {
@@ -3463,9 +3460,6 @@ func (x *Module3Entity) GetSqlFields() []string {
 func (x *Module3Entity) GetSqlFieldNames() []string {
 	items := []string{"parent_id", "visibility", "updated_at", "created_at"}
 	for _, field := range x.Fields {
-		if field.Type == "object" {
-			continue
-		}
 
 		if field.Type == "one" {
 			items = append(items, ToSnakeCase(field.Name)+"_id")
@@ -3486,9 +3480,6 @@ func (x *Module3Entity) GetSqlFieldNamesAfter() []string {
 		"template_entities_cte.created_at",
 	}
 	for _, field := range x.Fields {
-		if field.Type == "object" {
-			continue
-		}
 
 		if field.Type == "one" {
 			items = append(items, "template_entities_cte."+ToSnakeCase(field.Name)+"_id\n")

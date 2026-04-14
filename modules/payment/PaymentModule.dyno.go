@@ -33,12 +33,6 @@ var ALL_PERM_PAYMENT_MODULE = []fireback.PermissionInfo{
 	PERM_ROOT_PAYMENT_EVERYTHING,
 }
 
-type VerifyTransactionResData struct {
-	Token string `json:"token" xml:"token" yaml:"token"        `
-}
-type RegisterTransactionResData struct {
-	Token string `json:"token" xml:"token" yaml:"token"        `
-}
 type paymentCode string
 
 const (
@@ -159,8 +153,8 @@ func (x *paymentRemoteContext) ProductInventoryAvailability(
 
 /// VerifyTransaction
 type VerifyTransactionRemoteResponse struct {
-	Data  *VerifyTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Error string                    `json:"error" xml:"error" yaml:"error"        `
+	Data  *string `json:"data" xml:"data" yaml:"data"        `
+	Error string  `json:"error" xml:"error" yaml:"error"        `
 }
 type VerifyTransactionRemoteBody struct {
 	PosId      int64  `json:"posId" xml:"posId" yaml:"posId"        `
@@ -216,8 +210,8 @@ func (x *paymentRemoteContext) VerifyTransaction(
 
 /// RegisterTransaction
 type RegisterTransactionRemoteResponse struct {
-	Data  *RegisterTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-	Error string                      `json:"error" xml:"error" yaml:"error"        `
+	Data  *string `json:"data" xml:"data" yaml:"data"        `
+	Error string  `json:"error" xml:"error" yaml:"error"        `
 }
 type RegisterTransactionRemoteBody struct {
 	MerchantId  int64  `json:"merchantId" xml:"merchantId" yaml:"merchantId"        `

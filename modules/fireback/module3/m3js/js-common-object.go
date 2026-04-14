@@ -34,7 +34,7 @@ type jsRenderedField struct {
 // need to have the correct generated class to be assigned to them.
 func jsFieldTypeOnNestedClasses(field *mcore.Module3Field, parentChain string) string {
 
-	if field.Type == mcore.FIELD_TYPE_ARRAY || field.Type == mcore.FIELD_TYPE_OBJECT {
+	if field.Type == mcore.FIELD_TYPE_ARRAY {
 		return mcore.ToUpper(parentChain) + "." + mcore.ToUpper(field.Name)
 	}
 
@@ -99,7 +99,7 @@ func jsRenderDataClasses(fields []*mcore.Module3Field, className string, treeLoc
 
 	// then descend into object/array fields
 	for _, field := range fields {
-		if field.Type == mcore.FIELD_TYPE_OBJECT || field.Type == mcore.FIELD_TYPE_ARRAY {
+		if field.Type == mcore.FIELD_TYPE_ARRAY {
 			childName := mcore.ToUpper(field.Name)
 			currentClass.SubClasses = append(currentClass.SubClasses, jsRenderDataClasses(field.Fields, mcore.ToUpper(childName), treeLocation+"."+mcore.ToUpper(childName), false)...)
 		}
@@ -251,7 +251,7 @@ func TsComputedField(field *mcore.Module3Field, isWorkspace bool) string {
 		return "Date"
 	case "double":
 		return "number"
-	case "object", "embed":
+	case "embed":
 		return field.PublicName()
 	case "money?":
 		return "{amount: number, currency: string, formatted?: string}"

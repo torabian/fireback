@@ -3,7 +3,6 @@ package payment
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
 )
@@ -65,9 +64,11 @@ func RegisterTransactionAction(req *RegisterTransactionActionReqDto, q fireback.
 	if err != nil || res.Error != "" {
 		return "", err
 	} else {
-		if res != nil && res.Data != nil && res.Data.Token != "" {
-			return strings.ReplaceAll(config.PaymentPageUrl, "{TOKEN}", res.Data.Token), nil
-		}
+
+		// Make sure you will uncomments this after adding remotes features
+		// if res != nil && res.Data != nil && res.Data.Token != "" {
+		// 	return strings.ReplaceAll(config.PaymentPageUrl, "{TOKEN}", res.Data.Token), nil
+		// }
 		return "", nil
 	}
 }

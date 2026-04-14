@@ -15,10 +15,6 @@ import (
 )
 
 // using shared actions here
-type PayInvoiceQueryPathParams struct {
-	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
-}
-
 var NotificationSecurityModel *fireback.SecurityModel = nil
 
 type NotificationActionReqDto struct {
@@ -201,8 +197,8 @@ var PayInvoiceSecurityModel *fireback.SecurityModel = nil
 
 type PayInvoiceQuery struct {
 	// Created invoice to be payed via strip
-	InvoiceId  string                     `json:"invoiceId" xml:"invoiceId" yaml:"invoiceId"  validate:"required"          url:"invoiceId"  `
-	PathParams *PayInvoiceQueryPathParams `json:"pathParams" xml:"pathParams" yaml:"pathParams"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"        url:"pathParams"  `
+	InvoiceId  string  `json:"invoiceId" xml:"invoiceId" yaml:"invoiceId"  validate:"required"          url:"invoiceId"  `
+	PathParams *string `json:"pathParams" xml:"pathParams" yaml:"pathParams"          url:"pathParams"  `
 }
 type payInvoiceActionImpSig func(
 	q fireback.QueryDSL) (string,

@@ -533,7 +533,7 @@ func DatabaseColumnsResolver(
 		}
 
 		// Nested struct
-		if typeof == "one" || typeof == "object" || typeof == "array" || typeof == "collection" {
+		if typeof == "one" || typeof == "array" || typeof == "collection" {
 			if slices.Contains(requestedFields, qs) {
 				if preload != "" {
 					value.Preloads = append(value.Preloads, preload)

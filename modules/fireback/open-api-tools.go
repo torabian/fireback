@@ -75,8 +75,6 @@ func OpenApiTypeToFirebackType(fieldName string, t *openapi3.Schema) Module3Fiel
 		field.Type = "float64"
 	case "boolean":
 		field.Type = "bool"
-	// case "object":
-	// fmt.Println("Object!")
 	case "array":
 		field.Type = "array"
 
