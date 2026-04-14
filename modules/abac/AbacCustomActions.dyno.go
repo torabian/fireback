@@ -192,146 +192,6 @@ var OauthAuthenticateActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var UserPassportsSecurityModel = &fireback.SecurityModel{
-	ActionRequires:  []fireback.PermissionInfo{},
-	ResolveStrategy: "user",
-}
-
-type UserPassportsActionResDto struct {
-	// The passport value, such as email address or phone number
-	Value string `json:"value" xml:"value" yaml:"value"        `
-	// Unique identifier of the passport to operate some action on top of it
-	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
-	// The type of the passport, such as email, phone number
-	Type string `json:"type" xml:"type" yaml:"type"        `
-	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
-	TotpConfirmed bool `json:"totpConfirmed" xml:"totpConfirmed" yaml:"totpConfirmed"        `
-}
-
-func (x *UserPassportsActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type userPassportsActionImpSig func(
-	q fireback.QueryDSL) ([]*UserPassportsActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-)
-
-var UserPassportsActionImp userPassportsActionImpSig
-
-func UserPassportsActionFn(
-	q fireback.QueryDSL,
-) (
-	[]*UserPassportsActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-) {
-	if UserPassportsActionImp == nil {
-		return nil, nil, nil
-	}
-	return UserPassportsActionImp(q)
-}
-
-var UserPassportsActionCmd cli.Command = cli.Command{
-	Name:  "user-passports",
-	Usage: `Returns list of passports belongs to an specific user.`,
-	Flags: fireback.CommonQueryFlags,
-	Action: func(c *cli.Context) {
-		fireback.CommonCliQueryCmd3IError(
-			c,
-			UserPassportsActionFn,
-			UserPassportsSecurityModel,
-			nil,
-		)
-	},
-}
-var ChangePasswordSecurityModel = &fireback.SecurityModel{
-	ActionRequires:  []fireback.PermissionInfo{},
-	ResolveStrategy: "user",
-}
-
-type ChangePasswordActionReqDto struct {
-	// New password meeting the security requirements.
-	Password string `json:"password" xml:"password" yaml:"password"  validate:"required"        `
-	// The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.
-	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"  validate:"required"        `
-}
-
-func (x *ChangePasswordActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var ChangePasswordCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "password",
-		Required: true,
-		Usage:    `New password meeting the security requirements. (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "unique-id",
-		Required: true,
-		Usage:    `The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value. (string)`,
-	},
-}
-
-func ChangePasswordActionReqValidator(dto *ChangePasswordActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastChangePasswordFromCli(c *cli.Context) *ChangePasswordActionReqDto {
-	template := &ChangePasswordActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("password") {
-		template.Password = c.String("password")
-	}
-	if c.IsSet("unique-id") {
-		template.UniqueId = c.String("unique-id")
-	}
-	return template
-}
-
-type changePasswordActionImpSig func(
-	req *ChangePasswordActionReqDto,
-	q fireback.QueryDSL) (string,
-	*fireback.IError,
-)
-
-var ChangePasswordActionImp changePasswordActionImpSig
-
-func ChangePasswordActionFn(
-	req *ChangePasswordActionReqDto,
-	q fireback.QueryDSL,
-) (
-	string,
-	*fireback.IError,
-) {
-	if ChangePasswordActionImp == nil {
-		return "", nil
-	}
-	return ChangePasswordActionImp(req, q)
-}
-
-var ChangePasswordActionCmd cli.Command = cli.Command{
-	Name:  "change-password",
-	Usage: `Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.`,
-	Flags: ChangePasswordCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
-		dto := CastChangePasswordFromCli(c)
-		result, err := ChangePasswordActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var UserInvitationsSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
@@ -1048,99 +908,120 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var CreateWorkspaceSecurityModel *fireback.SecurityModel = nil
-
-type CreateWorkspaceActionReqDto struct {
-	Name        string           `json:"name" xml:"name" yaml:"name"        `
-	Workspace   *WorkspaceEntity `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	WorkspaceId fireback.String  `json:"workspaceId" xml:"workspaceId" yaml:"workspaceId"        `
-}
-
-func (x *CreateWorkspaceActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var CreateWorkspaceCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    `name (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: false,
-		Usage:    `workspace (one)`,
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: false,
-		Usage:    `workspaceId (string?)`,
-	},
-}
-
-func CreateWorkspaceActionReqValidator(dto *CreateWorkspaceActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastCreateWorkspaceFromCli(c *cli.Context) *CreateWorkspaceActionReqDto {
-	template := &CreateWorkspaceActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("name") {
-		template.Name = c.String("name")
-	}
-	if c.IsSet("workspace-id") {
-		template.WorkspaceId = fireback.NewStringAutoNull(c.String("workspace-id"))
-	}
-	if c.IsSet("workspace-id") {
-		template.WorkspaceId = fireback.NewStringAutoNull(c.String("workspace-id"))
-	}
-	return template
-}
-
-type createWorkspaceActionImpSig func(
-	req *CreateWorkspaceActionReqDto,
-	q fireback.QueryDSL) (*WorkspaceEntity,
-	*fireback.IError,
-)
-
-var CreateWorkspaceActionImp createWorkspaceActionImpSig
-
-func CreateWorkspaceActionFn(
-	req *CreateWorkspaceActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*WorkspaceEntity,
-	*fireback.IError,
-) {
-	if CreateWorkspaceActionImp == nil {
-		return nil, nil
-	}
-	return CreateWorkspaceActionImp(req, q)
-}
-
-var CreateWorkspaceActionCmd cli.Command = cli.Command{
-	Name:  "create-workspace",
-	Usage: ``,
-	Flags: CreateWorkspaceCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
-		dto := CastCreateWorkspaceFromCli(c)
-		result, err := CreateWorkspaceActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var ChangePasswordImpl func(c ChangePasswordActionRequest, query fireback.QueryDSL) (*ChangePasswordActionResponse, error) = nil
+var ChangePasswordSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+// This can be both used as cli and http
+var ChangePasswordActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       ChangePasswordActionMeta().CliName,
+	Description:   ChangePasswordActionMeta().Description,
+	Name:          ChangePasswordActionMeta().Name,
+	Method:        ChangePasswordActionMeta().Method,
+	Url:           ChangePasswordActionMeta().URL,
+	SecurityModel: ChangePasswordSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := ChangePasswordActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := ChangePasswordImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
+		req := ChangePasswordActionRequest{}
+		resp, err := ChangePasswordImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var UserPassportsImpl func(c UserPassportsActionRequest, query fireback.QueryDSL) (*UserPassportsActionResponse, error) = nil
+var UserPassportsSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+// This can be both used as cli and http
+var UserPassportsActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       UserPassportsActionMeta().CliName,
+	Description:   UserPassportsActionMeta().Description,
+	Name:          UserPassportsActionMeta().Name,
+	Method:        UserPassportsActionMeta().Method,
+	Url:           UserPassportsActionMeta().URL,
+	SecurityModel: UserPassportsSecurityModel,
+	// get
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := UserPassportsActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := UserPassportsImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserPassportsSecurityModel)
+		req := UserPassportsActionRequest{}
+		resp, err := UserPassportsImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var CreateWorkspaceImpl func(c CreateWorkspaceActionRequest, query fireback.QueryDSL) (*CreateWorkspaceActionResponse, error) = nil
+var CreateWorkspaceSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var CreateWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       CreateWorkspaceActionMeta().CliName,
+	Description:   CreateWorkspaceActionMeta().Description,
+	Name:          CreateWorkspaceActionMeta().Name,
+	Method:        CreateWorkspaceActionMeta().Method,
+	Url:           CreateWorkspaceActionMeta().URL,
+	SecurityModel: CreateWorkspaceSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := CreateWorkspaceActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := CreateWorkspaceImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
+		req := CreateWorkspaceActionRequest{}
+		resp, err := CreateWorkspaceImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var ClassicPassportRequestOtpImpl func(c ClassicPassportRequestOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionResponse, error) = nil
 var ClassicPassportRequestOtpSecurityModel *fireback.SecurityModel = nil
 
@@ -1425,6 +1306,9 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		ChangePasswordActionDef,
+		UserPassportsActionDef,
+		CreateWorkspaceActionDef,
 		ClassicPassportRequestOtpActionDef,
 		ClassicPassportOtpActionDef,
 		CheckClassicPassportActionDef,
@@ -1478,52 +1362,6 @@ func AbacCustomActions() []fireback.Module3Action {
 			RequestEntity: &OauthAuthenticateActionReqDto{},
 			In: &fireback.Module3ActionBody{
 				Entity: "OauthAuthenticateActionReqDto",
-			},
-		},
-		{
-			Method:        "GET",
-			Url:           "/user/passports",
-			SecurityModel: UserPassportsSecurityModel,
-			Name:          "userPassports",
-			Description:   "Returns list of passports belongs to an specific user.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// QUERY - get
-					fireback.HttpQueryEntity(
-						c,
-						UserPassportsActionFn,
-						nil,
-					)
-				},
-			},
-			Format:         "QUERY",
-			Action:         UserPassportsActionFn,
-			ResponseEntity: &UserPassportsActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "UserPassportsActionResDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/passport/change-password",
-			SecurityModel: ChangePasswordSecurityModel,
-			Name:          "changePassword",
-			Description:   "Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, ChangePasswordActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ChangePasswordActionFn,
-			ResponseEntity: string(""),
-			Out: &fireback.Module3ActionBody{
-				Entity: "",
-			},
-			RequestEntity: &ChangePasswordActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "ChangePasswordActionReqDto",
 			},
 		},
 		{
@@ -1767,29 +1605,6 @@ func AbacCustomActions() []fireback.Module3Action {
 				Entity: "GsmSendSmsWithProviderActionReqDto",
 			},
 		},
-		{
-			Method:        "POST",
-			Url:           "/workspaces/create",
-			SecurityModel: CreateWorkspaceSecurityModel,
-			Name:          "createWorkspace",
-			Description:   "",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, CreateWorkspaceActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         CreateWorkspaceActionFn,
-			ResponseEntity: &WorkspaceEntity{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "WorkspaceEntity",
-			},
-			RequestEntity: &CreateWorkspaceActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "CreateWorkspaceActionReqDto",
-			},
-		},
 	}
 	return routes
 }
@@ -1797,8 +1612,6 @@ func AbacCustomActions() []fireback.Module3Action {
 var AbacCustomActionsCli = []cli.Command{
 	AcceptInviteActionCmd,
 	OauthAuthenticateActionCmd,
-	UserPassportsActionCmd,
-	ChangePasswordActionCmd,
 	UserInvitationsActionCmd,
 	ConfirmClassicPassportTotpActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
@@ -1810,7 +1623,6 @@ var AbacCustomActionsCli = []cli.Command{
 	InviteToWorkspaceActionCmd,
 	GsmSendSmsActionCmd,
 	GsmSendSmsWithProviderActionCmd,
-	CreateWorkspaceActionCmd,
 }
 
 // Only to include some headers
@@ -1826,6 +1638,9 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		ChangePasswordActionDef.ToCli(),
+		UserPassportsActionDef.ToCli(),
+		CreateWorkspaceActionDef.ToCli(),
 		ClassicPassportRequestOtpActionDef.ToCli(),
 		ClassicPassportOtpActionDef.ToCli(),
 		CheckClassicPassportActionDef.ToCli(),
@@ -1836,8 +1651,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		OsLoginAuthenticateActionDef.ToCli(),
 		AcceptInviteActionCmd,
 		OauthAuthenticateActionCmd,
-		UserPassportsActionCmd,
-		ChangePasswordActionCmd,
 		UserInvitationsActionCmd,
 		ConfirmClassicPassportTotpActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
@@ -1849,7 +1662,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		InviteToWorkspaceActionCmd,
 		GsmSendSmsActionCmd,
 		GsmSendSmsWithProviderActionCmd,
-		CreateWorkspaceActionCmd,
 		TimezoneGroupCliFn(),
 		FileCliFn(),
 		TableViewSizingCliFn(),

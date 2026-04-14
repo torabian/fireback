@@ -16,9 +16,6 @@ import {
 import {
     UserSessionDto,
 } from "./UserSessionDto"
-import {
-    WorkspaceEntity,
-} from "./WorkspaceEntity"
   export class QueryUserRoleWorkspacesResDtoRoles {
   public name?: string | null;
   public uniqueId?: string | null;
@@ -62,44 +59,6 @@ public static Fields = {
       session$: 'session',
       session: UserSessionDto.Fields,
       next: 'next',
-}
-}
-export class UserPassportsActionResDto {
-  /**
-  The passport value, such as email address or phone number
-  */
-  public value?: string | null;
-  /**
-  Unique identifier of the passport to operate some action on top of it
-  */
-  public uniqueId?: string | null;
-  /**
-  The type of the passport, such as email, phone number
-  */
-  public type?: string | null;
-  /**
-  Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
-  */
-  public totpConfirmed?: boolean | null;
-public static Fields = {
-      value: 'value',
-      uniqueId: 'uniqueId',
-      type: 'type',
-      totpConfirmed: 'totpConfirmed',
-}
-}
-export class ChangePasswordActionReqDto {
-  /**
-  New password meeting the security requirements.
-  */
-  public password?: string | null;
-  /**
-  The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.
-  */
-  public uniqueId?: string | null;
-public static Fields = {
-      password: 'password',
-      uniqueId: 'uniqueId',
 }
 }
 export class ConfirmClassicPassportTotpActionReqDto {
@@ -220,16 +179,5 @@ export class GsmSendSmsWithProviderActionResDto {
   public queueId?: string | null;
 public static Fields = {
       queueId: 'queueId',
-}
-}
-export class CreateWorkspaceActionReqDto {
-  public name?: string | null;
-  public workspace?: WorkspaceEntity | null;
-  public workspaceId?: string | null;
-public static Fields = {
-      name: 'name',
-      workspace$: 'workspace',
-      workspace: WorkspaceEntity.Fields,
-      workspaceId: 'workspaceId',
 }
 }

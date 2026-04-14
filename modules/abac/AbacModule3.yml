@@ -172,6 +172,71 @@ dtom:
         type: string?
 
 acts:
+  - name: ChangePassword
+    url: /passport/change-password
+    security:
+      resolveStrategy: user
+    description:
+      Change the password for a given passport of the user. User needs to be authenticated in
+      order to be able to change the password for a given account.
+    cliName: cp
+    method: post
+    out:
+      envelope: GResponse
+      fields:
+        - name: changed
+          type: bool
+    in:
+      fields:
+        - name: password
+          type: string
+          description: New password meeting the security requirements.
+          tags:
+            validate: required
+        - name: uniqueId
+          tags:
+            validate: required
+          description:
+            The passport uniqueId (not the email or phone number) which password would be applied to.
+            Don't confuse with value.
+          type: string
+
+  - name: UserPassports
+    url: /user/passports
+    security:
+      resolveStrategy: user
+    description: Returns list of passports belongs to an specific user.
+    method: get
+    out:
+      envelope: GResponse
+      fields:
+        - name: value
+          type: string
+          description: The passport value, such as email address or phone number
+        - name: uniqueId
+          type: string
+          description: Unique identifier of the passport to operate some action on top of it
+        - name: type
+          type: string
+          description: The type of the passport, such as email, phone number
+        - name: totpConfirmed
+          type: bool
+          description:
+            Regardless of the secret, user needs to confirm his secret. There is an extra action
+            to confirm user totp, could be used after signup or prior to login.
+  - name: CreateWorkspace
+    method: post
+    url: /workspaces/create
+    in:
+      fields:
+        - name: name
+          type: string
+    out:
+      envelope: GResponse
+      fields:
+        - name: workspaceId
+          type: string
+
   - name: ClassicPassportRequestOtp
     description: >-
       Triggers an otp request, and will send an sms or email to the passport.
@@ -511,54 +576,6 @@ actions:
   #         description:
   #           The new passport value
 
-  - name: userPassports
-    url: /user/passports
-    security:
-      resolveStrategy: user
-    description: Returns list of passports belongs to an specific user.
-    actionAliases:
-      - upass
-    format: query
-    method: get
-    out:
-      fields:
-        - name: value
-          type: string
-          description: The passport value, such as email address or phone number
-        - name: uniqueId
-          type: string
-          description: Unique identifier of the passport to operate some action on top of it
-        - name: type
-          type: string
-          description: The type of the passport, such as email, phone number
-        - name: totpConfirmed
-          type: bool
-          description:
-            Regardless of the secret, user needs to confirm his secret. There is an extra action
-            to confirm user totp, could be used after signup or prior to login.
-  - name: changePassword
-    url: /passport/change-password
-    security:
-      resolveStrategy: user
-    description:
-      Change the password for a given passport of the user. User needs to be authenticated in
-      order to be able to change the password for a given account.
-    actionAliases:
-      - cp
-    format: POST_ONE
-    method: post
-    in:
-      fields:
-        - name: password
-          type: string
-          description: New password meeting the security requirements.
-          validate: required
-        - name: uniqueId
-          validate: required
-          description:
-            The passport uniqueId (not the email or phone number) which password would be applied to.
-            Don't confuse with value.
-          type: string
   - name: userInvitations
     description:
       Shows the invitations for an specific user, if the invited member already has a account.
@@ -736,21 +753,6 @@ actions:
       fields:
         - name: queueId
           type: string
-
-  - name: createWorkspace
-    method: post
-    url: /workspaces/create
-    in:
-      fields:
-        - name: name
-          type: string
-        - name: workspace
-          type: one
-          target: WorkspaceEntity
-        - name: workspaceId
-          type: string?
-    out:
-      entity: WorkspaceEntity
 
 entities:
   - name: timezoneGroup

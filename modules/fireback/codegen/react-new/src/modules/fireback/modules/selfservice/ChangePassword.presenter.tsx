@@ -2,32 +2,23 @@ import { useFormik } from "formik";
 import { useEffect } from "react";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { ChangePasswordActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
-import { usePostPassportChangePassword } from "../../sdk/modules/abac/usePostPassportChangePassword";
+import { ChangePasswordActionReq, useChangePasswordAction } from "../../sdk/modules/abac/ChangePassword";
 import { strings } from "./strings/translations";
 
-// We extend it because the repeat password is only a front-end validation
-export class ChangePasswordDto extends ChangePasswordActionReqDto {
-  public password2?: string;
-  static Fields = {
-    ...ChangePasswordActionReqDto.Fields,
-    password2: "password2",
-  };
-}
 
 export const usePresenter = () => {
   const s = useS(strings);
   const { goBack, state, replace, push, query } = useRouter();
-  const { submit: changePassword, mutation } = usePostPassportChangePassword();
+  const mutation = useChangePasswordAction();
   const uniqueId = query?.uniqueId as string;
 
   const submit = () => {
-    changePassword(form.values).then((res) => {
+    mutation.mutateAsync(new ChangePasswordActionReq(form.values)).then((res) => {
       goBack();
     });
   };
 
-  const form = useFormik<ChangePasswordActionReqDto>({
+  const form = useFormik<ChangePasswordActionReq>({
     initialValues: {},
     onSubmit: submit,
   });
@@ -37,7 +28,7 @@ export const usePresenter = () => {
       return;
     }
 
-    form.setFieldValue(ChangePasswordActionReqDto.Fields.uniqueId, uniqueId);
+    form.setFieldValue(ChangePasswordActionReq.Fields.uniqueId, uniqueId);
   }, [uniqueId]);
 
   return {
