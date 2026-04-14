@@ -3,18 +3,19 @@ import { type FormikProps, useFormik } from "formik";
 import { useContext } from "react";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
 import { QueryErrorView } from "../../components/error-view/QueryError";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { source } from "../../hooks/source";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { usePostPassportViaOauth } from "../../sdk/modules/abac/usePostPassportViaOauth";
+import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
+import { OauthAuthenticateActionReq, OauthAuthenticateActionRes, useOauthAuthenticateAction } from "../../sdk/modules/abac/OauthAuthenticate";
+import type { GResponse } from "../../sdk/sdk/envelopes";
 import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { FacebookLogin } from "./FacebookLogin";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
-import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
 
 export const WelcomeScreen = () => {
   const {
@@ -80,7 +81,7 @@ const Form = ({
   onSelect: (method: AuthMethod) => void;
   availableOptions: AuthAvailableMethods;
 }) => {
-  const { submit } = usePostPassportViaOauth({});
+  const { mutateAsync } = useOauthAuthenticateAction({});
   const { setSession } = useContext(RemoteQueryContext);
   const { locale } = useLocale();
   const { replace } = useRouter();
@@ -89,12 +90,12 @@ const Form = ({
     token: string,
     service: "google" | "facebook",
   ) => {
-    submit({ service, token })
-      .then((res) => {
-        setSession(res.data.session);
+    mutateAsync(new OauthAuthenticateActionReq({ service, token }))
+      .then((res: GResponse<OauthAuthenticateActionRes>) => {
+        setSession(res.data?.item?.session);
         if ((window as any).ReactNativeWebView) {
           (window as any).ReactNativeWebView.postMessage(
-            JSON.stringify(res.data),
+            JSON.stringify(res.data?.item),
           );
         }
         if (BUILD_VARIABLES.DEFAULT_ROUTE) {

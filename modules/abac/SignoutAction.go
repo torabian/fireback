@@ -4,15 +4,17 @@ import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
-	SignoutActionImp = SignoutAction
+	SignoutImpl = SignoutAction
 }
-func SignoutAction(
-	q fireback.QueryDSL) (string,
-	*fireback.IError,
-) {
+
+func SignoutAction(c SignoutActionRequest, query fireback.QueryDSL) (*SignoutActionResponse, error) {
 
 	// Clear secure cookie
-	q.G.SetCookie("authorization", "", 3600*24, "/", "", true, true)
+	c.GinCtx.SetCookie("authorization", "", 3600*24, "/", "", true, true)
 
-	return "OKAY", nil
+	return &SignoutActionResponse{
+		Payload: SignoutActionRes{
+			Okay: true,
+		},
+	}, nil
 }

@@ -10,86 +10,88 @@ package abac
 	and firebak tries to simplify that process for you.
 */
 
-import (
-	"fmt"
+// This code requires a deep test, since a lot is changed.
 
-	"github.com/schollz/progressbar/v3"
-	"github.com/torabian/fireback/modules/fireback"
-	seeders "github.com/torabian/fireback/modules/fireback/mocks/User"
-)
+// import (
+// 	"fmt"
 
-func ImportFromFs(req *ImportUserActionReqDto, q fireback.QueryDSL) (*OkayResponseDto, *fireback.IError) {
+// 	"github.com/schollz/progressbar/v3"
+// 	"github.com/torabian/fireback/modules/fireback"
+// 	seeders "github.com/torabian/fireback/modules/fireback/mocks/User"
+// )
 
-	var content fireback.ContentImport[UserImportDto]
-	if err := fireback.ReadYamlFileEmbed[fireback.ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
-		return nil, fireback.Create401Error(&AbacMessages.FileNotFound, []string{})
-	}
-	bar := progressbar.Default(int64(len(content.Items)))
-	for _, item := range content.Items {
-		user, role, workspace, passport := CreateUserCatalog(&item)
-		if _, err := UnsafeGenerateUser(&GenerateUserDto{
-			user:            user,
-			workspace:       workspace,
-			role:            role,
-			passport:        passport,
-			createUser:      true,
-			createWorkspace: true,
-			createRole:      true,
-			createPassport:  true,
+// func ImportFromFs(req *ImportUserActionReqDto, q fireback.QueryDSL) (*OkayResponseDto, *fireback.IError) {
 
-			// We want always to be able to login regardless
-			restricted: true,
-		}, q); err != nil {
-			fmt.Println("Error:", err)
-		} else {
+// 	var content fireback.ContentImport[UserImportDto]
+// 	if err := fireback.ReadYamlFileEmbed[fireback.ContentImport[UserImportDto]](&seeders.ViewsFs, "fake-random-users.yml", &content); err != nil {
+// 		return nil, fireback.Create401Error(&AbacMessages.FileNotFound, []string{})
+// 	}
+// 	bar := progressbar.Default(int64(len(content.Items)))
+// 	for _, item := range content.Items {
+// 		user, role, workspace, passport := CreateUserCatalog(&item)
+// 		if _, err := UnsafeGenerateUser(&GenerateUserDto{
+// 			user:            user,
+// 			workspace:       workspace,
+// 			role:            role,
+// 			passport:        passport,
+// 			createUser:      true,
+// 			createWorkspace: true,
+// 			createRole:      true,
+// 			createPassport:  true,
 
-		}
-		bar.Add(1)
-		// time.Sleep(time)
-	}
+// 			// We want always to be able to login regardless
+// 			restricted: true,
+// 		}, q); err != nil {
+// 			fmt.Println("Error:", err)
+// 		} else {
 
-	return &OkayResponseDto{}, nil
-}
+// 		}
+// 		bar.Add(1)
+// 		// time.Sleep(time)
+// 	}
 
-func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
+// 	return &OkayResponseDto{}, nil
+// }
 
-	user := &UserEntity{
-		UniqueId: "ux_" + dto.Passports[0].Value,
-	}
+// func CreateUserCatalog(dto *UserImportDto) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
 
-	passwordHashed, _ := fireback.HashPassword(dto.Passports[0].Password)
-	method, _ := DetectSignupMechanismOverValue(dto.Passports[0].Value)
+// 	user := &UserEntity{
+// 		UniqueId: "ux_" + dto.Passports[0].Value,
+// 	}
 
-	passport := &PassportEntity{
-		UniqueId: "ps_" + dto.Passports[0].Value,
-		Value:    dto.Passports[0].Value,
-		Password: passwordHashed,
-		Type:     method,
-	}
+// 	passwordHashed, _ := fireback.HashPassword(dto.Passports[0].Password)
+// 	method, _ := DetectSignupMechanismOverValue(dto.Passports[0].Value)
 
-	// For now, it's random. But make sure later we have the track of workspaces
-	wid := fireback.UUID()
-	workspace := &WorkspaceEntity{
+// 	passport := &PassportEntity{
+// 		UniqueId: "ps_" + dto.Passports[0].Value,
+// 		Value:    dto.Passports[0].Value,
+// 		Password: passwordHashed,
+// 		Type:     method,
+// 	}
 
-		UniqueId:    wid,
-		WorkspaceId: fireback.NewString(wid),
-		LinkerId:    fireback.NewString(ROOT_VAR),
-		ParentId:    fireback.NewString(ROOT_VAR),
-		TypeId:      fireback.NewString(ROOT_VAR),
-	}
+// 	// For now, it's random. But make sure later we have the track of workspaces
+// 	wid := fireback.UUID()
+// 	workspace := &WorkspaceEntity{
 
-	role := &RoleEntity{
-		UniqueId: "ROLE_WORKSPACE_" + fireback.UUID(),
+// 		UniqueId:    wid,
+// 		WorkspaceId: fireback.NewString(wid),
+// 		LinkerId:    fireback.NewString(ROOT_VAR),
+// 		ParentId:    fireback.NewString(ROOT_VAR),
+// 		TypeId:      fireback.NewString(ROOT_VAR),
+// 	}
 
-		WorkspaceId: fireback.NewString(workspace.UniqueId),
-		Capabilities: []*fireback.CapabilityEntity{
-			{UniqueId: ROOT_ALL_ACCESS, Visibility: fireback.NewString("A")},
-		},
-	}
+// 	role := &RoleEntity{
+// 		UniqueId: "ROLE_WORKSPACE_" + fireback.UUID(),
 
-	return user, role, workspace, passport
-}
+// 		WorkspaceId: fireback.NewString(workspace.UniqueId),
+// 		Capabilities: []*fireback.CapabilityEntity{
+// 			{UniqueId: ROOT_ALL_ACCESS, Visibility: fireback.NewString("A")},
+// 		},
+// 	}
 
-func init() {
-	ImportUserActionImp = ImportFromFs
-}
+// 	return user, role, workspace, passport
+// }
+
+// func init() {
+// 	ImportUserActionImp = ImportFromFs
+// }

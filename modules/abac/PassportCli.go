@@ -72,7 +72,7 @@ var PassportCli cli.Command = cli.Command{
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionDef.ToCli(),
 		UserPassportsActionDef.ToCli(),
-		OauthAuthenticateActionCmd,
+		OauthAuthenticateActionDef.ToCli(),
 		PassportWipeCmd,
 		PassportUpdateCmd,
 		fireback.GetCommonRemoveQuery(

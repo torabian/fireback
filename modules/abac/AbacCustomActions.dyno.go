@@ -22,100 +22,6 @@ type QueryUserRoleWorkspacesResDtoRoles struct {
 	Capabilities []string `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
 }
 
-var OauthAuthenticateSecurityModel *fireback.SecurityModel = nil
-
-type OauthAuthenticateActionReqDto struct {
-	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
-	Token string `json:"token" xml:"token" yaml:"token"        `
-	// The service name, such as 'google' which later backend will use to authorize the token and create the user.
-	Service string `json:"service" xml:"service" yaml:"service"        `
-}
-
-func (x *OauthAuthenticateActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var OauthAuthenticateCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "token",
-		Required: false,
-		Usage:    `The token that Auth2 provider returned to the front-end, which will be used to validate the backend (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "service",
-		Required: false,
-		Usage:    `The service name, such as 'google' which later backend will use to authorize the token and create the user. (string)`,
-	},
-}
-
-func OauthAuthenticateActionReqValidator(dto *OauthAuthenticateActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastOauthAuthenticateFromCli(c *cli.Context) *OauthAuthenticateActionReqDto {
-	template := &OauthAuthenticateActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("token") {
-		template.Token = c.String("token")
-	}
-	if c.IsSet("service") {
-		template.Service = c.String("service")
-	}
-	return template
-}
-
-type OauthAuthenticateActionResDto struct {
-	Session   *UserSessionDto `json:"session" xml:"session" yaml:"session"    gorm:"foreignKey:SessionId;references:UniqueId"      `
-	SessionId fireback.String `json:"sessionId" yaml:"sessionId" xml:"sessionId"  `
-	// The next possible action which is suggested.
-	Next []string `json:"next" xml:"next" yaml:"next"        `
-}
-
-func (x *OauthAuthenticateActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type oauthAuthenticateActionImpSig func(
-	req *OauthAuthenticateActionReqDto,
-	q fireback.QueryDSL) (*OauthAuthenticateActionResDto,
-	*fireback.IError,
-)
-
-var OauthAuthenticateActionImp oauthAuthenticateActionImpSig
-
-func OauthAuthenticateActionFn(
-	req *OauthAuthenticateActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*OauthAuthenticateActionResDto,
-	*fireback.IError,
-) {
-	if OauthAuthenticateActionImp == nil {
-		return nil, nil
-	}
-	return OauthAuthenticateActionImp(req, q)
-}
-
-var OauthAuthenticateActionCmd cli.Command = cli.Command{
-	Name:  "oauth-authenticate",
-	Usage: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
-	Flags: OauthAuthenticateCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OauthAuthenticateSecurityModel)
-		dto := CastOauthAuthenticateFromCli(c)
-		result, err := OauthAuthenticateActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var UserInvitationsSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
@@ -204,108 +110,6 @@ var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
 			QueryUserRoleWorkspacesSecurityModel,
 			nil,
 		)
-	},
-}
-var SignoutSecurityModel *fireback.SecurityModel = nil
-
-type signoutActionImpSig func(
-	q fireback.QueryDSL) (string,
-	*fireback.IError,
-)
-
-var SignoutActionImp signoutActionImpSig
-
-func SignoutActionFn(
-	q fireback.QueryDSL,
-) (
-	string,
-	*fireback.IError,
-) {
-	if SignoutActionImp == nil {
-		return "", nil
-	}
-	return SignoutActionImp(q)
-}
-
-var SignoutActionCmd cli.Command = cli.Command{
-	Name:  "signout",
-	Usage: `Signout the user, clears cookies or does anything else if needed.`,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SignoutSecurityModel)
-		result, err := SignoutActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-var ImportUserSecurityModel *fireback.SecurityModel = nil
-
-type ImportUserActionReqDto struct {
-	Path string `json:"path" xml:"path" yaml:"path"        `
-}
-
-func (x *ImportUserActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var ImportUserCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "path",
-		Required: false,
-		Usage:    `path (string)`,
-	},
-}
-
-func ImportUserActionReqValidator(dto *ImportUserActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastImportUserFromCli(c *cli.Context) *ImportUserActionReqDto {
-	template := &ImportUserActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("path") {
-		template.Path = c.String("path")
-	}
-	return template
-}
-
-type importUserActionImpSig func(
-	req *ImportUserActionReqDto,
-	q fireback.QueryDSL) (*OkayResponseDto,
-	*fireback.IError,
-)
-
-var ImportUserActionImp importUserActionImpSig
-
-func ImportUserActionFn(
-	req *ImportUserActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*OkayResponseDto,
-	*fireback.IError,
-) {
-	if ImportUserActionImp == nil {
-		return nil, nil
-	}
-	return ImportUserActionImp(req, q)
-}
-
-var ImportUserActionCmd cli.Command = cli.Command{
-	Name:  "import-user",
-	Usage: `Imports users, and creates their passports, and all details`,
-	Flags: ImportUserCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ImportUserSecurityModel)
-		dto := CastImportUserFromCli(c)
-		result, err := ImportUserActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 var SendEmailSecurityModel *fireback.SecurityModel = nil
@@ -721,6 +525,76 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var SignoutImpl func(c SignoutActionRequest, query fireback.QueryDSL) (*SignoutActionResponse, error) = nil
+var SignoutSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var SignoutActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       SignoutActionMeta().CliName,
+	Description:   SignoutActionMeta().Description,
+	Name:          SignoutActionMeta().Name,
+	Method:        SignoutActionMeta().Method,
+	Url:           SignoutActionMeta().URL,
+	SecurityModel: SignoutSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := SignoutActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := SignoutImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SignoutSecurityModel)
+		req := SignoutActionRequest{}
+		resp, err := SignoutImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var OauthAuthenticateImpl func(c OauthAuthenticateActionRequest, query fireback.QueryDSL) (*OauthAuthenticateActionResponse, error) = nil
+var OauthAuthenticateSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var OauthAuthenticateActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       OauthAuthenticateActionMeta().CliName,
+	Description:   OauthAuthenticateActionMeta().Description,
+	Name:          OauthAuthenticateActionMeta().Name,
+	Method:        OauthAuthenticateActionMeta().Method,
+	Url:           OauthAuthenticateActionMeta().URL,
+	SecurityModel: OauthAuthenticateSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := OauthAuthenticateActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := OauthAuthenticateImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OauthAuthenticateSecurityModel)
+		req := OauthAuthenticateActionRequest{}
+		resp, err := OauthAuthenticateImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var AcceptInviteImpl func(c AcceptInviteActionRequest, query fireback.QueryDSL) (*AcceptInviteActionResponse, error) = nil
 var AcceptInviteSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
@@ -1189,6 +1063,8 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		SignoutActionDef,
+		OauthAuthenticateActionDef,
 		AcceptInviteActionDef,
 		ConfirmClassicPassportTotpActionDef,
 		ChangePasswordActionDef,
@@ -1203,29 +1079,6 @@ func AbacCustomActions() []fireback.Module3Action {
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
 		/// End for emi actions
-		{
-			Method:        "POST",
-			Url:           "/passport/via-oauth",
-			SecurityModel: OauthAuthenticateSecurityModel,
-			Name:          "oauthAuthenticate",
-			Description:   "When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, OauthAuthenticateActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         OauthAuthenticateActionFn,
-			ResponseEntity: &OauthAuthenticateActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "OauthAuthenticateActionResDto",
-			},
-			RequestEntity: &OauthAuthenticateActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "OauthAuthenticateActionReqDto",
-			},
-		},
 		{
 			Method:        "GET",
 			Url:           "/users/invitations",
@@ -1270,48 +1123,6 @@ func AbacCustomActions() []fireback.Module3Action {
 			ResponseEntity: &QueryUserRoleWorkspacesActionResDto{},
 			Out: &fireback.Module3ActionBody{
 				Entity: "QueryUserRoleWorkspacesActionResDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/passport/signout",
-			SecurityModel: SignoutSecurityModel,
-			Name:          "signout",
-			Description:   "Signout the user, clears cookies or does anything else if needed.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPost(c, SignoutActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         SignoutActionFn,
-			ResponseEntity: string(""),
-			Out: &fireback.Module3ActionBody{
-				Entity: "",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/user/import",
-			SecurityModel: ImportUserSecurityModel,
-			Name:          "importUser",
-			Description:   "Imports users, and creates their passports, and all details",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, ImportUserActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         ImportUserActionFn,
-			ResponseEntity: &OkayResponseDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "OkayResponseDto",
-			},
-			RequestEntity: &ImportUserActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "ImportUserActionReqDto",
 			},
 		},
 		{
@@ -1434,11 +1245,8 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
-	OauthAuthenticateActionCmd,
 	UserInvitationsActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
-	SignoutActionCmd,
-	ImportUserActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
 	InviteToWorkspaceActionCmd,
@@ -1459,6 +1267,8 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		SignoutActionDef.ToCli(),
+		OauthAuthenticateActionDef.ToCli(),
 		AcceptInviteActionDef.ToCli(),
 		ConfirmClassicPassportTotpActionDef.ToCli(),
 		ChangePasswordActionDef.ToCli(),
@@ -1472,11 +1282,8 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
-		OauthAuthenticateActionCmd,
 		UserInvitationsActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
-		SignoutActionCmd,
-		ImportUserActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,
 		InviteToWorkspaceActionCmd,

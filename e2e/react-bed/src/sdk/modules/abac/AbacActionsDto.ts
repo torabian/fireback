@@ -13,9 +13,6 @@ import {
 import {
     GsmProviderEntity,
 } from "./GsmProviderEntity"
-import {
-    UserSessionDto,
-} from "./UserSessionDto"
   export class QueryUserRoleWorkspacesResDtoRoles {
   public name?: string | null;
   public uniqueId?: string | null;
@@ -24,34 +21,6 @@ import {
   */
   public capabilities?: string[] | null;
   }
-export class OauthAuthenticateActionReqDto {
-  /**
-  The token that Auth2 provider returned to the front-end, which will be used to validate the backend
-  */
-  public token?: string | null;
-  /**
-  The service name, such as 'google' which later backend will use to authorize the token and create the user.
-  */
-  public service?: string | null;
-public static Fields = {
-      token: 'token',
-      service: 'service',
-}
-}
-export class OauthAuthenticateActionResDto {
-  public session?: UserSessionDto | null;
-      sessionId?: string | null;
-  /**
-  The next possible action which is suggested.
-  */
-  public next?: string[] | null;
-public static Fields = {
-          sessionId: 'sessionId',
-      session$: 'session',
-      session: UserSessionDto.Fields,
-      next: 'next',
-}
-}
 export class QueryUserRoleWorkspacesActionResDto {
   public name?: string | null;
   /**
@@ -70,12 +39,6 @@ public static Fields = {
       uniqueId: 'uniqueId',
       capabilities: 'capabilities',
       },
-}
-}
-export class ImportUserActionReqDto {
-  public path?: string | null;
-public static Fields = {
-      path: 'path',
 }
 }
 export class SendEmailActionReqDto {
