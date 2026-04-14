@@ -1,17 +1,13 @@
 import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
-import { type IResponse } from "../../sdk/core/http-tools";
-import { usePostPassportTotpConfirm } from "../../sdk/modules/abac/usePostPassportTotpConfirm";
+import { ConfirmClassicPassportTotpActionReq, useConfirmClassicPassportTotpAction, type ConfirmClassicPassportTotpActionRes } from "../../sdk/modules/abac/ConfirmClassicPassportTotp";
+import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
-import {
-  ConfirmClassicPassportTotpActionReqDto,
-  ConfirmClassicPassportTotpActionResDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
 
 export const usePresenter = () => {
   const { goBack, state } = useRouter();
-  const { submit: confirm, mutation } = usePostPassportTotpConfirm();
+  const mutation = useConfirmClassicPassportTotpAction();
   const { onComplete } = useCompleteAuth();
 
   const totpUrl = state?.totpUrl;
@@ -19,23 +15,23 @@ export const usePresenter = () => {
   const password = state?.password;
   const value = state?.value;
 
-  const submit = (values: Partial<ConfirmClassicPassportTotpActionReqDto>) => {
-    confirm({ ...values, password, value })
+  const submit = (values: Partial<ConfirmClassicPassportTotpActionReq>) => {
+    mutation.mutateAsync(new ConfirmClassicPassportTotpActionReq({ ...values, password, value }))
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
       });
   };
 
-  const form = useFormik<Partial<ConfirmClassicPassportTotpActionReqDto>>({
+  const form = useFormik<Partial<ConfirmClassicPassportTotpActionReq>>({
     initialValues: {},
     onSubmit: submit,
   });
 
   const successful = (
-    res: IResponse<ConfirmClassicPassportTotpActionResDto>
+    res: GResponse<ConfirmClassicPassportTotpActionRes>
   ) => {
-    if (res.data?.session) {
+    if (res.data?.item?.session) {
       onComplete(res);
     }
   };

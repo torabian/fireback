@@ -7,15 +7,12 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	ConfirmClassicPassportTotpActionImp = ConfirmClassicPassportTotpAction
+	ConfirmClassicPassportTotpImpl = ConfirmClassicPassportTotpAction
 }
 
-func ConfirmClassicPassportTotpAction(
-	req *ConfirmClassicPassportTotpActionReqDto,
-	q fireback.QueryDSL) (*ConfirmClassicPassportTotpActionResDto,
-	*fireback.IError,
-) {
-	if err := ConfirmClassicPassportTotpActionReqValidator(req); err != nil {
+func ConfirmClassicPassportTotpAction(c ConfirmClassicPassportTotpActionRequest, q fireback.QueryDSL) (*ConfirmClassicPassportTotpActionResponse, error) {
+	req := c.Body
+	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
@@ -46,7 +43,9 @@ func ConfirmClassicPassportTotpAction(
 	}
 
 	// Implement the logic here.
-	return &ConfirmClassicPassportTotpActionResDto{
-		Session: &singinResult.Session,
+	return &ConfirmClassicPassportTotpActionResponse{
+		Payload: ConfirmClassicPassportTotpActionRes{
+			Session: singinResult.Session,
+		},
 	}, nil
 }

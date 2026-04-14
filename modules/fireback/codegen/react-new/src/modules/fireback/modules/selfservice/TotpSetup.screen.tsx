@@ -7,9 +7,9 @@ import { useS } from "../../hooks/useS";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpSetup.presenter";
-import { ConfirmClassicPassportTotpActionReqDto } from "../../sdk/modules/abac/AbacActionsDto";
+import { ConfirmClassicPassportTotpActionReq } from "../../sdk/modules/abac/ConfirmClassicPassportTotp";
 
-export const TotpSetup = ({}: {}) => {
+export const TotpSetup = ({ }: {}) => {
   const { goBack, submit, mutation, form, totpUrl, forcedTotp } =
     usePresenter();
 
@@ -45,7 +45,7 @@ const Form = ({
   forcedTotp,
   totpUrl,
 }: {
-  form: FormikProps<Partial<ConfirmClassicPassportTotpActionReqDto>>;
+  form: FormikProps<Partial<ConfirmClassicPassportTotpActionReq>>;
   mutation: UseMutationResult<any, any, Partial<any>, any>;
   totpUrl: string;
   forcedTotp: boolean;
@@ -68,7 +68,7 @@ const Form = ({
         values={form.values.totpCode?.split("")}
         onChange={(value) =>
           form.setFieldValue(
-            ConfirmClassicPassportTotpActionReqDto.Fields.totpCode,
+            ConfirmClassicPassportTotpActionReq.Fields.totpCode,
             value,
             false
           )
