@@ -172,6 +172,26 @@ dtom:
         type: string?
 
 acts:
+  - name: AcceptInvite
+    method: post
+    url: /user/invitation/accept
+    description: Use it when user accepts an invitation, and it will complete the joining process
+    security:
+      resolveStrategy: user
+
+    out:
+      envelope: GResponse
+      fields:
+        - name: accepted
+          type: bool
+    in:
+      fields:
+        - name: invitationUniqueId
+          type: string
+          tags:
+            validate: required
+          description: The invitation id which will be used to process
+
   - name: ConfirmClassicPassportTotp
     description:
       When user requires to setup the totp for an specifc passport, they can use this endpoint to confirm
@@ -553,20 +573,6 @@ acts:
     out:
       dto: UserSessionDto
 actions:
-  - name: acceptInvite
-    method: post
-    url: /user/invitation/accept
-    description: Use it when user accepts an invitation, and it will complete the joining process
-    security:
-      resolveStrategy: user
-
-    in:
-      fields:
-        - name: invitationUniqueId
-          type: string
-          validate: required
-          description: The invitation id which will be used to process
-
   - name: oauthAuthenticate
     description: When a token is got from a oauth service such as google,
       we send the token here to authenticate the user.
@@ -595,17 +601,6 @@ actions:
           type: slice
           primitive: string
           description: The next possible action which is suggested.
-
-  # - name: addPassport
-  #   url: /users/passports/add
-  #   security:
-  #     resolveStrategy: user
-  #   method: post
-  #   in:
-  #     fields:
-  #       - name: value
-  #         description:
-  #           The new passport value
 
   - name: userInvitations
     description:

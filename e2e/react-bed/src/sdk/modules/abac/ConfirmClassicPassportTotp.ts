@@ -1,3 +1,4 @@
+import { GResponse } from "../../sdk/envelopes/index";
 import { UserSessionDto } from "./UserSessionDto";
 import { buildUrl } from "../../sdk/common/buildUrl";
 import {
@@ -86,7 +87,7 @@ export class ConfirmClassicPassportTotpAction {
     overrideUrl?: string,
   ) => {
     return fetchx<
-      ConfirmClassicPassportTotpActionRes,
+      GResponse<ConfirmClassicPassportTotpActionRes>,
       ConfirmClassicPassportTotpActionReq,
       unknown
     >(
@@ -128,7 +129,14 @@ export class ConfirmClassicPassportTotpAction {
     );
     return handleFetchResponse(
       res,
-      (item) => (creatorFn ? creatorFn(item) : item),
+      (data) => {
+        const resp = new GResponse<ConfirmClassicPassportTotpActionRes>();
+        if (creatorFn) {
+          resp.setCreator(creatorFn);
+        }
+        resp.inject(data);
+        return resp;
+      },
       onMessage,
       init?.signal,
     );
@@ -171,6 +179,7 @@ export class ConfirmClassicPassportTotpAction {
       ],
     },
     out: {
+      envelope: "GResponse",
       fields: [
         {
           name: "session",
