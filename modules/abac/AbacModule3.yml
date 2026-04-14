@@ -156,6 +156,36 @@ dtom:
         type: string?
 
 acts:
+  - name: OauthAuthenticate
+    description: When a token is got from a oauth service such as google,
+      we send the token here to authenticate the user.
+      To me seems this doesn't need to have 2FA or anything, so we return
+      the session directly, or maybe there needs to be next step.
+    url: /passport/via-oauth
+    method: post
+    in:
+      fields:
+        - name: token
+          type: string
+          description:
+            The token that Auth2 provider returned to the front-end, which will
+            be used to validate the backend
+        - name: service
+          type: string
+          description:
+            The service name, such as 'google' which later backend will use to authorize the token
+            and create the user.
+    out:
+      envelope: GResponse
+      fields:
+        - name: session
+          type: one
+          target: UserSessionDto
+        - name: next
+          type: slice
+          primitive: string
+          description: The next possible action which is suggested.
+
   - name: AcceptInvite
     method: post
     url: /user/invitation/accept
@@ -557,35 +587,6 @@ acts:
     out:
       dto: UserSessionDto
 actions:
-  - name: oauthAuthenticate
-    description: When a token is got from a oauth service such as google,
-      we send the token here to authenticate the user.
-      To me seems this doesn't need to have 2FA or anything, so we return
-      the session directly, or maybe there needs to be next step.
-    url: /passport/via-oauth
-    method: post
-    in:
-      fields:
-        - name: token
-          type: string
-          description:
-            The token that Auth2 provider returned to the front-end, which will
-            be used to validate the backend
-        - name: service
-          type: string
-          description:
-            The service name, such as 'google' which later backend will use to authorize the token
-            and create the user.
-    out:
-      fields:
-        - name: session
-          type: one
-          target: UserSessionDto
-        - name: next
-          type: slice
-          primitive: string
-          description: The next possible action which is suggested.
-
   - name: userInvitations
     description:
       Shows the invitations for an specific user, if the invited member already has a account.

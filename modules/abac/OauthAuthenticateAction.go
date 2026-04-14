@@ -9,6 +9,10 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
+func init() {
+	OauthAuthenticateImpl = OauthAuthenticateAction
+}
+
 // Supported OAuth providers
 const (
 	ProviderGoogle   = "google"
@@ -24,21 +28,31 @@ type TokenInfo struct {
 }
 
 // OauthAuthenticateAction authenticates a user via OAuth
-func OauthAuthenticateAction(
-	req *OauthAuthenticateActionReqDto,
-	q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
-
+func OauthAuthenticateAction(c OauthAuthenticateActionRequest, q fireback.QueryDSL) (*OauthAuthenticateActionResponse, error) {
+	req := c.Body
 	switch req.Service {
 	case ProviderGoogle:
-		return authenticateWithGoogle(req.Token, q)
+		if res, err := authenticateWithGoogle(req.Token, q); err == nil {
+			return &OauthAuthenticateActionResponse{
+				Payload: fireback.GResponseSingleItem(res),
+			}, nil
+		} else {
+			return nil, err
+		}
 	case ProviderFacebook:
-		return authenticateWithFacebook(req.Token, q)
+		if res, err := authenticateWithFacebook(req.Token, q); err == nil {
+			return &OauthAuthenticateActionResponse{
+				Payload: fireback.GResponseSingleItem(res),
+			}, nil
+		} else {
+			return nil, err
+		}
 	default:
 		return nil, fireback.Create401Error(&AbacMessages.UnsupportedOAuth, []string{})
 	}
 }
 
-func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
+func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fireback.QueryDSL) (*OauthAuthenticateActionRes, *fireback.IError) {
 	if err := validateValueFormat(info.Email); err != nil {
 		return nil, err
 	}
@@ -64,8 +78,8 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 			return nil, err
 		}
 
-		return &OauthAuthenticateActionResDto{
-			Session: &res.Session,
+		return &OauthAuthenticateActionRes{
+			Session: res.Session,
 		}, nil
 	} else {
 		session := &UserSessionDto{}
@@ -75,14 +89,14 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 		if err := applyUserTokenAndWorkspacesToToken(session, q); err != nil {
 			return nil, err
 		}
-		return &OauthAuthenticateActionResDto{
-			Session: session,
+		return &OauthAuthenticateActionRes{
+			Session: *session,
 		}, nil
 	}
 }
 
 // authenticateWithGoogle verifies the Google access token and returns user info
-func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
+func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionRes, *fireback.IError) {
 	url := fmt.Sprintf("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=%s", accessToken)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
@@ -99,7 +113,7 @@ func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*OauthAuth
 }
 
 // authenticateWithFacebook verifies the Facebook access token and returns user info
-func authenticateWithFacebook(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionResDto, *fireback.IError) {
+func authenticateWithFacebook(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionRes, *fireback.IError) {
 	url := fmt.Sprintf("https://graph.facebook.com/me?fields=email,name,picture&access_token=%s", accessToken)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
@@ -128,10 +142,6 @@ func authenticateWithFacebook(accessToken string, q fireback.QueryDSL) (*OauthAu
 	}
 
 	return continueAuthenticationViaOAuthEmail(tokenInfo, ProviderFacebook, q)
-}
-
-func init() {
-	OauthAuthenticateActionImp = OauthAuthenticateAction
 }
 
 func SplitName(fullName, email string) (firstName, lastName string) {
