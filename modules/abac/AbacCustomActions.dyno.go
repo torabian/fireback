@@ -112,36 +112,6 @@ var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
 		)
 	},
 }
-var SignoutSecurityModel *fireback.SecurityModel = nil
-
-type signoutActionImpSig func(
-	q fireback.QueryDSL) (string,
-	*fireback.IError,
-)
-
-var SignoutActionImp signoutActionImpSig
-
-func SignoutActionFn(
-	q fireback.QueryDSL,
-) (
-	string,
-	*fireback.IError,
-) {
-	if SignoutActionImp == nil {
-		return "", nil
-	}
-	return SignoutActionImp(q)
-}
-
-var SignoutActionCmd cli.Command = cli.Command{
-	Name:  "signout",
-	Usage: `Signout the user, clears cookies or does anything else if needed.`,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SignoutSecurityModel)
-		result, err := SignoutActionFn(query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
 var ImportUserSecurityModel *fireback.SecurityModel = nil
 
 type ImportUserActionReqDto struct {
@@ -627,6 +597,41 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var SignoutImpl func(c SignoutActionRequest, query fireback.QueryDSL) (*SignoutActionResponse, error) = nil
+var SignoutSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var SignoutActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       SignoutActionMeta().CliName,
+	Description:   SignoutActionMeta().Description,
+	Name:          SignoutActionMeta().Name,
+	Method:        SignoutActionMeta().Method,
+	Url:           SignoutActionMeta().URL,
+	SecurityModel: SignoutSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := SignoutActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := SignoutImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SignoutSecurityModel)
+		req := SignoutActionRequest{}
+		resp, err := SignoutImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var OauthAuthenticateImpl func(c OauthAuthenticateActionRequest, query fireback.QueryDSL) (*OauthAuthenticateActionResponse, error) = nil
 var OauthAuthenticateSecurityModel *fireback.SecurityModel = nil
 
@@ -1130,6 +1135,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		SignoutActionDef,
 		OauthAuthenticateActionDef,
 		AcceptInviteActionDef,
 		ConfirmClassicPassportTotpActionDef,
@@ -1189,25 +1195,6 @@ func AbacCustomActions() []fireback.Module3Action {
 			ResponseEntity: &QueryUserRoleWorkspacesActionResDto{},
 			Out: &fireback.Module3ActionBody{
 				Entity: "QueryUserRoleWorkspacesActionResDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/passport/signout",
-			SecurityModel: SignoutSecurityModel,
-			Name:          "signout",
-			Description:   "Signout the user, clears cookies or does anything else if needed.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPost(c, SignoutActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         SignoutActionFn,
-			ResponseEntity: string(""),
-			Out: &fireback.Module3ActionBody{
-				Entity: "",
 			},
 		},
 		{
@@ -1355,7 +1342,6 @@ func AbacCustomActions() []fireback.Module3Action {
 var AbacCustomActionsCli = []cli.Command{
 	UserInvitationsActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
-	SignoutActionCmd,
 	ImportUserActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
@@ -1377,6 +1363,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		SignoutActionDef.ToCli(),
 		OauthAuthenticateActionDef.ToCli(),
 		AcceptInviteActionDef.ToCli(),
 		ConfirmClassicPassportTotpActionDef.ToCli(),
@@ -1393,7 +1380,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		OsLoginAuthenticateActionDef.ToCli(),
 		UserInvitationsActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
-		SignoutActionCmd,
 		ImportUserActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,

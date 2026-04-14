@@ -156,6 +156,20 @@ dtom:
         type: string?
 
 acts:
+  - name: Signout
+    url: /passport/signout
+    description: Signout the user, clears cookies or does anything else if needed.
+    method: post
+    in:
+      fields:
+        - name: clear
+          type: bool?
+    out:
+      envelope: GResponse
+      fields:
+        - name: okay
+          type: bool
+
   - name: OauthAuthenticate
     description: When a token is got from a oauth service such as google,
       we send the token here to authenticate the user.
@@ -630,11 +644,6 @@ actions:
               type: slice
               description: Capabilities related to this role which are available
               primitive: string
-
-  - name: signout
-    url: /passport/signout
-    description: Signout the user, clears cookies or does anything else if needed.
-    method: post
 
   - name: importUser
     url: /user/import
