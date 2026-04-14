@@ -72,22 +72,6 @@ dtom:
         type: string
       - name: workspaceTypeId
         type: string
-  - name: reactiveSearchResult
-    fields:
-      - type: string
-        name: uniqueId
-      - type: string
-        name: phrase
-      - type: string
-        name: icon
-      - type: string
-        name: description
-      - type: string
-        name: group
-      - type: string
-        name: uiLocation
-      - type: string
-        name: actionFn
   - name: assignRole
     fields:
       - name: roleId
@@ -651,13 +635,6 @@ actions:
     description: Signout the user, clears cookies or does anything else if needed.
     method: post
 
-  - name: reactiveSearch
-    description:
-      Reactive search is a general purpose search mechanism for different modules,
-      and could be used in mobile apps or front-end to quickly search for a entity.
-    url: reactive-search
-    method: reactive
-    format: reactive
   - name: importUser
     url: /user/import
     method: post

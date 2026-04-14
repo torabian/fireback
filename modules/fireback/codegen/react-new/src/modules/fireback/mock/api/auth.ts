@@ -6,12 +6,11 @@ import {
   method,
   uriMatch,
 } from "../../hooks/mock-tools";
-import {
-  ConfirmClassicPassportTotpActionResDto,
-} from "../../sdk/modules/abac/AbacActionsDto";
+
 import type { CheckClassicPassportActionRes } from "../../sdk/modules/abac/CheckClassicPassport";
 import { CheckPassportMethodsActionRes } from "../../sdk/modules/abac/CheckPassportMethods";
 import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
+import type { ConfirmClassicPassportTotpActionRes } from "../../sdk/modules/abac/ConfirmClassicPassportTotp";
 import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
@@ -128,7 +127,7 @@ export class AuthMockServer {
   @method("post")
   async postConfirm(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionResDto>>> {
+  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionRes>>> {
     return {
       data: {
         session: commonSession.data,
@@ -140,7 +139,7 @@ export class AuthMockServer {
   @method("post")
   async postOtp(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionResDto>>> {
+  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionRes>>> {
     return {
       data: {
         session: commonSession.data,

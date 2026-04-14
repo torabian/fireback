@@ -34,7 +34,7 @@ func QueryRolesReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 
 	roles := "roles"
 	for _, item := range items {
-		loc := "/role/" + item.UniqueId
+		loc := "/selfservice/role/" + item.UniqueId
 
 		uid := fireback.UUID()
 

@@ -5,7 +5,7 @@
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
 */
 import { type FormikHelpers } from "formik";
-import React, { 
+import React, {
   useCallback,
   useContext,
   useState,
@@ -21,7 +21,7 @@ import {
 } from "react-query";
 import { RemoteQueryContext } from "../../core/react-tools";
 interface ReactiveQueryProps {
-  query?: any ,
+  query?: any,
   queryClient?: QueryClient,
   unauthorized?: boolean,
   execFnOverride?: any,
@@ -29,7 +29,7 @@ interface ReactiveQueryProps {
   onMessage?: (msg: string) => void;
   presistResult?: boolean;
 }
-export function useReactivereactiveSearch({ 
+export function useReactivereactiveSearch({
   queryOptions,
   execFnOverride,
   query,
@@ -37,7 +37,7 @@ export function useReactivereactiveSearch({
   unauthorized,
   onMessage,
   presistResult,
- }: ReactiveQueryProps) {
+}: ReactiveQueryProps) {
   const { options } = useContext(RemoteQueryContext);
   const remote = options.prefix;
   const token = options.headers?.authorization;
@@ -66,12 +66,11 @@ export function useReactivereactiveSearch({
     }
     setResult([]);
     const wsRemote = remote?.replace("https", "wss").replace("http", "ws");
-    const remoteUrl = `reactive-search`.substr(1)
-    let url = `${wsRemote}${remoteUrl}?acceptLanguage=${
-      (options as any).headers["accept-language"]
-    }&token=${token}&workspaceId=${workspaceId}&${new URLSearchParams(
-      value
-    )}&${new URLSearchParams(query || {})}`;
+    const remoteUrl = `/reactive-search`.substr(1)
+    let url = `${wsRemote}${remoteUrl}?acceptLanguage=${(options as any).headers["accept-language"]
+      }&token=${token}&workspaceId=${workspaceId}&${new URLSearchParams(
+        value
+      )}&${new URLSearchParams(query || {})}`;
     url = url.replace(":uniqueId", query?.uniqueId);
     let conn = new WebSocket(url);
     connection.current = conn;
@@ -104,5 +103,5 @@ export function useReactivereactiveSearch({
       close();
     };
   }, []);
-  return { operate, data: result,  close, connected, write };
+  return { operate, data: result, close, connected, write };
 }

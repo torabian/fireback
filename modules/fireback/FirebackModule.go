@@ -63,12 +63,22 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
 			func(g *gin.RouterGroup, x *FirebackApp) error {
 
-				meta := EventBusSubscriptionActionMeta()
-				g.GET(
-					meta.URL,
-					WithSocketAuthorization(EventBusSubscriptionSecurityModel),
-					EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig),
-				)
+				{
+					meta := EventBusSubscriptionActionMeta()
+					g.GET(
+						meta.URL,
+						WithSocketAuthorization(EventBusSubscriptionSecurityModel),
+						EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig),
+					)
+				}
+				{
+					meta := ReactiveSearchActionMeta()
+					g.GET(
+						meta.URL,
+						WithSocketAuthorization(ReactiveSearchSecurityModel),
+						ReactiveSearchActionReactiveHandler(CreateReactiveSearchHanlder(x)),
+					)
+				}
 
 				return nil
 			},

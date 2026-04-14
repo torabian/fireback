@@ -236,18 +236,6 @@ var SignoutActionCmd cli.Command = cli.Command{
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
-var ReactiveSearchSecurityModel *fireback.SecurityModel = nil
-var ReactiveSearchActionImp = fireback.DefaultEmptyReactiveAction
-
-// Reactive action does not have that
-var ReactiveSearchActionCmd cli.Command = cli.Command{
-	Name:  "reactive-search",
-	Usage: `Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.`,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ReactiveSearchSecurityModel)
-		fireback.CliReactivePipeHandler(query, ReactiveSearchActionImp)
-	},
-}
 var ImportUserSecurityModel *fireback.SecurityModel = nil
 
 type ImportUserActionReqDto struct {
@@ -1304,21 +1292,6 @@ func AbacCustomActions() []fireback.Module3Action {
 			},
 		},
 		{
-			Method:        "REACTIVE",
-			Url:           "reactive-search",
-			SecurityModel: ReactiveSearchSecurityModel,
-			Name:          "reactiveSearch",
-			Description:   "Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.",
-			Handlers: []gin.HandlerFunc{
-				fireback.ReactiveSocketHandler(ReactiveSearchActionImp),
-			},
-			Format:         "REACTIVE",
-			ResponseEntity: string(""),
-			Out: &fireback.Module3ActionBody{
-				Entity: "",
-			},
-		},
-		{
 			Method:        "POST",
 			Url:           "/user/import",
 			SecurityModel: ImportUserSecurityModel,
@@ -1465,7 +1438,6 @@ var AbacCustomActionsCli = []cli.Command{
 	UserInvitationsActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
 	SignoutActionCmd,
-	ReactiveSearchActionCmd,
 	ImportUserActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
@@ -1504,7 +1476,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		UserInvitationsActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
 		SignoutActionCmd,
-		ReactiveSearchActionCmd,
 		ImportUserActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,
