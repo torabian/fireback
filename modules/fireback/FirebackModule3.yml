@@ -2,60 +2,53 @@ name: fireback
 meta-workspace: true
 config:
   - name: cookieAuthOnly
-    description: When true, the sessions (after authentication) would not return the token
+    description:
+      When true, the sessions (after authentication) would not return the token
       back in the response, and token will be only accessible via secure cookie.
     type: bool
   - name: clickhouseDsn
-    description: 
+    description:
       In case of using clickhouse replica option, then you need to provide this configuration for connection,
       make sure you add the username, password also in the same dsn
     type: string
     hint: 127.0.0.1:9000
   - name: mongodbDsn
-    description: 
-      In case of mongodb replica option, you need to provide the installation url and all necessary config
+    description: In case of mongodb replica option, you need to provide the installation url and all necessary config
     type: string
     hint: defaultmongodb instalaltion
   - name: elasticsearchDsn
-    description: 
-      Elastic search installation url in case some entities require to write into the elastic search.
+    description: Elastic search installation url in case some entities require to write into the elastic search.
     type: string
     hint: default elastic search installation
   - name: production
     type: bool
-    description: 
-      If true, set's the environment behavior to production, and some functionality will be limited
+    description: If true, set's the environment behavior to production, and some functionality will be limited
   - name: redisEventsUrl
     type: string
-    description: 
+    description:
       The address of the redis, which will be used to distribute the events. If provided empty,
       internal golang event library will be used, and events won't be distributed across different instances
-    default: '127.0.0.1:6379'
+    default: "127.0.0.1:6379"
 
   - name: tablePrefix
     type: string
-    description: 
-      Prefix all gorm tables with some string
+    description: Prefix all gorm tables with some string
   - name: vapidPublicKey
     type: string
-    description: 
-      VAPID Web push notification public key
+    description: VAPID Web push notification public key
   - name: vapidPrivateKey
     type: string
-    description: 
-      VAPID Web push notification private key
+    description: VAPID Web push notification private key
   - name: tokenGenerationStrategy
     type: string
     default: random
-    description: 
-      Fireback supports generating tokens based on random short string, or jwt.
+    description: Fireback supports generating tokens based on random short string, or jwt.
 
   - name: jwtSecretKey
     type: string
-    description: 
-      If tokenGenerationStrategy is set to jwt, then these secret will be used.
+    description: If tokenGenerationStrategy is set to jwt, then these secret will be used.
   - name: withTaskServer
-    description: 
+    description:
       Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run
       everything in single instance
     type: bool
@@ -64,7 +57,7 @@ config:
     description: >-
       Environment name, such as dev, prod, test, test-eu, etc...
   - name: dbName
-    default: ':memory:'
+    default: ":memory:"
     description: >-
       Database name for vendors which provide database names, such as mysql.
       Filename on disk for sqlite.
@@ -79,7 +72,7 @@ config:
     description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
     type: bool
   - name: dbPort
-    description: 'Database port for those which are having a port, 3306 on mysql for example'
+    description: "Database port for those which are having a port, 3306 on mysql for example"
     type: int64
   - name: driveEnabled
     type: bool
@@ -93,13 +86,13 @@ config:
       with all credentials and configs. This has hight priority, if set other
       details will be ignored.
   - name: dbHost
-    description: 'Database host, such as localhost, or 127.0.0.1'
+    description: "Database host, such as localhost, or 127.0.0.1"
   - name: dbUsername
-    description: 'Database username for connection, such as root.'
+    description: "Database username for connection, such as root."
   - name: dbPassword
     description: Database password for connection. Can be empty if there is no password
   - name: ginMode
-    description: 'Gin framework mode, which could be ''test'', ''debug'', ''release'''
+    description: "Gin framework mode, which could be 'test', 'debug', 'release'"
   - name: storage
     description: This is the storage url which files will be uploaded to
   - name: dbVendor
@@ -113,7 +106,7 @@ config:
     description: >-
       This is the url (host and port) of a queue service. If not set, we use the
       internal queue system
-    default: '127.0.0.1:6379'
+    default: "127.0.0.1:6379"
   - name: workerConcurrency
     description: How many tasks worker can take concurrently
     default: 10
@@ -123,12 +116,12 @@ config:
   - name: tusPort
     description: Resumable file upload server port.
   - name: cliToken
-    description: 'Authorization token for cli apps, to access resoruces similar on http api'
+    description: "Authorization token for cli apps, to access resoruces similar on http api"
   - name: cliRegion
-    description: 'Region, for example us or pl'
+    description: "Region, for example us or pl"
     default: us
   - name: cliLanguage
-    description: 'Language of the cli operations, for example en or pl'
+    description: "Language of the cli operations, for example en or pl"
     default: en
   - name: cliWorkspace
     description: Selected workspace in the cli context.
@@ -198,9 +191,17 @@ messages:
     en: The form data submitted is malformed or contains invalid fields. Please check the form and ensure all required fields are properly filled out.
   invalidFormDataContentType:
     en: The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.
- 
 
 acts:
+  - name: ReactiveSearch
+    description:
+      Reactive search is a general purpose search mechanism for different modules,
+      and could be used in mobile apps or front-end to quickly search for a entity.
+    url: /reactive-search
+    method: reactive
+    security:
+      resolveStrategy: workspace
+
   - name: EventBusSubscription
     description: Connects a client to all events related to their user profile, or workspace they are in
     method: reactive
@@ -215,8 +216,7 @@ acts:
       requires:
         - completeKey: root.manage.fireback.capability.query
       resolveStrategy: workspace
-    description: 
-      dLists all of the capabilities in database as a array of string as root access
+    description: dLists all of the capabilities in database as a array of string as root access
     out:
       envelope: GResponse
       fields:
@@ -227,32 +227,45 @@ acts:
           type: collection
           target: CapabilityInfoDto
 dtom:
-  - name: capabilityInfo
-    description: 
-      Capability and permission level which is suitable for front-end application to interact...
+  - name: reactiveSearchResult
     fields:
-    - name: uniqueId
-      type: string
-    - name: name
-      type: string
-    - name: children
-      type: collection
-      target: self@
-  
+      - type: string
+        name: uniqueId
+      - type: string
+        name: phrase
+      - type: string
+        name: icon
+      - type: string
+        name: description
+      - type: string
+        name: group
+      - type: string
+        name: uiLocation
+      - type: string
+        name: actionFn
+  - name: capabilityInfo
+    description: Capability and permission level which is suitable for front-end application to interact...
+    fields:
+      - name: uniqueId
+        type: string
+      - name: name
+        type: string
+      - name: children
+        type: collection
+        target: self@
+
   - name: okayResponse
 entities:
   - name: webPushConfig
     security:
       resolveStrategy: user
     distinctBy: user
-    description: 
-      Keep the web push notification configuration for each user
-    fields: 
-    - name: subscription
-      type: json
-      validate: required
-      description: 
-        The json content of the web push after getting it from browser
+    description: Keep the web push notification configuration for each user
+    fields:
+      - name: subscription
+        type: json
+        validate: required
+        description: The json content of the web push after getting it from browser
   - name: capability
     permRewrite:
       replace: root.modules

@@ -15,6 +15,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -25,6 +26,7 @@
     opacity: 1;
     max-height: 300px;
   }
+
   to {
     opacity: 0;
     max-height: 0;
@@ -36,6 +38,7 @@
     opacity: 0;
     max-height: 0;
   }
+
   to {
     opacity: 1;
     max-height: 1000px;
@@ -49,7 +52,7 @@
   // think about this not make it global 
   // height: 100vh;
   // overflow: hidden;
-  
+
 
   .panel-resize-handle {
     width: 8px;
@@ -64,9 +67,10 @@
       width: 2px;
     }
   }
-  
+
   .navbar-search-box {
-  display: flex;
+    display: flex;
+
     input {
       width: 220px;
     }
@@ -78,30 +82,33 @@
         width: 100%;
       }
     }
-  
+
   }
 
 
-  
+
   .reactive-search-result {
-      ul {
-        list-style: none;
-        padding: 30px 0;
-        
-      }
-      a {
-        text-decoration: none;
-        display: block;
-      }
-      .result-group-name {
-        text-transform: uppercase;
-        font-weight: bold;
-      }
-      .result-icon {
-        width: 25px;
-        height: 25px;
-        margin: 10px;
-      }
+    ul {
+      list-style: none;
+      padding: 30px 0;
+
+    }
+
+    a {
+      text-decoration: none;
+      display: block;
+    }
+
+    .result-group-name {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .result-icon {
+      width: 25px;
+      height: 25px;
+      margin: 10px;
+    }
   }
 
   .data-node-values-list {
@@ -116,18 +123,22 @@
     box-shadow: none;
     margin-bottom: 0;
     padding: 0;
+
     .card-footer {
       margin-left: 15px;
     }
   }
+
   .table.dto-view-table {
     th:first-child {
       width: 300px;
     }
+
     .table-active {
       transition: 0.3s all ease-in-out;
     }
   }
+
   * {
     // font-family: mac-sidebar, -apple-system, BlinkMacSystemFont, sans-serif;
 
@@ -152,14 +163,17 @@
     position: fixed !important;
     left: 10px !important;
     background-color: #ececed !important;
+
     * {
       color: #232323;
       font-size: 15px;
     }
+
     a {
       text-decoration: none;
       cursor: default;
     }
+
     .dropdown-item:hover {
       color: black;
       background: #5ba1ff;
@@ -191,6 +205,7 @@
     // animation: fadein 0.15s;
     font-size: 14px;
     margin: 0 -14px;
+
     td,
     th {
       padding: 3px;
@@ -199,6 +214,7 @@
     td {
       border: none;
     }
+
     tbody tr:nth-child(even) {
       background: #f4f5f5;
     }
@@ -228,11 +244,13 @@
     user-select: none;
     position: initial;
     z-index: 9;
+
     @supports (-webkit-touch-callout: none) {
       padding-top: 0;
       padding-top: constant(safe-area-inset-top);
       padding-top: env(safe-area-inset-top);
     }
+
     @media only screen and (max-width: 500px) {
       left: 0;
     }
@@ -262,7 +280,7 @@
   }
 
   .content-container {
-    
+
     background-color: transparent;
     box-shadow: none;
     $navHeight: 55px;
@@ -289,8 +307,7 @@
     overflow-x: hidden !important;
   }
 
-  .sidebar-overlay {
-  }
+  .sidebar-overlay {}
 
   @import "./sidebar.scss";
 
@@ -312,6 +329,7 @@
       border-radius: 5px;
     }
   }
+
   .dx-g-bs4-table {
     .dx-g-bs4-resizing-control-wrapper {
       width: 5px;
@@ -323,6 +341,7 @@
       right: 5px;
       top: 4px;
     }
+
     .table-row-action {
       margin: 0 5px;
       text-transform: uppercase;
@@ -331,10 +350,12 @@
       cursor: pointer;
       border: 0;
       border-radius: 5px;
+
       &:hover {
         background-color: rgb(185, 255, 185);
       }
     }
+
     thead .input-group {
       input {
         font-size: 13px;
@@ -342,6 +363,7 @@
         border: 0;
       }
     }
+
     tbody .form-control {
       font-size: 14px;
       padding: 0 5px;
@@ -372,6 +394,7 @@
 }
 
 html[dir="rtl"] {
+
   .mac-theme,
   .ios-theme {
     // * {
@@ -380,7 +403,7 @@ html[dir="rtl"] {
 
     .content-section {
       margin-left: 0;
-      margin-right: $sidebarExpandedSize;
+      // margin-right: $sidebarExpandedSize;
 
       @media only screen and (max-width: 500px) {
         margin-right: 0;
@@ -394,12 +417,12 @@ html[dir="rtl"] {
       }
     }
 
-    @media only screen and (max-width: 500px) {
-    }
+    @media only screen and (max-width: 500px) {}
 
     nav.navbar {
       right: $sidebarExpandedSize;
       left: 0;
+
       @media only screen and (max-width: 500px) {
         right: 0;
       }

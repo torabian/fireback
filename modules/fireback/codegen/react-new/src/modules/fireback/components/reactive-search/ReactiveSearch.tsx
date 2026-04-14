@@ -3,10 +3,10 @@ import { useKeyPress } from "../../hooks/useKeyPress";
 import { useLocale } from "../../hooks/useLocale";
 import { useT } from "../../hooks/useT";
 import { useRouter } from "../../hooks/useRouter";
-import { useReactivereactiveSearch } from "../../sdk/modules/abac/useReactivereactiveSearch";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";
 import { detectDeviceType } from "../../hooks/deviceInformation";
+import { useReactivereactiveSearch } from "./useReactiveSearchOld";
 
 export function ReactiveSearch() {
   const t = useT();

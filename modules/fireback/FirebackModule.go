@@ -18,7 +18,54 @@ var EverRunEntities []interface{} = []interface{}{
 	&CapabilityEntityPolyglot{},
 }
 
-func workspaceModuleCore(module *ModuleProvider) {
+type FirebackModuleConfig struct{}
+
+type X = func(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error)
+
+func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
+
+	module := &ModuleProvider{
+		Name:        "fireback",
+		Definitions: &Module3Definitions,
+		Actions: [][]Module3Action{
+			GetCapabilityModule3Actions(),
+			FirebackCustomActions(),
+		},
+		EntityBundles: []EntityBundle{
+			WebPushConfigEntityBundle,
+		},
+
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
+			func(g *gin.RouterGroup, x *FirebackApp) error {
+
+				{
+					meta := EventBusSubscriptionActionMeta()
+					g.GET(
+						meta.URL,
+						WithSocketAuthorization(EventBusSubscriptionSecurityModel),
+						EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig),
+					)
+				}
+				{
+					meta := ReactiveSearchActionMeta()
+					g.GET(
+						meta.URL,
+						WithSocketAuthorization(ReactiveSearchSecurityModel),
+						ReactiveSearchActionReactiveHandler(CreateReactiveSearchHanlder(x)),
+					)
+				}
+
+				return nil
+			},
+		},
+		GoMigrateDirectory: &migrations.MigrationsFs,
+	}
+
+	module.ProvideCliHandlers([]cli.Command{
+		CapabilityCliFn(),
+		PushNotificationCmd,
+		CapabilitiesTreeActionDef.ToCli(),
+	})
 
 	module.ProvidePermissionHandler(
 
@@ -40,49 +87,6 @@ func workspaceModuleCore(module *ModuleProvider) {
 
 		return nil
 	})
-
-}
-
-type FirebackModuleConfig struct{}
-
-type X = func(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error)
-
-func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
-
-	module := &ModuleProvider{
-		Name:        "fireback",
-		Definitions: &Module3Definitions,
-		Actions: [][]Module3Action{
-			GetCapabilityModule3Actions(),
-			FirebackCustomActions(),
-		},
-		EntityBundles: []EntityBundle{
-			WebPushConfigEntityBundle,
-		},
-
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
-			func(g *gin.RouterGroup, x *FirebackApp) error {
-
-				meta := EventBusSubscriptionActionMeta()
-				g.GET(
-					meta.URL,
-					WithSocketAuthorization(EventBusSubscriptionSecurityModel),
-					EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig),
-				)
-
-				return nil
-			},
-		},
-		GoMigrateDirectory: &migrations.MigrationsFs,
-	}
-
-	module.ProvideCliHandlers([]cli.Command{
-		CapabilityCliFn(),
-		PushNotificationCmd,
-		CapabilitiesTreeActionDef.ToCli(),
-	})
-
-	workspaceModuleCore(module)
 
 	return module
 }

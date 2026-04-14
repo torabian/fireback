@@ -45,12 +45,11 @@ type FirebackApp struct {
 	// Custom cli actions or command that you might want to add to the project
 	CliActions func() []cli.Command
 
-	InjectSearchEndpoint func(*gin.Engine, *FirebackApp)
-	SetupWebServerHook   func(*gin.Engine, *FirebackApp)
-	SearchProviders      []SearchProviderFn
-	SeedersSync          func()
-	MockSync             func()
-	PublicFolders        []PublicFolderInfo
+	SetupWebServerHook func(*gin.Engine, *FirebackApp)
+	SearchProviders    []SearchProviderFn
+	SeedersSync        func()
+	MockSync           func()
+	PublicFolders      []PublicFolderInfo
 }
 
 /*
@@ -288,10 +287,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 
 	if x.SetupWebServerHook != nil {
 		x.SetupWebServerHook(r, x)
-	}
-
-	if x.InjectSearchEndpoint != nil {
-		x.InjectSearchEndpoint(r, x)
 	}
 
 	r.GET("/stoplight.js", func(c *gin.Context) {

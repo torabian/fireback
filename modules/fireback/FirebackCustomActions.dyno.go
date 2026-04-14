@@ -16,6 +16,23 @@ import (
 // using shared actions here
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var ReactiveSearchSecurityModel = &SecurityModel{
+	ActionRequires:  []PermissionInfo{},
+	ResolveStrategy: "workspace",
+}
+
+// This can be both used as cli and http
+var ReactiveSearchActionDef Module3Action = Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       ReactiveSearchActionMeta().CliName,
+	Description:   ReactiveSearchActionMeta().Description,
+	Name:          ReactiveSearchActionMeta().Name,
+	Method:        ReactiveSearchActionMeta().Method,
+	Url:           ReactiveSearchActionMeta().URL,
+	SecurityModel: ReactiveSearchSecurityModel,
+	// reactive
+}
 var EventBusSubscriptionSecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "workspace",
@@ -100,6 +117,7 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		ReactiveSearchActionDef.ToCli(),
 		EventBusSubscriptionActionDef.ToCli(),
 		CapabilitiesTreeActionDef.ToCli(),
 		WebPushConfigCliFn(),
