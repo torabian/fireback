@@ -269,16 +269,29 @@ func IntegrateAuthFlow(c *cli.Context) error {
 					return err
 				}
 
-				m, err := ConfirmClassicPassportTotpAction(&ConfirmClassicPassportTotpActionReqDto{
-					Value:    value,
-					Password: dto.Password,
-					TotpCode: code,
+				m, err := ConfirmClassicPassportTotpAction(ConfirmClassicPassportTotpActionRequest{
+					Body: ConfirmClassicPassportTotpActionReq{
+						Value:    value,
+						Password: dto.Password,
+						TotpCode: code,
+					},
 				}, query)
 
-				if m.Session != nil {
-					authenticateCliWithSession(m.Session, workspaceType.UniqueId)
+				if err != nil {
+					fmt.Println("Totp action failed:", err)
+					os.Exit(2)
 				}
 
+				var session *UserSessionDto
+
+				if cast, ok := m.Payload.(fireback.GoogleResponse[ConfirmClassicPassportTotpActionRes]); ok {
+					session = &cast.Data.Item.Session
+				} else {
+					fmt.Println("Process successful, but casting has failed:", err)
+					os.Exit(2)
+				}
+
+				authenticateCliWithSession(session, workspaceType.UniqueId)
 			}
 
 			if workspaceType.UniqueId == ROOT_VAR && res2.Session.Token != "" {

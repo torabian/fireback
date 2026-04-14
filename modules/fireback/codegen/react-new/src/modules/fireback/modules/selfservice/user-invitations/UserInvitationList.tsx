@@ -7,14 +7,14 @@ import { userInvitationColumns } from "./UserInvitationColumns";
 import { ModalContext } from "@/modules/fireback/components/modal/Modal";
 import { useContext } from "react";
 import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
-import { usePostUserInvitationAccept } from "@/modules/fireback/sdk/modules/abac/usePostUserInvitationAccept";
+import { useAcceptInviteAction, AcceptInviteActionReq } from "@/modules/fireback/sdk/modules/abac/AcceptInvite";
 
 export const UserInvitationList = () => {
   const s = useS(strings);
 
   const useModal = useContext(ModalContext);
 
-  const { submit: acceptInvite } = usePostUserInvitationAccept();
+  const mutation = useAcceptInviteAction();
 
   const onAccept = (dto: UserInvitationsQueryColumns) => {
     useModal.openModal({
@@ -22,8 +22,10 @@ export const UserInvitationList = () => {
       confirmButtonLabel: s.acceptBtn,
       component: () => <div>{s.confirmAcceptDescription}</div>,
       onSubmit: async () => {
-        return acceptInvite({ invitationUniqueId: dto.uniqueId }).then(
-          (res) => {}
+        return mutation.mutateAsync(new AcceptInviteActionReq({ invitationUniqueId: dto.uniqueId })).then(
+          (res) => {
+            alert("Successful.")
+          }
         );
       },
     })

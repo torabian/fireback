@@ -7,13 +7,11 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	AcceptInviteActionImp = AcceptInviteAction
+	AcceptInviteImpl = AcceptInviteAction
 }
-func AcceptInviteAction(
-	req *AcceptInviteActionReqDto,
-	q fireback.QueryDSL) (string,
-	*fireback.IError,
-) {
+
+func AcceptInviteAction(c AcceptInviteActionRequest, q fireback.QueryDSL) (*AcceptInviteActionResponse, error) {
+	req := c.Body
 
 	// First of all, we will find the invitation and gather some information.
 	q.UniqueId = req.InvitationUniqueId
@@ -21,11 +19,11 @@ func AcceptInviteAction(
 	invite, err := WorkspaceInviteActions.GetOne(q)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if invite == nil {
-		return "", fireback.Create401Error(&AbacMessages.InvitationNotFound, []string{})
+		return nil, fireback.Create401Error(&AbacMessages.InvitationNotFound, []string{})
 	}
 
 	err2d := fireback.GetDbRef().Transaction(func(tx *gorm.DB) error {
@@ -69,9 +67,9 @@ func AcceptInviteAction(
 	})
 
 	if err2d != nil {
-		return "", err2d.(*fireback.IError)
+		return nil, err2d.(*fireback.IError)
 	}
 
 	// Implement the logic here.
-	return "", nil
+	return nil, nil
 }
