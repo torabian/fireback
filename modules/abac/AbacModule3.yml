@@ -188,7 +188,6 @@ acts:
         - name: coverLetter
           type: string
           description: The content that user will receive to understand the reason of the letter.
-
   - name: Signout
     url: /passport/signout
     description: Signout the user, clears cookies or does anything else if needed.

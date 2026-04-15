@@ -182,7 +182,7 @@ export const CommonListManager = ({
 
   q.jsonQuery = jsonQuery;
 
-  const rows: any = q.query.data?.data?.items || [];
+  const rows: any = q?.data?.items || [];
 
   return (
     <>
@@ -220,7 +220,7 @@ export const CommonListManager = ({
           inlineInsertHook={inlineInsertHook}
           rows={rows}
           defaultColumnWidths={defaultColumnWidths as any}
-          query={q.query}
+          query={q.query || q}
           booleanColumns={["uniqueId"]}
           withFilters={withFilters}
         >

@@ -41,8 +41,8 @@ export function PaginateTable({
   children?: React.ReactNode;
   columnSizes?: TableColumnWidthInfo[];
   onColumnWidthsChange?:
-    | ((nextColumnWidths: TableColumnWidthInfo[]) => void)
-    | undefined;
+  | ((nextColumnWidths: TableColumnWidthInfo[]) => void)
+  | undefined;
   bulkEditHook?: any;
   inlineInsertHook?: any;
 }) {
@@ -78,6 +78,7 @@ export function PaginateTable({
   const { indexedData, reindex } = useReindexedContent(udf);
   const ref = useRef<DataGridHandle>();
 
+  console.log(1, query?.data?.uniqueId)
   useEffect(() => {
     const rows: any = query.data?.data?.items || [];
 

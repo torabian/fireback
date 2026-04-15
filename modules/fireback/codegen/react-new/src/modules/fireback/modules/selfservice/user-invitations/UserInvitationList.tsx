@@ -42,6 +42,7 @@ export const UserInvitationList = () => {
     });
   };
 
+
   return (
     <>
       <CommonListManager
