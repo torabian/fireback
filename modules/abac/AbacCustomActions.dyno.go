@@ -15,477 +15,81 @@ import (
 )
 
 // using shared actions here
-type QueryUserRoleWorkspacesResDtoRoles struct {
-	Name     string `json:"name" xml:"name" yaml:"name"        `
-	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
-	// Capabilities related to this role which are available
-	Capabilities []string `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
-}
-
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
+var QueryUserRoleWorkspacesImpl func(c QueryUserRoleWorkspacesActionRequest, query fireback.QueryDSL) (*QueryUserRoleWorkspacesActionResponse, error) = nil
 var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
 }
 
-type QueryUserRoleWorkspacesActionResDto struct {
-	Name string `json:"name" xml:"name" yaml:"name"        `
-	// Workspace level capabilities which are available
-	Capabilities []string                              `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
-	UniqueId     string                                `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
-	Roles        []*QueryUserRoleWorkspacesResDtoRoles `json:"roles" xml:"roles" yaml:"roles"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-}
-
-func (x *QueryUserRoleWorkspacesActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type queryUserRoleWorkspacesActionImpSig func(
-	q fireback.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-)
-
-var QueryUserRoleWorkspacesActionImp queryUserRoleWorkspacesActionImpSig
-
-func QueryUserRoleWorkspacesActionFn(
-	q fireback.QueryDSL,
-) (
-	[]*QueryUserRoleWorkspacesActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-) {
-	if QueryUserRoleWorkspacesActionImp == nil {
-		return nil, nil, nil
-	}
-	return QueryUserRoleWorkspacesActionImp(q)
-}
-
-var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
-	Name:  "urw",
-	Usage: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
-	Flags: fireback.CommonQueryFlags,
-	Action: func(c *cli.Context) {
-		fireback.CommonCliQueryCmd3IError(
-			c,
-			QueryUserRoleWorkspacesActionFn,
-			QueryUserRoleWorkspacesSecurityModel,
-			nil,
-		)
+// This can be both used as cli and http
+var QueryUserRoleWorkspacesActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       QueryUserRoleWorkspacesActionMeta().CliName,
+	Description:   QueryUserRoleWorkspacesActionMeta().Description,
+	Name:          QueryUserRoleWorkspacesActionMeta().Name,
+	Method:        QueryUserRoleWorkspacesActionMeta().Method,
+	Url:           QueryUserRoleWorkspacesActionMeta().URL,
+	SecurityModel: QueryUserRoleWorkspacesSecurityModel,
+	// get
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := QueryUserRoleWorkspacesActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := QueryUserRoleWorkspacesImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
+		req := QueryUserRoleWorkspacesActionRequest{}
+		resp, err := QueryUserRoleWorkspacesImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
 	},
 }
-var SendEmailSecurityModel *fireback.SecurityModel = nil
-
-type SendEmailActionReqDto struct {
-	ToAddress string `json:"toAddress" xml:"toAddress" yaml:"toAddress"  validate:"required"        `
-	Body      string `json:"body" xml:"body" yaml:"body"  validate:"required"        `
-}
-
-func (x *SendEmailActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var SendEmailCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "to-address",
-		Required: true,
-		Usage:    `toAddress (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "body",
-		Required: true,
-		Usage:    `body (string)`,
-	},
-}
-
-func SendEmailActionReqValidator(dto *SendEmailActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastSendEmailFromCli(c *cli.Context) *SendEmailActionReqDto {
-	template := &SendEmailActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("to-address") {
-		template.ToAddress = c.String("to-address")
-	}
-	if c.IsSet("body") {
-		template.Body = c.String("body")
-	}
-	return template
-}
-
-type SendEmailActionResDto struct {
-	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
-}
-
-func (x *SendEmailActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type sendEmailActionImpSig func(
-	req *SendEmailActionReqDto,
-	q fireback.QueryDSL) (*SendEmailActionResDto,
-	*fireback.IError,
-)
-
-var SendEmailActionImp sendEmailActionImpSig
-
-func SendEmailActionFn(
-	req *SendEmailActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*SendEmailActionResDto,
-	*fireback.IError,
-) {
-	if SendEmailActionImp == nil {
-		return nil, nil
-	}
-	return SendEmailActionImp(req, q)
-}
-
-var SendEmailActionCmd cli.Command = cli.Command{
-	Name:  "email",
-	Usage: `Send a email using default root notification configuration`,
-	Flags: SendEmailCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
-		dto := CastSendEmailFromCli(c)
-		result, err := SendEmailActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-var SendEmailWithProviderSecurityModel *fireback.SecurityModel = nil
-
-type SendEmailWithProviderActionReqDto struct {
-	EmailProvider   *EmailProviderEntity `json:"emailProvider" xml:"emailProvider" yaml:"emailProvider"    gorm:"foreignKey:EmailProviderId;references:UniqueId"      `
-	EmailProviderId fireback.String      `json:"emailProviderId" yaml:"emailProviderId" xml:"emailProviderId"  `
-	ToAddress       string               `json:"toAddress" xml:"toAddress" yaml:"toAddress"  validate:"required"        `
-	Body            string               `json:"body" xml:"body" yaml:"body"  validate:"required"        `
-}
-
-func (x *SendEmailWithProviderActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var SendEmailWithProviderCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "email-provider-id",
-		Required: false,
-		Usage:    `emailProvider (one)`,
-	},
-	&cli.StringFlag{
-		Name:     "to-address",
-		Required: true,
-		Usage:    `toAddress (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "body",
-		Required: true,
-		Usage:    `body (string)`,
-	},
-}
-
-func SendEmailWithProviderActionReqValidator(dto *SendEmailWithProviderActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastSendEmailWithProviderFromCli(c *cli.Context) *SendEmailWithProviderActionReqDto {
-	template := &SendEmailWithProviderActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("email-provider-id") {
-		template.EmailProviderId = fireback.NewStringAutoNull(c.String("email-provider-id"))
-	}
-	if c.IsSet("to-address") {
-		template.ToAddress = c.String("to-address")
-	}
-	if c.IsSet("body") {
-		template.Body = c.String("body")
-	}
-	return template
-}
-
-type SendEmailWithProviderActionResDto struct {
-	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
-}
-
-func (x *SendEmailWithProviderActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type sendEmailWithProviderActionImpSig func(
-	req *SendEmailWithProviderActionReqDto,
-	q fireback.QueryDSL) (*SendEmailWithProviderActionResDto,
-	*fireback.IError,
-)
-
-var SendEmailWithProviderActionImp sendEmailWithProviderActionImpSig
-
-func SendEmailWithProviderActionFn(
-	req *SendEmailWithProviderActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*SendEmailWithProviderActionResDto,
-	*fireback.IError,
-) {
-	if SendEmailWithProviderActionImp == nil {
-		return nil, nil
-	}
-	return SendEmailWithProviderActionImp(req, q)
-}
-
-var SendEmailWithProviderActionCmd cli.Command = cli.Command{
-	Name:  "emailp",
-	Usage: `Send a text message using an specific gsm provider`,
-	Flags: SendEmailWithProviderCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
-		dto := CastSendEmailWithProviderFromCli(c)
-		result, err := SendEmailWithProviderActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
+var InviteToWorkspaceImpl func(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) = nil
 var InviteToWorkspaceSecurityModel *fireback.SecurityModel = nil
 
-type inviteToWorkspaceActionImpSig func(
-	req *WorkspaceInviteEntity,
-	q fireback.QueryDSL) (*WorkspaceInviteEntity,
-	*fireback.IError,
-)
-
-var InviteToWorkspaceActionImp inviteToWorkspaceActionImpSig
-
-func InviteToWorkspaceActionFn(
-	req *WorkspaceInviteEntity,
-	q fireback.QueryDSL,
-) (
-	*WorkspaceInviteEntity,
-	*fireback.IError,
-) {
-	if InviteToWorkspaceActionImp == nil {
-		return nil, nil
-	}
-	return InviteToWorkspaceActionImp(req, q)
-}
-
-var InviteToWorkspaceActionCmd cli.Command = cli.Command{
-	Name:  "invite",
-	Usage: `Invite a new person (either a user, with passport or without passport)`,
-	Flags: WorkspaceInviteCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
+// This can be both used as cli and http
+var InviteToWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       InviteToWorkspaceActionMeta().CliName,
+	Description:   InviteToWorkspaceActionMeta().Description,
+	Name:          InviteToWorkspaceActionMeta().Name,
+	Method:        InviteToWorkspaceActionMeta().Method,
+	Url:           InviteToWorkspaceActionMeta().URL,
+	SecurityModel: InviteToWorkspaceSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := InviteToWorkspaceActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := InviteToWorkspaceImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
-		dto := CastWorkspaceInviteFromCli(c)
-		result, err := InviteToWorkspaceActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		req := InviteToWorkspaceActionRequest{}
+		resp, err := InviteToWorkspaceImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
 	},
 }
-var GsmSendSmsSecurityModel *fireback.SecurityModel = nil
-
-type GsmSendSmsActionReqDto struct {
-	ToNumber string `json:"toNumber" xml:"toNumber" yaml:"toNumber"  validate:"required"        `
-	Body     string `json:"body" xml:"body" yaml:"body"  validate:"required"        `
-}
-
-func (x *GsmSendSmsActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var GsmSendSmsCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "to-number",
-		Required: true,
-		Usage:    `toNumber (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "body",
-		Required: true,
-		Usage:    `body (string)`,
-	},
-}
-
-func GsmSendSmsActionReqValidator(dto *GsmSendSmsActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastGsmSendSmsFromCli(c *cli.Context) *GsmSendSmsActionReqDto {
-	template := &GsmSendSmsActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("to-number") {
-		template.ToNumber = c.String("to-number")
-	}
-	if c.IsSet("body") {
-		template.Body = c.String("body")
-	}
-	return template
-}
-
-type GsmSendSmsActionResDto struct {
-	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
-}
-
-func (x *GsmSendSmsActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type gsmSendSmsActionImpSig func(
-	req *GsmSendSmsActionReqDto,
-	q fireback.QueryDSL) (*GsmSendSmsActionResDto,
-	*fireback.IError,
-)
-
-var GsmSendSmsActionImp gsmSendSmsActionImpSig
-
-func GsmSendSmsActionFn(
-	req *GsmSendSmsActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*GsmSendSmsActionResDto,
-	*fireback.IError,
-) {
-	if GsmSendSmsActionImp == nil {
-		return nil, nil
-	}
-	return GsmSendSmsActionImp(req, q)
-}
-
-var GsmSendSmsActionCmd cli.Command = cli.Command{
-	Name:  "sms",
-	Usage: `Send a text message using default root notification configuration`,
-	Flags: GsmSendSmsCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
-		dto := CastGsmSendSmsFromCli(c)
-		result, err := GsmSendSmsActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-var GsmSendSmsWithProviderSecurityModel *fireback.SecurityModel = nil
-
-type GsmSendSmsWithProviderActionReqDto struct {
-	GsmProvider   *GsmProviderEntity `json:"gsmProvider" xml:"gsmProvider" yaml:"gsmProvider"    gorm:"foreignKey:GsmProviderId;references:UniqueId"      `
-	GsmProviderId fireback.String    `json:"gsmProviderId" yaml:"gsmProviderId" xml:"gsmProviderId"  `
-	ToNumber      string             `json:"toNumber" xml:"toNumber" yaml:"toNumber"  validate:"required"        `
-	Body          string             `json:"body" xml:"body" yaml:"body"  validate:"required"        `
-}
-
-func (x *GsmSendSmsWithProviderActionReqDto) RootObjectName() string {
-	return "Abac"
-}
-
-var GsmSendSmsWithProviderCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "x-src",
-		Required: false,
-		Usage:    `Import the body of the request from a file (e.g. json/yaml) on the disk`,
-	},
-	&cli.StringFlag{
-		Name:  "x-accept",
-		Usage: "Return type of the the content, such as json or yaml",
-	},
-	&cli.StringFlag{
-		Name:     "gsm-provider-id",
-		Required: false,
-		Usage:    `gsmProvider (one)`,
-	},
-	&cli.StringFlag{
-		Name:     "to-number",
-		Required: true,
-		Usage:    `toNumber (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "body",
-		Required: true,
-		Usage:    `body (string)`,
-	},
-}
-
-func GsmSendSmsWithProviderActionReqValidator(dto *GsmSendSmsWithProviderActionReqDto) *fireback.IError {
-	err := fireback.CommonStructValidatorPointer(dto, false)
-	return err
-}
-func CastGsmSendSmsWithProviderFromCli(c *cli.Context) *GsmSendSmsWithProviderActionReqDto {
-	template := &GsmSendSmsWithProviderActionReqDto{}
-	fireback.HandleXsrc(c, template)
-	if c.IsSet("gsm-provider-id") {
-		template.GsmProviderId = fireback.NewStringAutoNull(c.String("gsm-provider-id"))
-	}
-	if c.IsSet("to-number") {
-		template.ToNumber = c.String("to-number")
-	}
-	if c.IsSet("body") {
-		template.Body = c.String("body")
-	}
-	return template
-}
-
-type GsmSendSmsWithProviderActionResDto struct {
-	QueueId string `json:"queueId" xml:"queueId" yaml:"queueId"        `
-}
-
-func (x *GsmSendSmsWithProviderActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type gsmSendSmsWithProviderActionImpSig func(
-	req *GsmSendSmsWithProviderActionReqDto,
-	q fireback.QueryDSL) (*GsmSendSmsWithProviderActionResDto,
-	*fireback.IError,
-)
-
-var GsmSendSmsWithProviderActionImp gsmSendSmsWithProviderActionImpSig
-
-func GsmSendSmsWithProviderActionFn(
-	req *GsmSendSmsWithProviderActionReqDto,
-	q fireback.QueryDSL,
-) (
-	*GsmSendSmsWithProviderActionResDto,
-	*fireback.IError,
-) {
-	if GsmSendSmsWithProviderActionImp == nil {
-		return nil, nil
-	}
-	return GsmSendSmsWithProviderActionImp(req, q)
-}
-
-var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
-	Name:  "smsp",
-	Usage: `Send a text message using an specific gsm provider`,
-	Flags: GsmSendSmsWithProviderCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
-		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
-		dto := CastGsmSendSmsWithProviderFromCli(c)
-		result, err := GsmSendSmsWithProviderActionFn(dto, query)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-	},
-}
-
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
 var UserInvitationsImpl func(c UserInvitationsActionRequest, query fireback.QueryDSL) (*UserInvitationsActionResponse, error) = nil
 var UserInvitationsSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
@@ -1058,10 +662,152 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 		return nil
 	},
 }
+var SendEmailImpl func(c SendEmailActionRequest, query fireback.QueryDSL) (*SendEmailActionResponse, error) = nil
+var SendEmailSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var SendEmailActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       SendEmailActionMeta().CliName,
+	Description:   SendEmailActionMeta().Description,
+	Name:          SendEmailActionMeta().Name,
+	Method:        SendEmailActionMeta().Method,
+	Url:           SendEmailActionMeta().URL,
+	SecurityModel: SendEmailSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := SendEmailActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := SendEmailImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
+		req := SendEmailActionRequest{}
+		resp, err := SendEmailImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var SendEmailWithProviderImpl func(c SendEmailWithProviderActionRequest, query fireback.QueryDSL) (*SendEmailWithProviderActionResponse, error) = nil
+var SendEmailWithProviderSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var SendEmailWithProviderActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       SendEmailWithProviderActionMeta().CliName,
+	Description:   SendEmailWithProviderActionMeta().Description,
+	Name:          SendEmailWithProviderActionMeta().Name,
+	Method:        SendEmailWithProviderActionMeta().Method,
+	Url:           SendEmailWithProviderActionMeta().URL,
+	SecurityModel: SendEmailWithProviderSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := SendEmailWithProviderActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := SendEmailWithProviderImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
+		req := SendEmailWithProviderActionRequest{}
+		resp, err := SendEmailWithProviderImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var GsmSendSmsImpl func(c GsmSendSmsActionRequest, query fireback.QueryDSL) (*GsmSendSmsActionResponse, error) = nil
+var GsmSendSmsSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var GsmSendSmsActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       GsmSendSmsActionMeta().CliName,
+	Description:   GsmSendSmsActionMeta().Description,
+	Name:          GsmSendSmsActionMeta().Name,
+	Method:        GsmSendSmsActionMeta().Method,
+	Url:           GsmSendSmsActionMeta().URL,
+	SecurityModel: GsmSendSmsSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := GsmSendSmsActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := GsmSendSmsImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
+		req := GsmSendSmsActionRequest{}
+		resp, err := GsmSendSmsImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
+var GsmSendSmsWithProviderImpl func(c GsmSendSmsWithProviderActionRequest, query fireback.QueryDSL) (*GsmSendSmsWithProviderActionResponse, error) = nil
+var GsmSendSmsWithProviderSecurityModel *fireback.SecurityModel = nil
+
+// This can be both used as cli and http
+var GsmSendSmsWithProviderActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       GsmSendSmsWithProviderActionMeta().CliName,
+	Description:   GsmSendSmsWithProviderActionMeta().Description,
+	Name:          GsmSendSmsWithProviderActionMeta().Name,
+	Method:        GsmSendSmsWithProviderActionMeta().Method,
+	Url:           GsmSendSmsWithProviderActionMeta().URL,
+	SecurityModel: GsmSendSmsWithProviderSecurityModel,
+	// post
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := GsmSendSmsWithProviderActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := GsmSendSmsWithProviderImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
+		req := GsmSendSmsWithProviderActionRequest{}
+		resp, err := GsmSendSmsWithProviderImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		QueryUserRoleWorkspacesActionDef,
+		InviteToWorkspaceActionDef,
 		UserInvitationsActionDef,
 		SignoutActionDef,
 		OauthAuthenticateActionDef,
@@ -1078,157 +824,16 @@ func AbacCustomActions() []fireback.Module3Action {
 		QueryWorkspaceTypesPubliclyActionDef,
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
+		SendEmailActionDef,
+		SendEmailWithProviderActionDef,
+		GsmSendSmsActionDef,
+		GsmSendSmsWithProviderActionDef,
 		/// End for emi actions
-		{
-			Method:        "GET",
-			Url:           "/urw/query",
-			SecurityModel: QueryUserRoleWorkspacesSecurityModel,
-			Name:          "queryUserRoleWorkspaces",
-			Description:   "Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// QUERY - get
-					fireback.HttpQueryEntity(
-						c,
-						QueryUserRoleWorkspacesActionFn,
-						nil,
-					)
-				},
-			},
-			Format:         "QUERY",
-			Action:         QueryUserRoleWorkspacesActionFn,
-			ResponseEntity: &QueryUserRoleWorkspacesActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "QueryUserRoleWorkspacesActionResDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/email/send",
-			SecurityModel: SendEmailSecurityModel,
-			Name:          "sendEmail",
-			Description:   "Send a email using default root notification configuration",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, SendEmailActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         SendEmailActionFn,
-			ResponseEntity: &SendEmailActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "SendEmailActionResDto",
-			},
-			RequestEntity: &SendEmailActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "SendEmailActionReqDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/emailProvider/send",
-			SecurityModel: SendEmailWithProviderSecurityModel,
-			Name:          "sendEmailWithProvider",
-			Description:   "Send a text message using an specific gsm provider",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, SendEmailWithProviderActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         SendEmailWithProviderActionFn,
-			ResponseEntity: &SendEmailWithProviderActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "SendEmailWithProviderActionResDto",
-			},
-			RequestEntity: &SendEmailWithProviderActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "SendEmailWithProviderActionReqDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/workspace/invite",
-			SecurityModel: InviteToWorkspaceSecurityModel,
-			Name:          "inviteToWorkspace",
-			Description:   "Invite a new person (either a user, with passport or without passport)",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, InviteToWorkspaceActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         InviteToWorkspaceActionFn,
-			ResponseEntity: &WorkspaceInviteEntity{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "WorkspaceInviteEntity",
-			},
-			RequestEntity: &WorkspaceInviteEntity{},
-			In: &fireback.Module3ActionBody{
-				Entity: "WorkspaceInviteEntity",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/gsm/send/sms",
-			SecurityModel: GsmSendSmsSecurityModel,
-			Name:          "gsmSendSms",
-			Description:   "Send a text message using default root notification configuration",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, GsmSendSmsActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         GsmSendSmsActionFn,
-			ResponseEntity: &GsmSendSmsActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "GsmSendSmsActionResDto",
-			},
-			RequestEntity: &GsmSendSmsActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "GsmSendSmsActionReqDto",
-			},
-		},
-		{
-			Method:        "POST",
-			Url:           "/gsmProvider/send/sms",
-			SecurityModel: GsmSendSmsWithProviderSecurityModel,
-			Name:          "gsmSendSmsWithProvider",
-			Description:   "Send a text message using an specific gsm provider",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// POST_ONE - post
-					fireback.HttpPostEntity(c, GsmSendSmsWithProviderActionFn)
-				},
-			},
-			Format:         "POST_ONE",
-			Action:         GsmSendSmsWithProviderActionFn,
-			ResponseEntity: &GsmSendSmsWithProviderActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "GsmSendSmsWithProviderActionResDto",
-			},
-			RequestEntity: &GsmSendSmsWithProviderActionReqDto{},
-			In: &fireback.Module3ActionBody{
-				Entity: "GsmSendSmsWithProviderActionReqDto",
-			},
-		},
 	}
 	return routes
 }
 
-var AbacCustomActionsCli = []cli.Command{
-	QueryUserRoleWorkspacesActionCmd,
-	SendEmailActionCmd,
-	SendEmailWithProviderActionCmd,
-	InviteToWorkspaceActionCmd,
-	GsmSendSmsActionCmd,
-	GsmSendSmsWithProviderActionCmd,
-}
+var AbacCustomActionsCli = []cli.Command{}
 
 // Only to include some headers
 func AbacJsonInclude() {
@@ -1243,6 +848,8 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		QueryUserRoleWorkspacesActionDef.ToCli(),
+		InviteToWorkspaceActionDef.ToCli(),
 		UserInvitationsActionDef.ToCli(),
 		SignoutActionDef.ToCli(),
 		OauthAuthenticateActionDef.ToCli(),
@@ -1259,12 +866,10 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
-		QueryUserRoleWorkspacesActionCmd,
-		SendEmailActionCmd,
-		SendEmailWithProviderActionCmd,
-		InviteToWorkspaceActionCmd,
-		GsmSendSmsActionCmd,
-		GsmSendSmsWithProviderActionCmd,
+		SendEmailActionDef.ToCli(),
+		SendEmailWithProviderActionDef.ToCli(),
+		GsmSendSmsActionDef.ToCli(),
+		GsmSendSmsWithProviderActionDef.ToCli(),
 		TimezoneGroupCliFn(),
 		FileCliFn(),
 		TableViewSizingCliFn(),

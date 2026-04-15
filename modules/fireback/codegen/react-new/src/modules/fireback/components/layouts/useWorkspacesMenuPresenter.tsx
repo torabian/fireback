@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { MacTagsColor, type MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspaces";
 
 /**
  * It computes the menu items related to the workspaces, and active role generally
@@ -13,12 +13,11 @@ import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
 export function useWorkspacesMenuPresenter() {
   const t = useT();
   const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
-  const { query: queryWorkspaces } = useGetUrwQuery({
-    queryOptions: { cacheTime: 50 },
-    query: {},
+  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
+    cacheTime: 50,
   });
 
-  const items = queryWorkspaces.data?.data?.items || [];
+  const items = queryUrw.data?.data?.items || [];
   const recomputeKey =
     items.map((item) => item.uniqueId).join("-") +
     "_" +

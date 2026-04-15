@@ -8,11 +8,11 @@ import {
 
 import { type ReactNode, useContext, useEffect } from "react";
 import { useCheckAuthentication } from "../../components/layouts/ForcedAuthenticated";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { SelectWorkspaceScreen } from "../../modules/selfservice/SelectWorkspace.screen";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { SelectWorkspaceScreen } from "../../modules/selfservice/SelectWorkspace.screen";
-import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspaces";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -26,10 +26,9 @@ export const WithSelfServiceRoutes = ({
   const selfServicePublicRoutes = useSelfServicePublicRoutes();
   const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
 
-  const { query: queryUrw } = useGetUrwQuery({
-    queryOptions: { cacheTime: 50, enabled: false }, // this react-query 3, how can I avoid it to run until later alert time to figure this out,
-    // as promise and continue?
-    query: {},
+  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
+    cacheTime: 50,
+    enabled: false
   });
 
   useEffect(() => {

@@ -8,50 +8,58 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	InviteToWorkspaceActionImp = InviteToWorkspaceAction
+	InviteToWorkspaceImpl = InviteToWorkspaceAction
 }
 
-func InviteToWorkspaceAction(req *WorkspaceInviteEntity, q fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError) {
-	if err := WorkspaceInviteValidator(req, false); err != nil {
+func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) {
+	req := c.Body
+
+	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
-	_, roleErrors := ValidateRoleAndItsExistence(req.RoleId)
+	_, roleErrors := ValidateRoleAndItsExistence(fireback.NewString(req.RoleId))
 	if len(roleErrors) != 0 {
 		return nil, &fireback.IError{
 			Errors: roleErrors,
 		}
 	}
 
-	userLocale := q.Language
+	userLocale := query.Language
 	if strings.TrimSpace(req.TargetUserLocale) != "" {
 		userLocale = req.TargetUserLocale
 	}
 
-	var invite WorkspaceInviteEntity = *req
-	invite.WorkspaceId = fireback.NewString(q.WorkspaceId)
+	invite := WorkspaceInviteEntity{}
+
+	invite.WorkspaceId = fireback.NewString(query.WorkspaceId)
 	invite.UniqueId = fireback.UUID()
 	invite.TargetUserLocale = userLocale
 
-	if err := fireback.GetRef(q).Create(&invite).Error; err != nil {
-		return &invite, fireback.GormErrorToIError(err)
+	if err := fireback.GetRef(query).Create(&invite).Error; err != nil {
+		return nil, fireback.GormErrorToIError(err)
 	}
 
 	if invite.Email != "" {
-		if err7 := SendInviteEmail(q, &invite); err7 != nil {
+		if err7 := SendInviteEmail(query, &invite); err7 != nil {
 			return nil, err7
 		}
 	}
 
 	if invite.Phonenumber != "" {
 		inviteBody := "You are invite " + invite.FirstName + " " + invite.LastName
-		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{
-			ToNumber: invite.Phonenumber,
-			Body:     inviteBody,
-		}, q); err7 != nil {
+
+		if _, err7 := GsmSendSmsImpl(GsmSendSmsActionRequest{
+			Body: GsmSendSmsActionReq{
+				ToNumber: invite.Phonenumber,
+				Body:     inviteBody,
+			},
+		}, query); err7 != nil {
 			return nil, fireback.GormErrorToIError(err7)
 		}
 	}
 
-	return &invite, nil
+	return &InviteToWorkspaceActionResponse{
+		Payload: fireback.GResponseSingleItem(invite),
+	}, nil
 }

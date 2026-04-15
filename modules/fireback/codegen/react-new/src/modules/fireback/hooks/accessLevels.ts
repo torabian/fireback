@@ -1,5 +1,5 @@
 import { type DisplayDetectionProps } from "../definitions/common";
-import { QueryUserRoleWorkspacesActionResDto } from "../sdk/modules/abac/AbacActionsDto";
+import type { QueryUserRoleWorkspacesActionRes } from "../sdk/modules/abac/QueryUserRoleWorkspaces";
 import { CapabilityEntity } from "../sdk/modules/fireback/CapabilityEntity";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
@@ -22,7 +22,7 @@ export function userMeetsAccess(urw: any, perm: string): boolean {
 
 export function userMeetsAccess2(
   state: { roleId: string; workspaceId: string },
-  urw: QueryUserRoleWorkspacesActionResDto[],
+  urw: QueryUserRoleWorkspacesActionRes[],
   perm: string
 ): boolean {
   let workspaceMeets = false;

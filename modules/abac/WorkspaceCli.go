@@ -233,7 +233,7 @@ func init() {
 		CliConfigCmd,
 		ViewAuthorize,
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
-		QueryUserRoleWorkspacesActionCmd,
+		QueryUserRoleWorkspacesActionDef.ToCli(),
 		CheckUserMeetsAPermissionCmd,
 		WorkspaceAsCmd,
 		PublicAuthenticationCliFn(),

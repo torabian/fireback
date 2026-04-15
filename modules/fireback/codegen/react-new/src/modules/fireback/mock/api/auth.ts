@@ -1,4 +1,4 @@
-import { type IResponse, type IResponseList } from "../../definitions/JSONStyle";
+import { type IResponseList } from "../../definitions/JSONStyle";
 import {
   type Context,
   type DeepPartial,
@@ -17,14 +17,16 @@ import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEnt
 import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
 import { GResponse } from "../../sdk/sdk/envelopes";
 
-const commonSession: IResponse<DeepPartial<UserSessionDto>> = {
+const commonSession: GResponse<DeepPartial<UserSessionDto>> = {
   data: {
-    user: {
-      firstName: "Ali",
-      lastName: "Torabi",
+    item: {
+      user: {
+        firstName: "Ali",
+        lastName: "Torabi",
+      },
+      exchangeKey: "key1",
+      token: "token",
     },
-    exchangeKey: "key1",
-    token: "token",
   },
 };
 
@@ -33,7 +35,7 @@ export class AuthMockServer {
   @method("post")
   async passportAuthroizeOs(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
+  ): Promise<GResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
   }
 
@@ -49,7 +51,7 @@ export class AuthMockServer {
   @method("post")
   async postSigninClassic(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
+  ): Promise<GResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
   }
 
@@ -57,7 +59,7 @@ export class AuthMockServer {
   @method("post")
   async postRequestResetMail(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<UserSessionDto>>> {
+  ): Promise<GResponse<DeepPartial<UserSessionDto>>> {
     return commonSession;
   }
 
@@ -83,23 +85,27 @@ export class AuthMockServer {
   @method("post")
   async postWorkspacePassportCheck(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<CheckClassicPassportActionRes>>> {
+  ): Promise<GResponse<CheckClassicPassportActionRes>> {
     const isEmail = ctx?.body?.value.includes("@");
 
     if (isEmail) {
       return {
         data: {
-          next: ["otp", "create-with-password"],
-          flags: ["enable-totp", "force-totp"],
-          otpInfo: null,
+          item: {
+            next: ["otp", "create-with-password"],
+            flags: ["enable-totp", "force-totp"],
+            otpInfo: null,
+          }
         },
       };
     } else {
       return {
         data: {
-          next: ["otp"],
-          flags: ["enable-totp", "force-totp"],
-          otpInfo: null,
+          item: {
+            next: ["otp"],
+            flags: ["enable-totp", "force-totp"],
+            otpInfo: null,
+          }
         },
       };
     }
@@ -109,16 +115,18 @@ export class AuthMockServer {
   @method("post")
   async postPassportSignupClassic(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<ClassicSignupActionRes>>> {
+  ): Promise<GResponse<DeepPartial<ClassicSignupActionRes>>> {
     const isEmail = ctx?.body?.value.includes("@");
 
     return {
       data: {
-        session: null,
-        totpUrl:
-          "otpauth://totp/Fireback:ali@ali.com?algorithm=SHA1\u0026digits=6\u0026issuer=Fireback\u0026period=30\u0026secret=R2AQ4NPS7FKECL3ZVTF3JMTLBYGDAAVU",
-        continueToTotp: true,
-        forcedTotp: true,
+        item: {
+          session: null,
+          totpUrl:
+            "otpauth://totp/Fireback:ali@ali.com?algorithm=SHA1\u0026digits=6\u0026issuer=Fireback\u0026period=30\u0026secret=R2AQ4NPS7FKECL3ZVTF3JMTLBYGDAAVU",
+          continueToTotp: true,
+          forcedTotp: true,
+        }
       },
     };
   }
@@ -127,10 +135,12 @@ export class AuthMockServer {
   @method("post")
   async postConfirm(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionRes>>> {
+  ): Promise<GResponse<DeepPartial<ConfirmClassicPassportTotpActionRes>>> {
     return {
       data: {
-        session: commonSession.data,
+        item: {
+          session: commonSession.data,
+        }
       },
     };
   }
@@ -139,10 +149,12 @@ export class AuthMockServer {
   @method("post")
   async postOtp(
     ctx: Context,
-  ): Promise<IResponse<DeepPartial<ConfirmClassicPassportTotpActionRes>>> {
+  ): Promise<GResponse<DeepPartial<ConfirmClassicPassportTotpActionRes>>> {
     return {
       data: {
-        session: commonSession.data,
+        item: {
+          session: commonSession.data,
+        }
       },
     };
   }

@@ -70,7 +70,7 @@ func GsmProviderActionUpdate(
 *   for example, getting sms template for otp in europe area
 **/
 
-func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
+func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
@@ -85,13 +85,13 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendS
 		log.Default().Println(message, recp)
 
 		terminalQueue := "print-to-terminal"
-		return &GsmSendSmsWithProviderActionResDto{QueueId: terminalQueue}, nil
+		return &GsmSendSmsWithProviderActionRes{QueueId: terminalQueue}, nil
 	}
 
 	return config.GeneralGsmProvider.SendSms(message, recp)
 }
 
-func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
+func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
 
 	if provider, err := GsmProviderActions.GetOne(fireback.QueryDSL{UniqueId: providerId}); err != nil {
 		return nil, err
@@ -100,25 +100,25 @@ func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWi
 	}
 }
 
-func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
+func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
 
 	if x.Type == GsmProviderType.Url {
 		if j, err := GsmSendSMSByHttpCall(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionResDto{QueueId: j}, nil
+			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
 		}
 	} else if x.Type == GsmProviderType.Terminal {
 		if j, err := GsmSendSMSByTerminal(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionResDto{QueueId: j}, nil
+			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
 		}
 	} else if x.Type == GsmProviderType.Mediana {
 		if j, err := GsmSendSMSByMediana(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionResDto{QueueId: j}, nil
+			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
 		}
 	}
 
