@@ -169,7 +169,7 @@ export const CommonListManager = ({
 
   const jsonQuery = useMemo(() => filtersToJsonQuery(f as any), [f]);
 
-  const q = queryHook({
+  const source = queryHook({
     query: {
       deep: deep === undefined ? true : deep,
       ...udf.debouncedFilters,
@@ -177,6 +177,8 @@ export const CommonListManager = ({
     },
     queryClient: queryClient,
   });
+
+  const q = source.query ? source : { query: source };
 
   q.jsonQuery = jsonQuery;
 

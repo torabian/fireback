@@ -156,6 +156,39 @@ dtom:
         type: string?
 
 acts:
+  - name: UserInvitations
+    description:
+      Shows the invitations for an specific user, if the invited member already has a account.
+      It's based on the passports, so if the passport is authenticated we will show them.
+    url: /users/invitations
+    method: get
+    security:
+      resolveStrategy: user
+    out:
+      envelope: GResponse
+      fields:
+        - name: userId
+          type: string
+          description: UserUniqueId
+        - name: uniqueId
+          type: string
+          description: Invitation unique id
+        - name: value
+          type: string
+          description: The value of the passport (email/phone)
+        - name: roleName
+          type: string
+          description: Name of the role that user will get
+        - name: workspaceName
+          type: string
+          description: Name of the workspace which user is invited to.
+        - name: type
+          type: string
+          description: The method of the invitation, such as email.
+        - name: coverLetter
+          type: string
+          description: The content that user will receive to understand the reason of the letter.
+
   - name: Signout
     url: /passport/signout
     description: Signout the user, clears cookies or does anything else if needed.
@@ -601,18 +634,6 @@ acts:
     out:
       dto: UserSessionDto
 actions:
-  - name: userInvitations
-    description:
-      Shows the invitations for an specific user, if the invited member already has a account.
-      It's based on the passports, so if the passport is authenticated we will show them.
-    format: query
-    url: /users/invitations
-    method: get
-    security:
-      resolveStrategy: user
-    out:
-      dto: UserInvitationsQueryColumns
-
   - name: queryUserRoleWorkspaces
     format: query
     method: get
