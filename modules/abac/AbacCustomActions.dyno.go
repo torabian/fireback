@@ -22,45 +22,6 @@ type QueryUserRoleWorkspacesResDtoRoles struct {
 	Capabilities []string `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
 }
 
-var UserInvitationsSecurityModel = &fireback.SecurityModel{
-	ActionRequires:  []fireback.PermissionInfo{},
-	ResolveStrategy: "user",
-}
-
-type userInvitationsActionImpSig func(
-	q fireback.QueryDSL) ([]*UserInvitationsQueryColumns,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-)
-
-var UserInvitationsActionImp userInvitationsActionImpSig
-
-func UserInvitationsActionFn(
-	q fireback.QueryDSL,
-) (
-	[]*UserInvitationsQueryColumns,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-) {
-	if UserInvitationsActionImp == nil {
-		return nil, nil, nil
-	}
-	return UserInvitationsActionImp(q)
-}
-
-var UserInvitationsActionCmd cli.Command = cli.Command{
-	Name:  "user-invitations",
-	Usage: `Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.`,
-	Flags: fireback.CommonQueryFlags,
-	Action: func(c *cli.Context) {
-		fireback.CommonCliQueryCmd3IError(
-			c,
-			UserInvitationsActionFn,
-			UserInvitationsSecurityModel,
-			nil,
-		)
-	},
-}
 var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},
 	ResolveStrategy: "user",
@@ -525,6 +486,44 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var UserInvitationsImpl func(c UserInvitationsActionRequest, query fireback.QueryDSL) (*UserInvitationsActionResponse, error) = nil
+var UserInvitationsSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+// This can be both used as cli and http
+var UserInvitationsActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       UserInvitationsActionMeta().CliName,
+	Description:   UserInvitationsActionMeta().Description,
+	Name:          UserInvitationsActionMeta().Name,
+	Method:        UserInvitationsActionMeta().Method,
+	Url:           UserInvitationsActionMeta().URL,
+	SecurityModel: UserInvitationsSecurityModel,
+	// get
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := UserInvitationsActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := UserInvitationsImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
+		req := UserInvitationsActionRequest{}
+		resp, err := UserInvitationsImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var SignoutImpl func(c SignoutActionRequest, query fireback.QueryDSL) (*SignoutActionResponse, error) = nil
 var SignoutSecurityModel *fireback.SecurityModel = nil
 
@@ -1063,6 +1062,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		UserInvitationsActionDef,
 		SignoutActionDef,
 		OauthAuthenticateActionDef,
 		AcceptInviteActionDef,
@@ -1079,29 +1079,6 @@ func AbacCustomActions() []fireback.Module3Action {
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
 		/// End for emi actions
-		{
-			Method:        "GET",
-			Url:           "/users/invitations",
-			SecurityModel: UserInvitationsSecurityModel,
-			Name:          "userInvitations",
-			Description:   "Shows the invitations for an specific user, if the invited member already has a account. It's based on the passports, so if the passport is authenticated we will show them.",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// QUERY - get
-					fireback.HttpQueryEntity(
-						c,
-						UserInvitationsActionFn,
-						nil,
-					)
-				},
-			},
-			Format:         "QUERY",
-			Action:         UserInvitationsActionFn,
-			ResponseEntity: &UserInvitationsQueryColumns{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "UserInvitationsQueryColumns",
-			},
-		},
 		{
 			Method:        "GET",
 			Url:           "/urw/query",
@@ -1245,7 +1222,6 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
-	UserInvitationsActionCmd,
 	QueryUserRoleWorkspacesActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
@@ -1267,6 +1243,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		UserInvitationsActionDef.ToCli(),
 		SignoutActionDef.ToCli(),
 		OauthAuthenticateActionDef.ToCli(),
 		AcceptInviteActionDef.ToCli(),
@@ -1282,7 +1259,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
-		UserInvitationsActionCmd,
 		QueryUserRoleWorkspacesActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,

@@ -1,5 +1,4 @@
 import { useS } from "@/modules/fireback/hooks/useS";
-import { useGetUsersInvitations } from "@/modules/fireback/sdk/modules/abac/useGetUsersInvitations";
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
 import { strings } from "./strings/translations";
 import { userInvitationColumns } from "./UserInvitationColumns";
@@ -8,6 +7,7 @@ import { ModalContext } from "@/modules/fireback/components/modal/Modal";
 import { useContext } from "react";
 import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
 import { useAcceptInviteAction, AcceptInviteActionReq } from "@/modules/fireback/sdk/modules/abac/AcceptInvite";
+import { useUserInvitationsActionQuery } from "@/modules/fireback/sdk/modules/abac/UserInvitations";
 
 export const UserInvitationList = () => {
   const s = useS(strings);
@@ -47,7 +47,7 @@ export const UserInvitationList = () => {
       <CommonListManager
         selectable={false}
         columns={userInvitationColumns(s, onAccept, onReject)}
-        queryHook={useGetUsersInvitations}
+        queryHook={useUserInvitationsActionQuery}
       ></CommonListManager>
     </>
   );
