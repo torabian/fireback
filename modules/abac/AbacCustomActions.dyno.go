@@ -15,64 +15,6 @@ import (
 )
 
 // using shared actions here
-type QueryUserRoleWorkspacesResDtoRoles struct {
-	Name     string `json:"name" xml:"name" yaml:"name"        `
-	UniqueId string `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
-	// Capabilities related to this role which are available
-	Capabilities []string `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
-}
-
-var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
-	ActionRequires:  []fireback.PermissionInfo{},
-	ResolveStrategy: "user",
-}
-
-type QueryUserRoleWorkspacesActionResDto struct {
-	Name string `json:"name" xml:"name" yaml:"name"        `
-	// Workspace level capabilities which are available
-	Capabilities []string                              `json:"capabilities" xml:"capabilities" yaml:"capabilities"        `
-	UniqueId     string                                `json:"uniqueId" xml:"uniqueId" yaml:"uniqueId"        `
-	Roles        []*QueryUserRoleWorkspacesResDtoRoles `json:"roles" xml:"roles" yaml:"roles"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
-}
-
-func (x *QueryUserRoleWorkspacesActionResDto) RootObjectName() string {
-	return "Abac"
-}
-
-type queryUserRoleWorkspacesActionImpSig func(
-	q fireback.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-)
-
-var QueryUserRoleWorkspacesActionImp queryUserRoleWorkspacesActionImpSig
-
-func QueryUserRoleWorkspacesActionFn(
-	q fireback.QueryDSL,
-) (
-	[]*QueryUserRoleWorkspacesActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-) {
-	if QueryUserRoleWorkspacesActionImp == nil {
-		return nil, nil, nil
-	}
-	return QueryUserRoleWorkspacesActionImp(q)
-}
-
-var QueryUserRoleWorkspacesActionCmd cli.Command = cli.Command{
-	Name:  "urw",
-	Usage: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
-	Flags: fireback.CommonQueryFlags,
-	Action: func(c *cli.Context) {
-		fireback.CommonCliQueryCmd3IError(
-			c,
-			QueryUserRoleWorkspacesActionFn,
-			QueryUserRoleWorkspacesSecurityModel,
-			nil,
-		)
-	},
-}
 var SendEmailSecurityModel *fireback.SecurityModel = nil
 
 type SendEmailActionReqDto struct {
@@ -452,6 +394,44 @@ var GsmSendSmsWithProviderActionCmd cli.Command = cli.Command{
 
 /// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
 /// and not available in Emi (won't be)
+var QueryUserRoleWorkspacesImpl func(c QueryUserRoleWorkspacesActionRequest, query fireback.QueryDSL) (*QueryUserRoleWorkspacesActionResponse, error) = nil
+var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
+	ActionRequires:  []fireback.PermissionInfo{},
+	ResolveStrategy: "user",
+}
+
+// This can be both used as cli and http
+var QueryUserRoleWorkspacesActionDef fireback.Module3Action = fireback.Module3Action{
+	// Temporary until fireback code gen is deleted.
+	Skip:          true,
+	CliName:       QueryUserRoleWorkspacesActionMeta().CliName,
+	Description:   QueryUserRoleWorkspacesActionMeta().Description,
+	Name:          QueryUserRoleWorkspacesActionMeta().Name,
+	Method:        QueryUserRoleWorkspacesActionMeta().Method,
+	Url:           QueryUserRoleWorkspacesActionMeta().URL,
+	SecurityModel: QueryUserRoleWorkspacesSecurityModel,
+	// get
+	Handlers: []gin.HandlerFunc{
+		func(m *gin.Context) {
+			req := QueryUserRoleWorkspacesActionRequest{
+				QueryParams: m.Request.URL.Query(),
+				Headers:     m.Request.Header,
+				GinCtx:      m,
+			}
+			query := fireback.ExtractQueryDslFromGinContext(m)
+			fireback.ReadGinRequestBodyAndCastToGoStruct(m, &req.Body, query)
+			resp, err := QueryUserRoleWorkspacesImpl(req, query)
+			fireback.WriteActionResponseToGin(m, resp, err)
+		},
+	},
+	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
+		req := QueryUserRoleWorkspacesActionRequest{}
+		resp, err := QueryUserRoleWorkspacesImpl(req, query)
+		fireback.HandleActionInCli2(c, resp, err, map[string]map[string]string{})
+		return nil
+	},
+}
 var InviteToWorkspaceImpl func(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) = nil
 var InviteToWorkspaceSecurityModel *fireback.SecurityModel = nil
 
@@ -1063,6 +1043,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 func AbacCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
+		QueryUserRoleWorkspacesActionDef,
 		InviteToWorkspaceActionDef,
 		UserInvitationsActionDef,
 		SignoutActionDef,
@@ -1081,29 +1062,6 @@ func AbacCustomActions() []fireback.Module3Action {
 		CheckPassportMethodsActionDef,
 		OsLoginAuthenticateActionDef,
 		/// End for emi actions
-		{
-			Method:        "GET",
-			Url:           "/urw/query",
-			SecurityModel: QueryUserRoleWorkspacesSecurityModel,
-			Name:          "queryUserRoleWorkspaces",
-			Description:   "Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role",
-			Handlers: []gin.HandlerFunc{
-				func(c *gin.Context) {
-					// QUERY - get
-					fireback.HttpQueryEntity(
-						c,
-						QueryUserRoleWorkspacesActionFn,
-						nil,
-					)
-				},
-			},
-			Format:         "QUERY",
-			Action:         QueryUserRoleWorkspacesActionFn,
-			ResponseEntity: &QueryUserRoleWorkspacesActionResDto{},
-			Out: &fireback.Module3ActionBody{
-				Entity: "QueryUserRoleWorkspacesActionResDto",
-			},
-		},
 		{
 			Method:        "POST",
 			Url:           "/email/send",
@@ -1201,7 +1159,6 @@ func AbacCustomActions() []fireback.Module3Action {
 }
 
 var AbacCustomActionsCli = []cli.Command{
-	QueryUserRoleWorkspacesActionCmd,
 	SendEmailActionCmd,
 	SendEmailWithProviderActionCmd,
 	GsmSendSmsActionCmd,
@@ -1221,6 +1178,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
 	Subcommands: cli.Commands{
+		QueryUserRoleWorkspacesActionDef.ToCli(),
 		InviteToWorkspaceActionDef.ToCli(),
 		UserInvitationsActionDef.ToCli(),
 		SignoutActionDef.ToCli(),
@@ -1238,7 +1196,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		CheckPassportMethodsActionDef.ToCli(),
 		OsLoginAuthenticateActionDef.ToCli(),
-		QueryUserRoleWorkspacesActionCmd,
 		SendEmailActionCmd,
 		SendEmailWithProviderActionCmd,
 		GsmSendSmsActionCmd,

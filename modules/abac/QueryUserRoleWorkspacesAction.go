@@ -8,31 +8,27 @@ import (
 
 func init() {
 	// Override the implementation with our actual code.
-	QueryUserRoleWorkspacesActionImp = QueryUserRoleWorkspacesAction
+	QueryUserRoleWorkspacesImpl = QueryUserRoleWorkspacesAction
 }
 
-func QueryUserRoleWorkspacesAction(
-	q fireback.QueryDSL) ([]*QueryUserRoleWorkspacesActionResDto,
-	*fireback.QueryResultMeta,
-	*fireback.IError,
-) {
+func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest, q fireback.QueryDSL) (*QueryUserRoleWorkspacesActionResponse, error) {
 
-	items := []*QueryUserRoleWorkspacesActionResDto{}
+	items := []*QueryUserRoleWorkspacesActionRes{}
 
 	if q.UserAccessPerWorkspace != nil {
 
 		for workspaceId, content := range *q.UserAccessPerWorkspace {
-			roles := []*QueryUserRoleWorkspacesResDtoRoles{}
+			roles := []QueryUserRoleWorkspacesActionResRoles{}
 
 			for roleId, roleContent := range content.UserRoles {
-				roles = append(roles, &QueryUserRoleWorkspacesResDtoRoles{
+				roles = append(roles, QueryUserRoleWorkspacesActionResRoles{
 					Name:         roleContent.Name,
 					Capabilities: roleContent.Accesses,
 					UniqueId:     roleId,
 				})
 			}
 
-			items = append(items, &QueryUserRoleWorkspacesActionResDto{
+			items = append(items, &QueryUserRoleWorkspacesActionRes{
 				Name:         content.Name,
 				UniqueId:     workspaceId,
 				Roles:        roles,
@@ -45,5 +41,7 @@ func QueryUserRoleWorkspacesAction(
 		return items[i].UniqueId < items[j].UniqueId
 	})
 
-	return items, nil, nil
+	return &QueryUserRoleWorkspacesActionResponse{
+		Payload: fireback.GResponseQuery(items, nil, &q),
+	}, nil
 }

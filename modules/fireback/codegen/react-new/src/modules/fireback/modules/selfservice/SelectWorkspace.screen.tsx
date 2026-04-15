@@ -1,15 +1,15 @@
 import { useContext } from "react";
-import { useGetUrwQuery } from "../../sdk/modules/abac/useGetUrwQuery";
 import { usePresenter } from "./SelectWorkspace.presenter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspaces";
 
 export const SelectWorkspaceScreen = () => {
   const { s } = usePresenter();
-  const { query: queryWorkspaces } = useGetUrwQuery({
-    queryOptions: { cacheTime: 50 },
-    query: {},
+  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
+    cacheTime: 50,
   });
-  const items = queryWorkspaces.data?.data?.items || [];
+
+  const items = queryUrw.data?.data?.items || [];
   const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
 
   return (

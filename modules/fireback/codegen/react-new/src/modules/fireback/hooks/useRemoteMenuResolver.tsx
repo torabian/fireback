@@ -6,7 +6,7 @@ import { useQueryClient } from "react-query";
 import { useLocale } from "./useLocale";
 import { RemoteQueryContext } from "../sdk/core/react-tools";
 import { userMeetsAccess2 } from "./accessLevels";
-import { useGetUrwQuery } from "../sdk/modules/abac/useGetUrwQuery";
+import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/modules/abac/QueryUserRoleWorkspaces";
 
 /**
  *
@@ -15,12 +15,15 @@ import { useGetUrwQuery } from "../sdk/modules/abac/useGetUrwQuery";
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const queryClient = useQueryClient();
   const { selectedUrw } = useContext(RemoteQueryContext) as any;
-  const { query: queryWorkspaces } = useGetUrwQuery({ query: {} });
+  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
+    cacheTime: 50,
+  });
+
   const { query } = useGetCteAppMenus({
     queryClient,
     queryOptions: {
       refetchOnWindowFocus: false,
-      enabled: !queryWorkspaces.isError && queryWorkspaces.isSuccess,
+      enabled: !queryUrw.isError && queryUrw.isSuccess,
     },
     query: {
       itemsPerPage: 9999,
@@ -42,7 +45,7 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
 
     return userMeetsAccess2(
       selectedUrw,
-      queryWorkspaces.data?.data?.items || [],
+      queryUrw.data?.data?.items || [],
       permissionKey
     );
   };

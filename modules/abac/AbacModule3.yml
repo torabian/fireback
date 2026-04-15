@@ -202,6 +202,38 @@ dtom:
         tags:
           validate: required
 acts:
+  - name: QueryUserRoleWorkspaces
+    method: get
+    url: /urw/query
+    cliName: urw
+
+    security:
+      resolveStrategy: user
+    description:
+      Returns the workspaces that user belongs to, as well as his role in there,
+      and the permissions for each role
+    out:
+      envelope: GResponse
+      fields:
+        - name: name
+          type: string
+        - name: capabilities
+          type: slice
+          description: Workspace level capabilities which are available
+          primitive: string
+        - name: uniqueId
+          type: string
+        - name: roles
+          type: array
+          fields:
+            - name: name
+              type: string
+            - name: uniqueId
+              type: string
+            - name: capabilities
+              type: slice
+              description: Capabilities related to this role which are available
+              primitive: string
   - name: InviteToWorkspace
     url: /workspace/invite
     cliName: invite
@@ -690,38 +722,6 @@ acts:
     out:
       dto: UserSessionDto
 actions:
-  - name: queryUserRoleWorkspaces
-    format: query
-    method: get
-    url: /urw/query
-    cliName: urw
-    security:
-      resolveStrategy: user
-    description:
-      Returns the workspaces that user belongs to, as well as his role in there,
-      and the permissions for each role
-    out:
-      fields:
-        - name: name
-          type: string
-        - name: capabilities
-          type: slice
-          description: Workspace level capabilities which are available
-          primitive: string
-        - name: uniqueId
-          type: string
-        - name: roles
-          type: array
-          fields:
-            - name: name
-              type: string
-            - name: uniqueId
-              type: string
-            - name: capabilities
-              type: slice
-              description: Capabilities related to this role which are available
-              primitive: string
-
   - name: sendEmail
     url: /email/send
     cliName: email
@@ -759,7 +759,6 @@ actions:
       fields:
         - name: queueId
           type: string
-
   - name: gsmSendSms
     url: /gsm/send/sms
     cliName: sms
