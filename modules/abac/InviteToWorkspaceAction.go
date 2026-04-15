@@ -49,9 +49,11 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.Qu
 	if invite.Phonenumber != "" {
 		inviteBody := "You are invite " + invite.FirstName + " " + invite.LastName
 
-		if _, err7 := GsmSendSmsAction(&GsmSendSmsActionReqDto{
-			ToNumber: invite.Phonenumber,
-			Body:     inviteBody,
+		if _, err7 := GsmSendSmsImpl(GsmSendSmsActionRequest{
+			Body: GsmSendSmsActionReq{
+				ToNumber: invite.Phonenumber,
+				Body:     inviteBody,
+			},
 		}, query); err7 != nil {
 			return nil, fireback.GormErrorToIError(err7)
 		}

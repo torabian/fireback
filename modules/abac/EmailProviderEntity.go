@@ -17,7 +17,7 @@ const (
 	GENERAL_SENDER EmailSenderCategory = "GENERAL_SENDER"
 )
 
-func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender EmailSenderCategory) (*SendEmailWithProviderActionResDto, *fireback.IError) {
+func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender EmailSenderCategory) (*SendEmailWithProviderActionRes, *fireback.IError) {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 
@@ -34,7 +34,7 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 		log.Default().Println(content.Json())
 
 		QueueId := "printed-to-terminal"
-		return &SendEmailWithProviderActionResDto{QueueId: QueueId}, nil
+		return &SendEmailWithProviderActionRes{QueueId: QueueId}, nil
 	} else {
 
 		// @todo: Give the option to set custom senders everywhere
@@ -46,7 +46,7 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 		if err := SendMail(*content, config.GeneralEmailProvider); err != nil {
 			return nil, fireback.CastToIError(err)
 		} else {
-			return &SendEmailWithProviderActionResDto{}, nil
+			return &SendEmailWithProviderActionRes{}, nil
 		}
 	}
 }

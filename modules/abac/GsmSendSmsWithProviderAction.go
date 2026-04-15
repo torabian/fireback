@@ -4,14 +4,22 @@ import "github.com/torabian/fireback/modules/fireback"
 
 func init() {
 	// Override the implementation with our actual code.
-	GsmSendSmsWithProviderActionImp = GsmSendSmsWithProviderAction
+	GsmSendSmsWithProviderImpl = GsmSendSmsWithProviderActionfunc
 }
 
-func GsmSendSmsWithProviderAction(req *GsmSendSmsWithProviderActionReqDto, q fireback.QueryDSL) (*GsmSendSmsWithProviderActionResDto, *fireback.IError) {
+func GsmSendSmsWithProviderActionfunc(c GsmSendSmsWithProviderActionRequest, query fireback.QueryDSL) (*GsmSendSmsWithProviderActionResponse, error) {
 
-	if err := GsmSendSmsWithProviderActionReqValidator(req); err != nil {
+	req := c.Body
+	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
-	return GsmSendSMS(req.GsmProviderId.String, req.Body, []string{req.ToNumber})
+	if res, err := GsmSendSMS(req.GsmProviderId, req.Body, []string{req.ToNumber}); err != nil {
+		return nil, err
+	} else {
+		return &GsmSendSmsWithProviderActionResponse{
+			Payload: res,
+		}, nil
+	}
+
 }

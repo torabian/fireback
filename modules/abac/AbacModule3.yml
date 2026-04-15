@@ -721,8 +721,8 @@ acts:
       for them. Useful for desktop applications.
     out:
       dto: UserSessionDto
-actions:
-  - name: sendEmail
+
+  - name: SendEmail
     url: /email/send
     cliName: email
     method: post
@@ -730,16 +730,18 @@ actions:
     in:
       fields:
         - name: toAddress
-          validate: required
+          tags:
+            validate: required
           type: string
         - name: body
-          validate: required
+          tags:
+            validate: required
           type: string
     out:
       fields:
         - name: queueId
           type: string
-  - name: sendEmailWithProvider
+  - name: SendEmailWithProvider
     url: /emailProvider/send
     cliName: emailp
     method: post
@@ -750,16 +752,18 @@ actions:
           type: one
           target: EmailProviderEntity
         - name: toAddress
-          validate: required
+          tags:
+            validate: required
           type: string
         - name: body
-          validate: required
+          tags:
+            validate: required
           type: string
     out:
       fields:
         - name: queueId
           type: string
-  - name: gsmSendSms
+  - name: GsmSendSms
     url: /gsm/send/sms
     cliName: sms
     method: post
@@ -767,30 +771,33 @@ actions:
     in:
       fields:
         - name: toNumber
-          validate: required
+          tags:
+            validate: required
           type: string
         - name: body
-          validate: required
+          tags:
+            validate: required
           type: string
     out:
       fields:
         - name: queueId
           type: string
-  - name: gsmSendSmsWithProvider
+  - name: GsmSendSmsWithProvider
     url: /gsmProvider/send/sms
     cliName: smsp
     method: post
     description: Send a text message using an specific gsm provider
     in:
       fields:
-        - name: gsmProvider
-          type: one
-          target: GsmProviderEntity
+        - name: gsmProviderId
+          type: string
         - name: toNumber
-          validate: required
+          tags:
+            validate: required
           type: string
         - name: body
-          validate: required
+          tags:
+            validate: required
           type: string
     out:
       fields:
