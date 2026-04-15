@@ -37,7 +37,7 @@ export function usePostWorkspaceInvite(
     ? execFn(options)
     : execApiFn(options);
   // Url of the remote affix.
-  const url = "/workspace/invite".substr(1);
+  const url = "/workspace-invite".substr(1);
   let computedUrl = `${url}?${new URLSearchParams(
     queryBeforeSend(query)
   ).toString()}`;

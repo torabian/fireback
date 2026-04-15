@@ -154,8 +154,64 @@ dtom:
         target: UserEntity
       - name: userId
         type: string?
-
+  - name: workspaceInvitation
+    description: Workspace invitation has some common usage, so it's put here.
+    fields:
+      - name: publicKey
+        type: string
+        description:
+          A long hash to get the user into the confirm or signup page without sending
+          the email or phone number, for example if an administrator wants to copy the link.
+      - name: coverLetter
+        type: string
+        description: The content that user will receive to understand the reason of the letter.
+      - name: targetUserLocale
+        type: string
+        description:
+          If the invited person has a different language, then you can define
+          that so the interface for him will be automatically translated.
+      - name: email
+        type: string
+        description: The email address of the person which is invited.
+      - name: phonenumber
+        type: string
+        description: The phone number of the person which is invited.
+      - name: workspace
+        type: one
+        target: WorkspaceEntity
+        description: Workspace which user is being invite to.
+      - name: firstName
+        type: string
+        tags:
+          validate: required
+        description: First name of the person which is invited
+      - name: lastName
+        tags:
+          validate: required
+        type: string
+        description: Last name of the person which is invited.
+      - name: forceEmailAddress
+        type: bool?
+        description: If forced, the email address cannot be changed by the user which has been invited.
+      - name: forcePhoneNumber
+        type: bool?
+        description: If forced, user cannot change the phone number and needs to complete signup.
+      - name: roleId
+        type: string
+        description: The role which invitee get if they accept the request.
+        tags:
+          validate: required
 acts:
+  - name: InviteToWorkspace
+    url: /workspace/invite
+    cliName: invite
+    method: post
+    description: "Invite a new person (either a user, with passport or without passport)"
+    in:
+      dto: WorkspaceInvitationDto
+    out:
+      dto: WorkspaceInvitationDto
+
   - name: UserInvitations
     description:
       Shows the invitations for an specific user, if the invited member already has a account.
@@ -703,15 +759,7 @@ actions:
       fields:
         - name: queueId
           type: string
-  - name: inviteToWorkspace
-    url: /workspace/invite
-    cliName: invite
-    method: post
-    description: "Invite a new person (either a user, with passport or without passport)"
-    in:
-      entity: WorkspaceInviteEntity
-    out:
-      entity: WorkspaceInviteEntity
+
   - name: gsmSendSms
     url: /gsm/send/sms
     cliName: sms
