@@ -2,8 +2,14 @@ package fireback
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"log"
+	"math/big"
 	"net"
 	"net/http"
 	"os"
@@ -56,13 +62,32 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 		fmt.Println("Starting virtual domain: ", vd, EnableDomain(vd))
 	}
 
-	forceSSL := config2.SSL || config.UseSSL
-
 	mainServer := &http.Server{
 		Addr:         fmt.Sprintf(":%d", port),
 		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
+	}
+
+	forceSSL := config2.SSL || config.UseSSL
+
+	var useVirtualCert bool
+
+	if forceSSL {
+		useVirtualCert = config.CertFile == "" || config.KeyFile == ""
+
+		if useVirtualCert {
+			cert, err := GenerateSelfSignedCert(config2.VirtualDomains)
+			if err != nil {
+				log.Fatal("failed to generate self-signed cert:", err)
+			}
+
+			mainServer.TLSConfig = &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			}
+
+			fmt.Println("Using self-signed certificate (no cert files provided)")
+		}
 	}
 
 	var redirectServer *http.Server
@@ -89,7 +114,11 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	go func() {
 		var err error
 		if forceSSL {
-			err = mainServer.ListenAndServeTLS(config.CertFile, config.KeyFile)
+			if useVirtualCert {
+				err = mainServer.ListenAndServeTLS("", "")
+			} else {
+				err = mainServer.ListenAndServeTLS(config.CertFile, config.KeyFile)
+			}
 		} else {
 			err = mainServer.ListenAndServe()
 		}
@@ -124,4 +153,43 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	}
 
 	LOG.Info("Server exited properly")
+}
+
+func GenerateSelfSignedCert(domains []string) (tls.Certificate, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	if len(domains) == 0 {
+		domains = []string{"localhost"}
+	}
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(365 * 24 * time.Hour),
+
+		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+
+		BasicConstraintsValid: true,
+		DNSNames:              domains,
+	}
+
+	// add localhost fallback
+	template.DNSNames = append(template.DNSNames, "localhost")
+
+	// add IP support
+	template.IPAddresses = []net.IP{net.ParseIP("127.0.0.1")}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
+
+	return tls.X509KeyPair(certPEM, keyPEM)
 }
