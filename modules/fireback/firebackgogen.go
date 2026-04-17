@@ -53,6 +53,10 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return "int64"
 	case "boolean":
 		return "*bool"
+
+	case "complex":
+		return field.Complex
+
 	case "double":
 		return "*float64"
 	case FIELD_TYPE_OBJECT:

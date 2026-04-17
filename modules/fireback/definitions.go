@@ -2,6 +2,7 @@ package fireback
 
 import (
 	"encoding/json"
+	reflect "reflect"
 
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
@@ -126,4 +127,10 @@ func (x *QueryResultMeta) Json() string {
 		return (string(str))
 	}
 	return ""
+}
+
+// Checks if the underlying value is a nil error.
+// Using IError sometimes causes the err to not be nil, but underlying value is nil
+func IsErr(err error) bool {
+	return err != nil && !reflect.ValueOf(err).IsNil()
 }

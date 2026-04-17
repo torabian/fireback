@@ -51,6 +51,11 @@ type XFileMeta struct {
 	IsBase64 bool   `json:"isBase64,omitempty" yaml:"isBase64,omitempty"`
 }
 
+func (m *XFile) UnmarshalText(text []byte) error {
+	*m = NewXFileAutoNull(string(text))
+	return nil
+}
+
 func (f *XFile) UnmarshalJSON(data []byte) error {
 	var obj interface{}
 	if err := json.Unmarshal(data, &obj); err != nil {

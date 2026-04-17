@@ -114,26 +114,6 @@ func GetCliCommands(x *FirebackApp) []cli.Command {
 	return commands
 }
 
-// func GetCliCommands(x *FirebackApp) []cli.Command {
-// 	commands := []cli.Command{}
-
-// 	for _, module := range x.Modules {
-// 		commands = append(commands, module.CliHandlers...)
-// 		for _, bundle := range module.EntityBundles {
-// 			commands = append(commands, bundle.CliCommands...)
-// 		}
-
-// 		if module.CliActionsBundle != nil {
-// 			commands = append(commands, *module.CliActionsBundle)
-// 		}
-
-// 	}
-
-// 	commands = append(commands, x.CliActions()...)
-
-// 	return commands
-// }
-
 func GetReportCommands(x *FirebackApp) []cli.Command {
 	commands := []cli.Command{}
 

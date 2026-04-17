@@ -1549,7 +1549,7 @@ func {{ .e.Upper }}ActionImport(
       {{ template "entityCommonCliFlag" (arr .Fields $newPrefix)}}
     {{ end }}
 
-    {{ if or (eq .Type "string") (eq .Type "json") (eq .Type "enum") (eq .Type "text") (eq .Type "html") (eq .Type "")}}
+    {{ if or (eq .Type "string") (eq .Type "complex") (eq .Type "json") (eq .Type "enum") (eq .Type "text") (eq .Type "html") (eq .Type "")}}
     &cli.StringFlag{
       Name:     "{{ $prefix }}{{ .ComputedCliName }}",
       Required: {{ .IsRequired }},
@@ -1864,6 +1864,13 @@ type x{{$prefix}}{{ .PublicName}} struct {
     {{ if or (eq .Type "string?") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
         template.{{ .PublicName }} = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
+      }
+	  {{ end }}
+    {{ if or (eq .Type "complex") }}
+      if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
+        if u, ok := any(&template.{{ .PublicName }}).(encoding.TextUnmarshaler); ok {
+          u.UnmarshalText([]byte(c.String("{{ $prefix }}{{ .ComputedCliName }}")))
+        }
       }
 	  {{ end }}
     {{ if or (eq .Type "bool?") }}

@@ -20,7 +20,17 @@ import (
 // JSON defined JSON data type, need to implements driver.Valuer, sql.Scanner interface
 type JSON json.RawMessage
 
+func (m *JSON) UnmarshalText(text []byte) error {
+	return json.Unmarshal(text, m)
+}
+
 // Converts any object into a database JSON object
+func JSONFromString(data string) *JSON {
+	var intermediate interface{}
+	json.Unmarshal([]byte(data), &intermediate)
+	return JSONFrom(intermediate)
+}
+
 func JSONFrom(data any) *JSON {
 	jsx, _ := json.Marshal(data)
 	b := &JSON{}
@@ -116,6 +126,10 @@ func (JSON) GormDBDataType(db *gorm.DB, field *schema.Field) string {
 		return "JSONB"
 	}
 	return ""
+}
+
+func (js JSON) FromString(source string) {
+	js = *JSONFromString(source)
 }
 
 func (js JSON) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
