@@ -205,6 +205,8 @@ type HttpServerInstanceConfig struct {
 	SSL bool
 
 	Slow bool
+
+	VirtualDomains []string
 }
 
 func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {

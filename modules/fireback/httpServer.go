@@ -1,10 +1,20 @@
 package fireback
 
 import (
+	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"log"
+	"math/big"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,63 +49,147 @@ var LOG *zap.Logger
 // Other one is used for public, anyone who wants to use their software,
 // create account, etc.
 func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
-
 	port := config.Port
-
 	if config2.Port != 0 {
 		port = config2.Port
 	}
 
-	forceSSL := config2.SSL || config.UseSSL
+	for _, vd := range config2.VirtualDomains {
+		if vd == "" {
+			continue
+		}
 
-	if forceSSL {
-		port = 443
-
-		go func() {
-			redirectServer := &http.Server{
-				Addr: ":80",
-				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					target := "https://" + r.Host + r.URL.Path
-					if r.URL.RawQuery != "" {
-						target += "?" + r.URL.RawQuery
-					}
-					http.Redirect(w, r, target, http.StatusMovedPermanently)
-				}),
-			}
-			log.Fatal(redirectServer.ListenAndServe())
-		}()
+		fmt.Println("Starting virtual domain: ", vd, EnableDomain(vd))
 	}
 
-	server01 := &http.Server{
-		Addr:         ":" + fmt.Sprintf("%v", port),
+	mainServer := &http.Server{
+		Addr:         fmt.Sprintf(":%d", port),
 		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	LOG.Info("Http server running on:", zap.String("url", "http://localhost"+server01.Addr+"/"))
-	LOG.Info("Ping available on:", zap.String("url", "http://localhost"+server01.Addr+"/ping"))
-	LOG.Info("Internal server ip: ** slash char \"/\" in the end is important in some sdks we generate depend on it **")
+	forceSSL := config2.SSL || config.UseSSL
 
-	// Get's the local IP.
-	ipData := GetOutboundIP()
-	if ipData != nil {
-		url := "http://" + ipData.String() + server01.Addr + "/"
-		LOG.Info("Local network address:", zap.String("url", url))
-	}
+	var useVirtualCert bool
 
-	g.Go(func() error {
-		if forceSSL {
-			return server01.ListenAndServeTLS(config.CertFile, config.KeyFile)
+	if forceSSL {
+		useVirtualCert = config.CertFile == "" || config.KeyFile == ""
+
+		if useVirtualCert {
+			cert, err := GenerateSelfSignedCert(config2.VirtualDomains)
+			if err != nil {
+				log.Fatal("failed to generate self-signed cert:", err)
+			}
+
+			mainServer.TLSConfig = &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			}
+
+			fmt.Println("Using self-signed certificate (no cert files provided)")
 		}
-		return server01.ListenAndServe()
-	})
-
-	if config2.Monitor {
-		go monitor()
 	}
 
-	if err := g.Wait(); err != nil {
-		log.Fatal(err)
+	var redirectServer *http.Server
+
+	if forceSSL {
+		mainServer.Addr = ":443"
+
+		redirectServer = &http.Server{
+			Addr: ":80",
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				target := "https://" + r.Host + r.URL.RequestURI()
+				http.Redirect(w, r, target, http.StatusMovedPermanently)
+			}),
+		}
+
+		go func() {
+			if err := redirectServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatal(err)
+			}
+		}()
 	}
+
+	// Run main server
+	go func() {
+		var err error
+		if forceSSL {
+			if useVirtualCert {
+				err = mainServer.ListenAndServeTLS("", "")
+			} else {
+				err = mainServer.ListenAndServeTLS(config.CertFile, config.KeyFile)
+			}
+		} else {
+			err = mainServer.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
+
+	// --- Graceful shutdown ---
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	<-stop
+	LOG.Info("Shutting down...")
+
+	for _, vd := range config2.VirtualDomains {
+		if vd == "" {
+			continue
+		}
+		fmt.Println("Stopping virtual domain: ", vd, DisableDomain(vd))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := mainServer.Shutdown(ctx); err != nil {
+		LOG.Error("Main server shutdown failed", zap.Error(err))
+	}
+
+	if redirectServer != nil {
+		_ = redirectServer.Shutdown(ctx)
+	}
+
+	LOG.Info("Server exited properly")
+}
+
+func GenerateSelfSignedCert(domains []string) (tls.Certificate, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	if len(domains) == 0 {
+		domains = []string{"localhost"}
+	}
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(365 * 24 * time.Hour),
+
+		KeyUsage:    x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+
+		BasicConstraintsValid: true,
+		DNSNames:              domains,
+	}
+
+	// add localhost fallback
+	template.DNSNames = append(template.DNSNames, "localhost")
+
+	// add IP support
+	template.IPAddresses = []net.IP{net.ParseIP("127.0.0.1")}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
+
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
+
+	return tls.X509KeyPair(certPEM, keyPEM)
 }
