@@ -47,6 +47,10 @@ import (
 	{{ if .e.HasClickHouse }}
 	"context"
 	{{ end }}
+	
+	{{ if .e.HasComplexes }}
+	"encoding"
+	{{ end }}
    
 )
 

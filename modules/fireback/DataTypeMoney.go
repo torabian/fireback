@@ -23,6 +23,18 @@ type Money struct {
 	Present  bool
 }
 
+func (m *Money) UnmarshalText(text []byte) error {
+
+	amount, currency, err := ParseMoneyString(string(text))
+	if err != nil {
+		return err
+	}
+	m.Amount = sql.NullInt64{Int64: amount, Valid: true}
+	m.Currency = sql.NullString{String: NormalizeCurrency(currency), Valid: true}
+
+	return nil
+}
+
 func currencyMultiplier(currency string) int64 {
 	return pow10(CurrencyPrecision(currency))
 }

@@ -17,6 +17,12 @@ type Duration struct {
 	Present bool // Whether the field was present in JSON or YAML
 }
 
+func (m *Duration) UnmarshalText(text []byte) error {
+	*m = NewDurationAutoNull(string(text))
+
+	return nil
+}
+
 // UnmarshalJSON handles JSON deserialization
 func (d *Duration) UnmarshalJSON(data []byte) error {
 	d.Present = true

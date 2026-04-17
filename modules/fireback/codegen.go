@@ -1829,7 +1829,168 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 	}
 
-	for _, dto := range x.Dtom {
+	mDtos := []*core.EmiDto{}
+	mDtos = append(mDtos, x.Dtom...)
+	aktFields := []*FirebackEmiAction{}
+	aktFields = append(aktFields, x.Acts...)
+
+	for _, entity := range x.Entities {
+
+		// Disabled now, but later we need to fix this.
+		// ve := ConvertEntityToEmi(entity)
+		// mDtos = append(mDtos, ve.Dtos...)
+		// aktFields = append(aktFields, ve.Actions...)
+
+		// Computing field types is important for target writter.
+		ComputeFieldTypes(entity.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
+		ComputeComplexGormField(&entity, entity.CompleteFields())
+
+		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
+
+		if ctx.Catalog.LanguageName == "FirebackGo" {
+
+			entity.RootModule = x
+
+			if !HasSeeders(ctx.Path, &entity) {
+				err7 := CreateSeederDirectory(ctx.Path, &entity)
+				if err7 != nil {
+					fmt.Println("Error on entity seeders directory generation:", err7)
+				}
+			}
+
+			if !HasMocks(ctx.Path, &entity) {
+				err7 := CreateMockDirectory(ctx.Path, &entity)
+				if err7 != nil {
+					fmt.Println("Error on entity mocks directory generation:", err7)
+				}
+			}
+			if !HasMocks(ctx.Path, &entity) {
+				err7 := CreateMockDirectory(ctx.Path, &entity)
+				if err7 != nil {
+					fmt.Println("Error on entity mocks directory generation:", err7)
+				}
+			}
+		}
+
+		if ctx.Catalog.EntityHeaderDiskName != nil {
+			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityHeaderDiskName(&entity))
+
+			params := gin.H{
+				"implementation": "skip",
+			}
+
+			data, err := entity.RenderTemplate(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.EntityGeneratorTemplate,
+				x,
+				params,
+			)
+
+			if err != nil {
+				fmt.Println("Error on entity extension generation:", err)
+			} else {
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+				if err3 != nil {
+					fmt.Println("Error on writing content:", exportPath, err3)
+				}
+			}
+		}
+
+		if ctx.Catalog.EntityExtensionGeneratorTemplate != "" {
+			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityExtensionDiskName(&entity))
+
+			// We only render the extension, if this entity is first time being created
+			if !Exists(exportPath) && !Exists(entityAddress) {
+				data, err := entity.RenderTemplate(
+					ctx,
+					ctx.Catalog.Templates,
+					ctx.Catalog.EntityExtensionGeneratorTemplate,
+					x,
+					nil,
+				)
+				if err != nil {
+					fmt.Println("Error on entity extension generation:", err)
+				} else {
+					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+					if err3 != nil {
+						fmt.Println("Error on writing content:", exportPath, err3)
+					}
+				}
+
+			}
+
+		}
+
+		// Step 0: Generate the Entity
+		if ctx.Catalog.EntityGeneratorTemplate != "" {
+
+			data, err := entity.RenderTemplate(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.EntityGeneratorTemplate,
+				x,
+				nil,
+			)
+			if err != nil {
+				log.Fatalln("Error on entity generation:", err)
+			} else {
+				err3 := WriteFileGen(ctx, entityAddress, EscapeLines(data), 0644)
+				if err3 != nil {
+					log.Fatalln("Error on writing content:", entityAddress, err3)
+				}
+			}
+		}
+
+		// Step 0: Cte SQL Render
+		if entity.Cte && ctx.Catalog.CteSqlTemplate != "" {
+
+			{
+				os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
+				CreateQueryIndex(ctx.Path)
+				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"Cte.vsql")
+				data, err := entity.RenderCteSqlTemplate(
+					ctx,
+					ctx.Catalog.Templates,
+					ctx.Catalog.CteSqlTemplate,
+					x,
+					"sql",
+				)
+				if err != nil {
+					log.Fatalln("Error on cte sql generation:", err)
+				} else {
+					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+					if err3 != nil {
+						log.Fatalln("Error on writing content:", exportPath, err3)
+					}
+				}
+			}
+		}
+
+		// Step 1: Generate the form, (fields, sections, inputs, etc...)
+		if ctx.Catalog.FormGeneratorTemplate != "" {
+			exportPath := filepath.Join(exportDir, ctx.Catalog.FormDiskName(&entity))
+
+			data, err := entity.RenderTemplate(
+				ctx,
+				ctx.Catalog.Templates,
+				ctx.Catalog.FormGeneratorTemplate,
+				x,
+				nil,
+			)
+			if err != nil {
+				log.Fatalln("Error on UI generation:", err)
+			} else {
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
+				if err3 != nil {
+					log.Fatalln("Error on writing content:", exportPath, err3)
+				}
+			}
+		}
+
+	}
+
+	for _, dto := range mDtos {
 
 		// Fireback, has a naming convension which Emi, as a general compiler
 		// doesn't. It would always put the names upper case, and end Dtos with .Dto affix
@@ -1880,7 +2041,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 	}
 
 	/// Emi compiler action
-	for _, action := range x.Acts {
+	for _, action := range aktFields {
 		var content string
 		var exportPath string
 
@@ -2049,156 +2210,6 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 	}
 
-	for _, entity := range x.Entities {
-
-		// Computing field types is important for target writter.
-		ComputeFieldTypes(entity.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
-		ComputeComplexGormField(&entity, entity.CompleteFields())
-
-		entityAddress := filepath.Join(exportDir, ctx.Catalog.EntityDiskName(&entity))
-
-		if ctx.Catalog.LanguageName == "FirebackGo" {
-
-			entity.RootModule = x
-
-			if !HasSeeders(ctx.Path, &entity) {
-				err7 := CreateSeederDirectory(ctx.Path, &entity)
-				if err7 != nil {
-					fmt.Println("Error on entity seeders directory generation:", err7)
-				}
-			}
-
-			if !HasMocks(ctx.Path, &entity) {
-				err7 := CreateMockDirectory(ctx.Path, &entity)
-				if err7 != nil {
-					fmt.Println("Error on entity mocks directory generation:", err7)
-				}
-			}
-			if !HasMocks(ctx.Path, &entity) {
-				err7 := CreateMockDirectory(ctx.Path, &entity)
-				if err7 != nil {
-					fmt.Println("Error on entity mocks directory generation:", err7)
-				}
-			}
-		}
-
-		if ctx.Catalog.EntityHeaderDiskName != nil {
-			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityHeaderDiskName(&entity))
-
-			params := gin.H{
-				"implementation": "skip",
-			}
-
-			data, err := entity.RenderTemplate(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.EntityGeneratorTemplate,
-				x,
-				params,
-			)
-
-			if err != nil {
-				fmt.Println("Error on entity extension generation:", err)
-			} else {
-				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-				if err3 != nil {
-					fmt.Println("Error on writing content:", exportPath, err3)
-				}
-			}
-		}
-
-		if ctx.Catalog.EntityExtensionGeneratorTemplate != "" {
-			exportPath := filepath.Join(exportDir, ctx.Catalog.EntityExtensionDiskName(&entity))
-
-			// We only render the extension, if this entity is first time being created
-			if !Exists(exportPath) && !Exists(entityAddress) {
-				data, err := entity.RenderTemplate(
-					ctx,
-					ctx.Catalog.Templates,
-					ctx.Catalog.EntityExtensionGeneratorTemplate,
-					x,
-					nil,
-				)
-				if err != nil {
-					fmt.Println("Error on entity extension generation:", err)
-				} else {
-					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-					if err3 != nil {
-						fmt.Println("Error on writing content:", exportPath, err3)
-					}
-				}
-
-			}
-
-		}
-
-		// Step 0: Generate the Entity
-		if ctx.Catalog.EntityGeneratorTemplate != "" {
-
-			data, err := entity.RenderTemplate(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.EntityGeneratorTemplate,
-				x,
-				nil,
-			)
-			if err != nil {
-				log.Fatalln("Error on entity generation:", err)
-			} else {
-				err3 := WriteFileGen(ctx, entityAddress, EscapeLines(data), 0644)
-				if err3 != nil {
-					log.Fatalln("Error on writing content:", entityAddress, err3)
-				}
-			}
-		}
-
-		// Step 0: Cte SQL Render
-		if entity.Cte && ctx.Catalog.CteSqlTemplate != "" {
-
-			{
-				os.MkdirAll(filepath.Join(exportDir, "queries"), os.ModePerm)
-				CreateQueryIndex(ctx.Path)
-				exportPath := filepath.Join(exportDir, "queries", entity.Upper()+"Cte.vsql")
-				data, err := entity.RenderCteSqlTemplate(
-					ctx,
-					ctx.Catalog.Templates,
-					ctx.Catalog.CteSqlTemplate,
-					x,
-					"sql",
-				)
-				if err != nil {
-					log.Fatalln("Error on cte sql generation:", err)
-				} else {
-					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-					if err3 != nil {
-						log.Fatalln("Error on writing content:", exportPath, err3)
-					}
-				}
-			}
-		}
-
-		// Step 1: Generate the form, (fields, sections, inputs, etc...)
-		if ctx.Catalog.FormGeneratorTemplate != "" {
-			exportPath := filepath.Join(exportDir, ctx.Catalog.FormDiskName(&entity))
-
-			data, err := entity.RenderTemplate(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.FormGeneratorTemplate,
-				x,
-				nil,
-			)
-			if err != nil {
-				log.Fatalln("Error on UI generation:", err)
-			} else {
-				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-				if err3 != nil {
-					log.Fatalln("Error on writing content:", exportPath, err3)
-				}
-			}
-		}
-
-	}
 }
 
 func DiscoverJsComplexes(module *Module3) []js.RecognizedComplex {

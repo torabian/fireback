@@ -1043,23 +1043,14 @@
         "type": {
           "type": "string",
           "enum": [
-            "string?",
+            "complex",
             "int?",
             "float64?",
-            "money?",
-            "xfile?",
             "float32?",
             "bool?",
             "int32?",
             "int64?",
             "int",
-            "datetime",
-            "json",
-            "datenano",
-            "html",
-            "text",
-            "date",
-            "daterange",
             "collection",
             "slice",
             "enum",
@@ -1067,12 +1058,15 @@
             "one",
             "int64",
             "float64",
-            "duration?",
             "object",
             "array",
             "string"
           ],
           "description": "Type of the field based on Fireback types."
+        },
+        "complex": {
+          "type": "string",
+          "description": "The complex class which will be used for data type complex"
         },
         "primitive": {
           "type": "string",

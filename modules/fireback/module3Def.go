@@ -595,6 +595,24 @@ func (x Module3Entity) HasClickHouse() bool {
 	return x.Replicas != nil && x.Replicas.Clickhouse != nil
 }
 
+func hasComplexInFields(fields []*Module3Field) bool {
+	for _, f := range fields {
+		if f.Type == "complex" {
+			return true
+		}
+		if len(f.Fields) > 0 && hasComplexInFields(f.Fields) {
+			return true
+		}
+	}
+	return false
+}
+
+func (x Module3Entity) HasComplexes() bool {
+	// I need to go recursively into x.Fields, which might have fields again, and if type is 'complex',
+	// in any occurence, then return true. if never met, then false.
+	return hasComplexInFields(x.Fields)
+}
+
 func (x Module3Action) ToCli() cli.Command {
 
 	name := x.Name

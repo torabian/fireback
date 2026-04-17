@@ -14,6 +14,12 @@ import (
 
 type XDate string
 
+func (m *XDate) UnmarshalText(text []byte) error {
+	FromString(string(text), m)
+
+	return nil
+}
+
 type XDateMetaData struct {
 	Formatted *string `json:"formatted,omitempty"`
 	Locale    *string `json:"startLocale,omitempty"`

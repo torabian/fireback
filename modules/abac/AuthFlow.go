@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -122,15 +123,15 @@ func IntegrateAuthFlow(c *cli.Context) error {
 
 		value := fireback.AskForInput(label, prefix)
 		query.C = c
-		mresponse, e := CheckClassicPassportAction(CheckClassicPassportActionRequest{
+		mresponse, err := CheckClassicPassportAction(CheckClassicPassportActionRequest{
 			Body: CheckClassicPassportActionReq{
 				Value: value,
 			},
 			CliCtx: c,
 		}, query)
 
-		if e != nil {
-			return e
+		if err != nil && !reflect.ValueOf(err).IsNil() {
+			return err
 		}
 
 		var m *CheckClassicPassportActionRes
