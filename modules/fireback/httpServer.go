@@ -1,10 +1,14 @@
 package fireback
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -39,63 +43,85 @@ var LOG *zap.Logger
 // Other one is used for public, anyone who wants to use their software,
 // create account, etc.
 func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
-
 	port := config.Port
-
 	if config2.Port != 0 {
 		port = config2.Port
 	}
 
-	forceSSL := config2.SSL || config.UseSSL
+	for _, vd := range config2.VirtualDomains {
+		if vd == "" {
+			continue
+		}
 
-	if forceSSL {
-		port = 443
-
-		go func() {
-			redirectServer := &http.Server{
-				Addr: ":80",
-				Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					target := "https://" + r.Host + r.URL.Path
-					if r.URL.RawQuery != "" {
-						target += "?" + r.URL.RawQuery
-					}
-					http.Redirect(w, r, target, http.StatusMovedPermanently)
-				}),
-			}
-			log.Fatal(redirectServer.ListenAndServe())
-		}()
+		fmt.Println("Starting virtual domain: ", vd, EnableDomain(vd))
 	}
 
-	server01 := &http.Server{
-		Addr:         ":" + fmt.Sprintf("%v", port),
+	forceSSL := config2.SSL || config.UseSSL
+
+	mainServer := &http.Server{
+		Addr:         fmt.Sprintf(":%d", port),
 		Handler:      handler,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	LOG.Info("Http server running on:", zap.String("url", "http://localhost"+server01.Addr+"/"))
-	LOG.Info("Ping available on:", zap.String("url", "http://localhost"+server01.Addr+"/ping"))
-	LOG.Info("Internal server ip: ** slash char \"/\" in the end is important in some sdks we generate depend on it **")
+	var redirectServer *http.Server
 
-	// Get's the local IP.
-	ipData := GetOutboundIP()
-	if ipData != nil {
-		url := "http://" + ipData.String() + server01.Addr + "/"
-		LOG.Info("Local network address:", zap.String("url", url))
-	}
+	if forceSSL {
+		mainServer.Addr = ":443"
 
-	g.Go(func() error {
-		if forceSSL {
-			return server01.ListenAndServeTLS(config.CertFile, config.KeyFile)
+		redirectServer = &http.Server{
+			Addr: ":80",
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				target := "https://" + r.Host + r.URL.RequestURI()
+				http.Redirect(w, r, target, http.StatusMovedPermanently)
+			}),
 		}
-		return server01.ListenAndServe()
-	})
 
-	if config2.Monitor {
-		go monitor()
+		go func() {
+			if err := redirectServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				log.Fatal(err)
+			}
+		}()
 	}
 
-	if err := g.Wait(); err != nil {
-		log.Fatal(err)
+	// Run main server
+	go func() {
+		var err error
+		if forceSSL {
+			err = mainServer.ListenAndServeTLS(config.CertFile, config.KeyFile)
+		} else {
+			err = mainServer.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
+
+	// --- Graceful shutdown ---
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	<-stop
+	LOG.Info("Shutting down...")
+
+	for _, vd := range config2.VirtualDomains {
+		if vd == "" {
+			continue
+		}
+		fmt.Println("Stopping virtual domain: ", vd, DisableDomain(vd))
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := mainServer.Shutdown(ctx); err != nil {
+		LOG.Error("Main server shutdown failed", zap.Error(err))
+	}
+
+	if redirectServer != nil {
+		_ = redirectServer.Shutdown(ctx)
+	}
+
+	LOG.Info("Server exited properly")
 }

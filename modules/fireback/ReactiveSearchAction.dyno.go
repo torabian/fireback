@@ -146,7 +146,7 @@ func ReactiveSearchActionReactiveHandler(factory func(
 	return func(ctx *gin.Context) {
 		read := make(chan ReactiveSearchActionReadChan)
 		done := make(chan bool)
-		c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		c, err := upgraderReactiveSearchAction.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
 			c.Close()

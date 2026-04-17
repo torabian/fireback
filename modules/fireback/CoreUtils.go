@@ -11,6 +11,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
@@ -340,6 +341,10 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 				Name:  "watch",
 				Usage: "Monitor server stat using charts and interactive graphics",
 			},
+			&cli.StringFlag{
+				Name:  "domains",
+				Usage: "Mimics the runtime on specific domains locally, for example: test.com,test.pl. If ssl enabled, the certificate needs to include the domains.",
+			},
 			&cli.BoolFlag{
 				Name:  "ssl",
 				Usage: "Runs ssl server on 443 port",
@@ -365,19 +370,22 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 		},
 		Name:    "start",
 		Aliases: []string{"s"},
-		Usage:   "Starts http server only",
+		Usage:   "Starts http(s) server only, has few configuration",
 		Action: func(c *cli.Context) error {
 
 			initLogger()
 			if !config.Production {
 				Doctor()
 			}
+
 			cfg2 := HttpServerInstanceConfig{
-				Monitor: c.Bool("watch"),
-				Port:    c.Int64("port"),
-				SSL:     c.Bool("ssl"),
-				Slow:    c.Bool("slow"),
+				Monitor:        c.Bool("watch"),
+				Port:           c.Int64("port"),
+				SSL:            c.Bool("ssl"),
+				Slow:           c.Bool("slow"),
+				VirtualDomains: strings.Split(c.String("domains"), ","),
 			}
+
 			engine := engineFn(cfg2)
 			CreateHttpServer(engine, cfg2)
 
