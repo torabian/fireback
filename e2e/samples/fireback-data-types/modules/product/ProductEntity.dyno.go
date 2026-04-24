@@ -218,7 +218,7 @@ type productActionsSig struct {
 	Create         func(dto *ProductEntity, query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
 	Upsert         func(dto *ProductEntity, query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
 	SeederInit     func() *ProductEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*ProductEntity, *fireback.IError)
@@ -229,7 +229,7 @@ var ProductActions productActionsSig = productActionsSig{
 	Update:         ProductActionUpdateFn,
 	Create:         ProductActionCreateFn,
 	Upsert:         ProductActionUpsertFn,
-	Remove:         ProductActionRemoveFn,
+	RemoveEnqueue:  ProductActionRemoveEnqueueFn,
 	SeederInit:     ProductActionSeederInitFn,
 	MultiInsert:    ProductMultiInsertFn,
 	GetOne:         ProductActionGetOneFn,
@@ -323,17 +323,6 @@ func ProductActionSeederInitFn() *ProductEntity {
 	return entity
 }
 func ProductAssociationCreate(dto *ProductEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func ProductRelationContentCreate(dto *ProductEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func ProductRelationContentUpdate(dto *ProductEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func ProductPolyglotUpdateHandler(dto *ProductEntity, query fireback.QueryDSL) {
@@ -469,8 +458,6 @@ func ProductActionCreateFn(dto *ProductEntity, query fireback.QueryDSL) (*Produc
 	ProductEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	ProductEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	ProductRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -575,7 +562,6 @@ func ProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ProductE
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	ProductRelationContentUpdate(fields, query)
 	ProductPolyglotUpdateHandler(fields, query)
 	if ero := ProductDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -646,10 +632,10 @@ var ProductWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func ProductActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func ProductActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&ProductEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PRODUCT_DELETE}
-	return fireback.RemoveEntity[ProductEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[ProductEntity](req, query, refl)
 }
 func ProductActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1221,7 +1207,7 @@ var ProductCliCommands []cli.Command = []cli.Command{
 	ProductCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&ProductEntity{}).Elem(),
-		ProductActions.Remove,
+		ProductActions.RemoveEnqueue,
 	),
 }
 
@@ -1420,21 +1406,20 @@ var PRODUCT_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "ProductEntity",
 	},
 }
-var PRODUCT_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/product",
-	Format: "DELETE_DSL",
+var PRODUCT_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/product-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, ProductActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, ProductActions.RemoveEnqueue)
 		},
 	},
-	Action:         ProductActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         ProductActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &ProductEntity{},
 }
 
@@ -1452,7 +1437,7 @@ func GetProductModule3Actions() []fireback.Module3Action {
 		PRODUCT_ACTION_POST_ONE,
 		PRODUCT_ACTION_PATCH,
 		PRODUCT_ACTION_PATCH_BULK,
-		PRODUCT_ACTION_DELETE,
+		PRODUCT_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendProductRouter(&routes)
@@ -1460,27 +1445,27 @@ func GetProductModule3Actions() []fireback.Module3Action {
 }
 
 var PERM_ROOT_PRODUCT = fireback.PermissionInfo{
-	CompleteKey: "root.e2e.samples.fireback-data-types.modules.product.product.*",
+	CompleteKey: "root.modules.product.product.*",
 	Name:        "Entire product actions (*)",
 	Description: "",
 }
 var PERM_ROOT_PRODUCT_DELETE = fireback.PermissionInfo{
-	CompleteKey: "root.e2e.samples.fireback-data-types.modules.product.product.delete",
+	CompleteKey: "root.modules.product.product.delete",
 	Name:        "Delete product",
 	Description: "",
 }
 var PERM_ROOT_PRODUCT_CREATE = fireback.PermissionInfo{
-	CompleteKey: "root.e2e.samples.fireback-data-types.modules.product.product.create",
+	CompleteKey: "root.modules.product.product.create",
 	Name:        "Create product",
 	Description: "",
 }
 var PERM_ROOT_PRODUCT_UPDATE = fireback.PermissionInfo{
-	CompleteKey: "root.e2e.samples.fireback-data-types.modules.product.product.update",
+	CompleteKey: "root.modules.product.product.update",
 	Name:        "Update product",
 	Description: "",
 }
 var PERM_ROOT_PRODUCT_QUERY = fireback.PermissionInfo{
-	CompleteKey: "root.e2e.samples.fireback-data-types.modules.product.product.query",
+	CompleteKey: "root.modules.product.product.query",
 	Name:        "Query product",
 	Description: "",
 }

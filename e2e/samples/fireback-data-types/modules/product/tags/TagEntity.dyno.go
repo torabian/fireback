@@ -1063,10 +1063,10 @@ var TagCliCommands []cli.Command = []cli.Command{
 	TagUpdateCmd,
 	TagAskCmd,
 	TagCreateInteractiveCmd,
-	fireback.GetCommonRemoveQuery(
-		reflect.ValueOf(&TagEntity{}).Elem(),
-		TagActions.Remove,
-	),
+	// fireback.GetCommonRemoveQuery(
+	// 	reflect.ValueOf(&TagEntity{}).Elem(),
+	// 	TagActions.Remove,
+	// ),
 }
 
 func TagCliFn() cli.Command {
