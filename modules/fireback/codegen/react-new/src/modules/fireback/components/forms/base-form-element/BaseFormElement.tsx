@@ -59,7 +59,10 @@ export const BaseFormElement = ({
       {label && <label className="form-label">{label}</label>}
       {children}
 
-      <div className="form-text">{hint}</div>
+      <div
+        className="form-text"
+        dangerouslySetInnerHTML={{ __html: hint }}
+      ></div>
       <div className="invalid-feedback">{errorMessage}</div>
       <div className="valid-feedback">{validMessage}</div>
     </div>

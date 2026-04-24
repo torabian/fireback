@@ -111,6 +111,13 @@ func (x *QueryWorkspaceTypesPubliclyActionResponse) AsJSON(payload any) *QueryWo
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *QueryWorkspaceTypesPubliclyActionResponse) WithIdeal(payload QueryWorkspaceTypesPubliclyActionRes) *QueryWorkspaceTypesPubliclyActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *QueryWorkspaceTypesPubliclyActionResponse) AsHTML(payload string) *QueryWorkspaceTypesPubliclyActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")

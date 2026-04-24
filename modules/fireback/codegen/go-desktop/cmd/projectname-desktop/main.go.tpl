@@ -197,8 +197,6 @@ var xapp = &fireback.FirebackApp{
 		 
 	},
 
- 
-	{{ end }}
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to

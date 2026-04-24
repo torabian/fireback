@@ -46,7 +46,7 @@ func TsCalcJsonField(field *Module3Field) string {
 
 func TsComputedField(field *Module3Field, isWorkspace bool) string {
 	switch field.Type {
-	case "string", "text":
+	case "string", "text", "string?":
 		return "string"
 	case "one":
 		return field.Target
@@ -89,7 +89,7 @@ func TsComputedField(field *Module3Field, isWorkspace bool) string {
 	case "money?":
 		return "{amount: number, currency: string, formatted?: string}"
 	default:
-		return "string"
+		return "any"
 		// return field.Type
 	}
 }

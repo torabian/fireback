@@ -124,6 +124,13 @@ func (x *GsmSendSmsActionResponse) AsJSON(payload any) *GsmSendSmsActionResponse
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *GsmSendSmsActionResponse) WithIdeal(payload GsmSendSmsActionRes) *GsmSendSmsActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *GsmSendSmsActionResponse) AsHTML(payload string) *GsmSendSmsActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")

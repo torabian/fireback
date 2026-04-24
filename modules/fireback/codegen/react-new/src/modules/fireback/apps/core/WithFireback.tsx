@@ -48,17 +48,23 @@ export function WithFireback({
   );
 }
 
-const WithFetchX = ({ children, mockServer }: { children: any, mockServer: any }) => {
-  const {options, session} = useContext(RemoteQueryContext);
+const WithFetchX = ({
+  children,
+  mockServer,
+}: {
+  children: any;
+  mockServer: any;
+}) => {
+  const { options, session } = useContext(RemoteQueryContext);
 
- 
   const fetchContext = useRef(
     new FetchxContext(BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, "")),
   );
+
   fetchContext.current.defaultHeaders = {
-    'authorization': session?.token,
-    'workspace-id': options?.headers["workspace-id"]
-  }
+    authorization: session?.token,
+    "workspace-id": options?.headers["workspace-id"],
+  };
 
   if (BUILD_VARIABLES.INACCURATE_MOCK_MODE === "true") {
     console.log(

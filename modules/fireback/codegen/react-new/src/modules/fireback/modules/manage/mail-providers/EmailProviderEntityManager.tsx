@@ -37,7 +37,7 @@ export const EmailProviderEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          EmailProviderEntity.Navigation.query(undefined, locale)
+          EmailProviderEntity.Navigation.query(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>

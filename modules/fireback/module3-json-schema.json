@@ -52,10 +52,18 @@
           "type": "string"
         },
         "primitive": {
-          "type": "string"
-        },
-        "xhtml": {
-          "type": "boolean"
+          "type": "string",
+          "enum": [
+            "string",
+            "bool",
+            "int",
+            "int32",
+            "int64",
+            "float32",
+            "float64",
+            "bytes"
+          ],
+          "description": "The primitve that is allowed for the slice is limited to following values"
         }
       },
       "additionalProperties": false,
@@ -196,7 +204,17 @@
         },
         "primitive": {
           "type": "string",
-          "description": "Primitive type in golang when type: slice is set"
+          "enum": [
+            "string",
+            "bool",
+            "int",
+            "int32",
+            "int64",
+            "float32",
+            "float64",
+            "bytes"
+          ],
+          "description": "The primitve that is allowed for the slice is limited to following values"
         },
         "target": {
           "type": "string",

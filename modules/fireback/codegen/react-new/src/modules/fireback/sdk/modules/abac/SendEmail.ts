@@ -128,6 +128,12 @@ export class SendEmailAction {
     in: {
       fields: [
         {
+          name: "providerId",
+          description:
+            "Sending a test email requires to be sent through an specific email provider.",
+          type: "string",
+        },
+        {
           name: "toAddress",
           type: "string",
           tags: {
@@ -157,6 +163,29 @@ export class SendEmailAction {
  * The base class definition for sendEmailActionReq
  **/
 export class SendEmailActionReq {
+  /**
+   * Sending a test email requires to be sent through an specific email provider.
+   * @type {string}
+   **/
+  #providerId: string = "";
+  /**
+   * Sending a test email requires to be sent through an specific email provider.
+   * @returns {string}
+   **/
+  get providerId() {
+    return this.#providerId;
+  }
+  /**
+   * Sending a test email requires to be sent through an specific email provider.
+   * @type {string}
+   **/
+  set providerId(value: string) {
+    this.#providerId = String(value);
+  }
+  setProviderId(value: string) {
+    this.providerId = value;
+    return this;
+  }
   /**
    *
    * @type {string}
@@ -239,6 +268,9 @@ export class SendEmailActionReq {
    **/
   applyFromObject(data = {}) {
     const d = data as Partial<SendEmailActionReq>;
+    if (d.providerId !== undefined) {
+      this.providerId = d.providerId;
+    }
     if (d.toAddress !== undefined) {
       this.toAddress = d.toAddress;
     }
@@ -252,6 +284,7 @@ export class SendEmailActionReq {
    **/
   toJSON() {
     return {
+      providerId: this.#providerId,
       toAddress: this.#toAddress,
       body: this.#body,
     };
@@ -261,6 +294,7 @@ export class SendEmailActionReq {
   }
   static get Fields() {
     return {
+      providerId: "providerId",
       toAddress: "toAddress",
       body: "body",
     };
@@ -297,6 +331,11 @@ export abstract class SendEmailActionReqFactory {
  * The base type definition for sendEmailActionReq
  **/
 export type SendEmailActionReqType = {
+  /**
+   * Sending a test email requires to be sent through an specific email provider.
+   * @type {string}
+   **/
+  providerId: string;
   /**
    *
    * @type {string}

@@ -129,6 +129,13 @@ func (x *SendEmailWithProviderActionResponse) AsJSON(payload any) *SendEmailWith
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *SendEmailWithProviderActionResponse) WithIdeal(payload SendEmailWithProviderActionRes) *SendEmailWithProviderActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *SendEmailWithProviderActionResponse) AsHTML(payload string) *SendEmailWithProviderActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")

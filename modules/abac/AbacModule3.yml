@@ -202,6 +202,7 @@ dtom:
         tags:
           validate: required
 acts:
+  
   - name: QueryUserRoleWorkspaces
     method: get
     url: /urw/query
@@ -729,6 +730,10 @@ acts:
     description: Send a email using default root notification configuration
     in:
       fields:
+        - name: providerId
+          type: string
+          description: 
+            Sending a test email requires to be sent through an specific email provider.
         - name: toAddress
           tags:
             validate: required
@@ -1440,19 +1445,38 @@ entities:
       replace: root.modules
       with: root.manage
     description:
-      Thirdparty services which will send email, allows each workspace graphically
-      configure their token without the need of restarting servers
+      Email servers and thirdparty services configuration to send emails across the app.
+      Each configuration can be used for a different purpose, hence information is stored
+      in database to give operation chance change the mail services without taking the 
+      server down.
     security:
       writeOnRoot: true
+      readOnRoot: true
     fields:
       - name: type
+        description: 
+          Type of the service, or communication which actually is being used
+          under the hood for providing the service, such as third party or printing
+          right away for terminal or logs.
         validate: required
         type: enum
         of:
-          - k: terminal
           - k: sendgrid
-      - name: apiKey
+          - k: mailgun
+          - k: postmark
+          - k: resend
+          - k: smtp
+          - k: terminal
+      - name: title
         type: string
+        description: 
+          Give the email provider configuration a name, which makes it easier later to query.
+      - name: config
+        type: complex
+        description: 
+          JSON field which contains api keys, or other kind of configuration based
+          on the type of the email provider.
+        complex: fireback.JSON
   - name: emailSender
     permRewrite:
       replace: root.modules

@@ -3,6 +3,7 @@ import { CopyCell } from "../entity-manager/CopyCell";
 
 export interface GeneralEntityField {
   label: string;
+  copyableContent?: string;
   elem: any;
 }
 
@@ -61,7 +62,7 @@ export function GeneralEntityView({
                 className="field-value"
                 data-test-id={field.label?.toString() || ""}
               >
-                {value} <CopyCell value={value} />
+                {value} <CopyCell value={field.copyableContent || value} />
               </div>
             </div>
           );

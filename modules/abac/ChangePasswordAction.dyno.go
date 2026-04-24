@@ -126,6 +126,13 @@ func (x *ChangePasswordActionResponse) AsJSON(payload any) *ChangePasswordAction
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *ChangePasswordActionResponse) WithIdeal(payload ChangePasswordActionRes) *ChangePasswordActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *ChangePasswordActionResponse) AsHTML(payload string) *ChangePasswordActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")

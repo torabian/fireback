@@ -12,9 +12,10 @@ import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/Qu
  */
 export function useWorkspacesMenuPresenter() {
   const t = useT();
-  const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
+  const { selectedUrw, selectUrw, session } = useContext(RemoteQueryContext);
+
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
-    cacheTime: 50,
+    enabled: !!session?.token,
   });
 
   const items = queryUrw.data?.data?.items || [];
@@ -54,7 +55,7 @@ export function useWorkspacesMenuPresenter() {
       {
         label: t.wokspaces.sidetitle,
         children: workspacesAndRolesList.sort((a, b) =>
-          a.key < b.key ? -1 : 1
+          a.key < b.key ? -1 : 1,
         ),
       },
     ];

@@ -203,6 +203,13 @@ func (x *ClassicSignupActionResponse) AsJSON(payload any) *ClassicSignupActionRe
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *ClassicSignupActionResponse) WithIdeal(payload ClassicSignupActionRes) *ClassicSignupActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *ClassicSignupActionResponse) AsHTML(payload string) *ClassicSignupActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")

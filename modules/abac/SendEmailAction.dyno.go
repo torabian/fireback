@@ -39,6 +39,10 @@ func SendEmailActionMeta() struct {
 func GetSendEmailActionReqCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
+			Name: prefix + "provider-id",
+			Type: "string",
+		},
+		{
 			Name: prefix + "to-address",
 			Type: "string",
 		},
@@ -50,6 +54,9 @@ func GetSendEmailActionReqCliFlags(prefix string) []emigo.CliFlag {
 }
 func CastSendEmailActionReqFromCli(c emigo.CliCastable) SendEmailActionReq {
 	data := SendEmailActionReq{}
+	if c.IsSet("provider-id") {
+		data.ProviderId = c.String("provider-id")
+	}
 	if c.IsSet("to-address") {
 		data.ToAddress = c.String("to-address")
 	}
@@ -61,8 +68,10 @@ func CastSendEmailActionReqFromCli(c emigo.CliCastable) SendEmailActionReq {
 
 // The base class definition for sendEmailActionReq
 type SendEmailActionReq struct {
-	ToAddress string `json:"toAddress" validate:"required" yaml:"toAddress"`
-	Body      string `json:"body" validate:"required" yaml:"body"`
+	// Sending a test email requires to be sent through an specific email provider.
+	ProviderId string `json:"providerId" yaml:"providerId"`
+	ToAddress  string `json:"toAddress" validate:"required" yaml:"toAddress"`
+	Body       string `json:"body" validate:"required" yaml:"body"`
 }
 
 func (x *SendEmailActionReq) Json() string {
@@ -122,6 +131,13 @@ func (x *SendEmailActionResponse) AsStream(r io.Reader, contentType string) *Sen
 func (x *SendEmailActionResponse) AsJSON(payload any) *SendEmailActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
+	return x
+}
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *SendEmailActionResponse) WithIdeal(payload SendEmailActionRes) *SendEmailActionResponse {
+	x.Payload = payload
 	return x
 }
 func (x *SendEmailActionResponse) AsHTML(payload string) *SendEmailActionResponse {

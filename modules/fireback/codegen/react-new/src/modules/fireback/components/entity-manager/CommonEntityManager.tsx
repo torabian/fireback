@@ -9,7 +9,7 @@ import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
 import { type IResponse } from "../../definitions/JSONStyle";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { set } from "lodash";
+import { get, set } from "lodash";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -79,11 +79,11 @@ export const CommonEntityManager = ({
       formik.current?.setValues(
         beforeSetValues
           ? beforeSetValues({
-            ...getQuery.data.data,
-          })
+              ...getQuery.data.data,
+            })
           : {
-            ...getQuery.data.data,
-          }
+              ...getQuery.data.data,
+            },
       );
 
       setInitialData(getQuery.data?.data);
@@ -92,7 +92,7 @@ export const CommonEntityManager = ({
 
   useEffect(() => {
     formik.current?.setSubmitting(
-      postHook?.mutation.isLoading || patchHook?.mutation.isLoading
+      postHook?.mutation.isLoading || patchHook?.mutation.isLoading,
     );
   }, [postHook?.isLoading, patchHook?.isLoading]);
 
@@ -180,26 +180,39 @@ export const CommonEntityManager = ({
               />
             </div>
             {disableOnGetFailed === true &&
-              getSingleHook?.query?.isError ? null : (
+            getSingleHook?.query?.isError ? null : (
               <Form
                 isEditing={isEditing}
                 initialData={initialData}
                 form={{
                   ...form,
-                  setValues: (values: React.SetStateAction<any>, shouldValidate?: boolean) => {
 
+                  setValues: (
+                    values: React.SetStateAction<any>,
+                    shouldValidate?: boolean,
+                  ) => {
                     for (const key in values) {
-                      set(touchedData.current, key, values[key])
+                      set(touchedData.current, key, values[key]);
                     }
-                    return form.setValues(values)
+
+                    return form.setValues(values);
                   },
+
                   setFieldValue: (
                     field: string,
                     value: any,
-                    shouldValidate?: boolean
+                    shouldValidate?: boolean,
                   ) => {
+                    // In case of having a nested object, we touch the entire nested for safety.
+                    // This is completely correct for json fields for example, but might not be
+                    // most efficient for object or embed types in fireback.
+                    if (field.includes(".")) {
+                      const v = field.split(".")[0];
+                      set(touchedData.current, v, get(form.values, v));
+                    }
 
                     set(touchedData.current, field, value);
+
                     return form.setFieldValue(field, value, shouldValidate);
                   },
                 }}

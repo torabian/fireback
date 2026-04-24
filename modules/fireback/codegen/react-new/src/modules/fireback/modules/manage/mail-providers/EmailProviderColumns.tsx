@@ -8,6 +8,11 @@ export const columns = (t: typeof enTranslations) => [
     width: 200,
   },
   {
+    name: "title",
+    title: "Title",
+    width: 200,
+  },
+  {
     name: EmailProviderEntity.Fields.type,
     title: t.mailProvider.type,
     width: 200,

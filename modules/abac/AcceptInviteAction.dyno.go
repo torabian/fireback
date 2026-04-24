@@ -117,6 +117,13 @@ func (x *AcceptInviteActionResponse) AsJSON(payload any) *AcceptInviteActionResp
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *AcceptInviteActionResponse) WithIdeal(payload AcceptInviteActionRes) *AcceptInviteActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *AcceptInviteActionResponse) AsHTML(payload string) *AcceptInviteActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
