@@ -195,7 +195,7 @@ type {{ .e.Name }}ActionsSig struct {
 	Create func(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix }}QueryDSL) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError)
 	Upsert func(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix }}QueryDSL) (*{{ .e.Upper }}Entity, *{{ $.wsprefix }}IError)
 	SeederInit func() *{{ .e.Upper }}Entity
-	Remove func(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError)
+	RemoveEnqueue  func(request {{ .wsprefix }}DeleteRequest, query {{ .wsprefix }}QueryDSL) (*{{ .wsprefix }}DeleteResponse, *{{ .wsprefix }}IError)
 	MultiInsert func(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix }}QueryDSL) ([]*{{ .e.Upper}}Entity, *{{ .wsprefix }}IError)
 	GetOne func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
 	GetByWorkspace func(query {{ .wsprefix }}QueryDSL) (*{{ .e.EntityName }}, *{{ .wsprefix }}IError)
@@ -209,7 +209,7 @@ var {{ .e.Upper }}Actions {{ .e.Name }}ActionsSig = {{ .e.Name }}ActionsSig{
 	Update: {{ .e.Upper }}ActionUpdateFn,
 	Create: {{ .e.Upper }}ActionCreateFn,
 	Upsert: {{ .e.Upper }}ActionUpsertFn,
-	Remove: {{ .e.Upper }}ActionRemoveFn,
+	RemoveEnqueue: {{ .e.Upper }}ActionRemoveEnqueueFn,
 	SeederInit: {{ .e.Upper }}ActionSeederInitFn,
 	MultiInsert: {{ .e.Upper }}MultiInsertFn,
 	GetOne: {{ .e.Upper }}ActionGetOneFn,
@@ -241,10 +241,6 @@ func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix
 
 {{ template "entityAssociationCreate" . }}
 
-{{ template "entityRelationContentCreation" . }}
-
-{{ template "relationContentUpdate" . }}
-
 {{ template "polyglot" . }}
 
 {{ template "entityValidator" . }}
@@ -266,7 +262,6 @@ func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix
 {{ template "entityMemory" . }}
 
 {{ template "queriesAndPivot" . }}
-
 
 {{ template "entityUpdateExec" . }}
 

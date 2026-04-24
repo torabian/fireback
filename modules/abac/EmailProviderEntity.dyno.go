@@ -175,7 +175,7 @@ type emailProviderActionsSig struct {
 	Create         func(dto *EmailProviderEntity, query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
 	Upsert         func(dto *EmailProviderEntity, query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
 	SeederInit     func() *EmailProviderEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*EmailProviderEntity, query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*EmailProviderEntity, *fireback.IError)
@@ -186,7 +186,7 @@ var EmailProviderActions emailProviderActionsSig = emailProviderActionsSig{
 	Update:         EmailProviderActionUpdateFn,
 	Create:         EmailProviderActionCreateFn,
 	Upsert:         EmailProviderActionUpsertFn,
-	Remove:         EmailProviderActionRemoveFn,
+	RemoveEnqueue:  EmailProviderActionRemoveEnqueueFn,
 	SeederInit:     EmailProviderActionSeederInitFn,
 	MultiInsert:    EmailProviderMultiInsertFn,
 	GetOne:         EmailProviderActionGetOneFn,
@@ -274,17 +274,6 @@ func EmailProviderActionSeederInitFn() *EmailProviderEntity {
 	return entity
 }
 func EmailProviderAssociationCreate(dto *EmailProviderEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func EmailProviderRelationContentCreate(dto *EmailProviderEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func EmailProviderRelationContentUpdate(dto *EmailProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func EmailProviderPolyglotUpdateHandler(dto *EmailProviderEntity, query fireback.QueryDSL) {
@@ -414,8 +403,6 @@ func EmailProviderActionCreateFn(dto *EmailProviderEntity, query fireback.QueryD
 	EmailProviderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailProviderEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	EmailProviderRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -520,7 +507,6 @@ func EmailProviderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Em
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	EmailProviderRelationContentUpdate(fields, query)
 	EmailProviderPolyglotUpdateHandler(fields, query)
 	if ero := EmailProviderDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -592,10 +578,10 @@ var EmailProviderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailProviderActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func EmailProviderActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailProviderEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE}
-	return fireback.RemoveEntity[EmailProviderEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[EmailProviderEntity](req, query, refl)
 }
 func EmailProviderActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1081,7 +1067,7 @@ var EmailProviderCliCommands []cli.Command = []cli.Command{
 	EmailProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
-		EmailProviderActions.Remove,
+		EmailProviderActions.RemoveEnqueue,
 	),
 }
 
@@ -1283,22 +1269,21 @@ var EMAIL_PROVIDER_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "EmailProviderEntity",
 	},
 }
-var EMAIL_PROVIDER_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/email-provider",
-	Format: "DELETE_DSL",
+var EMAIL_PROVIDER_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/email-provider-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, EmailProviderActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, EmailProviderActions.RemoveEnqueue)
 		},
 	},
-	Action:         EmailProviderActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         EmailProviderActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &EmailProviderEntity{},
 }
 
@@ -1316,7 +1301,7 @@ func GetEmailProviderModule3Actions() []fireback.Module3Action {
 		EMAIL_PROVIDER_ACTION_POST_ONE,
 		EMAIL_PROVIDER_ACTION_PATCH,
 		EMAIL_PROVIDER_ACTION_PATCH_BULK,
-		EMAIL_PROVIDER_ACTION_DELETE,
+		EMAIL_PROVIDER_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendEmailProviderRouter(&routes)

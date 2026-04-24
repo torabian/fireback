@@ -175,7 +175,7 @@ type userProfileActionsSig struct {
 	Create         func(dto *UserProfileEntity, query fireback.QueryDSL) (*UserProfileEntity, *fireback.IError)
 	Upsert         func(dto *UserProfileEntity, query fireback.QueryDSL) (*UserProfileEntity, *fireback.IError)
 	SeederInit     func() *UserProfileEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*UserProfileEntity, query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*UserProfileEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*UserProfileEntity, *fireback.IError)
@@ -186,7 +186,7 @@ var UserProfileActions userProfileActionsSig = userProfileActionsSig{
 	Update:         UserProfileActionUpdateFn,
 	Create:         UserProfileActionCreateFn,
 	Upsert:         UserProfileActionUpsertFn,
-	Remove:         UserProfileActionRemoveFn,
+	RemoveEnqueue:  UserProfileActionRemoveEnqueueFn,
 	SeederInit:     UserProfileActionSeederInitFn,
 	MultiInsert:    UserProfileMultiInsertFn,
 	GetOne:         UserProfileActionGetOneFn,
@@ -274,17 +274,6 @@ func UserProfileActionSeederInitFn() *UserProfileEntity {
 	return entity
 }
 func UserProfileAssociationCreate(dto *UserProfileEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func UserProfileRelationContentCreate(dto *UserProfileEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func UserProfileRelationContentUpdate(dto *UserProfileEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func UserProfilePolyglotUpdateHandler(dto *UserProfileEntity, query fireback.QueryDSL) {
@@ -414,8 +403,6 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query fireback.QueryDSL) 
 	UserProfileEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserProfileEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	UserProfileRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -520,7 +507,6 @@ func UserProfileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *User
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	UserProfileRelationContentUpdate(fields, query)
 	UserProfilePolyglotUpdateHandler(fields, query)
 	if ero := UserProfileDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -591,10 +577,10 @@ var UserProfileWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func UserProfileActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func UserProfileActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&UserProfileEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}
-	return fireback.RemoveEntity[UserProfileEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[UserProfileEntity](req, query, refl)
 }
 func UserProfileActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1076,7 +1062,7 @@ var UserProfileCliCommands []cli.Command = []cli.Command{
 	UserProfileCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
-		UserProfileActions.Remove,
+		UserProfileActions.RemoveEnqueue,
 	),
 }
 
@@ -1275,21 +1261,20 @@ var USER_PROFILE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "UserProfileEntity",
 	},
 }
-var USER_PROFILE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/user-profile",
-	Format: "DELETE_DSL",
+var USER_PROFILE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/user-profile-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, UserProfileActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, UserProfileActions.RemoveEnqueue)
 		},
 	},
-	Action:         UserProfileActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         UserProfileActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &UserProfileEntity{},
 }
 
@@ -1307,7 +1292,7 @@ func GetUserProfileModule3Actions() []fireback.Module3Action {
 		USER_PROFILE_ACTION_POST_ONE,
 		USER_PROFILE_ACTION_PATCH,
 		USER_PROFILE_ACTION_PATCH_BULK,
-		USER_PROFILE_ACTION_DELETE,
+		USER_PROFILE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendUserProfileRouter(&routes)

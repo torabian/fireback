@@ -194,7 +194,7 @@ type regionalContentActionsSig struct {
 	Create         func(dto *RegionalContentEntity, query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
 	Upsert         func(dto *RegionalContentEntity, query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
 	SeederInit     func() *RegionalContentEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError)
@@ -205,7 +205,7 @@ var RegionalContentActions regionalContentActionsSig = regionalContentActionsSig
 	Update:         RegionalContentActionUpdateFn,
 	Create:         RegionalContentActionCreateFn,
 	Upsert:         RegionalContentActionUpsertFn,
-	Remove:         RegionalContentActionRemoveFn,
+	RemoveEnqueue:  RegionalContentActionRemoveEnqueueFn,
 	SeederInit:     RegionalContentActionSeederInitFn,
 	MultiInsert:    RegionalContentMultiInsertFn,
 	GetOne:         RegionalContentActionGetOneFn,
@@ -298,17 +298,6 @@ func RegionalContentActionSeederInitFn() *RegionalContentEntity {
 	return entity
 }
 func RegionalContentAssociationCreate(dto *RegionalContentEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func RegionalContentRelationContentCreate(dto *RegionalContentEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func RegionalContentRelationContentUpdate(dto *RegionalContentEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func RegionalContentPolyglotUpdateHandler(dto *RegionalContentEntity, query fireback.QueryDSL) {
@@ -455,8 +444,6 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query fireback.Qu
 	RegionalContentEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	RegionalContentEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	RegionalContentRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -561,7 +548,6 @@ func RegionalContentUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	RegionalContentRelationContentUpdate(fields, query)
 	RegionalContentPolyglotUpdateHandler(fields, query)
 	if ero := RegionalContentDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -633,10 +619,10 @@ var RegionalContentWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func RegionalContentActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func RegionalContentActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&RegionalContentEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}
-	return fireback.RemoveEntity[RegionalContentEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[RegionalContentEntity](req, query, refl)
 }
 func RegionalContentActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1177,7 +1163,7 @@ var RegionalContentCliCommands []cli.Command = []cli.Command{
 	RegionalContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
-		RegionalContentActions.Remove,
+		RegionalContentActions.RemoveEnqueue,
 	),
 }
 
@@ -1380,22 +1366,21 @@ var REGIONAL_CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "RegionalContentEntity",
 	},
 }
-var REGIONAL_CONTENT_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/regional-content",
-	Format: "DELETE_DSL",
+var REGIONAL_CONTENT_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/regional-content-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, RegionalContentActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, RegionalContentActions.RemoveEnqueue)
 		},
 	},
-	Action:         RegionalContentActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         RegionalContentActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &RegionalContentEntity{},
 }
 
@@ -1413,7 +1398,7 @@ func GetRegionalContentModule3Actions() []fireback.Module3Action {
 		REGIONAL_CONTENT_ACTION_POST_ONE,
 		REGIONAL_CONTENT_ACTION_PATCH,
 		REGIONAL_CONTENT_ACTION_PATCH_BULK,
-		REGIONAL_CONTENT_ACTION_DELETE,
+		REGIONAL_CONTENT_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendRegionalContentRouter(&routes)

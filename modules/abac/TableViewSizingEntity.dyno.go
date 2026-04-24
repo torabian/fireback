@@ -175,7 +175,7 @@ type tableViewSizingActionsSig struct {
 	Create         func(dto *TableViewSizingEntity, query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
 	Upsert         func(dto *TableViewSizingEntity, query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
 	SeederInit     func() *TableViewSizingEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TableViewSizingEntity, *fireback.IError)
@@ -186,7 +186,7 @@ var TableViewSizingActions tableViewSizingActionsSig = tableViewSizingActionsSig
 	Update:         TableViewSizingActionUpdateFn,
 	Create:         TableViewSizingActionCreateFn,
 	Upsert:         TableViewSizingActionUpsertFn,
-	Remove:         TableViewSizingActionRemoveFn,
+	RemoveEnqueue:  TableViewSizingActionRemoveEnqueueFn,
 	SeederInit:     TableViewSizingActionSeederInitFn,
 	MultiInsert:    TableViewSizingMultiInsertFn,
 	GetOne:         TableViewSizingActionGetOneFn,
@@ -274,17 +274,6 @@ func TableViewSizingActionSeederInitFn() *TableViewSizingEntity {
 	return entity
 }
 func TableViewSizingAssociationCreate(dto *TableViewSizingEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func TableViewSizingRelationContentCreate(dto *TableViewSizingEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func TableViewSizingRelationContentUpdate(dto *TableViewSizingEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func TableViewSizingPolyglotUpdateHandler(dto *TableViewSizingEntity, query fireback.QueryDSL) {
@@ -414,8 +403,6 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query fireback.Qu
 	TableViewSizingEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TableViewSizingEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	TableViewSizingRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -520,7 +507,6 @@ func TableViewSizingUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	TableViewSizingRelationContentUpdate(fields, query)
 	TableViewSizingPolyglotUpdateHandler(fields, query)
 	if ero := TableViewSizingDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -591,10 +577,10 @@ var TableViewSizingWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TableViewSizingActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func TableViewSizingActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&TableViewSizingEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE}
-	return fireback.RemoveEntity[TableViewSizingEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[TableViewSizingEntity](req, query, refl)
 }
 func TableViewSizingActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1076,7 +1062,7 @@ var TableViewSizingCliCommands []cli.Command = []cli.Command{
 	TableViewSizingCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
-		TableViewSizingActions.Remove,
+		TableViewSizingActions.RemoveEnqueue,
 	),
 }
 
@@ -1276,21 +1262,20 @@ var TABLE_VIEW_SIZING_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "TableViewSizingEntity",
 	},
 }
-var TABLE_VIEW_SIZING_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/table-view-sizing",
-	Format: "DELETE_DSL",
+var TABLE_VIEW_SIZING_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/table-view-sizing-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, TableViewSizingActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, TableViewSizingActions.RemoveEnqueue)
 		},
 	},
-	Action:         TableViewSizingActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         TableViewSizingActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &TableViewSizingEntity{},
 }
 
@@ -1308,7 +1293,7 @@ func GetTableViewSizingModule3Actions() []fireback.Module3Action {
 		TABLE_VIEW_SIZING_ACTION_POST_ONE,
 		TABLE_VIEW_SIZING_ACTION_PATCH,
 		TABLE_VIEW_SIZING_ACTION_PATCH_BULK,
-		TABLE_VIEW_SIZING_ACTION_DELETE,
+		TABLE_VIEW_SIZING_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendTableViewSizingRouter(&routes)

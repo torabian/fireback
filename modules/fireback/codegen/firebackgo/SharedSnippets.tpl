@@ -465,96 +465,6 @@ func {{ .e.Upper }}ActionSeederInitFn() *{{ .e.EntityName }} {
 {{ end }}
 
 
-{{ define "entityRelationContentCreation" }}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func {{ .e.Upper }}RelationContentCreate(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) error {
-
-  {{ range .e.CompleteFields }}
-    {{ if and (eq .Type  "one") (eq .AllowCreate  true) (ne .Name  "") }}
-
-  {
-    if dto.{{ .PublicName }} != nil {
-      dt, err := {{ .TargetWithModuleWithoutEntity}}Actions.Create(dto.{{ .PublicName }}, query);
-      if err != nil {
-        return err;
-      }
-      dto.{{ .PublicName }} = dt;
-    }
-  }
-  {{ end }}
-      
-  {{ if and (eq .Type  "collection") (eq .AllowCreate  true) (ne .Name  "") }}
-  {
-    if dto.{{ .PublicName }} != nil {
-      
-
-      dt, err := {{ .TargetWithModuleWithoutEntity}}ActionBatchCreateFn(dto.{{ .PublicName }}, query);
-      if err != nil {
-        return err;
-      }
-      dto.{{ .PublicName }} = dt;
-    }
-  }
-  {{ end }}
-
-{{ end }}
-return nil
-}
-
-{{ end }}
-
-
-{{ define "relationContentUpdate" }}
-func {{ .e.Upper }}RelationContentUpdate(dto *{{ .e.EntityName}}, query {{ .wsprefix }}QueryDSL) error {
-
-  {{ range .e.CompleteFields }}
-    {{ if and (eq .Type  "one") (eq .AllowCreate  true) (ne .Name  "") }}
-		{
-			if dto.{{ .PublicName }} != nil {
-			
-				dt, err := {{ .TargetWithModuleWithoutEntity }}Actions.Update(query, dto.{{ .PublicName }});
-				if err != nil {
-					return err;
-				}
-				dto.{{ .PublicName }} = dt;
-			}
-		}
-		{{ end }}
-    {{ if and (eq .Type "collection") (eq .AllowCreate  true) (ne .Name  "") }}
-		{
-			if dto.{{ .PublicName }} != nil {
-
-				cleanQuery := query
-				for _, item := range dto.{{ .PublicName }} {
-					cleanQuery.Query = "unique_id = " + item.UniqueId
-					{{ .TargetWithModuleWithoutEntity }}Actions.Remove(cleanQuery)
-				}
-	
- 
-				dt, err := {{ .TargetWithModuleWithoutEntity }}ActionBatchCreateFn(dto.{{ .PublicName }}, query);
-				if err != nil {
-					return err;
-				}
-
-				query.Tx.
-					Model(&{{ $.e.EntityName}}{UniqueId: dto.UniqueId}).
-					Association("{{ .PublicName }}").
-					Replace(dt)
-				
-				dto.{{ .PublicName }} = dt;
-			}
-		}
-		{{ end }}
-	{{ end }}
-	return nil
-}
-{{ end }}
-
-
 {{ define "generateQuery" }}
   {{ $fields := index . 0 }}
   {{ $wsprefix := index . 1 }}
@@ -799,9 +709,6 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 	
 	// 2. Append the necessary information about user, workspace
 	{{ .e.EntityName }}BeforeCreateAppend(dto, query)
-
-	// 3. Create other entities if we want select from them
-	{{ .e.Upper }}RelationContentCreate(dto, query)
 
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
@@ -1141,7 +1048,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     }
 
     query.Tx = dbref
-    {{ .e.Upper }}RelationContentUpdate(fields, query)
+
 
     {{ .e.Upper }}PolyglotUpdateHandler(fields, query)
 
@@ -1284,11 +1191,12 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 	},
 }
 
-func {{ .e.Upper }}ActionRemoveFn(query {{ .wsprefix }}QueryDSL) (int64, *{{ .wsprefix }}IError) {
+func {{ .e.Upper }}ActionRemoveEnqueueFn(req {{ .wsprefix }}DeleteRequest, query {{ .wsprefix }}QueryDSL) (*{{ .wsprefix }}DeleteResponse, *{{ .wsprefix }}IError) {
 	refl := reflect.ValueOf(&{{ .e.EntityName }}{})
 	query.ActionRequires = []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper}}_DELETE}
-	return {{ .wsprefix }}RemoveEntity[{{ .e.EntityName }}](query, refl)
+	return {{ .wsprefix }}RemoveEntityEnqueue[{{ .e.EntityName }}](req, query, refl)
 }
+
 
 func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error) {
  
@@ -2288,7 +2196,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ .e.Upper }}CreateInteractiveCmd,
       {{ .wsprefix }}GetCommonRemoveQuery(
         reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
-        {{ .e.Upper }}Actions.Remove,
+        {{ .e.Upper }}Actions.RemoveEnqueue,
       ),
       {{ if .e.HasExtendedQuer }}
           {{ .wsprefix }}GetCommonExtendedQuery({{ .e.Upper }}ActionExtendedQuery),
@@ -2612,10 +2520,10 @@ var {{.e.AllUpper}}_ACTION_PATCH_BULK = {{ .wsprefix }}Module3Action{
 		Entity: "{{ .e.EntityName }}",
 	},
 }
-var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module3Action{
-  Method: "DELETE",
-  Url:    "/{{ .e.Template }}",
-  Format: "DELETE_DSL",
+
+var {{.e.AllUpper}}_ACTION_DELETE_ENQUEUE = {{ .wsprefix }}Module3Action{
+  Method: "POST",
+  Url:    "/{{ .e.Template }}-remove",
   SecurityModel: &{{ .wsprefix }}SecurityModel{
     {{ if ne $.e.QueryScope "public" }}
     ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
@@ -2632,12 +2540,12 @@ var {{.e.AllUpper}}_ACTION_DELETE = {{ .wsprefix }}Module3Action{
   },
   Handlers: []gin.HandlerFunc{
     func (c *gin.Context) {
-      {{ .wsprefix }}HttpRemoveEntity(c, {{ .e.Upper }}Actions.Remove)
+      {{ .wsprefix }}HttpRemoveEnqueueEntity(c, {{ .e.Upper }}Actions.RemoveEnqueue)
     },
   },
-  Action: {{ .e.Upper }}Actions.Remove,
-  RequestEntity: &{{ .wsprefix }}DeleteRequest{},
-  ResponseEntity: &{{ .wsprefix }}DeleteResponse{},
+  Action: {{ .e.Upper }}Actions.RemoveEnqueue,
+  RequestEntity: &{{ .wsprefix }}DeleteRequestDto{},
+  ResponseEntity: &{{ .wsprefix }}DeleteResponseDto{},
   TargetEntity: &{{ .e.EntityName }}{},
 }
 
@@ -2833,7 +2741,7 @@ var {{.e.AllUpper}}_ACTION_DISTINCT_GET_ONE = {{ .wsprefix }}Module3Action{
       {{.e.AllUpper}}_ACTION_POST_ONE,
       {{.e.AllUpper}}_ACTION_PATCH,
       {{.e.AllUpper}}_ACTION_PATCH_BULK,
-      {{.e.AllUpper}}_ACTION_DELETE,
+      {{.e.AllUpper}}_ACTION_DELETE_ENQUEUE,
      
       {{ if or (eq .e.DistinctBy "user") (eq .e.DistinctBy "workspace")}}
       {{.e.AllUpper}}_ACTION_DISTINCT_PATCH_ONE,

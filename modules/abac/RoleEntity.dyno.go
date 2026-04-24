@@ -176,7 +176,7 @@ type roleActionsSig struct {
 	Create         func(dto *RoleEntity, query fireback.QueryDSL) (*RoleEntity, *fireback.IError)
 	Upsert         func(dto *RoleEntity, query fireback.QueryDSL) (*RoleEntity, *fireback.IError)
 	SeederInit     func() *RoleEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*RoleEntity, query fireback.QueryDSL) ([]*RoleEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*RoleEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*RoleEntity, *fireback.IError)
@@ -187,7 +187,7 @@ var RoleActions roleActionsSig = roleActionsSig{
 	Update:         RoleActionUpdateFn,
 	Create:         RoleActionCreateFn,
 	Upsert:         RoleActionUpsertFn,
-	Remove:         RoleActionRemoveFn,
+	RemoveEnqueue:  RoleActionRemoveEnqueueFn,
 	SeederInit:     RoleActionSeederInitFn,
 	MultiInsert:    RoleMultiInsertFn,
 	GetOne:         RoleActionGetOneFn,
@@ -296,17 +296,6 @@ func RoleAssociationCreate(dto *RoleEntity, query fireback.QueryDSL) error {
 			}
 		}
 	}
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func RoleRelationContentCreate(dto *RoleEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func RoleRelationContentUpdate(dto *RoleEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func RolePolyglotUpdateHandler(dto *RoleEntity, query fireback.QueryDSL) {
@@ -436,8 +425,6 @@ func RoleActionCreateFn(dto *RoleEntity, query fireback.QueryDSL) (*RoleEntity, 
 	RoleEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	RoleEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	RoleRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -542,7 +529,6 @@ func RoleUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *RoleEntity)
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	RoleRelationContentUpdate(fields, query)
 	RolePolyglotUpdateHandler(fields, query)
 	if ero := RoleDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -630,10 +616,10 @@ var RoleWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func RoleActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func RoleActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&RoleEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_ROLE_DELETE}
-	return fireback.RemoveEntity[RoleEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[RoleEntity](req, query, refl)
 }
 func RoleActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1117,7 +1103,7 @@ var RoleCliCommands []cli.Command = []cli.Command{
 	RoleCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&RoleEntity{}).Elem(),
-		RoleActions.Remove,
+		RoleActions.RemoveEnqueue,
 	),
 }
 
@@ -1316,21 +1302,20 @@ var ROLE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "RoleEntity",
 	},
 }
-var ROLE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/role",
-	Format: "DELETE_DSL",
+var ROLE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/role-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, RoleActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, RoleActions.RemoveEnqueue)
 		},
 	},
-	Action:         RoleActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         RoleActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &RoleEntity{},
 }
 
@@ -1348,7 +1333,7 @@ func GetRoleModule3Actions() []fireback.Module3Action {
 		ROLE_ACTION_POST_ONE,
 		ROLE_ACTION_PATCH,
 		ROLE_ACTION_PATCH_BULK,
-		ROLE_ACTION_DELETE,
+		ROLE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendRoleRouter(&routes)

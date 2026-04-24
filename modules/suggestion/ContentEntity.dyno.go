@@ -184,7 +184,7 @@ type contentActionsSig struct {
 	Create         func(dto *ContentEntity, query fireback.QueryDSL) (*ContentEntity, *fireback.IError)
 	Upsert         func(dto *ContentEntity, query fireback.QueryDSL) (*ContentEntity, *fireback.IError)
 	SeederInit     func() *ContentEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*ContentEntity, query fireback.QueryDSL) ([]*ContentEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*ContentEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*ContentEntity, *fireback.IError)
@@ -195,7 +195,7 @@ var ContentActions contentActionsSig = contentActionsSig{
 	Update:         ContentActionUpdateFn,
 	Create:         ContentActionCreateFn,
 	Upsert:         ContentActionUpsertFn,
-	Remove:         ContentActionRemoveFn,
+	RemoveEnqueue:  ContentActionRemoveEnqueueFn,
 	SeederInit:     ContentActionSeederInitFn,
 	MultiInsert:    ContentMultiInsertFn,
 	GetOne:         ContentActionGetOneFn,
@@ -284,17 +284,6 @@ func ContentActionSeederInitFn() *ContentEntity {
 	return entity
 }
 func ContentAssociationCreate(dto *ContentEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func ContentRelationContentCreate(dto *ContentEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func ContentRelationContentUpdate(dto *ContentEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func ContentPolyglotUpdateHandler(dto *ContentEntity, query fireback.QueryDSL) {
@@ -425,8 +414,6 @@ func ContentActionCreateFn(dto *ContentEntity, query fireback.QueryDSL) (*Conten
 	ContentEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	ContentEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	ContentRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -531,7 +518,6 @@ func ContentUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ContentE
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	ContentRelationContentUpdate(fields, query)
 	ContentPolyglotUpdateHandler(fields, query)
 	if ero := ContentDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -602,10 +588,10 @@ var ContentWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func ContentActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func ContentActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&ContentEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_CONTENT_DELETE}
-	return fireback.RemoveEntity[ContentEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[ContentEntity](req, query, refl)
 }
 func ContentActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1108,7 +1094,7 @@ var ContentCliCommands []cli.Command = []cli.Command{
 	ContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&ContentEntity{}).Elem(),
-		ContentActions.Remove,
+		ContentActions.RemoveEnqueue,
 	),
 }
 
@@ -1307,21 +1293,20 @@ var CONTENT_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "ContentEntity",
 	},
 }
-var CONTENT_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/content",
-	Format: "DELETE_DSL",
+var CONTENT_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/content-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CONTENT_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, ContentActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, ContentActions.RemoveEnqueue)
 		},
 	},
-	Action:         ContentActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         ContentActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &ContentEntity{},
 }
 
@@ -1339,7 +1324,7 @@ func GetContentModule3Actions() []fireback.Module3Action {
 		CONTENT_ACTION_POST_ONE,
 		CONTENT_ACTION_PATCH,
 		CONTENT_ACTION_PATCH_BULK,
-		CONTENT_ACTION_DELETE,
+		CONTENT_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendContentRouter(&routes)

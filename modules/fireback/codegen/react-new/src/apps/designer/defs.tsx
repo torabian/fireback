@@ -68,7 +68,6 @@ export interface Module3Field {
   default?: any;
   translate?: boolean;
   unsafe?: boolean;
-  allowCreate?: boolean;
   module?: string;
   provider?: string;
   json?: string;

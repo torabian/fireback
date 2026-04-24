@@ -332,7 +332,7 @@ type notificationConfigActionsSig struct {
 	Create         func(dto *NotificationConfigEntity, query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
 	Upsert         func(dto *NotificationConfigEntity, query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
 	SeederInit     func() *NotificationConfigEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*NotificationConfigEntity, query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError)
@@ -343,7 +343,7 @@ var NotificationConfigActions notificationConfigActionsSig = notificationConfigA
 	Update:         NotificationConfigActionUpdateFn,
 	Create:         NotificationConfigActionCreateFn,
 	Upsert:         NotificationConfigActionUpsertFn,
-	Remove:         NotificationConfigActionRemoveFn,
+	RemoveEnqueue:  NotificationConfigActionRemoveEnqueueFn,
 	SeederInit:     NotificationConfigActionSeederInitFn,
 	MultiInsert:    NotificationConfigMultiInsertFn,
 	GetOne:         NotificationConfigActionGetOneFn,
@@ -458,17 +458,6 @@ func NotificationConfigActionSeederInitFn() *NotificationConfigEntity {
 	return entity
 }
 func NotificationConfigAssociationCreate(dto *NotificationConfigEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func NotificationConfigRelationContentCreate(dto *NotificationConfigEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func NotificationConfigRelationContentUpdate(dto *NotificationConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func NotificationConfigPolyglotUpdateHandler(dto *NotificationConfigEntity, query fireback.QueryDSL) {
@@ -623,8 +612,6 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query fireb
 	NotificationConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	NotificationConfigEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	NotificationConfigRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -729,7 +716,6 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, field
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	NotificationConfigRelationContentUpdate(fields, query)
 	NotificationConfigPolyglotUpdateHandler(fields, query)
 	if ero := NotificationConfigDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -802,10 +788,10 @@ var NotificationConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func NotificationConfigActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func NotificationConfigActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE}
-	return fireback.RemoveEntity[NotificationConfigEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[NotificationConfigEntity](req, query, refl)
 }
 func NotificationConfigActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1766,7 +1752,7 @@ var NotificationConfigCliCommands []cli.Command = []cli.Command{
 	NotificationConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&NotificationConfigEntity{}).Elem(),
-		NotificationConfigActions.Remove,
+		NotificationConfigActions.RemoveEnqueue,
 	),
 }
 
@@ -1975,10 +1961,9 @@ var NOTIFICATION_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "NotificationConfigEntity",
 	},
 }
-var NOTIFICATION_CONFIG_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/notification-config",
-	Format: "DELETE_DSL",
+var NOTIFICATION_CONFIG_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/notification-config-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_DELETE},
 		ResolveStrategy: "workspace",
@@ -1986,12 +1971,12 @@ var NOTIFICATION_CONFIG_ACTION_DELETE = fireback.Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, NotificationConfigActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, NotificationConfigActions.RemoveEnqueue)
 		},
 	},
-	Action:         NotificationConfigActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         NotificationConfigActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &NotificationConfigEntity{},
 }
 var NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
@@ -2052,7 +2037,7 @@ func GetNotificationConfigModule3Actions() []fireback.Module3Action {
 		NOTIFICATION_CONFIG_ACTION_POST_ONE,
 		NOTIFICATION_CONFIG_ACTION_PATCH,
 		NOTIFICATION_CONFIG_ACTION_PATCH_BULK,
-		NOTIFICATION_CONFIG_ACTION_DELETE,
+		NOTIFICATION_CONFIG_ACTION_DELETE_ENQUEUE,
 		NOTIFICATION_CONFIG_ACTION_DISTINCT_PATCH_ONE,
 		NOTIFICATION_CONFIG_ACTION_DISTINCT_GET_ONE,
 	}

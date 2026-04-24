@@ -268,7 +268,7 @@ type userActionsSig struct {
 	Create         func(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, *fireback.IError)
 	Upsert         func(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, *fireback.IError)
 	SeederInit     func() *UserEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*UserEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*UserEntity, *fireback.IError)
@@ -279,7 +279,7 @@ var UserActions userActionsSig = userActionsSig{
 	Update:         UserActionUpdateFn,
 	Create:         UserActionCreateFn,
 	Upsert:         UserActionUpsertFn,
-	Remove:         UserActionRemoveFn,
+	RemoveEnqueue:  UserActionRemoveEnqueueFn,
 	SeederInit:     UserActionSeederInitFn,
 	MultiInsert:    UserMultiInsertFn,
 	GetOne:         UserActionGetOneFn,
@@ -377,17 +377,6 @@ func UserActionSeederInitFn() *UserEntity {
 	return entity
 }
 func UserAssociationCreate(dto *UserEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func UserRelationContentCreate(dto *UserEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func UserRelationContentUpdate(dto *UserEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func UserPolyglotUpdateHandler(dto *UserEntity, query fireback.QueryDSL) {
@@ -524,8 +513,6 @@ func UserActionCreateFn(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, 
 	UserEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	UserRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -630,7 +617,6 @@ func UserUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserEntity)
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	UserRelationContentUpdate(fields, query)
 	UserPolyglotUpdateHandler(fields, query)
 	if ero := UserDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -702,10 +688,10 @@ var UserWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func UserActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func UserActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&UserEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_USER_DELETE}
-	return fireback.RemoveEntity[UserEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[UserEntity](req, query, refl)
 }
 func UserActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1389,7 +1375,7 @@ var UserCliCommands []cli.Command = []cli.Command{
 	UserCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserEntity{}).Elem(),
-		UserActions.Remove,
+		UserActions.RemoveEnqueue,
 	),
 }
 
@@ -1591,22 +1577,21 @@ var USER_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "UserEntity",
 	},
 }
-var USER_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/user",
-	Format: "DELETE_DSL",
+var USER_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/user-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, UserActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, UserActions.RemoveEnqueue)
 		},
 	},
-	Action:         UserActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         UserActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &UserEntity{},
 }
 
@@ -1624,7 +1609,7 @@ func GetUserModule3Actions() []fireback.Module3Action {
 		USER_ACTION_POST_ONE,
 		USER_ACTION_PATCH,
 		USER_ACTION_PATCH_BULK,
-		USER_ACTION_DELETE,
+		USER_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendUserRouter(&routes)

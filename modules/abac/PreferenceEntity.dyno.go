@@ -169,7 +169,7 @@ type preferenceActionsSig struct {
 	Create         func(dto *PreferenceEntity, query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
 	Upsert         func(dto *PreferenceEntity, query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
 	SeederInit     func() *PreferenceEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PreferenceEntity, query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PreferenceEntity, *fireback.IError)
@@ -180,7 +180,7 @@ var PreferenceActions preferenceActionsSig = preferenceActionsSig{
 	Update:         PreferenceActionUpdateFn,
 	Create:         PreferenceActionCreateFn,
 	Upsert:         PreferenceActionUpsertFn,
-	Remove:         PreferenceActionRemoveFn,
+	RemoveEnqueue:  PreferenceActionRemoveEnqueueFn,
 	SeederInit:     PreferenceActionSeederInitFn,
 	MultiInsert:    PreferenceMultiInsertFn,
 	GetOne:         PreferenceActionGetOneFn,
@@ -267,17 +267,6 @@ func PreferenceActionSeederInitFn() *PreferenceEntity {
 	return entity
 }
 func PreferenceAssociationCreate(dto *PreferenceEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PreferenceRelationContentCreate(dto *PreferenceEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PreferenceRelationContentUpdate(dto *PreferenceEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PreferencePolyglotUpdateHandler(dto *PreferenceEntity, query fireback.QueryDSL) {
@@ -406,8 +395,6 @@ func PreferenceActionCreateFn(dto *PreferenceEntity, query fireback.QueryDSL) (*
 	PreferenceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PreferenceEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PreferenceRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -512,7 +499,6 @@ func PreferenceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Prefe
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PreferenceRelationContentUpdate(fields, query)
 	PreferencePolyglotUpdateHandler(fields, query)
 	if ero := PreferenceDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -583,10 +569,10 @@ var PreferenceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PreferenceActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PreferenceActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PreferenceEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}
-	return fireback.RemoveEntity[PreferenceEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PreferenceEntity](req, query, refl)
 }
 func PreferenceActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1047,7 +1033,7 @@ var PreferenceCliCommands []cli.Command = []cli.Command{
 	PreferenceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PreferenceEntity{}).Elem(),
-		PreferenceActions.Remove,
+		PreferenceActions.RemoveEnqueue,
 	),
 }
 
@@ -1246,21 +1232,20 @@ var PREFERENCE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PreferenceEntity",
 	},
 }
-var PREFERENCE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/preference",
-	Format: "DELETE_DSL",
+var PREFERENCE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/preference-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PreferenceActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PreferenceActions.RemoveEnqueue)
 		},
 	},
-	Action:         PreferenceActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PreferenceActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PreferenceEntity{},
 }
 
@@ -1278,7 +1263,7 @@ func GetPreferenceModule3Actions() []fireback.Module3Action {
 		PREFERENCE_ACTION_POST_ONE,
 		PREFERENCE_ACTION_PATCH,
 		PREFERENCE_ACTION_PATCH_BULK,
-		PREFERENCE_ACTION_DELETE,
+		PREFERENCE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendPreferenceRouter(&routes)

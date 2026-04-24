@@ -184,7 +184,7 @@ type workspaceActionsSig struct {
 	Create         func(dto *WorkspaceEntity, query fireback.QueryDSL) (*WorkspaceEntity, *fireback.IError)
 	Upsert         func(dto *WorkspaceEntity, query fireback.QueryDSL) (*WorkspaceEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*WorkspaceEntity, query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceEntity, *fireback.IError)
@@ -196,7 +196,7 @@ var WorkspaceActions workspaceActionsSig = workspaceActionsSig{
 	Update:         WorkspaceActionUpdateFn,
 	Create:         WorkspaceActionCreateFn,
 	Upsert:         WorkspaceActionUpsertFn,
-	Remove:         WorkspaceActionRemoveFn,
+	RemoveEnqueue:  WorkspaceActionRemoveEnqueueFn,
 	SeederInit:     WorkspaceActionSeederInitFn,
 	MultiInsert:    WorkspaceMultiInsertFn,
 	GetOne:         WorkspaceActionGetOneFn,
@@ -286,17 +286,6 @@ func WorkspaceActionSeederInitFn() *WorkspaceEntity {
 	return entity
 }
 func WorkspaceAssociationCreate(dto *WorkspaceEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func WorkspaceRelationContentCreate(dto *WorkspaceEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func WorkspaceRelationContentUpdate(dto *WorkspaceEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func WorkspacePolyglotUpdateHandler(dto *WorkspaceEntity, query fireback.QueryDSL) {
@@ -427,8 +416,6 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query fireback.QueryDSL) (*Wo
 	WorkspaceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	WorkspaceRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -579,7 +566,6 @@ func WorkspaceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Worksp
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	WorkspaceRelationContentUpdate(fields, query)
 	WorkspacePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -651,10 +637,10 @@ var WorkspaceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func WorkspaceActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}
-	return fireback.RemoveEntity[WorkspaceEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[WorkspaceEntity](req, query, refl)
 }
 func WorkspaceActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1153,7 +1139,7 @@ var WorkspaceCliCommands []cli.Command = []cli.Command{
 	WorkspaceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceEntity{}).Elem(),
-		WorkspaceActions.Remove,
+		WorkspaceActions.RemoveEnqueue,
 	),
 	fireback.GetCommonCteQuery(WorkspaceActions.CteQuery),
 	fireback.GetCommonPivotQuery(WorkspaceActionCommonPivotQuery),
@@ -1380,22 +1366,21 @@ var WORKSPACE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "WorkspaceEntity",
 	},
 }
-var WORKSPACE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/workspace",
-	Format: "DELETE_DSL",
+var WORKSPACE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/workspace-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, WorkspaceActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, WorkspaceActions.RemoveEnqueue)
 		},
 	},
-	Action:         WorkspaceActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         WorkspaceActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &WorkspaceEntity{},
 }
 
@@ -1414,7 +1399,7 @@ func GetWorkspaceModule3Actions() []fireback.Module3Action {
 		WORKSPACE_ACTION_POST_ONE,
 		WORKSPACE_ACTION_PATCH,
 		WORKSPACE_ACTION_PATCH_BULK,
-		WORKSPACE_ACTION_DELETE,
+		WORKSPACE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendWorkspaceRouter(&routes)

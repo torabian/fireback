@@ -16,6 +16,7 @@ import Link from "../link/Link";
 import { filtersToJsonQuery } from "./EnttityManagerHelper";
 import { type CardComponentType, FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
+import { useReindexedContent } from "../common-data-table/useReindex";
 
 const media = matchMedia("(max-width: 600px)");
 
@@ -23,7 +24,7 @@ function useViewMode() {
   const matchRef = useRef(media);
 
   const [view, setView] = useState<"datatable" | "card" | "map">(
-    media.matches ? "card" : "datatable"
+    media.matches ? "card" : "datatable",
   );
 
   useEffect(() => {
@@ -105,7 +106,7 @@ export const CommonListManager = ({
   });
 
   const [columnSizes, setColumnSizes] = useState<any>(
-    columns.map((t) => ({ columnName: t.name, width: t.width }))
+    columns.map((t) => ({ columnName: t.name, width: t.width })),
   );
 
   useEffect(() => {
@@ -129,16 +130,32 @@ export const CommonListManager = ({
       queryClient,
     });
 
+  const onRecordsDeleted$ = (items: string[]) => {
+    if (onRecordsDeleted) {
+      onRecordsDeleted({ queryClient });
+    }
+    deleteViaUniqueIds(items);
+  };
+
   const udf = useDatatableFiltering({
     urlMask: "",
     submitDelete: delHook?.submit,
-    onRecordsDeleted: onRecordsDeleted
-      ? () => onRecordsDeleted({ queryClient })
-      : undefined,
+    onRecordsDeleted: onRecordsDeleted$,
   });
 
+  const source = queryHook({
+    query: {
+      deep: deep === undefined ? true : deep,
+      ...udf.debouncedFilters,
+      withPreloads,
+    },
+    queryClient: queryClient,
+  });
+
+  const { indexedData, reindex, deleteViaUniqueIds } = useReindexedContent(udf);
+
   const [defaultColumnWidths] = useState(
-    columns.map((t) => ({ columnName: t.name, width: t.width }))
+    columns.map((t) => ({ columnName: t.name, width: t.width })),
   );
 
   const onColumnWidthsChange = (nextColumnWidths: TableColumnWidthInfo[]) => {
@@ -168,15 +185,6 @@ export const CommonListManager = ({
   const f = [...(queryFilters || [])];
 
   const jsonQuery = useMemo(() => filtersToJsonQuery(f as any), [f]);
-
-  const source = queryHook({
-    query: {
-      deep: deep === undefined ? true : deep,
-      ...udf.debouncedFilters,
-      withPreloads,
-    },
-    queryClient: queryClient,
-  });
 
   const q = source.query ? source : { query: source };
 
@@ -213,6 +221,8 @@ export const CommonListManager = ({
           selectable={selectable}
           bulkEditHook={bulkEditHook}
           RowDetail={RowDetail}
+          reindex={reindex}
+          indexedData={indexedData}
           uniqueIdHrefHandler={uniqueIdHrefHandler}
           onColumnWidthsChange={onColumnWidthsChange}
           columns={columns}

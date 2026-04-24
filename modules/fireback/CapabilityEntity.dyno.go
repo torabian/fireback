@@ -175,7 +175,7 @@ type capabilityActionsSig struct {
 	Create         func(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError)
 	Upsert         func(dto *CapabilityEntity, query QueryDSL) (*CapabilityEntity, *IError)
 	SeederInit     func() *CapabilityEntity
-	Remove         func(query QueryDSL) (int64, *IError)
+	RemoveEnqueue  func(request DeleteRequest, query QueryDSL) (*DeleteResponse, *IError)
 	MultiInsert    func(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError)
 	GetOne         func(query QueryDSL) (*CapabilityEntity, *IError)
 	GetByWorkspace func(query QueryDSL) (*CapabilityEntity, *IError)
@@ -186,7 +186,7 @@ var CapabilityActions capabilityActionsSig = capabilityActionsSig{
 	Update:         CapabilityActionUpdateFn,
 	Create:         CapabilityActionCreateFn,
 	Upsert:         CapabilityActionUpsertFn,
-	Remove:         CapabilityActionRemoveFn,
+	RemoveEnqueue:  CapabilityActionRemoveEnqueueFn,
 	SeederInit:     CapabilityActionSeederInitFn,
 	MultiInsert:    CapabilityMultiInsertFn,
 	GetOne:         CapabilityActionGetOneFn,
@@ -290,17 +290,6 @@ func CapabilityActionSeederInitFn() *CapabilityEntity {
 	return entity
 }
 func CapabilityAssociationCreate(dto *CapabilityEntity, query QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func CapabilityRelationContentCreate(dto *CapabilityEntity, query QueryDSL) error {
-	return nil
-}
-func CapabilityRelationContentUpdate(dto *CapabilityEntity, query QueryDSL) error {
 	return nil
 }
 func CapabilityPolyglotUpdateHandler(dto *CapabilityEntity, query QueryDSL) {
@@ -431,8 +420,6 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 	CapabilityEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	CapabilityEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	CapabilityRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -537,7 +524,6 @@ func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEnti
 		return nil, GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	CapabilityRelationContentUpdate(fields, query)
 	CapabilityPolyglotUpdateHandler(fields, query)
 	if ero := CapabilityDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -609,10 +595,10 @@ var CapabilityWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func CapabilityActionRemoveFn(query QueryDSL) (int64, *IError) {
+func CapabilityActionRemoveEnqueueFn(req DeleteRequest, query QueryDSL) (*DeleteResponse, *IError) {
 	refl := reflect.ValueOf(&CapabilityEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE}
-	return RemoveEntity[CapabilityEntity](query, refl)
+	return RemoveEntityEnqueue[CapabilityEntity](req, query, refl)
 }
 func CapabilityActionWipeClean(query QueryDSL) (int64, error) {
 	var err error
@@ -1098,7 +1084,7 @@ var CapabilityCliCommands []cli.Command = []cli.Command{
 	CapabilityCreateInteractiveCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
-		CapabilityActions.Remove,
+		CapabilityActions.RemoveEnqueue,
 	),
 }
 
@@ -1301,22 +1287,21 @@ var CAPABILITY_ACTION_PATCH_BULK = Module3Action{
 		Entity: "CapabilityEntity",
 	},
 }
-var CAPABILITY_ACTION_DELETE = Module3Action{
-	Method: "DELETE",
-	Url:    "/capability",
-	Format: "DELETE_DSL",
+var CAPABILITY_ACTION_DELETE_ENQUEUE = Module3Action{
+	Method: "POST",
+	Url:    "/capability-remove",
 	SecurityModel: &SecurityModel{
 		ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, CapabilityActions.Remove)
+			HttpRemoveEnqueueEntity(c, CapabilityActions.RemoveEnqueue)
 		},
 	},
-	Action:         CapabilityActions.Remove,
-	RequestEntity:  &DeleteRequest{},
-	ResponseEntity: &DeleteResponse{},
+	Action:         CapabilityActions.RemoveEnqueue,
+	RequestEntity:  &DeleteRequestDto{},
+	ResponseEntity: &DeleteResponseDto{},
 	TargetEntity:   &CapabilityEntity{},
 }
 
@@ -1334,7 +1319,7 @@ func GetCapabilityModule3Actions() []Module3Action {
 		CAPABILITY_ACTION_POST_ONE,
 		CAPABILITY_ACTION_PATCH,
 		CAPABILITY_ACTION_PATCH_BULK,
-		CAPABILITY_ACTION_DELETE,
+		CAPABILITY_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendCapabilityRouter(&routes)

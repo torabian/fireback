@@ -184,7 +184,7 @@ type paymentConfigActionsSig struct {
 	Create         func(dto *PaymentConfigEntity, query fireback.QueryDSL) (*PaymentConfigEntity, *fireback.IError)
 	Upsert         func(dto *PaymentConfigEntity, query fireback.QueryDSL) (*PaymentConfigEntity, *fireback.IError)
 	SeederInit     func() *PaymentConfigEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PaymentConfigEntity, query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PaymentConfigEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PaymentConfigEntity, *fireback.IError)
@@ -195,7 +195,7 @@ var PaymentConfigActions paymentConfigActionsSig = paymentConfigActionsSig{
 	Update:         PaymentConfigActionUpdateFn,
 	Create:         PaymentConfigActionCreateFn,
 	Upsert:         PaymentConfigActionUpsertFn,
-	Remove:         PaymentConfigActionRemoveFn,
+	RemoveEnqueue:  PaymentConfigActionRemoveEnqueueFn,
 	SeederInit:     PaymentConfigActionSeederInitFn,
 	MultiInsert:    PaymentConfigMultiInsertFn,
 	GetOne:         PaymentConfigActionGetOneFn,
@@ -284,17 +284,6 @@ func PaymentConfigActionSeederInitFn() *PaymentConfigEntity {
 	return entity
 }
 func PaymentConfigAssociationCreate(dto *PaymentConfigEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PaymentConfigRelationContentCreate(dto *PaymentConfigEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PaymentConfigRelationContentUpdate(dto *PaymentConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PaymentConfigPolyglotUpdateHandler(dto *PaymentConfigEntity, query fireback.QueryDSL) {
@@ -425,8 +414,6 @@ func PaymentConfigActionCreateFn(dto *PaymentConfigEntity, query fireback.QueryD
 	PaymentConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PaymentConfigEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PaymentConfigRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -531,7 +518,6 @@ func PaymentConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Pa
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PaymentConfigRelationContentUpdate(fields, query)
 	PaymentConfigPolyglotUpdateHandler(fields, query)
 	if ero := PaymentConfigDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -604,10 +590,10 @@ var PaymentConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PaymentConfigActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PaymentConfigActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PaymentConfigEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PAYMENT_CONFIG_DELETE}
-	return fireback.RemoveEntity[PaymentConfigEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PaymentConfigEntity](req, query, refl)
 }
 func PaymentConfigActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1110,7 +1096,7 @@ var PaymentConfigCliCommands []cli.Command = []cli.Command{
 	PaymentConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PaymentConfigEntity{}).Elem(),
-		PaymentConfigActions.Remove,
+		PaymentConfigActions.RemoveEnqueue,
 	),
 }
 
@@ -1321,10 +1307,9 @@ var PAYMENT_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PaymentConfigEntity",
 	},
 }
-var PAYMENT_CONFIG_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/payment-config",
-	Format: "DELETE_DSL",
+var PAYMENT_CONFIG_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/payment-config-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PAYMENT_CONFIG_DELETE},
 		ResolveStrategy: "workspace",
@@ -1332,12 +1317,12 @@ var PAYMENT_CONFIG_ACTION_DELETE = fireback.Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PaymentConfigActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PaymentConfigActions.RemoveEnqueue)
 		},
 	},
-	Action:         PaymentConfigActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PaymentConfigActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PaymentConfigEntity{},
 }
 var PAYMENT_CONFIG_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
@@ -1399,7 +1384,7 @@ func GetPaymentConfigModule3Actions() []fireback.Module3Action {
 		PAYMENT_CONFIG_ACTION_POST_ONE,
 		PAYMENT_CONFIG_ACTION_PATCH,
 		PAYMENT_CONFIG_ACTION_PATCH_BULK,
-		PAYMENT_CONFIG_ACTION_DELETE,
+		PAYMENT_CONFIG_ACTION_DELETE_ENQUEUE,
 		PAYMENT_CONFIG_ACTION_DISTINCT_PATCH_ONE,
 		PAYMENT_CONFIG_ACTION_DISTINCT_GET_ONE,
 	}

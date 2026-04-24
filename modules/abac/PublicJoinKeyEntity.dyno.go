@@ -176,7 +176,7 @@ type publicJoinKeyActionsSig struct {
 	Create         func(dto *PublicJoinKeyEntity, query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
 	Upsert         func(dto *PublicJoinKeyEntity, query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
 	SeederInit     func() *PublicJoinKeyEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PublicJoinKeyEntity, *fireback.IError)
@@ -187,7 +187,7 @@ var PublicJoinKeyActions publicJoinKeyActionsSig = publicJoinKeyActionsSig{
 	Update:         PublicJoinKeyActionUpdateFn,
 	Create:         PublicJoinKeyActionCreateFn,
 	Upsert:         PublicJoinKeyActionUpsertFn,
-	Remove:         PublicJoinKeyActionRemoveFn,
+	RemoveEnqueue:  PublicJoinKeyActionRemoveEnqueueFn,
 	SeederInit:     PublicJoinKeyActionSeederInitFn,
 	MultiInsert:    PublicJoinKeyMultiInsertFn,
 	GetOne:         PublicJoinKeyActionGetOneFn,
@@ -275,17 +275,6 @@ func PublicJoinKeyActionSeederInitFn() *PublicJoinKeyEntity {
 	return entity
 }
 func PublicJoinKeyAssociationCreate(dto *PublicJoinKeyEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PublicJoinKeyRelationContentCreate(dto *PublicJoinKeyEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PublicJoinKeyRelationContentUpdate(dto *PublicJoinKeyEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PublicJoinKeyPolyglotUpdateHandler(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
@@ -415,8 +404,6 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query fireback.QueryD
 	PublicJoinKeyEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PublicJoinKeyEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PublicJoinKeyRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -521,7 +508,6 @@ func PublicJoinKeyUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Pu
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PublicJoinKeyRelationContentUpdate(fields, query)
 	PublicJoinKeyPolyglotUpdateHandler(fields, query)
 	if ero := PublicJoinKeyDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -592,10 +578,10 @@ var PublicJoinKeyWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PublicJoinKeyActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PublicJoinKeyActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicJoinKeyEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}
-	return fireback.RemoveEntity[PublicJoinKeyEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PublicJoinKeyEntity](req, query, refl)
 }
 func PublicJoinKeyActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1060,7 +1046,7 @@ var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
 	PublicJoinKeyCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
-		PublicJoinKeyActions.Remove,
+		PublicJoinKeyActions.RemoveEnqueue,
 	),
 }
 
@@ -1259,21 +1245,20 @@ var PUBLIC_JOIN_KEY_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PublicJoinKeyEntity",
 	},
 }
-var PUBLIC_JOIN_KEY_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/public-join-key",
-	Format: "DELETE_DSL",
+var PUBLIC_JOIN_KEY_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/public-join-key-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PublicJoinKeyActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PublicJoinKeyActions.RemoveEnqueue)
 		},
 	},
-	Action:         PublicJoinKeyActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PublicJoinKeyActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PublicJoinKeyEntity{},
 }
 
@@ -1291,7 +1276,7 @@ func GetPublicJoinKeyModule3Actions() []fireback.Module3Action {
 		PUBLIC_JOIN_KEY_ACTION_POST_ONE,
 		PUBLIC_JOIN_KEY_ACTION_PATCH,
 		PUBLIC_JOIN_KEY_ACTION_PATCH_BULK,
-		PUBLIC_JOIN_KEY_ACTION_DELETE,
+		PUBLIC_JOIN_KEY_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendPublicJoinKeyRouter(&routes)

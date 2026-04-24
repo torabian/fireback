@@ -171,7 +171,7 @@ type timezoneGroupActionsSig struct {
 	Create         func(dto *TimezoneGroupEntity, query fireback.QueryDSL) (*TimezoneGroupEntity, *fireback.IError)
 	Upsert         func(dto *TimezoneGroupEntity, query fireback.QueryDSL) (*TimezoneGroupEntity, *fireback.IError)
 	SeederInit     func() *TimezoneGroupEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*TimezoneGroupEntity, query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TimezoneGroupEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TimezoneGroupEntity, *fireback.IError)
@@ -182,7 +182,7 @@ var TimezoneGroupActions timezoneGroupActionsSig = timezoneGroupActionsSig{
 	Update:         TimezoneGroupActionUpdateFn,
 	Create:         TimezoneGroupActionCreateFn,
 	Upsert:         TimezoneGroupActionUpsertFn,
-	Remove:         TimezoneGroupActionRemoveFn,
+	RemoveEnqueue:  TimezoneGroupActionRemoveEnqueueFn,
 	SeederInit:     TimezoneGroupActionSeederInitFn,
 	MultiInsert:    TimezoneGroupMultiInsertFn,
 	GetOne:         TimezoneGroupActionGetOneFn,
@@ -285,17 +285,6 @@ func TimezoneGroupActionSeederInitFn() *TimezoneGroupEntity {
 	return entity
 }
 func TimezoneGroupAssociationCreate(dto *TimezoneGroupEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func TimezoneGroupRelationContentCreate(dto *TimezoneGroupEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func TimezoneGroupRelationContentUpdate(dto *TimezoneGroupEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func TimezoneGroupPolyglotUpdateHandler(dto *TimezoneGroupEntity, query fireback.QueryDSL) {
@@ -425,8 +414,6 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query fireback.QueryD
 	TimezoneGroupEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TimezoneGroupEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	TimezoneGroupRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -531,7 +518,6 @@ func TimezoneGroupUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Ti
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	TimezoneGroupRelationContentUpdate(fields, query)
 	TimezoneGroupPolyglotUpdateHandler(fields, query)
 	if ero := TimezoneGroupDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -602,10 +588,10 @@ var TimezoneGroupWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TimezoneGroupActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func TimezoneGroupActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&TimezoneGroupEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_TIMEZONE_GROUP_DELETE}
-	return fireback.RemoveEntity[TimezoneGroupEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[TimezoneGroupEntity](req, query, refl)
 }
 func TimezoneGroupActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1066,7 +1052,7 @@ var TimezoneGroupCliCommands []cli.Command = []cli.Command{
 	TimezoneGroupCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
-		TimezoneGroupActions.Remove,
+		TimezoneGroupActions.RemoveEnqueue,
 	),
 }
 
@@ -1253,19 +1239,18 @@ var TIMEZONE_GROUP_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "TimezoneGroupEntity",
 	},
 }
-var TIMEZONE_GROUP_ACTION_DELETE = fireback.Module3Action{
-	Method:        "DELETE",
-	Url:           "/timezone-group",
-	Format:        "DELETE_DSL",
+var TIMEZONE_GROUP_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method:        "POST",
+	Url:           "/timezone-group-remove",
 	SecurityModel: &fireback.SecurityModel{},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, TimezoneGroupActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, TimezoneGroupActions.RemoveEnqueue)
 		},
 	},
-	Action:         TimezoneGroupActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         TimezoneGroupActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &TimezoneGroupEntity{},
 }
 
@@ -1283,7 +1268,7 @@ func GetTimezoneGroupModule3Actions() []fireback.Module3Action {
 		TIMEZONE_GROUP_ACTION_POST_ONE,
 		TIMEZONE_GROUP_ACTION_PATCH,
 		TIMEZONE_GROUP_ACTION_PATCH_BULK,
-		TIMEZONE_GROUP_ACTION_DELETE,
+		TIMEZONE_GROUP_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendTimezoneGroupRouter(&routes)

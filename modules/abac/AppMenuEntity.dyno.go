@@ -202,7 +202,7 @@ type appMenuActionsSig struct {
 	Create         func(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
 	Upsert         func(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
 	SeederInit     func() *AppMenuEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*AppMenuEntity, *fireback.IError)
@@ -214,7 +214,7 @@ var AppMenuActions appMenuActionsSig = appMenuActionsSig{
 	Update:         AppMenuActionUpdateFn,
 	Create:         AppMenuActionCreateFn,
 	Upsert:         AppMenuActionUpsertFn,
-	Remove:         AppMenuActionRemoveFn,
+	RemoveEnqueue:  AppMenuActionRemoveEnqueueFn,
 	SeederInit:     AppMenuActionSeederInitFn,
 	MultiInsert:    AppMenuMultiInsertFn,
 	GetOne:         AppMenuActionGetOneFn,
@@ -322,17 +322,6 @@ func AppMenuActionSeederInitFn() *AppMenuEntity {
 	return entity
 }
 func AppMenuAssociationCreate(dto *AppMenuEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func AppMenuRelationContentCreate(dto *AppMenuEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func AppMenuRelationContentUpdate(dto *AppMenuEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func AppMenuPolyglotUpdateHandler(dto *AppMenuEntity, query fireback.QueryDSL) {
@@ -466,8 +455,6 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 	AppMenuEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	AppMenuEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	AppMenuRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -618,7 +605,6 @@ func AppMenuUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *AppMenuE
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	AppMenuRelationContentUpdate(fields, query)
 	AppMenuPolyglotUpdateHandler(fields, query)
 	if ero := AppMenuDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -689,10 +675,10 @@ var AppMenuWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func AppMenuActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func AppMenuActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&AppMenuEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}
-	return fireback.RemoveEntity[AppMenuEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[AppMenuEntity](req, query, refl)
 }
 func AppMenuActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1229,7 +1215,7 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 	AppMenuCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
-		AppMenuActions.Remove,
+		AppMenuActions.RemoveEnqueue,
 	),
 	fireback.GetCommonCteQuery(AppMenuActions.CteQuery),
 	fireback.GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
@@ -1449,21 +1435,20 @@ var APP_MENU_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "AppMenuEntity",
 	},
 }
-var APP_MENU_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/app-menu",
-	Format: "DELETE_DSL",
+var APP_MENU_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/app-menu-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, AppMenuActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, AppMenuActions.RemoveEnqueue)
 		},
 	},
-	Action:         AppMenuActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         AppMenuActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &AppMenuEntity{},
 }
 
@@ -1482,7 +1467,7 @@ func GetAppMenuModule3Actions() []fireback.Module3Action {
 		APP_MENU_ACTION_POST_ONE,
 		APP_MENU_ACTION_PATCH,
 		APP_MENU_ACTION_PATCH_BULK,
-		APP_MENU_ACTION_DELETE,
+		APP_MENU_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendAppMenuRouter(&routes)

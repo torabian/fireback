@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type ActionDeleteSignature = func(query QueryDSL) (int64, *IError)
+type ActionDeleteSignature = func(request DeleteRequest, query QueryDSL) (*DeleteResponse, *IError)
 
 func CreateEntity[T any](dto T) (T, *IError) {
 	// Do not forget to create unique key:
@@ -731,7 +731,46 @@ func AppendQueryDslWhereToDb(db *gorm.DB, query QueryDSL, reflectVal reflect.Val
 	}
 	return db
 }
+func RemoveEntityEnqueue[T any](req DeleteRequest, query QueryDSL, reflectVal reflect.Value) (*DeleteResponse, *IError) {
 
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
+		dbref = GetDbRef()
+	} else {
+		dbref = query.Tx
+	}
+
+	var dto T
+
+	queryAdaptor := sql_adaptor.NewDefaultAdaptorFromStruct(reflectVal)
+	parsedQuery, dslError := queryAdaptor.Parse(req.Query)
+
+	if dslError == nil {
+		dbref = dbref.Where(parsedQuery.Raw, sql_adaptor.StringSliceToInterfaceSlice(parsedQuery.Values)...).Delete(&dto)
+	}
+
+	if dbref.Error != nil {
+		return nil, GormErrorToIError(dbref.Error)
+	} else {
+
+		if query.TriggerEventName != "" {
+			event.MustFire(query.TriggerEventName, event.M{
+				"entity":   dto,
+				"target":   "workspace",
+				"uniqueId": query.WorkspaceId,
+			})
+		}
+
+		return &DeleteResponse{
+			Data: &DeleteResponseData{
+				Item: DeleteResponseDataItem{
+					RowsAffected: dbref.RowsAffected,
+					Executed:     true,
+				},
+			},
+		}, nil
+	}
+}
 func RemoveEntity[T any](query QueryDSL, reflectVal reflect.Value) (int64, *IError) {
 
 	var dbref *gorm.DB = nil

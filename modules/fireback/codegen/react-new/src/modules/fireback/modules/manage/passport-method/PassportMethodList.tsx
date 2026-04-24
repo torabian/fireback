@@ -1,9 +1,9 @@
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { columns } from "./PassportMethodColumns";
+import { useS } from "@/modules/fireback/hooks/useS";
 import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
 import { useGetPassportMethods } from "@/modules/fireback/sdk/modules/abac/useGetPassportMethods";
-import { useDeletePassportMethod } from "@/modules/fireback/sdk/modules/abac/useDeletePassportMethod";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { usePostPassportMethodRemove } from "@/modules/fireback/sdk/modules/abac/usePostPassportMethodRemove";
+import { columns } from "./PassportMethodColumns";
 import { strings } from "./strings/translations";
 export const PassportMethodList = () => {
   const s = useS(strings);
@@ -15,7 +15,7 @@ export const PassportMethodList = () => {
         uniqueIdHrefHandler={(uniqueId: string) =>
           PassportMethodEntity.Navigation.single(uniqueId)
         }
-        deleteHook={useDeletePassportMethod}
+        deleteHook={usePostPassportMethodRemove}
       ></CommonListManager>
     </>
   );

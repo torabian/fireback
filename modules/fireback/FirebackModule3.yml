@@ -227,6 +227,27 @@ acts:
           type: collection
           target: CapabilityInfoDto
 dtom:
+  - name: deleteRequest
+    fields:
+      - name: query
+        type: string
+        description: The query selector which would be used to delete the content.
+  - name: deleteResponse
+    fields:
+      - name: data
+        type: object
+        fields:
+          - name: item
+            type: object
+            fields:
+            - name: executed
+              type: bool
+              description: 
+                If the deletion executed immediately.
+            - name: rowsAffected
+              type: int64
+              description: The query selector which would be used to delete the content.
+
   - name: reactiveSearchResult
     fields:
       - type: string

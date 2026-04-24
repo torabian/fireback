@@ -181,7 +181,7 @@ type tokenActionsSig struct {
 	Create         func(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
 	Upsert         func(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
 	SeederInit     func() *TokenEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*TokenEntity, *fireback.IError)
@@ -192,7 +192,7 @@ var TokenActions tokenActionsSig = tokenActionsSig{
 	Update:         TokenActionUpdateFn,
 	Create:         TokenActionCreateFn,
 	Upsert:         TokenActionUpsertFn,
-	Remove:         TokenActionRemoveFn,
+	RemoveEnqueue:  TokenActionRemoveEnqueueFn,
 	SeederInit:     TokenActionSeederInitFn,
 	MultiInsert:    TokenMultiInsertFn,
 	GetOne:         TokenActionGetOneFn,
@@ -281,17 +281,6 @@ func TokenActionSeederInitFn() *TokenEntity {
 	return entity
 }
 func TokenAssociationCreate(dto *TokenEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func TokenRelationContentCreate(dto *TokenEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func TokenRelationContentUpdate(dto *TokenEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func TokenPolyglotUpdateHandler(dto *TokenEntity, query fireback.QueryDSL) {
@@ -422,8 +411,6 @@ func TokenActionCreateFn(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntit
 	TokenEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TokenEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	TokenRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -528,7 +515,6 @@ func TokenUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TokenEntit
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	TokenRelationContentUpdate(fields, query)
 	TokenPolyglotUpdateHandler(fields, query)
 	if ero := TokenDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -600,10 +586,10 @@ var TokenWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func TokenActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func TokenActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&TokenEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE}
-	return fireback.RemoveEntity[TokenEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[TokenEntity](req, query, refl)
 }
 func TokenActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1081,7 +1067,7 @@ var TokenCliCommands []cli.Command = []cli.Command{
 	TokenCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TokenEntity{}).Elem(),
-		TokenActions.Remove,
+		TokenActions.RemoveEnqueue,
 	),
 }
 
@@ -1283,22 +1269,21 @@ var TOKEN_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "TokenEntity",
 	},
 }
-var TOKEN_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/token",
-	Format: "DELETE_DSL",
+var TOKEN_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/token-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, TokenActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, TokenActions.RemoveEnqueue)
 		},
 	},
-	Action:         TokenActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         TokenActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &TokenEntity{},
 }
 
@@ -1316,7 +1301,7 @@ func GetTokenModule3Actions() []fireback.Module3Action {
 		TOKEN_ACTION_POST_ONE,
 		TOKEN_ACTION_PATCH,
 		TOKEN_ACTION_PATCH_BULK,
-		TOKEN_ACTION_DELETE,
+		TOKEN_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendTokenRouter(&routes)

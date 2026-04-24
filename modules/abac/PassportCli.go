@@ -77,7 +77,7 @@ var PassportCli cli.Command = cli.Command{
 		PassportUpdateCmd,
 		fireback.GetCommonRemoveQuery(
 			reflect.ValueOf(&PassportEntity{}).Elem(),
-			PassportActions.Remove,
+			PassportActions.RemoveEnqueue,
 		),
 		PASSPORT_ACTION_QUERY.ToCli(),
 	}, fireback.FirebackCustomActionsCli...),

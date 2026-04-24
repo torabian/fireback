@@ -97,19 +97,21 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Comman
 
 			f := QueryDSL{
 				UniqueId: c.String("uid"),
-				Query:    "unique_id = " + c.String("id"),
 			}
 
-			count, err := fn(f)
+			res, err := fn(DeleteRequest{
+				Query: "unique_id = " + c.String("id"),
+			}, f)
+
 			if err != nil {
 				fmt.Println("Delete operation encountered an error on database level: %w", err)
 				return err
 			}
 
-			if count == 0 {
+			if res.Data.Item.RowsAffected == 0 {
 				fmt.Println("Query executed successfully, but no Rows have been deleted.")
 			} else {
-				fmt.Printf("Deleted rows by delete operation: %d\r\n", count)
+				fmt.Printf("Deleted rows by delete operation: %d\r\n", res.Data.Item.RowsAffected)
 			}
 
 			return nil

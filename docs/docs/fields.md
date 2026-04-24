@@ -4,8 +4,8 @@ sidebar_position: 5.5
 
 # Defining fields
 
-Fireback supports fields and datatypes which are common sense in programming world. Because Fireback generates 
-code primarily for Golang, and then tries to give SDK for clients such as React, Android, etc, fields 
+Fireback supports fields and datatypes which are common sense in programming world. Because Fireback generates
+code primarily for Golang, and then tries to give SDK for clients such as React, Android, etc, fields
 are inspired by Golang fields.
 
 Nevertheless, I've added some extra field types which are commonly could be used in multiple projects.
@@ -26,12 +26,11 @@ entities:
     - name: creditCard
       fields:
       - name: title
-        type: string 
+        type: string
 
 ```
 
 As you see, we defined a field with type string for creditCard entity.
-
 
 ## Type: string
 
@@ -53,7 +52,7 @@ This type is a bit special. When a field is a date, it would have some code rela
 ## Type: daterange
 
 This is another special datatype which instead of a single date, stores on database level 2 dates as start and end.
-When a field is defined as `daterange`, it would automatically makes Start and End fields into the generated 
+When a field is defined as `daterange`, it would automatically makes Start and End fields into the generated
 Go code.
 
 It's important to understand date and daterange field, will create a meta object which will be available publicly,
@@ -79,7 +78,6 @@ For example from license module:
             type: one
             target: CapabilityEntity
             module: fireback
-            allowCreate: false
 ```
 
 You see that `permissions` is an array. **Important** It's important that, every array field to end
@@ -87,7 +85,7 @@ in plural english form. Some code might end up in mismatch for singular fields a
 
 ## Type: one
 
-The type one, is a specific type to Fireback. It means, you are targeting another table as a `one-to-one` relationship. The different with `object` is, in this type managing the data, deleting it is not depending 
+The type one, is a specific type to Fireback. It means, you are targeting another table as a `one-to-one` relationship. The different with `object` is, in this type managing the data, deleting it is not depending
 on the parent entity, they are just being related over a loose relation.
 
 ## Type: slice
@@ -103,4 +101,3 @@ in a DTO, then you can define the `type: slice`. Now, the primitive itself needs
 ```
 
 Will resolve to a []string slice in Golang, and similar regime in other langauges.
-    

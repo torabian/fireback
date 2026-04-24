@@ -193,7 +193,7 @@ type phoneConfirmationActionsSig struct {
 	Create         func(dto *PhoneConfirmationEntity, query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
 	Upsert         func(dto *PhoneConfirmationEntity, query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
 	SeederInit     func() *PhoneConfirmationEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PhoneConfirmationEntity, query fireback.QueryDSL) ([]*PhoneConfirmationEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PhoneConfirmationEntity, *fireback.IError)
@@ -204,7 +204,7 @@ var PhoneConfirmationActions phoneConfirmationActionsSig = phoneConfirmationActi
 	Update:         PhoneConfirmationActionUpdateFn,
 	Create:         PhoneConfirmationActionCreateFn,
 	Upsert:         PhoneConfirmationActionUpsertFn,
-	Remove:         PhoneConfirmationActionRemoveFn,
+	RemoveEnqueue:  PhoneConfirmationActionRemoveEnqueueFn,
 	SeederInit:     PhoneConfirmationActionSeederInitFn,
 	MultiInsert:    PhoneConfirmationMultiInsertFn,
 	GetOne:         PhoneConfirmationActionGetOneFn,
@@ -295,17 +295,6 @@ func PhoneConfirmationActionSeederInitFn() *PhoneConfirmationEntity {
 	return entity
 }
 func PhoneConfirmationAssociationCreate(dto *PhoneConfirmationEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PhoneConfirmationRelationContentCreate(dto *PhoneConfirmationEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PhoneConfirmationRelationContentUpdate(dto *PhoneConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PhoneConfirmationPolyglotUpdateHandler(dto *PhoneConfirmationEntity, query fireback.QueryDSL) {
@@ -438,8 +427,6 @@ func PhoneConfirmationActionCreateFn(dto *PhoneConfirmationEntity, query firebac
 	PhoneConfirmationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PhoneConfirmationEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PhoneConfirmationRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -544,7 +531,6 @@ func PhoneConfirmationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PhoneConfirmationRelationContentUpdate(fields, query)
 	PhoneConfirmationPolyglotUpdateHandler(fields, query)
 	if ero := PhoneConfirmationDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -615,10 +601,10 @@ var PhoneConfirmationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PhoneConfirmationActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PhoneConfirmationActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PhoneConfirmationEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}
-	return fireback.RemoveEntity[PhoneConfirmationEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PhoneConfirmationEntity](req, query, refl)
 }
 func PhoneConfirmationActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1155,7 +1141,7 @@ var PhoneConfirmationCliCommands []cli.Command = []cli.Command{
 	PhoneConfirmationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PhoneConfirmationEntity{}).Elem(),
-		PhoneConfirmationActions.Remove,
+		PhoneConfirmationActions.RemoveEnqueue,
 	),
 }
 
@@ -1354,21 +1340,20 @@ var PHONE_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PhoneConfirmationEntity",
 	},
 }
-var PHONE_CONFIRMATION_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/phone-confirmation",
-	Format: "DELETE_DSL",
+var PHONE_CONFIRMATION_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/phone-confirmation-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PhoneConfirmationActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PhoneConfirmationActions.RemoveEnqueue)
 		},
 	},
-	Action:         PhoneConfirmationActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PhoneConfirmationActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PhoneConfirmationEntity{},
 }
 
@@ -1386,7 +1371,7 @@ func GetPhoneConfirmationModule3Actions() []fireback.Module3Action {
 		PHONE_CONFIRMATION_ACTION_POST_ONE,
 		PHONE_CONFIRMATION_ACTION_PATCH,
 		PHONE_CONFIRMATION_ACTION_PATCH_BULK,
-		PHONE_CONFIRMATION_ACTION_DELETE,
+		PHONE_CONFIRMATION_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendPhoneConfirmationRouter(&routes)

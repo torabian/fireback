@@ -50,6 +50,24 @@ func HttpUpdateEntities[T any](c *gin.Context, fn func(QueryDSL, *BulkRecordRequ
 	}
 }
 
+func HttpRemoveEnqueueEntity(c *gin.Context, fn func(request DeleteRequest, query QueryDSL) (*DeleteResponse, *IError)) {
+	f := ExtractQueryDslFromGinContext(c)
+
+	var body DeleteRequest
+	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
+		return
+	}
+
+	f.Query = body.Query
+	if deleteResponse, err := fn(body, f); err != nil {
+		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f)})
+	} else {
+		GinWriteContent(c, 200, gin.H{
+			"data": deleteResponse.Data,
+		})
+	}
+}
+
 func HttpRemoveEntity[T any](c *gin.Context, fn func(QueryDSL) (T, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 	var body DeleteRequest

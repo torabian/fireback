@@ -23,11 +23,12 @@ func init() {
 		return RoleActionUpdateFn(query, dto)
 	}
 
-	RoleActions.Remove = func(query fireback.QueryDSL) (int64, *fireback.IError) {
+	RoleActions.RemoveEnqueue = func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 		if query.InternalQuery != "" {
 			query.InternalQuery += " and unique_id != 'root'"
 		}
-		return RoleActionRemoveFn(query)
+
+		return RoleActionRemoveEnqueueFn(request, query)
 	}
 
 	RoleActions.Query = func(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {

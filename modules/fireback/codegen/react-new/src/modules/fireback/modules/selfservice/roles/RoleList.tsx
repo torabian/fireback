@@ -1,9 +1,9 @@
-import { useT } from "@/modules/fireback/hooks/useT";
-import { columns } from "./RoleColumns";
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
+import { useT } from "@/modules/fireback/hooks/useT";
 import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
-import { useDeleteRole } from "@/modules/fireback/sdk/modules/abac/useDeleteRole";
+import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
+import { usePostRoleRemove } from "@/modules/fireback/sdk/modules/abac/usePostRoleRemove";
+import { columns } from "./RoleColumns";
 
 export const RoleList = () => {
   const t = useT();
@@ -16,7 +16,7 @@ export const RoleList = () => {
         uniqueIdHrefHandler={(uniqueId: string) =>
           RoleEntity.Navigation.single(uniqueId)
         }
-        deleteHook={useDeleteRole}
+        deleteHook={usePostRoleRemove}
       ></CommonListManager>
     </>
   );

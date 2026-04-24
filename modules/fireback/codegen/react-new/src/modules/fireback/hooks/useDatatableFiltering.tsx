@@ -24,7 +24,7 @@ export function useDatatableFiltering({
   initialFilters,
 }: {
   urlMask: string;
-  onRecordsDeleted?: () => void;
+  onRecordsDeleted?: (items: string[]) => void;
   submitDelete?: any;
   initialFilters?: Partial<Filters>;
 }) {
@@ -151,7 +151,7 @@ export function useDatatableFiltering({
         }
       })
       .then(() => {
-        onRecordsDeleted && onRecordsDeleted();
+        onRecordsDeleted && onRecordsDeleted(selection);
       });
   };
 

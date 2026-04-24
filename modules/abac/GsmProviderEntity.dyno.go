@@ -193,7 +193,7 @@ type gsmProviderActionsSig struct {
 	Create         func(dto *GsmProviderEntity, query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
 	Upsert         func(dto *GsmProviderEntity, query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
 	SeederInit     func() *GsmProviderEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*GsmProviderEntity, query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*GsmProviderEntity, *fireback.IError)
@@ -204,7 +204,7 @@ var GsmProviderActions gsmProviderActionsSig = gsmProviderActionsSig{
 	Update:         GsmProviderActionUpdateFn,
 	Create:         GsmProviderActionCreateFn,
 	Upsert:         GsmProviderActionUpsertFn,
-	Remove:         GsmProviderActionRemoveFn,
+	RemoveEnqueue:  GsmProviderActionRemoveEnqueueFn,
 	SeederInit:     GsmProviderActionSeederInitFn,
 	MultiInsert:    GsmProviderMultiInsertFn,
 	GetOne:         GsmProviderActionGetOneFn,
@@ -295,17 +295,6 @@ func GsmProviderActionSeederInitFn() *GsmProviderEntity {
 	return entity
 }
 func GsmProviderAssociationCreate(dto *GsmProviderEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func GsmProviderRelationContentCreate(dto *GsmProviderEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func GsmProviderRelationContentUpdate(dto *GsmProviderEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func GsmProviderPolyglotUpdateHandler(dto *GsmProviderEntity, query fireback.QueryDSL) {
@@ -438,8 +427,6 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query fireback.QueryDSL) 
 	GsmProviderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	GsmProviderEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	GsmProviderRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -544,7 +531,6 @@ func GsmProviderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GsmP
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	GsmProviderRelationContentUpdate(fields, query)
 	GsmProviderPolyglotUpdateHandler(fields, query)
 	if ero := GsmProviderDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -615,10 +601,10 @@ var GsmProviderWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func GsmProviderActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func GsmProviderActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&GsmProviderEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}
-	return fireback.RemoveEntity[GsmProviderEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[GsmProviderEntity](req, query, refl)
 }
 func GsmProviderActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1163,7 +1149,7 @@ var GsmProviderCliCommands []cli.Command = []cli.Command{
 	GsmProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
-		GsmProviderActions.Remove,
+		GsmProviderActions.RemoveEnqueue,
 	),
 }
 
@@ -1362,21 +1348,20 @@ var GSM_PROVIDER_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "GsmProviderEntity",
 	},
 }
-var GSM_PROVIDER_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/gsm-provider",
-	Format: "DELETE_DSL",
+var GSM_PROVIDER_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/gsm-provider-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, GsmProviderActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, GsmProviderActions.RemoveEnqueue)
 		},
 	},
-	Action:         GsmProviderActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         GsmProviderActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &GsmProviderEntity{},
 }
 
@@ -1394,7 +1379,7 @@ func GetGsmProviderModule3Actions() []fireback.Module3Action {
 		GSM_PROVIDER_ACTION_POST_ONE,
 		GSM_PROVIDER_ACTION_PATCH,
 		GSM_PROVIDER_ACTION_PATCH_BULK,
-		GSM_PROVIDER_ACTION_DELETE,
+		GSM_PROVIDER_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendGsmProviderRouter(&routes)
