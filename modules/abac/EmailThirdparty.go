@@ -179,7 +179,6 @@ func SendMail(msg EmailMessageContent, p *EmailProviderEntity) error {
 		return errors.New("provider required")
 	}
 
-	fmt.Println("PType:", p.Type)
 	switch p.Type {
 
 	case "curl":
