@@ -23,13 +23,25 @@ type QueryFilterRequest struct {
 }
 
 type DeleteRequest struct {
-	List     []string `json:"list,omitempty"`
-	Query    string   `json:"query,omitempty"`
-	Suspense bool     `json:"suspense,omitempty"`
+	List           []string `json:"list,omitempty"`
+	Query          string   `json:"query,omitempty"`
+	Suspense       bool     `json:"suspense,omitempty"`
+	ForceImmediate bool     `json:"forceImmediate"`
+}
+
+type DeleteResponseDataItem struct {
+	// Determines if the deletion is already executed immediately.
+	Executed bool `json:"executed,omitempty"`
+
+	// Task id
+	TaskId int64 `json:"taskId,omitempty"`
+
+	// Rows affected upon the execution, has more than zero if anything has removed.
+	RowsAffected int64 `json:"rowsAffected,omitempty"`
 }
 
 type DeleteResponseData struct {
-	RowsAffected int64 `json:"rowsAffected,omitempty"`
+	Item DeleteResponseDataItem `json:"item,omitempty"`
 }
 
 type DeleteResponse struct {

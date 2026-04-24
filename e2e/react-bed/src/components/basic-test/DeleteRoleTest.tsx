@@ -1,8 +1,7 @@
-import { useDeleteRole } from "../../sdk/modules/abac/useDeleteRole";
-import { useGetCapabilities } from "../../sdk/modules/fireback/useGetCapabilities";
+import { usePostRoleRemove } from "../../sdk/modules/abac/usePostRoleRemove";
 
 export function DeleteRoleTest() {
-  const { submit } = useDeleteRole();
+  const { submit } = usePostRoleRemove();
 
   const onComplete = () => {
     submit({ uniqueId: "asd" })

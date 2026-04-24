@@ -23,7 +23,7 @@ func ProductJson() string {
 
 // Module dynamic things comes here. Don't touch it :D
 var PERM_ROOT_PRODUCT_EVERYTHING = fireback.PermissionInfo{
-	CompleteKey: "root.e2e.samples.fireback-data-types.modules.product.*",
+	CompleteKey: "root.modules.product.*",
 }
 var ALL_PERM_PRODUCT_MODULE = []fireback.PermissionInfo{
 	PERM_ROOT_PRODUCT_EVERYTHING,

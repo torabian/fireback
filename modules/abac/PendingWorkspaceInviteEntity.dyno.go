@@ -194,7 +194,7 @@ type pendingWorkspaceInviteActionsSig struct {
 	Create         func(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
 	Upsert         func(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
 	SeederInit     func() *PendingWorkspaceInviteEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PendingWorkspaceInviteEntity, *fireback.IError)
@@ -205,7 +205,7 @@ var PendingWorkspaceInviteActions pendingWorkspaceInviteActionsSig = pendingWork
 	Update:         PendingWorkspaceInviteActionUpdateFn,
 	Create:         PendingWorkspaceInviteActionCreateFn,
 	Upsert:         PendingWorkspaceInviteActionUpsertFn,
-	Remove:         PendingWorkspaceInviteActionRemoveFn,
+	RemoveEnqueue:  PendingWorkspaceInviteActionRemoveEnqueueFn,
 	SeederInit:     PendingWorkspaceInviteActionSeederInitFn,
 	MultiInsert:    PendingWorkspaceInviteMultiInsertFn,
 	GetOne:         PendingWorkspaceInviteActionGetOneFn,
@@ -296,17 +296,6 @@ func PendingWorkspaceInviteActionSeederInitFn() *PendingWorkspaceInviteEntity {
 	return entity
 }
 func PendingWorkspaceInviteAssociationCreate(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PendingWorkspaceInviteRelationContentCreate(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PendingWorkspaceInviteRelationContentUpdate(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PendingWorkspaceInvitePolyglotUpdateHandler(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
@@ -439,8 +428,6 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 	PendingWorkspaceInviteEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PendingWorkspaceInviteEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PendingWorkspaceInviteRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -545,7 +532,6 @@ func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, f
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PendingWorkspaceInviteRelationContentUpdate(fields, query)
 	PendingWorkspaceInvitePolyglotUpdateHandler(fields, query)
 	if ero := PendingWorkspaceInviteDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -616,10 +602,10 @@ var PendingWorkspaceInviteWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PendingWorkspaceInviteActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PendingWorkspaceInviteActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PendingWorkspaceInviteEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}
-	return fireback.RemoveEntity[PendingWorkspaceInviteEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PendingWorkspaceInviteEntity](req, query, refl)
 }
 func PendingWorkspaceInviteActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1156,7 +1142,7 @@ var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	PendingWorkspaceInviteCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
-		PendingWorkspaceInviteActions.Remove,
+		PendingWorkspaceInviteActions.RemoveEnqueue,
 	),
 }
 
@@ -1355,21 +1341,20 @@ var PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PendingWorkspaceInviteEntity",
 	},
 }
-var PENDING_WORKSPACE_INVITE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/pending-workspace-invite",
-	Format: "DELETE_DSL",
+var PENDING_WORKSPACE_INVITE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/pending-workspace-invite-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PendingWorkspaceInviteActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PendingWorkspaceInviteActions.RemoveEnqueue)
 		},
 	},
-	Action:         PendingWorkspaceInviteActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PendingWorkspaceInviteActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PendingWorkspaceInviteEntity{},
 }
 
@@ -1387,7 +1372,7 @@ func GetPendingWorkspaceInviteModule3Actions() []fireback.Module3Action {
 		PENDING_WORKSPACE_INVITE_ACTION_POST_ONE,
 		PENDING_WORKSPACE_INVITE_ACTION_PATCH,
 		PENDING_WORKSPACE_INVITE_ACTION_PATCH_BULK,
-		PENDING_WORKSPACE_INVITE_ACTION_DELETE,
+		PENDING_WORKSPACE_INVITE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendPendingWorkspaceInviteRouter(&routes)

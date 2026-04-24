@@ -235,7 +235,7 @@ type publicAuthenticationActionsSig struct {
 	Create         func(dto *PublicAuthenticationEntity, query fireback.QueryDSL) (*PublicAuthenticationEntity, *fireback.IError)
 	Upsert         func(dto *PublicAuthenticationEntity, query fireback.QueryDSL) (*PublicAuthenticationEntity, *fireback.IError)
 	SeederInit     func() *PublicAuthenticationEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PublicAuthenticationEntity, query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PublicAuthenticationEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PublicAuthenticationEntity, *fireback.IError)
@@ -246,7 +246,7 @@ var PublicAuthenticationActions publicAuthenticationActionsSig = publicAuthentic
 	Update:         PublicAuthenticationActionUpdateFn,
 	Create:         PublicAuthenticationActionCreateFn,
 	Upsert:         PublicAuthenticationActionUpsertFn,
-	Remove:         PublicAuthenticationActionRemoveFn,
+	RemoveEnqueue:  PublicAuthenticationActionRemoveEnqueueFn,
 	SeederInit:     PublicAuthenticationActionSeederInitFn,
 	MultiInsert:    PublicAuthenticationMultiInsertFn,
 	GetOne:         PublicAuthenticationActionGetOneFn,
@@ -344,17 +344,6 @@ func PublicAuthenticationActionSeederInitFn() *PublicAuthenticationEntity {
 	return entity
 }
 func PublicAuthenticationAssociationCreate(dto *PublicAuthenticationEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PublicAuthenticationRelationContentCreate(dto *PublicAuthenticationEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PublicAuthenticationRelationContentUpdate(dto *PublicAuthenticationEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PublicAuthenticationPolyglotUpdateHandler(dto *PublicAuthenticationEntity, query fireback.QueryDSL) {
@@ -493,8 +482,6 @@ func PublicAuthenticationActionCreateFn(dto *PublicAuthenticationEntity, query f
 	PublicAuthenticationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PublicAuthenticationEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PublicAuthenticationRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -599,7 +586,6 @@ func PublicAuthenticationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fie
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PublicAuthenticationRelationContentUpdate(fields, query)
 	PublicAuthenticationPolyglotUpdateHandler(fields, query)
 	if ero := PublicAuthenticationDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -671,10 +657,10 @@ var PublicAuthenticationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PublicAuthenticationActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PublicAuthenticationActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PublicAuthenticationEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}
-	return fireback.RemoveEntity[PublicAuthenticationEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PublicAuthenticationEntity](req, query, refl)
 }
 func PublicAuthenticationActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1304,7 +1290,7 @@ var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
 	PublicAuthenticationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
-		PublicAuthenticationActions.Remove,
+		PublicAuthenticationActions.RemoveEnqueue,
 	),
 }
 
@@ -1507,22 +1493,21 @@ var PUBLIC_AUTHENTICATION_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PublicAuthenticationEntity",
 	},
 }
-var PUBLIC_AUTHENTICATION_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/public-authentication",
-	Format: "DELETE_DSL",
+var PUBLIC_AUTHENTICATION_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/public-authentication-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PublicAuthenticationActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PublicAuthenticationActions.RemoveEnqueue)
 		},
 	},
-	Action:         PublicAuthenticationActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PublicAuthenticationActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PublicAuthenticationEntity{},
 }
 
@@ -1540,7 +1525,7 @@ func GetPublicAuthenticationModule3Actions() []fireback.Module3Action {
 		PUBLIC_AUTHENTICATION_ACTION_POST_ONE,
 		PUBLIC_AUTHENTICATION_ACTION_PATCH,
 		PUBLIC_AUTHENTICATION_ACTION_PATCH_BULK,
-		PUBLIC_AUTHENTICATION_ACTION_DELETE,
+		PUBLIC_AUTHENTICATION_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendPublicAuthenticationRouter(&routes)

@@ -273,7 +273,7 @@ type workspaceConfigActionsSig struct {
 	Create         func(dto *WorkspaceConfigEntity, query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
 	Upsert         func(dto *WorkspaceConfigEntity, query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceConfigEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*WorkspaceConfigEntity, query fireback.QueryDSL) ([]*WorkspaceConfigEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError)
@@ -284,7 +284,7 @@ var WorkspaceConfigActions workspaceConfigActionsSig = workspaceConfigActionsSig
 	Update:         WorkspaceConfigActionUpdateFn,
 	Create:         WorkspaceConfigActionCreateFn,
 	Upsert:         WorkspaceConfigActionUpsertFn,
-	Remove:         WorkspaceConfigActionRemoveFn,
+	RemoveEnqueue:  WorkspaceConfigActionRemoveEnqueueFn,
 	SeederInit:     WorkspaceConfigActionSeederInitFn,
 	MultiInsert:    WorkspaceConfigMultiInsertFn,
 	GetOne:         WorkspaceConfigActionGetOneFn,
@@ -385,17 +385,6 @@ func WorkspaceConfigActionSeederInitFn() *WorkspaceConfigEntity {
 	return entity
 }
 func WorkspaceConfigAssociationCreate(dto *WorkspaceConfigEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func WorkspaceConfigRelationContentCreate(dto *WorkspaceConfigEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func WorkspaceConfigRelationContentUpdate(dto *WorkspaceConfigEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func WorkspaceConfigPolyglotUpdateHandler(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
@@ -538,8 +527,6 @@ func WorkspaceConfigActionCreateFn(dto *WorkspaceConfigEntity, query fireback.Qu
 	WorkspaceConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceConfigEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	WorkspaceConfigRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -644,7 +631,6 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	WorkspaceConfigRelationContentUpdate(fields, query)
 	WorkspaceConfigPolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceConfigDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -717,10 +703,10 @@ var WorkspaceConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceConfigActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func WorkspaceConfigActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceConfigEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE}
-	return fireback.RemoveEntity[WorkspaceConfigEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[WorkspaceConfigEntity](req, query, refl)
 }
 func WorkspaceConfigActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1379,7 +1365,7 @@ var WorkspaceConfigCliCommands []cli.Command = []cli.Command{
 	WorkspaceConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceConfigEntity{}).Elem(),
-		WorkspaceConfigActions.Remove,
+		WorkspaceConfigActions.RemoveEnqueue,
 	),
 }
 
@@ -1590,10 +1576,9 @@ var WORKSPACE_CONFIG_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "WorkspaceConfigEntity",
 	},
 }
-var WORKSPACE_CONFIG_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/workspace-config",
-	Format: "DELETE_DSL",
+var WORKSPACE_CONFIG_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/workspace-config-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CONFIG_DELETE},
 		ResolveStrategy: "workspace",
@@ -1601,12 +1586,12 @@ var WORKSPACE_CONFIG_ACTION_DELETE = fireback.Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, WorkspaceConfigActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, WorkspaceConfigActions.RemoveEnqueue)
 		},
 	},
-	Action:         WorkspaceConfigActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         WorkspaceConfigActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &WorkspaceConfigEntity{},
 }
 var WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
@@ -1668,7 +1653,7 @@ func GetWorkspaceConfigModule3Actions() []fireback.Module3Action {
 		WORKSPACE_CONFIG_ACTION_POST_ONE,
 		WORKSPACE_CONFIG_ACTION_PATCH,
 		WORKSPACE_CONFIG_ACTION_PATCH_BULK,
-		WORKSPACE_CONFIG_ACTION_DELETE,
+		WORKSPACE_CONFIG_ACTION_DELETE_ENQUEUE,
 		WORKSPACE_CONFIG_ACTION_DISTINCT_PATCH_ONE,
 		WORKSPACE_CONFIG_ACTION_DISTINCT_GET_ONE,
 	}

@@ -1,9 +1,9 @@
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { columns } from "./RegionalContentColumns";
+import { useS } from "@/modules/fireback/hooks/useS";
 import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
 import { useGetRegionalContents } from "@/modules/fireback/sdk/modules/abac/useGetRegionalContents";
-import { useDeleteRegionalContent } from "@/modules/fireback/sdk/modules/abac/useDeleteRegionalContent";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { usePostRegionalContentRemove } from "@/modules/fireback/sdk/modules/abac/usePostRegionalContentRemove";
+import { columns } from "./RegionalContentColumns";
 import { strings } from "./strings/translations";
 export const RegionalContentList = () => {
   const s = useS(strings);
@@ -15,7 +15,7 @@ export const RegionalContentList = () => {
         uniqueIdHrefHandler={(uniqueId: string) =>
           RegionalContentEntity.Navigation.single(uniqueId)
         }
-        deleteHook={useDeleteRegionalContent}
+        deleteHook={usePostRegionalContentRemove}
       ></CommonListManager>
     </>
   );

@@ -193,7 +193,7 @@ type emailConfirmationActionsSig struct {
 	Create         func(dto *EmailConfirmationEntity, query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
 	Upsert         func(dto *EmailConfirmationEntity, query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
 	SeederInit     func() *EmailConfirmationEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*EmailConfirmationEntity, *fireback.IError)
@@ -204,7 +204,7 @@ var EmailConfirmationActions emailConfirmationActionsSig = emailConfirmationActi
 	Update:         EmailConfirmationActionUpdateFn,
 	Create:         EmailConfirmationActionCreateFn,
 	Upsert:         EmailConfirmationActionUpsertFn,
-	Remove:         EmailConfirmationActionRemoveFn,
+	RemoveEnqueue:  EmailConfirmationActionRemoveEnqueueFn,
 	SeederInit:     EmailConfirmationActionSeederInitFn,
 	MultiInsert:    EmailConfirmationMultiInsertFn,
 	GetOne:         EmailConfirmationActionGetOneFn,
@@ -295,17 +295,6 @@ func EmailConfirmationActionSeederInitFn() *EmailConfirmationEntity {
 	return entity
 }
 func EmailConfirmationAssociationCreate(dto *EmailConfirmationEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func EmailConfirmationRelationContentCreate(dto *EmailConfirmationEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func EmailConfirmationRelationContentUpdate(dto *EmailConfirmationEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func EmailConfirmationPolyglotUpdateHandler(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
@@ -438,8 +427,6 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query firebac
 	EmailConfirmationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailConfirmationEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	EmailConfirmationRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -544,7 +531,6 @@ func EmailConfirmationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	EmailConfirmationRelationContentUpdate(fields, query)
 	EmailConfirmationPolyglotUpdateHandler(fields, query)
 	if ero := EmailConfirmationDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -615,10 +601,10 @@ var EmailConfirmationWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func EmailConfirmationActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func EmailConfirmationActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&EmailConfirmationEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}
-	return fireback.RemoveEntity[EmailConfirmationEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[EmailConfirmationEntity](req, query, refl)
 }
 func EmailConfirmationActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1155,7 +1141,7 @@ var EmailConfirmationCliCommands []cli.Command = []cli.Command{
 	EmailConfirmationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
-		EmailConfirmationActions.Remove,
+		EmailConfirmationActions.RemoveEnqueue,
 	),
 }
 
@@ -1354,21 +1340,20 @@ var EMAIL_CONFIRMATION_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "EmailConfirmationEntity",
 	},
 }
-var EMAIL_CONFIRMATION_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/email-confirmation",
-	Format: "DELETE_DSL",
+var EMAIL_CONFIRMATION_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/email-confirmation-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, EmailConfirmationActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, EmailConfirmationActions.RemoveEnqueue)
 		},
 	},
-	Action:         EmailConfirmationActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         EmailConfirmationActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &EmailConfirmationEntity{},
 }
 
@@ -1386,7 +1371,7 @@ func GetEmailConfirmationModule3Actions() []fireback.Module3Action {
 		EMAIL_CONFIRMATION_ACTION_POST_ONE,
 		EMAIL_CONFIRMATION_ACTION_PATCH,
 		EMAIL_CONFIRMATION_ACTION_PATCH_BULK,
-		EMAIL_CONFIRMATION_ACTION_DELETE,
+		EMAIL_CONFIRMATION_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendEmailConfirmationRouter(&routes)

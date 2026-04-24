@@ -604,11 +604,9 @@ entities:
     - name: generalEmailProvider
       type: one
       target: EmailProviderEntity
-      allowCreate: false
     - name: generalGsmProvider
       type: one
       target: GsmProviderEntity
-      allowCreate: false
     - name: inviteToWorkspaceContent
       type: string
       gorm: text
@@ -715,7 +713,6 @@ entities:
       type: one
       target: WorkspaceEntity
       validate: required
-      allowCreate: false
     - name: firstName
       type: string
       validate: required
@@ -728,7 +725,6 @@ entities:
       type: one
       validate: required
       target: RoleEntity
-      allowCreate: false
 
   - name: pendingWorkspaceInvite
     fields:
@@ -743,7 +739,6 @@ entities:
     - name: role
       type: one
       target: RoleEntity
-      allowCreate: false
   - name: preference
     fields:
     - name: timezone
@@ -752,7 +747,6 @@ entities:
     fields:
     - name: user
       type: one
-      allowCreate: false
       target: UserEntity
     - name: validUntil
       type: string
@@ -862,7 +856,6 @@ entities:
     - name: capabilities
       type: collection
       target: CapabilityEntity
-      allowCreate: false
 
   - name: capability
     cliShort: cap
@@ -963,7 +956,6 @@ entities:
     fields:
     - name: user
       target: UserEntity
-      allowCreate: false
       type: one
     - name: status
       type: string
@@ -979,18 +971,15 @@ entities:
     fields:
     - name: role
       type: one
-      allowCreate: false
       target: RoleEntity
     - name: workspace
       type: one
-      allowCreate: false
       target: WorkspaceEntity
  
   - name: emailConfirmation
     fields:
     - name: user
       target: UserEntity
-      allowCreate: false
       type: one
     - name: status
       type: string
@@ -1053,12 +1042,10 @@ entities:
     fields:
     - name: user
       target: UserEntity
-      allowCreate: false
       type: one
       json: false
     - name: passport
       target: PassportEntity
-      allowCreate: false
       type: one
       json: false
     - name: status

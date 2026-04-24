@@ -241,7 +241,7 @@ type workspaceInviteActionsSig struct {
 	Create         func(dto *WorkspaceInviteEntity, query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
 	Upsert         func(dto *WorkspaceInviteEntity, query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceInviteEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*WorkspaceInviteEntity, query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceInviteEntity, *fireback.IError)
@@ -252,7 +252,7 @@ var WorkspaceInviteActions workspaceInviteActionsSig = workspaceInviteActionsSig
 	Update:         WorkspaceInviteActionUpdateFn,
 	Create:         WorkspaceInviteActionCreateFn,
 	Upsert:         WorkspaceInviteActionUpsertFn,
-	Remove:         WorkspaceInviteActionRemoveFn,
+	RemoveEnqueue:  WorkspaceInviteActionRemoveEnqueueFn,
 	SeederInit:     WorkspaceInviteActionSeederInitFn,
 	MultiInsert:    WorkspaceInviteMultiInsertFn,
 	GetOne:         WorkspaceInviteActionGetOneFn,
@@ -349,17 +349,6 @@ func WorkspaceInviteActionSeederInitFn() *WorkspaceInviteEntity {
 	return entity
 }
 func WorkspaceInviteAssociationCreate(dto *WorkspaceInviteEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func WorkspaceInviteRelationContentCreate(dto *WorkspaceInviteEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func WorkspaceInviteRelationContentUpdate(dto *WorkspaceInviteEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func WorkspaceInvitePolyglotUpdateHandler(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
@@ -498,8 +487,6 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query fireback.Qu
 	WorkspaceInviteEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceInviteEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	WorkspaceInviteRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -604,7 +591,6 @@ func WorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	WorkspaceInviteRelationContentUpdate(fields, query)
 	WorkspaceInvitePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceInviteDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -675,10 +661,10 @@ var WorkspaceInviteWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceInviteActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func WorkspaceInviteActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceInviteEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}
-	return fireback.RemoveEntity[WorkspaceInviteEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[WorkspaceInviteEntity](req, query, refl)
 }
 func WorkspaceInviteActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1317,7 +1303,7 @@ var WorkspaceInviteCliCommands []cli.Command = []cli.Command{
 	WorkspaceInviteCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceInviteEntity{}).Elem(),
-		WorkspaceInviteActions.Remove,
+		WorkspaceInviteActions.RemoveEnqueue,
 	),
 }
 
@@ -1517,21 +1503,20 @@ var WORKSPACE_INVITE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "WorkspaceInviteEntity",
 	},
 }
-var WORKSPACE_INVITE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/workspace-invite",
-	Format: "DELETE_DSL",
+var WORKSPACE_INVITE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/workspace-invite-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, WorkspaceInviteActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, WorkspaceInviteActions.RemoveEnqueue)
 		},
 	},
-	Action:         WorkspaceInviteActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         WorkspaceInviteActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &WorkspaceInviteEntity{},
 }
 
@@ -1549,7 +1534,7 @@ func GetWorkspaceInviteModule3Actions() []fireback.Module3Action {
 		WORKSPACE_INVITE_ACTION_POST_ONE,
 		WORKSPACE_INVITE_ACTION_PATCH,
 		WORKSPACE_INVITE_ACTION_PATCH_BULK,
-		WORKSPACE_INVITE_ACTION_DELETE,
+		WORKSPACE_INVITE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendWorkspaceInviteRouter(&routes)

@@ -1,9 +1,9 @@
-import { useT } from "@/modules/fireback/hooks/useT";
-import { columns } from "./WorkspaceInviteColumns";
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { useT } from "@/modules/fireback/hooks/useT";
 import { useGetWorkspaceInvites } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceInvites";
+import { usePostWorkspaceInviteRemove } from "@/modules/fireback/sdk/modules/abac/usePostWorkspaceInviteRemove";
 import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
-import { useDeleteWorkspaceInvite } from "@/modules/fireback/sdk/modules/abac/useDeleteWorkspaceInvite";
+import { columns } from "./WorkspaceInviteColumns";
 
 export const WorkspaceInviteList = () => {
   const t = useT();
@@ -16,7 +16,7 @@ export const WorkspaceInviteList = () => {
         uniqueIdHrefHandler={(uniqueId: string) =>
           WorkspaceInviteEntity.Navigation.single(uniqueId)
         }
-        deleteHook={useDeleteWorkspaceInvite}
+        deleteHook={usePostWorkspaceInviteRemove}
       ></CommonListManager>
     </>
   );

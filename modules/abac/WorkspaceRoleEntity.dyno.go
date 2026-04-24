@@ -177,7 +177,7 @@ type workspaceRoleActionsSig struct {
 	Create         func(dto *WorkspaceRoleEntity, query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
 	Upsert         func(dto *WorkspaceRoleEntity, query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
 	SeederInit     func() *WorkspaceRoleEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*WorkspaceRoleEntity, query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*WorkspaceRoleEntity, *fireback.IError)
@@ -188,7 +188,7 @@ var WorkspaceRoleActions workspaceRoleActionsSig = workspaceRoleActionsSig{
 	Update:         WorkspaceRoleActionUpdateFn,
 	Create:         WorkspaceRoleActionCreateFn,
 	Upsert:         WorkspaceRoleActionUpsertFn,
-	Remove:         WorkspaceRoleActionRemoveFn,
+	RemoveEnqueue:  WorkspaceRoleActionRemoveEnqueueFn,
 	SeederInit:     WorkspaceRoleActionSeederInitFn,
 	MultiInsert:    WorkspaceRoleMultiInsertFn,
 	GetOne:         WorkspaceRoleActionGetOneFn,
@@ -276,17 +276,6 @@ func WorkspaceRoleActionSeederInitFn() *WorkspaceRoleEntity {
 	return entity
 }
 func WorkspaceRoleAssociationCreate(dto *WorkspaceRoleEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func WorkspaceRoleRelationContentCreate(dto *WorkspaceRoleEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func WorkspaceRoleRelationContentUpdate(dto *WorkspaceRoleEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func WorkspaceRolePolyglotUpdateHandler(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
@@ -416,8 +405,6 @@ func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query fireback.QueryD
 	WorkspaceRoleEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceRoleEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	WorkspaceRoleRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -522,7 +509,6 @@ func WorkspaceRoleUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Wo
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	WorkspaceRoleRelationContentUpdate(fields, query)
 	WorkspaceRolePolyglotUpdateHandler(fields, query)
 	if ero := WorkspaceRoleDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -593,10 +579,10 @@ var WorkspaceRoleWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WorkspaceRoleActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func WorkspaceRoleActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&WorkspaceRoleEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}
-	return fireback.RemoveEntity[WorkspaceRoleEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[WorkspaceRoleEntity](req, query, refl)
 }
 func WorkspaceRoleActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1061,7 +1047,7 @@ var WorkspaceRoleCliCommands []cli.Command = []cli.Command{
 	WorkspaceRoleCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceRoleEntity{}).Elem(),
-		WorkspaceRoleActions.Remove,
+		WorkspaceRoleActions.RemoveEnqueue,
 	),
 }
 
@@ -1261,21 +1247,20 @@ var WORKSPACE_ROLE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "WorkspaceRoleEntity",
 	},
 }
-var WORKSPACE_ROLE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/workspace-role",
-	Format: "DELETE_DSL",
+var WORKSPACE_ROLE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/workspace-role-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, WorkspaceRoleActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, WorkspaceRoleActions.RemoveEnqueue)
 		},
 	},
-	Action:         WorkspaceRoleActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         WorkspaceRoleActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &WorkspaceRoleEntity{},
 }
 
@@ -1293,7 +1278,7 @@ func GetWorkspaceRoleModule3Actions() []fireback.Module3Action {
 		WORKSPACE_ROLE_ACTION_POST_ONE,
 		WORKSPACE_ROLE_ACTION_PATCH,
 		WORKSPACE_ROLE_ACTION_PATCH_BULK,
-		WORKSPACE_ROLE_ACTION_DELETE,
+		WORKSPACE_ROLE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendWorkspaceRoleRouter(&routes)

@@ -169,7 +169,7 @@ type backupTableMetaActionsSig struct {
 	Create         func(dto *BackupTableMetaEntity, query fireback.QueryDSL) (*BackupTableMetaEntity, *fireback.IError)
 	Upsert         func(dto *BackupTableMetaEntity, query fireback.QueryDSL) (*BackupTableMetaEntity, *fireback.IError)
 	SeederInit     func() *BackupTableMetaEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*BackupTableMetaEntity, query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*BackupTableMetaEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*BackupTableMetaEntity, *fireback.IError)
@@ -180,7 +180,7 @@ var BackupTableMetaActions backupTableMetaActionsSig = backupTableMetaActionsSig
 	Update:         BackupTableMetaActionUpdateFn,
 	Create:         BackupTableMetaActionCreateFn,
 	Upsert:         BackupTableMetaActionUpsertFn,
-	Remove:         BackupTableMetaActionRemoveFn,
+	RemoveEnqueue:  BackupTableMetaActionRemoveEnqueueFn,
 	SeederInit:     BackupTableMetaActionSeederInitFn,
 	MultiInsert:    BackupTableMetaMultiInsertFn,
 	GetOne:         BackupTableMetaActionGetOneFn,
@@ -267,17 +267,6 @@ func BackupTableMetaActionSeederInitFn() *BackupTableMetaEntity {
 	return entity
 }
 func BackupTableMetaAssociationCreate(dto *BackupTableMetaEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func BackupTableMetaRelationContentCreate(dto *BackupTableMetaEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func BackupTableMetaRelationContentUpdate(dto *BackupTableMetaEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func BackupTableMetaPolyglotUpdateHandler(dto *BackupTableMetaEntity, query fireback.QueryDSL) {
@@ -406,8 +395,6 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query fireback.Qu
 	BackupTableMetaEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	BackupTableMetaEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	BackupTableMetaRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -512,7 +499,6 @@ func BackupTableMetaUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	BackupTableMetaRelationContentUpdate(fields, query)
 	BackupTableMetaPolyglotUpdateHandler(fields, query)
 	if ero := BackupTableMetaDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -583,10 +569,10 @@ var BackupTableMetaWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func BackupTableMetaActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func BackupTableMetaActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&BackupTableMetaEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_DELETE}
-	return fireback.RemoveEntity[BackupTableMetaEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[BackupTableMetaEntity](req, query, refl)
 }
 func BackupTableMetaActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1047,7 +1033,7 @@ var BackupTableMetaCliCommands []cli.Command = []cli.Command{
 	BackupTableMetaCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
-		BackupTableMetaActions.Remove,
+		BackupTableMetaActions.RemoveEnqueue,
 	),
 }
 
@@ -1246,21 +1232,20 @@ var BACKUP_TABLE_META_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "BackupTableMetaEntity",
 	},
 }
-var BACKUP_TABLE_META_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/backup-table-meta",
-	Format: "DELETE_DSL",
+var BACKUP_TABLE_META_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/backup-table-meta-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, BackupTableMetaActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, BackupTableMetaActions.RemoveEnqueue)
 		},
 	},
-	Action:         BackupTableMetaActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         BackupTableMetaActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &BackupTableMetaEntity{},
 }
 
@@ -1278,7 +1263,7 @@ func GetBackupTableMetaModule3Actions() []fireback.Module3Action {
 		BACKUP_TABLE_META_ACTION_POST_ONE,
 		BACKUP_TABLE_META_ACTION_PATCH,
 		BACKUP_TABLE_META_ACTION_PATCH_BULK,
-		BACKUP_TABLE_META_ACTION_DELETE,
+		BACKUP_TABLE_META_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendBackupTableMetaRouter(&routes)

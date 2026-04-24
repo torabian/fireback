@@ -11,7 +11,7 @@ export function useReindexedContent(udf: Udf) {
   const reindex = (
     rows: Array<any>,
     jsonQueryKey: string,
-    onKeyChange?: () => void
+    onKeyChange?: () => void,
   ) => {
     if (jsonQueryKey === previousQuery.current) {
       const toAdd = rows.filter((row) => {
@@ -31,5 +31,12 @@ export function useReindexedContent(udf: Udf) {
     previousQuery.current = jsonQueryKey;
   };
 
-  return { reindex, indexedData };
+  const deleteViaUniqueIds = (ids: string[]) => {
+    setIndexedData((items) =>
+      items.filter((item) => !ids.includes(item.uniqueId)),
+    );
+    previousQuery.current = "";
+  };
+
+  return { reindex, indexedData, deleteViaUniqueIds };
 }

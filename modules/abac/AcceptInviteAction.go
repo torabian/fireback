@@ -57,7 +57,10 @@ func AcceptInviteAction(c AcceptInviteActionRequest, q fireback.QueryDSL) (*Acce
 
 		q.UniqueId = req.InvitationUniqueId
 		q.Query = "unique_id = " + q.UniqueId
-		_, errRemove := WorkspaceInviteActions.Remove(q)
+		_, errRemove := WorkspaceInviteActions.RemoveEnqueue(fireback.DeleteRequest{
+			Query:          "unique_id = " + q.UniqueId,
+			ForceImmediate: true,
+		}, q)
 
 		if errRemove != nil {
 			return errRemove

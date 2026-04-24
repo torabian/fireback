@@ -193,7 +193,7 @@ type userWorkspaceActionsSig struct {
 	Create         func(dto *UserWorkspaceEntity, query fireback.QueryDSL) (*UserWorkspaceEntity, *fireback.IError)
 	Upsert         func(dto *UserWorkspaceEntity, query fireback.QueryDSL) (*UserWorkspaceEntity, *fireback.IError)
 	SeederInit     func() *UserWorkspaceEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*UserWorkspaceEntity, query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*UserWorkspaceEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*UserWorkspaceEntity, *fireback.IError)
@@ -204,7 +204,7 @@ var UserWorkspaceActions userWorkspaceActionsSig = userWorkspaceActionsSig{
 	Update:         UserWorkspaceActionUpdateFn,
 	Create:         UserWorkspaceActionCreateFn,
 	Upsert:         UserWorkspaceActionUpsertFn,
-	Remove:         UserWorkspaceActionRemoveFn,
+	RemoveEnqueue:  UserWorkspaceActionRemoveEnqueueFn,
 	SeederInit:     UserWorkspaceActionSeederInitFn,
 	MultiInsert:    UserWorkspaceMultiInsertFn,
 	GetOne:         UserWorkspaceActionGetOneFn,
@@ -295,17 +295,6 @@ func UserWorkspaceActionSeederInitFn() *UserWorkspaceEntity {
 	return entity
 }
 func UserWorkspaceAssociationCreate(dto *UserWorkspaceEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func UserWorkspaceRelationContentCreate(dto *UserWorkspaceEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func UserWorkspaceRelationContentUpdate(dto *UserWorkspaceEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func UserWorkspacePolyglotUpdateHandler(dto *UserWorkspaceEntity, query fireback.QueryDSL) {
@@ -438,8 +427,6 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query fireback.QueryD
 	UserWorkspaceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserWorkspaceEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	UserWorkspaceRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -544,7 +531,6 @@ func UserWorkspaceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Us
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	UserWorkspaceRelationContentUpdate(fields, query)
 	UserWorkspacePolyglotUpdateHandler(fields, query)
 	if ero := UserWorkspaceDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -616,10 +602,10 @@ var UserWorkspaceWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func UserWorkspaceActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func UserWorkspaceActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&UserWorkspaceEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE}
-	return fireback.RemoveEntity[UserWorkspaceEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[UserWorkspaceEntity](req, query, refl)
 }
 func UserWorkspaceActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1088,7 +1074,7 @@ var UserWorkspaceCliCommands []cli.Command = []cli.Command{
 	UserWorkspaceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
-		UserWorkspaceActions.Remove,
+		UserWorkspaceActions.RemoveEnqueue,
 	),
 }
 
@@ -1294,22 +1280,21 @@ var USER_WORKSPACE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "UserWorkspaceEntity",
 	},
 }
-var USER_WORKSPACE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/user-workspace",
-	Format: "DELETE_DSL",
+var USER_WORKSPACE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/user-workspace-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE},
 		ResolveStrategy: "user",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, UserWorkspaceActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, UserWorkspaceActions.RemoveEnqueue)
 		},
 	},
-	Action:         UserWorkspaceActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         UserWorkspaceActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &UserWorkspaceEntity{},
 }
 
@@ -1327,7 +1312,7 @@ func GetUserWorkspaceModule3Actions() []fireback.Module3Action {
 		USER_WORKSPACE_ACTION_POST_ONE,
 		USER_WORKSPACE_ACTION_PATCH,
 		USER_WORKSPACE_ACTION_PATCH_BULK,
-		USER_WORKSPACE_ACTION_DELETE,
+		USER_WORKSPACE_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendUserWorkspaceRouter(&routes)

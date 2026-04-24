@@ -48,9 +48,13 @@ var AppMenuTests = []fireback.Test{
 			assert.Nil(t, err2, "There should be no error while updating the menu item")
 			assert.Equal(t, 3, len(menuUpdated1.Translations), "There has to be now 3 items")
 
-			affected, err3 := AppMenuActions.Remove(fireback.QueryDSL{
-				Query: "unique_id = " + menuUpdated1.UniqueId,
-			})
+			affected, err3 := AppMenuActions.RemoveEnqueue(
+				fireback.DeleteRequest{
+					Query:          "unique_id = " + menuUpdated1.UniqueId,
+					ForceImmediate: true,
+				},
+				fireback.QueryDSL{},
+			)
 
 			assert.Nil(t, err3, "There should be no issue while deleting app menu")
 			assert.Equal(t, int64(1), affected, "Only one row has to be deleted")

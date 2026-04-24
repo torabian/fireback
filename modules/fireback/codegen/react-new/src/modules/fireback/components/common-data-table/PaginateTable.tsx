@@ -24,8 +24,17 @@ export function PaginateTable({
   udf,
   tableClass,
   uniqueIdHrefHandler,
+  reindex,
+  indexedData,
 }: {
   rows: any[];
+  indexedData: any[];
+  reindex: (
+    rows: any[],
+    jsonQueryKey: string,
+    onKeyChange?: () => void,
+  ) => void;
+
   columns: DatatableColumn[];
   booleanColumns?: string[];
   permissions?: string[];
@@ -70,12 +79,11 @@ export function PaginateTable({
         udf,
         columnSizes,
         uniqueIdHrefHandler,
-        pathname
+        pathname,
       ),
     ];
   }, [columns, columnSizes]);
 
-  const { indexedData, reindex } = useReindexedContent(udf);
   const ref = useRef<DataGridHandle>();
 
   useEffect(() => {
@@ -102,7 +110,7 @@ export function PaginateTable({
 
       onColumnWidthsChange(newSizes);
     },
-    300
+    300,
   );
 
   return (

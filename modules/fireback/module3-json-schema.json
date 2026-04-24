@@ -1095,10 +1095,6 @@
           "type": "boolean",
           "description": "It would skip the sanitization for html field types allowing store anything as htm"
         },
-        "allowCreate": {
-          "type": "boolean",
-          "description": "Allow create is a useful option to set true if the type one or collection could be allowed to crea"
-        },
         "module": {
           "type": "string",
           "description": "When using one or collection types you need to set the module name here to import tha"

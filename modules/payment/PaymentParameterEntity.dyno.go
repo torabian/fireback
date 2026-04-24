@@ -240,7 +240,7 @@ type paymentParameterActionsSig struct {
 	Create         func(dto *PaymentParameterEntity, query fireback.QueryDSL) (*PaymentParameterEntity, *fireback.IError)
 	Upsert         func(dto *PaymentParameterEntity, query fireback.QueryDSL) (*PaymentParameterEntity, *fireback.IError)
 	SeederInit     func() *PaymentParameterEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PaymentParameterEntity, query fireback.QueryDSL) ([]*PaymentParameterEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PaymentParameterEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PaymentParameterEntity, *fireback.IError)
@@ -251,7 +251,7 @@ var PaymentParameterActions paymentParameterActionsSig = paymentParameterActions
 	Update:         PaymentParameterActionUpdateFn,
 	Create:         PaymentParameterActionCreateFn,
 	Upsert:         PaymentParameterActionUpsertFn,
-	Remove:         PaymentParameterActionRemoveFn,
+	RemoveEnqueue:  PaymentParameterActionRemoveEnqueueFn,
 	SeederInit:     PaymentParameterActionSeederInitFn,
 	MultiInsert:    PaymentParameterMultiInsertFn,
 	GetOne:         PaymentParameterActionGetOneFn,
@@ -348,17 +348,6 @@ func PaymentParameterActionSeederInitFn() *PaymentParameterEntity {
 	return entity
 }
 func PaymentParameterAssociationCreate(dto *PaymentParameterEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PaymentParameterRelationContentCreate(dto *PaymentParameterEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PaymentParameterRelationContentUpdate(dto *PaymentParameterEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PaymentParameterPolyglotUpdateHandler(dto *PaymentParameterEntity, query fireback.QueryDSL) {
@@ -497,8 +486,6 @@ func PaymentParameterActionCreateFn(dto *PaymentParameterEntity, query fireback.
 	PaymentParameterEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PaymentParameterEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PaymentParameterRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -603,7 +590,6 @@ func PaymentParameterUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields 
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PaymentParameterRelationContentUpdate(fields, query)
 	PaymentParameterPolyglotUpdateHandler(fields, query)
 	if ero := PaymentParameterDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -675,10 +661,10 @@ var PaymentParameterWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PaymentParameterActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PaymentParameterActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PaymentParameterEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PAYMENT_PARAMETER_DELETE}
-	return fireback.RemoveEntity[PaymentParameterEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PaymentParameterEntity](req, query, refl)
 }
 func PaymentParameterActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1361,7 +1347,7 @@ var PaymentParameterCliCommands []cli.Command = []cli.Command{
 	PaymentParameterCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
-		PaymentParameterActions.Remove,
+		PaymentParameterActions.RemoveEnqueue,
 	),
 }
 
@@ -1563,22 +1549,21 @@ var PAYMENT_PARAMETER_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PaymentParameterEntity",
 	},
 }
-var PAYMENT_PARAMETER_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/payment-parameter",
-	Format: "DELETE_DSL",
+var PAYMENT_PARAMETER_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/payment-parameter-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PAYMENT_PARAMETER_DELETE},
 		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PaymentParameterActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PaymentParameterActions.RemoveEnqueue)
 		},
 	},
-	Action:         PaymentParameterActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PaymentParameterActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PaymentParameterEntity{},
 }
 var PAYMENT_PARAMETER_ACTION_DISTINCT_PATCH_ONE = fireback.Module3Action{
@@ -1637,7 +1622,7 @@ func GetPaymentParameterModule3Actions() []fireback.Module3Action {
 		PAYMENT_PARAMETER_ACTION_POST_ONE,
 		PAYMENT_PARAMETER_ACTION_PATCH,
 		PAYMENT_PARAMETER_ACTION_PATCH_BULK,
-		PAYMENT_PARAMETER_ACTION_DELETE,
+		PAYMENT_PARAMETER_ACTION_DELETE_ENQUEUE,
 		PAYMENT_PARAMETER_ACTION_DISTINCT_PATCH_ONE,
 		PAYMENT_PARAMETER_ACTION_DISTINCT_GET_ONE,
 	}

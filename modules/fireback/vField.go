@@ -42,9 +42,6 @@ type Module3Field struct {
 	// It would skip the sanitization for html field types allowing store anything as html
 	Unsafe bool `yaml:"unsafe,omitempty" json:"unsafe,omitempty" jsonschema:"description=It would skip the sanitization for html field types allowing store anything as htm"`
 
-	// Allow create is a useful option to set true if the type one or collection could be allowed to create entities on target table.
-	AllowCreate bool `yaml:"allowCreate,omitempty" json:"allowCreate,omitempty" jsonschema:"description=Allow create is a useful option to set true if the type one or collection could be allowed to crea"`
-
 	// When using one or collection types you need to set the module name here to import that in generated go file.
 	Module string `yaml:"module,omitempty" json:"module,omitempty" jsonschema:"description=When using one or collection types you need to set the module name here to import tha"`
 

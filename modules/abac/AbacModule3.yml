@@ -911,11 +911,9 @@ entities:
       - name: generalEmailProvider
         type: one
         target: EmailProviderEntity
-        allowCreate: false
       - name: generalGsmProvider
         type: one
         target: GsmProviderEntity
-        allowCreate: false
       - name: inviteToWorkspaceContent
         type: string
         gorm: text
@@ -1062,7 +1060,6 @@ entities:
       - name: workspace
         type: one
         target: WorkspaceEntity
-        allowCreate: false
         description: Workspace which user is being invite to.
       - name: firstName
         type: string
@@ -1083,7 +1080,6 @@ entities:
         description: The role which invitee get if they accept the request.
         validate: required
         target: RoleEntity
-        allowCreate: false
         fields: []
   - name: pendingWorkspaceInvite
     fields:
@@ -1098,7 +1094,6 @@ entities:
       - name: role
         type: one
         target: RoleEntity
-        allowCreate: false
         fields: []
   - name: preference
     fields:
@@ -1113,7 +1108,6 @@ entities:
     fields:
       - name: user
         type: one
-        allowCreate: false
         target: UserEntity
         fields: []
       - name: token
@@ -1277,7 +1271,6 @@ entities:
       - name: capabilities
         type: collection
         target: CapabilityEntity
-        allowCreate: false
         module: fireback
   - name: workspaceConfig
     cliName: config
@@ -1347,7 +1340,6 @@ entities:
       - name: generalEmailProvider
         type: one
         target: EmailProviderEntity
-        allowCreate: false
         description:
           Email provider service, which will be used to send the messages using it's service. It doesn't
           affect the message content, rather, you can choose via which third-party service, or even your own
@@ -1356,25 +1348,21 @@ entities:
       - name: generalGsmProvider
         type: one
         target: GsmProviderEntity
-        allowCreate: false
         description: General service which would be used to send text messages (sms) using it's services or API.
 
       - name: inviteToWorkspaceContent
         type: one
         target: RegionalContentEntity
-        allowCreate: false
         description: This template would be used, as default when a user is inviting a third-party into their own workspace.
 
       - name: emailOtpContent
         type: one
         target: RegionalContentEntity
-        allowCreate: false
         description: Upon one time password request for email, the content will be read to fill the message which will go to user.
 
       - name: smsOtpContent
         type: one
         target: RegionalContentEntity
-        allowCreate: false
         description: Upon OTP text messages, this template will be used to create such text message, including the one time password code.
 
   - name: gsmProvider
@@ -1495,7 +1483,6 @@ entities:
     fields:
       - name: user
         target: UserEntity
-        allowCreate: false
         type: one
         fields: []
       - name: status
@@ -1511,18 +1498,15 @@ entities:
     fields:
       - name: role
         type: one
-        allowCreate: false
         target: RoleEntity
       - name: workspace
         type: one
-        allowCreate: false
         target: WorkspaceEntity
         fields: []
   - name: emailConfirmation
     fields:
       - name: user
         target: UserEntity
-        allowCreate: false
         type: one
         fields: []
       - name: status
@@ -1624,7 +1608,6 @@ entities:
     fields:
       - name: user
         target: UserEntity
-        allowCreate: false
         type: one
       - name: totpSecret
         type: string
@@ -1636,7 +1619,6 @@ entities:
         description: The url which will be converted into QR code on client side to scan
       - name: passport
         target: PassportEntity
-        allowCreate: false
         type: one
         fields: []
       - name: sessionSecret

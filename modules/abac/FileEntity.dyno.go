@@ -273,7 +273,7 @@ type fileActionsSig struct {
 	Create         func(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, *fireback.IError)
 	Upsert         func(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, *fireback.IError)
 	SeederInit     func() *FileEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*FileEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*FileEntity, *fireback.IError)
@@ -284,7 +284,7 @@ var FileActions fileActionsSig = fileActionsSig{
 	Update:         FileActionUpdateFn,
 	Create:         FileActionCreateFn,
 	Upsert:         FileActionUpsertFn,
-	Remove:         FileActionRemoveFn,
+	RemoveEnqueue:  FileActionRemoveEnqueueFn,
 	SeederInit:     FileActionSeederInitFn,
 	MultiInsert:    FileMultiInsertFn,
 	GetOne:         FileActionGetOneFn,
@@ -431,17 +431,6 @@ func FileActionSeederInitFn() *FileEntity {
 func FileAssociationCreate(dto *FileEntity, query fireback.QueryDSL) error {
 	return nil
 }
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func FileRelationContentCreate(dto *FileEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func FileRelationContentUpdate(dto *FileEntity, query fireback.QueryDSL) error {
-	return nil
-}
 func FilePolyglotUpdateHandler(dto *FileEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
@@ -584,8 +573,6 @@ func FileActionCreateFn(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, 
 	FileEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	FileEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	FileRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -690,7 +677,6 @@ func FileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *FileEntity)
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	FileRelationContentUpdate(fields, query)
 	FilePolyglotUpdateHandler(fields, query)
 	if ero := FileDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -772,10 +758,10 @@ var FileWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func FileActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func FileActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&FileEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_FILE_DELETE}
-	return fireback.RemoveEntity[FileEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[FileEntity](req, query, refl)
 }
 func FileActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1361,7 +1347,7 @@ var FileCliCommands []cli.Command = []cli.Command{
 	FileCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&FileEntity{}).Elem(),
-		FileActions.Remove,
+		FileActions.RemoveEnqueue,
 	),
 }
 
@@ -1560,21 +1546,20 @@ var FILE_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "FileEntity",
 	},
 }
-var FILE_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/file",
-	Format: "DELETE_DSL",
+var FILE_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/file-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_FILE_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, FileActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, FileActions.RemoveEnqueue)
 		},
 	},
-	Action:         FileActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         FileActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &FileEntity{},
 }
 var FILE_VARIATIONS_ACTION_PATCH = fireback.Module3Action{
@@ -1660,7 +1645,7 @@ func GetFileModule3Actions() []fireback.Module3Action {
 		FILE_ACTION_POST_ONE,
 		FILE_ACTION_PATCH,
 		FILE_ACTION_PATCH_BULK,
-		FILE_ACTION_DELETE,
+		FILE_ACTION_DELETE_ENQUEUE,
 		FILE_VARIATIONS_ACTION_PATCH,
 		FILE_VARIATIONS_ACTION_GET,
 		FILE_VARIATIONS_ACTION_POST,

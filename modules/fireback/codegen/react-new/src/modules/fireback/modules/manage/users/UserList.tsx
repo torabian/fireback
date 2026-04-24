@@ -3,10 +3,10 @@ import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useT } from "../../../hooks/useT";
 
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
-import { useDeleteUser } from "../../../sdk/modules/abac/useDeleteUser";
 import { useGetUsers } from "../../../sdk/modules/abac/useGetUsers";
 import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 import { columns } from "./UserColumns";
+import { usePostUserRemove } from "@/modules/fireback/sdk/modules/abac/usePostUserRemove";
 
 export const UserList = () => {
   const t = useT();
@@ -21,7 +21,7 @@ export const UserList = () => {
         uniqueIdHrefHandler={(uniqueId: string) =>
           UserEntity.Navigation.single(uniqueId)
         }
-        deleteHook={useDeleteUser}
+        deleteHook={usePostUserRemove}
       ></CommonListManager>
     </>
   );

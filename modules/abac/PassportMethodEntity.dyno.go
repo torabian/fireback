@@ -183,7 +183,7 @@ type passportMethodActionsSig struct {
 	Create         func(dto *PassportMethodEntity, query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
 	Upsert         func(dto *PassportMethodEntity, query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
 	SeederInit     func() *PassportMethodEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*PassportMethodEntity, *fireback.IError)
@@ -194,7 +194,7 @@ var PassportMethodActions passportMethodActionsSig = passportMethodActionsSig{
 	Update:         PassportMethodActionUpdateFn,
 	Create:         PassportMethodActionCreateFn,
 	Upsert:         PassportMethodActionUpsertFn,
-	Remove:         PassportMethodActionRemoveFn,
+	RemoveEnqueue:  PassportMethodActionRemoveEnqueueFn,
 	SeederInit:     PassportMethodActionSeederInitFn,
 	MultiInsert:    PassportMethodMultiInsertFn,
 	GetOne:         PassportMethodActionGetOneFn,
@@ -283,17 +283,6 @@ func PassportMethodActionSeederInitFn() *PassportMethodEntity {
 	return entity
 }
 func PassportMethodAssociationCreate(dto *PassportMethodEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func PassportMethodRelationContentCreate(dto *PassportMethodEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func PassportMethodRelationContentUpdate(dto *PassportMethodEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func PassportMethodPolyglotUpdateHandler(dto *PassportMethodEntity, query fireback.QueryDSL) {
@@ -424,8 +413,6 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query fireback.Quer
 	PassportMethodEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PassportMethodEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	PassportMethodRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -530,7 +517,6 @@ func PassportMethodUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *P
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	PassportMethodRelationContentUpdate(fields, query)
 	PassportMethodPolyglotUpdateHandler(fields, query)
 	if ero := PassportMethodDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -603,10 +589,10 @@ var PassportMethodWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func PassportMethodActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func PassportMethodActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&PassportMethodEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE}
-	return fireback.RemoveEntity[PassportMethodEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[PassportMethodEntity](req, query, refl)
 }
 func PassportMethodActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1066,7 +1052,7 @@ var PassportMethodCliCommands []cli.Command = []cli.Command{
 	PassportMethodCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
-		PassportMethodActions.Remove,
+		PassportMethodActions.RemoveEnqueue,
 	),
 }
 
@@ -1278,10 +1264,9 @@ var PASSPORT_METHOD_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "PassportMethodEntity",
 	},
 }
-var PASSPORT_METHOD_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/passport-method",
-	Format: "DELETE_DSL",
+var PASSPORT_METHOD_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/passport-method-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
 		ResolveStrategy: "workspace",
@@ -1289,12 +1274,12 @@ var PASSPORT_METHOD_ACTION_DELETE = fireback.Module3Action{
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, PassportMethodActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, PassportMethodActions.RemoveEnqueue)
 		},
 	},
-	Action:         PassportMethodActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         PassportMethodActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &PassportMethodEntity{},
 }
 
@@ -1312,7 +1297,7 @@ func GetPassportMethodModule3Actions() []fireback.Module3Action {
 		PASSPORT_METHOD_ACTION_POST_ONE,
 		PASSPORT_METHOD_ACTION_PATCH,
 		PASSPORT_METHOD_ACTION_PATCH_BULK,
-		PASSPORT_METHOD_ACTION_DELETE,
+		PASSPORT_METHOD_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendPassportMethodRouter(&routes)

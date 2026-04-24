@@ -213,7 +213,7 @@ type invoiceTransactionActionsSig struct {
 	Create         func(dto *InvoiceTransactionEntity, query fireback.QueryDSL) (*InvoiceTransactionEntity, *fireback.IError)
 	Upsert         func(dto *InvoiceTransactionEntity, query fireback.QueryDSL) (*InvoiceTransactionEntity, *fireback.IError)
 	SeederInit     func() *InvoiceTransactionEntity
-	Remove         func(query fireback.QueryDSL) (int64, *fireback.IError)
+	RemoveEnqueue  func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError)
 	MultiInsert    func(dtos []*InvoiceTransactionEntity, query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.IError)
 	GetOne         func(query fireback.QueryDSL) (*InvoiceTransactionEntity, *fireback.IError)
 	GetByWorkspace func(query fireback.QueryDSL) (*InvoiceTransactionEntity, *fireback.IError)
@@ -224,7 +224,7 @@ var InvoiceTransactionActions invoiceTransactionActionsSig = invoiceTransactionA
 	Update:         InvoiceTransactionActionUpdateFn,
 	Create:         InvoiceTransactionActionCreateFn,
 	Upsert:         InvoiceTransactionActionUpsertFn,
-	Remove:         InvoiceTransactionActionRemoveFn,
+	RemoveEnqueue:  InvoiceTransactionActionRemoveEnqueueFn,
 	SeederInit:     InvoiceTransactionActionSeederInitFn,
 	MultiInsert:    InvoiceTransactionMultiInsertFn,
 	GetOne:         InvoiceTransactionActionGetOneFn,
@@ -317,17 +317,6 @@ func InvoiceTransactionActionSeederInitFn() *InvoiceTransactionEntity {
 	return entity
 }
 func InvoiceTransactionAssociationCreate(dto *InvoiceTransactionEntity, query fireback.QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func InvoiceTransactionRelationContentCreate(dto *InvoiceTransactionEntity, query fireback.QueryDSL) error {
-	return nil
-}
-func InvoiceTransactionRelationContentUpdate(dto *InvoiceTransactionEntity, query fireback.QueryDSL) error {
 	return nil
 }
 func InvoiceTransactionPolyglotUpdateHandler(dto *InvoiceTransactionEntity, query fireback.QueryDSL) {
@@ -462,8 +451,6 @@ func InvoiceTransactionActionCreateFn(dto *InvoiceTransactionEntity, query fireb
 	InvoiceTransactionEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	InvoiceTransactionEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	InvoiceTransactionRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -568,7 +555,6 @@ func InvoiceTransactionUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, field
 		return nil, fireback.GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	InvoiceTransactionRelationContentUpdate(fields, query)
 	InvoiceTransactionPolyglotUpdateHandler(fields, query)
 	if ero := InvoiceTransactionDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -639,10 +625,10 @@ var InvoiceTransactionWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func InvoiceTransactionActionRemoveFn(query fireback.QueryDSL) (int64, *fireback.IError) {
+func InvoiceTransactionActionRemoveEnqueueFn(req fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
 	refl := reflect.ValueOf(&InvoiceTransactionEntity{})
 	query.ActionRequires = []fireback.PermissionInfo{PERM_ROOT_INVOICE_TRANSACTION_DELETE}
-	return fireback.RemoveEntity[InvoiceTransactionEntity](query, refl)
+	return fireback.RemoveEntityEnqueue[InvoiceTransactionEntity](req, query, refl)
 }
 func InvoiceTransactionActionWipeClean(query fireback.QueryDSL) (int64, error) {
 	var err error
@@ -1201,7 +1187,7 @@ var InvoiceTransactionCliCommands []cli.Command = []cli.Command{
 	InvoiceTransactionCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&InvoiceTransactionEntity{}).Elem(),
-		InvoiceTransactionActions.Remove,
+		InvoiceTransactionActions.RemoveEnqueue,
 	),
 }
 
@@ -1400,21 +1386,20 @@ var INVOICE_TRANSACTION_ACTION_PATCH_BULK = fireback.Module3Action{
 		Entity: "InvoiceTransactionEntity",
 	},
 }
-var INVOICE_TRANSACTION_ACTION_DELETE = fireback.Module3Action{
-	Method: "DELETE",
-	Url:    "/invoice-transaction",
-	Format: "DELETE_DSL",
+var INVOICE_TRANSACTION_ACTION_DELETE_ENQUEUE = fireback.Module3Action{
+	Method: "POST",
+	Url:    "/invoice-transaction-remove",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_INVOICE_TRANSACTION_DELETE},
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			fireback.HttpRemoveEntity(c, InvoiceTransactionActions.Remove)
+			fireback.HttpRemoveEnqueueEntity(c, InvoiceTransactionActions.RemoveEnqueue)
 		},
 	},
-	Action:         InvoiceTransactionActions.Remove,
-	RequestEntity:  &fireback.DeleteRequest{},
-	ResponseEntity: &fireback.DeleteResponse{},
+	Action:         InvoiceTransactionActions.RemoveEnqueue,
+	RequestEntity:  &fireback.DeleteRequestDto{},
+	ResponseEntity: &fireback.DeleteResponseDto{},
 	TargetEntity:   &InvoiceTransactionEntity{},
 }
 
@@ -1432,7 +1417,7 @@ func GetInvoiceTransactionModule3Actions() []fireback.Module3Action {
 		INVOICE_TRANSACTION_ACTION_POST_ONE,
 		INVOICE_TRANSACTION_ACTION_PATCH,
 		INVOICE_TRANSACTION_ACTION_PATCH_BULK,
-		INVOICE_TRANSACTION_ACTION_DELETE,
+		INVOICE_TRANSACTION_ACTION_DELETE_ENQUEUE,
 	}
 	// Append user defined functions
 	AppendInvoiceTransactionRouter(&routes)

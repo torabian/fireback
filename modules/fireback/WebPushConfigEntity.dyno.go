@@ -169,7 +169,7 @@ type webPushConfigActionsSig struct {
 	Create         func(dto *WebPushConfigEntity, query QueryDSL) (*WebPushConfigEntity, *IError)
 	Upsert         func(dto *WebPushConfigEntity, query QueryDSL) (*WebPushConfigEntity, *IError)
 	SeederInit     func() *WebPushConfigEntity
-	Remove         func(query QueryDSL) (int64, *IError)
+	RemoveEnqueue  func(request DeleteRequest, query QueryDSL) (*DeleteResponse, *IError)
 	MultiInsert    func(dtos []*WebPushConfigEntity, query QueryDSL) ([]*WebPushConfigEntity, *IError)
 	GetOne         func(query QueryDSL) (*WebPushConfigEntity, *IError)
 	GetByWorkspace func(query QueryDSL) (*WebPushConfigEntity, *IError)
@@ -180,7 +180,7 @@ var WebPushConfigActions webPushConfigActionsSig = webPushConfigActionsSig{
 	Update:         WebPushConfigActionUpdateFn,
 	Create:         WebPushConfigActionCreateFn,
 	Upsert:         WebPushConfigActionUpsertFn,
-	Remove:         WebPushConfigActionRemoveFn,
+	RemoveEnqueue:  WebPushConfigActionRemoveEnqueueFn,
 	SeederInit:     WebPushConfigActionSeederInitFn,
 	MultiInsert:    WebPushConfigMultiInsertFn,
 	GetOne:         WebPushConfigActionGetOneFn,
@@ -267,17 +267,6 @@ func WebPushConfigActionSeederInitFn() *WebPushConfigEntity {
 	return entity
 }
 func WebPushConfigAssociationCreate(dto *WebPushConfigEntity, query QueryDSL) error {
-	return nil
-}
-
-/**
-* These kind of content are coming from another entity, which is indepndent module
-* If we want to create them, we need to do it before. This is not association.
-**/
-func WebPushConfigRelationContentCreate(dto *WebPushConfigEntity, query QueryDSL) error {
-	return nil
-}
-func WebPushConfigRelationContentUpdate(dto *WebPushConfigEntity, query QueryDSL) error {
 	return nil
 }
 func WebPushConfigPolyglotUpdateHandler(dto *WebPushConfigEntity, query QueryDSL) {
@@ -406,8 +395,6 @@ func WebPushConfigActionCreateFn(dto *WebPushConfigEntity, query QueryDSL) (*Web
 	WebPushConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WebPushConfigEntityBeforeCreateAppend(dto, query)
-	// 3. Create other entities if we want select from them
-	WebPushConfigRelationContentCreate(dto, query)
 	// 4. Create the entity
 	var dbref *gorm.DB = nil
 	if query.Tx == nil {
@@ -512,7 +499,6 @@ func WebPushConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WebPushConf
 		return nil, GormErrorToIError(err)
 	}
 	query.Tx = dbref
-	WebPushConfigRelationContentUpdate(fields, query)
 	WebPushConfigPolyglotUpdateHandler(fields, query)
 	if ero := WebPushConfigDeleteEntireChildren(query, fields); ero != nil {
 		return nil, ero
@@ -584,10 +570,10 @@ var WebPushConfigWipeCmd cli.Command = cli.Command{
 	},
 }
 
-func WebPushConfigActionRemoveFn(query QueryDSL) (int64, *IError) {
+func WebPushConfigActionRemoveEnqueueFn(req DeleteRequest, query QueryDSL) (*DeleteResponse, *IError) {
 	refl := reflect.ValueOf(&WebPushConfigEntity{})
 	query.ActionRequires = []PermissionInfo{PERM_ROOT_WEB_PUSH_CONFIG_DELETE}
-	return RemoveEntity[WebPushConfigEntity](query, refl)
+	return RemoveEntityEnqueue[WebPushConfigEntity](req, query, refl)
 }
 func WebPushConfigActionWipeClean(query QueryDSL) (int64, error) {
 	var err error
@@ -1043,7 +1029,7 @@ var WebPushConfigCliCommands []cli.Command = []cli.Command{
 	WebPushConfigCreateInteractiveCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&WebPushConfigEntity{}).Elem(),
-		WebPushConfigActions.Remove,
+		WebPushConfigActions.RemoveEnqueue,
 	),
 }
 
@@ -1248,22 +1234,21 @@ var WEB_PUSH_CONFIG_ACTION_PATCH_BULK = Module3Action{
 		Entity: "WebPushConfigEntity",
 	},
 }
-var WEB_PUSH_CONFIG_ACTION_DELETE = Module3Action{
-	Method: "DELETE",
-	Url:    "/web-push-config",
-	Format: "DELETE_DSL",
+var WEB_PUSH_CONFIG_ACTION_DELETE_ENQUEUE = Module3Action{
+	Method: "POST",
+	Url:    "/web-push-config-remove",
 	SecurityModel: &SecurityModel{
 		ActionRequires:  []PermissionInfo{PERM_ROOT_WEB_PUSH_CONFIG_DELETE},
 		ResolveStrategy: "user",
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
-			HttpRemoveEntity(c, WebPushConfigActions.Remove)
+			HttpRemoveEnqueueEntity(c, WebPushConfigActions.RemoveEnqueue)
 		},
 	},
-	Action:         WebPushConfigActions.Remove,
-	RequestEntity:  &DeleteRequest{},
-	ResponseEntity: &DeleteResponse{},
+	Action:         WebPushConfigActions.RemoveEnqueue,
+	RequestEntity:  &DeleteRequestDto{},
+	ResponseEntity: &DeleteResponseDto{},
 	TargetEntity:   &WebPushConfigEntity{},
 }
 var WEB_PUSH_CONFIG_ACTION_DISTINCT_PATCH_ONE = Module3Action{
@@ -1323,7 +1308,7 @@ func GetWebPushConfigModule3Actions() []Module3Action {
 		WEB_PUSH_CONFIG_ACTION_POST_ONE,
 		WEB_PUSH_CONFIG_ACTION_PATCH,
 		WEB_PUSH_CONFIG_ACTION_PATCH_BULK,
-		WEB_PUSH_CONFIG_ACTION_DELETE,
+		WEB_PUSH_CONFIG_ACTION_DELETE_ENQUEUE,
 		WEB_PUSH_CONFIG_ACTION_DISTINCT_PATCH_ONE,
 		WEB_PUSH_CONFIG_ACTION_DISTINCT_GET_ONE,
 	}
