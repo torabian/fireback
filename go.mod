@@ -3,6 +3,7 @@ module github.com/torabian/fireback
 go 1.25.0
 
 require (
+	github.com/474420502/gcurl v1.2.1
 	github.com/ClickHouse/clickhouse-go/v2 v2.43.0
 	github.com/Rhymond/go-money v1.0.15
 	github.com/SherClockHolmes/webpush-go v1.4.0
@@ -58,7 +59,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.0.32
+	github.com/torabian/emi v1.0.33
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli v1.22.17
 	github.com/wk8/go-ordered-map/v2 v2.1.8
@@ -79,7 +80,6 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/474420502/gcurl v1.2.1 // indirect
 	github.com/474420502/requests v1.50.0 // indirect
 	github.com/ClickHouse/ch-go v0.71.0 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
@@ -211,5 +211,3 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.46.1 // indirect
 )
-
-replace github.com/torabian/emi => ../emi
