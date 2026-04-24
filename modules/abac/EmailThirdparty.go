@@ -174,6 +174,30 @@ type curlInfo struct {
 	Curl string `json:"curl"`
 }
 
+type sendGridInfo struct {
+	APIKey string `json:"apiKey"`
+}
+
+type mailGunInfo struct {
+	ApiKey string `json:"apiKey"`
+	Domain string `json:"domain"`
+}
+
+type postmarkInfo struct {
+	ApiKey string `json:"apiKey"`
+}
+
+type resendInfo struct {
+	ApiKey string `json:"apiKey"`
+}
+
+type smtpInfo struct {
+	Host string `json:"host"`
+	Port string `json:"port"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+}
+
 func SendMail(msg EmailMessageContent, p *EmailProviderEntity) error {
 	if p == nil {
 		return errors.New("provider required")
@@ -183,32 +207,36 @@ func SendMail(msg EmailMessageContent, p *EmailProviderEntity) error {
 
 	case "curl":
 		m, _ := fireback.JSONTo[curlInfo](p.Config)
-
 		return SendWithCurl(msg, m.Curl)
 
-	// case "sendgrid":
-	// 	return sendViaSendGrid(msg, p.Config["apiKey"])
+	case "sendgrid":
+		m, _ := fireback.JSONTo[sendGridInfo](p.Config)
+		return sendViaSendGrid(msg, m.APIKey)
 
-	// case "mailgun":
-	// 	return sendViaMailgun(msg, p.Config["apiKey"], p.Config["domain"])
+	case "mailgun":
+		m, _ := fireback.JSONTo[mailGunInfo](p.Config)
+		return sendViaMailgun(msg, m.ApiKey, m.Domain)
 
-	// case "postmark":
-	// 	return sendViaPostmark(msg, p.Config["apiKey"])
+	case "postmark":
+		m, _ := fireback.JSONTo[postmarkInfo](p.Config)
+		return sendViaPostmark(msg, m.ApiKey)
 
-	// case "resend":
-	// 	return sendViaResend(msg, p.Config["apiKey"])
+	case "resend":
+		m, _ := fireback.JSONTo[resendInfo](p.Config)
+		return sendViaResend(msg, m.ApiKey)
 
-	// case "smtp":
-	// 	return sendViaSMTP(
-	// 		msg,
-	// 		p.Config["host"],
-	// 		p.Config["port"],
-	// 		p.Config["user"],
-	// 		p.Config["pass"],
-	// 	)
+	case "smtp":
+		m, _ := fireback.JSONTo[smtpInfo](p.Config)
+		return sendViaSMTP(
+			msg,
+			m.Host,
+			m.Port,
+			m.User,
+			m.Pass,
+		)
 
 	case "terminal":
-		fmt.Println("EMAIL:", msg)
+		fmt.Println("EMAIL:", msg.Json())
 		return nil
 
 	default:
