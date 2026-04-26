@@ -44,8 +44,8 @@ func ConfirmClassicPassportTotpAction(c ConfirmClassicPassportTotpActionRequest,
 
 	// Implement the logic here.
 	return &ConfirmClassicPassportTotpActionResponse{
-		Payload: ConfirmClassicPassportTotpActionRes{
+		Payload: fireback.GResponseSingleItem(ConfirmClassicPassportTotpActionRes{
 			Session: singinResult.Session,
-		},
+		}),
 	}, nil
 }
