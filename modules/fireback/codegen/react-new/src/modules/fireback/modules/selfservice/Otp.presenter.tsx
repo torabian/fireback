@@ -4,12 +4,14 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 
-
-
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
-import { ClassicPassportOtpActionReq, useClassicPassportOtpAction, type ClassicPassportOtpActionRes } from "../../sdk/modules/abac/ClassicPassportOtp";
+import {
+  ClassicPassportOtpActionReq,
+  useClassicPassportOtpAction,
+  type ClassicPassportOtpActionRes,
+} from "../../sdk/modules/abac/ClassicPassportOtp";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
@@ -19,7 +21,10 @@ export const usePresenter = () => {
   const { onComplete } = useCompleteAuth();
 
   const submit = (values: Partial<ClassicPassportOtpActionReq>) => {
-    mutation.mutateAsync(new ClassicPassportOtpActionReq({ ...values, value: state.value }))
+    mutation
+      .mutateAsync(
+        new ClassicPassportOtpActionReq({ ...values, value: state.value }),
+      )
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
@@ -32,7 +37,7 @@ export const usePresenter = () => {
   });
 
   const successful = (res: GResponse<ClassicPassportOtpActionRes>) => {
-    if (res.data?.item.session) {
+    if (res.data?.item.session?.token) {
       onComplete(res);
     } else if (res.data?.item?.continueWithCreation) {
       push(`/${locale}/selfservice/complete`, undefined, {

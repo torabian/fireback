@@ -6,8 +6,15 @@ import { useRouter } from "../../hooks/useRouter";
 
 import { useS } from "../../hooks/useS";
 
-import { ClassicSignupActionReq, ClassicSignupActionRes, useClassicSignupAction } from "../../sdk/modules/abac/ClassicSignup";
-import { QueryWorkspaceTypesPubliclyActionRes, useQueryWorkspaceTypesPubliclyActionQuery } from "../../sdk/modules/abac/QueryWorkspaceTypesPublicly";
+import {
+  ClassicSignupActionReq,
+  ClassicSignupActionRes,
+  useClassicSignupAction,
+} from "../../sdk/modules/abac/ClassicSignup";
+import {
+  QueryWorkspaceTypesPubliclyActionRes,
+  useQueryWorkspaceTypesPubliclyActionQuery,
+} from "../../sdk/modules/abac/QueryWorkspaceTypesPublicly";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
@@ -23,7 +30,8 @@ export const usePresenter = () => {
   // });
 
   const { data, isLoading } = useQueryWorkspaceTypesPubliclyActionQuery({});
-  const workspaceTypes: QueryWorkspaceTypesPubliclyActionRes[] = data?.data?.items || []
+  const workspaceTypes: QueryWorkspaceTypesPubliclyActionRes[] =
+    data?.data?.items || [];
 
   const s = useS(strings);
 
@@ -31,13 +39,16 @@ export const usePresenter = () => {
   const requestedWorkspaceTypeId = sessionStorage.getItem("workspace_type_id");
 
   const submit = (values: Partial<ClassicSignupActionReq>) => {
-    mutation.mutateAsync(new ClassicSignupActionReq({
-      ...values,
-      value: state?.value,
-      workspaceTypeId,
-      type: state?.type,
-      sessionSecret: state?.sessionSecret,
-    }))
+    mutation
+      .mutateAsync(
+        new ClassicSignupActionReq({
+          ...values,
+          value: state?.value,
+          workspaceTypeId,
+          type: state?.type,
+          sessionSecret: state?.sessionSecret,
+        }),
+      )
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
@@ -49,7 +60,6 @@ export const usePresenter = () => {
     onSubmit: submit,
   });
 
-
   // Previous screen sends the email/phone here
   useEffect(() => {
     form?.setFieldValue(ClassicSignupActionReq.Fields.value, state?.value);
@@ -58,9 +68,9 @@ export const usePresenter = () => {
   // we expect either the account completion is successful this stage
   // only catch is, if the server requires totp (dual factor)
   const successful = (res: GResponse<ClassicSignupActionRes>) => {
-    if (res.data.item.session) {
+    if (res.data?.item?.session?.token) {
       onComplete(res);
-    } else if (res.data.item.continueToTotp) {
+    } else if (res.data?.item?.continueToTotp) {
       push(`/${locale}/selfservice/totp-setup`, undefined, {
         totpUrl: res.data.item.totpUrl || totpUrl,
         forcedTotp: res.data.item.forcedTotp,

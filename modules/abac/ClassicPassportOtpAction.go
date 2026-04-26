@@ -30,6 +30,14 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.
 		return nil, fireback.Create401Error(&AbacMessages.OtpCodeInvalid, []string{})
 	}
 
+	// if olderEntity.IsInCreationProcess.Bool {
+	// 	completeClassicSignupProcess(
+	// 		ClassicSignupActionReq{},
+	// 		query,
+	// 		olderEntity,
+	// 	)
+	// }
+
 	if olderEntity.IsInCreationProcess.Bool {
 		// in some cases, the otp alone should be enough and can complete signup process.
 		// for example, phone number often is enough for authroization of sms or phone call
