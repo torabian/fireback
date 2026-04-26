@@ -87,11 +87,11 @@ export const FormRichText = (props: FormRichTextProps) => {
 
   const uploadUploadHandler: any = async (
     blobInfo: { blob: Blob },
-    progress: () => void
+    progress: () => void,
   ) => {
     const resp = await upload(
       [new File([(blobInfo.blob as any)()], "filename")],
-      true
+      true,
     )[0];
     return directPath({ diskPath: resp as any } as any);
   };
@@ -159,12 +159,12 @@ export const FormRichText = (props: FormRichTextProps) => {
           {...restProps}
           value={value}
           placeholder={placeholder}
-          style={{ minHeight: "140px" }}
+          style={{ minHeight: "140px", height: height || 400 }}
           autoFocus={autoFocus}
           className={classNames(
             "form-control",
             props.errorMessage && "is-invalid",
-            props.validMessage && "is-valid"
+            props.validMessage && "is-valid",
           )}
           onChange={(e) => onChange && onChange(e.target.value)}
           onBlur={() => setFocused(false)}

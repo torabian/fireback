@@ -5,6 +5,10 @@ import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import {
+  SendEmailActionReq,
+  useSendEmailAction,
+} from "@/modules/fireback/sdk/modules/abac/SendEmail";
 import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
 
 export const EmailProviderSingleScreen = () => {
@@ -12,6 +16,8 @@ export const EmailProviderSingleScreen = () => {
   const t = useT();
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
+
+  const { mutateAsync } = useSendEmailAction();
 
   const getSingleHook = useGetEmailProviderByUniqueId({
     query: { uniqueId },
@@ -32,15 +38,37 @@ export const EmailProviderSingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: t.mailProvider.type,
-              elem: <span>{d?.type}</span>,
+              label: "Title",
+              elem: d?.title,
             },
             {
-              label: t.mailProvider.apiKey,
-              elem: <pre dir="ltr">{d?.apiKey}</pre>,
+              label: t.mailProvider.type,
+              elem: d?.type,
             },
           ]}
         />
+
+        <button
+          className="btn mt-5 btn-success btn-sm"
+          onClick={() => {
+            mutateAsync(
+              SendEmailActionReq.from({
+                providerId: uniqueId,
+                body: "±",
+                toAddress: "asdad",
+              }),
+            )
+              .then((res) => {
+                console.log(res);
+                alert("Mail has been sent");
+              })
+              .catch((err) => {
+                alert(`${err}`);
+              });
+          }}
+        >
+          Send a test email
+        </button>
       </CommonSingleManager>
     </>
   );

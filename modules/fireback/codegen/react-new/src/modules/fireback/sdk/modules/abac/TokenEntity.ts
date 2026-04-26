@@ -18,7 +18,7 @@ export class TokenEntity extends BaseEntity {
   public children?: TokenEntity[] | null;
   public user?: UserEntity | null;
   public token?: string | null;
-  public validUntil?: string | null;
+  public validUntil?: any | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/token/edit/${uniqueId}`;
@@ -72,7 +72,7 @@ export class TokenEntity extends BaseEntity {
     {
       "name": "validUntil",
       "type": "datetime",
-      "computedType": "string",
+      "computedType": "any",
       "gormMap": {}
     }
   ]

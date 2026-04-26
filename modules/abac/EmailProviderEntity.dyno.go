@@ -7,6 +7,7 @@ package abac
  */
 import (
 	"embed"
+	"encoding"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,8 @@ func ResetEmailProviderSeeders(fs *embed.FS) {
 
 type EmailProviderEntityQs struct {
 	Type   fireback.QueriableField `cli:"type" table:"email_provider" typeof:"enum" column:"type" qs:"type"`
-	ApiKey fireback.QueriableField `cli:"api-key" table:"email_provider" typeof:"string" column:"api_key" qs:"apiKey"`
+	Title  fireback.QueriableField `cli:"title" table:"email_provider" typeof:"string" column:"title" qs:"title"`
+	Config fireback.QueriableField `cli:"config" table:"email_provider" typeof:"complex" column:"config" qs:"config"`
 }
 
 func (x *EmailProviderEntityQs) GetQuery() string {
@@ -44,11 +46,15 @@ func (x *EmailProviderEntityQs) GetQuery() string {
 var EmailProviderQsFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:  "type",
-		Usage: "",
+		Usage: "Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.",
 	},
 	&cli.StringFlag{
-		Name:  "api-key",
-		Usage: "",
+		Name:  "title",
+		Usage: "Give the email provider configuration a name, which makes it easier later to query.",
+	},
+	&cli.StringFlag{
+		Name:  "config",
+		Usage: "JSON field which contains api keys, or other kind of configuration based on the type of the email provider.",
 	},
 }
 
@@ -110,11 +116,15 @@ type EmailProviderEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Type             string                 `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	ApiKey           string                 `json:"apiKey" xml:"apiKey" yaml:"apiKey"        `
-	Children         []*EmailProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *EmailProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	// Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
+	Type string `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	// Give the email provider configuration a name, which makes it easier later to query.
+	Title string `json:"title" xml:"title" yaml:"title"        `
+	// JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
+	Config   fireback.JSON          `json:"config" xml:"config" yaml:"config"        `
+	Children []*EmailProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo *EmailProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func EmailProviderEntityStream(q fireback.QueryDSL) (chan []*EmailProviderEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -209,7 +219,8 @@ var EMAIL_PROVIDER_EVENTS = []string{
 
 type EmailProviderFieldMap struct {
 	Type   fireback.TranslatedString `yaml:"type"`
-	ApiKey fireback.TranslatedString `yaml:"apiKey"`
+	Title  fireback.TranslatedString `yaml:"title"`
+	Config fireback.TranslatedString `yaml:"config"`
 }
 
 var EmailProviderEntityMetaConfig map[string]int64 = map[string]int64{}
@@ -321,8 +332,9 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-Type: (type: enum) Description: 
-ApiKey: (type: string) Description: 
+Type: (type: enum) Description: Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
+Title: (type: string) Description: Give the email provider configuration a name, which makes it easier later to query.
+Config: (type: complex) Description: JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -683,12 +695,17 @@ var EmailProviderCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `One of: 'terminal', 'sendgrid' (enum)`,
+		Usage:    `One of: 'sendgrid', 'mailgun', 'postmark', 'resend', 'smtp', 'terminal' (enum)`,
 	},
 	&cli.StringFlag{
-		Name:     "api-key",
+		Name:     "title",
 		Required: false,
-		Usage:    `apiKey (string)`,
+		Usage:    `Give the email provider configuration a name, which makes it easier later to query. (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "config",
+		Required: false,
+		Usage:    `JSON field which contains api keys, or other kind of configuration based on the type of the email provider. (complex)`,
 	},
 }
 var EmailProviderCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
@@ -697,15 +714,15 @@ var EmailProviderCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 		StructField: "Type",
 		Required:    true,
 		Recommended: false,
-		Usage:       `One of: 'terminal', 'sendgrid'`,
+		Usage:       `One of: 'sendgrid', 'mailgun', 'postmark', 'resend', 'smtp', 'terminal'`,
 		Type:        "string",
 	},
 	{
-		Name:        "apiKey",
-		StructField: "ApiKey",
+		Name:        "title",
+		StructField: "Title",
 		Required:    false,
 		Recommended: false,
-		Usage:       `apiKey`,
+		Usage:       `Give the email provider configuration a name, which makes it easier later to query.`,
 		Type:        "string",
 	},
 }
@@ -737,12 +754,17 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "type",
 		Required: true,
-		Usage:    `One of: 'terminal', 'sendgrid' (enum)`,
+		Usage:    `One of: 'sendgrid', 'mailgun', 'postmark', 'resend', 'smtp', 'terminal' (enum)`,
 	},
 	&cli.StringFlag{
-		Name:     "api-key",
+		Name:     "title",
 		Required: false,
-		Usage:    `apiKey (string)`,
+		Usage:    `Give the email provider configuration a name, which makes it easier later to query. (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "config",
+		Required: false,
+		Usage:    `JSON field which contains api keys, or other kind of configuration based on the type of the email provider. (complex)`,
 	},
 }
 var EmailProviderCreateCmd cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
@@ -806,8 +828,13 @@ func CastEmailProviderFromCli(c *cli.Context) *EmailProviderEntity {
 	if c.IsSet("type") {
 		template.Type = c.String("type")
 	}
-	if c.IsSet("api-key") {
-		template.ApiKey = c.String("api-key")
+	if c.IsSet("title") {
+		template.Title = c.String("title")
+	}
+	if c.IsSet("config") {
+		if u, ok := any(&template.Config).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("config")))
+		}
 	}
 	return template
 }
@@ -1078,8 +1105,8 @@ func EmailProviderCliFn() cli.Command {
 	}
 	return cli.Command{
 		Name:        "emailprovider",
-		Description: `Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers`,
-		Usage:       `Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers`,
+		Description: `Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down.`,
+		Usage:       `Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "language",
@@ -1110,6 +1137,7 @@ var EMAIL_PROVIDER_ACTION_QUERY = fireback.Module3Action{
 	Url:    "/email-providers",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1144,6 +1172,7 @@ var EMAIL_PROVIDER_ACTION_EXPORT = fireback.Module3Action{
 	Url:    "/email-providers/export",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1162,6 +1191,7 @@ var EMAIL_PROVIDER_ACTION_GET_ONE = fireback.Module3Action{
 	Url:    "/email-provider/:uniqueId",
 	SecurityModel: &fireback.SecurityModel{
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_QUERY},
+		AllowOnRoot:    true,
 	},
 	Handlers: []gin.HandlerFunc{
 		func(c *gin.Context) {
@@ -1344,14 +1374,22 @@ var EmailProviderType = newEmailProviderType()
 
 func newEmailProviderType() *xEmailProviderType {
 	return &xEmailProviderType{
-		Terminal: "terminal",
 		Sendgrid: "sendgrid",
+		Mailgun:  "mailgun",
+		Postmark: "postmark",
+		Resend:   "resend",
+		Smtp:     "smtp",
+		Terminal: "terminal",
 	}
 }
 
 type xEmailProviderType struct {
-	Terminal string
 	Sendgrid string
+	Mailgun  string
+	Postmark string
+	Resend   string
+	Smtp     string
+	Terminal string
 }
 
 func NewEmailProviderCreatedEvent(
@@ -1365,6 +1403,7 @@ func NewEmailProviderCreatedEvent(
 			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_EMAIL_PROVIDER_QUERY,
 			},
+			AllowOnRoot: true,
 		},
 		CacheKey: "*abac.EmailProviderEntity",
 	}
@@ -1383,6 +1422,7 @@ func NewEmailProviderUpdatedEvent(
 			ActionRequires: []fireback.PermissionInfo{
 				PERM_ROOT_EMAIL_PROVIDER_QUERY,
 			},
+			AllowOnRoot: true,
 		},
 		CacheKey: "*abac.EmailProviderEntity",
 	}

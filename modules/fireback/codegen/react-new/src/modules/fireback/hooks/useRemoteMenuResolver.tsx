@@ -14,16 +14,18 @@ import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/modules/abac/Query
  */
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const queryClient = useQueryClient();
-  const { selectedUrw } = useContext(RemoteQueryContext) as any;
+  const { selectedUrw, session } = useContext(RemoteQueryContext);
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
-    cacheTime: 50,
+    enabled: !!session?.token,
   });
+
+  const enabled = !queryUrw.isError && queryUrw.isSuccess && !!session?.token;
 
   const { query } = useGetCteAppMenus({
     queryClient,
     queryOptions: {
       refetchOnWindowFocus: false,
-      enabled: !queryUrw.isError && queryUrw.isSuccess,
+      enabled,
     },
     query: {
       itemsPerPage: 9999,
@@ -46,7 +48,7 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
     return userMeetsAccess2(
       selectedUrw,
       queryUrw.data?.data?.items || [],
-      permissionKey
+      permissionKey,
     );
   };
 

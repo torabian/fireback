@@ -2,7 +2,6 @@ package abac
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/sendgrid/rest"
@@ -51,23 +50,6 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 	}
 }
 
-func SendMailViaSendGrid(message EmailMessageContent, apiKey string) (*rest.Response, error) {
-
-	from := mail.NewEmail(message.FromName, message.FromEmail)
-	to := mail.NewEmail(message.ToName, message.ToEmail)
-
-	message2 := mail.NewSingleEmail(from, message.Subject, to, message.Content, message.Content)
-
-	client := sendgrid.NewSendClient(apiKey)
-	res, err := client.Send(message2)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
-
 func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*NotificationConfigEntity, error) {
 	query.Deep = true
 	items, _, err := NotificationConfigActions.Query(query)
@@ -85,29 +67,23 @@ func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*Notification
 	return items[0], nil
 }
 
-func SendMail(message EmailMessageContent, provider *EmailProviderEntity) error {
+type IEmailSender interface {
+	Send(message EmailMessageContent) error
+}
 
-	if provider == nil {
-		return errors.New("GENERAL_EMAIL_PROVIDER_IS_NEEDED")
+func SendMailViaSendGrid(message EmailMessageContent, apiKey string) (*rest.Response, error) {
+
+	from := mail.NewEmail(message.FromName, message.FromEmail)
+	to := mail.NewEmail(message.ToName, message.ToEmail)
+
+	message2 := mail.NewSingleEmail(from, message.Subject, to, message.Content, message.Content)
+
+	client := sendgrid.NewSendClient(apiKey)
+	res, err := client.Send(message2)
+
+	if err != nil {
+		return nil, err
 	}
 
-	if provider.Type == EmailProviderType.Sendgrid {
-		res, err := SendMailViaSendGrid(message, provider.ApiKey)
-
-		if res != nil {
-			fmt.Println(res.Body)
-		}
-
-		return err
-
-	} else if provider.Type == EmailProviderType.Terminal {
-
-		log.Default().Println(message.Json())
-
-		return nil
-
-	} else {
-		return errors.New("EMAIL_PROVIDER_IS_NOT_AVAILABLE")
-	}
-
+	return res, nil
 }

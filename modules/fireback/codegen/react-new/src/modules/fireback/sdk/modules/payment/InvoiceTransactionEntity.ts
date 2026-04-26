@@ -44,7 +44,7 @@ export class InvoiceTransactionEntity extends BaseEntity {
   /**
   The time that payment successfully gone through.
   */
-  public paidAt?: string | null;
+  public paidAt?: any | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/invoice-transaction/edit/${uniqueId}`;
@@ -127,7 +127,7 @@ export class InvoiceTransactionEntity extends BaseEntity {
       "name": "paidAt",
       "description": "The time that payment successfully gone through.",
       "type": "datetime",
-      "computedType": "string",
+      "computedType": "any",
       "gormMap": {}
     }
   ],

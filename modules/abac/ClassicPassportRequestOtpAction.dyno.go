@@ -142,6 +142,13 @@ func (x *ClassicPassportRequestOtpActionResponse) AsJSON(payload any) *ClassicPa
 	x.SetContentType("application/json")
 	return x
 }
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *ClassicPassportRequestOtpActionResponse) WithIdeal(payload ClassicPassportRequestOtpActionRes) *ClassicPassportRequestOtpActionResponse {
+	x.Payload = payload
+	return x
+}
 func (x *ClassicPassportRequestOtpActionResponse) AsHTML(payload string) *ClassicPassportRequestOtpActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")

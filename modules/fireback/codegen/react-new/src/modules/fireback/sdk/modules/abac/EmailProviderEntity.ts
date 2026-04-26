@@ -13,8 +13,18 @@ export type EmailProviderEntityKeys =
   keyof typeof EmailProviderEntity.Fields;
 export class EmailProviderEntity extends BaseEntity {
   public children?: EmailProviderEntity[] | null;
-  public type?: "terminal" | "sendgrid" | null;
-  public apiKey?: string | null;
+  /**
+  Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
+  */
+  public type?: "sendgrid" | "mailgun" | "postmark" | "resend" | "smtp" | "terminal" | null;
+  /**
+  Give the email provider configuration a name, which makes it easier later to query.
+  */
+  public title?: string | null;
+  /**
+  JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
+  */
+  public config?: any | null;
   public static Navigation = {
       edit(uniqueId: string, locale?: string) {
           return `${locale ? '/' + locale : '..'}/email-provider/edit/${uniqueId}`;
@@ -48,37 +58,61 @@ export class EmailProviderEntity extends BaseEntity {
   "name": "emailProvider",
   "features": {},
   "security": {
-    "writeOnRoot": true
+    "writeOnRoot": true,
+    "readOnRoot": true
   },
   "gormMap": {},
   "fields": [
     {
       "name": "type",
+      "description": "Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.",
       "type": "enum",
       "validate": "required",
       "of": [
         {
-          "k": "terminal"
+          "k": "sendgrid"
         },
         {
-          "k": "sendgrid"
+          "k": "mailgun"
+        },
+        {
+          "k": "postmark"
+        },
+        {
+          "k": "resend"
+        },
+        {
+          "k": "smtp"
+        },
+        {
+          "k": "terminal"
         }
       ],
-      "computedType": "\"terminal\" | \"sendgrid\"",
+      "computedType": "\"sendgrid\" | \"mailgun\" | \"postmark\" | \"resend\" | \"smtp\" | \"terminal\"",
       "gormMap": {}
     },
     {
-      "name": "apiKey",
+      "name": "title",
+      "description": "Give the email provider configuration a name, which makes it easier later to query.",
       "type": "string",
       "computedType": "string",
       "gormMap": {}
+    },
+    {
+      "name": "config",
+      "description": "JSON field which contains api keys, or other kind of configuration based on the type of the email provider.",
+      "type": "complex",
+      "complex": "fireback.JSON",
+      "computedType": "any",
+      "gormMap": {}
     }
   ],
-  "description": "Thirdparty services which will send email, allows each workspace graphically configure their token without the need of restarting servers"
+  "description": "Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down."
 }
 public static Fields = {
   ...BaseEntity.Fields,
       type: `type`,
-      apiKey: `apiKey`,
+      title: `title`,
+      config: `config`,
 }
 }
