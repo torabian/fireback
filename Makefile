@@ -68,3 +68,8 @@ rebuild-sdks-ci:
 
 web:
 	cd modules/fireback/codegen/react-new && npm start
+
+# When we want to open pr, we use this.
+
+prepare:
+	make refresh && make rebuild-sdks && make bundle
