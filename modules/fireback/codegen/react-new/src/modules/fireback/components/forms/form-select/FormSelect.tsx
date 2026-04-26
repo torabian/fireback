@@ -291,7 +291,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
   }
 
   if (typeof value !== "object" && keyExtractor && value !== undefined) {
-    value = options.find((item) => keyExtractor(item) === value);
+    value = (options || []).find((item) => keyExtractor(item) === value);
   }
 
   // if (props.type === "verbose") {

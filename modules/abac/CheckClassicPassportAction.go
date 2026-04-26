@@ -3,6 +3,7 @@ package abac
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -70,8 +71,17 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 	if otpResponse != nil && otpResponse.Payload != nil {
 		var otpInfo *CheckClassicPassportActionResOtpInfo
 
-		if casted, ok := otpResponse.Payload.(fireback.GoogleResponse[CheckClassicPassportActionResOtpInfo]); ok {
-			otpInfo = &casted.Data.Item
+		if casted, ok := otpResponse.Payload.(fireback.GoogleResponse[ClassicPassportRequestOtpActionRes]); ok {
+
+			otpInfo = &CheckClassicPassportActionResOtpInfo{
+				SuspendUntil:     casted.Data.Item.SuspendUntil,
+				ValidUntil:       casted.Data.Item.ValidUntil,
+				BlockedUntil:     casted.Data.Item.BlockedUntil,
+				SecondsToUnblock: casted.Data.Item.SecondsToUnblock,
+			}
+		} else {
+			j, _ := json.MarshalIndent(otpResponse, "", "  ")
+			fmt.Println("Not okay!", ok, casted, string(j))
 		}
 
 		// if request is blocked, we actually did not sent the otp.
@@ -80,6 +90,8 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 				return nil, otpFailed
 			}
 		}
+
+		fmt.Println(1, otpFailed, otpInfo, otpResponse)
 
 		return &CheckClassicPassportActionResOtpInfo{
 			SuspendUntil:     otpInfo.SuspendUntil,
