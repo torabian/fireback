@@ -8,7 +8,6 @@ import type { GResponse } from "../../sdk/sdk/envelopes";
 import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
 import type { ClassicPassportOtpActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
 
-
 export enum AuthMethod {
   Email = "email",
   Phone = "phone",
@@ -30,8 +29,13 @@ export const useCompleteAuth = () => {
   const { locale } = useLocale();
   const { replace } = useRouter();
 
-  const onComplete = (res: GResponse<ClassicSigninActionRes | ClassicSignupActionRes | ClassicPassportOtpActionResDto>) => {
-    setSession(res.data.item.session);
+  const onComplete = (
+    res: GResponse<
+      | ClassicSigninActionRes
+      | ClassicSignupActionRes
+      | ClassicPassportOtpActionResDto
+    >,
+  ) => {
     // Handle React Native WebView
     if ((window as any).ReactNativeWebView) {
       (window as any).ReactNativeWebView.postMessage(JSON.stringify(res.data));
@@ -52,6 +56,8 @@ export const useCompleteAuth = () => {
       return;
     }
 
+    setSession(res.data.item.session);
+
     // Clean up url options which are set earlier.
     sessionStorage.removeItem("redirect_temporary");
     sessionStorage.removeItem("workspace_type_id");
@@ -61,7 +67,10 @@ export const useCompleteAuth = () => {
     } else if (redirectUrl) {
       // Append the token to the redirect URL
       const finalUrl = new URL(redirectUrl);
-      finalUrl.searchParams.set("session", JSON.stringify(res.data.item.session));
+      finalUrl.searchParams.set(
+        "session",
+        JSON.stringify(res.data.item.session),
+      );
 
       // Redirect to the final URL
       window.location.href = finalUrl.toString();
