@@ -51,11 +51,6 @@ type QueryDSL struct {
 	// SQL search.
 	WithPreloads []string `json:"withPreloads"`
 
-	// A modern JSON Query object to replace the 'query' section.
-	// JsonQuery can allow for better and more complex queries inspired by
-	// Elastic search json query format.
-	JsonQuery string `json:"jsonQuery"`
-
 	// this is gin context upon the request, which is being attached to the dsl
 	// regularly, should not be accessed directly but in reality many times we need
 	// to work low level and there is no reason framework do not allow it.

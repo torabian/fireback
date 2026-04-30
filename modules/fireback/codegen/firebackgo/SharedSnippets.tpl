@@ -3017,7 +3017,7 @@ type {{ $name }}Msgs struct {
 
   {{ if .QSFields }}
   type {{ .Upper }}Qs struct {
-    {{ template "qsFields" (arr .QSFields "" $wsprefix "tablena" )}}
+    {{ template "qsFields" (arr .QSFields "" $wsprefix "tablena" "" )}}
   }
   func (x * {{ .Upper }}Qs) GetQuery() string {
     return {{ $wsprefix }} GenerateQueryStringStyle(reflect.ValueOf(x), "")
@@ -3558,14 +3558,17 @@ var {{ $entity.Upper }}ClickHouseActions = {{ $entity.Name }}ClickHouseSig{
 	{{ $prefix := index . 1}}
 	{{ $wsprefix := index . 2}}
 	{{ $table := index . 3}}
+	{{ $qsParent := index . 4}}
 	{{ range $fields }}
 		{{ if or (eq .Type "object")}}
 			{{ .PublicName }} struct {
 				{{ $newPrefix := print $prefix .ComputedCliName "." }}
-				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table)}}
+				{{ $newQsPrefix := print $qsParent .Name "." }}
+
+				{{ template "qsFields" (arr .Fields $newPrefix $wsprefix $table $newQsPrefix )}}
 			} `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" column:"{{.ComputedSnakeName}}" typeof:"{{.Type}}" qs:"{{.Name}}" preload:"{{ $prefix }}{{ .PublicName }}"`
 		{{ else }}
-			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" typeof:"{{.Type}}" column:"{{.ComputedSnakeName}}" qs:"{{.Name}}"`
+			{{ .PublicName }}  {{ $wsprefix }}QueriableField `cli:"{{ $prefix }}{{ .ComputedCliName }}" table:"{{ $table }}" typeof:"{{.Type}}" column:"{{.ComputedSnakeName}}" qs:"{{ $qsParent }}{{.Name}}"`
 		{{ end }}
 	{{ end }}
 

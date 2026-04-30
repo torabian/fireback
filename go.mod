@@ -1,6 +1,6 @@
 module github.com/torabian/fireback
 
-go 1.25.0
+go 1.25.1
 
 require (
 	github.com/474420502/gcurl v1.2.1
@@ -116,6 +116,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
+	github.com/h22rana/jsonlogic2sql v1.0.10 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect

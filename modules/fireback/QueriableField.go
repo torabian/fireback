@@ -222,11 +222,13 @@ func (m QueriableField) AsJq() (string, error) {
 }
 
 func (m QueriableField) MarshalJSON() ([]byte, error) {
-	if res, err := m.AsSql(); err != nil {
-		return json.Marshal("Cannot cast the query to sql:")
-	} else {
-		return json.Marshal(res)
-	}
+	return json.Marshal(m.UserInput)
+
+	// if res, err := m.AsSql(); err != nil {
+	// 	return json.Marshal("Cannot cast the query to sql:")
+	// } else {
+	// 	return json.Marshal(res)
+	// }
 }
 
 func (q QueriableField) String() string {

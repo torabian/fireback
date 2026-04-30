@@ -75,14 +75,8 @@ export class MemoryEntity<T extends BaseEntity> {
   constructor(private content: T[]) {}
 
   items(ctx?: Context): T[] {
-    let jsonQuery = {};
-    try {
-      jsonQuery = JSON.parse((ctx as any).jsonQuery);
-    } catch (e) {
-      // intentionall
-    }
-
-    let filtered = filterData(this.content, jsonQuery);
+ 
+    let filtered = this.content;
     return filtered.filter((item, index) => {
       if (index < ctx.startIndex - 1) {
         return false;

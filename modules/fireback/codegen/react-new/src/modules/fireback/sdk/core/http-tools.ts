@@ -164,6 +164,5 @@ export interface Query {
   deep?: boolean | null;
   startIndex?: number | null;
   query?: string | null;
-  jsonQuery?: any;
   uniqueId?: string | null;
 }

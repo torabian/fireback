@@ -21,7 +21,7 @@ export function FilterRenderer<R>({
 }) {
   // Single sort for now, assumes 1st one.
   const columnSort = udf.filters.sorting?.find(
-    (col) => col.columnName === column.key
+    (col) => col.columnName === column.key,
   );
 
   const [internalValue, setInternalValue] = useState("");
@@ -47,7 +47,7 @@ export function FilterRenderer<R>({
     if (columnSort) {
       if (columnSort?.direction === "desc") {
         udf.setSorting(
-          udf.filters.sorting.filter((m) => m.columnName !== column.key)
+          udf.filters.sorting.filter((m) => m.columnName !== column.key),
         );
       }
 
@@ -61,7 +61,7 @@ export function FilterRenderer<R>({
               };
             }
             return m;
-          })
+          }),
         );
       }
     } else {
@@ -111,6 +111,11 @@ export function FilterRenderer<R>({
             <input
               className="data-table-filter-input"
               tabIndex={tabIndex}
+              onKeyDown={(e) => {
+                if (e.code === "Space") {
+                  e.stopPropagation();
+                }
+              }}
               value={internalValue}
               onChange={(e) => {
                 setInternalValue(e.target.value);

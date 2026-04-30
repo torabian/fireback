@@ -270,11 +270,7 @@ func CommonCliQueryCmd3IError[T any](
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 	if qs != nil {
 		InitQueryStruct(qs)
-
-		QueriableFieldFromCliContext(reflect.ValueOf(qs), "", c)
-		DetectSelectFieldsInSQL(qs, &f)
-		getFilterQuery(qs, &f)
-		getJqQuery(qs, &f)
+		CaptureCliRequestIntoFilterQuery(qs, c, &f)
 	}
 
 	if items, count, err := fn(f); err != nil {

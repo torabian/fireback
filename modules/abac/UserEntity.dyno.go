@@ -62,12 +62,12 @@ type UserEntityQs struct {
 	Avatar         fireback.QueriableField `cli:"avatar" table:"user" typeof:"string" column:"avatar" qs:"avatar"`
 	LastIpAddress  fireback.QueriableField `cli:"last-ip-address" table:"user" typeof:"string" column:"last_ip_address" qs:"lastIpAddress"`
 	PrimaryAddress struct {
-		AddressLine1    fireback.QueriableField `cli:"primary-address.address-line1" table:"user" typeof:"string" column:"address_line1" qs:"addressLine1"`
-		AddressLine2    fireback.QueriableField `cli:"primary-address.address-line2" table:"user" typeof:"string?" column:"address_line2" qs:"addressLine2"`
-		City            fireback.QueriableField `cli:"primary-address.city" table:"user" typeof:"string?" column:"city" qs:"city"`
-		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" typeof:"string?" column:"state_or_province" qs:"stateOrProvince"`
-		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" typeof:"string?" column:"postal_code" qs:"postalCode"`
-		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" typeof:"string?" column:"country_code" qs:"countryCode"`
+		AddressLine1    fireback.QueriableField `cli:"primary-address.address-line1" table:"user" typeof:"string" column:"address_line1" qs:"primaryAddress.addressLine1"`
+		AddressLine2    fireback.QueriableField `cli:"primary-address.address-line2" table:"user" typeof:"string?" column:"address_line2" qs:"primaryAddress.addressLine2"`
+		City            fireback.QueriableField `cli:"primary-address.city" table:"user" typeof:"string?" column:"city" qs:"primaryAddress.city"`
+		StateOrProvince fireback.QueriableField `cli:"primary-address.state-or-province" table:"user" typeof:"string?" column:"state_or_province" qs:"primaryAddress.stateOrProvince"`
+		PostalCode      fireback.QueriableField `cli:"primary-address.postal-code" table:"user" typeof:"string?" column:"postal_code" qs:"primaryAddress.postalCode"`
+		CountryCode     fireback.QueriableField `cli:"primary-address.country-code" table:"user" typeof:"string?" column:"country_code" qs:"primaryAddress.countryCode"`
 	} `cli:"primary-address" table:"user" column:"primary_address" typeof:"object" qs:"primaryAddress" preload:"PrimaryAddress"`
 }
 

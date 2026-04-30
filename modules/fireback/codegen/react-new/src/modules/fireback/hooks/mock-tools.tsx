@@ -1,4 +1,3 @@
-import { withJsonQuery } from "./withJsonQuery";
 import { FetchxContext, type TypedRequestInit } from "../sdk/sdk/common/fetchx";
 import { type RemoteRequestOption } from "../definitions/JSONStyle";
 import { BUILD_VARIABLES } from "./build-variables";
@@ -113,7 +112,7 @@ function paginate(items: Array<any>, ctx: Context): Array<any> {
 }
 
 function applyQueryDSL(items: Array<any>, ctx: Context): Array<any> {
-  return paginate(withJsonQuery(items, ctx), ctx);
+  return paginate(items, ctx);
 }
 
 export async function getJsonList(entity: string, ctx: Context) {
