@@ -1834,7 +1834,7 @@ queries:
         workspace_invite_entities.{{ . }} = passport_entities.value 
       left join role_entities on role_entities.unique_id = workspace_invite_entities.role_id
       left join workspace_entities on workspace_entities.unique_id = workspace_invite_entities.workspace_id
-      WHERE passport_entities.user_id = "(userId)"
+      WHERE passport_entities.user_id = '(userId)'
 
       {{ end }}
 
