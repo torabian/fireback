@@ -229,14 +229,14 @@ func GetSqlContext(x *fireback.UserAccessPerWorkspaceDto, activeWorkspaceId stri
 
 		// Visibility A means that the content is accessible across the entire project.
 		// It's a public content.
-		`visibility = "A"`,
+		`visibility = 'A'`,
 	}
 
 	// Let's allow the user to see everything which they belong to
 	// but usually it's not necessary, because they are focused on one workspace at the moment
 	if allowCascade {
 		for workspaceId := range *x {
-			conditions = append(conditions, "workspace_id in (\""+workspaceId+"\")")
+			conditions = append(conditions, fireback.RealEscape("workspace_id in (?)", workspaceId))
 		}
 	} else {
 		userBelongsToWorkspace := false
@@ -250,7 +250,7 @@ func GetSqlContext(x *fireback.UserAccessPerWorkspaceDto, activeWorkspaceId stri
 		}
 
 		if userBelongsToWorkspace {
-			conditions = append(conditions, "workspace_id in (\""+activeWorkspaceId+"\")")
+			conditions = append(conditions, fireback.RealEscape("workspace_id in (?)", activeWorkspaceId))
 		}
 	}
 
