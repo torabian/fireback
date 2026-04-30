@@ -108,7 +108,6 @@ func QuickOr(v reflect.Value, parent string) []FlatKeyPairCondition {
 
 		if fieldValue.CanSet() && fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
 			current := fieldValue.Interface().(QueriableField)
-			fmt.Println("Found value:", field.Tag.Get("qs"), current.UserInput)
 			res = append(res, FlatKeyPairCondition{
 				Field:           field.Tag.Get("qs"),
 				Value:           current.UserInput,
