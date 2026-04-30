@@ -1,5 +1,3 @@
-//go:build cgo
-
 package fireback
 
 import (
@@ -8,11 +6,11 @@ import (
 	// on Android and IOS the golang version does not work. On the server, it's better not use cgo
 	// to make it portable on more operating systems.
 
-	"gorm.io/driver/sqlite"
+	"github.com/ncruces/go-sqlite3/gormlite"
 	"gorm.io/gorm"
 )
 
 func GetSQLiteDialector(dsn string) gorm.Dialector {
 
-	return sqlite.Open(dsn)
+	return gormlite.Open(dsn)
 }
