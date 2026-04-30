@@ -66,18 +66,21 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.countryCode}</>,
   },
   {
+    filterable: true,
     name: UserEntity.Fields.primaryAddress.addressLine1,
     title: "Address Line 1",
     width: 180,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine1}</>,
   },
   {
+    filterable: true,
     name: UserEntity.Fields.primaryAddress.addressLine2,
     title: "Address Line 2",
     width: 180,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine2}</>,
   },
   {
+    filterable: true,
     name: UserEntity.Fields.primaryAddress.city,
     title: "City",
     width: 180,

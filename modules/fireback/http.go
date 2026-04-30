@@ -18,7 +18,6 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	workspaceId := c.GetString("workspaceId")
 	internal_sql := c.GetString("internal_sql")
 	id := c.Param("uniqueId")
-	jsonQuery := c.Query("jsonQuery")
 	sort := c.Query("sort")
 
 	resolveStrategy := c.GetString("resolveStrategy")
@@ -89,7 +88,6 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		UserHas:                userHas,
 		WorkspaceHas:           workspaceHas,
 		Sort:                   sort,
-		JsonQuery:              jsonQuery,
 		SearchPhrase:           searchPhrase,
 		LinkerId:               linkerId,
 		WorkspaceId:            workspaceId,

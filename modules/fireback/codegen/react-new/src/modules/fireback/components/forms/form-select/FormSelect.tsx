@@ -94,13 +94,6 @@ export interface FormSelectBase<
   };
 
   /**
-   * Call back to create JsonQuery object to filter and search the endpoint
-   * @param keyword
-   * @returns
-   */
-  jsonQuery?: (keyword: string) => JsonQuery;
-
-  /**
    * @description withPreloads
    * Goes to the query to left join inner tables (objects) or foreign relations if needed.
    */
@@ -219,7 +212,6 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
     queryClient,
     query: {
       itemsPerPage: 20,
-      jsonQuery: resolveJsonQuery(keyword, props.jsonQuery),
       withPreloads: props.withPreloads,
     },
     queryOptions: {

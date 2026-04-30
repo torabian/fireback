@@ -30,7 +30,6 @@ export const FlatListMode = ({
   deleteHook,
   uniqueIdHrefHandler,
   udf,
-  jsonQuery,
   q,
   CardComponent,
 }: {
@@ -40,7 +39,6 @@ export const FlatListMode = ({
   deleteHook?: any;
   columns: QueryArchiveColumn[];
   uniqueIdHrefHandler?: (id: string) => void;
-  jsonQuery?: any;
   CardComponent?: CardComponentType<unknown>;
 }) => {
   const t = useT();
@@ -84,6 +82,7 @@ export const FlatListMode = ({
   useEffect(() => {
     const rows: any = q.query.data?.data?.items || [];
 
+    // @todo: Fix this. There is no more jsonQuery, there should be hash coming in for filters.
     reindex(rows, q.query.data?.jsonQuery);
   }, [q.query.data?.data?.items]);
 

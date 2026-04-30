@@ -1,6 +1,11 @@
 // @ts-nocheck
 
-import type { ExecApi, IResponse, RemoteRequestOption, Query } from "./http-tools";
+import type {
+  ExecApi,
+  IResponse,
+  RemoteRequestOption,
+  Query,
+} from "./http-tools";
 import React, {
   useContext,
   useState,
@@ -183,7 +188,7 @@ export class WebStorage implements CredentialStorage {
 async function saveSession(
   identifier: string,
   session: ContextSession,
-  storagex: CredentialStorage
+  storagex: CredentialStorage,
 ) {
   storagex.setItem("fb_microservice_" + identifier, JSON.stringify(session));
 }
@@ -191,11 +196,11 @@ async function saveSession(
 function saveWorkspace(
   identifier: string,
   workspaceId: UserRoleWorkspace,
-  storagex: CredentialStorage
+  storagex: CredentialStorage,
 ) {
   storagex.setItem(
     "fb_selected_workspace_" + identifier,
-    JSON.stringify(workspaceId)
+    JSON.stringify(workspaceId),
   );
 }
 
@@ -209,12 +214,12 @@ async function getSession(identifier: string, storagex: CredentialStorage) {
 
 async function getWorkspace(
   identifier: string,
-  storagex: CredentialStorage
+  storagex: CredentialStorage,
 ): UserRoleWorkspace | undefined {
   let data = null;
   try {
     data = JSON.parse(
-      await storagex.getItem("fb_selected_workspace_" + identifier)
+      await storagex.getItem("fb_selected_workspace_" + identifier),
     );
   } catch (err) {}
   return data;
@@ -325,7 +330,7 @@ export function RemoteQueryProvider({
     useState<UserRoleWorkspace>();
 
   const storage = useRef(
-    credentialStorage ? credentialStorage : new WebStorage()
+    credentialStorage ? credentialStorage : new WebStorage(),
   );
 
   const beginPreCatch = async () => {
@@ -405,7 +410,7 @@ export function RemoteQueryProvider({
     remote,
     options.headers?.authorization,
     (options.headers as any)["workspace-id"],
-    queryClient
+    queryClient,
   );
 
   return (
@@ -437,7 +442,6 @@ export function RemoteQueryProvider({
 
 export interface PossibleStoreData<T> {
   data: IResponse<T>;
-  jsonQuery: string;
 }
 
 export interface SocketNotification<T = any> {
@@ -446,23 +450,24 @@ export interface SocketNotification<T = any> {
   payload: T;
 }
 
-export function useSocket(remote, token, workspaceId, queryClient, enabled = true) {
+export function useSocket(
+  remote,
+  token,
+  workspaceId,
+  queryClient,
+  enabled = true,
+) {
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
-    if (
-      !remote ||
-      !token ||
-      token === "undefined" ||
-      enabled === false
-    ) {
+    if (!remote || !token || token === "undefined" || enabled === false) {
       return;
     }
     const wsRemote = remote.replace("https", "wss").replace("http", "ws");
     let conn: WebSocket;
     try {
       conn = new WebSocket(
-        `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`
+        `${wsRemote}ws?token=${token}&workspaceId=${workspaceId}`,
       );
       conn.onerror = function (evt) {
         setSocketState({ state: "error" });
@@ -516,9 +521,7 @@ export function queryBeforeSend(query: any) {
   if (query.deep) {
     newQuery.deep = query.deep;
   }
-  if (query.jsonQuery) {
-    newQuery.jsonQuery = JSON.stringify(query.jsonQuery);
-  }
+
   if (query.withPreloads) {
     newQuery.withPreloads = query.withPreloads;
   }

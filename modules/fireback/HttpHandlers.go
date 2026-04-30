@@ -398,11 +398,7 @@ func getHttpF(qs interface{}, c *gin.Context) QueryDSL {
 
 	if qs != nil {
 		InitQueryStruct(qs)
-
-		QueriableFieldFromGinContext(reflect.ValueOf(qs), "", c)
-		DetectSelectFieldsInSQL(qs, &f)
-		getFilterQuery(qs, &f)
-		getJqQuery(qs, &f)
+		CaptureGinRequestIntoFilterQuery(qs, c, &f)
 	}
 
 	return f
@@ -413,12 +409,12 @@ func HttpQueryEntity[T any](
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
 	qs interface{},
 ) {
+
 	f := getHttpF(qs, c)
 	if items, count, err := fn(f); err != nil {
 		GinWriteContent(c, 500, gin.H{"error": err})
 	} else {
 		result := QueryEntitySuccessResult(f, items, count)
-		result["jsonQuery"] = c.Query("jsonQuery")
 		GinWriteContent(c, 200, result)
 	}
 }

@@ -21,7 +21,8 @@ ui2:
 	cp -R ../../modules/fireback/codegen/react-new/dist ../../modules/fireback/codegen/fireback-manage && \
 	git checkout ../../modules/fireback/codegen/fireback-manage/index.go
 
-
+wasm:
+	GOOS=js GOARCH=wasm go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project).wasm .
 linux-arm64:
 	GOARCH=arm64 GOOS=linux go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
 linux-amd64:

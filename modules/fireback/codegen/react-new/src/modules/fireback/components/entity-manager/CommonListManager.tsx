@@ -182,14 +182,7 @@ export const CommonListManager = ({
     <DataTypeProvider formatterComponent={UniqueIdCellRenderer} {...props} />
   );
 
-  const f = [...(queryFilters || [])];
-
-  const jsonQuery = useMemo(() => filtersToJsonQuery(f as any), [f]);
-
   const q = source.query ? source : { query: source };
-
-  q.jsonQuery = jsonQuery;
-
   const rows: any = q.query.data?.data?.items || [];
 
   return (
@@ -207,7 +200,6 @@ export const CommonListManager = ({
         <FlatListMode
           columns={columns}
           CardComponent={CardComponent}
-          jsonQuery={jsonQuery}
           deleteHook={deleteHook}
           uniqueIdHrefHandler={uniqueIdHrefHandler}
           q={q}

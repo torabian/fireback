@@ -1,7 +1,6 @@
 import { type QueryObserverResult, type UseQueryResult } from "react-query";
 import { type IResponseList } from "../sdk/core/http-tools";
 import { type UseRemoteQuery } from "../sdk/core/react-tools";
-import { jsonQueryFilter } from "./withJsonQuery";
 
 export function createQuerySource<T>(items: T[]): (
   params: UseRemoteQuery & { items: T[] }
@@ -27,10 +26,6 @@ export function useAsQuery<T>(params: UseRemoteQuery & { items: T[] }): {
   let startIndex = params.query.startIndex || 0;
 
   let items: T[] = params.items || [];
-  if (params.query?.jsonQuery) {
-    items = jsonQueryFilter(items, params.query.jsonQuery);
-  }
-
   items = items.slice(startIndex, startIndex + itemsPerPage);
 
   const query: UseQueryResult<IResponseList<T>> = {

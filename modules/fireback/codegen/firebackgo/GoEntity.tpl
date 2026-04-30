@@ -97,7 +97,7 @@ func ( x * {{ .FullName }}) RootObjectName() string {
 
 
 type {{ .e.EntityName }}Qs struct {
-	{{ template "qsFields" (arr .e.CompleteFields "" $.wsprefix .e.TableName )}}
+	{{ template "qsFields" (arr .e.CompleteFields "" $.wsprefix .e.TableName  "")}}
 }
 
 func (x * {{ .e.EntityName }}Qs) GetQuery() string {
