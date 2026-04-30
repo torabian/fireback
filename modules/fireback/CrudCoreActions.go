@@ -467,12 +467,12 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
 
 		// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
-		q = q.Where("unique_id <> \"system\"")
+		q = q.Where("unique_id <> 'system'")
 
 		if query.ResolveStrategy == ResolveStrategyUser {
-			q = q.Where(`user_id = "` + query.UserId + `"`)
+			q = q.Where(RealEscape(`user_id = ?`, query.UserId))
 		} else if query.WorkspaceId != "" {
-			q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
+			q = q.Where(RealEscape(`workspace_id = ? or workspace_id = 'system'`, query.WorkspaceId))
 		}
 
 	}
@@ -511,7 +511,7 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
 		// Counter query should not have the limit, and offset, only the where condition is enough
 		// We do not want to show the workspce system anywhere, but we want data belongs to it everywhere
-		countQ = countQ.Where("unique_id <> \"system\"")
+		countQ = countQ.Where("unique_id <> 'system'")
 	}
 
 	countQ = countQ.Where(query.InternalQuery)
@@ -530,9 +530,9 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 	v := ref.Where(query.InternalQuery)
 
 	if query.ResolveStrategy == ResolveStrategyUser {
-		q = q.Where(`user_id = "` + query.UserId + `"`)
+		q = q.Where(RealEscape(`user_id = ?`, query.UserId))
 	} else if query.WorkspaceId != "" {
-		q = q.Where(`workspace_id = "` + query.WorkspaceId + `" or workspace_id = "system"`)
+		q = q.Where(RealEscape(`workspace_id = ? or workspace_id = 'system' `, query.WorkspaceId))
 	}
 
 	v.Model(item).Count(&countTotalAvailable)
@@ -673,7 +673,7 @@ func GetOneByWorkspaceEntity[T any](query QueryDSL, reflectVal reflect.Value) (*
 func RealEscape(portion string, values ...string) string {
 
 	for _, item := range values {
-		escapedItem := `"` + strings.ReplaceAll(item, "\"", "\\\"") + `"`
+		escapedItem := `'` + strings.ReplaceAll(item, "'", "''") + `'`
 		portion = strings.Replace(portion, "?", escapedItem, 1)
 	}
 
@@ -810,7 +810,7 @@ func WipeCleanEntity[T any]() (int64, error) {
 
 	// Wipe the main entities
 	var item T
-	operation := GetDbRef().Where("unique_id <> \"\"").Delete(&item)
+	operation := GetDbRef().Where("unique_id <> ''").Delete(&item)
 	if operation.Error != nil {
 		return 0, operation.Error
 	} else {

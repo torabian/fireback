@@ -16,7 +16,7 @@ LEFT JOIN role_capabilities rc
 LEFT JOIN role_entities re
     ON re.unique_id = wte.role_id
 
-WHERE uwe.user_id = "(userId)"
+WHERE uwe.user_id = '(userId)'
 
 
 UNION
@@ -40,4 +40,4 @@ LEFT JOIN role_entities re
     ON re.unique_id = wre.role_id
 LEFT JOIN capability_entities ce 
     ON ce.unique_id = rc.capability_entity_unique_id
-WHERE uwe.user_id = "(userId)"
+WHERE uwe.user_id = '(userId)'
