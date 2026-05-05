@@ -71,9 +71,6 @@ import  "{{ $key}}"
     {{ .PublicName }}ListId []string `json:"{{ .PrivateName }}ListId" yaml:"{{ .PrivateName }}ListId" xml:"{{ .PrivateName }}ListId" gorm:"-" sql:"-"`
     {{ end }}
     
-    {{ if eq .Type "html" }}
-    {{ .PublicName }}Excerpt *string `json:"{{ .PrivateName }}Excerpt" yaml:"{{ .PrivateName }}Excerpt" xml:"{{ .PrivateName }}Excerpt"`
-    {{ end }}
     
   {{ end }}
 {{ end }}
@@ -560,35 +557,7 @@ And here is the actual object signature:
   }
 {{ end }}
 
-{{ define "entitySanitize" }}
-func {{ .e.Upper }}EntityPreSanitize(dto *{{ .e.EntityName }}, query {{ .wsprefix }}QueryDSL) {
-
-	{{ range .e.CompleteFields }}
-		{{ if  eq .Type "html"  }}
-
-			if (dto.{{ .PublicName }} != "" ) {
-          {{ .PublicName }} := dto.{{ .PublicName }}
-          {{ .PublicName }}Excerpt := {{ $.wsprefix}}StripPolicy.Sanitize(dto.{{ .PublicName }})
-          {{ if ne .Unsafe true }}
-            {{ .PublicName }} = {{ $.wsprefix}}UgcPolicy.Sanitize({{ .PublicName }})
-            {{ .PublicName }}Excerpt = {{ $.wsprefix}}StripPolicy.Sanitize({{ .PublicName }}Excerpt)
-          {{ end }}
-          
-        {{ .PublicName }}ExcerptSize, {{ .PublicName }}ExcerptSizeExists := {{ $.e.EntityName }}MetaConfig["{{ .PublicName }}ExcerptSize"]
-        if {{ .PublicName }}ExcerptSizeExists {
-          {{ .PublicName }}Excerpt = {{ $.wsprefix }}PickFirstNWords({{ .PublicName }}Excerpt, int({{ .PublicName }}ExcerptSize))
-        } else {
-          {{ .PublicName }}Excerpt = {{ $.wsprefix }}PickFirstNWords({{ .PublicName }}Excerpt, 30)
-        }
-        
-        dto.{{ .PublicName }}Excerpt = &{{ .PublicName }}Excerpt
-        dto.{{ .PublicName }} = {{ .PublicName }}
-      }
-	    {{ end }}
-	{{ end }}
-}
-
-{{ end }}
+ 
 
 
 
@@ -652,7 +621,7 @@ func {{ .e.Upper}}MultiInsertFn(dtos []*{{ .e.Upper}}Entity, query {{ .wsprefix 
 	if len(dtos) > 0 {
 
 		for index := range dtos {
-			{{ .e.Upper}}EntityPreSanitize(dtos[index], query)
+
 			{{ .e.Upper}}EntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -704,7 +673,7 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
 	}
 
 	// 1.5 Sanitize the content coming of the front-end
-	{{ .e.EntityName }}PreSanitize(dto, query)
+
 
 	
 	// 2. Append the necessary information about user, workspace
@@ -1021,7 +990,7 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
 
     query.TriggerEventName = {{ .e.EventUpdated }}
 
-    {{.e.EntityName }}PreSanitize(fields, query)
+
     var item {{.e.EntityName }}
     var itemRefetched {{.e.EntityName }}
 

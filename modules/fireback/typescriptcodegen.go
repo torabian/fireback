@@ -70,24 +70,16 @@ func TsComputedField(field *Module3Field, isWorkspace bool) string {
 		return field.PublicName() + "[]"
 	case "slice":
 		return TsPrimitve(field.Primitive) + "[]"
-	case "html":
-		return "string"
 	case "int64", "int32", "int":
 		return "number"
 	case "float64", "float32", "float":
 		return "number"
 	case "bool":
 		return "boolean"
-	case "Timestamp", "datenano":
-		return "string"
-	case "date":
-		return "Date"
 	case "double":
 		return "number"
 	case FIELD_TYPE_OBJECT:
 		return field.PublicName()
-	case "money?":
-		return "{amount: number, currency: string, formatted?: string}"
 	default:
 		return "any"
 		// return field.Type

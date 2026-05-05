@@ -417,8 +417,6 @@ And here is the actual object signature:
 	},
 }
 
-func WorkspaceInviteEntityPreSanitize(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
-}
 func WorkspaceInviteEntityBeforeCreateAppend(dto *WorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -442,7 +440,6 @@ func WorkspaceInviteRecursiveAddUniqueId(dto *WorkspaceInviteEntity, query fireb
 func WorkspaceInviteMultiInsertFn(dtos []*WorkspaceInviteEntity, query fireback.QueryDSL) ([]*WorkspaceInviteEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			WorkspaceInviteEntityPreSanitize(dtos[index], query)
 			WorkspaceInviteEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -484,7 +481,6 @@ func WorkspaceInviteActionCreateFn(dto *WorkspaceInviteEntity, query fireback.Qu
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	WorkspaceInviteEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	WorkspaceInviteEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -576,7 +572,6 @@ func WorkspaceInviteMemJoin(items []uint) []*WorkspaceInviteEntity {
 func WorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceInviteEntity) (*WorkspaceInviteEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_INVITE_EVENT_UPDATED
-	WorkspaceInviteEntityPreSanitize(fields, query)
 	var item WorkspaceInviteEntity
 	var itemRefetched WorkspaceInviteEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

@@ -52,7 +52,7 @@ type NotificationConfigEntityQs struct {
 	ForgetPasswordTitle                    fireback.QueriableField `cli:"forget-password-title" table:"notification_config" typeof:"string" column:"forget_password_title" qs:"forgetPasswordTitle"`
 	ForgetPasswordTitleDefault             fireback.QueriableField `cli:"forget-password-title-default" table:"notification_config" typeof:"string" column:"forget_password_title_default" qs:"forgetPasswordTitleDefault"`
 	ForgetPasswordSender                   fireback.QueriableField `cli:"forget-password-sender" table:"notification_config" typeof:"one" column:"forget_password_sender" qs:"forgetPasswordSender"`
-	AcceptLanguage                         fireback.QueriableField `cli:"accept-language" table:"notification_config" typeof:"text" column:"accept_language" qs:"acceptLanguage"`
+	AcceptLanguage                         fireback.QueriableField `cli:"accept-language" table:"notification_config" typeof:"string" column:"accept_language" qs:"acceptLanguage"`
 	ConfirmEmailSender                     fireback.QueriableField `cli:"confirm-email-sender" table:"notification_config" typeof:"one" column:"confirm_email_sender" qs:"confirmEmailSender"`
 	ConfirmEmailContent                    fireback.QueriableField `cli:"confirm-email-content" table:"notification_config" typeof:"string" column:"confirm_email_content" qs:"confirmEmailContent"`
 	ConfirmEmailContentExcerpt             fireback.QueriableField `cli:"confirm-email-content-excerpt" table:"notification_config" typeof:"string" column:"confirm_email_content_excerpt" qs:"confirmEmailContentExcerpt"`
@@ -260,8 +260,7 @@ type NotificationConfigEntity struct {
 	ForgetPasswordTitleDefault             string                      `json:"forgetPasswordTitleDefault" xml:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
 	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" xml:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
 	ForgetPasswordSenderId                 fireback.String             `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
-	AcceptLanguage                         string                      `json:"acceptLanguage" xml:"acceptLanguage" yaml:"acceptLanguage"    gorm:"text"      `
-	AcceptLanguageExcerpt                  *string                     `json:"acceptLanguageExcerpt" yaml:"acceptLanguageExcerpt" xml:"acceptLanguageExcerpt"`
+	AcceptLanguage                         string                      `json:"acceptLanguage" xml:"acceptLanguage" yaml:"acceptLanguage"        `
 	ConfirmEmailSender                     *EmailSenderEntity          `json:"confirmEmailSender" xml:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"      `
 	ConfirmEmailSenderId                   fireback.String             `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
 	ConfirmEmailContent                    string                      `json:"confirmEmailContent" xml:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
@@ -394,9 +393,7 @@ type NotificationConfigFieldMap struct {
 	ConfirmEmailTitleDefault               fireback.TranslatedString `yaml:"confirmEmailTitleDefault"`
 }
 
-var NotificationConfigEntityMetaConfig map[string]int64 = map[string]int64{
-	"AcceptLanguageExcerptSize": 100,
-}
+var NotificationConfigEntityMetaConfig map[string]int64 = map[string]int64{}
 var NotificationConfigEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&NotificationConfigEntity{}))
 
 func entityNotificationConfigFormatter(dto *NotificationConfigEntity, query fireback.QueryDSL) {
@@ -524,7 +521,7 @@ ForgetPasswordContentDefaultExcerpt: (type: string) Description:
 ForgetPasswordTitle: (type: string) Description: 
 ForgetPasswordTitleDefault: (type: string) Description: 
 ForgetPasswordSender: (type: one) Description: 
-AcceptLanguage: (type: text) Description: 
+AcceptLanguage: (type: string) Description: 
 ConfirmEmailSender: (type: one) Description: 
 ConfirmEmailContent: (type: string) Description: 
 ConfirmEmailContentExcerpt: (type: string) Description: 
@@ -542,8 +539,6 @@ And here is the actual object signature:
 	},
 }
 
-func NotificationConfigEntityPreSanitize(dto *NotificationConfigEntity, query fireback.QueryDSL) {
-}
 func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -567,7 +562,6 @@ func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query
 func NotificationConfigMultiInsertFn(dtos []*NotificationConfigEntity, query fireback.QueryDSL) ([]*NotificationConfigEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			NotificationConfigEntityPreSanitize(dtos[index], query)
 			NotificationConfigEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -609,7 +603,6 @@ func NotificationConfigActionCreateFn(dto *NotificationConfigEntity, query fireb
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	NotificationConfigEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	NotificationConfigEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -701,7 +694,6 @@ func NotificationConfigMemJoin(items []uint) []*NotificationConfigEntity {
 func NotificationConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *NotificationConfigEntity) (*NotificationConfigEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = NOTIFICATION_CONFIG_EVENT_UPDATED
-	NotificationConfigEntityPreSanitize(fields, query)
 	var item NotificationConfigEntity
 	var itemRefetched NotificationConfigEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -988,7 +980,7 @@ var NotificationConfigCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "accept-language",
 		Required: false,
-		Usage:    `acceptLanguage (text)`,
+		Usage:    `acceptLanguage (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-sender-id",
@@ -1137,6 +1129,14 @@ var NotificationConfigCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 		Required:    false,
 		Recommended: false,
 		Usage:       `forgetPasswordTitleDefault`,
+		Type:        "string",
+	},
+	{
+		Name:        "acceptLanguage",
+		StructField: "AcceptLanguage",
+		Required:    false,
+		Recommended: false,
+		Usage:       `acceptLanguage`,
 		Type:        "string",
 	},
 	{
@@ -1311,7 +1311,7 @@ var NotificationConfigCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "accept-language",
 		Required: false,
-		Usage:    `acceptLanguage (text)`,
+		Usage:    `acceptLanguage (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "confirm-email-sender-id",

@@ -334,8 +334,6 @@ And here is the actual object signature:
 	},
 }
 
-func PublicJoinKeyEntityPreSanitize(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
-}
 func PublicJoinKeyEntityBeforeCreateAppend(dto *PublicJoinKeyEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -359,7 +357,6 @@ func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query fireback.
 func PublicJoinKeyMultiInsertFn(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			PublicJoinKeyEntityPreSanitize(dtos[index], query)
 			PublicJoinKeyEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -401,7 +398,6 @@ func PublicJoinKeyActionCreateFn(dto *PublicJoinKeyEntity, query fireback.QueryD
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	PublicJoinKeyEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PublicJoinKeyEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -493,7 +489,6 @@ func PublicJoinKeyMemJoin(items []uint) []*PublicJoinKeyEntity {
 func PublicJoinKeyUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PublicJoinKeyEntity) (*PublicJoinKeyEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PUBLIC_JOIN_KEY_EVENT_UPDATED
-	PublicJoinKeyEntityPreSanitize(fields, query)
 	var item PublicJoinKeyEntity
 	var itemRefetched PublicJoinKeyEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

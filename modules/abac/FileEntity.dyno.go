@@ -496,8 +496,6 @@ And here is the actual object signature:
 	},
 }
 
-func FileEntityPreSanitize(dto *FileEntity, query fireback.QueryDSL) {
-}
 func FileEntityBeforeCreateAppend(dto *FileEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -528,7 +526,6 @@ func FileRecursiveAddUniqueId(dto *FileEntity, query fireback.QueryDSL) {
 func FileMultiInsertFn(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			FileEntityPreSanitize(dtos[index], query)
 			FileEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -570,7 +567,6 @@ func FileActionCreateFn(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	FileEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	FileEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -662,7 +658,6 @@ func FileMemJoin(items []uint) []*FileEntity {
 func FileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *FileEntity) (*FileEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = FILE_EVENT_UPDATED
-	FileEntityPreSanitize(fields, query)
 	var item FileEntity
 	var itemRefetched FileEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

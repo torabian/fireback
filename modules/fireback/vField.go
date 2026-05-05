@@ -16,7 +16,7 @@ type Module3Field struct {
 	Description string `yaml:"description,omitempty" json:"description,omitempty" jsonschema:"description=Description about the field for developers and generated documents."`
 
 	// Type of the field based on Fireback types.
-	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=complex,string?,enum=int?,enum=float64?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=int,enum=collection,enum=slice,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
+	Type string `yaml:"type,omitempty" json:"type,omitempty" jsonschema:"enum=complex,string?,enum=int?,enum=float64?,enum=float32?,enum=bool?,enum=int32?,enum=int64?,enum=string?,enum=int,enum=collection,enum=slice,enum=enum,enum=bool,enum=one,enum=int64,enum=float64,enum=object,enum=array,enum=string,description=Type of the field based on Fireback types."`
 
 	// The complex class which will be used for data type complex
 	Complex string `yaml:"complex,omitempty" json:"complex,omitempty" jsonschema:"description=The complex class which will be used for data type complex"`

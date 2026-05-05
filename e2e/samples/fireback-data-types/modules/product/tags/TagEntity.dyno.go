@@ -385,7 +385,7 @@ func TagRecursiveAddUniqueId(dto *TagEntity, query fireback.QueryDSL) {
 func TagMultiInsertFn(dtos []*TagEntity, query fireback.QueryDSL) ([]*TagEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			TagEntityPreSanitize(dtos[index], query)
+
 			TagEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -427,7 +427,7 @@ func TagActionCreateFn(dto *TagEntity, query fireback.QueryDSL) (*TagEntity, *fi
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	TagEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	TagEntityBeforeCreateAppend(dto, query)
 	// 3. Create other entities if we want select from them
@@ -513,7 +513,7 @@ func TagMemJoin(items []uint) []*TagEntity {
 func TagUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TagEntity) (*TagEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TAG_EVENT_UPDATED
-	TagEntityPreSanitize(fields, query)
+
 	var item TagEntity
 	var itemRefetched TagEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

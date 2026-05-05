@@ -73,10 +73,9 @@ func QuickGetOtpMessage(q fireback.QueryDSL, field RegionContentKey) *RegionalCo
 		log.Default().Println("For otp, the default content has been used. Make sure you update the regional content, you can customize it for different users, regions, and languages")
 
 		return &RegionalContentEntity{
-			Content:        DefaultOtpForEmailMessage,
-			ContentExcerpt: &DefaultOtpForEmailMessage,
-			Title:          DefaultOtpForEmailMessageTitle,
-			UniqueId:       "~in-binary-default-content",
+			Content:  DefaultOtpForEmailMessage,
+			Title:    DefaultOtpForEmailMessageTitle,
+			UniqueId: "~in-binary-default-content",
 		}
 	} else {
 		return result

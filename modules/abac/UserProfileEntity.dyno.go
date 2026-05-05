@@ -333,8 +333,6 @@ And here is the actual object signature:
 	},
 }
 
-func UserProfileEntityPreSanitize(dto *UserProfileEntity, query fireback.QueryDSL) {
-}
 func UserProfileEntityBeforeCreateAppend(dto *UserProfileEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -358,7 +356,6 @@ func UserProfileRecursiveAddUniqueId(dto *UserProfileEntity, query fireback.Quer
 func UserProfileMultiInsertFn(dtos []*UserProfileEntity, query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			UserProfileEntityPreSanitize(dtos[index], query)
 			UserProfileEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -400,7 +397,6 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query fireback.QueryDSL) 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	UserProfileEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	UserProfileEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -492,7 +488,6 @@ func UserProfileMemJoin(items []uint) []*UserProfileEntity {
 func UserProfileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserProfileEntity) (*UserProfileEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = USER_PROFILE_EVENT_UPDATED
-	UserProfileEntityPreSanitize(fields, query)
 	var item UserProfileEntity
 	var itemRefetched UserProfileEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

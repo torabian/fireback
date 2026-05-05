@@ -357,8 +357,6 @@ And here is the actual object signature:
 	},
 }
 
-func GsmProviderEntityPreSanitize(dto *GsmProviderEntity, query fireback.QueryDSL) {
-}
 func GsmProviderEntityBeforeCreateAppend(dto *GsmProviderEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -382,7 +380,6 @@ func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query fireback.Quer
 func GsmProviderMultiInsertFn(dtos []*GsmProviderEntity, query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			GsmProviderEntityPreSanitize(dtos[index], query)
 			GsmProviderEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -424,7 +421,6 @@ func GsmProviderActionCreateFn(dto *GsmProviderEntity, query fireback.QueryDSL) 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	GsmProviderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	GsmProviderEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -516,7 +512,6 @@ func GsmProviderMemJoin(items []uint) []*GsmProviderEntity {
 func GsmProviderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *GsmProviderEntity) (*GsmProviderEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = GSM_PROVIDER_EVENT_UPDATED
-	GsmProviderEntityPreSanitize(fields, query)
 	var item GsmProviderEntity
 	var itemRefetched GsmProviderEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

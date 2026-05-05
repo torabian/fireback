@@ -381,8 +381,6 @@ And here is the actual object signature:
 	},
 }
 
-func InvoiceTransactionEntityPreSanitize(dto *InvoiceTransactionEntity, query fireback.QueryDSL) {
-}
 func InvoiceTransactionEntityBeforeCreateAppend(dto *InvoiceTransactionEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -406,7 +404,6 @@ func InvoiceTransactionRecursiveAddUniqueId(dto *InvoiceTransactionEntity, query
 func InvoiceTransactionMultiInsertFn(dtos []*InvoiceTransactionEntity, query fireback.QueryDSL) ([]*InvoiceTransactionEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			InvoiceTransactionEntityPreSanitize(dtos[index], query)
 			InvoiceTransactionEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -448,7 +445,6 @@ func InvoiceTransactionActionCreateFn(dto *InvoiceTransactionEntity, query fireb
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	InvoiceTransactionEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	InvoiceTransactionEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -540,7 +536,6 @@ func InvoiceTransactionMemJoin(items []uint) []*InvoiceTransactionEntity {
 func InvoiceTransactionUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *InvoiceTransactionEntity) (*InvoiceTransactionEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = INVOICE_TRANSACTION_EVENT_UPDATED
-	InvoiceTransactionEntityPreSanitize(fields, query)
 	var item InvoiceTransactionEntity
 	var itemRefetched InvoiceTransactionEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

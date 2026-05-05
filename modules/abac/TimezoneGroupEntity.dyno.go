@@ -344,8 +344,6 @@ And here is the actual object signature:
 	},
 }
 
-func TimezoneGroupEntityPreSanitize(dto *TimezoneGroupEntity, query fireback.QueryDSL) {
-}
 func TimezoneGroupEntityBeforeCreateAppend(dto *TimezoneGroupEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -369,7 +367,6 @@ func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query fireback.
 func TimezoneGroupMultiInsertFn(dtos []*TimezoneGroupEntity, query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			TimezoneGroupEntityPreSanitize(dtos[index], query)
 			TimezoneGroupEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -411,7 +408,6 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query fireback.QueryD
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	TimezoneGroupEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	TimezoneGroupEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -503,7 +499,6 @@ func TimezoneGroupMemJoin(items []uint) []*TimezoneGroupEntity {
 func TimezoneGroupUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TIMEZONE_GROUP_EVENT_UPDATED
-	TimezoneGroupEntityPreSanitize(fields, query)
 	var item TimezoneGroupEntity
 	var itemRefetched TimezoneGroupEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

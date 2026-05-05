@@ -355,8 +355,6 @@ And here is the actual object signature:
 	},
 }
 
-func RoleEntityPreSanitize(dto *RoleEntity, query fireback.QueryDSL) {
-}
 func RoleEntityBeforeCreateAppend(dto *RoleEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -380,7 +378,6 @@ func RoleRecursiveAddUniqueId(dto *RoleEntity, query fireback.QueryDSL) {
 func RoleMultiInsertFn(dtos []*RoleEntity, query fireback.QueryDSL) ([]*RoleEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			RoleEntityPreSanitize(dtos[index], query)
 			RoleEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -422,7 +419,6 @@ func RoleActionCreateFn(dto *RoleEntity, query fireback.QueryDSL) (*RoleEntity, 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	RoleEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	RoleEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -514,7 +510,6 @@ func RoleMemJoin(items []uint) []*RoleEntity {
 func RoleUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *RoleEntity) (*RoleEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = ROLE_EVENT_UPDATED
-	RoleEntityPreSanitize(fields, query)
 	var item RoleEntity
 	var itemRefetched RoleEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

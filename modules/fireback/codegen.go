@@ -1837,7 +1837,8 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 	for _, entity := range x.Entities {
 
 		// Disabled now, but later we need to fix this.
-		// ve := ConvertEntityToEmi(entity)
+		ve := ConvertEntityToEmi(entity)
+		fmt.Println("Ve", ve.Json())
 		// mDtos = append(mDtos, ve.Dtos...)
 		// aktFields = append(aktFields, ve.Actions...)
 

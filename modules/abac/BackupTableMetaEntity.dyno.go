@@ -325,8 +325,6 @@ And here is the actual object signature:
 	},
 }
 
-func BackupTableMetaEntityPreSanitize(dto *BackupTableMetaEntity, query fireback.QueryDSL) {
-}
 func BackupTableMetaEntityBeforeCreateAppend(dto *BackupTableMetaEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -350,7 +348,6 @@ func BackupTableMetaRecursiveAddUniqueId(dto *BackupTableMetaEntity, query fireb
 func BackupTableMetaMultiInsertFn(dtos []*BackupTableMetaEntity, query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			BackupTableMetaEntityPreSanitize(dtos[index], query)
 			BackupTableMetaEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -392,7 +389,6 @@ func BackupTableMetaActionCreateFn(dto *BackupTableMetaEntity, query fireback.Qu
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	BackupTableMetaEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	BackupTableMetaEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -484,7 +480,6 @@ func BackupTableMetaMemJoin(items []uint) []*BackupTableMetaEntity {
 func BackupTableMetaUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *BackupTableMetaEntity) (*BackupTableMetaEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = BACKUP_TABLE_META_EVENT_UPDATED
-	BackupTableMetaEntityPreSanitize(fields, query)
 	var item BackupTableMetaEntity
 	var itemRefetched BackupTableMetaEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

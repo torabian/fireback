@@ -37,7 +37,7 @@ export class PublicAuthenticationEntity extends BaseEntity {
   public passportValue?: string | null;
   public isInCreationProcess?: boolean | null;
   public status?: string | null;
-  public blockedUntil?: string | null;
+  public blockedUntil?: number | null;
   public otp?: string | null;
   public recoveryAbsoluteUrl?: string | null;
   public static Navigation = {
@@ -132,8 +132,8 @@ export class PublicAuthenticationEntity extends BaseEntity {
     },
     {
       "name": "blockedUntil",
-      "type": "datenano",
-      "computedType": "string",
+      "type": "int64",
+      "computedType": "number",
       "gormMap": {}
     },
     {

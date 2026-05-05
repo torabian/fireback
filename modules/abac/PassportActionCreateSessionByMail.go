@@ -45,9 +45,6 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 	}
 
 	for _, token := range tokens {
-		if token.ValidUntil == nil {
-			continue
-		}
 
 		t, err := token.ValidUntil.GetTime()
 		if err != nil {
@@ -73,7 +70,7 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 		UniqueId:    fireback.UUID(),
 		UserId:      fireback.NewString(x.UniqueId),
 		Token:       tokenString,
-		ValidUntil:  until,
+		ValidUntil:  *until,
 		WorkspaceId: fireback.NewString(ROOT_VAR),
 	}
 	if err3 := ref.Create(token).Error; err3 != nil {

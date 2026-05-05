@@ -325,8 +325,6 @@ And here is the actual object signature:
 	},
 }
 
-func PreferenceEntityPreSanitize(dto *PreferenceEntity, query fireback.QueryDSL) {
-}
 func PreferenceEntityBeforeCreateAppend(dto *PreferenceEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -350,7 +348,6 @@ func PreferenceRecursiveAddUniqueId(dto *PreferenceEntity, query fireback.QueryD
 func PreferenceMultiInsertFn(dtos []*PreferenceEntity, query fireback.QueryDSL) ([]*PreferenceEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			PreferenceEntityPreSanitize(dtos[index], query)
 			PreferenceEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -392,7 +389,6 @@ func PreferenceActionCreateFn(dto *PreferenceEntity, query fireback.QueryDSL) (*
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	PreferenceEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PreferenceEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -484,7 +480,6 @@ func PreferenceMemJoin(items []uint) []*PreferenceEntity {
 func PreferenceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PreferenceEntity) (*PreferenceEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PREFERENCE_EVENT_UPDATED
-	PreferenceEntityPreSanitize(fields, query)
 	var item PreferenceEntity
 	var itemRefetched PreferenceEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

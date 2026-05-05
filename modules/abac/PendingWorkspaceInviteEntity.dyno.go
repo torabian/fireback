@@ -358,8 +358,6 @@ And here is the actual object signature:
 	},
 }
 
-func PendingWorkspaceInviteEntityPreSanitize(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
-}
 func PendingWorkspaceInviteEntityBeforeCreateAppend(dto *PendingWorkspaceInviteEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -383,7 +381,6 @@ func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntit
 func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			PendingWorkspaceInviteEntityPreSanitize(dtos[index], query)
 			PendingWorkspaceInviteEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -425,7 +422,6 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	PendingWorkspaceInviteEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	PendingWorkspaceInviteEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -517,7 +513,6 @@ func PendingWorkspaceInviteMemJoin(items []uint) []*PendingWorkspaceInviteEntity
 func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PENDING_WORKSPACE_INVITE_EVENT_UPDATED
-	PendingWorkspaceInviteEntityPreSanitize(fields, query)
 	var item PendingWorkspaceInviteEntity
 	var itemRefetched PendingWorkspaceInviteEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

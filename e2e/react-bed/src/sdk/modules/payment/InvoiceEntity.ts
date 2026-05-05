@@ -21,7 +21,7 @@ export class InvoiceEntity extends BaseEntity {
   /**
   Amount of the invoice which has to be payed
   */
-  public amount?: {amount: number, currency: string, formatted?: string} | null;
+  public amount?: any | null;
   /**
   The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.
   */
@@ -85,7 +85,7 @@ export class InvoiceEntity extends BaseEntity {
       "description": "Amount of the invoice which has to be payed",
       "type": "money?",
       "validate": "required",
-      "computedType": "{amount: number, currency: string, formatted?: string}",
+      "computedType": "any",
       "gormMap": {}
     },
     {

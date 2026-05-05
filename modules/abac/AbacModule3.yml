@@ -969,7 +969,7 @@ entities:
         type: one
         target: EmailSenderEntity
       - name: acceptLanguage
-        type: text
+        type: string
       - name: confirmEmailSender
         type: one
         target: EmailSenderEntity
@@ -1118,7 +1118,8 @@ entities:
       - name: token
         type: string
       - name: validUntil
-        type: datetime
+        type: complex
+        complex: fireback.XDateTime
   - name: userWorkspace
     permRewrite:
       replace: root.modules
@@ -1206,7 +1207,8 @@ entities:
       - name: title
         type: string
       - name: birthDate
-        type: date
+        type: complex
+        complex: fireback.XDate
       - name: avatar
         type: string
       - name: lastIpAddress
@@ -1599,7 +1601,7 @@ entities:
       accessed.
     fields:
       - name: content
-        type: html
+        type: string
         validate: required
       - name: region
         validate: required
@@ -1658,7 +1660,7 @@ entities:
       - name: status
         type: string
       - name: blockedUntil
-        type: datenano
+        type: int64
       - name: otp
         type: string
       - name: recoveryAbsoluteUrl

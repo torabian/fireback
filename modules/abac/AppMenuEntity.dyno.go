@@ -385,8 +385,6 @@ And here is the actual object signature:
 	},
 }
 
-func AppMenuEntityPreSanitize(dto *AppMenuEntity, query fireback.QueryDSL) {
-}
 func AppMenuEntityBeforeCreateAppend(dto *AppMenuEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -410,7 +408,6 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query fireback.QueryDSL) {
 func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			AppMenuEntityPreSanitize(dtos[index], query)
 			AppMenuEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -452,7 +449,6 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	AppMenuEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	AppMenuEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -590,7 +586,6 @@ func AppMenuActionCteQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireba
 func AppMenuUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *AppMenuEntity) (*AppMenuEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = APP_MENU_EVENT_UPDATED
-	AppMenuEntityPreSanitize(fields, query)
 	var item AppMenuEntity
 	var itemRefetched AppMenuEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

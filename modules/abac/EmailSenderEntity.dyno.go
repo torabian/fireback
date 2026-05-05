@@ -349,8 +349,6 @@ And here is the actual object signature:
 	},
 }
 
-func EmailSenderEntityPreSanitize(dto *EmailSenderEntity, query fireback.QueryDSL) {
-}
 func EmailSenderEntityBeforeCreateAppend(dto *EmailSenderEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -374,7 +372,6 @@ func EmailSenderRecursiveAddUniqueId(dto *EmailSenderEntity, query fireback.Quer
 func EmailSenderMultiInsertFn(dtos []*EmailSenderEntity, query fireback.QueryDSL) ([]*EmailSenderEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			EmailSenderEntityPreSanitize(dtos[index], query)
 			EmailSenderEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -416,7 +413,6 @@ func EmailSenderActionCreateFn(dto *EmailSenderEntity, query fireback.QueryDSL) 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	EmailSenderEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailSenderEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -508,7 +504,6 @@ func EmailSenderMemJoin(items []uint) []*EmailSenderEntity {
 func EmailSenderUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *EmailSenderEntity) (*EmailSenderEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = EMAIL_SENDER_EVENT_UPDATED
-	EmailSenderEntityPreSanitize(fields, query)
 	var item EmailSenderEntity
 	var itemRefetched EmailSenderEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

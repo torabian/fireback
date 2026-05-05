@@ -357,8 +357,6 @@ And here is the actual object signature:
 	},
 }
 
-func EmailConfirmationEntityPreSanitize(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
-}
 func EmailConfirmationEntityBeforeCreateAppend(dto *EmailConfirmationEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -382,7 +380,6 @@ func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query f
 func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			EmailConfirmationEntityPreSanitize(dtos[index], query)
 			EmailConfirmationEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -424,7 +421,6 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query firebac
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	EmailConfirmationEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	EmailConfirmationEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -516,7 +512,6 @@ func EmailConfirmationMemJoin(items []uint) []*EmailConfirmationEntity {
 func EmailConfirmationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = EMAIL_CONFIRMATION_EVENT_UPDATED
-	EmailConfirmationEntityPreSanitize(fields, query)
 	var item EmailConfirmationEntity
 	var itemRefetched EmailConfirmationEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

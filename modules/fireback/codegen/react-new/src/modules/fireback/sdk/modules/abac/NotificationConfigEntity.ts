@@ -47,7 +47,6 @@ export class NotificationConfigEntity extends BaseEntity {
   public forgetPasswordSender?: EmailSenderEntity | null;
       forgetPasswordSenderId?: string | null;
   public acceptLanguage?: string | null;
-    public acceptLanguageExcerpt?: string[] | null;
   public confirmEmailSender?: EmailSenderEntity | null;
       confirmEmailSenderId?: string | null;
   public confirmEmailContent?: string | null;
@@ -232,7 +231,7 @@ export class NotificationConfigEntity extends BaseEntity {
     },
     {
       "name": "acceptLanguage",
-      "type": "text",
+      "type": "string",
       "computedType": "string",
       "gormMap": {}
     },

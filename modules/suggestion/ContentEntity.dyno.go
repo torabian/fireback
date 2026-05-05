@@ -344,8 +344,6 @@ And here is the actual object signature:
 	},
 }
 
-func ContentEntityPreSanitize(dto *ContentEntity, query fireback.QueryDSL) {
-}
 func ContentEntityBeforeCreateAppend(dto *ContentEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -369,7 +367,6 @@ func ContentRecursiveAddUniqueId(dto *ContentEntity, query fireback.QueryDSL) {
 func ContentMultiInsertFn(dtos []*ContentEntity, query fireback.QueryDSL) ([]*ContentEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			ContentEntityPreSanitize(dtos[index], query)
 			ContentEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -411,7 +408,6 @@ func ContentActionCreateFn(dto *ContentEntity, query fireback.QueryDSL) (*Conten
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	ContentEntityPreSanitize(dto, query)
 	// 2. Append the necessary information about user, workspace
 	ContentEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -503,7 +499,6 @@ func ContentMemJoin(items []uint) []*ContentEntity {
 func ContentUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ContentEntity) (*ContentEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = CONTENT_EVENT_UPDATED
-	ContentEntityPreSanitize(fields, query)
 	var item ContentEntity
 	var itemRefetched ContentEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
