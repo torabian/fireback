@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -25,6 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var emailConfirmationSeedersFs = &seeders.ViewsFs
@@ -371,19 +370,16 @@ func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query f
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			EmailConfirmationEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -425,7 +421,6 @@ func EmailConfirmationActionCreateFn(dto *EmailConfirmationEntity, query firebac
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	EmailConfirmationEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -517,7 +512,6 @@ func EmailConfirmationMemJoin(items []uint) []*EmailConfirmationEntity {
 func EmailConfirmationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *EmailConfirmationEntity) (*EmailConfirmationEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = EMAIL_CONFIRMATION_EVENT_UPDATED
-
 	var item EmailConfirmationEntity
 	var itemRefetched EmailConfirmationEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

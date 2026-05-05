@@ -8,9 +8,6 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -18,17 +15,17 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-
+	"log"
+	"strings"
 	//queries github.com/torabian/fireback - modules/abac"
 	"embed"
-	reflect "reflect"
-	"time"
-
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/Workspace"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/Workspace"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
+	reflect "reflect"
+	"time"
 )
 
 var workspaceSeedersFs = &seeders.ViewsFs
@@ -362,19 +359,16 @@ func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query fireback.QueryDSL
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func WorkspaceMultiInsertFn(dtos []*WorkspaceEntity, query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			WorkspaceEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -416,7 +410,6 @@ func WorkspaceActionCreateFn(dto *WorkspaceEntity, query fireback.QueryDSL) (*Wo
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	WorkspaceEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -554,7 +547,6 @@ func WorkspaceActionCteQueryFn(query fireback.QueryDSL) ([]*WorkspaceEntity, *fi
 func WorkspaceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_EVENT_UPDATED
-
 	var item WorkspaceEntity
 	var itemRefetched WorkspaceEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

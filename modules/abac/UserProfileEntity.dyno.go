@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -25,6 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var userProfileSeedersFs = &seeders.ViewsFs
@@ -347,19 +346,16 @@ func UserProfileRecursiveAddUniqueId(dto *UserProfileEntity, query fireback.Quer
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func UserProfileMultiInsertFn(dtos []*UserProfileEntity, query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			UserProfileEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -401,7 +397,6 @@ func UserProfileActionCreateFn(dto *UserProfileEntity, query fireback.QueryDSL) 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	UserProfileEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -493,7 +488,6 @@ func UserProfileMemJoin(items []uint) []*UserProfileEntity {
 func UserProfileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserProfileEntity) (*UserProfileEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = USER_PROFILE_EVENT_UPDATED
-
 	var item UserProfileEntity
 	var itemRefetched UserProfileEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

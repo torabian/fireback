@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -24,6 +19,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var capabilitySeedersFs = &seeders.ViewsFs
@@ -364,19 +363,16 @@ func CapabilityRecursiveAddUniqueId(dto *CapabilityEntity, query QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func CapabilityMultiInsertFn(dtos []*CapabilityEntity, query QueryDSL) ([]*CapabilityEntity, *IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			CapabilityEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -418,7 +414,6 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	CapabilityEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -510,7 +505,6 @@ func CapabilityMemJoin(items []uint) []*CapabilityEntity {
 func CapabilityUpdateExec(dbref *gorm.DB, query QueryDSL, fields *CapabilityEntity) (*CapabilityEntity, *IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = CAPABILITY_EVENT_UPDATED
-
 	var item CapabilityEntity
 	var itemRefetched CapabilityEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

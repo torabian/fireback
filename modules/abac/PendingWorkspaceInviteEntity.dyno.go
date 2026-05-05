@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -25,6 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var pendingWorkspaceInviteSeedersFs = &seeders.ViewsFs
@@ -372,19 +371,16 @@ func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntit
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			PendingWorkspaceInviteEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -426,7 +422,6 @@ func PendingWorkspaceInviteActionCreateFn(dto *PendingWorkspaceInviteEntity, que
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	PendingWorkspaceInviteEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -518,7 +513,6 @@ func PendingWorkspaceInviteMemJoin(items []uint) []*PendingWorkspaceInviteEntity
 func PendingWorkspaceInviteUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PendingWorkspaceInviteEntity) (*PendingWorkspaceInviteEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PENDING_WORKSPACE_INVITE_EVENT_UPDATED
-
 	var item PendingWorkspaceInviteEntity
 	var itemRefetched PendingWorkspaceInviteEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

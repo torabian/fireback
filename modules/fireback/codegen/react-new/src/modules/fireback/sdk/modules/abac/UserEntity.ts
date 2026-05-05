@@ -44,7 +44,7 @@ export class UserEntity extends BaseEntity {
   public photo?: string | null;
   public gender?: number | null;
   public title?: string | null;
-  public birthDate?: Date | null;
+  public birthDate?: any | null;
   public avatar?: string | null;
   /**
   User last connecting ip address
@@ -157,8 +157,9 @@ export class UserEntity extends BaseEntity {
     },
     {
       "name": "birthDate",
-      "type": "date",
-      "computedType": "Date",
+      "type": "complex",
+      "complex": "fireback.XDate",
+      "computedType": "any",
       "gormMap": {}
     },
     {

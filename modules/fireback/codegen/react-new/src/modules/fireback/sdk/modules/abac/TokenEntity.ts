@@ -71,7 +71,8 @@ export class TokenEntity extends BaseEntity {
     },
     {
       "name": "validUntil",
-      "type": "datetime",
+      "type": "complex",
+      "complex": "fireback.XDateTime",
       "computedType": "any",
       "gormMap": {}
     }

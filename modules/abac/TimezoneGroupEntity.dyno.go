@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -25,6 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var timezoneGroupSeedersFs = &seeders.ViewsFs
@@ -358,19 +357,16 @@ func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query fireback.
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func TimezoneGroupMultiInsertFn(dtos []*TimezoneGroupEntity, query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			TimezoneGroupEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -412,7 +408,6 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query fireback.QueryD
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	TimezoneGroupEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -504,7 +499,6 @@ func TimezoneGroupMemJoin(items []uint) []*TimezoneGroupEntity {
 func TimezoneGroupUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TimezoneGroupEntity) (*TimezoneGroupEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TIMEZONE_GROUP_EVENT_UPDATED
-
 	var item TimezoneGroupEntity
 	var itemRefetched TimezoneGroupEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

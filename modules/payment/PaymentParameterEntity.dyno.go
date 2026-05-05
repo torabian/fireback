@@ -9,11 +9,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -25,6 +20,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var paymentParameterSeedersFs = &seeders.ViewsFs
@@ -430,19 +429,16 @@ func PaymentParameterRecursiveAddUniqueId(dto *PaymentParameterEntity, query fir
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PaymentParameterMultiInsertFn(dtos []*PaymentParameterEntity, query fireback.QueryDSL) ([]*PaymentParameterEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			PaymentParameterEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -484,7 +480,6 @@ func PaymentParameterActionCreateFn(dto *PaymentParameterEntity, query fireback.
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	PaymentParameterEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -576,7 +571,6 @@ func PaymentParameterMemJoin(items []uint) []*PaymentParameterEntity {
 func PaymentParameterUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PaymentParameterEntity) (*PaymentParameterEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PAYMENT_PARAMETER_EVENT_UPDATED
-
 	var item PaymentParameterEntity
 	var itemRefetched PaymentParameterEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
