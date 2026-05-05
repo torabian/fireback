@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var fileSeedersFs = &seeders.ViewsFs
@@ -496,8 +497,6 @@ And here is the actual object signature:
 	},
 }
 
-func FileEntityPreSanitize(dto *FileEntity, query fireback.QueryDSL) {
-}
 func FileEntityBeforeCreateAppend(dto *FileEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -518,17 +517,19 @@ func FileRecursiveAddUniqueId(dto *FileEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func FileMultiInsertFn(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			FileEntityPreSanitize(dtos[index], query)
+
 			FileEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -570,7 +571,7 @@ func FileActionCreateFn(dto *FileEntity, query fireback.QueryDSL) (*FileEntity, 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	FileEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	FileEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -662,7 +663,7 @@ func FileMemJoin(items []uint) []*FileEntity {
 func FileUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *FileEntity) (*FileEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = FILE_EVENT_UPDATED
-	FileEntityPreSanitize(fields, query)
+
 	var item FileEntity
 	var itemRefetched FileEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

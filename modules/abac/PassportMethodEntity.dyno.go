@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var passportMethodSeedersFs = &seeders.ViewsFs
@@ -343,8 +344,6 @@ And here is the actual object signature:
 	},
 }
 
-func PassportMethodEntityPreSanitize(dto *PassportMethodEntity, query fireback.QueryDSL) {
-}
 func PassportMethodEntityBeforeCreateAppend(dto *PassportMethodEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -358,17 +357,19 @@ func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query firebac
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			PassportMethodEntityPreSanitize(dtos[index], query)
+
 			PassportMethodEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -410,7 +411,7 @@ func PassportMethodActionCreateFn(dto *PassportMethodEntity, query fireback.Quer
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	PassportMethodEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	PassportMethodEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -502,7 +503,7 @@ func PassportMethodMemJoin(items []uint) []*PassportMethodEntity {
 func PassportMethodUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PassportMethodEntity) (*PassportMethodEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PASSPORT_METHOD_EVENT_UPDATED
-	PassportMethodEntityPreSanitize(fields, query)
+
 	var item PassportMethodEntity
 	var itemRefetched PassportMethodEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

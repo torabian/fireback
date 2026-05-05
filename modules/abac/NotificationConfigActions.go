@@ -149,7 +149,6 @@ func NotificationWorkspaceConfigActionUpdate(
 	fields *NotificationConfigEntity,
 ) (*NotificationConfigEntity, *fireback.IError) {
 
-	NotificationConfigEntityPreSanitize(fields, query)
 	var item NotificationConfigEntity
 	q := fireback.GetDbRef().
 		Where(&NotificationConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}).

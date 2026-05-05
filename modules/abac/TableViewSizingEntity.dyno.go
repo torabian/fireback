@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var tableViewSizingSeedersFs = &seeders.ViewsFs
@@ -333,8 +334,6 @@ And here is the actual object signature:
 	},
 }
 
-func TableViewSizingEntityPreSanitize(dto *TableViewSizingEntity, query fireback.QueryDSL) {
-}
 func TableViewSizingEntityBeforeCreateAppend(dto *TableViewSizingEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -348,17 +347,19 @@ func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query fireb
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			TableViewSizingEntityPreSanitize(dtos[index], query)
+
 			TableViewSizingEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -400,7 +401,7 @@ func TableViewSizingActionCreateFn(dto *TableViewSizingEntity, query fireback.Qu
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	TableViewSizingEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	TableViewSizingEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -492,7 +493,7 @@ func TableViewSizingMemJoin(items []uint) []*TableViewSizingEntity {
 func TableViewSizingUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TableViewSizingEntity) (*TableViewSizingEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TABLE_VIEW_SIZING_EVENT_UPDATED
-	TableViewSizingEntityPreSanitize(fields, query)
+
 	var item TableViewSizingEntity
 	var itemRefetched TableViewSizingEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

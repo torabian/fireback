@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var regionalContentSeedersFs = &seeders.ViewsFs
@@ -33,7 +34,7 @@ func ResetRegionalContentSeeders(fs *embed.FS) {
 }
 
 type RegionalContentEntityQs struct {
-	Content    fireback.QueriableField `cli:"content" table:"regional_content" typeof:"html" column:"content" qs:"content"`
+	Content    fireback.QueriableField `cli:"content" table:"regional_content" typeof:"string" column:"content" qs:"content"`
 	Region     fireback.QueriableField `cli:"region" table:"regional_content" typeof:"string" column:"region" qs:"region"`
 	Title      fireback.QueriableField `cli:"title" table:"regional_content" typeof:"string" column:"title" qs:"title"`
 	LanguageId fireback.QueriableField `cli:"language-id" table:"regional_content" typeof:"string" column:"language_id" qs:"languageId"`
@@ -127,7 +128,6 @@ type RegionalContentEntity struct {
 	// possible factors.
 	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	Content          string                   `json:"content" xml:"content" yaml:"content"  validate:"required"        `
-	ContentExcerpt   *string                  `json:"contentExcerpt" yaml:"contentExcerpt" xml:"contentExcerpt"`
 	Region           string                   `json:"region" xml:"region" yaml:"region"  validate:"required"        `
 	Title            string                   `json:"title" xml:"title" yaml:"title"        `
 	LanguageId       string                   `json:"languageId" xml:"languageId" yaml:"languageId"  validate:"required"    gorm:"index:regional_content_index,unique"      `
@@ -234,9 +234,7 @@ type RegionalContentFieldMap struct {
 	KeyGroup   fireback.TranslatedString `yaml:"keyGroup"`
 }
 
-var RegionalContentEntityMetaConfig map[string]int64 = map[string]int64{
-	"ContentExcerptSize": 100,
-}
+var RegionalContentEntityMetaConfig map[string]int64 = map[string]int64{}
 var RegionalContentEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&RegionalContentEntity{}))
 
 func entityRegionalContentFormatter(dto *RegionalContentEntity, query fireback.QueryDSL) {
@@ -345,7 +343,7 @@ I need you to create me an array of exact signature as the example given below,
 with at least ` + fmt.Sprint(c.String("count")) + ` items, mock the content with few words, and guess the possible values
 based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
-Content: (type: html) Description: 
+Content: (type: string) Description: 
 Region: (type: string) Description: 
 Title: (type: string) Description: 
 LanguageId: (type: string) Description: 
@@ -360,22 +358,6 @@ And here is the actual object signature:
 	},
 }
 
-func RegionalContentEntityPreSanitize(dto *RegionalContentEntity, query fireback.QueryDSL) {
-	if dto.Content != "" {
-		Content := dto.Content
-		ContentExcerpt := fireback.StripPolicy.Sanitize(dto.Content)
-		Content = fireback.UgcPolicy.Sanitize(Content)
-		ContentExcerpt = fireback.StripPolicy.Sanitize(ContentExcerpt)
-		ContentExcerptSize, ContentExcerptSizeExists := RegionalContentEntityMetaConfig["ContentExcerptSize"]
-		if ContentExcerptSizeExists {
-			ContentExcerpt = fireback.PickFirstNWords(ContentExcerpt, int(ContentExcerptSize))
-		} else {
-			ContentExcerpt = fireback.PickFirstNWords(ContentExcerpt, 30)
-		}
-		dto.ContentExcerpt = &ContentExcerpt
-		dto.Content = Content
-	}
-}
 func RegionalContentEntityBeforeCreateAppend(dto *RegionalContentEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -389,17 +371,19 @@ func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query fireb
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			RegionalContentEntityPreSanitize(dtos[index], query)
+
 			RegionalContentEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -441,7 +425,7 @@ func RegionalContentActionCreateFn(dto *RegionalContentEntity, query fireback.Qu
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	RegionalContentEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	RegionalContentEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -533,7 +517,7 @@ func RegionalContentMemJoin(items []uint) []*RegionalContentEntity {
 func RegionalContentUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *RegionalContentEntity) (*RegionalContentEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = REGIONAL_CONTENT_EVENT_UPDATED
-	RegionalContentEntityPreSanitize(fields, query)
+
 	var item RegionalContentEntity
 	var itemRefetched RegionalContentEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -724,7 +708,7 @@ var RegionalContentCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "content",
 		Required: true,
-		Usage:    `content (html)`,
+		Usage:    `content (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "region",
@@ -748,6 +732,14 @@ var RegionalContentCommonCliFlags = []cli.Flag{
 	},
 }
 var RegionalContentCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
+	{
+		Name:        "content",
+		StructField: "Content",
+		Required:    true,
+		Recommended: false,
+		Usage:       `content`,
+		Type:        "string",
+	},
 	{
 		Name:        "region",
 		StructField: "Region",
@@ -809,7 +801,7 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "content",
 		Required: true,
-		Usage:    `content (html)`,
+		Usage:    `content (string)`,
 	},
 	&cli.StringFlag{
 		Name:     "region",

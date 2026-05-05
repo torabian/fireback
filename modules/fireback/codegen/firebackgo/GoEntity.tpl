@@ -247,8 +247,6 @@ func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix
 
 {{ template "asks" . }}
 
-{{ template "entitySanitize" . }}
-
 {{ template "entityBeforeCreateActions" . }}
 
 {{ template "batchActionCreate" . }}

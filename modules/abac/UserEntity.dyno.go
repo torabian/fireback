@@ -7,8 +7,14 @@ package abac
  */
 import (
 	"embed"
+	"encoding"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +26,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var userSeedersFs = &seeders.ViewsFs
@@ -58,7 +60,7 @@ type UserEntityQs struct {
 	Photo          fireback.QueriableField `cli:"photo" table:"user" typeof:"string" column:"photo" qs:"photo"`
 	Gender         fireback.QueriableField `cli:"gender" table:"user" typeof:"int?" column:"gender" qs:"gender"`
 	Title          fireback.QueriableField `cli:"title" table:"user" typeof:"string" column:"title" qs:"title"`
-	BirthDate      fireback.QueriableField `cli:"birth-date" table:"user" typeof:"date" column:"birth_date" qs:"birthDate"`
+	BirthDate      fireback.QueriableField `cli:"birth-date" table:"user" typeof:"complex" column:"birth_date" qs:"birthDate"`
 	Avatar         fireback.QueriableField `cli:"avatar" table:"user" typeof:"string" column:"avatar" qs:"avatar"`
 	LastIpAddress  fireback.QueriableField `cli:"last-ip-address" table:"user" typeof:"string" column:"last_ip_address" qs:"lastIpAddress"`
 	PrimaryAddress struct {
@@ -199,9 +201,7 @@ type UserEntity struct {
 	Gender           fireback.Int   `json:"gender" xml:"gender" yaml:"gender"        `
 	Title            string         `json:"title" xml:"title" yaml:"title"        `
 	BirthDate        fireback.XDate `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
-	// Date range is a complex date storage
-	BirthDateDateInfo fireback.XDateMetaData `json:"birthDateDateInfo" yaml:"birthDateDateInfo" xml:"birthDateDateInfo" sql:"-" gorm:"-"`
-	Avatar            string                 `json:"avatar" xml:"avatar" yaml:"avatar"        `
+	Avatar           string         `json:"avatar" xml:"avatar" yaml:"avatar"        `
 	// User last connecting ip address
 	LastIpAddress string `json:"lastIpAddress" xml:"lastIpAddress" yaml:"lastIpAddress"        `
 	// User primary address location. Can be useful for simple projects that a user is associated with a single address.
@@ -319,7 +319,6 @@ func entityUserFormatter(dto *UserEntity, query fireback.QueryDSL) {
 	if dto == nil {
 		return
 	}
-	dto.BirthDateDateInfo = fireback.ComputeXDateMetaData(&dto.BirthDate, query)
 }
 func UserActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
@@ -429,7 +428,7 @@ LastName: (type: string) Description:
 Photo: (type: string) Description: 
 Gender: (type: int?) Description: 
 Title: (type: string) Description: 
-BirthDate: (type: date) Description: 
+BirthDate: (type: complex) Description: 
 Avatar: (type: string) Description: 
 LastIpAddress: (type: string) Description: User last connecting ip address
 PrimaryAddress: (type: object) Description: User primary address location. Can be useful for simple projects that a user is associated with a single address.
@@ -443,8 +442,6 @@ And here is the actual object signature:
 	},
 }
 
-func UserEntityPreSanitize(dto *UserEntity, query fireback.QueryDSL) {
-}
 func UserEntityBeforeCreateAppend(dto *UserEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -458,17 +455,19 @@ func UserRecursiveAddUniqueId(dto *UserEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserMultiInsertFn(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			UserEntityPreSanitize(dtos[index], query)
+
 			UserEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -510,7 +509,7 @@ func UserActionCreateFn(dto *UserEntity, query fireback.QueryDSL) (*UserEntity, 
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	UserEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	UserEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -602,7 +601,7 @@ func UserMemJoin(items []uint) []*UserEntity {
 func UserUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserEntity) (*UserEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = USER_EVENT_UPDATED
-	UserEntityPreSanitize(fields, query)
+
 	var item UserEntity
 	var itemRefetched UserEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -818,7 +817,7 @@ var UserCommonCliFlags = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "birth-date",
 		Required: false,
-		Usage:    `birthDate (date)`,
+		Usage:    `birthDate (complex)`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
@@ -979,7 +978,7 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
 		Name:     "birth-date",
 		Required: false,
-		Usage:    `birthDate (date)`,
+		Usage:    `birthDate (complex)`,
 	},
 	&cli.StringFlag{
 		Name:     "avatar",
@@ -1108,8 +1107,9 @@ func CastUserFromCli(c *cli.Context) *UserEntity {
 		template.Title = c.String("title")
 	}
 	if c.IsSet("birth-date") {
-		value := c.String("birth-date")
-		template.BirthDate.Scan(value)
+		if u, ok := any(&template.BirthDate).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("birth-date")))
+		}
 	}
 	if c.IsSet("avatar") {
 		template.Avatar = c.String("avatar")

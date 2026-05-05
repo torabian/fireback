@@ -7,8 +7,14 @@ package abac
  */
 import (
 	"embed"
+	"encoding"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +26,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var tokenSeedersFs = &seeders.ViewsFs
@@ -35,7 +37,7 @@ func ResetTokenSeeders(fs *embed.FS) {
 type TokenEntityQs struct {
 	User       fireback.QueriableField `cli:"user" table:"token" typeof:"one" column:"user" qs:"user"`
 	Token      fireback.QueriableField `cli:"token" table:"token" typeof:"string" column:"token" qs:"token"`
-	ValidUntil fireback.QueriableField `cli:"valid-until" table:"token" typeof:"datetime" column:"valid_until" qs:"validUntil"`
+	ValidUntil fireback.QueriableField `cli:"valid-until" table:"token" typeof:"complex" column:"valid_until" qs:"validUntil"`
 }
 
 func (x *TokenEntityQs) GetQuery() string {
@@ -115,12 +117,12 @@ type TokenEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string              `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User             *UserEntity         `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Token            string              `json:"token" xml:"token" yaml:"token"        `
-	ValidUntil       *fireback.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
-	Children         []*TokenEntity      `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *TokenEntity        `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string             `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
+	User             *UserEntity        `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Token            string             `json:"token" xml:"token" yaml:"token"        `
+	ValidUntil       fireback.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
+	Children         []*TokenEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo         *TokenEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func TokenEntityStream(q fireback.QueryDSL) (chan []*TokenEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -330,7 +332,7 @@ based on the common sense. I need the output to be a valid ` + format + ` file.
 Make sure you wrap the entire array in 'items' field. Also before that, I provide some explanation of each field:
 User: (type: one) Description: 
 Token: (type: string) Description: 
-ValidUntil: (type: datetime) Description: 
+ValidUntil: (type: complex) Description: 
 And here is the actual object signature:
 ` + v.Seeder() + `
 `
@@ -341,8 +343,6 @@ And here is the actual object signature:
 	},
 }
 
-func TokenEntityPreSanitize(dto *TokenEntity, query fireback.QueryDSL) {
-}
 func TokenEntityBeforeCreateAppend(dto *TokenEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -356,17 +356,19 @@ func TokenRecursiveAddUniqueId(dto *TokenEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func TokenMultiInsertFn(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			TokenEntityPreSanitize(dtos[index], query)
+
 			TokenEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -408,7 +410,7 @@ func TokenActionCreateFn(dto *TokenEntity, query fireback.QueryDSL) (*TokenEntit
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	TokenEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	TokenEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -500,7 +502,7 @@ func TokenMemJoin(items []uint) []*TokenEntity {
 func TokenUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *TokenEntity) (*TokenEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = TOKEN_EVENT_UPDATED
-	TokenEntityPreSanitize(fields, query)
+
 	var item TokenEntity
 	var itemRefetched TokenEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -698,6 +700,11 @@ var TokenCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `token (string)`,
 	},
+	&cli.StringFlag{
+		Name:     "valid-until",
+		Required: false,
+		Usage:    `validUntil (complex)`,
+	},
 }
 var TokenCommonInteractiveCliFlags = []fireback.CliInteractiveFlag{
 	{
@@ -743,6 +750,11 @@ var TokenCommonCliFlagsOptional = []cli.Flag{
 		Name:     "token",
 		Required: false,
 		Usage:    `token (string)`,
+	},
+	&cli.StringFlag{
+		Name:     "valid-until",
+		Required: false,
+		Usage:    `validUntil (complex)`,
 	},
 }
 var TokenCreateCmd cli.Command = TOKEN_ACTION_POST_ONE.ToCli()
@@ -808,6 +820,11 @@ func CastTokenFromCli(c *cli.Context) *TokenEntity {
 	}
 	if c.IsSet("token") {
 		template.Token = c.String("token")
+	}
+	if c.IsSet("valid-until") {
+		if u, ok := any(&template.ValidUntil).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("valid-until")))
+		}
 	}
 	return template
 }

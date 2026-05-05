@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var publicAuthenticationSeedersFs = &seeders.ViewsFs
@@ -41,7 +42,7 @@ type PublicAuthenticationEntityQs struct {
 	PassportValue       fireback.QueriableField `cli:"passport-value" table:"public_authentication" typeof:"string" column:"passport_value" qs:"passportValue"`
 	IsInCreationProcess fireback.QueriableField `cli:"is-in-creation-process" table:"public_authentication" typeof:"bool?" column:"is_in_creation_process" qs:"isInCreationProcess"`
 	Status              fireback.QueriableField `cli:"status" table:"public_authentication" typeof:"string" column:"status" qs:"status"`
-	BlockedUntil        fireback.QueriableField `cli:"blocked-until" table:"public_authentication" typeof:"datenano" column:"blocked_until" qs:"blockedUntil"`
+	BlockedUntil        fireback.QueriableField `cli:"blocked-until" table:"public_authentication" typeof:"int64" column:"blocked_until" qs:"blockedUntil"`
 	Otp                 fireback.QueriableField `cli:"otp" table:"public_authentication" typeof:"string" column:"otp" qs:"otp"`
 	RecoveryAbsoluteUrl fireback.QueriableField `cli:"recovery-absolute-url" table:"public_authentication" typeof:"string" column:"recovery_absolute_url" qs:"recoveryAbsoluteUrl"`
 }
@@ -164,17 +165,15 @@ type PublicAuthenticationEntity struct {
 	Passport   *PassportEntity `json:"passport" xml:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
 	PassportId fireback.String `json:"passportId" yaml:"passportId" xml:"passportId"  `
 	// This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account
-	SessionSecret       string        `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
-	PassportValue       string        `json:"passportValue" xml:"passportValue" yaml:"passportValue"        `
-	IsInCreationProcess fireback.Bool `json:"isInCreationProcess" xml:"isInCreationProcess" yaml:"isInCreationProcess"        `
-	Status              string        `json:"status" xml:"status" yaml:"status"        `
-	BlockedUntil        int64         `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
-	// Datenano also has a text representation
-	BlockedUntilFormatted string                        `json:"blockedUntilFormatted" xml:"blockedUntilFormatted" yaml:"blockedUntilFormatted"`
-	Otp                   string                        `json:"otp" xml:"otp" yaml:"otp"        `
-	RecoveryAbsoluteUrl   string                        `json:"recoveryAbsoluteUrl" xml:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
-	Children              []*PublicAuthenticationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo              *PublicAuthenticationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	SessionSecret       string                        `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
+	PassportValue       string                        `json:"passportValue" xml:"passportValue" yaml:"passportValue"        `
+	IsInCreationProcess fireback.Bool                 `json:"isInCreationProcess" xml:"isInCreationProcess" yaml:"isInCreationProcess"        `
+	Status              string                        `json:"status" xml:"status" yaml:"status"        `
+	BlockedUntil        int64                         `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
+	Otp                 string                        `json:"otp" xml:"otp" yaml:"otp"        `
+	RecoveryAbsoluteUrl string                        `json:"recoveryAbsoluteUrl" xml:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
+	Children            []*PublicAuthenticationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo            *PublicAuthenticationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func PublicAuthenticationEntityStream(q fireback.QueryDSL) (chan []*PublicAuthenticationEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -288,7 +287,6 @@ func entityPublicAuthenticationFormatter(dto *PublicAuthenticationEntity, query 
 	if dto == nil {
 		return
 	}
-	dto.BlockedUntilFormatted = fireback.FormatDateBasedOnQuery(dto.BlockedUntil, query)
 }
 func PublicAuthenticationActionSeederMultiple(query fireback.QueryDSL, count int) {
 	successInsert := 0
@@ -399,7 +397,7 @@ SessionSecret: (type: string) Description: This is a long hash generated and wil
 PassportValue: (type: string) Description: 
 IsInCreationProcess: (type: bool?) Description: 
 Status: (type: string) Description: 
-BlockedUntil: (type: datenano) Description: 
+BlockedUntil: (type: int64) Description: 
 Otp: (type: string) Description: 
 RecoveryAbsoluteUrl: (type: string) Description: 
 And here is the actual object signature:
@@ -412,8 +410,6 @@ And here is the actual object signature:
 	},
 }
 
-func PublicAuthenticationEntityPreSanitize(dto *PublicAuthenticationEntity, query fireback.QueryDSL) {
-}
 func PublicAuthenticationEntityBeforeCreateAppend(dto *PublicAuthenticationEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -427,17 +423,19 @@ func PublicAuthenticationRecursiveAddUniqueId(dto *PublicAuthenticationEntity, q
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PublicAuthenticationMultiInsertFn(dtos []*PublicAuthenticationEntity, query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			PublicAuthenticationEntityPreSanitize(dtos[index], query)
+
 			PublicAuthenticationEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -479,7 +477,7 @@ func PublicAuthenticationActionCreateFn(dto *PublicAuthenticationEntity, query f
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	PublicAuthenticationEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	PublicAuthenticationEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -571,7 +569,7 @@ func PublicAuthenticationMemJoin(items []uint) []*PublicAuthenticationEntity {
 func PublicAuthenticationUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *PublicAuthenticationEntity) (*PublicAuthenticationEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PUBLIC_AUTHENTICATION_EVENT_UPDATED
-	PublicAuthenticationEntityPreSanitize(fields, query)
+
 	var item PublicAuthenticationEntity
 	var itemRefetched PublicAuthenticationEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -799,6 +797,11 @@ var PublicAuthenticationCommonCliFlags = []cli.Flag{
 		Required: false,
 		Usage:    `status (string)`,
 	},
+	&cli.Int64Flag{
+		Name:     "blocked-until",
+		Required: false,
+		Usage:    `blockedUntil (int64)`,
+	},
 	&cli.StringFlag{
 		Name:     "otp",
 		Required: false,
@@ -850,6 +853,14 @@ var PublicAuthenticationCommonInteractiveCliFlags = []fireback.CliInteractiveFla
 		Recommended: false,
 		Usage:       `status`,
 		Type:        "string",
+	},
+	{
+		Name:        "blockedUntil",
+		StructField: "BlockedUntil",
+		Required:    false,
+		Recommended: false,
+		Usage:       `blockedUntil`,
+		Type:        "int64",
 	},
 	{
 		Name:        "otp",
@@ -932,6 +943,11 @@ var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 		Name:     "status",
 		Required: false,
 		Usage:    `status (string)`,
+	},
+	&cli.Int64Flag{
+		Name:     "blocked-until",
+		Required: false,
+		Usage:    `blockedUntil (int64)`,
 	},
 	&cli.StringFlag{
 		Name:     "otp",
@@ -1025,6 +1041,10 @@ func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity
 	}
 	if c.IsSet("status") {
 		template.Status = c.String("status")
+	}
+	if c.IsSet("blocked-until") {
+		value := c.Int64("blocked-until")
+		template.BlockedUntil = value
 	}
 	if c.IsSet("otp") {
 		template.Otp = c.String("otp")

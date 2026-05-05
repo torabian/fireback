@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var workspaceRoleSeedersFs = &seeders.ViewsFs
@@ -335,8 +336,6 @@ And here is the actual object signature:
 	},
 }
 
-func WorkspaceRoleEntityPreSanitize(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
-}
 func WorkspaceRoleEntityBeforeCreateAppend(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -350,17 +349,19 @@ func WorkspaceRoleRecursiveAddUniqueId(dto *WorkspaceRoleEntity, query fireback.
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WorkspaceRoleMultiInsertFn(dtos []*WorkspaceRoleEntity, query fireback.QueryDSL) ([]*WorkspaceRoleEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			WorkspaceRoleEntityPreSanitize(dtos[index], query)
+
 			WorkspaceRoleEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -402,7 +403,7 @@ func WorkspaceRoleActionCreateFn(dto *WorkspaceRoleEntity, query fireback.QueryD
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	WorkspaceRoleEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	WorkspaceRoleEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -494,7 +495,7 @@ func WorkspaceRoleMemJoin(items []uint) []*WorkspaceRoleEntity {
 func WorkspaceRoleUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *WorkspaceRoleEntity) (*WorkspaceRoleEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = WORKSPACE_ROLE_EVENT_UPDATED
-	WorkspaceRoleEntityPreSanitize(fields, query)
+
 	var item WorkspaceRoleEntity
 	var itemRefetched WorkspaceRoleEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

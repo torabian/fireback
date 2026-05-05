@@ -14,7 +14,7 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 	}
 	switch field.Type {
 
-	case "string", "text", "html", "enum":
+	case "string", "text", "enum":
 		return "string"
 	case "string?", "text?", "html?", "enum?":
 		return prefix + "String"

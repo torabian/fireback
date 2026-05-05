@@ -9,6 +9,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -20,10 +25,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var userWorkspaceSeedersFs = &seeders.ViewsFs
@@ -357,8 +358,6 @@ And here is the actual object signature:
 	},
 }
 
-func UserWorkspaceEntityPreSanitize(dto *UserWorkspaceEntity, query fireback.QueryDSL) {
-}
 func UserWorkspaceEntityBeforeCreateAppend(dto *UserWorkspaceEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -372,17 +371,19 @@ func UserWorkspaceRecursiveAddUniqueId(dto *UserWorkspaceEntity, query fireback.
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserWorkspaceMultiInsertFn(dtos []*UserWorkspaceEntity, query fireback.QueryDSL) ([]*UserWorkspaceEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-			UserWorkspaceEntityPreSanitize(dtos[index], query)
+
 			UserWorkspaceEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -424,7 +425,7 @@ func UserWorkspaceActionCreateFn(dto *UserWorkspaceEntity, query fireback.QueryD
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-	UserWorkspaceEntityPreSanitize(dto, query)
+
 	// 2. Append the necessary information about user, workspace
 	UserWorkspaceEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -516,7 +517,7 @@ func UserWorkspaceMemJoin(items []uint) []*UserWorkspaceEntity {
 func UserWorkspaceUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *UserWorkspaceEntity) (*UserWorkspaceEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = USER_WORKSPACE_EVENT_UPDATED
-	UserWorkspaceEntityPreSanitize(fields, query)
+
 	var item UserWorkspaceEntity
 	var itemRefetched UserWorkspaceEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId

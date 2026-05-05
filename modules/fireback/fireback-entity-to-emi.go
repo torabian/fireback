@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/torabian/emi/lib/core"
@@ -13,6 +14,14 @@ import (
 type EntityEmiData struct {
 	Actions []*FirebackEmiAction `json:"actions"`
 	Dtos    []*core.EmiDto       `json:"dtos"`
+}
+
+func (x *EntityEmiData) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
 }
 
 func ConvertEntityToEmi(entity Module3Entity) EntityEmiData {
@@ -68,6 +77,12 @@ func ConvertEntityToEmi(entity Module3Entity) EntityEmiData {
 				Name:   fmt.Sprintf("update%v", entity.Upper()),
 				Url:    fmt.Sprintf("/%v", entity.DashedName()),
 				Method: "patch",
+				In: &core.EmiActionBody{
+					Fields: refDto.Fields,
+				},
+				Out: &core.EmiActionBody{
+					Fields: refDto.Fields,
+				},
 			},
 		}
 		res.Actions = append(res.Actions, &action)
@@ -79,6 +94,9 @@ func ConvertEntityToEmi(entity Module3Entity) EntityEmiData {
 				Name:   fmt.Sprintf("query%v", ToUpper(entity.PluralName())),
 				Url:    fmt.Sprintf("/%v", entity.DashedName()),
 				Method: "get",
+				Out: &core.EmiActionBody{
+					Fields: refDto.Fields,
+				},
 			},
 		}
 		res.Actions = append(res.Actions, &action)
