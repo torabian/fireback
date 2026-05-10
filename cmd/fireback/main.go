@@ -9,7 +9,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
-	"github.com/torabian/fireback/modules/payment"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -57,8 +56,8 @@ var xapp = &fireback.FirebackApp{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
 
-		// Add fireback payment module also
-		payment.PaymentModuleSetup(nil),
+		// // Add fireback payment module also
+		// payment.PaymentModuleSetup(nil),
 
 		// suggestion.SuggestionModuleSetup(nil),
 		// {

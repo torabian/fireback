@@ -141,8 +141,8 @@ type NewProjectContext struct {
 	CreateCapacitorProject bool
 }
 
-func NewProjectCli() cli.Command {
-	return cli.Command{
+func NewProjectCli() *cli.Command {
+	return &cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "name",

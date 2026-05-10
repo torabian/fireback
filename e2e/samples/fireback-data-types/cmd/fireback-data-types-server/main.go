@@ -46,7 +46,7 @@ var xapp = &fireback.FirebackApp{
 		product.ProductModuleSetup(nil),
 		fireback.FirebackModuleSetup(nil),
 		{
-			CliHandlers: []cli.Command{
+			CliHandlers: []*cli.Command{
 				fireback.NewProjectCli(),
 			},
 		},
