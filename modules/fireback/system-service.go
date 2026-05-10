@@ -10,7 +10,7 @@ import (
 	"text/template"
 
 	systemconfigs "github.com/torabian/fireback/modules/fireback/systemconfigs"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 // ~/Library/LaunchAgents Per-user agents provided by the user.
@@ -31,7 +31,7 @@ type SystemServiceInfo struct {
 	StdErr      string
 }
 
-func SystemServiceHandler(action string, c *cli.Context) {
+func SystemServiceHandler(action string, c *cli.Command) {
 	switch os := runtime.GOOS; os {
 	case "darwin":
 		if action == "load" {
@@ -56,7 +56,7 @@ func SystemServiceHandler(action string, c *cli.Context) {
 	}
 }
 
-func ServiceUnloadDebian(c *cli.Context) error {
+func ServiceUnloadDebian(c *cli.Command) error {
 
 	serviceName := config.DebianIdentifier
 	serviceFileName := serviceName + ".service"
@@ -84,7 +84,7 @@ func ServiceUnloadDebian(c *cli.Context) error {
 	return nil
 }
 
-func ServiceLoadDebian(c *cli.Context) error {
+func ServiceLoadDebian(c *cli.Command) error {
 	binaryPath, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -161,7 +161,7 @@ func GetMacDaemon() string {
 	return daemonPath
 }
 
-func ServiceLoadMac(c *cli.Context) error {
+func ServiceLoadMac(c *cli.Command) error {
 	binaryPath, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -228,7 +228,7 @@ func ServiceLoadMac(c *cli.Context) error {
 	return nil
 }
 
-func ServiceUnloadMac(c *cli.Context) {
+func ServiceUnloadMac(c *cli.Command) {
 
 	daemonPath := GetMacDaemon()
 	cmd := exec.Command("launchctl", "unload", "-w", daemonPath)

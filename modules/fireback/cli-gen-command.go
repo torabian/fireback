@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,7 +9,7 @@ import (
 	"strings"
 
 	reactui "github.com/torabian/fireback/modules/fireback/codegen/react-ui"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
 
@@ -102,7 +103,7 @@ var reactUIFlags = []cli.Flag{
 	},
 }
 
-func GenContextFromCli(c *cli.Context, cat CodeGenCatalog) *CodeGenContext {
+func GenContextFromCli(c *cli.Command, cat CodeGenCatalog) *CodeGenContext {
 	tsx := &TypeScriptGenContext{
 		IncludeStaticField:      true,
 		IncludeFirebackDef:      true,
@@ -170,7 +171,7 @@ func GetReportsTool(xapp *FirebackApp) cli.Command {
 				Required: false,
 			},
 		),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			reports := []Report{}
 			for _, m := range xapp.Modules {
@@ -202,26 +203,26 @@ func GetReportsTool(xapp *FirebackApp) cli.Command {
 	}
 }
 
-func GetSeeder(xapp *FirebackApp) cli.Command {
-	return cli.Command{
+func GetSeeder(xapp *FirebackApp) *cli.Command {
+	return &cli.Command{
 
 		Name:  "seeders",
 		Usage: "Imports all necessary seeders",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			ExecuteSeederImport(xapp)
 			return nil
 		},
 	}
 }
 
-func GetMigrationCommand(xapp *FirebackApp) cli.Command {
-	return cli.Command{
+func GetMigrationCommand(xapp *FirebackApp) *cli.Command {
+	return &cli.Command{
 
 		Name:  "migration",
 		Usage: "Database and content migration, syncing the application entities with database",
-		Subcommands: cli.Commands{
+		Commands: []*cli.Command{
 			GetCapabilityRefreshCommand(xapp),
-			cli.Command{
+			{
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "file",
@@ -231,7 +232,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 				},
 				Name:  "export",
 				Usage: "Exports the content of the migration based on the criteria",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					xinfo := []TableMetaData{}
 
 					for _, module := range xapp.Modules {
@@ -246,7 +247,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 					return nil
 				},
 			},
-			cli.Command{
+			{
 				Flags: []cli.Flag{
 					&cli.Int64Flag{
 						Name:  "level",
@@ -256,7 +257,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 				},
 				Name:  "apply",
 				Usage: "Applies all necessary migration code on database or other infrastructure the the project.",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					ApplyMigration(xapp, c.Int64("level"))
 					SyncPermissionsInDatabase(xapp, GetDbRef())
@@ -264,7 +265,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 					return nil
 				},
 			},
-			cli.Command{
+			{
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "file",
@@ -274,7 +275,7 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 				},
 				Name:  "import",
 				Usage: "Import system data from a previous export",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					xinfo := []TableMetaData{}
 					// f := CommonCliQueryDSLBuilder(c)
 
@@ -295,12 +296,12 @@ func GetMigrationCommand(xapp *FirebackApp) cli.Command {
 
 }
 
-func GetApplicationTasks(xapp *FirebackApp) cli.Command {
-	sub := []cli.Command{}
+func GetApplicationTasks(xapp *FirebackApp) *cli.Command {
+	sub := []*cli.Command{}
 
 	for _, m := range xapp.Modules {
 		for _, t := range m.Tasks {
-			sub = append(sub, cli.Command{
+			sub = append(sub, &cli.Command{
 				Name:   t.Name,
 				Flags:  t.Flags,
 				Action: t.Cli,
@@ -308,21 +309,20 @@ func GetApplicationTasks(xapp *FirebackApp) cli.Command {
 		}
 	}
 
-	return cli.Command{
-
+	return &cli.Command{
 		Name:  "tasks",
 		Usage: "Actions related to the project tasks, running them in background, list, etc.",
-		Subcommands: cli.Commands{
+		Commands: []*cli.Command{
 
 			{
-				Name:        "enqueue",
-				Usage:       "Enqueues a task to the queue so worker can pick it up",
-				Subcommands: sub,
+				Name:     "enqueue",
+				Usage:    "Enqueues a task to the queue so worker can pick it up",
+				Commands: sub,
 			},
 			{
 				Name:  "list",
 				Usage: "Lists all of the tasks in the app",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					for _, m := range xapp.Modules {
 						for _, t := range m.Tasks {
 
@@ -335,7 +335,7 @@ func GetApplicationTasks(xapp *FirebackApp) cli.Command {
 			{
 				Name:  "start",
 				Usage: "Starts the background worker server",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					taskServerLifter(xapp)
 					return nil
 				},
@@ -356,29 +356,29 @@ func taskServerLifter(xapp *FirebackApp) {
 	liftAsyncqWorkerServer(tasks)
 }
 
-func CodeGenTools(xapp *FirebackApp) cli.Command {
-	return cli.Command{
+func CodeGenTools(xapp *FirebackApp) *cli.Command {
+	return &cli.Command{
 		Name:  "gen",
 		Usage: "Code generation tools, both for internal codes and sdk remote files",
-		Subcommands: cli.Commands{
+		Commands: []*cli.Command{
 			{
 				Name: "module3spec",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:  "source",
 						Usage: "You can pass a yaml file address on disk, to make the schema based on that. If left empty, an empty module3 file will be considered.",
 					},
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:  "out",
 						Usage: "Where to write output. If not set, result will be printed to stdout",
 					},
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:  "vscode-settings",
 						Usage: "Updates the .vscode/settings.json file for redhat yaml extension",
 					},
 				},
 				Usage: "Generates json schema for module3 file.",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					source := ""
 					if c.IsSet("source") {
@@ -407,7 +407,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Name:  "entities",
 				Usage: "Lists all of the entities across the binary",
 
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					for _, item := range ListModule3WithEntities(xapp) {
 						fmt.Println(item)
 					}
@@ -418,12 +418,12 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Name:  "openapi",
 				Usage: "Writes the entire app definitions into openapi yml or json file",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:  "path",
 						Usage: "The location that it would write the content, will print it out if left empty",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					if content, err := ConvertStructToOpenAPIYaml(xapp); err != nil {
 						return err
 					} else {
@@ -457,12 +457,12 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Name:  "describe",
 				Usage: "Writes a markdown document, explaining entities, actions, tasks, cronjobs - useful for documenting on project management softwares",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:  "only",
 						Usage: "a list of specific modules to be included only, a whitelist of modules as string separated by comma (,)",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx0 context.Context, c *cli.Command) error {
 
 					ctx := &DescribeContext{}
 
@@ -478,13 +478,13 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Name:  "module-entities",
 				Usage: "Lists all of the entities that project has inside a module",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:     "path",
 						Usage:    "Module path, you can get the list using 'list' command",
 						Required: true,
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					for _, item := range ListModule3Entities(xapp, c.String("path")) {
 						fmt.Println(item.Name)
 					}
@@ -494,7 +494,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 			{
 				Name:  "actions",
 				Usage: "Lists all of the available actions over http calls",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					for _, item := range xapp.Modules {
 						for _, actions := range item.Actions {
 							for _, action := range actions {
@@ -505,17 +505,17 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 					return nil
 				},
 			},
-			cli.Command{
+			{
 				Name: "csv",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:     "file",
 						Usage:    "The address of csv file which will be used to generate",
 						Required: true,
 					},
 				},
 				Usage: "Generates Module3 definitions from a csv file, by auto detecting the fields from header",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					fields := CastJsonFileToModule3Fields(c.String("file"))
 					m2 := &Module3{
@@ -543,7 +543,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 						Required: true,
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					postman := PostmanCollection{
 						Info: PostmanInfo{
@@ -658,7 +658,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Flags: commonFlags,
 				Name:  "gof",
 				Usage: "Generates the fireback module as golang (backend)",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx0 context.Context, c *cli.Command) error {
 					// gof is a little bit different. We want
 					// to generate it's content just next to the module 3 file
 					// to allow nested operation
@@ -700,7 +700,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				},
 				Name:  "strings",
 				Usage: "Language resource translation runner",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx0 context.Context, c *cli.Command) error {
 					ctx := TranslationResourceCatalog{
 						EntryPoint: c.String("path"),
 						Languages:  []string{"en"},
@@ -729,7 +729,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Flags: fbGoModuleFlags,
 				Name:  "module",
 				Usage: "Generates a new golang (fireback) module into it's own specific directory",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					var dirname string
 					var moduleName string
 					var autoImport string
@@ -764,7 +764,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Flags: append(commonFlags, reactFlags...),
 				Name:  "react",
 				Usage: "Generates the typescript definition and react tools for the product",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					RunCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog))
 
@@ -775,7 +775,7 @@ func CodeGenTools(xapp *FirebackApp) cli.Command {
 				Flags: append(commonFlags, reactUIFlags...),
 				Name:  "react-ui",
 				Usage: "Generates the ui elements for react application, entity manger, form, etc...",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					ReactUiCodeGen(xapp, GenContextFromCli(c, TypeScriptGenCatalog), reactui.ReactUITpl)
 

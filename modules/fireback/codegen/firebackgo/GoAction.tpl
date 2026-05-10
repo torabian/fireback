@@ -12,10 +12,14 @@ import (
 	"github.com/gin-gonic/gin"
     {{ end }}
 
+    {{ if or (.m.Actions) }}
+	"context"
+    {{ end }}
+
     {{ range .m.ActionsCustomImport }}
     "{{ .}}"
     {{ end }}
-    "github.com/urfave/cli"
+    "github.com/urfave/cli/v3"
     {{ if ne .wsprefix "" }}
 	"github.com/torabian/fireback/modules/fireback"
     {{ end }}
@@ -28,9 +32,9 @@ import (
 
 {{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut .m.Acts )}}
 
-var {{ .m.Upper }}CustomActionsCli = []cli.Command {
+var {{ .m.Upper }}CustomActionsCli = []*cli.Command {
 {{ range .m.Actions }}
-    {{ .Upper }}ActionCmd,
+    &{{ .Upper }}ActionCmd,
 {{ end }}
 }
 
@@ -48,12 +52,12 @@ var {{ .m.Upper }}CliActionsBundle = &{{ $.wsprefix }}CliActionsBundle{
     Usage: `{{ .m.Description }}`,
 
     // Here we will include entities actions, as well as module level actions
-    Subcommands: cli.Commands{
+    Commands: []*cli.Command{
         {{ range .m.Acts }}
             {{ .Upper }}ActionDef.ToCli(),
         {{ end }}
         {{ range .m.Actions }}
-            {{ .Upper }}ActionCmd,
+            &{{ .Upper }}ActionCmd,
         {{ end }}
         {{ range .m.Entities }}
         {{ .Upper }}CliFn(),
@@ -70,7 +74,7 @@ func Get{{ .m.Upper }}ActionsBundle() *{{ $.wsprefix }}ModuleActionsBundle {
 }
 
 
-func Get{{ .m.Upper }}ActionsCli() []cli.Command {
+func Get{{ .m.Upper }}ActionsCli() []*cli.Command {
 	return {{ .m.Upper }}CustomActionsCli
 }
 

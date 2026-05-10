@@ -6,6 +6,7 @@ package payment
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	metas "github.com/torabian/fireback/modules/payment/metas"
 	mocks "github.com/torabian/fireback/modules/payment/mocks/PaymentParameter"
 	seeders "github.com/torabian/fireback/modules/payment/seeders/PaymentParameter"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -371,7 +372,7 @@ func PaymentParameterValidator(dto *PaymentParameterEntity, isPatch bool) *fireb
 var PaymentParameterAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -387,7 +388,7 @@ var PaymentParameterAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &PaymentParameterEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -645,7 +646,7 @@ func PaymentParameterActionUpdateFn(query fireback.QueryDSL, fields *PaymentPara
 var PaymentParameterWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire paymentparameters ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PAYMENT_PARAMETER_DELETE},
 			AllowOnRoot:    true,
@@ -993,7 +994,7 @@ var PaymentParameterCommonCliFlagsOptional = []cli.Flag{
 		Value:    `https://sandbox.przelewy24.pl/api/v1/transaction/verify`,
 	},
 }
-var PaymentParameterCreateCmd cli.Command = PAYMENT_PARAMETER_ACTION_POST_ONE.ToCli()
+var PaymentParameterCreateCmd *cli.Command = PAYMENT_PARAMETER_ACTION_POST_ONE.ToCli()
 var PaymentParameterCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -1003,7 +1004,7 @@ var PaymentParameterCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PAYMENT_PARAMETER_CREATE},
 			AllowOnRoot:    true,
@@ -1016,6 +1017,7 @@ var PaymentParameterCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PaymentParameterUpdateCmd cli.Command = cli.Command{
@@ -1023,7 +1025,7 @@ var PaymentParameterUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   PaymentParameterCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PAYMENT_PARAMETER_UPDATE},
 			AllowOnRoot:    true,
@@ -1039,10 +1041,10 @@ var PaymentParameterUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *PaymentParameterEntity) FromCli(c *cli.Context) *PaymentParameterEntity {
+func (x *PaymentParameterEntity) FromCli(c *cli.Command) *PaymentParameterEntity {
 	return CastPaymentParameterFromCli(c)
 }
-func CastPaymentParameterFromCli(c *cli.Context) *PaymentParameterEntity {
+func CastPaymentParameterFromCli(c *cli.Command) *PaymentParameterEntity {
 	template := &PaymentParameterEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -1150,8 +1152,8 @@ func PaymentParametersActionQueryString(keyword string, page int) ([]string, *fi
 	return stringItems, meta, err
 }
 
-var PaymentParameterDevCommands = []cli.Command{
-	PaymentParameterWipeCmd,
+var PaymentParameterDevCommands = []*cli.Command{
+	&PaymentParameterWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1166,7 +1168,7 @@ var PaymentParameterDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PAYMENT_PARAMETER_CREATE},
 				AllowOnRoot:    true,
@@ -1190,16 +1192,16 @@ var PaymentParameterDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := PaymentParameterActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1209,10 +1211,10 @@ var PaymentParameterDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				PaymentParameterActions.Create,
 				reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
@@ -1222,7 +1224,7 @@ var PaymentParameterDevCommands = []cli.Command{
 		},
 	},
 }
-var PaymentParameterImportExportCommands = []cli.Command{
+var PaymentParameterImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1235,7 +1237,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of payment-parameters, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[PaymentParameterEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1250,10 +1252,10 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(paymentParameterSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1269,10 +1271,10 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				PaymentParameterActions.Create,
 				reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
@@ -1281,7 +1283,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1291,7 +1293,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				PaymentParameterEntityStream,
 				reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
@@ -1302,7 +1304,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1315,7 +1317,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			PaymentParameterCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				PaymentParameterActions.Create,
 				reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
@@ -1333,25 +1335,25 @@ var PaymentParameterImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PaymentParameterCliCommands []cli.Command = []cli.Command{
+var PaymentParameterCliCommands []*cli.Command = []*cli.Command{
 	PAYMENT_PARAMETER_ACTION_QUERY.ToCli(),
 	PAYMENT_PARAMETER_ACTION_TABLE.ToCli(),
 	PAYMENT_PARAMETER_ACTION_PATCH.ToCli(),
 	PaymentParameterCreateCmd,
-	PaymentParameterAskCmd,
-	PaymentParameterCreateInteractiveCmd,
+	&PaymentParameterAskCmd,
+	&PaymentParameterCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
 		PaymentParameterActions.RemoveEnqueue,
 	),
 }
 
-func PaymentParameterCliFn() cli.Command {
+func PaymentParameterCliFn() *cli.Command {
 	commands := append(PaymentParameterImportExportCommands, PaymentParameterCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PaymentParameterDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "param",
 		Description: `Keeps the information about payment Przelewy24 payment provider`,
 		Usage:       `Keeps the information about payment Przelewy24 payment provider`,
@@ -1361,7 +1363,7 @@ func PaymentParameterCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1371,7 +1373,7 @@ var PAYMENT_PARAMETER_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PaymentParameterActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			PaymentParameterActions.Query,
 			security,
@@ -1398,7 +1400,7 @@ var PAYMENT_PARAMETER_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "PaymentParameterEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &PaymentParameterEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1466,7 +1468,7 @@ var PAYMENT_PARAMETER_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, PaymentParameterActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PaymentParameterActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1512,7 +1514,7 @@ var PAYMENT_PARAMETER_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the PaymentParameter entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PaymentParameterActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1739,7 +1741,7 @@ var PaymentParameterEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	PaymentParameterCliFn(),
 	//},
 	Actions:      GetPaymentParameterModule3Actions(),

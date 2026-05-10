@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/PublicAuthentication"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PublicAuthentication"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -364,7 +365,7 @@ func PublicAuthenticationValidator(dto *PublicAuthenticationEntity, isPatch bool
 var PublicAuthenticationAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -380,7 +381,7 @@ var PublicAuthenticationAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &PublicAuthenticationEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -638,7 +639,7 @@ func PublicAuthenticationActionUpdateFn(query fireback.QueryDSL, fields *PublicA
 var PublicAuthenticationWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire publicauthentications ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE},
 			AllowOnRoot:    true,
@@ -954,7 +955,7 @@ var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `recoveryAbsoluteUrl (string)`,
 	},
 }
-var PublicAuthenticationCreateCmd cli.Command = PUBLIC_AUTHENTICATION_ACTION_POST_ONE.ToCli()
+var PublicAuthenticationCreateCmd *cli.Command = PUBLIC_AUTHENTICATION_ACTION_POST_ONE.ToCli()
 var PublicAuthenticationCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -964,7 +965,7 @@ var PublicAuthenticationCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_CREATE},
 			AllowOnRoot:    true,
@@ -977,6 +978,7 @@ var PublicAuthenticationCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PublicAuthenticationUpdateCmd cli.Command = cli.Command{
@@ -984,7 +986,7 @@ var PublicAuthenticationUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   PublicAuthenticationCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_UPDATE},
 			AllowOnRoot:    true,
@@ -1000,10 +1002,10 @@ var PublicAuthenticationUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *PublicAuthenticationEntity) FromCli(c *cli.Context) *PublicAuthenticationEntity {
+func (x *PublicAuthenticationEntity) FromCli(c *cli.Command) *PublicAuthenticationEntity {
 	return CastPublicAuthenticationFromCli(c)
 }
-func CastPublicAuthenticationFromCli(c *cli.Context) *PublicAuthenticationEntity {
+func CastPublicAuthenticationFromCli(c *cli.Command) *PublicAuthenticationEntity {
 	template := &PublicAuthenticationEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -1112,8 +1114,8 @@ func PublicAuthenticationsActionQueryString(keyword string, page int) ([]string,
 	return stringItems, meta, err
 }
 
-var PublicAuthenticationDevCommands = []cli.Command{
-	PublicAuthenticationWipeCmd,
+var PublicAuthenticationDevCommands = []*cli.Command{
+	&PublicAuthenticationWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1128,7 +1130,7 @@ var PublicAuthenticationDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_CREATE},
 				AllowOnRoot:    true,
@@ -1152,16 +1154,16 @@ var PublicAuthenticationDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := PublicAuthenticationActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1171,10 +1173,10 @@ var PublicAuthenticationDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
@@ -1184,7 +1186,7 @@ var PublicAuthenticationDevCommands = []cli.Command{
 		},
 	},
 }
-var PublicAuthenticationImportExportCommands = []cli.Command{
+var PublicAuthenticationImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1197,7 +1199,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of public-authentications, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[PublicAuthenticationEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1212,10 +1214,10 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(publicAuthenticationSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1231,10 +1233,10 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
@@ -1243,7 +1245,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1253,7 +1255,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				PublicAuthenticationEntityStream,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
@@ -1264,7 +1266,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1277,7 +1279,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			PublicAuthenticationCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				PublicAuthenticationActions.Create,
 				reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
@@ -1295,27 +1297,27 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
+var PublicAuthenticationCliCommands []*cli.Command = []*cli.Command{
 	PUBLIC_AUTHENTICATION_ACTION_QUERY.ToCli(),
 	PUBLIC_AUTHENTICATION_ACTION_TABLE.ToCli(),
 	PUBLIC_AUTHENTICATION_ACTION_PATCH.ToCli(),
 	PublicAuthenticationCreateCmd,
-	PublicAuthenticationAskCmd,
-	PublicAuthenticationCreateInteractiveCmd,
+	&PublicAuthenticationAskCmd,
+	&PublicAuthenticationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		PublicAuthenticationActions.RemoveEnqueue,
 	),
 }
 
-func PublicAuthenticationCliFn() cli.Command {
+func PublicAuthenticationCliFn() *cli.Command {
 	commands := append(PublicAuthenticationImportExportCommands, PublicAuthenticationCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PublicAuthenticationDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "publicauthentication",
-		ShortName:   "pa",
+		Aliases:     []string{"pa"},
 		Description: `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Usage:       `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Flags: []cli.Flag{
@@ -1324,7 +1326,7 @@ func PublicAuthenticationCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1334,7 +1336,7 @@ var PUBLIC_AUTHENTICATION_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PublicAuthenticationActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			PublicAuthenticationActions.Query,
 			security,
@@ -1361,7 +1363,7 @@ var PUBLIC_AUTHENTICATION_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "PublicAuthenticationEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &PublicAuthenticationEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1429,7 +1431,7 @@ var PUBLIC_AUTHENTICATION_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, PublicAuthenticationActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PublicAuthenticationActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1475,7 +1477,7 @@ var PUBLIC_AUTHENTICATION_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the PublicAuthentication entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PublicAuthenticationActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1621,7 +1623,7 @@ var PublicAuthenticationEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	PublicAuthenticationCliFn(),
 	//},
 	Actions:      GetPublicAuthenticationModule3Actions(),

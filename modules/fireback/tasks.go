@@ -7,7 +7,7 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/robfig/cron"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 type TaskCtx struct {
@@ -17,7 +17,7 @@ type TaskCtx struct {
 type TaskAction struct {
 	HandlerFunc func(ctx *TaskCtx, content []byte) error
 	Name        string
-	Cli         func(c *cli.Context) error
+	Cli         func(context.Context, *cli.Command) error
 	Flags       []cli.Flag
 	Triggers    []*Module3Trigger
 }

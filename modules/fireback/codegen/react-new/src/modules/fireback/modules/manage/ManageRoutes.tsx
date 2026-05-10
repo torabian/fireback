@@ -12,7 +12,6 @@ import { useDriveRoutes } from "./drive/DriveRoutes";
 import { useEmailProviderRoutes } from "./mail-providers/EmailProviderRoutes";
 import { useEmailSenderRoutes } from "./mail-senders/EmailSenderRoutes";
 import { usePassportMethodRoutes } from "./passport-method/PassportMethodRoutes";
-import { usePaymentRoutes } from "./payment/PaymentRoutes";
 import { useRegionalContentRoutes } from "./regional-content/RegionalContentRoutes";
 import { useUserRoutes } from "./users/UserRoutes";
 import { useWorkspaceConfigRoutes } from "./workspace-config/WorkspaceConfigRoutes";
@@ -32,13 +31,11 @@ export function useManageRoutes() {
   const workspaceTypeRoutes = useWorkspaceTypeRoutes();
   const workspaceRoutes = useWorkspaceRoutes();
   const regionalContentRoutes = useRegionalContentRoutes();
-  const paymentConfigRoutes = usePaymentRoutes();
 
   return (
     <Route path="manage">
       {capabilityRoutes}
       {driveRoutes}
-      {paymentConfigRoutes}
       {mailProviderRoutes}
       {mailSenderRoutes}
       {passportMethodRoutes}

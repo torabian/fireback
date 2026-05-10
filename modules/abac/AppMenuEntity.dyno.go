@@ -18,11 +18,12 @@ import (
 	"log"
 	"strings"
 	//queries github.com/torabian/fireback - modules/abac"
+	"context"
 	"embed"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/AppMenu"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	reflect "reflect"
 	"time"
@@ -346,7 +347,7 @@ func AppMenuValidator(dto *AppMenuEntity, isPatch bool) *fireback.IError {
 var AppMenuAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -362,7 +363,7 @@ var AppMenuAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &AppMenuEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -660,7 +661,7 @@ func AppMenuActionUpdateFn(query fireback.QueryDSL, fields *AppMenuEntity) (*App
 var AppMenuWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire appmenus ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE},
 		})
@@ -883,7 +884,7 @@ var AppMenuCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `The permission which is required for the menu to be visible. (one)`,
 	},
 }
-var AppMenuCreateCmd cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()
+var AppMenuCreateCmd *cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()
 var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -893,7 +894,7 @@ var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
 		})
@@ -905,6 +906,7 @@ var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var AppMenuUpdateCmd cli.Command = cli.Command{
@@ -912,7 +914,7 @@ var AppMenuUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   AppMenuCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE},
 		})
@@ -927,10 +929,10 @@ var AppMenuUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *AppMenuEntity) FromCli(c *cli.Context) *AppMenuEntity {
+func (x *AppMenuEntity) FromCli(c *cli.Command) *AppMenuEntity {
 	return CastAppMenuFromCli(c)
 }
-func CastAppMenuFromCli(c *cli.Context) *AppMenuEntity {
+func CastAppMenuFromCli(c *cli.Command) *AppMenuEntity {
 	template := &AppMenuEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -1020,8 +1022,8 @@ func AppMenusActionQueryString(keyword string, page int) ([]string, *fireback.Qu
 	return stringItems, meta, err
 }
 
-var AppMenuDevCommands = []cli.Command{
-	AppMenuWipeCmd,
+var AppMenuDevCommands = []*cli.Command{
+	&AppMenuWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1036,7 +1038,7 @@ var AppMenuDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE},
 			})
@@ -1059,16 +1061,16 @@ var AppMenuDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := AppMenuActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1078,10 +1080,10 @@ var AppMenuDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
@@ -1091,7 +1093,7 @@ var AppMenuDevCommands = []cli.Command{
 		},
 	},
 }
-var AppMenuImportExportCommands = []cli.Command{
+var AppMenuImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1104,7 +1106,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of app-menus, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[AppMenuEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1119,10 +1121,10 @@ var AppMenuImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(appMenuSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1138,10 +1140,10 @@ var AppMenuImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
@@ -1150,7 +1152,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1160,7 +1162,7 @@ var AppMenuImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				AppMenuEntityStream,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
@@ -1171,7 +1173,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1184,7 +1186,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			AppMenuCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				AppMenuActions.Create,
 				reflect.ValueOf(&AppMenuEntity{}).Elem(),
@@ -1201,13 +1203,13 @@ var AppMenuImportExportCommands = []cli.Command{
 		},
 	},
 }
-var AppMenuCliCommands []cli.Command = []cli.Command{
+var AppMenuCliCommands []*cli.Command = []*cli.Command{
 	APP_MENU_ACTION_QUERY.ToCli(),
 	APP_MENU_ACTION_TABLE.ToCli(),
 	APP_MENU_ACTION_PATCH.ToCli(),
 	AppMenuCreateCmd,
-	AppMenuAskCmd,
-	AppMenuCreateInteractiveCmd,
+	&AppMenuAskCmd,
+	&AppMenuCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		AppMenuActions.RemoveEnqueue,
@@ -1216,12 +1218,12 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 	fireback.GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
 }
 
-func AppMenuCliFn() cli.Command {
+func AppMenuCliFn() *cli.Command {
 	commands := append(AppMenuImportExportCommands, AppMenuCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, AppMenuDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "appmenu",
 		Description: `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
 		Usage:       `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
@@ -1231,7 +1233,7 @@ func AppMenuCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1241,7 +1243,7 @@ var APP_MENU_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        AppMenuActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			AppMenuActions.Query,
 			security,
@@ -1268,7 +1270,7 @@ var APP_MENU_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "AppMenuEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &AppMenuEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1354,7 +1356,7 @@ var APP_MENU_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, AppMenuActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, AppMenuActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1399,7 +1401,7 @@ var APP_MENU_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the AppMenu entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, AppMenuActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1544,7 +1546,7 @@ var AppMenuEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	AppMenuCliFn(),
 	//},
 	Actions:      GetAppMenuModule3Actions(),

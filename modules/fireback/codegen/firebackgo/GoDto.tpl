@@ -14,7 +14,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	{{ end }}
 	"strings"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 {{ template "goimport" . }}

@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding"
 	"encoding/json"
@@ -17,7 +18,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/EmailProvider"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/EmailProvider"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -308,7 +309,7 @@ func EmailProviderValidator(dto *EmailProviderEntity, isPatch bool) *fireback.IE
 var EmailProviderAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -324,7 +325,7 @@ var EmailProviderAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &EmailProviderEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -574,7 +575,7 @@ func EmailProviderActionUpdateFn(query fireback.QueryDSL, fields *EmailProviderE
 var EmailProviderWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire emailproviders ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_DELETE},
 			AllowOnRoot:    true,
@@ -762,7 +763,7 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `JSON field which contains api keys, or other kind of configuration based on the type of the email provider. (complex)`,
 	},
 }
-var EmailProviderCreateCmd cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
+var EmailProviderCreateCmd *cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
 var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -772,7 +773,7 @@ var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 			AllowOnRoot:    true,
@@ -785,6 +786,7 @@ var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var EmailProviderUpdateCmd cli.Command = cli.Command{
@@ -792,7 +794,7 @@ var EmailProviderUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   EmailProviderCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_UPDATE},
 			AllowOnRoot:    true,
@@ -808,10 +810,10 @@ var EmailProviderUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *EmailProviderEntity) FromCli(c *cli.Context) *EmailProviderEntity {
+func (x *EmailProviderEntity) FromCli(c *cli.Command) *EmailProviderEntity {
 	return CastEmailProviderFromCli(c)
 }
-func CastEmailProviderFromCli(c *cli.Context) *EmailProviderEntity {
+func CastEmailProviderFromCli(c *cli.Command) *EmailProviderEntity {
 	template := &EmailProviderEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -897,8 +899,8 @@ func EmailProvidersActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var EmailProviderDevCommands = []cli.Command{
-	EmailProviderWipeCmd,
+var EmailProviderDevCommands = []*cli.Command{
+	&EmailProviderWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -913,7 +915,7 @@ var EmailProviderDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_PROVIDER_CREATE},
 				AllowOnRoot:    true,
@@ -937,16 +939,16 @@ var EmailProviderDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := EmailProviderActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -956,10 +958,10 @@ var EmailProviderDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
@@ -969,7 +971,7 @@ var EmailProviderDevCommands = []cli.Command{
 		},
 	},
 }
-var EmailProviderImportExportCommands = []cli.Command{
+var EmailProviderImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -982,7 +984,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of email-providers, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[EmailProviderEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -997,10 +999,10 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(emailProviderSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1016,10 +1018,10 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
@@ -1028,7 +1030,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1038,7 +1040,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				EmailProviderEntityStream,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
@@ -1049,7 +1051,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1062,7 +1064,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			EmailProviderCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				EmailProviderActions.Create,
 				reflect.ValueOf(&EmailProviderEntity{}).Elem(),
@@ -1080,25 +1082,25 @@ var EmailProviderImportExportCommands = []cli.Command{
 		},
 	},
 }
-var EmailProviderCliCommands []cli.Command = []cli.Command{
+var EmailProviderCliCommands []*cli.Command = []*cli.Command{
 	EMAIL_PROVIDER_ACTION_QUERY.ToCli(),
 	EMAIL_PROVIDER_ACTION_TABLE.ToCli(),
 	EMAIL_PROVIDER_ACTION_PATCH.ToCli(),
 	EmailProviderCreateCmd,
-	EmailProviderAskCmd,
-	EmailProviderCreateInteractiveCmd,
+	&EmailProviderAskCmd,
+	&EmailProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		EmailProviderActions.RemoveEnqueue,
 	),
 }
 
-func EmailProviderCliFn() cli.Command {
+func EmailProviderCliFn() *cli.Command {
 	commands := append(EmailProviderImportExportCommands, EmailProviderCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, EmailProviderDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "emailprovider",
 		Description: `Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down.`,
 		Usage:       `Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down.`,
@@ -1108,7 +1110,7 @@ func EmailProviderCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1118,7 +1120,7 @@ var EMAIL_PROVIDER_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        EmailProviderActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			EmailProviderActions.Query,
 			security,
@@ -1146,7 +1148,7 @@ var EMAIL_PROVIDER_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "EmailProviderEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &EmailProviderEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1216,7 +1218,7 @@ var EMAIL_PROVIDER_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, EmailProviderActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, EmailProviderActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1262,7 +1264,7 @@ var EMAIL_PROVIDER_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the EmailProvider entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, EmailProviderActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1431,7 +1433,7 @@ var EmailProviderEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	EmailProviderCliFn(),
 	//},
 	Actions:      GetEmailProviderModule3Actions(),

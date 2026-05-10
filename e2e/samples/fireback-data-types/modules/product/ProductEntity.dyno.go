@@ -6,14 +6,10 @@ package product
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -21,10 +17,14 @@ import (
 	mocks "github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product/mocks/Product"
 	seeders "github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product/seeders/Product"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var productSeedersFs = &seeders.ViewsFs
@@ -347,7 +347,7 @@ func ProductValidator(dto *ProductEntity, isPatch bool) *fireback.IError {
 var ProductAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -363,7 +363,7 @@ var ProductAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &ProductEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -389,8 +389,6 @@ And here is the actual object signature:
 	},
 }
 
-func ProductEntityPreSanitize(dto *ProductEntity, query fireback.QueryDSL) {
-}
 func ProductEntityBeforeCreateAppend(dto *ProductEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -404,19 +402,16 @@ func ProductRecursiveAddUniqueId(dto *ProductEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func ProductMultiInsertFn(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			ProductEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -458,7 +453,6 @@ func ProductActionCreateFn(dto *ProductEntity, query fireback.QueryDSL) (*Produc
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	ProductEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -550,7 +544,6 @@ func ProductMemJoin(items []uint) []*ProductEntity {
 func ProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ProductEntity) (*ProductEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PRODUCT_EVENT_UPDATED
-
 	var item ProductEntity
 	var itemRefetched ProductEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -625,7 +618,7 @@ func ProductActionUpdateFn(query fireback.QueryDSL, fields *ProductEntity) (*Pro
 var ProductWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire products ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_DELETE},
 		})
@@ -878,7 +871,7 @@ var ProductCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Is the product available? (bool)`,
 	},
 }
-var ProductCreateCmd cli.Command = PRODUCT_ACTION_POST_ONE.ToCli()
+var ProductCreateCmd *cli.Command = PRODUCT_ACTION_POST_ONE.ToCli()
 var ProductCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -888,7 +881,7 @@ var ProductCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 		})
@@ -900,6 +893,7 @@ var ProductCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var ProductUpdateCmd cli.Command = cli.Command{
@@ -907,7 +901,7 @@ var ProductUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   ProductCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_UPDATE},
 		})
@@ -922,10 +916,10 @@ var ProductUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *ProductEntity) FromCli(c *cli.Context) *ProductEntity {
+func (x *ProductEntity) FromCli(c *cli.Command) *ProductEntity {
 	return CastProductFromCli(c)
 }
-func CastProductFromCli(c *cli.Context) *ProductEntity {
+func CastProductFromCli(c *cli.Command) *ProductEntity {
 	template := &ProductEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -1020,8 +1014,8 @@ func ProductsActionQueryString(keyword string, page int) ([]string, *fireback.Qu
 	return stringItems, meta, err
 }
 
-var ProductDevCommands = []cli.Command{
-	ProductWipeCmd,
+var ProductDevCommands = []*cli.Command{
+	&ProductWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1036,7 +1030,7 @@ var ProductDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PRODUCT_CREATE},
 			})
@@ -1059,16 +1053,16 @@ var ProductDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := ProductActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1078,10 +1072,10 @@ var ProductDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
@@ -1091,7 +1085,7 @@ var ProductDevCommands = []cli.Command{
 		},
 	},
 }
-var ProductImportExportCommands = []cli.Command{
+var ProductImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1104,7 +1098,7 @@ var ProductImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of products, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[ProductEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1119,10 +1113,10 @@ var ProductImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(productSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1138,10 +1132,10 @@ var ProductImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
@@ -1150,7 +1144,7 @@ var ProductImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1160,7 +1154,7 @@ var ProductImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				ProductEntityStream,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
@@ -1171,7 +1165,7 @@ var ProductImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1184,7 +1178,7 @@ var ProductImportExportCommands = []cli.Command{
 			ProductCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				ProductActions.Create,
 				reflect.ValueOf(&ProductEntity{}).Elem(),
@@ -1201,25 +1195,25 @@ var ProductImportExportCommands = []cli.Command{
 		},
 	},
 }
-var ProductCliCommands []cli.Command = []cli.Command{
+var ProductCliCommands []*cli.Command = []*cli.Command{
 	PRODUCT_ACTION_QUERY.ToCli(),
 	PRODUCT_ACTION_TABLE.ToCli(),
 	PRODUCT_ACTION_PATCH.ToCli(),
 	ProductCreateCmd,
-	ProductAskCmd,
-	ProductCreateInteractiveCmd,
+	&ProductAskCmd,
+	&ProductCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&ProductEntity{}).Elem(),
 		ProductActions.RemoveEnqueue,
 	),
 }
 
-func ProductCliFn() cli.Command {
+func ProductCliFn() *cli.Command {
 	commands := append(ProductImportExportCommands, ProductCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, ProductDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "product",
 		Description: `Sample Product Table with Various Field Types`,
 		Usage:       `Sample Product Table with Various Field Types`,
@@ -1229,7 +1223,7 @@ func ProductCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1239,7 +1233,7 @@ var PRODUCT_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        ProductActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			ProductActions.Query,
 			security,
@@ -1266,7 +1260,7 @@ var PRODUCT_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "ProductEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &ProductEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1333,7 +1327,7 @@ var PRODUCT_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, ProductActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, ProductActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1378,7 +1372,7 @@ var PRODUCT_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the Product entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, ProductActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1522,7 +1516,7 @@ var ProductEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	ProductCliFn(),
 	//},
 	Actions:      GetProductModule3Actions(),

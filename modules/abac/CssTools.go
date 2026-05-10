@@ -3,6 +3,7 @@ package abac
 // Css is a good tool for building UI elements. This file gives such tools to the applications
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 func resolveCssImports(path string, visited map[string]bool) (string, error) {
@@ -74,8 +75,8 @@ func combineAndMinifyCssRecursively(sourceFilePath string, outputFilePath string
 	}
 }
 
-func getCssMinCombineCli() cli.Command {
-	return cli.Command{
+func getCssMinCombineCli() *cli.Command {
+	return &cli.Command{
 		Name:        "cssx",
 		Description: "Minifies css file, and resolves the @import dependencies recursively",
 		Usage:       `Minifies css file, and resolves the @import dependencies recursively`,
@@ -96,7 +97,7 @@ func getCssMinCombineCli() cli.Command {
 				Usage: "If true, would skip minifying the css result file",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			combineAndMinifyCssRecursively(c.String("entry-point"), c.String("out"), c.Bool("skip-minify"))
 			return nil
 		},

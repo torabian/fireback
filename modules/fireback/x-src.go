@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
-func HandleXsrc[T any](c *cli.Context, template *T) {
+func HandleXsrc[T any](c *cli.Command, template *T) {
 	if c.IsSet("x-src") {
 		path := c.String("x-src")
 		data, err := os.ReadFile(path)

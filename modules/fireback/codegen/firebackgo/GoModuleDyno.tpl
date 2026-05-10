@@ -35,7 +35,7 @@ import queries "{{ .gofModule }}/{{ .ctx.RelativePath }}/queries"
 {{ end }}
 
 import "encoding/json"
-import "github.com/urfave/cli"
+import "github.com/urfave/cli/v3"
 import "gopkg.in/yaml.v2"
 import "fmt"
 
@@ -44,7 +44,7 @@ import (
 
 	"github.com/hashicorp/go-retryablehttp"
   "net/http"
-  
+
 )
 {{ end }}
 
@@ -55,6 +55,9 @@ import (
 )
 {{ end }}
 
+{{ if .m.Config }}
+import   "context"
+{{ end }}
 
 func {{ upper .m.Name }}Json() string {
   e := cli.BoolFlag{}
@@ -276,7 +279,7 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() []*{{ $.wsprefix }}TaskActi
         return nil
         {{ end }}
 			},
-      Cli: func(c *cli.Context) error {
+      Cli: func(c *cli.Command) error {
         {{ if .In }}
         dto := Cast{{ upper .Name }}TaskFromCli(c)
 				task, err := New{{ upper .Name }}Task(dto)
@@ -323,7 +326,7 @@ func (x *{{ upper .m.Name }}TasksContext) GetTasks() []*{{ $.wsprefix }}TaskActi
     {{ template "dtoCliFlag" (arr .In.Fields "") }}
   }
 
-  func Cast{{ upper .Name }}TaskFromCli (c *cli.Context) *{{ template "taskrequestbody" . }} {
+  func Cast{{ upper .Name }}TaskFromCli (c *cli.Command) *{{ template "taskrequestbody" . }} {
     template := &{{- template "taskrequestbody" . -}}{}
 
     {{ $.wsprefix}}HandleXsrc(c, template)
@@ -471,37 +474,37 @@ func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
     {{ range .m.Config }} 
       {{ if or (eq .Type "string") (eq .Type "")}}
-        cli.StringFlag{
+        &cli.StringFlag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "int64") }}
-        cli.Int64Flag{
+        &cli.Int64Flag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "float64") }}
-        cli.Float64Flag{
+        &cli.Float64Flag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "int") }}
-        cli.IntFlag{
+        &cli.IntFlag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "bool") (eq .Type "boolean") }}
-        cli.BoolFlag{
+        &cli.BoolFlag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "int32") }}
-        cli.Int32Flag{
+        &cli.Int32Flag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
@@ -510,7 +513,7 @@ func GetConfigCliFlags() []cli.Flag {
 	}
 }
 
-func CastConfigFromCli(config *Config, c *cli.Context) {
+func CastConfigFromCli(config *Config, c *cli.Command) {
   {{ range .m.Config }} 
     if c.IsSet("{{ .DashedName }}") {
       {{ if or (eq .Type "string") (eq .Type "")}}
@@ -536,24 +539,24 @@ func CastConfigFromCli(config *Config, c *cli.Context) {
 }
 
 
-func GetConfigCli() []cli.Command {
-	return []cli.Command{
+func GetConfigCli() []*cli.Command {
+	return []*cli.Command{
     {{ range .m.Config }}
 		{
 			Name:  "{{ .DashedName }}",
 			Usage: "{{ .Description }} ({{ if or (eq .Type "string") (eq .Type "")}}string{{else}}{{.Type}}{{end}})",
 
-      Subcommands: []cli.Command{
+      Commands: []*cli.Command{
 				{
 					Name: "get",
-					Action: func(c *cli.Context) error {
+					Action: func(ctx context.Context, c *cli.Command) error {
 						fmt.Println(config.{{ upper .Name }})
 						return nil
 					},
 				},
 				{
 					Name: "set",
-					Action: func(c *cli.Context) error {
+					Action: func(ctx context.Context, c *cli.Command) error {
             {{ if or (eq .Type "bool") (eq .Type "boolean") }}
               return ConfigSetBoolean(c, config.{{ upper .Name }}, func(value bool) {
                 config.{{ upper .Name }} = value

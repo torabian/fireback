@@ -8,7 +8,7 @@ package abac
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 import (
 	"reflect"
@@ -47,7 +47,7 @@ var QueryUserRoleWorkspacesActionDef fireback.Module3Action = fireback.Module3Ac
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryUserRoleWorkspacesSecurityModel)
 		req := QueryUserRoleWorkspacesActionRequest{}
 		resp, err := QueryUserRoleWorkspacesImpl(req, query)
@@ -82,7 +82,7 @@ var InviteToWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, InviteToWorkspaceSecurityModel)
 		req := InviteToWorkspaceActionRequest{}
 		resp, err := InviteToWorkspaceImpl(req, query)
@@ -120,7 +120,7 @@ var UserInvitationsActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserInvitationsSecurityModel)
 		req := UserInvitationsActionRequest{}
 		resp, err := UserInvitationsImpl(req, query)
@@ -155,7 +155,7 @@ var SignoutActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SignoutSecurityModel)
 		req := SignoutActionRequest{}
 		resp, err := SignoutImpl(req, query)
@@ -190,7 +190,7 @@ var OauthAuthenticateActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OauthAuthenticateSecurityModel)
 		req := OauthAuthenticateActionRequest{}
 		resp, err := OauthAuthenticateImpl(req, query)
@@ -228,7 +228,7 @@ var AcceptInviteActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, AcceptInviteSecurityModel)
 		req := AcceptInviteActionRequest{}
 		resp, err := AcceptInviteImpl(req, query)
@@ -263,7 +263,7 @@ var ConfirmClassicPassportTotpActionDef fireback.Module3Action = fireback.Module
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ConfirmClassicPassportTotpSecurityModel)
 		req := ConfirmClassicPassportTotpActionRequest{}
 		resp, err := ConfirmClassicPassportTotpImpl(req, query)
@@ -301,7 +301,7 @@ var ChangePasswordActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ChangePasswordSecurityModel)
 		req := ChangePasswordActionRequest{}
 		resp, err := ChangePasswordImpl(req, query)
@@ -339,7 +339,7 @@ var UserPassportsActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, UserPassportsSecurityModel)
 		req := UserPassportsActionRequest{}
 		resp, err := UserPassportsImpl(req, query)
@@ -374,7 +374,7 @@ var CreateWorkspaceActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CreateWorkspaceSecurityModel)
 		req := CreateWorkspaceActionRequest{}
 		resp, err := CreateWorkspaceImpl(req, query)
@@ -409,7 +409,7 @@ var ClassicPassportRequestOtpActionDef fireback.Module3Action = fireback.Module3
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportRequestOtpSecurityModel)
 		req := ClassicPassportRequestOtpActionRequest{}
 		resp, err := ClassicPassportRequestOtpImpl(req, query)
@@ -444,7 +444,7 @@ var ClassicPassportOtpActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicPassportOtpSecurityModel)
 		req := ClassicPassportOtpActionRequest{}
 		resp, err := ClassicPassportOtpImpl(req, query)
@@ -479,7 +479,7 @@ var CheckClassicPassportActionDef fireback.Module3Action = fireback.Module3Actio
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckClassicPassportSecurityModel)
 		req := CheckClassicPassportActionRequest{}
 		resp, err := CheckClassicPassportImpl(req, query)
@@ -514,7 +514,7 @@ var ClassicSignupActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSignupSecurityModel)
 		req := ClassicSignupActionRequest{}
 		resp, err := ClassicSignupImpl(req, query)
@@ -549,7 +549,7 @@ var ClassicSigninActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ClassicSigninSecurityModel)
 		req := ClassicSigninActionRequest{}
 		resp, err := ClassicSigninImpl(req, query)
@@ -584,7 +584,7 @@ var QueryWorkspaceTypesPubliclyActionDef fireback.Module3Action = fireback.Modul
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QueryWorkspaceTypesPubliclySecurityModel)
 		req := QueryWorkspaceTypesPubliclyActionRequest{}
 		resp, err := QueryWorkspaceTypesPubliclyImpl(req, query)
@@ -619,7 +619,7 @@ var CheckPassportMethodsActionDef fireback.Module3Action = fireback.Module3Actio
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckPassportMethodsSecurityModel)
 		req := CheckPassportMethodsActionRequest{}
 		resp, err := CheckPassportMethodsImpl(req, query)
@@ -654,7 +654,7 @@ var OsLoginAuthenticateActionDef fireback.Module3Action = fireback.Module3Action
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, OsLoginAuthenticateSecurityModel)
 		req := OsLoginAuthenticateActionRequest{}
 		resp, err := OsLoginAuthenticateImpl(req, query)
@@ -689,7 +689,7 @@ var SendEmailActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailSecurityModel)
 		req := SendEmailActionRequest{}
 		resp, err := SendEmailImpl(req, query)
@@ -724,7 +724,7 @@ var SendEmailWithProviderActionDef fireback.Module3Action = fireback.Module3Acti
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, SendEmailWithProviderSecurityModel)
 		req := SendEmailWithProviderActionRequest{}
 		resp, err := SendEmailWithProviderImpl(req, query)
@@ -759,7 +759,7 @@ var GsmSendSmsActionDef fireback.Module3Action = fireback.Module3Action{
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsSecurityModel)
 		req := GsmSendSmsActionRequest{}
 		resp, err := GsmSendSmsImpl(req, query)
@@ -794,7 +794,7 @@ var GsmSendSmsWithProviderActionDef fireback.Module3Action = fireback.Module3Act
 			fireback.WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GsmSendSmsWithProviderSecurityModel)
 		req := GsmSendSmsWithProviderActionRequest{}
 		resp, err := GsmSendSmsWithProviderImpl(req, query)
@@ -833,7 +833,7 @@ func AbacCustomActions() []fireback.Module3Action {
 	return routes
 }
 
-var AbacCustomActionsCli = []cli.Command{}
+var AbacCustomActionsCli = []*cli.Command{}
 
 // Only to include some headers
 func AbacJsonInclude() {
@@ -847,7 +847,7 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "abac",
 	Usage: `Fireback ABAC module provides user authentication, basic support for most projects, including advanced role, permission module on top of fireback core module. Using this module is not essential to create fireback projects, but provides a great possibility to avoid building most user management flow. Some other helpers, such as timezone are added here.`,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		QueryUserRoleWorkspacesActionDef.ToCli(),
 		InviteToWorkspaceActionDef.ToCli(),
 		UserInvitationsActionDef.ToCli(),
@@ -907,6 +907,6 @@ func GetAbacActionsBundle() *fireback.ModuleActionsBundle {
 		CliAction: AbacCliActionsBundle,
 	}
 }
-func GetAbacActionsCli() []cli.Command {
+func GetAbacActionsCli() []*cli.Command {
 	return AbacCustomActionsCli
 }

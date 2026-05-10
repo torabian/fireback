@@ -1,15 +1,12 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-
 	"os"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/torabian/fireback/modules/payment"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback-payment"
@@ -40,13 +37,13 @@ var xapp = &fireback.FirebackApp{
 	},
 
 	Modules: append([]*fireback.ModuleProvider{
-		payment.PaymentModuleSetup(nil),
 		fireback.FirebackModuleSetup(nil),
-		{
-			CliHandlers: []cli.Command{
-				fireback.NewProjectCli(),
-			},
-		},
+		// payment.PaymentModuleSetup(nil),
+		// {
+		// 	CliHandlers: []cli.Command{
+		// 		fireback.NewProjectCli(),
+		// 	},
+		// },
 	}, abac.AbacCompleteModules()...),
 }
 

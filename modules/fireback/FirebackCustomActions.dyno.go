@@ -7,7 +7,7 @@ package fireback
  */
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 import (
 	"reflect"
@@ -84,7 +84,7 @@ var CapabilitiesTreeActionDef Module3Action = Module3Action{
 			WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Command, security *SecurityModel) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, CapabilitiesTreeSecurityModel)
 		req := CapabilitiesTreeActionRequest{}
 		resp, err := CapabilitiesTreeImpl(req, query)
@@ -102,7 +102,7 @@ func FirebackCustomActions() []Module3Action {
 	return routes
 }
 
-var FirebackCustomActionsCli = []cli.Command{}
+var FirebackCustomActionsCli = []*cli.Command{}
 
 // Only to include some headers
 func FirebackJsonInclude() {
@@ -116,7 +116,7 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Name:  "fireback",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		ReactiveSearchActionDef.ToCli(),
 		EventBusSubscriptionActionDef.ToCli(),
 		CapabilitiesTreeActionDef.ToCli(),
@@ -131,6 +131,6 @@ func GetFirebackActionsBundle() *ModuleActionsBundle {
 		CliAction: FirebackCliActionsBundle,
 	}
 }
-func GetFirebackActionsCli() []cli.Command {
+func GetFirebackActionsCli() []*cli.Command {
 	return FirebackCustomActionsCli
 }

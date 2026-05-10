@@ -7,7 +7,7 @@ package suggestion
  */
 import "github.com/torabian/fireback/modules/fireback"
 import "encoding/json"
-import "github.com/urfave/cli"
+import "github.com/urfave/cli/v3"
 import "gopkg.in/yaml.v2"
 import "fmt"
 

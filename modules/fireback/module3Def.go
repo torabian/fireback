@@ -11,13 +11,14 @@ Front-end code can be generated in: Angular, React, Pure TypeScript, Android Jav
 package fireback
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/lib/core"
 	emi "github.com/torabian/emi/lib/core"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 type ErrorItem map[string]string
@@ -537,7 +538,7 @@ type Module3Action struct {
 	SecurityModel *SecurityModel `yaml:"security,omitempty" json:"security,omitempty" jsonschema:"description=Defines access control similar to middleware checking permissions, tokens, and roles"`
 
 	// CLI implementation of the action.
-	CliAction func(c *cli.Context, security *SecurityModel) error `jsonschema:"-"`
+	CliAction func(c *cli.Command, security *SecurityModel) error `jsonschema:"-"`
 
 	// HTTP implementation using Gin handlers.
 	Handlers []gin.HandlerFunc `yaml:"-" json:"-" jsonschema:"-"`
@@ -613,19 +614,19 @@ func (x Module3Entity) HasComplexes() bool {
 	return hasComplexInFields(x.Fields)
 }
 
-func (x Module3Action) ToCli() cli.Command {
+func (x Module3Action) ToCli() *cli.Command {
 
 	name := x.Name
 	if x.CliName != "" {
 		name = x.CliName
 	}
 
-	return cli.Command{
+	return &cli.Command{
 		Name:        name,
 		Aliases:     x.ActionAliases,
 		Description: x.Description,
 		Usage:       x.Description,
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return x.CliAction(c, x.SecurityModel)
 		},
 		Flags: x.Flags,

@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastUserRoleWorkspacePermissionFromCli(c *cli.Context) *UserRoleWorkspacePermissionDto {
+func CastUserRoleWorkspacePermissionFromCli(c *cli.Command) *UserRoleWorkspacePermissionDto {
 	template := &UserRoleWorkspacePermissionDto{}
 	if c.IsSet("workspace-id") {
 		template.WorkspaceId = c.String("workspace-id")

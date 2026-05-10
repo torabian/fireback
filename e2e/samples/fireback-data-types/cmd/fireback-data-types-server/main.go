@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product"
 	"github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product/tags"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 
 	"os"
 
@@ -46,7 +46,7 @@ var xapp = &fireback.FirebackApp{
 		product.ProductModuleSetup(nil),
 		fireback.FirebackModuleSetup(nil),
 		{
-			CliHandlers: []cli.Command{
+			CliHandlers: []*cli.Command{
 				fireback.NewProjectCli(),
 			},
 		},

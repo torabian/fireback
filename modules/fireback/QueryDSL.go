@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -59,7 +59,7 @@ type QueryDSL struct {
 	// this is cli context upon the request, which is being attached to the dsl
 	// regularly, should not be accessed directly but in reality many times we need
 	// to work low level and there is no reason framework do not allow it.
-	C *cli.Context `json:"-" yaml:"-"`
+	C *cli.Command `json:"-" yaml:"-"`
 
 	// The gorm transaction object. By setting the query Tx, you can connect
 	// few Fireback actions to be done as transaction. Fireback also uses this

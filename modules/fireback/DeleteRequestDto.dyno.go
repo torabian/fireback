@@ -6,8 +6,9 @@ import emigo "github.com/torabian/emi/emigo"
 func GetDeleteRequestDtoCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
-			Name: prefix + "query",
-			Type: "string",
+			Name:        prefix + "query",
+			Type:        "string",
+			Description: "The query selector which would be used to delete the content.",
 		},
 	}
 }

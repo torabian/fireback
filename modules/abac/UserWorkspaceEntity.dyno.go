@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/UserWorkspace"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/UserWorkspace"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -318,7 +319,7 @@ func UserWorkspaceValidator(dto *UserWorkspaceEntity, isPatch bool) *fireback.IE
 var UserWorkspaceAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -334,7 +335,7 @@ var UserWorkspaceAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &UserWorkspaceEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -586,7 +587,7 @@ func UserWorkspaceActionUpdateFn(query fireback.QueryDSL, fields *UserWorkspaceE
 var UserWorkspaceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire userworkspaces ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_USER_WORKSPACE_DELETE},
 			ResolveStrategy: "user",
@@ -747,7 +748,7 @@ var UserWorkspaceCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `workspace (one)`,
 	},
 }
-var UserWorkspaceCreateCmd cli.Command = USER_WORKSPACE_ACTION_POST_ONE.ToCli()
+var UserWorkspaceCreateCmd *cli.Command = USER_WORKSPACE_ACTION_POST_ONE.ToCli()
 var UserWorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -757,7 +758,7 @@ var UserWorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
 			ResolveStrategy: "user",
@@ -770,6 +771,7 @@ var UserWorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var UserWorkspaceUpdateCmd cli.Command = cli.Command{
@@ -777,7 +779,7 @@ var UserWorkspaceUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   UserWorkspaceCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_USER_WORKSPACE_UPDATE},
 			ResolveStrategy: "user",
@@ -793,10 +795,10 @@ var UserWorkspaceUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *UserWorkspaceEntity) FromCli(c *cli.Context) *UserWorkspaceEntity {
+func (x *UserWorkspaceEntity) FromCli(c *cli.Command) *UserWorkspaceEntity {
 	return CastUserWorkspaceFromCli(c)
 }
-func CastUserWorkspaceFromCli(c *cli.Context) *UserWorkspaceEntity {
+func CastUserWorkspaceFromCli(c *cli.Command) *UserWorkspaceEntity {
 	template := &UserWorkspaceEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -877,8 +879,8 @@ func UserWorkspacesActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var UserWorkspaceDevCommands = []cli.Command{
-	UserWorkspaceWipeCmd,
+var UserWorkspaceDevCommands = []*cli.Command{
+	&UserWorkspaceWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -893,7 +895,7 @@ var UserWorkspaceDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_USER_WORKSPACE_CREATE},
 				ResolveStrategy: "user",
@@ -917,16 +919,16 @@ var UserWorkspaceDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := UserWorkspaceActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -936,10 +938,10 @@ var UserWorkspaceDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				UserWorkspaceActions.Create,
 				reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
@@ -949,7 +951,7 @@ var UserWorkspaceDevCommands = []cli.Command{
 		},
 	},
 }
-var UserWorkspaceImportExportCommands = []cli.Command{
+var UserWorkspaceImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -962,7 +964,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of user-workspaces, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[UserWorkspaceEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -977,10 +979,10 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(userWorkspaceSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -996,10 +998,10 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				UserWorkspaceActions.Create,
 				reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
@@ -1008,7 +1010,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1018,7 +1020,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				UserWorkspaceEntityStream,
 				reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
@@ -1029,7 +1031,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1042,7 +1044,7 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 			UserWorkspaceCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				UserWorkspaceActions.Create,
 				reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
@@ -1060,27 +1062,27 @@ var UserWorkspaceImportExportCommands = []cli.Command{
 		},
 	},
 }
-var UserWorkspaceCliCommands []cli.Command = []cli.Command{
+var UserWorkspaceCliCommands []*cli.Command = []*cli.Command{
 	USER_WORKSPACE_ACTION_QUERY.ToCli(),
 	USER_WORKSPACE_ACTION_TABLE.ToCli(),
 	USER_WORKSPACE_ACTION_PATCH.ToCli(),
 	UserWorkspaceCreateCmd,
-	UserWorkspaceAskCmd,
-	UserWorkspaceCreateInteractiveCmd,
+	&UserWorkspaceAskCmd,
+	&UserWorkspaceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserWorkspaceEntity{}).Elem(),
 		UserWorkspaceActions.RemoveEnqueue,
 	),
 }
 
-func UserWorkspaceCliFn() cli.Command {
+func UserWorkspaceCliFn() *cli.Command {
 	commands := append(UserWorkspaceImportExportCommands, UserWorkspaceCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, UserWorkspaceDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "userworkspace",
-		ShortName:   "user",
+		Aliases:     []string{"user"},
 		Description: `Manage the workspaces that user belongs to (either its himselves or adding by invitation)`,
 		Usage:       `Manage the workspaces that user belongs to (either its himselves or adding by invitation)`,
 		Flags: []cli.Flag{
@@ -1089,7 +1091,7 @@ func UserWorkspaceCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1099,7 +1101,7 @@ var USER_WORKSPACE_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        UserWorkspaceActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			UserWorkspaceActions.Query,
 			security,
@@ -1127,7 +1129,7 @@ var USER_WORKSPACE_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "UserWorkspaceEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &UserWorkspaceEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1197,7 +1199,7 @@ var USER_WORKSPACE_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, UserWorkspaceActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, UserWorkspaceActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1243,7 +1245,7 @@ var USER_WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the UserWorkspace entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserWorkspaceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1391,7 +1393,7 @@ var UserWorkspaceEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	UserWorkspaceCliFn(),
 	//},
 	Actions:      GetUserWorkspaceModule3Actions(),

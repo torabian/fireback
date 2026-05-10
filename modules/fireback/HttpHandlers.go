@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -363,11 +363,11 @@ func IsYaml(c *gin.Context) bool {
 	return isYaml(c.GetHeader("Accept"))
 }
 
-func IsYamlCli(c *cli.Context) bool {
+func IsYamlCli(c *cli.Command) bool {
 	return isYaml(c.String("x-accept"))
 }
 
-func IsCsvCli(c *cli.Context) bool {
+func IsCsvCli(c *cli.Command) bool {
 	return isCsv(c.String("x-accept"))
 }
 

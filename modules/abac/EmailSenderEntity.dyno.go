@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/EmailSender"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/EmailSender"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -311,7 +312,7 @@ func EmailSenderValidator(dto *EmailSenderEntity, isPatch bool) *fireback.IError
 var EmailSenderAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -327,7 +328,7 @@ var EmailSenderAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &EmailSenderEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -578,7 +579,7 @@ func EmailSenderActionUpdateFn(query fireback.QueryDSL, fields *EmailSenderEntit
 var EmailSenderWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire emailsenders ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE},
 			AllowOnRoot:    true,
@@ -792,7 +793,7 @@ var EmailSenderCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `nickName (string)`,
 	},
 }
-var EmailSenderCreateCmd cli.Command = EMAIL_SENDER_ACTION_POST_ONE.ToCli()
+var EmailSenderCreateCmd *cli.Command = EMAIL_SENDER_ACTION_POST_ONE.ToCli()
 var EmailSenderCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -802,7 +803,7 @@ var EmailSenderCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
 			AllowOnRoot:    true,
@@ -815,6 +816,7 @@ var EmailSenderCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var EmailSenderUpdateCmd cli.Command = cli.Command{
@@ -822,7 +824,7 @@ var EmailSenderUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   EmailSenderCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE},
 			AllowOnRoot:    true,
@@ -838,10 +840,10 @@ var EmailSenderUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *EmailSenderEntity) FromCli(c *cli.Context) *EmailSenderEntity {
+func (x *EmailSenderEntity) FromCli(c *cli.Command) *EmailSenderEntity {
 	return CastEmailSenderFromCli(c)
 }
-func CastEmailSenderFromCli(c *cli.Context) *EmailSenderEntity {
+func CastEmailSenderFromCli(c *cli.Command) *EmailSenderEntity {
 	template := &EmailSenderEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -928,8 +930,8 @@ func EmailSendersActionQueryString(keyword string, page int) ([]string, *firebac
 	return stringItems, meta, err
 }
 
-var EmailSenderDevCommands = []cli.Command{
-	EmailSenderWipeCmd,
+var EmailSenderDevCommands = []*cli.Command{
+	&EmailSenderWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -944,7 +946,7 @@ var EmailSenderDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE},
 				AllowOnRoot:    true,
@@ -968,16 +970,16 @@ var EmailSenderDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := EmailSenderActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -987,10 +989,10 @@ var EmailSenderDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				EmailSenderActions.Create,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
@@ -1000,7 +1002,7 @@ var EmailSenderDevCommands = []cli.Command{
 		},
 	},
 }
-var EmailSenderImportExportCommands = []cli.Command{
+var EmailSenderImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1013,7 +1015,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of email-senders, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[EmailSenderEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1028,10 +1030,10 @@ var EmailSenderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(emailSenderSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1047,10 +1049,10 @@ var EmailSenderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				EmailSenderActions.Create,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
@@ -1059,7 +1061,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1069,7 +1071,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				EmailSenderEntityStream,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
@@ -1080,7 +1082,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1093,7 +1095,7 @@ var EmailSenderImportExportCommands = []cli.Command{
 			EmailSenderCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				EmailSenderActions.Create,
 				reflect.ValueOf(&EmailSenderEntity{}).Elem(),
@@ -1111,25 +1113,25 @@ var EmailSenderImportExportCommands = []cli.Command{
 		},
 	},
 }
-var EmailSenderCliCommands []cli.Command = []cli.Command{
+var EmailSenderCliCommands []*cli.Command = []*cli.Command{
 	EMAIL_SENDER_ACTION_QUERY.ToCli(),
 	EMAIL_SENDER_ACTION_TABLE.ToCli(),
 	EMAIL_SENDER_ACTION_PATCH.ToCli(),
 	EmailSenderCreateCmd,
-	EmailSenderAskCmd,
-	EmailSenderCreateInteractiveCmd,
+	&EmailSenderAskCmd,
+	&EmailSenderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailSenderEntity{}).Elem(),
 		EmailSenderActions.RemoveEnqueue,
 	),
 }
 
-func EmailSenderCliFn() cli.Command {
+func EmailSenderCliFn() *cli.Command {
 	commands := append(EmailSenderImportExportCommands, EmailSenderCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, EmailSenderDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "emailsender",
 		Description: `All emails going from the system need to have a virtual sender (nick name, email address, etc)`,
 		Usage:       `All emails going from the system need to have a virtual sender (nick name, email address, etc)`,
@@ -1139,7 +1141,7 @@ func EmailSenderCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1149,7 +1151,7 @@ var EMAIL_SENDER_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        EmailSenderActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			EmailSenderActions.Query,
 			security,
@@ -1176,7 +1178,7 @@ var EMAIL_SENDER_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "EmailSenderEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &EmailSenderEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1244,7 +1246,7 @@ var EMAIL_SENDER_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, EmailSenderActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, EmailSenderActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1290,7 +1292,7 @@ var EMAIL_SENDER_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the EmailSender entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, EmailSenderActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1436,7 +1438,7 @@ var EmailSenderEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	EmailSenderCliFn(),
 	//},
 	Actions:      GetEmailSenderModule3Actions(),

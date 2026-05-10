@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastAuthContextFromCli(c *cli.Context) *AuthContextDto {
+func CastAuthContextFromCli(c *cli.Command) *AuthContextDto {
 	template := &AuthContextDto{}
 	if c.IsSet("skip-workspace-id") {
 		value := c.Bool("skip-workspace-id")

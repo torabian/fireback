@@ -60,9 +60,9 @@ require (
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.0.33
+	github.com/torabian/emi v1.1.1
 	github.com/tus/tusd v1.10.0
-	github.com/urfave/cli v1.22.17
+	github.com/urfave/cli/v3 v3.8.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaa110/go-persian-calendar v1.1.5
@@ -98,7 +98,6 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
@@ -175,7 +174,6 @@ require (
 	github.com/quic-go/quic-go v0.59.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/progressbar v1.0.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect

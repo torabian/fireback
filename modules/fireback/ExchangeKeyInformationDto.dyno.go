@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastExchangeKeyInformationFromCli(c *cli.Context) *ExchangeKeyInformationDto {
+func CastExchangeKeyInformationFromCli(c *cli.Command) *ExchangeKeyInformationDto {
 	template := &ExchangeKeyInformationDto{}
 	if c.IsSet("key") {
 		template.Key = c.String("key")

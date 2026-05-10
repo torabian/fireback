@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"context"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -16,7 +17,7 @@ import (
 	tmplGoDesktop "github.com/torabian/fireback/modules/fireback/codegen/go-desktop"
 	tmpl "github.com/torabian/fireback/modules/fireback/codegen/go-new"
 	tmplReact "github.com/torabian/fireback/modules/fireback/codegen/react-new"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 func newProjectContentWriter(fsys embed.FS, ctx *NewProjectContext, prefix string) {
@@ -140,8 +141,8 @@ type NewProjectContext struct {
 	CreateCapacitorProject bool
 }
 
-func NewProjectCli() cli.Command {
-	return cli.Command{
+func NewProjectCli() *cli.Command {
+	return &cli.Command{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "name",
@@ -211,7 +212,7 @@ func NewProjectCli() cli.Command {
 		},
 		Name:  "new",
 		Usage: "Generate a new fireback project or microservice.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx0 context.Context, c *cli.Command) error {
 			ctx := &NewProjectContext{
 				FirebackVersion: FIREBACK_VERSION,
 				IsMonolith:      false,

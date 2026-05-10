@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/UserProfile"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/UserProfile"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -297,7 +298,7 @@ func UserProfileValidator(dto *UserProfileEntity, isPatch bool) *fireback.IError
 var UserProfileAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -313,7 +314,7 @@ var UserProfileAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &UserProfileEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -562,7 +563,7 @@ func UserProfileActionUpdateFn(query fireback.QueryDSL, fields *UserProfileEntit
 var UserProfileWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire userprofiles ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE},
 		})
@@ -739,7 +740,7 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `lastName (string)`,
 	},
 }
-var UserProfileCreateCmd cli.Command = USER_PROFILE_ACTION_POST_ONE.ToCli()
+var UserProfileCreateCmd *cli.Command = USER_PROFILE_ACTION_POST_ONE.ToCli()
 var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -749,7 +750,7 @@ var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
 		})
@@ -761,6 +762,7 @@ var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var UserProfileUpdateCmd cli.Command = cli.Command{
@@ -768,7 +770,7 @@ var UserProfileUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   UserProfileCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE},
 		})
@@ -783,10 +785,10 @@ var UserProfileUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *UserProfileEntity) FromCli(c *cli.Context) *UserProfileEntity {
+func (x *UserProfileEntity) FromCli(c *cli.Command) *UserProfileEntity {
 	return CastUserProfileFromCli(c)
 }
-func CastUserProfileFromCli(c *cli.Context) *UserProfileEntity {
+func CastUserProfileFromCli(c *cli.Command) *UserProfileEntity {
 	template := &UserProfileEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -867,8 +869,8 @@ func UserProfilesActionQueryString(keyword string, page int) ([]string, *firebac
 	return stringItems, meta, err
 }
 
-var UserProfileDevCommands = []cli.Command{
-	UserProfileWipeCmd,
+var UserProfileDevCommands = []*cli.Command{
+	&UserProfileWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -883,7 +885,7 @@ var UserProfileDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE},
 			})
@@ -906,16 +908,16 @@ var UserProfileDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := UserProfileActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -925,10 +927,10 @@ var UserProfileDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
@@ -938,7 +940,7 @@ var UserProfileDevCommands = []cli.Command{
 		},
 	},
 }
-var UserProfileImportExportCommands = []cli.Command{
+var UserProfileImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -951,7 +953,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of user-profiles, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[UserProfileEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -966,10 +968,10 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(userProfileSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -985,10 +987,10 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
@@ -997,7 +999,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1007,7 +1009,7 @@ var UserProfileImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				UserProfileEntityStream,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
@@ -1018,7 +1020,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1031,7 +1033,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			UserProfileCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				UserProfileActions.Create,
 				reflect.ValueOf(&UserProfileEntity{}).Elem(),
@@ -1048,25 +1050,25 @@ var UserProfileImportExportCommands = []cli.Command{
 		},
 	},
 }
-var UserProfileCliCommands []cli.Command = []cli.Command{
+var UserProfileCliCommands []*cli.Command = []*cli.Command{
 	USER_PROFILE_ACTION_QUERY.ToCli(),
 	USER_PROFILE_ACTION_TABLE.ToCli(),
 	USER_PROFILE_ACTION_PATCH.ToCli(),
 	UserProfileCreateCmd,
-	UserProfileAskCmd,
-	UserProfileCreateInteractiveCmd,
+	&UserProfileAskCmd,
+	&UserProfileCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		UserProfileActions.RemoveEnqueue,
 	),
 }
 
-func UserProfileCliFn() cli.Command {
+func UserProfileCliFn() *cli.Command {
 	commands := append(UserProfileImportExportCommands, UserProfileCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, UserProfileDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "userprofile",
 		Description: ``,
 		Usage:       ``,
@@ -1076,7 +1078,7 @@ func UserProfileCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1086,7 +1088,7 @@ var USER_PROFILE_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        UserProfileActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			UserProfileActions.Query,
 			security,
@@ -1113,7 +1115,7 @@ var USER_PROFILE_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "UserProfileEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &UserProfileEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1180,7 +1182,7 @@ var USER_PROFILE_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, UserProfileActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, UserProfileActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1225,7 +1227,7 @@ var USER_PROFILE_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the UserProfile entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, UserProfileActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1369,7 +1371,7 @@ var UserProfileEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	UserProfileCliFn(),
 	//},
 	Actions:      GetUserProfileModule3Actions(),

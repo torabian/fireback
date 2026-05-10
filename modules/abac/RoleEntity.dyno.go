@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/Role"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/Role"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -319,7 +320,7 @@ func RoleValidator(dto *RoleEntity, isPatch bool) *fireback.IError {
 var RoleAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -335,7 +336,7 @@ var RoleAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &RoleEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -601,7 +602,7 @@ func RoleActionUpdateFn(query fireback.QueryDSL, fields *RoleEntity) (*RoleEntit
 var RoleWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire roles ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_DELETE},
 		})
@@ -770,7 +771,7 @@ var RoleCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `capabilities (collection)`,
 	},
 }
-var RoleCreateCmd cli.Command = ROLE_ACTION_POST_ONE.ToCli()
+var RoleCreateCmd *cli.Command = ROLE_ACTION_POST_ONE.ToCli()
 var RoleCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -780,7 +781,7 @@ var RoleCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_CREATE},
 		})
@@ -796,6 +797,7 @@ var RoleCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var RoleUpdateCmd cli.Command = cli.Command{
@@ -803,7 +805,7 @@ var RoleUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   RoleCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_UPDATE},
 		})
@@ -818,10 +820,10 @@ var RoleUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *RoleEntity) FromCli(c *cli.Context) *RoleEntity {
+func (x *RoleEntity) FromCli(c *cli.Command) *RoleEntity {
 	return CastRoleFromCli(c)
 }
-func CastRoleFromCli(c *cli.Context) *RoleEntity {
+func CastRoleFromCli(c *cli.Command) *RoleEntity {
 	template := &RoleEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -834,8 +836,7 @@ func CastRoleFromCli(c *cli.Context) *RoleEntity {
 		template.Name = c.String("name")
 	}
 	if c.IsSet("capabilities") {
-		value := c.String("capabilities")
-		template.CapabilitiesListId = strings.Split(value, ",")
+		template.CapabilitiesListId = c.StringSlice("capabilities")
 	} else {
 		template.CapabilitiesListId = fireback.CliInteractiveSearchAndSelect(
 			"Select Capabilities",
@@ -908,8 +909,8 @@ func RolesActionQueryString(keyword string, page int) ([]string, *fireback.Query
 	return stringItems, meta, err
 }
 
-var RoleDevCommands = []cli.Command{
-	RoleWipeCmd,
+var RoleDevCommands = []*cli.Command{
+	&RoleWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -924,7 +925,7 @@ var RoleDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_CREATE},
 			})
@@ -947,16 +948,16 @@ var RoleDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := RoleActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -966,10 +967,10 @@ var RoleDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
@@ -979,7 +980,7 @@ var RoleDevCommands = []cli.Command{
 		},
 	},
 }
-var RoleImportExportCommands = []cli.Command{
+var RoleImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -992,7 +993,7 @@ var RoleImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of roles, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[RoleEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1007,10 +1008,10 @@ var RoleImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(roleSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1026,10 +1027,10 @@ var RoleImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
@@ -1038,7 +1039,7 @@ var RoleImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1048,7 +1049,7 @@ var RoleImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				RoleEntityStream,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
@@ -1059,7 +1060,7 @@ var RoleImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1072,7 +1073,7 @@ var RoleImportExportCommands = []cli.Command{
 			RoleCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				RoleActions.Create,
 				reflect.ValueOf(&RoleEntity{}).Elem(),
@@ -1089,25 +1090,25 @@ var RoleImportExportCommands = []cli.Command{
 		},
 	},
 }
-var RoleCliCommands []cli.Command = []cli.Command{
+var RoleCliCommands []*cli.Command = []*cli.Command{
 	ROLE_ACTION_QUERY.ToCli(),
 	ROLE_ACTION_TABLE.ToCli(),
 	ROLE_ACTION_PATCH.ToCli(),
 	RoleCreateCmd,
-	RoleAskCmd,
-	RoleCreateInteractiveCmd,
+	&RoleAskCmd,
+	&RoleCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&RoleEntity{}).Elem(),
 		RoleActions.RemoveEnqueue,
 	),
 }
 
-func RoleCliFn() cli.Command {
+func RoleCliFn() *cli.Command {
 	commands := append(RoleImportExportCommands, RoleCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, RoleDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "role",
 		Description: `Manage roles within the workspaces, or root configuration`,
 		Usage:       `Manage roles within the workspaces, or root configuration`,
@@ -1117,7 +1118,7 @@ func RoleCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1127,7 +1128,7 @@ var ROLE_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        RoleActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			RoleActions.Query,
 			security,
@@ -1154,7 +1155,7 @@ var ROLE_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "RoleEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &RoleEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1221,7 +1222,7 @@ var ROLE_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, RoleActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, RoleActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1266,7 +1267,7 @@ var ROLE_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the Role entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, RoleActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1431,7 +1432,7 @@ var RoleEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	RoleCliFn(),
 	//},
 	Actions:      GetRoleModule3Actions(),

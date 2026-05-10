@@ -7,11 +7,12 @@ package payment
  */
 
 import (
+	"context"
 	"embed"
 
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/payment/migrations"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 //go:embed *Module3.yml
@@ -29,27 +30,29 @@ type PaymentModuleConfig struct {
 // if fireback is fixed, this is not needed.
 func getPaymentActionsBundleOverride() *fireback.ModuleActionsBundle {
 
-	var commands cli.Commands
-	for _, command := range PaymentCliActionsBundle.Subcommands {
+	var commands []*cli.Command
+	for _, command := range PaymentCliActionsBundle.Commands {
 		if command.Name != "pay-invoice" {
 			commands = append(commands, command)
 		}
 	}
 
-	commands = append(cli.Commands{
+	commands = append([]*cli.Command{
 		{
 			Name: "pay-invoice",
 			Flags: []cli.Flag{
-				cli.StringFlag{
+				&cli.StringFlag{
 					Name:  "invoice-id",
 					Usage: "Invoice string id",
 				},
 			},
 			Usage: `Pay an invoice created independently`,
-			Action: func(c *cli.Context) {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				query := fireback.CommonCliQueryDSLBuilderAuthorize(c, PayInvoiceSecurityModel)
 				result, err := PayInvoiceActionFn(query)
 				fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+
+				return err
 			},
 		},
 	}, commands...)
@@ -60,7 +63,7 @@ func getPaymentActionsBundleOverride() *fireback.ModuleActionsBundle {
 			Name:  "payment",
 			Usage: ``,
 			// Here we will include entities actions, as well as module level actions
-			Subcommands: commands,
+			Commands: commands,
 		},
 	}
 }

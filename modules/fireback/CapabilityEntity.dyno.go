@@ -6,6 +6,7 @@ package fireback
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -15,7 +16,7 @@ import (
 	metas "github.com/torabian/fireback/modules/fireback/metas"
 	mocks "github.com/torabian/fireback/modules/fireback/mocks/Capability"
 	seeders "github.com/torabian/fireback/modules/fireback/seeders/Capability"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -314,7 +315,7 @@ func CapabilityValidator(dto *CapabilityEntity, isPatch bool) *IError {
 var CapabilityAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -330,7 +331,7 @@ var CapabilityAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &CapabilityEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -579,7 +580,7 @@ func CapabilityActionUpdateFn(query QueryDSL, fields *CapabilityEntity) (*Capabi
 var CapabilityWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire capabilities ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
 			AllowOnRoot:    true,
@@ -757,7 +758,7 @@ var CapabilityCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `description (string)`,
 	},
 }
-var CapabilityCreateCmd cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
+var CapabilityCreateCmd *cli.Command = CAPABILITY_ACTION_POST_ONE.ToCli()
 var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -767,7 +768,7 @@ var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
 			AllowOnRoot:    true,
@@ -780,6 +781,7 @@ var CapabilityCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var CapabilityUpdateCmd cli.Command = cli.Command{
@@ -787,7 +789,7 @@ var CapabilityUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   CapabilityCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 			ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
 			AllowOnRoot:    true,
@@ -803,10 +805,10 @@ var CapabilityUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *CapabilityEntity) FromCli(c *cli.Context) *CapabilityEntity {
+func (x *CapabilityEntity) FromCli(c *cli.Command) *CapabilityEntity {
 	return CastCapabilityFromCli(c)
 }
-func CastCapabilityFromCli(c *cli.Context) *CapabilityEntity {
+func CastCapabilityFromCli(c *cli.Command) *CapabilityEntity {
 	template := &CapabilityEntity{}
 	HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -887,8 +889,8 @@ func CapabilitiesActionQueryString(keyword string, page int) ([]string, *QueryRe
 	return stringItems, meta, err
 }
 
-var CapabilityDevCommands = []cli.Command{
-	CapabilityWipeCmd,
+var CapabilityDevCommands = []*cli.Command{
+	&CapabilityWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -903,7 +905,7 @@ var CapabilityDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := CommonCliQueryDSLBuilderAuthorize(c, &SecurityModel{
 				ActionRequires: []PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
 				AllowOnRoot:    true,
@@ -927,16 +929,16 @@ var CapabilityDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := CapabilityActions.SeederInit()
 			CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -946,10 +948,10 @@ var CapabilityDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			CommonCliImportEmbedCmd(c,
 				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
@@ -959,7 +961,7 @@ var CapabilityDevCommands = []cli.Command{
 		},
 	},
 }
-var CapabilityImportExportCommands = []cli.Command{
+var CapabilityImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -972,7 +974,7 @@ var CapabilityImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of capabilities, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := ContentImport[CapabilityEntity]{}
 			if err := ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -987,10 +989,10 @@ var CapabilityImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := GetSeederFilenames(capabilitySeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1006,10 +1008,10 @@ var CapabilityImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			CommonCliImportEmbedCmd(c,
 				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
@@ -1018,7 +1020,7 @@ var CapabilityImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(CommonQueryFlags,
@@ -1028,7 +1030,7 @@ var CapabilityImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return CommonCliExportCmd2(c,
 				CapabilityEntityStream,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
@@ -1039,7 +1041,7 @@ var CapabilityImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1052,7 +1054,7 @@ var CapabilityImportExportCommands = []cli.Command{
 			CapabilityCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			CommonCliImportCmdAuthorized(c,
 				CapabilityActions.Create,
 				reflect.ValueOf(&CapabilityEntity{}).Elem(),
@@ -1070,27 +1072,27 @@ var CapabilityImportExportCommands = []cli.Command{
 		},
 	},
 }
-var CapabilityCliCommands []cli.Command = []cli.Command{
+var CapabilityCliCommands []*cli.Command = []*cli.Command{
 	CAPABILITY_ACTION_QUERY.ToCli(),
 	CAPABILITY_ACTION_TABLE.ToCli(),
 	CAPABILITY_ACTION_PATCH.ToCli(),
 	CapabilityCreateCmd,
-	CapabilityAskCmd,
-	CapabilityCreateInteractiveCmd,
+	&CapabilityAskCmd,
+	&CapabilityCreateInteractiveCmd,
 	GetCommonRemoveQuery(
 		reflect.ValueOf(&CapabilityEntity{}).Elem(),
 		CapabilityActions.RemoveEnqueue,
 	),
 }
 
-func CapabilityCliFn() cli.Command {
+func CapabilityCliFn() *cli.Command {
 	commands := append(CapabilityImportExportCommands, CapabilityCliCommands...)
 	if !GetConfig().Production {
 		commands = append(commands, CapabilityDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "capability",
-		ShortName:   "cap",
+		Aliases:     []string{"cap"},
 		Description: `Manage the capabilities inside the application, both builtin to core and custom defined ones`,
 		Usage:       `Manage the capabilities inside the application, both builtin to core and custom defined ones`,
 		Flags: []cli.Flag{
@@ -1099,7 +1101,7 @@ func CapabilityCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1109,7 +1111,7 @@ var CAPABILITY_ACTION_TABLE = Module3Action{
 	Flags:         CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        CapabilityActions.Query,
-	CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Command, security *SecurityModel) error {
 		CommonCliTableCmd2(c,
 			CapabilityActions.Query,
 			security,
@@ -1136,7 +1138,7 @@ var CAPABILITY_ACTION_QUERY = Module3Action{
 	Out: &Module3ActionBody{
 		Entity: "CapabilityEntity",
 	},
-	CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Command, security *SecurityModel) error {
 		qs := &CapabilityEntityQs{}
 		CommonCliQueryCmd3(
 			c,
@@ -1204,7 +1206,7 @@ var CAPABILITY_ACTION_POST_ONE = Module3Action{
 			HttpPostEntity(c, CapabilityActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Command, security *SecurityModel) error {
 		result, err := CliPostEntity(c, CapabilityActions.Create, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1250,7 +1252,7 @@ var CAPABILITY_ACTION_PATCH = Module3Action{
 	},
 	Description: "Update the Capability entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Command, security *SecurityModel) error {
 		result, err := CliPatchEntity(c, CapabilityActions.Update, security)
 		HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1396,7 +1398,7 @@ var CapabilityEntityBundle = EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	CapabilityCliFn(),
 	//},
 	Actions:      GetCapabilityModule3Actions(),

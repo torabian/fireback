@@ -2,12 +2,13 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"log"
 	"strings"
 	"text/template"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -163,7 +164,7 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 			Value:    "en",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		f := fireback.CommonCliQueryDSLBuilder(c)
 
 		result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
@@ -178,5 +179,5 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 }
 
 func init() {
-	RegionalContentCliCommands = append(RegionalContentCliCommands, RegionalContentGetCmd)
+	RegionalContentCliCommands = append(RegionalContentCliCommands, &RegionalContentGetCmd)
 }

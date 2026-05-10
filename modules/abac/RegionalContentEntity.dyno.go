@@ -6,6 +6,7 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/RegionalContent"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/RegionalContent"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -318,7 +319,7 @@ func RegionalContentValidator(dto *RegionalContentEntity, isPatch bool) *firebac
 var RegionalContentAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -334,7 +335,7 @@ var RegionalContentAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &RegionalContentEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -586,7 +587,7 @@ func RegionalContentActionUpdateFn(query fireback.QueryDSL, fields *RegionalCont
 var RegionalContentWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire regionalcontents ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE},
 			AllowOnRoot:    true,
@@ -818,7 +819,7 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP' (enum)`,
 	},
 }
-var RegionalContentCreateCmd cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()
+var RegionalContentCreateCmd *cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()
 var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -828,7 +829,7 @@ var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 			AllowOnRoot:    true,
@@ -841,6 +842,7 @@ var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var RegionalContentUpdateCmd cli.Command = cli.Command{
@@ -848,7 +850,7 @@ var RegionalContentUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   RegionalContentCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE},
 			AllowOnRoot:    true,
@@ -864,10 +866,10 @@ var RegionalContentUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *RegionalContentEntity) FromCli(c *cli.Context) *RegionalContentEntity {
+func (x *RegionalContentEntity) FromCli(c *cli.Command) *RegionalContentEntity {
 	return CastRegionalContentFromCli(c)
 }
-func CastRegionalContentFromCli(c *cli.Context) *RegionalContentEntity {
+func CastRegionalContentFromCli(c *cli.Command) *RegionalContentEntity {
 	template := &RegionalContentEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -957,8 +959,8 @@ func RegionalContentsActionQueryString(keyword string, page int) ([]string, *fir
 	return stringItems, meta, err
 }
 
-var RegionalContentDevCommands = []cli.Command{
-	RegionalContentWipeCmd,
+var RegionalContentDevCommands = []*cli.Command{
+	&RegionalContentWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -973,7 +975,7 @@ var RegionalContentDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE},
 				AllowOnRoot:    true,
@@ -997,16 +999,16 @@ var RegionalContentDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := RegionalContentActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1016,10 +1018,10 @@ var RegionalContentDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
@@ -1029,7 +1031,7 @@ var RegionalContentDevCommands = []cli.Command{
 		},
 	},
 }
-var RegionalContentImportExportCommands = []cli.Command{
+var RegionalContentImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1042,7 +1044,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of regional-contents, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[RegionalContentEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1057,10 +1059,10 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(regionalContentSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1076,10 +1078,10 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
@@ -1088,7 +1090,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1098,7 +1100,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				RegionalContentEntityStream,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
@@ -1109,7 +1111,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1122,7 +1124,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			RegionalContentCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				RegionalContentActions.Create,
 				reflect.ValueOf(&RegionalContentEntity{}).Elem(),
@@ -1140,27 +1142,27 @@ var RegionalContentImportExportCommands = []cli.Command{
 		},
 	},
 }
-var RegionalContentCliCommands []cli.Command = []cli.Command{
+var RegionalContentCliCommands []*cli.Command = []*cli.Command{
 	REGIONAL_CONTENT_ACTION_QUERY.ToCli(),
 	REGIONAL_CONTENT_ACTION_TABLE.ToCli(),
 	REGIONAL_CONTENT_ACTION_PATCH.ToCli(),
 	RegionalContentCreateCmd,
-	RegionalContentAskCmd,
-	RegionalContentCreateInteractiveCmd,
+	&RegionalContentAskCmd,
+	&RegionalContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		RegionalContentActions.RemoveEnqueue,
 	),
 }
 
-func RegionalContentCliFn() cli.Command {
+func RegionalContentCliFn() *cli.Command {
 	commands := append(RegionalContentImportExportCommands, RegionalContentCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, RegionalContentDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "regionalcontent",
-		ShortName:   "rc",
+		Aliases:     []string{"rc"},
 		Description: `Email templates, sms templates or other textual content which can be accessed.`,
 		Usage:       `Email templates, sms templates or other textual content which can be accessed.`,
 		Flags: []cli.Flag{
@@ -1169,7 +1171,7 @@ func RegionalContentCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1179,7 +1181,7 @@ var REGIONAL_CONTENT_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        RegionalContentActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			RegionalContentActions.Query,
 			security,
@@ -1206,7 +1208,7 @@ var REGIONAL_CONTENT_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "RegionalContentEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &RegionalContentEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1274,7 +1276,7 @@ var REGIONAL_CONTENT_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, RegionalContentActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, RegionalContentActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1320,7 +1322,7 @@ var REGIONAL_CONTENT_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the RegionalContent entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, RegionalContentActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1479,7 +1481,7 @@ var RegionalContentEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	RegionalContentCliFn(),
 	//},
 	Actions:      GetRegionalContentModule3Actions(),

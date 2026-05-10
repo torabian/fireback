@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/h22rana/jsonlogic2sql"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 // Iterates through a QS struct, and tries to map the fields from there with a getValue callback.
@@ -126,7 +126,7 @@ func CaptureGinRequestIntoFilterQuery(qs any, c *gin.Context, f *QueryDSL) {
 	}, f)
 }
 
-func CaptureCliRequestIntoFilterQuery(qs any, c *cli.Context, f *QueryDSL) {
+func CaptureCliRequestIntoFilterQuery(qs any, c *cli.Command, f *QueryDSL) {
 	CaptureRequestIntoFilterQuery(qs, func(field reflect.StructField) string {
 		return c.String(field.Tag.Get("cli"))
 	}, f)

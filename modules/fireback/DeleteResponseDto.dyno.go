@@ -50,12 +50,14 @@ type DeleteResponseDtoData struct {
 func GetDeleteResponseDtoDataItemCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
-			Name: prefix + "executed",
-			Type: "bool",
+			Name:        prefix + "executed",
+			Type:        "bool",
+			Description: "If the deletion executed immediately.",
 		},
 		{
-			Name: prefix + "rows-affected",
-			Type: "int64",
+			Name:        prefix + "rows-affected",
+			Type:        "int64",
+			Description: "The query selector which would be used to delete the content.",
 		},
 	}
 }

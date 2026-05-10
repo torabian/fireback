@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastTestMailFromCli(c *cli.Context) *TestMailDto {
+func CastTestMailFromCli(c *cli.Command) *TestMailDto {
 	template := &TestMailDto{}
 	if c.IsSet("sender-id") {
 		template.SenderId = c.String("sender-id")

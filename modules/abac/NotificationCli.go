@@ -1,12 +1,13 @@
 package abac
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 func GetWorkspaceNotificationConfig(workspaceId string) (*NotificationConfigEntity, *fireback.IError) {
@@ -25,7 +26,7 @@ var NotificationModuleAuditCmd cli.Command = cli.Command{
 
 	Name:  "audit",
 	Usage: "Runs several tests, and checks if the notification module has been configurated correctly",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		query := fireback.CommonCliQueryDSLBuilder(c)
 		fmt.Println("Workspace:", query.WorkspaceId)
@@ -62,7 +63,7 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 	Name:  "test-mail",
 	Usage: "Sends a test mail to verify the mail server is working correctly",
 
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		query := fireback.CommonCliQueryDSLBuilder(c)
 		items, count, err := EmailSenderActions.Query(fireback.QueryDSL{ItemsPerPage: 20})

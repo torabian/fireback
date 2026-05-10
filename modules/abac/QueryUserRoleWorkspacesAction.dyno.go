@@ -2,10 +2,9 @@ package abac
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +13,15 @@ import (
 /**
 * Action to communicate with the action QueryUserRoleWorkspacesAction
  */
+/*
+Here is a quick function implementation to make your life easier:
+// Actual implementation of QueryUserRoleWorkspacesAction
+func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error) {
+	return &QueryUserRoleWorkspacesActionResponse{
+		// Payload is an interface. Use it at carefully.
+	}, nil
+}
+*/
 func QueryUserRoleWorkspacesActionMeta() struct {
 	Name        string
 	CliName     string
@@ -42,8 +50,9 @@ func GetQueryUserRoleWorkspacesActionResCliFlags(prefix string) []emigo.CliFlag 
 			Type: "string",
 		},
 		{
-			Name: prefix + "capabilities",
-			Type: "slice",
+			Name:        prefix + "capabilities",
+			Type:        "slice",
+			Description: "Workspace level capabilities which are available",
 		},
 		{
 			Name: prefix + "unique-id",
@@ -92,8 +101,9 @@ func GetQueryUserRoleWorkspacesActionResRolesCliFlags(prefix string) []emigo.Cli
 			Type: "string",
 		},
 		{
-			Name: prefix + "capabilities",
-			Type: "slice",
+			Name:        prefix + "capabilities",
+			Type:        "slice",
+			Description: "Capabilities related to this role which are available",
 		},
 	}
 }
@@ -131,6 +141,10 @@ type QueryUserRoleWorkspacesActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
+	// Do not manually fill this in. It has no effect. This is only useful when you are using
+	// client code, and want to get access to the original response. When sending response from your
+	// application it will be ignored.
+	resp *http.Response
 }
 
 func (x *QueryUserRoleWorkspacesActionResponse) SetContentType(contentType string) *QueryUserRoleWorkspacesActionResponse {
@@ -286,57 +300,103 @@ func (q *QueryUserRoleWorkspacesActionQuery) SetMapped(m map[string]interface{})
 type QueryUserRoleWorkspacesActionRequest struct {
 	Body        interface{}
 	QueryParams url.Values
-	Headers     http.Header
-	GinCtx      *gin.Context
-	CliCtx      *cli.Context
-}
-type QueryUserRoleWorkspacesActionResult struct {
-	resp    *http.Response // embed original response
-	Payload interface{}
+	// Automatically casted headers, for purpose of typesafe headers in later versions
+	Headers http.Header
+	// Gin context for each request in case of a direct access requirement
+	GinCtx *gin.Context
+	// Urfave context, per each request
+	CliCtx *cli.Command
+	// Reference to the application instance, in such scenarios that entire
+	// application is wrapped into a single struct that holds database connection,
+	// routes, etc.
+	Application interface{}
 }
 
-func QueryUserRoleWorkspacesActionCall(
+func (x QueryUserRoleWorkspacesActionRequest) IsGin() bool {
+	return x.GinCtx != nil
+}
+func (x QueryUserRoleWorkspacesActionRequest) IsCli() bool {
+	return x.CliCtx != nil
+}
+
+// type QueryUserRoleWorkspacesActionResult struct {
+// /resp *http.Response
+// /	Payload interface{}
+// /}
+func QueryUserRoleWorkspacesActionClientCreateUrl(
 	req QueryUserRoleWorkspacesActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*QueryUserRoleWorkspacesActionResult, error) {
-	var httpReq *http.Request
-	if config == nil || config.Httpr == nil {
-		meta := QueryUserRoleWorkspacesActionMeta()
-		baseURL := meta.URL
-		// Build final URL with query string
-		u, err := url.Parse(baseURL)
-		if err != nil {
-			return nil, err
-		}
-		// if UrlValues present, encode and append
-		if len(req.QueryParams) > 0 {
-			u.RawQuery = req.QueryParams.Encode()
-		}
-		req0, err := http.NewRequest(meta.Method, u.String(), nil)
-		if err != nil {
-			return nil, err
-		}
-		httpReq = req0
-	} else {
-		httpReq = config.Httpr
+) (*url.URL, error) {
+	meta := QueryUserRoleWorkspacesActionMeta()
+	urlAddr := meta.URL
+	urlAddr = config.BaseURL + urlAddr
+	// Build final URL with query string
+	u, err := url.Parse(urlAddr)
+	if err != nil {
+		return nil, err
 	}
-	httpReq.Header = req.Headers
+	// if UrlValues present, encode and append
+	if len(req.QueryParams) > 0 {
+		u.RawQuery = req.QueryParams.Encode()
+	}
+	return u, nil
+}
+func QueryUserRoleWorkspacesActionClientExecuteTyped(httpReq *http.Request) (*QueryUserRoleWorkspacesActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
-	var result QueryUserRoleWorkspacesActionResult
+	// At this point, response is valid, and we need to return the results.
+	var result QueryUserRoleWorkspacesActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &result, err
-	}
-	if resp.StatusCode >= 400 {
-		return &result, fmt.Errorf("request failed: %s", respBody)
+		return &QueryUserRoleWorkspacesActionResponse{Payload: result}, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &result, err
+		return &QueryUserRoleWorkspacesActionResponse{Payload: result}, err
 	}
-	return &result, nil
+	return &QueryUserRoleWorkspacesActionResponse{Payload: result}, nil
+}
+func QueryUserRoleWorkspacesActionClientBuildRequest(req QueryUserRoleWorkspacesActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := QueryUserRoleWorkspacesActionMeta()
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header = make(http.Header)
+	// copy defaults
+	for k, v := range config.Headers {
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	// override with request-specific headers
+	for k, v := range req.Headers {
+		httpReq.Header.Del(k) // ensure override, not duplicate
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	return httpReq, nil
+}
+func QueryUserRoleWorkspacesActionCall(
+	req QueryUserRoleWorkspacesActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*QueryUserRoleWorkspacesActionResponse, error) {
+	// This function intentionally is split into 3 different sections, so in case
+	// of some modifications that we did not anticipate, at least a part would become quite useful.
+	// first we create url, apply all path parameters, query params, etc
+	u, err := QueryUserRoleWorkspacesActionClientCreateUrl(req, config)
+	if err != nil {
+		return nil, err
+	}
+	// We create the request from the body in second stage
+	r, err := QueryUserRoleWorkspacesActionClientBuildRequest(req, u, config)
+	if err != nil {
+		return nil, err
+	}
+	// This one would execute the request and cast the result.
+	return QueryUserRoleWorkspacesActionClientExecuteTyped(r)
 }

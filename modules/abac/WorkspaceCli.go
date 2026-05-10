@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -8,7 +9,7 @@ import (
 
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 var GetUserAccessScope cli.Command = cli.Command{
@@ -23,7 +24,7 @@ var GetUserAccessScope cli.Command = cli.Command{
 			Usage:    "User specific id",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilder(c)
 		query.UserId = c.String("id")
 		access, err := GetUserAccessLevels(query)
@@ -63,7 +64,7 @@ var CheckUserMeetsAPermissionCmd cli.Command = cli.Command{
 			Usage:    "Capabilities list, separated by , aka: ROOT_BOOKS_CREATE,ROOT_BOOKS_DELETE",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		f := fireback.CommonCliQueryDSLBuilder(c)
 		f.UserId = c.String("id")
 		access, _ := GetUserAccessLevels(f)
@@ -91,7 +92,7 @@ var WorkspaceRemoveCmd cli.Command = cli.Command{
 	Name:    "remove",
 	Aliases: []string{"r", "del", "delete"},
 	Usage:   "Deletes a workspace",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		fmt.Printf("Delete workspace")
 
@@ -115,7 +116,7 @@ var WorkspaceAsCmd cli.Command = cli.Command{
 			Usage:    "Selected token that you are using as authorization her in cli",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		appConfig := fireback.GetConfig()
 		wid := c.String("wid")
 		token := c.String("token")
@@ -132,7 +133,7 @@ var ViewAuthorize cli.Command = cli.Command{
 	Name:  "view",
 	Usage: "Shows the authorization result for current user",
 
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		appConfig := fireback.GetConfig()
 		fmt.Println("Workspace:", appConfig.CliWorkspace)
 		fmt.Println("Token:", appConfig.CliToken)
@@ -164,7 +165,7 @@ var CliConfigCmd cli.Command = cli.Command{
 			Usage:    "Sets the default region in the entire cli context",
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		appConfig := fireback.GetConfig()
 		if c.IsSet("lang") {
 			ws := c.String("lang")
@@ -187,12 +188,12 @@ var MiscCli cli.Command = cli.Command{
 
 	Name:  "misc",
 	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		TableViewSizingCliFn(),
 		RegionalContentCliFn(),
 		AppMenuCliFn(),
 		getCssMinCombineCli(),
-		cli.Command{
+		&cli.Command{
 			Name:        "totp",
 			Description: "Generates a time based code (6 digit) from a totp secret, simulates the mobile app",
 			Usage:       "Generates a time based code (6 digit) from a totp secret, simulates the mobile app",
@@ -204,7 +205,7 @@ var MiscCli cli.Command = cli.Command{
 					Required: true,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				secret := c.String("secret")
 
 				for {
@@ -229,13 +230,13 @@ var MiscCli cli.Command = cli.Command{
 func init() {
 	WorkspaceCliCommands = append(
 		WorkspaceCliCommands,
-		GetUserAccessScope,
-		CliConfigCmd,
-		ViewAuthorize,
+		&GetUserAccessScope,
+		&CliConfigCmd,
+		&ViewAuthorize,
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		QueryUserRoleWorkspacesActionDef.ToCli(),
-		CheckUserMeetsAPermissionCmd,
-		WorkspaceAsCmd,
+		&CheckUserMeetsAPermissionCmd,
+		&WorkspaceAsCmd,
 		PublicAuthenticationCliFn(),
 		TimezoneGroupCliFn(),
 		WorkspaceTypeCliFn(),

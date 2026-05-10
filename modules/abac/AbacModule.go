@@ -6,7 +6,7 @@ import (
 
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -163,15 +163,15 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// },
 	}
 
-	module.ProvideCliHandlers([]cli.Command{
+	module.ProvideCliHandlers([]*cli.Command{
 		RoleCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),
-		MiscCli,
+		&MiscCli,
 		TimezoneGroupCliFn(),
 	})
 
-	module.ProvideCliHandlers([]cli.Command{AuthFlow, AbacActions})
+	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})
 
 	return module
 }
@@ -179,12 +179,12 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 var AbacActions cli.Command = cli.Command{
 	Name:  "abac",
 	Usage: "All actions which are available for abac module",
-	Subcommands: append(
-		[]cli.Command{
+	Commands: append(
+		[]*cli.Command{
 			{
 				Name:  "internal",
 				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",
-				Subcommands: []cli.Command{
+				Commands: []*cli.Command{
 					PublicJoinKeyCliFn(),
 					PublicAuthenticationCliFn(),
 				},

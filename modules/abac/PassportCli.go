@@ -1,12 +1,13 @@
 package abac
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,7 +35,7 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 			Required: true,
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		f := fireback.QueryDSL{
 			UserId: c.String("user-id"),
@@ -65,16 +66,16 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 var PassportCli cli.Command = cli.Command{
 	Name:  "passport",
 	Usage: "Manage the methods of authentication in the app, as well as users passports (root only)",
-	Subcommands: append([]cli.Command{
-		AppendEmailPassportToUser,
-		PassportUpdateCmd,
+	Commands: append([]*cli.Command{
+		&AppendEmailPassportToUser,
+		&PassportUpdateCmd,
 		OsLoginAuthenticateActionDef.ToCli(),
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionDef.ToCli(),
 		UserPassportsActionDef.ToCli(),
 		OauthAuthenticateActionDef.ToCli(),
-		PassportWipeCmd,
-		PassportUpdateCmd,
+		&PassportWipeCmd,
+		&PassportUpdateCmd,
 		fireback.GetCommonRemoveQuery(
 			reflect.ValueOf(&PassportEntity{}).Elem(),
 			PassportActions.RemoveEnqueue,

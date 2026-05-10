@@ -6,9 +6,10 @@ package product
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 import (
 	"reflect"
@@ -47,10 +48,11 @@ func GetProductsCountActionFn(
 var GetProductsCountActionCmd cli.Command = cli.Command{
 	Name:  "get-products-count",
 	Usage: ``,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GetProductsCountSecurityModel)
 		result, err := GetProductsCountActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return nil
 	},
 }
 
@@ -83,8 +85,8 @@ func ProductCustomActions() []fireback.Module3Action {
 	return routes
 }
 
-var ProductCustomActionsCli = []cli.Command{
-	GetProductsCountActionCmd,
+var ProductCustomActionsCli = []*cli.Command{
+	&GetProductsCountActionCmd,
 }
 
 // Only to include some headers
@@ -99,8 +101,8 @@ var ProductCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "product",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
-		GetProductsCountActionCmd,
+	Commands: []*cli.Command{
+		&GetProductsCountActionCmd,
 		ProductCliFn(),
 	},
 }
@@ -111,6 +113,6 @@ func GetProductActionsBundle() *fireback.ModuleActionsBundle {
 		CliAction: ProductCliActionsBundle,
 	}
 }
-func GetProductActionsCli() []cli.Command {
+func GetProductActionsCli() []*cli.Command {
 	return ProductCustomActionsCli
 }

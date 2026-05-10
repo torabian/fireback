@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
@@ -13,12 +14,12 @@ import (
 	"github.com/pquerna/otp/totp"
 	emigo "github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 var ANONYMOUS_AUTHENTICATION = "anonymous"
 
-func discoverPassportMethodsAndPrint(c *cli.Context) []string {
+func discoverPassportMethodsAndPrint(c *cli.Command) []string {
 	fmt.Println("In authorization flow, first of all we need to check what are the available actions publicly, to the user.")
 	fmt.Println("On such authorization, there is no security model, since all actions are accessible publicly.")
 
@@ -98,7 +99,7 @@ func discoverPassportMethodsAndPrint(c *cli.Context) []string {
 // the users information in a system.
 // This tool, is a cli only tool, because it would allow root account creation as well, in case
 // system has no user accounts created.
-func IntegrateAuthFlow(c *cli.Context) error {
+func IntegrateAuthFlow(c *cli.Command) error {
 	query := fireback.QueryDSL{ItemsPerPage: 9999}
 
 	var sessionSecret = ""
@@ -390,10 +391,10 @@ func IntegrateAuthFlow(c *cli.Context) error {
 }
 
 var AuthFlow cli.Command = cli.Command{
-	Name:      "authorize",
-	ShortName: "auth",
-	Usage:     "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
-	Action: func(c *cli.Context) error {
+	Name:    "authorize",
+	Aliases: []string{"auth"},
+	Usage:   "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		// In case that there are flags, means the interactive operation is not needed
 		// this is useful to create an account in one go.

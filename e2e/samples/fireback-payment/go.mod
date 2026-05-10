@@ -7,7 +7,7 @@ toolchain go1.23.8
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/torabian/fireback v1.2.3
-	github.com/urfave/cli v1.22.9
+	github.com/urfave/cli/v3 v1.22.9
 )
 
 require (

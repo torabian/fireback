@@ -6,6 +6,7 @@ package suggestion
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,7 @@ import (
 	metas "github.com/torabian/fireback/modules/suggestion/metas"
 	mocks "github.com/torabian/fireback/modules/suggestion/mocks/Content"
 	seeders "github.com/torabian/fireback/modules/suggestion/seeders/Content"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -307,7 +308,7 @@ func ContentValidator(dto *ContentEntity, isPatch bool) *fireback.IError {
 var ContentAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -323,7 +324,7 @@ var ContentAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &ContentEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -573,7 +574,7 @@ func ContentActionUpdateFn(query fireback.QueryDSL, fields *ContentEntity) (*Con
 var ContentWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire contents ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CONTENT_DELETE},
 		})
@@ -768,7 +769,7 @@ var ContentCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `The content title, such as video title, course title, post title. (string)`,
 	},
 }
-var ContentCreateCmd cli.Command = CONTENT_ACTION_POST_ONE.ToCli()
+var ContentCreateCmd *cli.Command = CONTENT_ACTION_POST_ONE.ToCli()
 var ContentCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -778,7 +779,7 @@ var ContentCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CONTENT_CREATE},
 		})
@@ -790,6 +791,7 @@ var ContentCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var ContentUpdateCmd cli.Command = cli.Command{
@@ -797,7 +799,7 @@ var ContentUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   ContentCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CONTENT_UPDATE},
 		})
@@ -812,10 +814,10 @@ var ContentUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *ContentEntity) FromCli(c *cli.Context) *ContentEntity {
+func (x *ContentEntity) FromCli(c *cli.Command) *ContentEntity {
 	return CastContentFromCli(c)
 }
-func CastContentFromCli(c *cli.Context) *ContentEntity {
+func CastContentFromCli(c *cli.Command) *ContentEntity {
 	template := &ContentEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -899,8 +901,8 @@ func ContentsActionQueryString(keyword string, page int) ([]string, *fireback.Qu
 	return stringItems, meta, err
 }
 
-var ContentDevCommands = []cli.Command{
-	ContentWipeCmd,
+var ContentDevCommands = []*cli.Command{
+	&ContentWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -915,7 +917,7 @@ var ContentDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CONTENT_CREATE},
 			})
@@ -938,16 +940,16 @@ var ContentDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := ContentActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -957,10 +959,10 @@ var ContentDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				ContentActions.Create,
 				reflect.ValueOf(&ContentEntity{}).Elem(),
@@ -970,7 +972,7 @@ var ContentDevCommands = []cli.Command{
 		},
 	},
 }
-var ContentImportExportCommands = []cli.Command{
+var ContentImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -983,7 +985,7 @@ var ContentImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of contents, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[ContentEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -998,10 +1000,10 @@ var ContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(contentSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1017,10 +1019,10 @@ var ContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				ContentActions.Create,
 				reflect.ValueOf(&ContentEntity{}).Elem(),
@@ -1029,7 +1031,7 @@ var ContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1039,7 +1041,7 @@ var ContentImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				ContentEntityStream,
 				reflect.ValueOf(&ContentEntity{}).Elem(),
@@ -1050,7 +1052,7 @@ var ContentImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1063,7 +1065,7 @@ var ContentImportExportCommands = []cli.Command{
 			ContentCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				ContentActions.Create,
 				reflect.ValueOf(&ContentEntity{}).Elem(),
@@ -1080,25 +1082,25 @@ var ContentImportExportCommands = []cli.Command{
 		},
 	},
 }
-var ContentCliCommands []cli.Command = []cli.Command{
+var ContentCliCommands []*cli.Command = []*cli.Command{
 	CONTENT_ACTION_QUERY.ToCli(),
 	CONTENT_ACTION_TABLE.ToCli(),
 	CONTENT_ACTION_PATCH.ToCli(),
 	ContentCreateCmd,
-	ContentAskCmd,
-	ContentCreateInteractiveCmd,
+	&ContentAskCmd,
+	&ContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&ContentEntity{}).Elem(),
 		ContentActions.RemoveEnqueue,
 	),
 }
 
-func ContentCliFn() cli.Command {
+func ContentCliFn() *cli.Command {
 	commands := append(ContentImportExportCommands, ContentCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, ContentDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "content",
 		Description: `Source of the content which will be indexed by the FTS5 table. Other modules can use this entity to set the content.`,
 		Usage:       `Source of the content which will be indexed by the FTS5 table. Other modules can use this entity to set the content.`,
@@ -1108,7 +1110,7 @@ func ContentCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
@@ -1118,7 +1120,7 @@ var CONTENT_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        ContentActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			ContentActions.Query,
 			security,
@@ -1145,7 +1147,7 @@ var CONTENT_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "ContentEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &ContentEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1212,7 +1214,7 @@ var CONTENT_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, ContentActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, ContentActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1257,7 +1259,7 @@ var CONTENT_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the Content entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, ContentActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1401,7 +1403,7 @@ var ContentEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	ContentCliFn(),
 	//},
 	Actions:      GetContentModule3Actions(),

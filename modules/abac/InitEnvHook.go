@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func OnInitEnvHook(c *cli.Context) error {
+func OnInitEnvHook(c *cli.Command) error {
 
 	appConfig := fireback.GetConfig()
 	workingDirectory, err := os.Getwd()

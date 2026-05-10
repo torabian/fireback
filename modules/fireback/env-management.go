@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,29 +9,29 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 /*
 Manages the code related to switching and creating environment (files)
 */
 
-func EnvManagement(xapp *FirebackApp) cli.Command {
-	return cli.Command{
+func EnvManagement(xapp *FirebackApp) *cli.Command {
+	return &cli.Command{
 		Name:  "env",
 		Usage: "Manages the environments and .env files",
-		Subcommands: []cli.Command{
+		Commands: []*cli.Command{
 			{
 				Name:  "switch",
 				Usage: "Switches between environments, if you specify the --to it would look for that file, if not it would ask",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:     "to",
 						Required: false,
 						Usage:    "The environment file, for example dev, prod, or any other, skip .env prefix",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					envs, err := findEnvFiles()
 					if err != nil {
 						log.Fatalln("Error searching .env files: ", err)
@@ -60,7 +61,7 @@ func EnvManagement(xapp *FirebackApp) cli.Command {
 			{
 				Name:  "list",
 				Usage: "Shows a list of .env files, basically any file starts with .env",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					envs, err := findEnvFiles()
 					if err != nil {
@@ -83,13 +84,13 @@ func EnvManagement(xapp *FirebackApp) cli.Command {
 				Name:  "new",
 				Usage: "Creates a new environment file, and initializes it",
 				Flags: []cli.Flag{
-					cli.StringFlag{
+					&cli.StringFlag{
 						Name:     "name",
 						Required: false,
 						Usage:    "file name of the new environment, which will be created",
 					},
 				},
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					envName := c.String("name")
 

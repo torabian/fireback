@@ -2,7 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -31,21 +31,21 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 		)
 	})
 
-	module.ProvideCliHandlers([]cli.Command{
+	module.ProvideCliHandlers([]*cli.Command{
 		{
 			Name:        "notification",
 			Description: "Manage the notification system, emails, text messages, templates and so on",
 			Usage:       "Manage email accounts, templates, email providers and so on",
-			ShortName:   "nt",
+			Aliases:     []string{"nt"},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:  "language",
 					Value: "en",
 				},
 			},
-			Subcommands: cli.Commands{
-				NotificationModuleAuditCmd,
-				EmailProviderTestCmd,
+			Commands: []*cli.Command{
+				&NotificationModuleAuditCmd,
+				&EmailProviderTestCmd,
 				EmailProviderCliFn(),
 				EmailSenderCliFn(),
 				GsmProviderCliFn(),

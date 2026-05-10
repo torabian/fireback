@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"encoding/json"
@@ -16,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pressly/goose/v3"
 	statics "github.com/torabian/fireback/modules/fireback/static"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	"gopkg.in/yaml.v2"
@@ -43,7 +44,7 @@ type FirebackApp struct {
 	Modules []*ModuleProvider
 
 	// Custom cli actions or command that you might want to add to the project
-	CliActions func() []cli.Command
+	CliActions func() []*cli.Command
 
 	SetupWebServerHook func(*gin.Engine, *FirebackApp)
 	SearchProviders    []SearchProviderFn
@@ -71,17 +72,17 @@ cli application
 
 */
 
-func GetCliCommands(x *FirebackApp) []cli.Command {
-	var commands []cli.Command
+func GetCliCommands(x *FirebackApp) []*cli.Command {
+	var commands []*cli.Command
 
 	// Helper function to recursively collect CLI commands
-	var collectCommands func(modules []*ModuleProvider) []cli.Command
-	collectCommands = func(modules []*ModuleProvider) []cli.Command {
-		var collected []cli.Command
+	var collectCommands func(modules []*ModuleProvider) []*cli.Command
+	collectCommands = func(modules []*ModuleProvider) []*cli.Command {
+		var collected []*cli.Command
 		for _, module := range modules {
 			if len(module.Children) > 0 {
 				if module.ActionsBundle != nil && module.ActionsBundle.CliAction != nil {
-					module.ActionsBundle.CliAction.Subcommands = append(module.ActionsBundle.CliAction.Subcommands, collectCommands(module.Children)...)
+					module.ActionsBundle.CliAction.Commands = append(module.ActionsBundle.CliAction.Commands, collectCommands(module.Children)...)
 
 				}
 			}
@@ -96,7 +97,7 @@ func GetCliCommands(x *FirebackApp) []cli.Command {
 
 			// Add actions from CliActionsBundle
 			if module.ActionsBundle != nil && module.ActionsBundle.CliAction != nil {
-				collected = append(collected, *module.ActionsBundle.CliAction)
+				collected = append(collected, module.ActionsBundle.CliAction)
 			}
 
 			// Recursively collect from children
@@ -114,8 +115,8 @@ func GetCliCommands(x *FirebackApp) []cli.Command {
 	return commands
 }
 
-func GetReportCommands(x *FirebackApp) []cli.Command {
-	commands := []cli.Command{}
+func GetReportCommands(x *FirebackApp) []*cli.Command {
+	commands := []*cli.Command{}
 
 	for _, item := range x.Modules {
 		commands = append(commands, item.CliHandlers...)
@@ -527,14 +528,14 @@ func RunMigrationBasedOnGoose(db *sql.DB, moduleName string, dialect string, mdi
 
 func RunApp(xapp *FirebackApp) {
 
-	app := &cli.App{
-		EnableBashCompletion: true,
-		Name:                 xapp.Title,
-		Flags:                cliGlobalFlags,
-		Commands:             GetCliCommands(xapp),
+	app := &cli.Command{
+		EnableShellCompletion: true,
+		Name:                  xapp.Title,
+		Flags:                 cliGlobalFlags,
+		Commands:              GetCliCommands(xapp),
 	}
 
-	err := app.Run(os.Args)
+	err := app.Run(context.Background(), os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}

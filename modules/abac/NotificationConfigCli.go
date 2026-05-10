@@ -1,18 +1,19 @@
 package abac
 
 import (
+	"context"
 	"fmt"
 	reflect "reflect"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 var NotificationConfigTestCmd cli.Command = cli.Command{
 
 	Name:  "test",
 	Usage: "Tests the notificationConfig",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		fmt.Printf("Implement the test logic here")
 
@@ -21,7 +22,7 @@ var NotificationConfigTestCmd cli.Command = cli.Command{
 }
 
 func init() {
-	NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigTestCmd)
+	NotificationConfigCliCommands = append(NotificationConfigCliCommands, &NotificationConfigTestCmd)
 }
 func NotificationConfigActionGetOneByWorkspace(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
