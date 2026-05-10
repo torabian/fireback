@@ -1819,8 +1819,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
 	  {{ end }}
     {{ if or (eq .Type "collection") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        value := c.String("{{ $prefix }}{{ .ComputedCliName }}")
-        template.{{ .PublicName }}ListId = strings.Split(value, ",")
+        template.{{ .PublicName }}ListId = c.StringSlice("{{ $prefix }}{{ .ComputedCliName }}")
       } {{ if endsWithDto .Target }} {{ else }}  else {
         template.{{ .PublicName }}ListId = {{ $wsprefix }}CliInteractiveSearchAndSelect(
           "Select {{ .PublicName }}",

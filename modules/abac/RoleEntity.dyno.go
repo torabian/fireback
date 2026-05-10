@@ -836,8 +836,7 @@ func CastRoleFromCli(c *cli.Command) *RoleEntity {
 		template.Name = c.String("name")
 	}
 	if c.IsSet("capabilities") {
-		value := c.String("capabilities")
-		template.CapabilitiesListId = strings.Split(value, ",")
+		template.CapabilitiesListId = c.StringSlice("capabilities")
 	} else {
 		template.CapabilitiesListId = fireback.CliInteractiveSearchAndSelect(
 			"Select Capabilities",
