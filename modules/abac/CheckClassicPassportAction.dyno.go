@@ -3,19 +3,26 @@ package abac
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
+	"io"
+	"net/http"
+	"net/url"
 )
 
 /**
 * Action to communicate with the action CheckClassicPassportAction
  */
+/*
+Here is a quick function implementation to make your life easier:
+// Actual implementation of CheckClassicPassportAction
+func CheckClassicPassportAction(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error) {
+	return &CheckClassicPassportActionResponse{
+		// Payload is an interface. Use it at carefully.
+	}, nil
+}
+*/
 func CheckClassicPassportActionMeta() struct {
 	Name        string
 	CliName     string
@@ -44,8 +51,9 @@ func GetCheckClassicPassportActionReqCliFlags(prefix string) []emigo.CliFlag {
 			Type: "string",
 		},
 		{
-			Name: prefix + "security-token",
-			Type: "string",
+			Name:        prefix + "security-token",
+			Type:        "string",
+			Description: "This can be the value of ReCaptcha2, ReCaptcha3, or generate security image or voice for verification. Will be used based on the configuration.",
 		},
 	}
 }
@@ -77,16 +85,19 @@ func (x *CheckClassicPassportActionReq) Json() string {
 func GetCheckClassicPassportActionResCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
-			Name: prefix + "next",
-			Type: "slice",
+			Name:        prefix + "next",
+			Type:        "slice",
+			Description: "The next possible action which is suggested.",
 		},
 		{
-			Name: prefix + "flags",
-			Type: "slice",
+			Name:        prefix + "flags",
+			Type:        "slice",
+			Description: "Extra information that can be useful actually when doing onboarding. Make sure sensitive information doesn't go out.",
 		},
 		{
-			Name: prefix + "otp-info",
-			Type: "object?",
+			Name:        prefix + "otp-info",
+			Type:        "object?",
+			Description: "If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.",
 		},
 	}
 }
@@ -129,8 +140,9 @@ func GetCheckClassicPassportActionResOtpInfoCliFlags(prefix string) []emigo.CliF
 			Type: "int64",
 		},
 		{
-			Name: prefix + "seconds-to-unblock",
-			Type: "int64",
+			Name:        prefix + "seconds-to-unblock",
+			Type:        "int64",
+			Description: "The amount of time left to unblock for next request",
 		},
 	}
 }
@@ -172,6 +184,10 @@ type CheckClassicPassportActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
+	// Do not manually fill this in. It has no effect. This is only useful when you are using
+	// client code, and want to get access to the original response. When sending response from your
+	// application it will be ignored.
+	resp *http.Response
 }
 
 func (x *CheckClassicPassportActionResponse) SetContentType(contentType string) *CheckClassicPassportActionResponse {
@@ -332,61 +348,107 @@ func (q *CheckClassicPassportActionQuery) SetMapped(m map[string]interface{}) {
 type CheckClassicPassportActionRequest struct {
 	Body        CheckClassicPassportActionReq
 	QueryParams url.Values
-	Headers     http.Header
-	GinCtx      *gin.Context
-	CliCtx      *cli.Context
-}
-type CheckClassicPassportActionResult struct {
-	resp    *http.Response // embed original response
-	Payload interface{}
+	// Automatically casted headers, for purpose of typesafe headers in later versions
+	Headers http.Header
+	// Gin context for each request in case of a direct access requirement
+	GinCtx *gin.Context
+	// Urfave context, per each request
+	CliCtx *cli.Command
+	// Reference to the application instance, in such scenarios that entire
+	// application is wrapped into a single struct that holds database connection,
+	// routes, etc.
+	Application interface{}
 }
 
-func CheckClassicPassportActionCall(
+func (x CheckClassicPassportActionRequest) IsGin() bool {
+	return x.GinCtx != nil
+}
+func (x CheckClassicPassportActionRequest) IsCli() bool {
+	return x.CliCtx != nil
+}
+
+// type CheckClassicPassportActionResult struct {
+// /resp *http.Response
+// /	Payload interface{}
+// /}
+func CheckClassicPassportActionClientCreateUrl(
 	req CheckClassicPassportActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*CheckClassicPassportActionResult, error) {
-	var httpReq *http.Request
-	if config == nil || config.Httpr == nil {
-		meta := CheckClassicPassportActionMeta()
-		baseURL := meta.URL
-		// Build final URL with query string
-		u, err := url.Parse(baseURL)
-		if err != nil {
-			return nil, err
-		}
-		// if UrlValues present, encode and append
-		if len(req.QueryParams) > 0 {
-			u.RawQuery = req.QueryParams.Encode()
-		}
-		bodyBytes, err := json.Marshal(req.Body)
-		if err != nil {
-			return nil, err
-		}
-		req0, err := http.NewRequest(meta.Method, u.String(), bytes.NewReader(bodyBytes))
-		if err != nil {
-			return nil, err
-		}
-		httpReq = req0
-	} else {
-		httpReq = config.Httpr
+) (*url.URL, error) {
+	meta := CheckClassicPassportActionMeta()
+	urlAddr := meta.URL
+	urlAddr = config.BaseURL + urlAddr
+	// Build final URL with query string
+	u, err := url.Parse(urlAddr)
+	if err != nil {
+		return nil, err
 	}
-	httpReq.Header = req.Headers
+	// if UrlValues present, encode and append
+	if len(req.QueryParams) > 0 {
+		u.RawQuery = req.QueryParams.Encode()
+	}
+	return u, nil
+}
+func CheckClassicPassportActionClientExecuteTyped(httpReq *http.Request) (*CheckClassicPassportActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
-	var result CheckClassicPassportActionResult
+	// At this point, response is valid, and we need to return the results.
+	var result CheckClassicPassportActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &result, err
-	}
-	if resp.StatusCode >= 400 {
-		return &result, fmt.Errorf("request failed: %s", respBody)
+		return &CheckClassicPassportActionResponse{Payload: result}, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &result, err
+		return &CheckClassicPassportActionResponse{Payload: result}, err
 	}
-	return &result, nil
+	return &CheckClassicPassportActionResponse{Payload: result}, nil
+}
+func CheckClassicPassportActionClientBuildRequest(req CheckClassicPassportActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := CheckClassicPassportActionMeta()
+	bodyBytes, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header = make(http.Header)
+	// copy defaults
+	for k, v := range config.Headers {
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	// override with request-specific headers
+	for k, v := range req.Headers {
+		httpReq.Header.Del(k) // ensure override, not duplicate
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	return httpReq, nil
+}
+func CheckClassicPassportActionCall(
+	req CheckClassicPassportActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*CheckClassicPassportActionResponse, error) {
+	// This function intentionally is split into 3 different sections, so in case
+	// of some modifications that we did not anticipate, at least a part would become quite useful.
+	// first we create url, apply all path parameters, query params, etc
+	u, err := CheckClassicPassportActionClientCreateUrl(req, config)
+	if err != nil {
+		return nil, err
+	}
+	// We create the request from the body in second stage
+	r, err := CheckClassicPassportActionClientBuildRequest(req, u, config)
+	if err != nil {
+		return nil, err
+	}
+	// This one would execute the request and cast the result.
+	return CheckClassicPassportActionClientExecuteTyped(r)
 }

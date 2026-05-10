@@ -51,19 +51,13 @@ var xapp = &fireback.FirebackApp{
 	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
 
 	},
+	// Modules: append([]*fireback.ModuleProvider{
+	// 	// Add the very core module, such as capabilities
+	// 	fireback.FirebackModuleSetup(nil),
+	// }, abac.AbacCompleteModules()...),
 	Modules: []*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
-
-		// // Add fireback payment module also
-		// payment.PaymentModuleSetup(nil),
-
-		// suggestion.SuggestionModuleSetup(nil),
-		// {
-		// 	CliHandlers: []cli.Command{
-		// 		fireback.NewProjectCli(),
-		// 	},
-		// },
 	},
 }
 

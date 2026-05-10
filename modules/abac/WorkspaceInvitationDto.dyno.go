@@ -6,48 +6,59 @@ import emigo "github.com/torabian/emi/emigo"
 func GetWorkspaceInvitationDtoCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
-			Name: prefix + "public-key",
-			Type: "string",
+			Name:        prefix + "public-key",
+			Type:        "string",
+			Description: "A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.",
 		},
 		{
-			Name: prefix + "cover-letter",
-			Type: "string",
+			Name:        prefix + "cover-letter",
+			Type:        "string",
+			Description: "The content that user will receive to understand the reason of the letter.",
 		},
 		{
-			Name: prefix + "target-user-locale",
-			Type: "string",
+			Name:        prefix + "target-user-locale",
+			Type:        "string",
+			Description: "If the invited person has a different language, then you can define that so the interface for him will be automatically translated.",
 		},
 		{
-			Name: prefix + "email",
-			Type: "string",
+			Name:        prefix + "email",
+			Type:        "string",
+			Description: "The email address of the person which is invited.",
 		},
 		{
-			Name: prefix + "phonenumber",
-			Type: "string",
+			Name:        prefix + "phonenumber",
+			Type:        "string",
+			Description: "The phone number of the person which is invited.",
 		},
 		{
-			Name: prefix + "workspace",
-			Type: "one",
+			Name:        prefix + "workspace",
+			Type:        "one",
+			Description: "Workspace which user is being invite to.",
 		},
 		{
-			Name: prefix + "first-name",
-			Type: "string",
+			Name:        prefix + "first-name",
+			Type:        "string",
+			Description: "First name of the person which is invited",
 		},
 		{
-			Name: prefix + "last-name",
-			Type: "string",
+			Name:        prefix + "last-name",
+			Type:        "string",
+			Description: "Last name of the person which is invited.",
 		},
 		{
-			Name: prefix + "force-email-address",
-			Type: "bool?",
+			Name:        prefix + "force-email-address",
+			Type:        "bool?",
+			Description: "If forced, the email address cannot be changed by the user which has been invited.",
 		},
 		{
-			Name: prefix + "force-phone-number",
-			Type: "bool?",
+			Name:        prefix + "force-phone-number",
+			Type:        "bool?",
+			Description: "If forced, user cannot change the phone number and needs to complete signup.",
 		},
 		{
-			Name: prefix + "role-id",
-			Type: "string",
+			Name:        prefix + "role-id",
+			Type:        "string",
+			Description: "The role which invitee get if they accept the request.",
 		},
 	}
 }

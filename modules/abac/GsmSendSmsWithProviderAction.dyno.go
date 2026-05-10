@@ -3,19 +3,26 @@ package abac
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
+	"io"
+	"net/http"
+	"net/url"
 )
 
 /**
 * Action to communicate with the action GsmSendSmsWithProviderAction
  */
+/*
+Here is a quick function implementation to make your life easier:
+// Actual implementation of GsmSendSmsWithProviderAction
+func GsmSendSmsWithProviderAction(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error) {
+	return &GsmSendSmsWithProviderActionResponse{
+		// Payload is an interface. Use it at carefully.
+	}, nil
+}
+*/
 func GsmSendSmsWithProviderActionMeta() struct {
 	Name        string
 	CliName     string
@@ -114,6 +121,10 @@ type GsmSendSmsWithProviderActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
+	// Do not manually fill this in. It has no effect. This is only useful when you are using
+	// client code, and want to get access to the original response. When sending response from your
+	// application it will be ignored.
+	resp *http.Response
 }
 
 func (x *GsmSendSmsWithProviderActionResponse) SetContentType(contentType string) *GsmSendSmsWithProviderActionResponse {
@@ -274,61 +285,107 @@ func (q *GsmSendSmsWithProviderActionQuery) SetMapped(m map[string]interface{}) 
 type GsmSendSmsWithProviderActionRequest struct {
 	Body        GsmSendSmsWithProviderActionReq
 	QueryParams url.Values
-	Headers     http.Header
-	GinCtx      *gin.Context
-	CliCtx      *cli.Context
-}
-type GsmSendSmsWithProviderActionResult struct {
-	resp    *http.Response // embed original response
-	Payload interface{}
+	// Automatically casted headers, for purpose of typesafe headers in later versions
+	Headers http.Header
+	// Gin context for each request in case of a direct access requirement
+	GinCtx *gin.Context
+	// Urfave context, per each request
+	CliCtx *cli.Command
+	// Reference to the application instance, in such scenarios that entire
+	// application is wrapped into a single struct that holds database connection,
+	// routes, etc.
+	Application interface{}
 }
 
-func GsmSendSmsWithProviderActionCall(
+func (x GsmSendSmsWithProviderActionRequest) IsGin() bool {
+	return x.GinCtx != nil
+}
+func (x GsmSendSmsWithProviderActionRequest) IsCli() bool {
+	return x.CliCtx != nil
+}
+
+// type GsmSendSmsWithProviderActionResult struct {
+// /resp *http.Response
+// /	Payload interface{}
+// /}
+func GsmSendSmsWithProviderActionClientCreateUrl(
 	req GsmSendSmsWithProviderActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*GsmSendSmsWithProviderActionResult, error) {
-	var httpReq *http.Request
-	if config == nil || config.Httpr == nil {
-		meta := GsmSendSmsWithProviderActionMeta()
-		baseURL := meta.URL
-		// Build final URL with query string
-		u, err := url.Parse(baseURL)
-		if err != nil {
-			return nil, err
-		}
-		// if UrlValues present, encode and append
-		if len(req.QueryParams) > 0 {
-			u.RawQuery = req.QueryParams.Encode()
-		}
-		bodyBytes, err := json.Marshal(req.Body)
-		if err != nil {
-			return nil, err
-		}
-		req0, err := http.NewRequest(meta.Method, u.String(), bytes.NewReader(bodyBytes))
-		if err != nil {
-			return nil, err
-		}
-		httpReq = req0
-	} else {
-		httpReq = config.Httpr
+) (*url.URL, error) {
+	meta := GsmSendSmsWithProviderActionMeta()
+	urlAddr := meta.URL
+	urlAddr = config.BaseURL + urlAddr
+	// Build final URL with query string
+	u, err := url.Parse(urlAddr)
+	if err != nil {
+		return nil, err
 	}
-	httpReq.Header = req.Headers
+	// if UrlValues present, encode and append
+	if len(req.QueryParams) > 0 {
+		u.RawQuery = req.QueryParams.Encode()
+	}
+	return u, nil
+}
+func GsmSendSmsWithProviderActionClientExecuteTyped(httpReq *http.Request) (*GsmSendSmsWithProviderActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
-	var result GsmSendSmsWithProviderActionResult
+	// At this point, response is valid, and we need to return the results.
+	var result GsmSendSmsWithProviderActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &result, err
-	}
-	if resp.StatusCode >= 400 {
-		return &result, fmt.Errorf("request failed: %s", respBody)
+		return &GsmSendSmsWithProviderActionResponse{Payload: result}, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &result, err
+		return &GsmSendSmsWithProviderActionResponse{Payload: result}, err
 	}
-	return &result, nil
+	return &GsmSendSmsWithProviderActionResponse{Payload: result}, nil
+}
+func GsmSendSmsWithProviderActionClientBuildRequest(req GsmSendSmsWithProviderActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := GsmSendSmsWithProviderActionMeta()
+	bodyBytes, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header = make(http.Header)
+	// copy defaults
+	for k, v := range config.Headers {
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	// override with request-specific headers
+	for k, v := range req.Headers {
+		httpReq.Header.Del(k) // ensure override, not duplicate
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	return httpReq, nil
+}
+func GsmSendSmsWithProviderActionCall(
+	req GsmSendSmsWithProviderActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*GsmSendSmsWithProviderActionResponse, error) {
+	// This function intentionally is split into 3 different sections, so in case
+	// of some modifications that we did not anticipate, at least a part would become quite useful.
+	// first we create url, apply all path parameters, query params, etc
+	u, err := GsmSendSmsWithProviderActionClientCreateUrl(req, config)
+	if err != nil {
+		return nil, err
+	}
+	// We create the request from the body in second stage
+	r, err := GsmSendSmsWithProviderActionClientBuildRequest(req, u, config)
+	if err != nil {
+		return nil, err
+	}
+	// This one would execute the request and cast the result.
+	return GsmSendSmsWithProviderActionClientExecuteTyped(r)
 }
