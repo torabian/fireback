@@ -6,6 +6,7 @@ package suggestion
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -264,9 +265,9 @@ func SuggestionCustomActions() []fireback.Module3Action {
 }
 
 var SuggestionCustomActionsCli = []*cli.Command{
-	QueryActionCmd,
-	RestoreActionCmd,
-	ResyncActionCmd,
+	&QueryActionCmd,
+	&RestoreActionCmd,
+	&ResyncActionCmd,
 }
 
 // Only to include some headers
@@ -282,9 +283,9 @@ var SuggestionCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: `Suggestion module is a way to rank contents, such as video, posts, etc to users, based on full text search, user interaction, location, and so on. Aims to be general purpose, and allow to be extended.`,
 	// Here we will include entities actions, as well as module level actions
 	Commands: []*cli.Command{
-		QueryActionCmd,
-		RestoreActionCmd,
-		ResyncActionCmd,
+		&QueryActionCmd,
+		&RestoreActionCmd,
+		&ResyncActionCmd,
 		ContentCliFn(),
 	},
 }

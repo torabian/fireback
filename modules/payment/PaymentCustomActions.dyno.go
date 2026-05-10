@@ -6,6 +6,7 @@ package payment
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -476,11 +477,11 @@ func PaymentCustomActions() []fireback.Module3Action {
 }
 
 var PaymentCustomActionsCli = []*cli.Command{
-	NotificationActionCmd,
-	VerifyTransactionActionCmd,
-	PayInvoiceActionCmd,
-	RegisterTransactionActionCmd,
-	CheckProductInventoryActionCmd,
+	&NotificationActionCmd,
+	&VerifyTransactionActionCmd,
+	&PayInvoiceActionCmd,
+	&RegisterTransactionActionCmd,
+	&CheckProductInventoryActionCmd,
 }
 
 // Only to include some headers
@@ -496,11 +497,11 @@ var PaymentCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Commands: []*cli.Command{
-		NotificationActionCmd,
-		VerifyTransactionActionCmd,
-		PayInvoiceActionCmd,
-		RegisterTransactionActionCmd,
-		CheckProductInventoryActionCmd,
+		&NotificationActionCmd,
+		&VerifyTransactionActionCmd,
+		&PayInvoiceActionCmd,
+		&RegisterTransactionActionCmd,
+		&CheckProductInventoryActionCmd,
 		PaymentConfigCliFn(),
 		InvoiceCliFn(),
 		InvoiceTransactionCliFn(),
