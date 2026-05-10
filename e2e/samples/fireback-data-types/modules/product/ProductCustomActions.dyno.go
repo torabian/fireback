@@ -6,12 +6,12 @@ package product
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
-)
-import (
-	"reflect"
 )
 
 // using shared actions here
@@ -55,8 +55,8 @@ var GetProductsCountActionCmd cli.Command = cli.Command{
 	},
 }
 
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 func ProductCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
@@ -85,7 +85,7 @@ func ProductCustomActions() []fireback.Module3Action {
 }
 
 var ProductCustomActionsCli = []*cli.Command{
-	GetProductsCountActionCmd,
+	&GetProductsCountActionCmd,
 }
 
 // Only to include some headers
@@ -101,7 +101,7 @@ var ProductCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Commands: []*cli.Command{
-		GetProductsCountActionCmd,
+		&GetProductsCountActionCmd,
 		ProductCliFn(),
 	},
 }
