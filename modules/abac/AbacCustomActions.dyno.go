@@ -6,17 +6,16 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
-import (
-	"reflect"
-)
 
 // using shared actions here
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 var QueryUserRoleWorkspacesImpl func(c QueryUserRoleWorkspacesActionRequest, query fireback.QueryDSL) (*QueryUserRoleWorkspacesActionResponse, error) = nil
 var QueryUserRoleWorkspacesSecurityModel = &fireback.SecurityModel{
 	ActionRequires:  []fireback.PermissionInfo{},

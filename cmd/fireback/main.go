@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac"
+	"github.com/urfave/cli/v3"
 
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
@@ -60,11 +61,11 @@ var xapp = &fireback.FirebackApp{
 		// payment.PaymentModuleSetup(nil),
 
 		// suggestion.SuggestionModuleSetup(nil),
-		// {
-		// 	CliHandlers: []*cli.Command{
-		// 		fireback.NewProjectCli(),
-		// 	},
-		// },
+		{
+			CliHandlers: []*cli.Command{
+				fireback.NewProjectCli(),
+			},
+		},
 	}, abac.AbacCompleteModules()...),
 }
 
