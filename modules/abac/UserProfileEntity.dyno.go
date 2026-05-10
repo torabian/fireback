@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var userProfileSeedersFs = &seeders.ViewsFs
@@ -348,13 +347,11 @@ func UserProfileRecursiveAddUniqueId(dto *UserProfileEntity, query fireback.Quer
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func UserProfileMultiInsertFn(dtos []*UserProfileEntity, query fireback.QueryDSL) ([]*UserProfileEntity, *fireback.IError) {
@@ -743,7 +740,7 @@ var UserProfileCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `lastName (string)`,
 	},
 }
-var UserProfileCreateCmd cli.Command = USER_PROFILE_ACTION_POST_ONE.ToCli()
+var UserProfileCreateCmd *cli.Command = USER_PROFILE_ACTION_POST_ONE.ToCli()
 var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -765,6 +762,7 @@ var UserProfileCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var UserProfileUpdateCmd cli.Command = cli.Command{
@@ -871,8 +869,8 @@ func UserProfilesActionQueryString(keyword string, page int) ([]string, *firebac
 	return stringItems, meta, err
 }
 
-var UserProfileDevCommands = []cli.Command{
-	UserProfileWipeCmd,
+var UserProfileDevCommands = []*cli.Command{
+	&UserProfileWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -916,7 +914,7 @@ var UserProfileDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -929,7 +927,7 @@ var UserProfileDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -942,7 +940,7 @@ var UserProfileDevCommands = []cli.Command{
 		},
 	},
 }
-var UserProfileImportExportCommands = []cli.Command{
+var UserProfileImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -970,7 +968,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -989,7 +987,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1001,7 +999,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1022,7 +1020,7 @@ var UserProfileImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1052,25 +1050,25 @@ var UserProfileImportExportCommands = []cli.Command{
 		},
 	},
 }
-var UserProfileCliCommands []cli.Command = []cli.Command{
+var UserProfileCliCommands []*cli.Command = []*cli.Command{
 	USER_PROFILE_ACTION_QUERY.ToCli(),
 	USER_PROFILE_ACTION_TABLE.ToCli(),
 	USER_PROFILE_ACTION_PATCH.ToCli(),
 	UserProfileCreateCmd,
-	UserProfileAskCmd,
-	UserProfileCreateInteractiveCmd,
+	&UserProfileAskCmd,
+	&UserProfileCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserProfileEntity{}).Elem(),
 		UserProfileActions.RemoveEnqueue,
 	),
 }
 
-func UserProfileCliFn() cli.Command {
+func UserProfileCliFn() *cli.Command {
 	commands := append(UserProfileImportExportCommands, UserProfileCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, UserProfileDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "userprofile",
 		Description: ``,
 		Usage:       ``,
@@ -1080,7 +1078,7 @@ func UserProfileCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var timezoneGroupSeedersFs = &seeders.ViewsFs
@@ -359,13 +358,11 @@ func TimezoneGroupRecursiveAddUniqueId(dto *TimezoneGroupEntity, query fireback.
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func TimezoneGroupMultiInsertFn(dtos []*TimezoneGroupEntity, query fireback.QueryDSL) ([]*TimezoneGroupEntity, *fireback.IError) {
@@ -736,7 +733,7 @@ var TimezoneGroupCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `Title which is shown to the user and allows them to select. (string)`,
 	},
 }
-var TimezoneGroupCreateCmd cli.Command = TIMEZONE_GROUP_ACTION_POST_ONE.ToCli()
+var TimezoneGroupCreateCmd *cli.Command = TIMEZONE_GROUP_ACTION_POST_ONE.ToCli()
 var TimezoneGroupCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -758,6 +755,7 @@ var TimezoneGroupCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var TimezoneGroupUpdateCmd cli.Command = cli.Command{
@@ -861,8 +859,8 @@ func TimezoneGroupsActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var TimezoneGroupDevCommands = []cli.Command{
-	TimezoneGroupWipeCmd,
+var TimezoneGroupDevCommands = []*cli.Command{
+	&TimezoneGroupWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -906,7 +904,7 @@ var TimezoneGroupDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -919,7 +917,7 @@ var TimezoneGroupDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -932,7 +930,7 @@ var TimezoneGroupDevCommands = []cli.Command{
 		},
 	},
 }
-var TimezoneGroupImportExportCommands = []cli.Command{
+var TimezoneGroupImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -960,7 +958,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -979,7 +977,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -991,7 +989,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1012,7 +1010,7 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1042,25 +1040,25 @@ var TimezoneGroupImportExportCommands = []cli.Command{
 		},
 	},
 }
-var TimezoneGroupCliCommands []cli.Command = []cli.Command{
+var TimezoneGroupCliCommands []*cli.Command = []*cli.Command{
 	TIMEZONE_GROUP_ACTION_QUERY.ToCli(),
 	TIMEZONE_GROUP_ACTION_TABLE.ToCli(),
 	TIMEZONE_GROUP_ACTION_PATCH.ToCli(),
 	TimezoneGroupCreateCmd,
-	TimezoneGroupAskCmd,
-	TimezoneGroupCreateInteractiveCmd,
+	&TimezoneGroupAskCmd,
+	&TimezoneGroupCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
 		TimezoneGroupActions.RemoveEnqueue,
 	),
 }
 
-func TimezoneGroupCliFn() cli.Command {
+func TimezoneGroupCliFn() *cli.Command {
 	commands := append(TimezoneGroupImportExportCommands, TimezoneGroupCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, TimezoneGroupDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "tz",
 		Description: `World timezone information`,
 		Usage:       `World timezone information`,
@@ -1070,7 +1068,7 @@ func TimezoneGroupCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

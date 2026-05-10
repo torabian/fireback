@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var publicJoinKeySeedersFs = &seeders.ViewsFs
@@ -349,13 +348,11 @@ func PublicJoinKeyRecursiveAddUniqueId(dto *PublicJoinKeyEntity, query fireback.
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PublicJoinKeyMultiInsertFn(dtos []*PublicJoinKeyEntity, query fireback.QueryDSL) ([]*PublicJoinKeyEntity, *fireback.IError) {
@@ -727,7 +724,7 @@ var PublicJoinKeyCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `workspace (one)`,
 	},
 }
-var PublicJoinKeyCreateCmd cli.Command = PUBLIC_JOIN_KEY_ACTION_POST_ONE.ToCli()
+var PublicJoinKeyCreateCmd *cli.Command = PUBLIC_JOIN_KEY_ACTION_POST_ONE.ToCli()
 var PublicJoinKeyCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -749,6 +746,7 @@ var PublicJoinKeyCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PublicJoinKeyUpdateCmd cli.Command = cli.Command{
@@ -855,8 +853,8 @@ func PublicJoinKeysActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var PublicJoinKeyDevCommands = []cli.Command{
-	PublicJoinKeyWipeCmd,
+var PublicJoinKeyDevCommands = []*cli.Command{
+	&PublicJoinKeyWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -900,7 +898,7 @@ var PublicJoinKeyDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -913,7 +911,7 @@ var PublicJoinKeyDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -926,7 +924,7 @@ var PublicJoinKeyDevCommands = []cli.Command{
 		},
 	},
 }
-var PublicJoinKeyImportExportCommands = []cli.Command{
+var PublicJoinKeyImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -954,7 +952,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -973,7 +971,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -985,7 +983,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1006,7 +1004,7 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1036,25 +1034,25 @@ var PublicJoinKeyImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PublicJoinKeyCliCommands []cli.Command = []cli.Command{
+var PublicJoinKeyCliCommands []*cli.Command = []*cli.Command{
 	PUBLIC_JOIN_KEY_ACTION_QUERY.ToCli(),
 	PUBLIC_JOIN_KEY_ACTION_TABLE.ToCli(),
 	PUBLIC_JOIN_KEY_ACTION_PATCH.ToCli(),
 	PublicJoinKeyCreateCmd,
-	PublicJoinKeyAskCmd,
-	PublicJoinKeyCreateInteractiveCmd,
+	&PublicJoinKeyAskCmd,
+	&PublicJoinKeyCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicJoinKeyEntity{}).Elem(),
 		PublicJoinKeyActions.RemoveEnqueue,
 	),
 }
 
-func PublicJoinKeyCliFn() cli.Command {
+func PublicJoinKeyCliFn() *cli.Command {
 	commands := append(PublicJoinKeyImportExportCommands, PublicJoinKeyCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PublicJoinKeyDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "publicjoinkey",
 		Description: `Joining to different workspaces using a public link directly`,
 		Usage:       `Joining to different workspaces using a public link directly`,
@@ -1064,7 +1062,7 @@ func PublicJoinKeyCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

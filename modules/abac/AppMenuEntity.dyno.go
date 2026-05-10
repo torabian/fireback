@@ -6,12 +6,8 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -19,17 +15,18 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-
+	"log"
+	"strings"
 	//queries github.com/torabian/fireback - modules/abac"
+	"context"
 	"embed"
-	reflect "reflect"
-	"time"
-
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/AppMenu"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
+	reflect "reflect"
+	"time"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
@@ -402,13 +399,11 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError) {
@@ -889,7 +884,7 @@ var AppMenuCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `The permission which is required for the menu to be visible. (one)`,
 	},
 }
-var AppMenuCreateCmd cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()
+var AppMenuCreateCmd *cli.Command = APP_MENU_ACTION_POST_ONE.ToCli()
 var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -911,6 +906,7 @@ var AppMenuCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var AppMenuUpdateCmd cli.Command = cli.Command{
@@ -1026,8 +1022,8 @@ func AppMenusActionQueryString(keyword string, page int) ([]string, *fireback.Qu
 	return stringItems, meta, err
 }
 
-var AppMenuDevCommands = []cli.Command{
-	AppMenuWipeCmd,
+var AppMenuDevCommands = []*cli.Command{
+	&AppMenuWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1071,7 +1067,7 @@ var AppMenuDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1084,7 +1080,7 @@ var AppMenuDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1097,7 +1093,7 @@ var AppMenuDevCommands = []cli.Command{
 		},
 	},
 }
-var AppMenuImportExportCommands = []cli.Command{
+var AppMenuImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1125,7 +1121,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1144,7 +1140,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1156,7 +1152,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1177,7 +1173,7 @@ var AppMenuImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1207,13 +1203,13 @@ var AppMenuImportExportCommands = []cli.Command{
 		},
 	},
 }
-var AppMenuCliCommands []cli.Command = []cli.Command{
+var AppMenuCliCommands []*cli.Command = []*cli.Command{
 	APP_MENU_ACTION_QUERY.ToCli(),
 	APP_MENU_ACTION_TABLE.ToCli(),
 	APP_MENU_ACTION_PATCH.ToCli(),
 	AppMenuCreateCmd,
-	AppMenuAskCmd,
-	AppMenuCreateInteractiveCmd,
+	&AppMenuAskCmd,
+	&AppMenuCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&AppMenuEntity{}).Elem(),
 		AppMenuActions.RemoveEnqueue,
@@ -1222,12 +1218,12 @@ var AppMenuCliCommands []cli.Command = []cli.Command{
 	fireback.GetCommonPivotQuery(AppMenuActionCommonPivotQuery),
 }
 
-func AppMenuCliFn() cli.Command {
+func AppMenuCliFn() *cli.Command {
 	commands := append(AppMenuImportExportCommands, AppMenuCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, AppMenuDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "appmenu",
 		Description: `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
 		Usage:       `Manages the menus in the app, (for example tab views, sidebar items, etc.)`,
@@ -1237,7 +1233,7 @@ func AppMenuCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var fileSeedersFs = &seeders.ViewsFs
@@ -518,13 +517,11 @@ func FileRecursiveAddUniqueId(dto *FileEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func FileMultiInsertFn(dtos []*FileEntity, query fireback.QueryDSL) ([]*FileEntity, *fireback.IError) {
@@ -1015,7 +1012,7 @@ var FileCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `variations (array)`,
 	},
 }
-var FileCreateCmd cli.Command = FILE_ACTION_POST_ONE.ToCli()
+var FileCreateCmd *cli.Command = FILE_ACTION_POST_ONE.ToCli()
 var FileCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -1037,6 +1034,7 @@ var FileCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var FileUpdateCmd cli.Command = cli.Command{
@@ -1156,8 +1154,8 @@ func FilesActionQueryString(keyword string, page int) ([]string, *fireback.Query
 	return stringItems, meta, err
 }
 
-var FileDevCommands = []cli.Command{
-	FileWipeCmd,
+var FileDevCommands = []*cli.Command{
+	&FileWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1201,7 +1199,7 @@ var FileDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1214,7 +1212,7 @@ var FileDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1227,7 +1225,7 @@ var FileDevCommands = []cli.Command{
 		},
 	},
 }
-var FileImportExportCommands = []cli.Command{
+var FileImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1255,7 +1253,7 @@ var FileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1274,7 +1272,7 @@ var FileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1286,7 +1284,7 @@ var FileImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1307,7 +1305,7 @@ var FileImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1337,25 +1335,25 @@ var FileImportExportCommands = []cli.Command{
 		},
 	},
 }
-var FileCliCommands []cli.Command = []cli.Command{
+var FileCliCommands []*cli.Command = []*cli.Command{
 	FILE_ACTION_QUERY.ToCli(),
 	FILE_ACTION_TABLE.ToCli(),
 	FILE_ACTION_PATCH.ToCli(),
 	FileCreateCmd,
-	FileAskCmd,
-	FileCreateInteractiveCmd,
+	&FileAskCmd,
+	&FileCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&FileEntity{}).Elem(),
 		FileActions.RemoveEnqueue,
 	),
 }
 
-func FileCliFn() cli.Command {
+func FileCliFn() *cli.Command {
 	commands := append(FileImportExportCommands, FileCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, FileDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "file",
 		Description: `Tus file uploading reference of the content. Every files being uploaded using tus will be stored in this table.`,
 		Usage:       `Tus file uploading reference of the content. Every files being uploaded using tus will be stored in this table.`,
@@ -1365,7 +1363,7 @@ func FileCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

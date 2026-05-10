@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var regionalContentSeedersFs = &seeders.ViewsFs
@@ -372,13 +371,11 @@ func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query fireb
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError) {
@@ -822,7 +819,7 @@ var RegionalContentCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `One of: 'SMS_OTP', 'EMAIL_OTP' (enum)`,
 	},
 }
-var RegionalContentCreateCmd cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()
+var RegionalContentCreateCmd *cli.Command = REGIONAL_CONTENT_ACTION_POST_ONE.ToCli()
 var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -845,6 +842,7 @@ var RegionalContentCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var RegionalContentUpdateCmd cli.Command = cli.Command{
@@ -961,8 +959,8 @@ func RegionalContentsActionQueryString(keyword string, page int) ([]string, *fir
 	return stringItems, meta, err
 }
 
-var RegionalContentDevCommands = []cli.Command{
-	RegionalContentWipeCmd,
+var RegionalContentDevCommands = []*cli.Command{
+	&RegionalContentWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1007,7 +1005,7 @@ var RegionalContentDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1020,7 +1018,7 @@ var RegionalContentDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1033,7 +1031,7 @@ var RegionalContentDevCommands = []cli.Command{
 		},
 	},
 }
-var RegionalContentImportExportCommands = []cli.Command{
+var RegionalContentImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1061,7 +1059,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1080,7 +1078,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1092,7 +1090,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1113,7 +1111,7 @@ var RegionalContentImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1144,27 +1142,27 @@ var RegionalContentImportExportCommands = []cli.Command{
 		},
 	},
 }
-var RegionalContentCliCommands []cli.Command = []cli.Command{
+var RegionalContentCliCommands []*cli.Command = []*cli.Command{
 	REGIONAL_CONTENT_ACTION_QUERY.ToCli(),
 	REGIONAL_CONTENT_ACTION_TABLE.ToCli(),
 	REGIONAL_CONTENT_ACTION_PATCH.ToCli(),
 	RegionalContentCreateCmd,
-	RegionalContentAskCmd,
-	RegionalContentCreateInteractiveCmd,
+	&RegionalContentAskCmd,
+	&RegionalContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&RegionalContentEntity{}).Elem(),
 		RegionalContentActions.RemoveEnqueue,
 	),
 }
 
-func RegionalContentCliFn() cli.Command {
+func RegionalContentCliFn() *cli.Command {
 	commands := append(RegionalContentImportExportCommands, RegionalContentCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, RegionalContentDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "regionalcontent",
-		ShortName:   "rc",
+		Aliases:     []string{"rc"},
 		Description: `Email templates, sms templates or other textual content which can be accessed.`,
 		Usage:       `Email templates, sms templates or other textual content which can be accessed.`,
 		Flags: []cli.Flag{
@@ -1173,7 +1171,7 @@ func RegionalContentCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

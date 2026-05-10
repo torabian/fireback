@@ -122,9 +122,9 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) *cli.Comma
 
 }
 
-func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) cli.Command {
+func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 
 		Name:    "query-cte",
 		Aliases: []string{"cte"},
@@ -144,9 +144,9 @@ func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *
 
 }
 
-func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) cli.Command {
+func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 
 		Name:    "query-extended",
 		Aliases: []string{"extended"},
@@ -166,9 +166,9 @@ func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMe
 
 }
 
-func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) cli.Command {
+func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 
 		Name:    "query-pivot",
 		Aliases: []string{"pivot"},

@@ -101,7 +101,7 @@ func FirebackCustomActions() []Module3Action {
 	return routes
 }
 
-var FirebackCustomActionsCli = []cli.Command{}
+var FirebackCustomActionsCli = []*cli.Command{}
 
 // Only to include some headers
 func FirebackJsonInclude() {
@@ -130,6 +130,6 @@ func GetFirebackActionsBundle() *ModuleActionsBundle {
 		CliAction: FirebackCliActionsBundle,
 	}
 }
-func GetFirebackActionsCli() []cli.Command {
+func GetFirebackActionsCli() []*cli.Command {
 	return FirebackCustomActionsCli
 }

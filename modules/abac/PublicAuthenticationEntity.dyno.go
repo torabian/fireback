@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var publicAuthenticationSeedersFs = &seeders.ViewsFs
@@ -424,13 +423,11 @@ func PublicAuthenticationRecursiveAddUniqueId(dto *PublicAuthenticationEntity, q
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PublicAuthenticationMultiInsertFn(dtos []*PublicAuthenticationEntity, query fireback.QueryDSL) ([]*PublicAuthenticationEntity, *fireback.IError) {
@@ -958,7 +955,7 @@ var PublicAuthenticationCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `recoveryAbsoluteUrl (string)`,
 	},
 }
-var PublicAuthenticationCreateCmd cli.Command = PUBLIC_AUTHENTICATION_ACTION_POST_ONE.ToCli()
+var PublicAuthenticationCreateCmd *cli.Command = PUBLIC_AUTHENTICATION_ACTION_POST_ONE.ToCli()
 var PublicAuthenticationCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -981,6 +978,7 @@ var PublicAuthenticationCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PublicAuthenticationUpdateCmd cli.Command = cli.Command{
@@ -1116,8 +1114,8 @@ func PublicAuthenticationsActionQueryString(keyword string, page int) ([]string,
 	return stringItems, meta, err
 }
 
-var PublicAuthenticationDevCommands = []cli.Command{
-	PublicAuthenticationWipeCmd,
+var PublicAuthenticationDevCommands = []*cli.Command{
+	&PublicAuthenticationWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1162,7 +1160,7 @@ var PublicAuthenticationDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1175,7 +1173,7 @@ var PublicAuthenticationDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1188,7 +1186,7 @@ var PublicAuthenticationDevCommands = []cli.Command{
 		},
 	},
 }
-var PublicAuthenticationImportExportCommands = []cli.Command{
+var PublicAuthenticationImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1216,7 +1214,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1235,7 +1233,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1247,7 +1245,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1268,7 +1266,7 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1299,27 +1297,27 @@ var PublicAuthenticationImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PublicAuthenticationCliCommands []cli.Command = []cli.Command{
+var PublicAuthenticationCliCommands []*cli.Command = []*cli.Command{
 	PUBLIC_AUTHENTICATION_ACTION_QUERY.ToCli(),
 	PUBLIC_AUTHENTICATION_ACTION_TABLE.ToCli(),
 	PUBLIC_AUTHENTICATION_ACTION_PATCH.ToCli(),
 	PublicAuthenticationCreateCmd,
-	PublicAuthenticationAskCmd,
-	PublicAuthenticationCreateInteractiveCmd,
+	&PublicAuthenticationAskCmd,
+	&PublicAuthenticationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PublicAuthenticationEntity{}).Elem(),
 		PublicAuthenticationActions.RemoveEnqueue,
 	),
 }
 
-func PublicAuthenticationCliFn() cli.Command {
+func PublicAuthenticationCliFn() *cli.Command {
 	commands := append(PublicAuthenticationImportExportCommands, PublicAuthenticationCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PublicAuthenticationDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "publicauthentication",
-		ShortName:   "pa",
+		Aliases:     []string{"pa"},
 		Description: `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Usage:       `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
 		Flags: []cli.Flag{
@@ -1328,7 +1326,7 @@ func PublicAuthenticationCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var pendingWorkspaceInviteSeedersFs = &seeders.ViewsFs
@@ -373,13 +372,11 @@ func PendingWorkspaceInviteRecursiveAddUniqueId(dto *PendingWorkspaceInviteEntit
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PendingWorkspaceInviteMultiInsertFn(dtos []*PendingWorkspaceInviteEntity, query fireback.QueryDSL) ([]*PendingWorkspaceInviteEntity, *fireback.IError) {
@@ -814,7 +811,7 @@ var PendingWorkspaceInviteCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `role (one)`,
 	},
 }
-var PendingWorkspaceInviteCreateCmd cli.Command = PENDING_WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
+var PendingWorkspaceInviteCreateCmd *cli.Command = PENDING_WORKSPACE_INVITE_ACTION_POST_ONE.ToCli()
 var PendingWorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -836,6 +833,7 @@ var PendingWorkspaceInviteCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PendingWorkspaceInviteUpdateCmd cli.Command = cli.Command{
@@ -951,8 +949,8 @@ func PendingWorkspaceInvitesActionQueryString(keyword string, page int) ([]strin
 	return stringItems, meta, err
 }
 
-var PendingWorkspaceInviteDevCommands = []cli.Command{
-	PendingWorkspaceInviteWipeCmd,
+var PendingWorkspaceInviteDevCommands = []*cli.Command{
+	&PendingWorkspaceInviteWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -996,7 +994,7 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1009,7 +1007,7 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1022,7 +1020,7 @@ var PendingWorkspaceInviteDevCommands = []cli.Command{
 		},
 	},
 }
-var PendingWorkspaceInviteImportExportCommands = []cli.Command{
+var PendingWorkspaceInviteImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1050,7 +1048,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1069,7 +1067,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1081,7 +1079,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1102,7 +1100,7 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1132,25 +1130,25 @@ var PendingWorkspaceInviteImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PendingWorkspaceInviteCliCommands []cli.Command = []cli.Command{
+var PendingWorkspaceInviteCliCommands []*cli.Command = []*cli.Command{
 	PENDING_WORKSPACE_INVITE_ACTION_QUERY.ToCli(),
 	PENDING_WORKSPACE_INVITE_ACTION_TABLE.ToCli(),
 	PENDING_WORKSPACE_INVITE_ACTION_PATCH.ToCli(),
 	PendingWorkspaceInviteCreateCmd,
-	PendingWorkspaceInviteAskCmd,
-	PendingWorkspaceInviteCreateInteractiveCmd,
+	&PendingWorkspaceInviteAskCmd,
+	&PendingWorkspaceInviteCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PendingWorkspaceInviteEntity{}).Elem(),
 		PendingWorkspaceInviteActions.RemoveEnqueue,
 	),
 }
 
-func PendingWorkspaceInviteCliFn() cli.Command {
+func PendingWorkspaceInviteCliFn() *cli.Command {
 	commands := append(PendingWorkspaceInviteImportExportCommands, PendingWorkspaceInviteCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PendingWorkspaceInviteDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "pendingworkspaceinvite",
 		Description: ``,
 		Usage:       ``,
@@ -1160,7 +1158,7 @@ func PendingWorkspaceInviteCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

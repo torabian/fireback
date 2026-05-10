@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var emailConfirmationSeedersFs = &seeders.ViewsFs
@@ -372,13 +371,11 @@ func EmailConfirmationRecursiveAddUniqueId(dto *EmailConfirmationEntity, query f
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func EmailConfirmationMultiInsertFn(dtos []*EmailConfirmationEntity, query fireback.QueryDSL) ([]*EmailConfirmationEntity, *fireback.IError) {
@@ -813,7 +810,7 @@ var EmailConfirmationCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `expiresAt (string)`,
 	},
 }
-var EmailConfirmationCreateCmd cli.Command = EMAIL_CONFIRMATION_ACTION_POST_ONE.ToCli()
+var EmailConfirmationCreateCmd *cli.Command = EMAIL_CONFIRMATION_ACTION_POST_ONE.ToCli()
 var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -835,6 +832,7 @@ var EmailConfirmationCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var EmailConfirmationUpdateCmd cli.Command = cli.Command{
@@ -950,8 +948,8 @@ func EmailConfirmationsActionQueryString(keyword string, page int) ([]string, *f
 	return stringItems, meta, err
 }
 
-var EmailConfirmationDevCommands = []cli.Command{
-	EmailConfirmationWipeCmd,
+var EmailConfirmationDevCommands = []*cli.Command{
+	&EmailConfirmationWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -995,7 +993,7 @@ var EmailConfirmationDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1008,7 +1006,7 @@ var EmailConfirmationDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1021,7 +1019,7 @@ var EmailConfirmationDevCommands = []cli.Command{
 		},
 	},
 }
-var EmailConfirmationImportExportCommands = []cli.Command{
+var EmailConfirmationImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1049,7 +1047,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1068,7 +1066,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1080,7 +1078,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1101,7 +1099,7 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1131,25 +1129,25 @@ var EmailConfirmationImportExportCommands = []cli.Command{
 		},
 	},
 }
-var EmailConfirmationCliCommands []cli.Command = []cli.Command{
+var EmailConfirmationCliCommands []*cli.Command = []*cli.Command{
 	EMAIL_CONFIRMATION_ACTION_QUERY.ToCli(),
 	EMAIL_CONFIRMATION_ACTION_TABLE.ToCli(),
 	EMAIL_CONFIRMATION_ACTION_PATCH.ToCli(),
 	EmailConfirmationCreateCmd,
-	EmailConfirmationAskCmd,
-	EmailConfirmationCreateInteractiveCmd,
+	&EmailConfirmationAskCmd,
+	&EmailConfirmationCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailConfirmationEntity{}).Elem(),
 		EmailConfirmationActions.RemoveEnqueue,
 	),
 }
 
-func EmailConfirmationCliFn() cli.Command {
+func EmailConfirmationCliFn() *cli.Command {
 	commands := append(EmailConfirmationImportExportCommands, EmailConfirmationCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, EmailConfirmationDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "emailconfirmation",
 		Description: ``,
 		Usage:       ``,
@@ -1159,7 +1157,7 @@ func EmailConfirmationCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

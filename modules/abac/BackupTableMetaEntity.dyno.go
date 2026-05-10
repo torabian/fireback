@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var backupTableMetaSeedersFs = &seeders.ViewsFs
@@ -340,13 +339,11 @@ func BackupTableMetaRecursiveAddUniqueId(dto *BackupTableMetaEntity, query fireb
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func BackupTableMetaMultiInsertFn(dtos []*BackupTableMetaEntity, query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.IError) {
@@ -717,7 +714,7 @@ var BackupTableMetaCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `tableNameInDb (string)`,
 	},
 }
-var BackupTableMetaCreateCmd cli.Command = BACKUP_TABLE_META_ACTION_POST_ONE.ToCli()
+var BackupTableMetaCreateCmd *cli.Command = BACKUP_TABLE_META_ACTION_POST_ONE.ToCli()
 var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -739,6 +736,7 @@ var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var BackupTableMetaUpdateCmd cli.Command = cli.Command{
@@ -842,8 +840,8 @@ func BackupTableMetasActionQueryString(keyword string, page int) ([]string, *fir
 	return stringItems, meta, err
 }
 
-var BackupTableMetaDevCommands = []cli.Command{
-	BackupTableMetaWipeCmd,
+var BackupTableMetaDevCommands = []*cli.Command{
+	&BackupTableMetaWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -887,7 +885,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -900,7 +898,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -913,7 +911,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 		},
 	},
 }
-var BackupTableMetaImportExportCommands = []cli.Command{
+var BackupTableMetaImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -941,7 +939,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -960,7 +958,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -972,7 +970,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -993,7 +991,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1023,25 +1021,25 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 		},
 	},
 }
-var BackupTableMetaCliCommands []cli.Command = []cli.Command{
+var BackupTableMetaCliCommands []*cli.Command = []*cli.Command{
 	BACKUP_TABLE_META_ACTION_QUERY.ToCli(),
 	BACKUP_TABLE_META_ACTION_TABLE.ToCli(),
 	BACKUP_TABLE_META_ACTION_PATCH.ToCli(),
 	BackupTableMetaCreateCmd,
-	BackupTableMetaAskCmd,
-	BackupTableMetaCreateInteractiveCmd,
+	&BackupTableMetaAskCmd,
+	&BackupTableMetaCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
 		BackupTableMetaActions.RemoveEnqueue,
 	),
 }
 
-func BackupTableMetaCliFn() cli.Command {
+func BackupTableMetaCliFn() *cli.Command {
 	commands := append(BackupTableMetaImportExportCommands, BackupTableMetaCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, BackupTableMetaDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "backup",
 		Description: `Keeps information about which tables to be used during backup (mostly internal)`,
 		Usage:       `Keeps information about which tables to be used during backup (mostly internal)`,
@@ -1051,7 +1049,7 @@ func BackupTableMetaCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var paymentConfigSeedersFs = &seeders.ViewsFs
@@ -359,13 +358,11 @@ func PaymentConfigRecursiveAddUniqueId(dto *PaymentConfigEntity, query fireback.
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PaymentConfigMultiInsertFn(dtos []*PaymentConfigEntity, query fireback.QueryDSL) ([]*PaymentConfigEntity, *fireback.IError) {
@@ -766,7 +763,7 @@ var PaymentConfigCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `The endpoint which the payment module will handle response coming back from stripe. (string)`,
 	},
 }
-var PaymentConfigCreateCmd cli.Command = PAYMENT_CONFIG_ACTION_POST_ONE.ToCli()
+var PaymentConfigCreateCmd *cli.Command = PAYMENT_CONFIG_ACTION_POST_ONE.ToCli()
 var PaymentConfigCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -790,6 +787,7 @@ var PaymentConfigCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PaymentConfigUpdateCmd cli.Command = cli.Command{
@@ -901,8 +899,8 @@ func PaymentConfigsActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var PaymentConfigDevCommands = []cli.Command{
-	PaymentConfigWipeCmd,
+var PaymentConfigDevCommands = []*cli.Command{
+	&PaymentConfigWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -948,7 +946,7 @@ var PaymentConfigDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -961,7 +959,7 @@ var PaymentConfigDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -974,7 +972,7 @@ var PaymentConfigDevCommands = []cli.Command{
 		},
 	},
 }
-var PaymentConfigImportExportCommands = []cli.Command{
+var PaymentConfigImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1002,7 +1000,7 @@ var PaymentConfigImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1021,7 +1019,7 @@ var PaymentConfigImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1033,7 +1031,7 @@ var PaymentConfigImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1054,7 +1052,7 @@ var PaymentConfigImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1086,25 +1084,25 @@ var PaymentConfigImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PaymentConfigCliCommands []cli.Command = []cli.Command{
+var PaymentConfigCliCommands []*cli.Command = []*cli.Command{
 	PAYMENT_CONFIG_ACTION_QUERY.ToCli(),
 	PAYMENT_CONFIG_ACTION_TABLE.ToCli(),
 	PAYMENT_CONFIG_ACTION_PATCH.ToCli(),
 	PaymentConfigCreateCmd,
-	PaymentConfigAskCmd,
-	PaymentConfigCreateInteractiveCmd,
+	&PaymentConfigAskCmd,
+	&PaymentConfigCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PaymentConfigEntity{}).Elem(),
 		PaymentConfigActions.RemoveEnqueue,
 	),
 }
 
-func PaymentConfigCliFn() cli.Command {
+func PaymentConfigCliFn() *cli.Command {
 	commands := append(PaymentConfigImportExportCommands, PaymentConfigCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PaymentConfigDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "paymentconfig",
 		Description: `Contains the api keys, configuration, urls, callbacks for different payment gateways.`,
 		Usage:       `Contains the api keys, configuration, urls, callbacks for different payment gateways.`,
@@ -1114,7 +1112,7 @@ func PaymentConfigCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

@@ -22,7 +22,7 @@ var NotificationConfigTestCmd cli.Command = cli.Command{
 }
 
 func init() {
-	NotificationConfigCliCommands = append(NotificationConfigCliCommands, NotificationConfigTestCmd)
+	NotificationConfigCliCommands = append(NotificationConfigCliCommands, &NotificationConfigTestCmd)
 }
 func NotificationConfigActionGetOneByWorkspace(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})

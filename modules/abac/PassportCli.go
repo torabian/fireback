@@ -66,16 +66,16 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 var PassportCli cli.Command = cli.Command{
 	Name:  "passport",
 	Usage: "Manage the methods of authentication in the app, as well as users passports (root only)",
-	Subcommands: append([]cli.Command{
-		AppendEmailPassportToUser,
-		PassportUpdateCmd,
+	Commands: append([]*cli.Command{
+		&AppendEmailPassportToUser,
+		&PassportUpdateCmd,
 		OsLoginAuthenticateActionDef.ToCli(),
 		PassportMethodCliFn(),
 		CheckPassportMethodsActionDef.ToCli(),
 		UserPassportsActionDef.ToCli(),
 		OauthAuthenticateActionDef.ToCli(),
-		PassportWipeCmd,
-		PassportUpdateCmd,
+		&PassportWipeCmd,
+		&PassportUpdateCmd,
 		fireback.GetCommonRemoveQuery(
 			reflect.ValueOf(&PassportEntity{}).Elem(),
 			PassportActions.RemoveEnqueue,

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var invoiceSeedersFs = &seeders.ViewsFs
@@ -380,13 +379,11 @@ func InvoiceRecursiveAddUniqueId(dto *InvoiceEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func InvoiceMultiInsertFn(dtos []*InvoiceEntity, query fireback.QueryDSL) ([]*InvoiceEntity, *fireback.IError) {
@@ -814,7 +811,7 @@ var InvoiceCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `One of: 'payed', 'pending' (enum)`,
 	},
 }
-var InvoiceCreateCmd cli.Command = INVOICE_ACTION_POST_ONE.ToCli()
+var InvoiceCreateCmd *cli.Command = INVOICE_ACTION_POST_ONE.ToCli()
 var InvoiceCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -837,6 +834,7 @@ var InvoiceCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var InvoiceUpdateCmd cli.Command = cli.Command{
@@ -953,8 +951,8 @@ func InvoicesActionQueryString(keyword string, page int) ([]string, *fireback.Qu
 	return stringItems, meta, err
 }
 
-var InvoiceDevCommands = []cli.Command{
-	InvoiceWipeCmd,
+var InvoiceDevCommands = []*cli.Command{
+	&InvoiceWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -999,7 +997,7 @@ var InvoiceDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1012,7 +1010,7 @@ var InvoiceDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1025,7 +1023,7 @@ var InvoiceDevCommands = []cli.Command{
 		},
 	},
 }
-var InvoiceImportExportCommands = []cli.Command{
+var InvoiceImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1053,7 +1051,7 @@ var InvoiceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1072,7 +1070,7 @@ var InvoiceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1084,7 +1082,7 @@ var InvoiceImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1105,7 +1103,7 @@ var InvoiceImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1136,25 +1134,25 @@ var InvoiceImportExportCommands = []cli.Command{
 		},
 	},
 }
-var InvoiceCliCommands []cli.Command = []cli.Command{
+var InvoiceCliCommands []*cli.Command = []*cli.Command{
 	INVOICE_ACTION_QUERY.ToCli(),
 	INVOICE_ACTION_TABLE.ToCli(),
 	INVOICE_ACTION_PATCH.ToCli(),
 	InvoiceCreateCmd,
-	InvoiceAskCmd,
-	InvoiceCreateInteractiveCmd,
+	&InvoiceAskCmd,
+	&InvoiceCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&InvoiceEntity{}).Elem(),
 		InvoiceActions.RemoveEnqueue,
 	),
 }
 
-func InvoiceCliFn() cli.Command {
+func InvoiceCliFn() *cli.Command {
 	commands := append(InvoiceImportExportCommands, InvoiceCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, InvoiceDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "invoice",
 		Description: `Invoice is a billable value, which a party recieves, and needs to pay it by different means. Invoice keeps information such as reason, total amount, tax amount and other details. An invoice can be payed via different payment methods.`,
 		Usage:       `Invoice is a billable value, which a party recieves, and needs to pay it by different means. Invoice keeps information such as reason, total amount, tax amount and other details. An invoice can be payed via different payment methods.`,
@@ -1164,7 +1162,7 @@ func InvoiceCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

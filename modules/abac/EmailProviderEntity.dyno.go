@@ -11,11 +11,6 @@ import (
 	"encoding"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -27,6 +22,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var emailProviderSeedersFs = &seeders.ViewsFs
@@ -360,13 +359,11 @@ func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query fireback.
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func EmailProviderMultiInsertFn(dtos []*EmailProviderEntity, query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.IError) {
@@ -766,7 +763,7 @@ var EmailProviderCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `JSON field which contains api keys, or other kind of configuration based on the type of the email provider. (complex)`,
 	},
 }
-var EmailProviderCreateCmd cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
+var EmailProviderCreateCmd *cli.Command = EMAIL_PROVIDER_ACTION_POST_ONE.ToCli()
 var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -789,6 +786,7 @@ var EmailProviderCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var EmailProviderUpdateCmd cli.Command = cli.Command{
@@ -901,8 +899,8 @@ func EmailProvidersActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var EmailProviderDevCommands = []cli.Command{
-	EmailProviderWipeCmd,
+var EmailProviderDevCommands = []*cli.Command{
+	&EmailProviderWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -947,7 +945,7 @@ var EmailProviderDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -960,7 +958,7 @@ var EmailProviderDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -973,7 +971,7 @@ var EmailProviderDevCommands = []cli.Command{
 		},
 	},
 }
-var EmailProviderImportExportCommands = []cli.Command{
+var EmailProviderImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1001,7 +999,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1020,7 +1018,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1032,7 +1030,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1053,7 +1051,7 @@ var EmailProviderImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1084,25 +1082,25 @@ var EmailProviderImportExportCommands = []cli.Command{
 		},
 	},
 }
-var EmailProviderCliCommands []cli.Command = []cli.Command{
+var EmailProviderCliCommands []*cli.Command = []*cli.Command{
 	EMAIL_PROVIDER_ACTION_QUERY.ToCli(),
 	EMAIL_PROVIDER_ACTION_TABLE.ToCli(),
 	EMAIL_PROVIDER_ACTION_PATCH.ToCli(),
 	EmailProviderCreateCmd,
-	EmailProviderAskCmd,
-	EmailProviderCreateInteractiveCmd,
+	&EmailProviderAskCmd,
+	&EmailProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&EmailProviderEntity{}).Elem(),
 		EmailProviderActions.RemoveEnqueue,
 	),
 }
 
-func EmailProviderCliFn() cli.Command {
+func EmailProviderCliFn() *cli.Command {
 	commands := append(EmailProviderImportExportCommands, EmailProviderCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, EmailProviderDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "emailprovider",
 		Description: `Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down.`,
 		Usage:       `Email servers and thirdparty services configuration to send emails across the app. Each configuration can be used for a different purpose, hence information is stored in database to give operation chance change the mail services without taking the server down.`,
@@ -1112,7 +1110,7 @@ func EmailProviderCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

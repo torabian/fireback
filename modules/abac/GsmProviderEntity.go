@@ -50,7 +50,7 @@ var GsmProviderTestCmd cli.Command = cli.Command{
 }
 
 func init() {
-	GsmProviderCliCommands = append(GsmProviderCliCommands, GsmProviderTestCmd)
+	GsmProviderCliCommands = append(GsmProviderCliCommands, &GsmProviderTestCmd)
 }
 
 func GsmProviderActionCreate(

@@ -179,5 +179,5 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 }
 
 func init() {
-	RegionalContentCliCommands = append(RegionalContentCliCommands, RegionalContentGetCmd)
+	RegionalContentCliCommands = append(RegionalContentCliCommands, &RegionalContentGetCmd)
 }

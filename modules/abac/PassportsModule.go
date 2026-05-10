@@ -57,8 +57,8 @@ func PassportsModuleSetup() *fireback.ModuleProvider {
 		)
 	})
 
-	module.ProvideCliHandlers([]cli.Command{
-		PassportCli,
+	module.ProvideCliHandlers([]*cli.Command{
+		&PassportCli,
 	})
 
 	return module

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var workspaceTypeSeedersFs = &seeders.ViewsFs
@@ -395,13 +394,11 @@ func WorkspaceTypeRecursiveAddUniqueId(dto *WorkspaceTypeEntity, query fireback.
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func WorkspaceTypeMultiInsertFn(dtos []*WorkspaceTypeEntity, query fireback.QueryDSL) ([]*WorkspaceTypeEntity, *fireback.IError) {
@@ -819,7 +816,7 @@ var WorkspaceTypeCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected (one)`,
 	},
 }
-var WorkspaceTypeCreateCmd cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
+var WorkspaceTypeCreateCmd *cli.Command = WORKSPACE_TYPE_ACTION_POST_ONE.ToCli()
 var WorkspaceTypeCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -842,6 +839,7 @@ var WorkspaceTypeCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var WorkspaceTypeUpdateCmd cli.Command = cli.Command{
@@ -955,8 +953,8 @@ func WorkspaceTypesActionQueryString(keyword string, page int) ([]string, *fireb
 	return stringItems, meta, err
 }
 
-var WorkspaceTypeDevCommands = []cli.Command{
-	WorkspaceTypeWipeCmd,
+var WorkspaceTypeDevCommands = []*cli.Command{
+	&WorkspaceTypeWipeCmd,
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
@@ -975,7 +973,7 @@ var WorkspaceTypeDevCommands = []cli.Command{
 		},
 	},
 }
-var WorkspaceTypeImportExportCommands = []cli.Command{
+var WorkspaceTypeImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1003,7 +1001,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1022,7 +1020,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1034,7 +1032,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1055,7 +1053,7 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1086,25 +1084,25 @@ var WorkspaceTypeImportExportCommands = []cli.Command{
 		},
 	},
 }
-var WorkspaceTypeCliCommands []cli.Command = []cli.Command{
+var WorkspaceTypeCliCommands []*cli.Command = []*cli.Command{
 	WORKSPACE_TYPE_ACTION_QUERY.ToCli(),
 	WORKSPACE_TYPE_ACTION_TABLE.ToCli(),
 	WORKSPACE_TYPE_ACTION_PATCH.ToCli(),
 	WorkspaceTypeCreateCmd,
-	WorkspaceTypeAskCmd,
-	WorkspaceTypeCreateInteractiveCmd,
+	&WorkspaceTypeAskCmd,
+	&WorkspaceTypeCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&WorkspaceTypeEntity{}).Elem(),
 		WorkspaceTypeActions.RemoveEnqueue,
 	),
 }
 
-func WorkspaceTypeCliFn() cli.Command {
+func WorkspaceTypeCliFn() *cli.Command {
 	commands := append(WorkspaceTypeImportExportCommands, WorkspaceTypeCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, WorkspaceTypeDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "type",
 		Description: `Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users.`,
 		Usage:       `Defines a type for workspace, and the role which it can have as a whole. In systems with multiple types of services, e.g. student, teachers, schools this is useful to set those default types and limit the access of the users.`,
@@ -1114,7 +1112,7 @@ func WorkspaceTypeCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

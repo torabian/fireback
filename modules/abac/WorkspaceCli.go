@@ -193,7 +193,7 @@ var MiscCli cli.Command = cli.Command{
 		RegionalContentCliFn(),
 		AppMenuCliFn(),
 		getCssMinCombineCli(),
-		cli.Command{
+		&cli.Command{
 			Name:        "totp",
 			Description: "Generates a time based code (6 digit) from a totp secret, simulates the mobile app",
 			Usage:       "Generates a time based code (6 digit) from a totp secret, simulates the mobile app",
@@ -230,13 +230,13 @@ var MiscCli cli.Command = cli.Command{
 func init() {
 	WorkspaceCliCommands = append(
 		WorkspaceCliCommands,
-		GetUserAccessScope,
-		CliConfigCmd,
-		ViewAuthorize,
+		&GetUserAccessScope,
+		&CliConfigCmd,
+		&ViewAuthorize,
 		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
 		QueryUserRoleWorkspacesActionDef.ToCli(),
-		CheckUserMeetsAPermissionCmd,
-		WorkspaceAsCmd,
+		&CheckUserMeetsAPermissionCmd,
+		&WorkspaceAsCmd,
 		PublicAuthenticationCliFn(),
 		TimezoneGroupCliFn(),
 		WorkspaceTypeCliFn(),

@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var gsmProviderSeedersFs = &seeders.ViewsFs
@@ -372,13 +371,11 @@ func GsmProviderRecursiveAddUniqueId(dto *GsmProviderEntity, query fireback.Quer
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func GsmProviderMultiInsertFn(dtos []*GsmProviderEntity, query fireback.QueryDSL) ([]*GsmProviderEntity, *fireback.IError) {
@@ -821,7 +818,7 @@ var GsmProviderCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `invokeBody (string)`,
 	},
 }
-var GsmProviderCreateCmd cli.Command = GSM_PROVIDER_ACTION_POST_ONE.ToCli()
+var GsmProviderCreateCmd *cli.Command = GSM_PROVIDER_ACTION_POST_ONE.ToCli()
 var GsmProviderCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -843,6 +840,7 @@ var GsmProviderCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var GsmProviderUpdateCmd cli.Command = cli.Command{
@@ -958,8 +956,8 @@ func GsmProvidersActionQueryString(keyword string, page int) ([]string, *firebac
 	return stringItems, meta, err
 }
 
-var GsmProviderDevCommands = []cli.Command{
-	GsmProviderWipeCmd,
+var GsmProviderDevCommands = []*cli.Command{
+	&GsmProviderWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1003,7 +1001,7 @@ var GsmProviderDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1016,7 +1014,7 @@ var GsmProviderDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1029,7 +1027,7 @@ var GsmProviderDevCommands = []cli.Command{
 		},
 	},
 }
-var GsmProviderImportExportCommands = []cli.Command{
+var GsmProviderImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1057,7 +1055,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1076,7 +1074,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1088,7 +1086,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1109,7 +1107,7 @@ var GsmProviderImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1139,25 +1137,25 @@ var GsmProviderImportExportCommands = []cli.Command{
 		},
 	},
 }
-var GsmProviderCliCommands []cli.Command = []cli.Command{
+var GsmProviderCliCommands []*cli.Command = []*cli.Command{
 	GSM_PROVIDER_ACTION_QUERY.ToCli(),
 	GSM_PROVIDER_ACTION_TABLE.ToCli(),
 	GSM_PROVIDER_ACTION_PATCH.ToCli(),
 	GsmProviderCreateCmd,
-	GsmProviderAskCmd,
-	GsmProviderCreateInteractiveCmd,
+	&GsmProviderAskCmd,
+	&GsmProviderCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&GsmProviderEntity{}).Elem(),
 		GsmProviderActions.RemoveEnqueue,
 	),
 }
 
-func GsmProviderCliFn() cli.Command {
+func GsmProviderCliFn() *cli.Command {
 	commands := append(GsmProviderImportExportCommands, GsmProviderCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, GsmProviderDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "gsmprovider",
 		Description: ``,
 		Usage:       ``,
@@ -1167,7 +1165,7 @@ func GsmProviderCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

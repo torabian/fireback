@@ -832,7 +832,7 @@ func AbacCustomActions() []fireback.Module3Action {
 	return routes
 }
 
-var AbacCustomActionsCli = []cli.Command{}
+var AbacCustomActionsCli = []*cli.Command{}
 
 // Only to include some headers
 func AbacJsonInclude() {
@@ -906,6 +906,6 @@ func GetAbacActionsBundle() *fireback.ModuleActionsBundle {
 		CliAction: AbacCliActionsBundle,
 	}
 }
-func GetAbacActionsCli() []cli.Command {
+func GetAbacActionsCli() []*cli.Command {
 	return AbacCustomActionsCli
 }

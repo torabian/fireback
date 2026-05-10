@@ -24,7 +24,7 @@ func DriveModuleSetup() *fireback.ModuleProvider {
 		GetFileModule3Actions(),
 	}
 
-	module.ProvideCliHandlers([]cli.Command{
+	module.ProvideCliHandlers([]*cli.Command{
 		FileCliFn(),
 	})
 

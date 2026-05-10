@@ -391,9 +391,9 @@ func IntegrateAuthFlow(c *cli.Command) error {
 }
 
 var AuthFlow cli.Command = cli.Command{
-	Name:      "authorize",
-	ShortName: "auth",
-	Usage:     "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
+	Name:    "authorize",
+	Aliases: []string{"auth"},
+	Usage:   "All in one authorization tool into abac module, creates, authenticates end-to-end and can set cli workspace token.",
 	Action: func(ctx context.Context, c *cli.Command) error {
 
 		// In case that there are flags, means the interactive operation is not needed

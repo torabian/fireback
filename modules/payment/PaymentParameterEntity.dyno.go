@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var paymentParameterSeedersFs = &seeders.ViewsFs
@@ -431,13 +430,11 @@ func PaymentParameterRecursiveAddUniqueId(dto *PaymentParameterEntity, query fir
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func PaymentParameterMultiInsertFn(dtos []*PaymentParameterEntity, query fireback.QueryDSL) ([]*PaymentParameterEntity, *fireback.IError) {
@@ -997,7 +994,7 @@ var PaymentParameterCommonCliFlagsOptional = []cli.Flag{
 		Value:    `https://sandbox.przelewy24.pl/api/v1/transaction/verify`,
 	},
 }
-var PaymentParameterCreateCmd cli.Command = PAYMENT_PARAMETER_ACTION_POST_ONE.ToCli()
+var PaymentParameterCreateCmd *cli.Command = PAYMENT_PARAMETER_ACTION_POST_ONE.ToCli()
 var PaymentParameterCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -1020,6 +1017,7 @@ var PaymentParameterCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var PaymentParameterUpdateCmd cli.Command = cli.Command{
@@ -1154,8 +1152,8 @@ func PaymentParametersActionQueryString(keyword string, page int) ([]string, *fi
 	return stringItems, meta, err
 }
 
-var PaymentParameterDevCommands = []cli.Command{
-	PaymentParameterWipeCmd,
+var PaymentParameterDevCommands = []*cli.Command{
+	&PaymentParameterWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1200,7 +1198,7 @@ var PaymentParameterDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1213,7 +1211,7 @@ var PaymentParameterDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1226,7 +1224,7 @@ var PaymentParameterDevCommands = []cli.Command{
 		},
 	},
 }
-var PaymentParameterImportExportCommands = []cli.Command{
+var PaymentParameterImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1254,7 +1252,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1273,7 +1271,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1285,7 +1283,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1306,7 +1304,7 @@ var PaymentParameterImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1337,25 +1335,25 @@ var PaymentParameterImportExportCommands = []cli.Command{
 		},
 	},
 }
-var PaymentParameterCliCommands []cli.Command = []cli.Command{
+var PaymentParameterCliCommands []*cli.Command = []*cli.Command{
 	PAYMENT_PARAMETER_ACTION_QUERY.ToCli(),
 	PAYMENT_PARAMETER_ACTION_TABLE.ToCli(),
 	PAYMENT_PARAMETER_ACTION_PATCH.ToCli(),
 	PaymentParameterCreateCmd,
-	PaymentParameterAskCmd,
-	PaymentParameterCreateInteractiveCmd,
+	&PaymentParameterAskCmd,
+	&PaymentParameterCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&PaymentParameterEntity{}).Elem(),
 		PaymentParameterActions.RemoveEnqueue,
 	),
 }
 
-func PaymentParameterCliFn() cli.Command {
+func PaymentParameterCliFn() *cli.Command {
 	commands := append(PaymentParameterImportExportCommands, PaymentParameterCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, PaymentParameterDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "param",
 		Description: `Keeps the information about payment Przelewy24 payment provider`,
 		Usage:       `Keeps the information about payment Przelewy24 payment provider`,
@@ -1365,7 +1363,7 @@ func PaymentParameterCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

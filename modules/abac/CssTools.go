@@ -75,8 +75,8 @@ func combineAndMinifyCssRecursively(sourceFilePath string, outputFilePath string
 	}
 }
 
-func getCssMinCombineCli() cli.Command {
-	return cli.Command{
+func getCssMinCombineCli() *cli.Command {
+	return &cli.Command{
 		Name:        "cssx",
 		Description: "Minifies css file, and resolves the @import dependencies recursively",
 		Usage:       `Minifies css file, and resolves the @import dependencies recursively`,

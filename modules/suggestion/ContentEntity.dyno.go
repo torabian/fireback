@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var contentSeedersFs = &seeders.ViewsFs
@@ -359,13 +358,11 @@ func ContentRecursiveAddUniqueId(dto *ContentEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func ContentMultiInsertFn(dtos []*ContentEntity, query fireback.QueryDSL) ([]*ContentEntity, *fireback.IError) {
@@ -772,7 +769,7 @@ var ContentCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `The content title, such as video title, course title, post title. (string)`,
 	},
 }
-var ContentCreateCmd cli.Command = CONTENT_ACTION_POST_ONE.ToCli()
+var ContentCreateCmd *cli.Command = CONTENT_ACTION_POST_ONE.ToCli()
 var ContentCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -794,6 +791,7 @@ var ContentCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var ContentUpdateCmd cli.Command = cli.Command{
@@ -903,8 +901,8 @@ func ContentsActionQueryString(keyword string, page int) ([]string, *fireback.Qu
 	return stringItems, meta, err
 }
 
-var ContentDevCommands = []cli.Command{
-	ContentWipeCmd,
+var ContentDevCommands = []*cli.Command{
+	&ContentWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -948,7 +946,7 @@ var ContentDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -961,7 +959,7 @@ var ContentDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -974,7 +972,7 @@ var ContentDevCommands = []cli.Command{
 		},
 	},
 }
-var ContentImportExportCommands = []cli.Command{
+var ContentImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1002,7 +1000,7 @@ var ContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1021,7 +1019,7 @@ var ContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1033,7 +1031,7 @@ var ContentImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1054,7 +1052,7 @@ var ContentImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1084,25 +1082,25 @@ var ContentImportExportCommands = []cli.Command{
 		},
 	},
 }
-var ContentCliCommands []cli.Command = []cli.Command{
+var ContentCliCommands []*cli.Command = []*cli.Command{
 	CONTENT_ACTION_QUERY.ToCli(),
 	CONTENT_ACTION_TABLE.ToCli(),
 	CONTENT_ACTION_PATCH.ToCli(),
 	ContentCreateCmd,
-	ContentAskCmd,
-	ContentCreateInteractiveCmd,
+	&ContentAskCmd,
+	&ContentCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&ContentEntity{}).Elem(),
 		ContentActions.RemoveEnqueue,
 	),
 }
 
-func ContentCliFn() cli.Command {
+func ContentCliFn() *cli.Command {
 	commands := append(ContentImportExportCommands, ContentCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, ContentDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "content",
 		Description: `Source of the content which will be indexed by the FTS5 table. Other modules can use this entity to set the content.`,
 		Usage:       `Source of the content which will be indexed by the FTS5 table. Other modules can use this entity to set the content.`,
@@ -1112,7 +1110,7 @@ func ContentCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

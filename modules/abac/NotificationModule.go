@@ -31,12 +31,12 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 		)
 	})
 
-	module.ProvideCliHandlers([]cli.Command{
+	module.ProvideCliHandlers([]*cli.Command{
 		{
 			Name:        "notification",
 			Description: "Manage the notification system, emails, text messages, templates and so on",
 			Usage:       "Manage email accounts, templates, email providers and so on",
-			ShortName:   "nt",
+			Aliases:     []string{"nt"},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:  "language",
@@ -44,8 +44,8 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 				},
 			},
 			Commands: []*cli.Command{
-				NotificationModuleAuditCmd,
-				EmailProviderTestCmd,
+				&NotificationModuleAuditCmd,
+				&EmailProviderTestCmd,
 				EmailProviderCliFn(),
 				EmailSenderCliFn(),
 				GsmProviderCliFn(),

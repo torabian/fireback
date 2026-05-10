@@ -163,15 +163,15 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// },
 	}
 
-	module.ProvideCliHandlers([]cli.Command{
+	module.ProvideCliHandlers([]*cli.Command{
 		RoleCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),
-		MiscCli,
+		&MiscCli,
 		TimezoneGroupCliFn(),
 	})
 
-	module.ProvideCliHandlers([]cli.Command{AuthFlow, AbacActions})
+	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})
 
 	return module
 }
@@ -179,8 +179,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 var AbacActions cli.Command = cli.Command{
 	Name:  "abac",
 	Usage: "All actions which are available for abac module",
-	Subcommands: append(
-		[]cli.Command{
+	Commands: append(
+		[]*cli.Command{
 			{
 				Name:  "internal",
 				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",

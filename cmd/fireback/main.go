@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/abac"
 
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
@@ -25,14 +26,14 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 var xapp = &fireback.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	// SearchProviders: []fireback.SearchProviderFn{
-	// 	abac.QueryMenusReact,
-	// 	abac.QueryRolesReact,
-	// },
-	// SeedersSync: func() {
-	// 	abac.PassportMethodSyncSeeders()
-	// 	abac.AppMenuSyncSeeders()
-	// },
+	SearchProviders: []fireback.SearchProviderFn{
+		abac.QueryMenusReact,
+		abac.QueryRolesReact,
+	},
+	SeedersSync: func() {
+		abac.PassportMethodSyncSeeders()
+		abac.AppMenuSyncSeeders()
+	},
 
 	PublicFolders: []fireback.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
@@ -51,14 +52,20 @@ var xapp = &fireback.FirebackApp{
 	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
 
 	},
-	// Modules: append([]*fireback.ModuleProvider{
-	// 	// Add the very core module, such as capabilities
-	// 	fireback.FirebackModuleSetup(nil),
-	// }, abac.AbacCompleteModules()...),
-	Modules: []*fireback.ModuleProvider{
+	Modules: append([]*fireback.ModuleProvider{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
-	},
+
+		// Add fireback payment module also
+		// payment.PaymentModuleSetup(nil),
+
+		// suggestion.SuggestionModuleSetup(nil),
+		// {
+		// 	CliHandlers: []*cli.Command{
+		// 		fireback.NewProjectCli(),
+		// 	},
+		// },
+	}, abac.AbacCompleteModules()...),
 }
 
 func main() {

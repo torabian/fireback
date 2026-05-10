@@ -11,11 +11,6 @@ import (
 	"encoding"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -27,6 +22,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var userSeedersFs = &seeders.ViewsFs
@@ -456,13 +455,11 @@ func UserRecursiveAddUniqueId(dto *UserEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func UserMultiInsertFn(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError) {
@@ -1034,7 +1031,7 @@ var UserCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `ISO 3166-1 alpha-2 (e.g., \"US\", \"DE\") (string?)`,
 	},
 }
-var UserCreateCmd cli.Command = USER_ACTION_POST_ONE.ToCli()
+var UserCreateCmd *cli.Command = USER_ACTION_POST_ONE.ToCli()
 var UserCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -1057,6 +1054,7 @@ var UserCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var UserUpdateCmd cli.Command = cli.Command{
@@ -1181,8 +1179,8 @@ func UsersActionQueryString(keyword string, page int) ([]string, *fireback.Query
 	return stringItems, meta, err
 }
 
-var UserDevCommands = []cli.Command{
-	UserWipeCmd,
+var UserDevCommands = []*cli.Command{
+	&UserWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -1227,7 +1225,7 @@ var UserDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1240,7 +1238,7 @@ var UserDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1253,7 +1251,7 @@ var UserDevCommands = []cli.Command{
 		},
 	},
 }
-var UserImportExportCommands = []cli.Command{
+var UserImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -1281,7 +1279,7 @@ var UserImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1300,7 +1298,7 @@ var UserImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1312,7 +1310,7 @@ var UserImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1333,7 +1331,7 @@ var UserImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1364,25 +1362,25 @@ var UserImportExportCommands = []cli.Command{
 		},
 	},
 }
-var UserCliCommands []cli.Command = []cli.Command{
+var UserCliCommands []*cli.Command = []*cli.Command{
 	USER_ACTION_QUERY.ToCli(),
 	USER_ACTION_TABLE.ToCli(),
 	USER_ACTION_PATCH.ToCli(),
 	UserCreateCmd,
-	UserAskCmd,
-	UserCreateInteractiveCmd,
+	&UserAskCmd,
+	&UserCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&UserEntity{}).Elem(),
 		UserActions.RemoveEnqueue,
 	),
 }
 
-func UserCliFn() cli.Command {
+func UserCliFn() *cli.Command {
 	commands := append(UserImportExportCommands, UserCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, UserDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "user",
 		Description: `Manage the users who are in the current app (root only)`,
 		Usage:       `Manage the users who are in the current app (root only)`,
@@ -1392,7 +1390,7 @@ func UserCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

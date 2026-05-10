@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var tableViewSizingSeedersFs = &seeders.ViewsFs
@@ -348,13 +347,11 @@ func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query fireb
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError) {
@@ -743,7 +740,7 @@ var TableViewSizingCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `sizes (string)`,
 	},
 }
-var TableViewSizingCreateCmd cli.Command = TABLE_VIEW_SIZING_ACTION_POST_ONE.ToCli()
+var TableViewSizingCreateCmd *cli.Command = TABLE_VIEW_SIZING_ACTION_POST_ONE.ToCli()
 var TableViewSizingCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -765,6 +762,7 @@ var TableViewSizingCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+		return nil
 	},
 }
 var TableViewSizingUpdateCmd cli.Command = cli.Command{
@@ -871,8 +869,8 @@ func TableViewSizingsActionQueryString(keyword string, page int) ([]string, *fir
 	return stringItems, meta, err
 }
 
-var TableViewSizingDevCommands = []cli.Command{
-	TableViewSizingWipeCmd,
+var TableViewSizingDevCommands = []*cli.Command{
+	&TableViewSizingWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -916,7 +914,7 @@ var TableViewSizingDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -929,7 +927,7 @@ var TableViewSizingDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -942,7 +940,7 @@ var TableViewSizingDevCommands = []cli.Command{
 		},
 	},
 }
-var TableViewSizingImportExportCommands = []cli.Command{
+var TableViewSizingImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -970,7 +968,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -989,7 +987,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1001,7 +999,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1022,7 +1020,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1052,27 +1050,27 @@ var TableViewSizingImportExportCommands = []cli.Command{
 		},
 	},
 }
-var TableViewSizingCliCommands []cli.Command = []cli.Command{
+var TableViewSizingCliCommands []*cli.Command = []*cli.Command{
 	TABLE_VIEW_SIZING_ACTION_QUERY.ToCli(),
 	TABLE_VIEW_SIZING_ACTION_TABLE.ToCli(),
 	TABLE_VIEW_SIZING_ACTION_PATCH.ToCli(),
 	TableViewSizingCreateCmd,
-	TableViewSizingAskCmd,
-	TableViewSizingCreateInteractiveCmd,
+	&TableViewSizingAskCmd,
+	&TableViewSizingCreateInteractiveCmd,
 	fireback.GetCommonRemoveQuery(
 		reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
 		TableViewSizingActions.RemoveEnqueue,
 	),
 }
 
-func TableViewSizingCliFn() cli.Command {
+func TableViewSizingCliFn() *cli.Command {
 	commands := append(TableViewSizingImportExportCommands, TableViewSizingCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, TableViewSizingDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "tableviewsizing",
-		ShortName:   "tvs",
+		Aliases:     []string{"tvs"},
 		Description: `Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns`,
 		Usage:       `Used to store meta data about user tables (in front-end, or apps for example) about the size of the columns`,
 		Flags: []cli.Flag{
@@ -1081,7 +1079,7 @@ func TableViewSizingCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 
