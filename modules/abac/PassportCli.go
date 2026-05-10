@@ -1,12 +1,13 @@
 package abac
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,7 +35,7 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 			Required: true,
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		f := fireback.QueryDSL{
 			UserId: c.String("user-id"),

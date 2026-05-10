@@ -1,7 +1,9 @@
 package fireback
 
 import (
-	"github.com/urfave/cli"
+	"context"
+
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -34,14 +36,14 @@ type PermissionInfo struct {
 	GoVariable  string `yaml:"-" json:"-"`
 }
 
-func GetCapabilityRefreshCommand(xapp *FirebackApp) cli.Command {
-	return cli.Command{
+func GetCapabilityRefreshCommand(xapp *FirebackApp) *cli.Command {
+	return &cli.Command{
 
 		Name:        "capsync",
 		Flags:       CommonQueryFlags,
 		Usage:       "Idemponent sync the modules capabilities into the database again.",
 		Description: "Fireback and sub projects need to have permissions as capability strings into database to create role or check. This is happening on env startup, but after project updates needs to be refreshed, or if you have deleted them from database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			SyncPermissionsInDatabase(xapp, GetDbRef())
 			return nil
@@ -56,7 +58,7 @@ func GetStats(xapp *FirebackApp) cli.Command {
 		Flags:       CommonQueryFlags,
 		Usage:       "Some stats regarding the application will go here",
 		Description: "Some stats regarding the application will go here",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			return nil
 		},

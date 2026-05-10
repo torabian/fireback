@@ -2,7 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -43,7 +43,7 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 					Value: "en",
 				},
 			},
-			Subcommands: cli.Commands{
+			Commands: []*cli.Command{
 				NotificationModuleAuditCmd,
 				EmailProviderTestCmd,
 				EmailProviderCliFn(),

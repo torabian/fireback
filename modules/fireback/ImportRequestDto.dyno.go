@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastImportRequestFromCli(c *cli.Context) *ImportRequestDto {
+func CastImportRequestFromCli(c *cli.Command) *ImportRequestDto {
 	template := &ImportRequestDto{}
 	if c.IsSet("file") {
 		template.File = c.String("file")

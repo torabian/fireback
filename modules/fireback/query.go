@@ -19,7 +19,7 @@ import (
 	"github.com/alexeyco/simpletable"
 	"github.com/gin-gonic/gin"
 	"github.com/schollz/progressbar/v3"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,7 +34,7 @@ func CliAuth(security *SecurityModel) (*AuthResultDto, *IError) {
 	return WithAuthorizationPure(context)
 }
 
-func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) QueryDSL {
+func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) QueryDSL {
 	q := CommonCliQueryDSLBuilder(c)
 
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
@@ -60,7 +60,7 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Context, security *SecurityModel) 
 	return q
 }
 
-func CommonCliQueryDSLBuilder(c *cli.Context) QueryDSL {
+func CommonCliQueryDSLBuilder(c *cli.Command) QueryDSL {
 
 	queryString := c.String("query")
 	startIndex := c.Int("offset")
@@ -186,7 +186,7 @@ func DetectSelectFieldsInSQL(qs interface{}, f *QueryDSL) {
 }
 
 func CommonCliQueryCmd3[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
 	security *SecurityModel,
 	qs interface{},
@@ -262,7 +262,7 @@ func GenerateGoJQFilter(v any) string {
 }
 
 func CommonCliQueryCmd3IError[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),
 	security *SecurityModel,
 	qs interface{},
@@ -281,7 +281,7 @@ func CommonCliQueryCmd3IError[T any](
 	}
 }
 
-func cliSuccessPrinter(c *cli.Context, out any) {
+func cliSuccessPrinter(c *cli.Command, out any) {
 	if IsYamlCli(c) {
 		body, err := yaml.Marshal(out)
 		if err != nil {
@@ -410,7 +410,7 @@ func ExtractStringValueFromReflectCell[T any](row *T, t string, n string) string
 }
 
 func CommonCliTableCmd2[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	security *SecurityModel,
 	v reflect.Value,
@@ -469,7 +469,7 @@ func CommonCliTableCmd2[T any](
 }
 
 func CommonCliImportCmdAuthorized[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
 	v reflect.Value,
 	importFilePath string,
@@ -493,7 +493,7 @@ func CommonCliImportCmdAuthorized[T any](
 }
 
 func CommonCliImportCmd[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
 	v reflect.Value,
 	importFilePath string,
@@ -513,7 +513,7 @@ func CommonCliImportCmd[T any](
 }
 
 func CommonCliImportEmbedCmd[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
 	v reflect.Value,
 	fsRef *embed.FS,
@@ -707,7 +707,7 @@ func YamlExporter[T any](catalog *ExportCatalog[T], bar *progressbar.ProgressBar
 }
 
 func CommonCliExportCmd[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
 	v reflect.Value,
 	exportFilePath string,
@@ -761,7 +761,7 @@ func CommonCliExportCmd[T any](
 }
 
 func CommonCliExportCmd2[T any](
-	c *cli.Context,
+	c *cli.Command,
 	fn func(q QueryDSL) (chan []*T, *QueryResultMeta, *IError),
 	v reflect.Value,
 	exportFilePath string,
@@ -881,7 +881,7 @@ func GetStructFields(v interface{}) {
 	}
 }
 
-func PopulateInteractively[T any](entity T, c *cli.Context, flags []CliInteractiveFlag) {
+func PopulateInteractively[T any](entity T, c *cli.Command, flags []CliInteractiveFlag) {
 	for _, item := range flags {
 		if (!item.Required && !item.Recommended) && !c.Bool("all") {
 			continue

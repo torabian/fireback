@@ -6,6 +6,7 @@ package fireback
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -15,22 +16,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 )
 
-func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
+func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 
-	return cli.Commands{
+	return []*cli.Command{
 		CLIInit(xapp),
 		EnvManagement(xapp),
 		CodeGenTools(xapp),
 		GetApplicationTasks(xapp),
-		CLIDoctor,
-		CLIServiceCommand,
-		ConfigCommand,
+		&CLIDoctor,
+		&CLIServiceCommand,
+		&ConfigCommand,
 		GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
@@ -43,18 +44,18 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) cli.Commands {
 		ClickHouseTestConnectionCli,
 
 		// Keep these in the last
-		CLIAboutCommand,
-		Cliversion,
+		&CLIAboutCommand,
+		&Cliversion,
 	}
 }
-func GetCommonMicroserviceCliActions(xapp *FirebackApp) cli.Commands {
+func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 
-	return cli.Commands{
+	return []*cli.Command{
 		CLIInit(xapp),
 		GetApplicationTasks(xapp),
-		CLIDoctor,
-		CLIServiceCommand,
-		ConfigCommand,
+		&CLIDoctor,
+		&CLIServiceCommand,
+		&ConfigCommand,
 		GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
@@ -205,16 +206,16 @@ var CLIDoctor cli.Command = cli.Command{
 	Name:  "doctor",
 	Usage: "Gives some information about the app, operating system, for remote debugging",
 
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		Doctor()
 		return nil
 	},
 }
 
-func ConfigSetBoolean(c *cli.Context, currentValue bool, setValue func(value bool)) error {
-	if len(c.Args()) > 0 {
+func ConfigSetBoolean(c *cli.Command, currentValue bool, setValue func(value bool)) error {
+	if c.Args().Len() > 0 {
 		var value bool = false
-		read := c.Args()[0]
+		read := c.Args().First()
 		if read == "true" || read == "1" || read == "yes" {
 			value = true
 		} else if read == "false" || read == "0" || read == "no" {
@@ -243,9 +244,9 @@ func ConfigSetBoolean(c *cli.Context, currentValue bool, setValue func(value boo
 
 	return config.Save(".env")
 }
-func ConfigSetString(c *cli.Context, currentValue string, setValue func(value string)) error {
-	if len(c.Args()) > 0 {
-		var value string = c.Args()[0]
+func ConfigSetString(c *cli.Command, currentValue string, setValue func(value string)) error {
+	if c.Args().Len() > 0 {
+		var value string = c.Args().First()
 		setValue(value)
 	} else {
 		result := AskForInput("Set the value to?", currentValue)
@@ -255,9 +256,9 @@ func ConfigSetString(c *cli.Context, currentValue string, setValue func(value st
 	return config.Save(".env")
 }
 
-func ConfigSetInt64(c *cli.Context, currentValue int64, setValue func(value int64)) error {
-	if len(c.Args()) > 0 {
-		var value string = c.Args()[0]
+func ConfigSetInt64(c *cli.Command, currentValue int64, setValue func(value int64)) error {
+	if c.Args().Len() > 0 {
+		var value string = c.Args().First()
 
 		intValue, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
@@ -280,9 +281,9 @@ func ConfigSetInt64(c *cli.Context, currentValue int64, setValue func(value int6
 	return config.Save(".env")
 }
 
-func ConfigSetInt(c *cli.Context, currentValue int, setValue func(value int)) error {
-	if len(c.Args()) > 0 {
-		var value string = c.Args()[0]
+func ConfigSetInt(c *cli.Command, currentValue int, setValue func(value int)) error {
+	if c.Args().Len() > 0 {
+		var value string = c.Args().First()
 
 		intValue, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
@@ -305,9 +306,9 @@ func ConfigSetInt(c *cli.Context, currentValue int, setValue func(value int)) er
 	return config.Save(".env")
 }
 
-func ConfigSetFloat64(c *cli.Context, currentValue float64, setValue func(value float64)) error {
-	if len(c.Args()) > 0 {
-		var value string = c.Args()[0]
+func ConfigSetFloat64(c *cli.Command, currentValue float64, setValue func(value float64)) error {
+	if c.Args().Len() > 0 {
+		var value string = c.Args().First()
 
 		floatValue, err := strconv.ParseFloat(value, 64)
 		if err != nil {
@@ -330,8 +331,8 @@ func ConfigSetFloat64(c *cli.Context, currentValue float64, setValue func(value 
 	return config.Save(".env")
 }
 
-func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cli.Command {
-	return cli.Command{
+func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) *cli.Command {
+	return &cli.Command{
 		Flags: []cli.Flag{
 			&cli.Int64Flag{
 				Name:  "port",
@@ -354,11 +355,11 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 				Usage: "Makes a delay on serving xattach files to mimic slow server, might slow down also API calls",
 			},
 		},
-		Subcommands: []cli.Command{
+		Commands: []*cli.Command{
 			{
 				Name:  "routes",
 				Usage: "Returns the count of the http requests in the application",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 					engine := engineFn(HttpServerInstanceConfig{})
 					fmt.Println("Total routes:", len(engine.Routes()))
 					for _, route := range engine.Routes() {
@@ -371,7 +372,7 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) cl
 		Name:    "start",
 		Aliases: []string{"s"},
 		Usage:   "Starts http(s) server only, has few configuration",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			initLogger()
 			if !config.Production {
@@ -412,12 +413,12 @@ var ConfigCommand cli.Command = cli.Command{
 
 	Name:  "config",
 	Usage: "Set of tools to configurate the product",
-	Subcommands: append([]cli.Command{
+	Commands: append([]*cli.Command{
 		{
 
 			Name:  "db",
 			Usage: "Configurates the database of the project",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 
 				databaseData, err := askProjectDatabase(config.Name)
 				if err != nil {
@@ -450,7 +451,7 @@ var ConfigCommand cli.Command = cli.Command{
 
 			Name:  "dbdsn",
 			Usage: "Returns the database dsn which will be used",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				fmt.Println(GetDatabaseDsn(config))
 
 				return nil
@@ -460,7 +461,7 @@ var ConfigCommand cli.Command = cli.Command{
 
 			Name:  "ssl",
 			Usage: "Wizard to configurate the ssl on the server",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 
 				AskSSL(&config)
 
@@ -473,7 +474,7 @@ var ConfigCommand cli.Command = cli.Command{
 
 			Name:  "sqllog",
 			Usage: "Change the sql log level",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 
 				askSqlLogLevel(&config)
 
@@ -813,16 +814,16 @@ func askPostgresDetails(db *Database) (*Database, error) {
 	return db, nil
 }
 
-func GetCliMockTools(xapp *FirebackApp) cli.Command {
-	return cli.Command{
+func GetCliMockTools(xapp *FirebackApp) *cli.Command {
+	return &cli.Command{
 		Name:  "mock",
 		Usage: "Generates or export mocks based on all available content inside the database",
-		Subcommands: cli.Commands{
+		Commands: []*cli.Command{
 			{
 
 				Name:  "import",
 				Usage: "Execute the mock services, and populates the entire backend with data and instructions",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					fmt.Println("This function would create a virtual product, by first running mock data into database, and then run some actions as specified")
 					ExecuteMockImport(xapp)
@@ -832,7 +833,7 @@ func GetCliMockTools(xapp *FirebackApp) cli.Command {
 			{
 				Name:  "write",
 				Usage: "Writes the instructions and module mock data into the sample json files. Clean system before, run mock-import, and then execute this to keep data safe",
-				Action: func(c *cli.Context) error {
+				Action: func(ctx context.Context, c *cli.Command) error {
 
 					fmt.Println("Writing all mocks into artifacts folder...")
 					ExecuteMockWriter(xapp)
@@ -847,13 +848,13 @@ var CLIServiceCommand cli.Command = cli.Command{
 
 	Name:  "service",
 	Usage: "Manages the system service on operating system",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 
 			Name:    "unload",
 			Aliases: []string{"u"},
 			Usage:   "Unloads the system service",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				SystemServiceHandler("unload", c)
 
 				return nil
@@ -864,7 +865,7 @@ var CLIServiceCommand cli.Command = cli.Command{
 			Name:    "reload",
 			Aliases: []string{"r"},
 			Usage:   "Unloads the service, and basically loads it once again.",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				SystemServiceHandler("reload", c)
 
 				return nil
@@ -875,7 +876,7 @@ var CLIServiceCommand cli.Command = cli.Command{
 			Name:    "mac-daemon",
 			Aliases: []string{"mac"},
 			Usage:   "Shows the mac daemon path",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				fmt.Println("Daemon path:", GetMacDaemon())
 				return nil
 			},
@@ -896,7 +897,7 @@ var CLIServiceCommand cli.Command = cli.Command{
 			Name:    "load",
 			Aliases: []string{"l"},
 			Usage:   "Starts the system service",
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				SystemServiceHandler("load", c)
 
 				return nil
@@ -905,13 +906,13 @@ var CLIServiceCommand cli.Command = cli.Command{
 	},
 }
 
-func CLIInit(xapp *FirebackApp) cli.Command {
+func CLIInit(xapp *FirebackApp) *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 		Name:  "init",
 		Usage: "Creates a environment for project, by configurating database connection, http port, etc.",
 		Flags: GetConfigCliFlags(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if c.NumFlags() > 0 {
 				CastConfigFromCli(&config, c)
 
@@ -999,7 +1000,7 @@ func EnvRunMigration(xapp *FirebackApp) error {
 	return nil
 }
 
-func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Context) error {
+func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Command) error {
 
 	if AskForSelect("This command is to generate a .env file, for existing project, or standalone fireback installation. You need to use `fireback new` to create new project. Agree?", []string{"yes", "no"}) == "no" {
 		return nil
@@ -1079,7 +1080,7 @@ var Cliversion cli.Command = cli.Command{
 	Name:  "version",
 	Usage: "Returns the version of the fireback: " + FIREBACK_VERSION,
 
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		fmt.Println(FIREBACK_VERSION)
 		fmt.Println("Written with love by Ali Torabi")
 		return nil
@@ -1091,7 +1092,7 @@ var CLIAboutCommand cli.Command = cli.Command{
 	Name:  "about",
 	Usage: "About Fireback, the author of software, support and contact :)",
 
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 
 		fmt.Println("Written with passion by Ali Torabi, distributed under torabian.github.io, use this to build something which lasts for decades.")
 

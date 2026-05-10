@@ -2,6 +2,7 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 
 	medianasms "github.com/medianasms/go-rest-sdk"
 )
@@ -39,7 +40,7 @@ var GsmProviderTestCmd cli.Command = cli.Command{
 			Required: true,
 		},
 	},
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		message := c.String("message")
 		result, err := GsmSendSMS(c.String("id"), message, []string{c.String("to")})
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})

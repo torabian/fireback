@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 )
 
 /**

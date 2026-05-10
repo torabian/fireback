@@ -6,16 +6,15 @@ package fireback
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli"
-)
-import (
 	"reflect"
+
+	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli/v3"
 )
 
 // using shared actions here
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 var ReactiveSearchSecurityModel = &SecurityModel{
 	ActionRequires:  []PermissionInfo{},
 	ResolveStrategy: "workspace",
@@ -84,7 +83,7 @@ var CapabilitiesTreeActionDef Module3Action = Module3Action{
 			WriteActionResponseToGin(m, resp, err)
 		},
 	},
-	CliAction: func(c *cli.Context, security *SecurityModel) error {
+	CliAction: func(c *cli.Command, security *SecurityModel) error {
 		query := CommonCliQueryDSLBuilderAuthorize(c, CapabilitiesTreeSecurityModel)
 		req := CapabilitiesTreeActionRequest{}
 		resp, err := CapabilitiesTreeImpl(req, query)
@@ -116,7 +115,7 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 	Name:  "fireback",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		ReactiveSearchActionDef.ToCli(),
 		EventBusSubscriptionActionDef.ToCli(),
 		CapabilitiesTreeActionDef.ToCli(),

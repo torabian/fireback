@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/migrations"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -61,9 +61,9 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
-	module.ProvideCliHandlers([]cli.Command{
+	module.ProvideCliHandlers([]*cli.Command{
 		CapabilityCliFn(),
-		PushNotificationCmd,
+		&PushNotificationCmd,
 		CapabilitiesTreeActionDef.ToCli(),
 	})
 

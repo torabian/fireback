@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -9,7 +10,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +33,7 @@ var TokenParseInformation cli.Command = cli.Command{
 		},
 	},
 	Usage: "Extracts a token information, either JWT or internal tokens and prints on screen",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		token := c.String("token")
 		user, err := GetUserFromToken(token)
 		if err != nil {

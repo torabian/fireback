@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 
 	"os"
 

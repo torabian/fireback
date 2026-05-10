@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastAuthResultFromCli(c *cli.Context) *AuthResultDto {
+func CastAuthResultFromCli(c *cli.Command) *AuthResultDto {
 	template := &AuthResultDto{}
 	if c.IsSet("user-access-per-workspace-id") {
 		template.UserAccessPerWorkspaceId = NewStringAutoNull(c.String("user-access-per-workspace-id"))

@@ -3,12 +3,13 @@ package fireback
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 )
 
 /**
@@ -227,7 +228,7 @@ type CapabilitiesTreeActionRequest struct {
 	QueryParams url.Values
 	Headers     http.Header
 	GinCtx      *gin.Context
-	CliCtx      *cli.Context
+	CliCtx      *cli.Command
 }
 type CapabilitiesTreeActionResult struct {
 	resp    *http.Response // embed original response

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/exp/maps"
 	"gorm.io/gorm"
 )
@@ -41,7 +41,7 @@ type EntityBundle struct {
 	Tests                 []Test
 	Actions               []Module3Action
 	AutoMigrationEntities []interface{}
-	CliCommands           []cli.Command
+	CliCommands           []*cli.Command
 	MockProvider          func()
 	MigrationScripts      []MigrationScript
 }
@@ -56,7 +56,7 @@ type ModuleProvider struct {
 	MockWriterHandler   func(languages []string)
 	PermissionsProvider []PermissionInfo
 	Name                string
-	CliHandlers         []cli.Command
+	CliHandlers         []*cli.Command
 	BackupTables        []TableMetaData
 	Tasks               []*TaskAction
 	Definitions         *embed.FS
@@ -76,7 +76,7 @@ type ModuleProvider struct {
 
 	// A set of functions that you can add, when project is being initialised then they will be called.
 	// each module can have those hook inits, for example abac adds some other questions.
-	OnEnvInit func(c *cli.Context) error
+	OnEnvInit func(c *cli.Command) error
 
 	// When a gin web server is being created, the group for this module
 	// will be looking for this function. Could be used to manually add routes or other configuration
@@ -143,6 +143,6 @@ func (x *ModuleProvider) ProvideTranslationList(items ...map[string]map[string]s
 
 // Adds CLI handlers to the module. You can call this as many times as you wish,
 // They all will be added next to each other.
-func (x *ModuleProvider) ProvideCliHandlers(t []cli.Command) {
+func (x *ModuleProvider) ProvideCliHandlers(t []*cli.Command) {
 	x.CliHandlers = append(x.CliHandlers, t...)
 }

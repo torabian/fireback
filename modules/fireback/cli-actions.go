@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"context"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -15,7 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/manifoldco/promptui"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -78,9 +79,9 @@ var CommonQueryFlags = []cli.Flag{
 	},
 }
 
-func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Command {
+func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 
 		Name:    "remove",
 		Aliases: []string{"r", "del", "delete"},
@@ -93,7 +94,7 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) cli.Comman
 				Required: true,
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			f := QueryDSL{
 				UniqueId: c.String("uid"),
@@ -129,7 +130,7 @@ func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *
 		Aliases: []string{"cte"},
 		Flags:   CommonQueryFlags,
 		Usage:   "Same as query, but in recursive manner",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			CommonCliQueryCmd3(
 				c,
 				fn,
@@ -151,7 +152,7 @@ func GetCommonExtendedQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMe
 		Aliases: []string{"extended"},
 		Flags:   CommonQueryFlags,
 		Usage:   "Extended query, provides way more details, and combines the one-to-many hirechical relations",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			CommonCliQueryCmd3(
 				c,
 				fn,
@@ -173,7 +174,7 @@ func GetCommonPivotQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta,
 		Aliases: []string{"pivot"},
 		Flags:   CommonQueryFlags,
 		Usage:   "Pivots the the entire table based on conditions",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			CommonCliQueryCmd3(
 				c,
 				fn,
@@ -358,7 +359,7 @@ func WriteResponseCLI(w io.Writer, status int, resp emigo.EmiActionResult) error
 	}
 }
 
-func HandleActionInCli2(c *cli.Context, result emigo.EmiActionResult, err error, t map[string]map[string]string) {
+func HandleActionInCli2(c *cli.Command, result emigo.EmiActionResult, err error, t map[string]map[string]string) {
 
 	f := CommonCliQueryDSLBuilder(c)
 
@@ -382,7 +383,7 @@ func HandleActionInCli2(c *cli.Context, result emigo.EmiActionResult, err error,
 
 }
 
-func HandleActionInCli(c *cli.Context, result any, err *IError, t map[string]map[string]string) {
+func HandleActionInCli(c *cli.Command, result any, err *IError, t map[string]map[string]string) {
 	f := CommonCliQueryDSLBuilder(c)
 
 	resultIsNil := result == nil || (reflect.ValueOf(result).Kind() == reflect.Ptr && reflect.ValueOf(result).IsNil())
@@ -479,7 +480,7 @@ func populateQueriableFields(v reflect.Value, parent string, getValue func(field
 	}
 }
 
-func QueriableFieldFromCliContext(v reflect.Value, parent string, c *cli.Context) {
+func QueriableFieldFromCliContext(v reflect.Value, parent string, c *cli.Command) {
 	populateQueriableFields(v, parent, func(field reflect.StructField) string {
 		return c.String(field.Tag.Get("cli"))
 	})

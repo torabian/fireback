@@ -5,7 +5,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/emi/lib/core"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 func firstNonEmpty(a, b string) string {

@@ -6,9 +6,15 @@ package payment
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -16,14 +22,10 @@ import (
 	metas "github.com/torabian/fireback/modules/payment/metas"
 	mocks "github.com/torabian/fireback/modules/payment/mocks/Invoice"
 	seeders "github.com/torabian/fireback/modules/payment/seeders/Invoice"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var invoiceSeedersFs = &seeders.ViewsFs
@@ -326,7 +328,7 @@ func InvoiceValidator(dto *InvoiceEntity, isPatch bool) *fireback.IError {
 var InvoiceAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -342,7 +344,7 @@ var InvoiceAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &InvoiceEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -378,11 +380,13 @@ func InvoiceRecursiveAddUniqueId(dto *InvoiceEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func InvoiceMultiInsertFn(dtos []*InvoiceEntity, query fireback.QueryDSL) ([]*InvoiceEntity, *fireback.IError) {
@@ -594,7 +598,7 @@ func InvoiceActionUpdateFn(query fireback.QueryDSL, fields *InvoiceEntity) (*Inv
 var InvoiceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire invoices ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_INVOICE_DELETE},
 			AllowOnRoot:    true,
@@ -820,7 +824,7 @@ var InvoiceCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_INVOICE_CREATE},
 			AllowOnRoot:    true,
@@ -840,7 +844,7 @@ var InvoiceUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   InvoiceCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_INVOICE_UPDATE},
 			AllowOnRoot:    true,
@@ -856,10 +860,10 @@ var InvoiceUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *InvoiceEntity) FromCli(c *cli.Context) *InvoiceEntity {
+func (x *InvoiceEntity) FromCli(c *cli.Command) *InvoiceEntity {
 	return CastInvoiceFromCli(c)
 }
-func CastInvoiceFromCli(c *cli.Context) *InvoiceEntity {
+func CastInvoiceFromCli(c *cli.Command) *InvoiceEntity {
 	template := &InvoiceEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -965,7 +969,7 @@ var InvoiceDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_INVOICE_CREATE},
 				AllowOnRoot:    true,
@@ -989,7 +993,7 @@ var InvoiceDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := InvoiceActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -998,7 +1002,7 @@ var InvoiceDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1011,7 +1015,7 @@ var InvoiceDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				InvoiceActions.Create,
 				reflect.ValueOf(&InvoiceEntity{}).Elem(),
@@ -1034,7 +1038,7 @@ var InvoiceImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of invoices, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[InvoiceEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1052,7 +1056,7 @@ var InvoiceImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(invoiceSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1071,7 +1075,7 @@ var InvoiceImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				InvoiceActions.Create,
 				reflect.ValueOf(&InvoiceEntity{}).Elem(),
@@ -1090,7 +1094,7 @@ var InvoiceImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				InvoiceEntityStream,
 				reflect.ValueOf(&InvoiceEntity{}).Elem(),
@@ -1114,7 +1118,7 @@ var InvoiceImportExportCommands = []cli.Command{
 			InvoiceCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				InvoiceActions.Create,
 				reflect.ValueOf(&InvoiceEntity{}).Elem(),
@@ -1170,7 +1174,7 @@ var INVOICE_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        InvoiceActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			InvoiceActions.Query,
 			security,
@@ -1198,7 +1202,7 @@ var INVOICE_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "InvoiceEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &InvoiceEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1268,7 +1272,7 @@ var INVOICE_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, InvoiceActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, InvoiceActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1314,7 +1318,7 @@ var INVOICE_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the Invoice entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, InvoiceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1475,7 +1479,7 @@ var InvoiceEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	InvoiceCliFn(),
 	//},
 	Actions:      GetInvoiceModule3Actions(),

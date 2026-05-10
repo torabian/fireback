@@ -31,7 +31,7 @@ import (
 	"embed"
 	reflect "reflect"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	seeders "{{ .gofModule }}/{{ .ctx.RelativePath }}/seeders/{{ .e.Upper }}"
 	mocks "{{ .gofModule }}/{{ .ctx.RelativePath }}/mocks/{{ .e.Upper }}"
 	{{ if .hasMetas }}
@@ -345,7 +345,7 @@ var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	{{ .e.Upper }}CliFn(),
 	//},
 	Actions: Get{{ .e.Upper }}Module3Actions(),

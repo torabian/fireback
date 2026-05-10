@@ -6,8 +6,12 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -15,17 +19,17 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	"strings"
+
 	//queries github.com/torabian/fireback - modules/abac"
 	"embed"
+	reflect "reflect"
+	"time"
+
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/Workspace"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/Workspace"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
-	reflect "reflect"
-	"time"
 )
 
 var workspaceSeedersFs = &seeders.ViewsFs
@@ -309,7 +313,7 @@ func WorkspaceValidator(dto *WorkspaceEntity, isPatch bool) *fireback.IError {
 var WorkspaceAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -325,7 +329,7 @@ var WorkspaceAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &WorkspaceEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -359,11 +363,13 @@ func WorkspaceRecursiveAddUniqueId(dto *WorkspaceEntity, query fireback.QueryDSL
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WorkspaceMultiInsertFn(dtos []*WorkspaceEntity, query fireback.QueryDSL) ([]*WorkspaceEntity, *fireback.IError) {
@@ -621,7 +627,7 @@ func WorkspaceActionUpdateFn(query fireback.QueryDSL, fields *WorkspaceEntity) (
 var WorkspaceWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire workspaces ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE},
 			AllowOnRoot:    true,
@@ -819,7 +825,7 @@ var WorkspaceCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
 			AllowOnRoot:    true,
@@ -839,7 +845,7 @@ var WorkspaceUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   WorkspaceCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE},
 			AllowOnRoot:    true,
@@ -855,10 +861,10 @@ var WorkspaceUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *WorkspaceEntity) FromCli(c *cli.Context) *WorkspaceEntity {
+func (x *WorkspaceEntity) FromCli(c *cli.Command) *WorkspaceEntity {
 	return CastWorkspaceFromCli(c)
 }
-func CastWorkspaceFromCli(c *cli.Context) *WorkspaceEntity {
+func CastWorkspaceFromCli(c *cli.Command) *WorkspaceEntity {
 	template := &WorkspaceEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -958,7 +964,7 @@ var WorkspaceDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CREATE},
 				AllowOnRoot:    true,
@@ -982,7 +988,7 @@ var WorkspaceDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := WorkspaceActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -991,7 +997,7 @@ var WorkspaceDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -1004,7 +1010,7 @@ var WorkspaceDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
@@ -1027,7 +1033,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of workspaces, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[WorkspaceEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -1045,7 +1051,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(workspaceSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -1064,7 +1070,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
@@ -1083,7 +1089,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				WorkspaceEntityStream,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
@@ -1107,7 +1113,7 @@ var WorkspaceImportExportCommands = []cli.Command{
 			WorkspaceCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				WorkspaceActions.Create,
 				reflect.ValueOf(&WorkspaceEntity{}).Elem(),
@@ -1165,7 +1171,7 @@ var WORKSPACE_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        WorkspaceActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			WorkspaceActions.Query,
 			security,
@@ -1193,7 +1199,7 @@ var WORKSPACE_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "WorkspaceEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &WorkspaceEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1283,7 +1289,7 @@ var WORKSPACE_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, WorkspaceActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, WorkspaceActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1329,7 +1335,7 @@ var WORKSPACE_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the Workspace entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, WorkspaceActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1478,7 +1484,7 @@ var WorkspaceEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	WorkspaceCliFn(),
 	//},
 	Actions:      GetWorkspaceModule3Actions(),

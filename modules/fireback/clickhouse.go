@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 )
@@ -29,12 +29,12 @@ func connectToClickHouse() (driver.Conn, error) {
 	return conn, nil
 }
 
-var ClickHouseTestConnectionCli = cli.Command{
+var ClickHouseTestConnectionCli = &cli.Command{
 	Name:        "clickhouse",
-	ShortName:   "ch",
+	Aliases:     []string{"ch"},
 	Description: "Test the clickhouse connection in the project",
 	Usage:       "Test the clickhouse connection in the project",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx0 context.Context, c *cli.Command) error {
 
 		conn, err := connectToClickHouse()
 		if err != nil {

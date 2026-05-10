@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 type UserImportPassports struct {
@@ -32,7 +32,7 @@ type UserImportAddress struct {
 func (x *UserImportAddress) RootObjectName() string {
 	return "UserImportDto"
 }
-func CastUserImportFromCli(c *cli.Context) *UserImportDto {
+func CastUserImportFromCli(c *cli.Command) *UserImportDto {
 	template := &UserImportDto{}
 	if c.IsSet("avatar") {
 		template.Avatar = c.String("avatar")

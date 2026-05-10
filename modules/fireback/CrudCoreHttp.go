@@ -2,6 +2,7 @@ package fireback
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -27,7 +28,7 @@ var Upgrader = websocket.Upgrader{
 
 type QueryableAction[T any] func(query QueryDSL) ([]*T, *QueryResultMeta, error)
 
-func BindCli(c *cli.Context, entity any) (any, error) {
+func BindCli(c *cli.Command, entity any) (any, error) {
 	reqValue := reflect.Indirect(reflect.ValueOf(entity))
 	if reqValue.MethodByName("FromCli").IsValid() {
 		args := []reflect.Value{reflect.ValueOf(c)}
@@ -57,7 +58,7 @@ func CastAnyToT[T any](val interface{}) T {
 	return t
 }
 
-func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (*V, *IError), security *SecurityModel) (*V, *IError) {
+func CliPostEntity[T any, V any](c *cli.Command, fn func(T, QueryDSL) (*V, *IError), security *SecurityModel) (*V, *IError) {
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 	var body T
 
@@ -70,7 +71,7 @@ func CliPostEntity[T any, V any](c *cli.Context, fn func(T, QueryDSL) (*V, *IErr
 
 }
 
-func CliPatchEntity[T any, V any](c *cli.Context, fn func(QueryDSL, T) (*V, *IError), security *SecurityModel) (*V, *IError) {
+func CliPatchEntity[T any, V any](c *cli.Command, fn func(QueryDSL, T) (*V, *IError), security *SecurityModel) (*V, *IError) {
 	f := CommonCliQueryDSLBuilderAuthorize(c, security)
 	var body T
 
@@ -477,7 +478,7 @@ func GenerateBindings(items []Module3Action) cli.Command {
 		Name:    "bindings",
 		Aliases: []string{"bi"},
 		Usage:   "Generates the bindings",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			data := BindingTemplateData{
 				Imports: []string{

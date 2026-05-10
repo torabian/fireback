@@ -6,12 +6,12 @@ package product
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
-)
-import (
-	"reflect"
+	"github.com/urfave/cli/v3"
 )
 
 // using shared actions here
@@ -47,15 +47,15 @@ func GetProductsCountActionFn(
 var GetProductsCountActionCmd cli.Command = cli.Command{
 	Name:  "get-products-count",
 	Usage: ``,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GetProductsCountSecurityModel)
 		result, err := GetProductsCountActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 func ProductCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
@@ -99,7 +99,7 @@ var ProductCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "product",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		GetProductsCountActionCmd,
 		ProductCliFn(),
 	},

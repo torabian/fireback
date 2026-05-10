@@ -7,7 +7,7 @@ package tags
  */
 import (
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
 // using shared actions here
@@ -24,7 +24,7 @@ var TagsCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "tags",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		TagCliFn(),
 	},
 }

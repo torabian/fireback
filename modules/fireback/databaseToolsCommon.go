@@ -16,7 +16,7 @@ import (
 	// on Android and IOS the golang version does not work. On the server, it's better not use cgo
 	// to make it portable on more operating systems.
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -102,7 +102,7 @@ func commonHeadlessStarter(x *FirebackApp, onDatabaseCompleted func(), completeT
 		}
 	}
 
-	x.CliActions = func() []cli.Command {
+	x.CliActions = func() []*cli.Command {
 		if completeTool {
 			return GetCommonWebServerCliActions(x)
 		}

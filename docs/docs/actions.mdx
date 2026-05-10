@@ -24,7 +24,7 @@ actions:
   - name: importUser
     url: /user/import
     method: post
-    description: 'Imports users, and creates their passports, and all details'
+    description: "Imports users, and creates their passports, and all details"
     in:
       fields:
         - name: path
@@ -43,19 +43,17 @@ an explanation of the API is needed.
 
 `in` and `out` fields do define input and output of the action. They have the same struct underneath, you can set
 
-* entity, which will be indicating an entity is representing the response or request.
-* dto, which represents the dto. 
-* fields, which is basically an array of fields and you can learn how to define them in 
-[Fields](./fields.md) section.
-
+- entity, which will be indicating an entity is representing the response or request.
+- dto, which represents the dto.
+- fields, which is basically an array of fields and you can learn how to define them in
+  [Fields](./fields.md) section.
 
 ## Module3Action Struct
 
 The `Module3Action` struct defines an action that can be used both in HTTP routes and CLI commands. It is less tightly coupled with HTTP-specific definitions and can directly operate on sockets. Below is a detailed explanation of each field in the struct:
 
-
-
 ### `Name`
+
 - **Type:** `string`
 - **Description:**  
   The general name of the action. This name is used in Go code generation, request/response bodies, and more. It also serves as the default CLI action name unless overridden by `CliName`.
@@ -63,6 +61,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `CliName`
+
 - **Type:** `string`
 - **Description:**  
   Overrides the CLI action name. If not specified, the `Name` field is used (converted to kebab-case if necessary).
@@ -70,6 +69,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `ActionAliases`
+
 - **Type:** `[]string`
 - **Description:**  
   A list of CLI aliases for the action. Useful for providing shorter or more convenient command names, e.g., `u` as an alias for `update`.
@@ -77,6 +77,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Url`
+
 - **Type:** `string`
 - **Description:**  
   The HTTP route for the action, typically in the `/api/resource/action` format. If not provided, the action is CLI-only.
@@ -84,6 +85,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Method`
+
 - **Type:** `string`
 - **Description:**  
   Specifies the HTTP method (`POST`, `GET`, `DELETE`, etc.). Additionally, Fireback introduces a `reactive` method for opening WebSocket connections.
@@ -91,6 +93,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Query`
+
 - **Type:** `[]*Module3Field`
 - **Description:**  
   Type-safe query parameters, accessible with `--qs` in CLI and as standard query strings in HTTP.
@@ -98,6 +101,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Description`
+
 - **Type:** `string`
 - **Description:**  
   A detailed description of the action. This is used in comments, API specifications, and other documentation.
@@ -105,6 +109,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Format`
+
 - **Type:** `string`
 - **Description:**  
   Defines the request format. Available formats:
@@ -116,6 +121,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `In`
+
 - **Type:** `*Module3ActionBody`
 - **Description:**  
   Defines the request body, similar to HTTP `body`. See `Module3ActionBody` for details.
@@ -123,6 +129,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Out`
+
 - **Type:** `*Module3ActionBody`
 - **Description:**  
   Defines the response body. See `Module3ActionBody` for details.
@@ -130,6 +137,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `SecurityModel`
+
 - **Type:** `*SecurityModel`
 - **Description:**  
   Specifies access control, including permissions, tokens, and other security checks. Refer to the `SecurityModel` struct for more information.
@@ -137,13 +145,15 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `CliAction`
-- **Type:** `func(c *cli.Context, security *SecurityModel) error`
+
+- **Type:** `func(c *cli.Command, security *SecurityModel) error`
 - **Description:**  
   CLI implementation of the action. Fireback ensures CLI and HTTP functionalities are consistent.
 
 ---
 
 ### `Handlers`
+
 - **Type:** `[]gin.HandlerFunc`
 - **Description:**  
   HTTP implementation of the action using Gin handlers. Fireback handles security checks before invoking these handlers.
@@ -151,6 +161,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Flags`
+
 - **Type:** `[]cli.Flag`
 - **Description:**  
   CLI flags supported by the action. Fireback uses the `urfave/cli` library.
@@ -158,6 +169,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `ExternFuncName`
+
 - **Type:** `string`
 - **Description:**  
   Used for external function generation (e.g., TypeScript). If left empty, Fireback generates it automatically.
@@ -165,6 +177,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `RequestEntity`
+
 - **Type:** `any`
 - **Description:**  
   Represents the request body for RPC code generation in languages like TypeScript and Swift.
@@ -172,6 +185,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `ResponseEntity`
+
 - **Type:** `any`
 - **Description:**  
   Represents the response body for RPC code generation.
@@ -179,6 +193,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `Action`
+
 - **Type:** `any`
 - **Description:**  
   Represents the core implementation of the action, primarily for code generation purposes.
@@ -186,6 +201,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `TargetEntity`
+
 - **Type:** `any`
 - **Description:**  
   Specifies the target entity for the action. Useful for actions like deletion that don't have request or response bodies.
@@ -193,6 +209,7 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ### `RootModule`
+
 - **Type:** `*Module3`
 - **Description:**  
   Metadata for internal code generation. Links the action to the parent module.
@@ -200,5 +217,6 @@ The `Module3Action` struct defines an action that can be used both in HTTP route
 ---
 
 ## Notes
+
 - Fireback provides consistent functionality across CLI and HTTP by generating code that integrates both.
 - The `SecurityModel` ensures secure access to actions, and custom handlers allow for flexible implementation.

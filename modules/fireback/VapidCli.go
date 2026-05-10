@@ -1,20 +1,21 @@
 package fireback
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func VapidCmd() cli.Command {
+func VapidCmd() *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 		Name:        "vapid",
 		Description: "VAPID web push notification public/private key generator",
 		Usage:       `VAPID web push notification public/private key generator`,
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
 			if err != nil {
 				return err
@@ -28,13 +29,13 @@ func VapidCmd() cli.Command {
 	}
 }
 
-func AutoConfig() cli.Command {
+func AutoConfig() *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 		Name:        "autoconfig",
 		Description: "Creates private/public VAPID keys, and saves them in the environment",
 		Usage:       `Creates private/public VAPID keys, and saves them in the environment`,
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			privateKey, publicKey, err := webpush.GenerateVAPIDKeys()
 			if err != nil {
 				return err
@@ -56,13 +57,13 @@ func AutoConfig() cli.Command {
 	}
 }
 
-func SendWebPush() cli.Command {
+func SendWebPush() *cli.Command {
 
-	return cli.Command{
+	return &cli.Command{
 		Name:        "push",
 		Description: "Sends a push notification",
 		Usage:       `Sends a push notification`,
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data, _, err := WebPushConfigEntityStream(QueryDSL{})
 			if err != nil {
 				return err
@@ -101,7 +102,7 @@ var PushNotificationCmd cli.Command = cli.Command{
 
 	Name:  "pushnot",
 	Usage: "Push notification (web-push) config and actions",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		VapidCmd(),
 		AutoConfig(),
 		SendWebPush(),

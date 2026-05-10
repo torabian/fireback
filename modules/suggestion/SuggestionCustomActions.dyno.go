@@ -6,12 +6,12 @@ package suggestion
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
-)
-import (
-	"reflect"
+	"github.com/urfave/cli/v3"
 )
 
 // using shared actions here
@@ -71,7 +71,7 @@ func QueryActionReqValidator(dto *QueryActionReqDto) *fireback.IError {
 	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
-func CastQueryFromCli(c *cli.Context) *QueryActionReqDto {
+func CastQueryFromCli(c *cli.Command) *QueryActionReqDto {
 	template := &QueryActionReqDto{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("items-per-page") {
@@ -121,7 +121,7 @@ var QueryActionCmd cli.Command = cli.Command{
 	Name:  "query",
 	Usage: `The final result of the query, it is a list of content entities based on the search. It is a list of content entities based on the search.`,
 	Flags: QueryCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, QuerySecurityModel)
 		dto := CastQueryFromCli(c)
 		result, err := QueryActionFn(dto, query)
@@ -152,7 +152,7 @@ func RestoreActionFn(
 var RestoreActionCmd cli.Command = cli.Command{
 	Name:  "restore",
 	Usage: `Deletes the FTS5 table (sqlite) and recreates it.`,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, RestoreSecurityModel)
 		result, err := RestoreActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
@@ -182,15 +182,15 @@ func ResyncActionFn(
 var ResyncActionCmd cli.Command = cli.Command{
 	Name:  "resync",
 	Usage: `Resyncs the content_virtual table with the content_entities table.`,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ResyncSecurityModel)
 		result, err := ResyncActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 func SuggestionCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
@@ -278,7 +278,7 @@ var SuggestionCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "suggestion",
 	Usage: `Suggestion module is a way to rank contents, such as video, posts, etc to users, based on full text search, user interaction, location, and so on. Aims to be general purpose, and allow to be extended.`,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		QueryActionCmd,
 		RestoreActionCmd,
 		ResyncActionCmd,

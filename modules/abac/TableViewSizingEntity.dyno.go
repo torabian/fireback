@@ -6,9 +6,15 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -16,14 +22,10 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/TableViewSizing"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/TableViewSizing"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var tableViewSizingSeedersFs = &seeders.ViewsFs
@@ -297,7 +299,7 @@ func TableViewSizingValidator(dto *TableViewSizingEntity, isPatch bool) *firebac
 var TableViewSizingAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -313,7 +315,7 @@ var TableViewSizingAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &TableViewSizingEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -346,11 +348,13 @@ func TableViewSizingRecursiveAddUniqueId(dto *TableViewSizingEntity, query fireb
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func TableViewSizingMultiInsertFn(dtos []*TableViewSizingEntity, query fireback.QueryDSL) ([]*TableViewSizingEntity, *fireback.IError) {
@@ -562,7 +566,7 @@ func TableViewSizingActionUpdateFn(query fireback.QueryDSL, fields *TableViewSiz
 var TableViewSizingWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire tableviewsizings ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 		})
@@ -749,7 +753,7 @@ var TableViewSizingCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 		})
@@ -768,7 +772,7 @@ var TableViewSizingUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   TableViewSizingCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 		})
@@ -783,10 +787,10 @@ var TableViewSizingUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *TableViewSizingEntity) FromCli(c *cli.Context) *TableViewSizingEntity {
+func (x *TableViewSizingEntity) FromCli(c *cli.Command) *TableViewSizingEntity {
 	return CastTableViewSizingFromCli(c)
 }
-func CastTableViewSizingFromCli(c *cli.Context) *TableViewSizingEntity {
+func CastTableViewSizingFromCli(c *cli.Command) *TableViewSizingEntity {
 	template := &TableViewSizingEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -883,7 +887,7 @@ var TableViewSizingDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 			})
@@ -906,7 +910,7 @@ var TableViewSizingDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := TableViewSizingActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -915,7 +919,7 @@ var TableViewSizingDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -928,7 +932,7 @@ var TableViewSizingDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
@@ -951,7 +955,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of table-view-sizings, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[TableViewSizingEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -969,7 +973,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(tableViewSizingSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -988,7 +992,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
@@ -1007,7 +1011,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				TableViewSizingEntityStream,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
@@ -1031,7 +1035,7 @@ var TableViewSizingImportExportCommands = []cli.Command{
 			TableViewSizingCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				TableViewSizingActions.Create,
 				reflect.ValueOf(&TableViewSizingEntity{}).Elem(),
@@ -1087,7 +1091,7 @@ var TABLE_VIEW_SIZING_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        TableViewSizingActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			TableViewSizingActions.Query,
 			security,
@@ -1114,7 +1118,7 @@ var TABLE_VIEW_SIZING_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "TableViewSizingEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &TableViewSizingEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1181,7 +1185,7 @@ var TABLE_VIEW_SIZING_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, TableViewSizingActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, TableViewSizingActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1226,7 +1230,7 @@ var TABLE_VIEW_SIZING_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the TableViewSizing entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, TableViewSizingActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1370,7 +1374,7 @@ var TableViewSizingEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	TableViewSizingCliFn(),
 	//},
 	Actions:      GetTableViewSizingModule3Actions(),

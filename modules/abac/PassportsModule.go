@@ -3,7 +3,7 @@ package abac
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 

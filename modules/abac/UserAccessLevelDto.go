@@ -11,10 +11,10 @@ import (
 	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastUserAccessLevelFromCli(c *cli.Context) *UserAccessLevelDto {
+func CastUserAccessLevelFromCli(c *cli.Command) *UserAccessLevelDto {
 	template := &UserAccessLevelDto{}
 	if c.IsSet("user-access-per-workspace-id") {
 		template.UserAccessPerWorkspaceId = fireback.NewStringAutoNull(c.String("user-access-per-workspace-id"))

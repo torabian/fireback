@@ -5,11 +5,14 @@ package product
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/fireback"
-import "encoding/json"
-import "github.com/urfave/cli"
-import "gopkg.in/yaml.v2"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v2"
+)
 
 func ProductJson() string {
 	e := cli.BoolFlag{}

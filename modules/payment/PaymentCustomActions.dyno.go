@@ -6,12 +6,12 @@ package payment
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
-)
-import (
-	"reflect"
+	"github.com/urfave/cli/v3"
 )
 
 // using shared actions here
@@ -57,7 +57,7 @@ func NotificationActionReqValidator(dto *NotificationActionReqDto) *fireback.IEr
 	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
-func CastNotificationFromCli(c *cli.Context) *NotificationActionReqDto {
+func CastNotificationFromCli(c *cli.Command) *NotificationActionReqDto {
 	template := &NotificationActionReqDto{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("session-id") {
@@ -95,7 +95,7 @@ var NotificationActionCmd cli.Command = cli.Command{
 	Name:  "notify",
 	Usage: `A signal sent by P24 to give the order id into the system`,
 	Flags: NotificationCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, NotificationSecurityModel)
 		dto := CastNotificationFromCli(c)
 		result, err := NotificationActionFn(dto, query)
@@ -148,7 +148,7 @@ func VerifyTransactionActionReqValidator(dto *VerifyTransactionActionReqDto) *fi
 	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
-func CastVerifyTransactionFromCli(c *cli.Context) *VerifyTransactionActionReqDto {
+func CastVerifyTransactionFromCli(c *cli.Command) *VerifyTransactionActionReqDto {
 	template := &VerifyTransactionActionReqDto{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("session-id") {
@@ -190,7 +190,7 @@ var VerifyTransactionActionCmd cli.Command = cli.Command{
 	Name:  "verify",
 	Usage: `Calls a external api to verify a transaction has been done correctly`,
 	Flags: VerifyTransactionCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, VerifyTransactionSecurityModel)
 		dto := CastVerifyTransactionFromCli(c)
 		result, err := VerifyTransactionActionFn(dto, query)
@@ -226,7 +226,7 @@ func PayInvoiceActionFn(
 var PayInvoiceActionCmd cli.Command = cli.Command{
 	Name:  "pay-invoice",
 	Usage: `Pay an invoice created independently`,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, PayInvoiceSecurityModel)
 		result, err := PayInvoiceActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
@@ -278,7 +278,7 @@ func RegisterTransactionActionReqValidator(dto *RegisterTransactionActionReqDto)
 	err := fireback.CommonStructValidatorPointer(dto, false)
 	return err
 }
-func CastRegisterTransactionFromCli(c *cli.Context) *RegisterTransactionActionReqDto {
+func CastRegisterTransactionFromCli(c *cli.Command) *RegisterTransactionActionReqDto {
 	template := &RegisterTransactionActionReqDto{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("email") {
@@ -319,7 +319,7 @@ var RegisterTransactionActionCmd cli.Command = cli.Command{
 	Name:  "register",
 	Usage: `Initiates a transaction with przelewy24`,
 	Flags: RegisterTransactionCommonCliFlagsOptional,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, RegisterTransactionSecurityModel)
 		dto := CastRegisterTransactionFromCli(c)
 		result, err := RegisterTransactionActionFn(dto, query)
@@ -350,15 +350,15 @@ func CheckProductInventoryActionFn(
 var CheckProductInventoryActionCmd cli.Command = cli.Command{
 	Name:  "check-product-inventory",
 	Usage: `It would use the remote api for inventory to check if a product is available and sends it back to the front-end`,
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckProductInventorySecurityModel)
 		result, err := CheckProductInventoryActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 	},
 }
 
-/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-/// and not available in Emi (won't be)
+// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+// / and not available in Emi (won't be)
 func PaymentCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
@@ -490,7 +490,7 @@ var PaymentCliActionsBundle = &fireback.CliActionsBundle{
 	Name:  "payment",
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
-	Subcommands: cli.Commands{
+	Commands: []*cli.Command{
 		NotificationActionCmd,
 		VerifyTransactionActionCmd,
 		PayInvoiceActionCmd,

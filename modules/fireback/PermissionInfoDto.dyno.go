@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 )
 
-func CastPermissionInfoFromCli(c *cli.Context) *PermissionInfoDto {
+func CastPermissionInfoFromCli(c *cli.Command) *PermissionInfoDto {
 	template := &PermissionInfoDto{}
 	if c.IsSet("name") {
 		template.Name = c.String("name")

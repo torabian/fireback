@@ -6,9 +6,15 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -16,14 +22,10 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/PassportMethod"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PassportMethod"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var passportMethodSeedersFs = &seeders.ViewsFs
@@ -306,7 +308,7 @@ func PassportMethodValidator(dto *PassportMethodEntity, isPatch bool) *fireback.
 var PassportMethodAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -322,7 +324,7 @@ var PassportMethodAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &PassportMethodEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -356,11 +358,13 @@ func PassportMethodRecursiveAddUniqueId(dto *PassportMethodEntity, query firebac
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func PassportMethodMultiInsertFn(dtos []*PassportMethodEntity, query fireback.QueryDSL) ([]*PassportMethodEntity, *fireback.IError) {
@@ -572,7 +576,7 @@ func PassportMethodActionUpdateFn(query fireback.QueryDSL, fields *PassportMetho
 var PassportMethodWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire passportmethods ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_DELETE},
 			ResolveStrategy: "workspace",
@@ -781,7 +785,7 @@ var PassportMethodCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_CREATE},
 			ResolveStrategy: "workspace",
@@ -802,7 +806,7 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   PassportMethodCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires:  []fireback.PermissionInfo{PERM_ROOT_PASSPORT_METHOD_UPDATE},
 			ResolveStrategy: "workspace",
@@ -819,10 +823,10 @@ var PassportMethodUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *PassportMethodEntity) FromCli(c *cli.Context) *PassportMethodEntity {
+func (x *PassportMethodEntity) FromCli(c *cli.Command) *PassportMethodEntity {
 	return CastPassportMethodFromCli(c)
 }
-func CastPassportMethodFromCli(c *cli.Context) *PassportMethodEntity {
+func CastPassportMethodFromCli(c *cli.Command) *PassportMethodEntity {
 	template := &PassportMethodEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -919,7 +923,7 @@ var PassportMethodDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := PassportMethodActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -939,7 +943,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of passport-methods, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[PassportMethodEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -957,7 +961,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(passportMethodSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -976,7 +980,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				PassportMethodActions.Create,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
@@ -995,7 +999,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				PassportMethodEntityStream,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
@@ -1019,7 +1023,7 @@ var PassportMethodImportExportCommands = []cli.Command{
 			PassportMethodCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				PassportMethodActions.Create,
 				reflect.ValueOf(&PassportMethodEntity{}).Elem(),
@@ -1077,7 +1081,7 @@ var PASSPORT_METHOD_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        PassportMethodActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			PassportMethodActions.Query,
 			security,
@@ -1106,7 +1110,7 @@ var PASSPORT_METHOD_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "PassportMethodEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &PassportMethodEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1179,7 +1183,7 @@ var PASSPORT_METHOD_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, PassportMethodActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, PassportMethodActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1226,7 +1230,7 @@ var PASSPORT_METHOD_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the PassportMethod entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, PassportMethodActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1407,7 +1411,7 @@ var PassportMethodEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	PassportMethodCliFn(),
 	//},
 	Actions:      GetPassportMethodModule3Actions(),

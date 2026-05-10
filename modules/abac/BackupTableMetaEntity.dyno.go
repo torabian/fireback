@@ -6,9 +6,15 @@ package abac
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -16,14 +22,10 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/BackupTableMeta"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/BackupTableMeta"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var backupTableMetaSeedersFs = &seeders.ViewsFs
@@ -290,7 +292,7 @@ func BackupTableMetaValidator(dto *BackupTableMetaEntity, isPatch bool) *firebac
 var BackupTableMetaAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -306,7 +308,7 @@ var BackupTableMetaAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &BackupTableMetaEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -338,11 +340,13 @@ func BackupTableMetaRecursiveAddUniqueId(dto *BackupTableMetaEntity, query fireb
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func BackupTableMetaMultiInsertFn(dtos []*BackupTableMetaEntity, query fireback.QueryDSL) ([]*BackupTableMetaEntity, *fireback.IError) {
@@ -554,7 +558,7 @@ func BackupTableMetaActionUpdateFn(query fireback.QueryDSL, fields *BackupTableM
 var BackupTableMetaWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire backuptablemetas ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_DELETE},
 		})
@@ -723,7 +727,7 @@ var BackupTableMetaCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_CREATE},
 		})
@@ -742,7 +746,7 @@ var BackupTableMetaUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   BackupTableMetaCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_UPDATE},
 		})
@@ -757,10 +761,10 @@ var BackupTableMetaUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *BackupTableMetaEntity) FromCli(c *cli.Context) *BackupTableMetaEntity {
+func (x *BackupTableMetaEntity) FromCli(c *cli.Command) *BackupTableMetaEntity {
 	return CastBackupTableMetaFromCli(c)
 }
-func CastBackupTableMetaFromCli(c *cli.Context) *BackupTableMetaEntity {
+func CastBackupTableMetaFromCli(c *cli.Command) *BackupTableMetaEntity {
 	template := &BackupTableMetaEntity{}
 	fireback.HandleXsrc(c, template)
 	if c.IsSet("uid") {
@@ -854,7 +858,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_BACKUP_TABLE_META_CREATE},
 			})
@@ -877,7 +881,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := BackupTableMetaActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -886,7 +890,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -899,7 +903,7 @@ var BackupTableMetaDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
@@ -922,7 +926,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of backup-table-metas, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := fireback.ContentImport[BackupTableMetaEntity]{}
 			if err := fireback.ReadYamlFile(c.String("file"), &data); err != nil {
 				fmt.Printf("Reading the yaml file has failed to begin with: %v\r\n", err)
@@ -940,7 +944,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := fireback.GetSeederFilenames(backupTableMetaSeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -959,7 +963,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
@@ -978,7 +982,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				BackupTableMetaEntityStream,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
@@ -1002,7 +1006,7 @@ var BackupTableMetaImportExportCommands = []cli.Command{
 			BackupTableMetaCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				BackupTableMetaActions.Create,
 				reflect.ValueOf(&BackupTableMetaEntity{}).Elem(),
@@ -1057,7 +1061,7 @@ var BACKUP_TABLE_META_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        BackupTableMetaActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			BackupTableMetaActions.Query,
 			security,
@@ -1084,7 +1088,7 @@ var BACKUP_TABLE_META_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "BackupTableMetaEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &BackupTableMetaEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1151,7 +1155,7 @@ var BACKUP_TABLE_META_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, BackupTableMetaActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, BackupTableMetaActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1196,7 +1200,7 @@ var BACKUP_TABLE_META_ACTION_PATCH = fireback.Module3Action{
 	},
 	Description: "Update the BackupTableMeta entity by unique id",
 	CliName:     "update",
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPatchEntity(c, BackupTableMetaActions.Update, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		if err != nil {
@@ -1340,7 +1344,7 @@ var BackupTableMetaEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	BackupTableMetaCliFn(),
 	//},
 	Actions:      GetBackupTableMetaModule3Actions(),

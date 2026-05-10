@@ -492,7 +492,7 @@ func {{ .e.Upper }}PolyglotUpdateHandler(dto *{{ .e.EntityName }}, query {{ .wsp
 var {{ .e.Upper }}AskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-  Subcommands: []cli.Command{
+  Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -508,7 +508,7 @@ var {{ .e.Upper }}AskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &{{ .e.Upper }}Entity{}
 
 				format := c.String("format")
@@ -1138,7 +1138,7 @@ var {{ .e.Upper }}WipeCmd cli.Command = cli.Command{
 
 	Name:  "wipe",
 	Usage: "Wipes entire {{ .e.TemplatesLower }} ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
   
 		query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
       ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_DELETE},
@@ -1605,7 +1605,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
         Usage: "Interactively asks for all inputs, not only required ones",
       },
     },
-    Action: func(c *cli.Context) {
+    Action: func(ctx context.Context, c *cli.Command) error {
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
         ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
 
@@ -1648,7 +1648,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
     Aliases: []string{"u"},
     Flags: {{ .e.Upper }}CommonCliFlagsOptional,
     Usage:   "Updates entity by passing the parameters",
-    Action: func(c *cli.Context) error {
+    Action: func(ctx context.Context, c *cli.Command) error {
 
       query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
         ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_UPDATE},
@@ -1831,11 +1831,11 @@ type x{{$prefix}}{{ .PublicName}} struct {
 
 {{ define "entityCastFromCli" }}
 
-func (x* {{ .e.ObjectName }}) FromCli(c *cli.Context) *{{ .e.ObjectName }} {
+func (x* {{ .e.ObjectName }}) FromCli(c *cli.Command) *{{ .e.ObjectName }} {
 	return Cast{{ .e.Upper }}FromCli(c)
 }
 
-func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
+func Cast{{ .e.Upper }}FromCli (c *cli.Command) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
 
   {{ .wsprefix}}HandleXsrc(c, template)
@@ -1859,7 +1859,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
 
 {{ define "dtoCastFromCli" }}
 
-func Cast{{ .e.Upper }}FromCli (c *cli.Context) *{{ .e.ObjectName }} {
+func Cast{{ .e.Upper }}FromCli (c *cli.Command) *{{ .e.ObjectName }} {
 	template := &{{ .e.ObjectName }}{}
   {{ .wsprefix}}HandleXsrc(c, template)
   
@@ -1939,7 +1939,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := {{ .wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, &{{ .wsprefix }}SecurityModel{
         ActionRequires: []{{ .wsprefix }}PermissionInfo{PERM_ROOT_{{ .e.AllUpper }}_CREATE},
         {{ if and (.e.SecurityModel) (.e.SecurityModel.ResolveStrategy) }}
@@ -1975,7 +1975,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := {{ .e.Upper }}Actions.SeederInit()
 
       {{ .wsprefix }}CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
@@ -1986,7 +1986,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
   cli.Command{
     Name:  "mlist",
     Usage: "Prints the list of embedded mocks into the app",
-    Action: func(c *cli.Context) error {
+    Action: func(ctx context.Context, c *cli.Command) error {
       if entity, err := {{ .wsprefix }}GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
         fmt.Println(err.Error())
       } else {
@@ -2001,7 +2001,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
   cli.Command{
     Name:  "msync",
     Usage: "Tries to sync mocks into the system",
-    Action: func(c *cli.Context) error {
+    Action: func(ctx context.Context, c *cli.Command) error {
 
       {{ .wsprefix }}CommonCliImportEmbedCmd(c,
         {{ .e.Upper }}Actions.Create,
@@ -2031,7 +2031,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of {{ .e.DashedPluralName }}, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := {{ .wsprefix }}ContentImport[{{ .e.EntityName }}]{}
 
 			if err := {{ .wsprefix }}ReadYamlFile(c.String("file"), &data); err != nil {
@@ -2053,7 +2053,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
-    Action: func(c *cli.Context) error {
+    Action: func(ctx context.Context, c *cli.Command) error {
 			if seeders, err := {{ .wsprefix }}GetSeederFilenames({{ .e.Name }}SeedersFs, ""); err != nil {
 				return err
 			} else {
@@ -2073,7 +2073,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 
 			{{ .wsprefix }}CommonCliImportEmbedCmd(c,
 				{{ .e.Upper }}Actions.Create,
@@ -2096,7 +2096,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
       return {{ .wsprefix }}CommonCliExportCmd2(c,
         {{ .e.Upper }}EntityStream,
         reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
@@ -2122,7 +2122,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		),
 
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 	
 			{{ .wsprefix }}CommonCliImportCmdAuthorized(c,
 				{{ .e.Upper }}Actions.Create,
@@ -2213,7 +2213,7 @@ var {{.e.AllUpper}}_ACTION_TABLE = {{ .wsprefix }}Module3Action{
   Flags:  {{ .wsprefix }}CommonQueryFlags,
   Description:   "Table formatted queries all of the entities in database based on the standard query format",
   Action: {{ .e.Upper }}Actions.Query,
-  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+  CliAction: func(c *cli.Command, security *{{ .wsprefix }}SecurityModel) error {
     {{ .wsprefix }}CommonCliTableCmd2(c,
       {{ .e.Upper }}Actions.Query,
       security,
@@ -2253,7 +2253,7 @@ var {{.e.AllUpper}}_ACTION_QUERY = {{ .wsprefix }}Module3Action{
   Out: &{{ .wsprefix }}Module3ActionBody{
 		Entity: "{{ .e.EntityName }}",
 	},
-  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+  CliAction: func(c *cli.Command, security *{{ .wsprefix }}SecurityModel) error {
     qs := &{{ .e.EntityName }}Qs{}
 		{{ .wsprefix }}CommonCliQueryCmd3(
 			c,
@@ -2388,7 +2388,7 @@ var {{.e.AllUpper}}_ACTION_POST_ONE = {{ .wsprefix }}Module3Action{
       {{ .wsprefix }}HttpPostEntity(c, {{ .e.Upper }}Actions.Create)
     },
   },
-  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+  CliAction: func(c *cli.Command, security *{{ .wsprefix }}SecurityModel) error {
     result, err := {{ .wsprefix }}CliPostEntity(c, {{ .e.Upper }}Actions.Create, security)
     {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
     if err != nil {
@@ -2445,7 +2445,7 @@ var {{.e.AllUpper}}_ACTION_PATCH = {{ .wsprefix }}Module3Action{
 	},
   Description: "Update the {{ .e.Upper}} entity by unique id",
   CliName:    "update",
-  CliAction: func(c *cli.Context, security *{{ .wsprefix }}SecurityModel) error {
+  CliAction: func(c *cli.Command, security *{{ .wsprefix }}SecurityModel) error {
    result, err := {{ .wsprefix }}CliPatchEntity(c, {{ .e.Upper }}Actions.Update, security)
    {{ .wsprefix }}HandleActionInCli(c, result, err, map[string]map[string]string{})
     if err != nil {
@@ -2927,7 +2927,7 @@ type {{ $name }}Msgs struct {
         return err
       }
 
-      func Cast{{ .Upper }}FromCli (c *cli.Context) *{{ .Upper }}ActionReqDto {
+      func Cast{{ .Upper }}FromCli (c *cli.Command) *{{ .Upper }}ActionReqDto {
         template := &{{ .Upper }}ActionReqDto{}
 
         {{ $wsprefix}}HandleXsrc(c, template)
@@ -3019,7 +3019,7 @@ type {{ $name }}Msgs struct {
           Flags: {{ .In.EntityPure }}CommonCliFlagsOptional,
           {{ end }}
       {{ end }}
-    Action: func(c *cli.Context) {
+    Action: func(ctx context.Context, c *cli.Command) error {
       {{ if or (eq .FormatComputed "QUERY")}}
         
         {{ if .QSFields }}
@@ -3126,7 +3126,7 @@ type {{ $name }}Msgs struct {
         {{ $wsprefix }}WriteActionResponseToGin(m, resp, err)
       },
     },
-    CliAction: func(c *cli.Context, security *{{ $wsprefix }}SecurityModel) error {
+    CliAction: func(c *cli.Command, security *{{ $wsprefix }}SecurityModel) error {
       query := {{ $wsprefix }}CommonCliQueryDSLBuilderAuthorize(c, {{ .Name }}SecurityModel)
       req := {{ .Name }}ActionRequest{}
 

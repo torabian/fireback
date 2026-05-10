@@ -6,7 +6,7 @@ import (
 
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
@@ -184,7 +184,7 @@ var AbacActions cli.Command = cli.Command{
 			{
 				Name:  "internal",
 				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",
-				Subcommands: []cli.Command{
+				Commands: []*cli.Command{
 					PublicJoinKeyCliFn(),
 					PublicAuthenticationCliFn(),
 				},

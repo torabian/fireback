@@ -6,6 +6,7 @@ package tags
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -20,7 +21,7 @@ import (
 	mocks "github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product/tags/mocks/Tag"
 	seeders "github.com/torabian/fireback/e2e/samples/fireback-data-types/modules/product/tags/seeders/Tag"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -321,7 +322,7 @@ func TagValidator(dto *TagEntity, isPatch bool) *fireback.IError {
 var TagAskCmd cli.Command = cli.Command{
 	Name:  "nlp",
 	Usage: "Set of natural language queries which helps creating content or data",
-	Subcommands: []cli.Command{
+	Commands: []*cli.Command{
 		{
 			Name:  "sample",
 			Usage: "Asks for generating sample by giving an example data",
@@ -337,7 +338,7 @@ var TagAskCmd cli.Command = cli.Command{
 					Value: 30,
 				},
 			},
-			Action: func(c *cli.Context) error {
+			Action: func(ctx context.Context, c *cli.Command) error {
 				v := &TagEntity{}
 				format := c.String("format")
 				request := "\033[1m" + `
@@ -582,7 +583,7 @@ func TagActionUpdateFn(query fireback.QueryDSL, fields *TagEntity) (*TagEntity, 
 var TagWipeCmd cli.Command = cli.Command{
 	Name:  "wipe",
 	Usage: "Wipes entire tags ",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TAG_DELETE},
 		})
@@ -766,7 +767,7 @@ var TagCreateInteractiveCmd cli.Command = cli.Command{
 			Usage: "Interactively asks for all inputs, not only required ones",
 		},
 	},
-	Action: func(c *cli.Context) {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TAG_CREATE},
 		})
@@ -785,7 +786,7 @@ var TagUpdateCmd cli.Command = cli.Command{
 	Aliases: []string{"u"},
 	Flags:   TagCommonCliFlagsOptional,
 	Usage:   "Updates entity by passing the parameters",
-	Action: func(c *cli.Context) error {
+	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TAG_UPDATE},
 		})
@@ -800,10 +801,10 @@ var TagUpdateCmd cli.Command = cli.Command{
 	},
 }
 
-func (x *TagEntity) FromCli(c *cli.Context) *TagEntity {
+func (x *TagEntity) FromCli(c *cli.Command) *TagEntity {
 	return CastTagFromCli(c)
 }
-func CastTagFromCli(c *cli.Context) *TagEntity {
+func CastTagFromCli(c *cli.Command) *TagEntity {
 	template := &TagEntity{}
 	if c.IsSet("uid") {
 		template.UniqueId = c.String("uid")
@@ -899,7 +900,7 @@ var TagDevCommands = []cli.Command{
 				Usage: "Multiple insert into database mode. Might miss children and relations at the moment",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			query := fireback.CommonCliQueryDSLBuilderAuthorize(c, &fireback.SecurityModel{
 				ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TAG_CREATE},
 			})
@@ -922,7 +923,7 @@ var TagDevCommands = []cli.Command{
 			},
 		},
 		Usage: "Creates a basic seeder file for you, based on the definition module we have. You can populate this file as an example",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			seed := TagActions.SeederInit()
 			fireback.CommonInitSeeder(strings.TrimSpace(c.String("format")), seed)
 			return nil
@@ -931,7 +932,7 @@ var TagDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(&mocks.ViewsFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -944,7 +945,7 @@ var TagDevCommands = []cli.Command{
 	cli.Command{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				TagActions.Create,
 				reflect.ValueOf(&TagEntity{}).Elem(),
@@ -973,7 +974,7 @@ var TagImportExportCommands = []cli.Command{
 			},
 		},
 		Usage: "Reads a yaml file containing an array of tags, you can run this to validate if your import file is correct, and how it would look like after import",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			data := &[]TagEntity{}
 			fireback.ReadYamlFile(c.String("file"), data)
 			fmt.Println(data)
@@ -983,7 +984,7 @@ var TagImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if entity, err := fireback.GetSeederFilenames(tagSeedersFs, ""); err != nil {
 				fmt.Println(err.Error())
 			} else {
@@ -996,7 +997,7 @@ var TagImportExportCommands = []cli.Command{
 	cli.Command{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportEmbedCmd(c,
 				TagActions.Create,
 				reflect.ValueOf(&TagEntity{}).Elem(),
@@ -1015,7 +1016,7 @@ var TagImportExportCommands = []cli.Command{
 				Required: true,
 			}),
 		Usage: "Exports a query results into the csv/yaml/json format",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return fireback.CommonCliExportCmd2(c,
 				TagEntityStream,
 				reflect.ValueOf(&TagEntity{}).Elem(),
@@ -1039,7 +1040,7 @@ var TagImportExportCommands = []cli.Command{
 			TagCommonCliFlagsOptional...,
 		),
 		Usage: "imports csv/yaml/json file and place it and its children into database",
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			fireback.CommonCliImportCmdAuthorized(c,
 				TagActions.Create,
 				reflect.ValueOf(&TagEntity{}).Elem(),
@@ -1094,7 +1095,7 @@ var TAG_ACTION_TABLE = fireback.Module3Action{
 	Flags:         fireback.CommonQueryFlags,
 	Description:   "Table formatted queries all of the entities in database based on the standard query format",
 	Action:        TagActions.Query,
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		fireback.CommonCliTableCmd2(c,
 			TagActions.Query,
 			security,
@@ -1121,7 +1122,7 @@ var TAG_ACTION_QUERY = fireback.Module3Action{
 	Out: &fireback.Module3ActionBody{
 		Entity: "TagEntity",
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		qs := &TagEntityQs{}
 		fireback.CommonCliQueryCmd3(
 			c,
@@ -1188,7 +1189,7 @@ var TAG_ACTION_POST_ONE = fireback.Module3Action{
 			fireback.HttpPostEntity(c, TagActions.Create)
 		},
 	},
-	CliAction: func(c *cli.Context, security *fireback.SecurityModel) error {
+	CliAction: func(c *cli.Command, security *fireback.SecurityModel) error {
 		result, err := fireback.CliPostEntity(c, TagActions.Create, security)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 		return err
@@ -1327,7 +1328,7 @@ var TagEntityBundle = fireback.EntityBundle{
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
 	// Create your own bundle if you need with Cli
-	//CliCommands: []cli.Command{
+	//CliCommands: []*cli.Command{
 	//	TagCliFn(),
 	//},
 	Actions:      GetTagModule3Actions(),

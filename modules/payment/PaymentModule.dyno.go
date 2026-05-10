@@ -5,14 +5,15 @@ package payment
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/fireback"
-import "encoding/json"
-import "github.com/urfave/cli"
-import "gopkg.in/yaml.v2"
-import "fmt"
 import (
-	"github.com/hashicorp/go-retryablehttp"
+	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"github.com/hashicorp/go-retryablehttp"
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v2"
 )
 
 func PaymentJson() string {
@@ -121,7 +122,7 @@ var PaymentRemotes paymentRemoteContext = paymentRemoteContext{
 	client: retryablehttp.NewClient(),
 }
 
-/// ProductInventoryAvailability
+// / ProductInventoryAvailability
 type ProductInventoryAvailabilityRemoteResponse struct {
 	Name      string   `json:"name" xml:"name" yaml:"name"        `
 	Platforms []string `json:"platforms" xml:"platforms" yaml:"platforms"        `
@@ -157,7 +158,7 @@ func (x *paymentRemoteContext) ProductInventoryAvailability(
 	return content, resp, nil
 }
 
-/// VerifyTransaction
+// / VerifyTransaction
 type VerifyTransactionRemoteResponse struct {
 	Data  *VerifyTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"embedded"      `
 	Error string                    `json:"error" xml:"error" yaml:"error"        `
@@ -214,7 +215,7 @@ func (x *paymentRemoteContext) VerifyTransaction(
 	return content, resp, nil
 }
 
-/// RegisterTransaction
+// / RegisterTransaction
 type RegisterTransactionRemoteResponse struct {
 	Data  *RegisterTransactionResData `json:"data" xml:"data" yaml:"data"    gorm:"embedded"      `
 	Error string                      `json:"error" xml:"error" yaml:"error"        `

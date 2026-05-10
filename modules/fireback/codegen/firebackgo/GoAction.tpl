@@ -15,7 +15,7 @@ import (
     {{ range .m.ActionsCustomImport }}
     "{{ .}}"
     {{ end }}
-    "github.com/urfave/cli"
+    "github.com/urfave/cli/v3"
     {{ if ne .wsprefix "" }}
 	"github.com/torabian/fireback/modules/fireback"
     {{ end }}
@@ -48,7 +48,7 @@ var {{ .m.Upper }}CliActionsBundle = &{{ $.wsprefix }}CliActionsBundle{
     Usage: `{{ .m.Description }}`,
 
     // Here we will include entities actions, as well as module level actions
-    Subcommands: cli.Commands{
+    Commands: []*cli.Command{
         {{ range .m.Acts }}
             {{ .Upper }}ActionDef.ToCli(),
         {{ end }}
