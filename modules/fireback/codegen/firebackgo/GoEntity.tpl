@@ -28,6 +28,7 @@ import (
     //queries {{ .gofModule }} - {{ .ctx.RelativePath }}"
     {{ end }}
 
+"context"
 	"embed"
 	reflect "reflect"
 

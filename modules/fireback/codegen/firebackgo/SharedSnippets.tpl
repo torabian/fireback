@@ -1594,7 +1594,7 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
 
 {{ define "entityCliCommands" }}
 
-  var {{ .e.Upper }}CreateCmd cli.Command = {{.e.AllUpper}}_ACTION_POST_ONE.ToCli()
+  var {{ .e.Upper }}CreateCmd *cli.Command = {{.e.AllUpper}}_ACTION_POST_ONE.ToCli()
 
   var {{ .e.Upper }}CreateInteractiveCmd cli.Command = cli.Command{
     Name:  "ic",
@@ -1639,6 +1639,8 @@ var {{ .e.Upper }}CommonCliFlagsOptional = []cli.Flag{
         f, _ := yaml.Marshal(entity)
 			  fmt.Println({{ .wsprefix }}FormatYamlKeys(string(f)))
       }
+
+      return nil
     },
   }
 
@@ -1921,8 +1923,8 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Command) *{{ .e.ObjectName }} {
 
 {{ define "entityCliImportExportCmd" }}
 
-var {{ .e.Upper }}DevCommands = []cli.Command{
-  {{ .e.Upper }}WipeCmd,
+var {{ .e.Upper }}DevCommands = []*cli.Command{
+  &{{ .e.Upper }}WipeCmd,
  {{ if eq .e.Features.HasMockAction true }}
 	{
 
@@ -1983,7 +1985,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
 		},
 	},
 {{ if eq .e.Features.HasMsyncActions true }}
-  cli.Command{
+  {
     Name:  "mlist",
     Usage: "Prints the list of embedded mocks into the app",
     Action: func(ctx context.Context, c *cli.Command) error {
@@ -1998,7 +2000,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
       return nil
     },
   },
-  cli.Command{
+  {
     Name:  "msync",
     Usage: "Tries to sync mocks into the system",
     Action: func(ctx context.Context, c *cli.Command) error {
@@ -2017,7 +2019,7 @@ var {{ .e.Upper }}DevCommands = []cli.Command{
 
 }
 
-var {{ .e.Upper }}ImportExportCommands = []cli.Command{
+var {{ .e.Upper }}ImportExportCommands = []*cli.Command{
  
 	{
 		Name:    "validate",
@@ -2050,7 +2052,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 	},
   
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints list of seeders bundled, which can be inserted into database.",
     Action: func(ctx context.Context, c *cli.Command) error {
@@ -2070,7 +2072,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -2086,7 +2088,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 	},
   
   {{ if .hasMetas }}
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append({{ .wsprefix }}CommonQueryFlags,
@@ -2108,7 +2110,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 		},
 	},
   {{ end }}
-	cli.Command{
+  {
 		Name:    "import",
     Flags: append(
 			append(
@@ -2154,15 +2156,15 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
 
 {{ define "entityCliActionsCmd" }}
 
-    var {{ .e.Upper }}CliCommands []cli.Command = []cli.Command{
+    var {{ .e.Upper }}CliCommands []*cli.Command = []*cli.Command{
       {{.e.AllUpper}}_ACTION_QUERY.ToCli(),
       {{.e.AllUpper}}_ACTION_TABLE.ToCli(),
       {{.e.AllUpper}}_ACTION_PATCH.ToCli(),
       {{ if ne .e.Access "read" }}
 
       {{ .e.Upper }}CreateCmd,
-      {{ .e.Upper }}AskCmd,
-      {{ .e.Upper }}CreateInteractiveCmd,
+      &{{ .e.Upper }}AskCmd,
+      &{{ .e.Upper }}CreateInteractiveCmd,
       {{ .wsprefix }}GetCommonRemoveQuery(
         reflect.ValueOf(&{{ .e.EntityName }}{}).Elem(),
         {{ .e.Upper }}Actions.RemoveEnqueue,
@@ -2179,17 +2181,17 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
       {{ end }}
   }
 
-  func {{ .e.Upper }}CliFn() cli.Command {
+  func {{ .e.Upper }}CliFn() *cli.Command {
     commands := append({{ .e.Upper }}ImportExportCommands, {{ .e.Upper }}CliCommands...)
 
     if !{{ .wsprefix }}GetConfig().Production {
       commands = append(commands, {{ .e.Upper }}DevCommands...)
     }
 
-    return cli.Command{
+    return &cli.Command{
       Name:        "{{ .e.ComputedCliName }}",
       {{ if .e.CliShort }}
-      ShortName:   "{{ .e.CliShort }}",
+      Aliases:   []string{"{{ .e.CliShort }}"},
       {{ end }}
       Description: `{{ .e.ComputedCliDescription }}`,
       Usage:       `{{ .e.ComputedCliDescription }}`,
@@ -2199,7 +2201,7 @@ var {{ .e.Upper }}ImportExportCommands = []cli.Command{
           Value: "en",
         },
       },
-      Subcommands: commands,
+      Commands: commands,
     }
   }
 
