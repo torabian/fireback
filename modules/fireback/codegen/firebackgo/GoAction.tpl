@@ -12,6 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
     {{ end }}
 
+    {{ if or (.m.Actions) }}
+	"context"
+    {{ end }}
+
     {{ range .m.ActionsCustomImport }}
     "{{ .}}"
     {{ end }}
@@ -30,7 +34,7 @@ import (
 
 var {{ .m.Upper }}CustomActionsCli = []*cli.Command {
 {{ range .m.Actions }}
-    {{ .Upper }}ActionCmd,
+    &{{ .Upper }}ActionCmd,
 {{ end }}
 }
 
@@ -53,7 +57,7 @@ var {{ .m.Upper }}CliActionsBundle = &{{ $.wsprefix }}CliActionsBundle{
             {{ .Upper }}ActionDef.ToCli(),
         {{ end }}
         {{ range .m.Actions }}
-            {{ .Upper }}ActionCmd,
+            &{{ .Upper }}ActionCmd,
         {{ end }}
         {{ range .m.Entities }}
         {{ .Upper }}CliFn(),
