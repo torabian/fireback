@@ -5,14 +5,11 @@ package fireback
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-
-	"github.com/urfave/cli/v3"
-	"gopkg.in/yaml.v2"
-)
+import "encoding/json"
+import "github.com/urfave/cli/v3"
+import "gopkg.in/yaml.v2"
+import "fmt"
+import "context"
 
 func FirebackJson() string {
 	e := cli.BoolFlag{}
@@ -1536,15 +1533,13 @@ var config Config = Config{
 	WindowsIdentifier:       "fireback",
 }
 
-/*
-*
+/**
 You can call this function on first line of your main function.
 This is different from fireback configuration (for now), you can
 define config: in module3 file, similar to fields in entities,
 and we generate the config struct and this function would read .env.local,
 .env.prod, etc - depending on the ENV=xxx env variable.
-*
-*/
+**/
 func LoadConfiguration() Config {
 	HandleEnvVars(&config)
 	return config

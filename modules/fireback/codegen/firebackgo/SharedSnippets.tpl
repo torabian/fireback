@@ -3065,6 +3065,8 @@ type {{ $name }}Msgs struct {
           {{ else }}
             {{ $wsprefix }}CliReactivePipeHandler(query, {{ .Upper }}ActionImp)
           {{end}}
+
+          return nil
       {{ end }}
     },
   }

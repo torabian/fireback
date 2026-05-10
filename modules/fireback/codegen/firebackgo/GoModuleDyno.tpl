@@ -44,7 +44,7 @@ import (
 
 	"github.com/hashicorp/go-retryablehttp"
   "net/http"
-  
+
 )
 {{ end }}
 
@@ -55,6 +55,9 @@ import (
 )
 {{ end }}
 
+{{ if .m.Config }}
+import   "context"
+{{ end }}
 
 func {{ upper .m.Name }}Json() string {
   e := cli.BoolFlag{}
@@ -471,37 +474,37 @@ func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
     {{ range .m.Config }} 
       {{ if or (eq .Type "string") (eq .Type "")}}
-        cli.StringFlag{
+        &cli.StringFlag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "int64") }}
-        cli.Int64Flag{
+        &cli.Int64Flag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "float64") }}
-        cli.Float64Flag{
+        &cli.Float64Flag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "int") }}
-        cli.IntFlag{
+        &cli.IntFlag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "bool") (eq .Type "boolean") }}
-        cli.BoolFlag{
+        &cli.BoolFlag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
       {{ end }}
       {{ if or (eq .Type "int32") }}
-        cli.Int32Flag{
+        &cli.Int32Flag{
           Name:  "{{ .DashedName }}",
           Usage: "{{ .Description }}",
         },
@@ -536,8 +539,8 @@ func CastConfigFromCli(config *Config, c *cli.Command) {
 }
 
 
-func GetConfigCli() []cli.Command {
-	return []cli.Command{
+func GetConfigCli() []*cli.Command {
+	return []*cli.Command{
     {{ range .m.Config }}
 		{
 			Name:  "{{ .DashedName }}",
