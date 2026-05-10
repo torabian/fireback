@@ -13,6 +13,7 @@ import (
 	ptime "github.com/yaa110/go-persian-calendar"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/schema"
 )
 
 type XDateTime string
@@ -158,13 +159,29 @@ func (date XDateTime) Value() (driver.Value, error) {
 	if date == "" {
 		return nil, nil
 	}
-	return string(date), nil
 
+	t, err := time.Parse(time.RFC3339, string(date))
+	if err != nil {
+		return nil, err
+	}
+
+	return t, nil
 }
 
 // GormDataType gorm common data type
 func (date XDateTime) GormDataType() string {
 	return "datetime"
+}
+
+func (date XDateTime) GormDBDataType(db *gorm.DB, field *schema.Field) string {
+	switch db.Dialector.Name() {
+	case "postgres":
+		return "timestamptz"
+	case "mysql":
+		return "datetime"
+	default:
+		return "datetime"
+	}
 }
 
 func (js XDateTime) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
@@ -178,6 +195,12 @@ func (js XDateTime) GormValue(ctx context.Context, db *gorm.DB) clause.Expr {
 		if err == nil {
 			return gorm.Expr("?", string(parsedTime.Format("2006-01-02 15:04:05")))
 		}
+	case "postgres":
+		t, err := time.Parse(time.RFC3339, string(js))
+		if err == nil {
+			return gorm.Expr("?", t)
+		}
+
 	}
 
 	return gorm.Expr("?", string(js))
