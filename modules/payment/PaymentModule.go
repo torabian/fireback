@@ -31,7 +31,7 @@ type PaymentModuleConfig struct {
 func getPaymentActionsBundleOverride() *fireback.ModuleActionsBundle {
 
 	var commands []*cli.Command
-	for _, command := range PaymentCliActionsBundle.Subcommands {
+	for _, command := range PaymentCliActionsBundle.Commands {
 		if command.Name != "pay-invoice" {
 			commands = append(commands, command)
 		}
@@ -41,7 +41,7 @@ func getPaymentActionsBundleOverride() *fireback.ModuleActionsBundle {
 		{
 			Name: "pay-invoice",
 			Flags: []cli.Flag{
-				cli.StringFlag{
+				&cli.StringFlag{
 					Name:  "invoice-id",
 					Usage: "Invoice string id",
 				},
@@ -51,6 +51,8 @@ func getPaymentActionsBundleOverride() *fireback.ModuleActionsBundle {
 				query := fireback.CommonCliQueryDSLBuilderAuthorize(c, PayInvoiceSecurityModel)
 				result, err := PayInvoiceActionFn(query)
 				fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+
+				return err
 			},
 		},
 	}, commands...)
@@ -61,7 +63,7 @@ func getPaymentActionsBundleOverride() *fireback.ModuleActionsBundle {
 			Name:  "payment",
 			Usage: ``,
 			// Here we will include entities actions, as well as module level actions
-			Subcommands: commands,
+			Commands: commands,
 		},
 	}
 }
