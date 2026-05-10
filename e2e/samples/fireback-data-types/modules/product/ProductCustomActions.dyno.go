@@ -51,7 +51,6 @@ var GetProductsCountActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GetProductsCountSecurityModel)
 		result, err := GetProductsCountActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 		return nil
 	},
 }
@@ -85,8 +84,8 @@ func ProductCustomActions() []fireback.Module3Action {
 	return routes
 }
 
-var ProductCustomActionsCli = []cli.Command{
-	GetProductsCountActionCmd,
+var ProductCustomActionsCli = []*cli.Command{
+	&GetProductsCountActionCmd,
 }
 
 // Only to include some headers
@@ -113,6 +112,6 @@ func GetProductActionsBundle() *fireback.ModuleActionsBundle {
 		CliAction: ProductCliActionsBundle,
 	}
 }
-func GetProductActionsCli() []cli.Command {
+func GetProductActionsCli() []*cli.Command {
 	return ProductCustomActionsCli
 }

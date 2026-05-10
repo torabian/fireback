@@ -10,11 +10,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -26,6 +21,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
 )
 
 var productSeedersFs = &seeders.ViewsFs
@@ -390,8 +389,6 @@ And here is the actual object signature:
 	},
 }
 
-func ProductEntityPreSanitize(dto *ProductEntity, query fireback.QueryDSL) {
-}
 func ProductEntityBeforeCreateAppend(dto *ProductEntity, query fireback.QueryDSL) {
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
@@ -405,19 +402,16 @@ func ProductRecursiveAddUniqueId(dto *ProductEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func ProductMultiInsertFn(dtos []*ProductEntity, query fireback.QueryDSL) ([]*ProductEntity, *fireback.IError) {
 	if len(dtos) > 0 {
 		for index := range dtos {
-
 			ProductEntityBeforeCreateAppend(dtos[index], query)
 		}
 		var dbref *gorm.DB = nil
@@ -459,7 +453,6 @@ func ProductActionCreateFn(dto *ProductEntity, query fireback.QueryDSL) (*Produc
 		return nil, iError
 	}
 	// 1.5 Sanitize the content coming of the front-end
-
 	// 2. Append the necessary information about user, workspace
 	ProductEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
@@ -551,7 +544,6 @@ func ProductMemJoin(items []uint) []*ProductEntity {
 func ProductUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *ProductEntity) (*ProductEntity, *fireback.IError) {
 	uniqueId := fields.UniqueId
 	query.TriggerEventName = PRODUCT_EVENT_UPDATED
-
 	var item ProductEntity
 	var itemRefetched ProductEntity
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
@@ -901,7 +893,6 @@ var ProductCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
-
 		return nil
 	},
 }
