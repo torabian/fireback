@@ -70,7 +70,7 @@ func importYamlFromFileOnDisk[T any](
 ) {
 	var content ContentImport[T]
 	ReadYamlFile(importFilePath, &content)
-	importYamlFromArray(content, fn, f, false)
+	importYamlFromArray(content, fn, f, false, importFilePath)
 }
 
 // When we are working with objects, it's necessary to add a uniqueId to them
@@ -214,7 +214,7 @@ func importYamlFromFileEmbed[T any](
 		log.Default().Println("Yaml file is broken:", importFilePath)
 	}
 
-	importYamlFromArray(content, fn, f, silent)
+	importYamlFromArray(content, fn, f, silent, importFilePath)
 }
 
 func importYamlFromArray[T any](
@@ -222,6 +222,7 @@ func importYamlFromArray[T any](
 	fn func(dto *T, query QueryDSL) (*T, *IError),
 	f QueryDSL,
 	silent bool,
+	filepat string,
 ) {
 
 	successInsert := 0
@@ -236,7 +237,7 @@ func importYamlFromArray[T any](
 			successInsert++
 		} else {
 			failureInsert++
-			log.Default().Printf("error on insert: %v", err)
+			log.Default().Printf("error on insert: %v", err, filepat)
 			fmt.Println(err.Error())
 			fmt.Println(err.ToPublicEndUser(f).MessageTranslated)
 		}
