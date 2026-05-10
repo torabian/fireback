@@ -28,7 +28,7 @@ import (
 
 {{ template "actions-section" (arr .m.Actions $.wsprefix $.m.PublicName .remoteQueryChildren .childrenIn .childrenOut .m.Acts )}}
 
-var {{ .m.Upper }}CustomActionsCli = []cli.Command {
+var {{ .m.Upper }}CustomActionsCli = []*cli.Command {
 {{ range .m.Actions }}
     {{ .Upper }}ActionCmd,
 {{ end }}
@@ -70,7 +70,7 @@ func Get{{ .m.Upper }}ActionsBundle() *{{ $.wsprefix }}ModuleActionsBundle {
 }
 
 
-func Get{{ .m.Upper }}ActionsCli() []cli.Command {
+func Get{{ .m.Upper }}ActionsCli() []*cli.Command {
 	return {{ .m.Upper }}CustomActionsCli
 }
 

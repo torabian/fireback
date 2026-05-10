@@ -6,12 +6,12 @@ package payment
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"context"
-	"reflect"
-
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
+)
+import (
+	"reflect"
 )
 
 // using shared actions here
@@ -100,7 +100,6 @@ var NotificationActionCmd cli.Command = cli.Command{
 		dto := CastNotificationFromCli(c)
 		result, err := NotificationActionFn(dto, query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 		return nil
 	},
 }
@@ -197,7 +196,6 @@ var VerifyTransactionActionCmd cli.Command = cli.Command{
 		dto := CastVerifyTransactionFromCli(c)
 		result, err := VerifyTransactionActionFn(dto, query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 		return nil
 	},
 }
@@ -234,7 +232,6 @@ var PayInvoiceActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, PayInvoiceSecurityModel)
 		result, err := PayInvoiceActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 		return nil
 	},
 }
@@ -330,7 +327,6 @@ var RegisterTransactionActionCmd cli.Command = cli.Command{
 		dto := CastRegisterTransactionFromCli(c)
 		result, err := RegisterTransactionActionFn(dto, query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 		return nil
 	},
 }
@@ -362,13 +358,12 @@ var CheckProductInventoryActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, CheckProductInventorySecurityModel)
 		result, err := CheckProductInventoryActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
-
 		return nil
 	},
 }
 
-// / For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
-// / and not available in Emi (won't be)
+/// For emi, we also need to print the handlers, and also print security model, which is a part of Fireback
+/// and not available in Emi (won't be)
 func PaymentCustomActions() []fireback.Module3Action {
 	routes := []fireback.Module3Action{
 		//// Let's add actions for emi acts
@@ -480,7 +475,7 @@ func PaymentCustomActions() []fireback.Module3Action {
 	return routes
 }
 
-var PaymentCustomActionsCli = []cli.Command{
+var PaymentCustomActionsCli = []*cli.Command{
 	NotificationActionCmd,
 	VerifyTransactionActionCmd,
 	PayInvoiceActionCmd,
@@ -501,11 +496,11 @@ var PaymentCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Commands: []*cli.Command{
-		&NotificationActionCmd,
-		&VerifyTransactionActionCmd,
-		&PayInvoiceActionCmd,
-		&RegisterTransactionActionCmd,
-		&CheckProductInventoryActionCmd,
+		NotificationActionCmd,
+		VerifyTransactionActionCmd,
+		PayInvoiceActionCmd,
+		RegisterTransactionActionCmd,
+		CheckProductInventoryActionCmd,
 		PaymentConfigCliFn(),
 		InvoiceCliFn(),
 		InvoiceTransactionCliFn(),
@@ -519,6 +514,6 @@ func GetPaymentActionsBundle() *fireback.ModuleActionsBundle {
 		CliAction: PaymentCliActionsBundle,
 	}
 }
-func GetPaymentActionsCli() []cli.Command {
+func GetPaymentActionsCli() []*cli.Command {
 	return PaymentCustomActionsCli
 }

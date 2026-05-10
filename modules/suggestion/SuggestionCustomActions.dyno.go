@@ -126,6 +126,7 @@ var QueryActionCmd cli.Command = cli.Command{
 		dto := CastQueryFromCli(c)
 		result, err := QueryActionFn(dto, query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return nil
 	},
 }
 var RestoreSecurityModel *fireback.SecurityModel = nil
@@ -156,6 +157,7 @@ var RestoreActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, RestoreSecurityModel)
 		result, err := RestoreActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return nil
 	},
 }
 var ResyncSecurityModel *fireback.SecurityModel = nil
@@ -186,6 +188,7 @@ var ResyncActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, ResyncSecurityModel)
 		result, err := ResyncActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		return nil
 	},
 }
 
@@ -260,7 +263,7 @@ func SuggestionCustomActions() []fireback.Module3Action {
 	return routes
 }
 
-var SuggestionCustomActionsCli = []cli.Command{
+var SuggestionCustomActionsCli = []*cli.Command{
 	QueryActionCmd,
 	RestoreActionCmd,
 	ResyncActionCmd,
@@ -292,6 +295,6 @@ func GetSuggestionActionsBundle() *fireback.ModuleActionsBundle {
 		CliAction: SuggestionCliActionsBundle,
 	}
 }
-func GetSuggestionActionsCli() []cli.Command {
+func GetSuggestionActionsCli() []*cli.Command {
 	return SuggestionCustomActionsCli
 }
