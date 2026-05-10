@@ -757,7 +757,7 @@ var TagCommonCliFlagsOptional = []cli.Flag{
 		Usage:    `importance (float64?)`,
 	},
 }
-var TagCreateCmd cli.Command = TAG_ACTION_POST_ONE.ToCli()
+var TagCreateCmd *cli.Command = TAG_ACTION_POST_ONE.ToCli()
 var TagCreateInteractiveCmd cli.Command = cli.Command{
 	Name:  "ic",
 	Usage: "Creates a new entity, using requied fields in an interactive name",
@@ -779,6 +779,8 @@ var TagCreateInteractiveCmd cli.Command = cli.Command{
 			f, _ := yaml.Marshal(entity)
 			fmt.Println(fireback.FormatYamlKeys(string(f)))
 		}
+
+		return nil
 	},
 }
 var TagUpdateCmd cli.Command = cli.Command{
@@ -884,8 +886,8 @@ func TagsActionQueryString(keyword string, page int) ([]string, *fireback.QueryR
 	return stringItems, meta, err
 }
 
-var TagDevCommands = []cli.Command{
-	TagWipeCmd,
+var TagDevCommands = []*cli.Command{
+	&TagWipeCmd,
 	{
 		Name:  "mock",
 		Usage: "Generates mock records based on the entity definition",
@@ -929,7 +931,7 @@ var TagDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "mlist",
 		Usage: "Prints the list of embedded mocks into the app",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -942,7 +944,7 @@ var TagDevCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "msync",
 		Usage: "Tries to sync mocks into the system",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -955,7 +957,7 @@ var TagDevCommands = []cli.Command{
 		},
 	},
 }
-var TagImportExportCommands = []cli.Command{
+var TagImportExportCommands = []*cli.Command{
 	{
 		Name:    "validate",
 		Aliases: []string{"v"},
@@ -981,7 +983,7 @@ var TagImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "slist",
 		Usage: "Prints the list of files attached to this module for syncing or bootstrapping project",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -994,7 +996,7 @@ var TagImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:  "ssync",
 		Usage: "Tries to sync the embedded content into the database, the list could be seen by 'slist' command",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -1006,7 +1008,7 @@ var TagImportExportCommands = []cli.Command{
 			return nil
 		},
 	},
-	cli.Command{
+	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Flags: append(fireback.CommonQueryFlags,
@@ -1027,7 +1029,7 @@ var TagImportExportCommands = []cli.Command{
 			)
 		},
 	},
-	cli.Command{
+	{
 		Name: "import",
 		Flags: append(
 			append(
@@ -1057,25 +1059,25 @@ var TagImportExportCommands = []cli.Command{
 		},
 	},
 }
-var TagCliCommands []cli.Command = []cli.Command{
+var TagCliCommands []*cli.Command = []*cli.Command{
 	TAG_ACTION_QUERY.ToCli(),
 	TAG_ACTION_TABLE.ToCli(),
 	TagCreateCmd,
-	TagUpdateCmd,
-	TagAskCmd,
-	TagCreateInteractiveCmd,
+	&TagUpdateCmd,
+	&TagAskCmd,
+	&TagCreateInteractiveCmd,
 	// fireback.GetCommonRemoveQuery(
 	// 	reflect.ValueOf(&TagEntity{}).Elem(),
 	// 	TagActions.Remove,
 	// ),
 }
 
-func TagCliFn() cli.Command {
+func TagCliFn() *cli.Command {
 	commands := append(TagImportExportCommands, TagCliCommands...)
 	if !fireback.GetConfig().Production {
 		commands = append(commands, TagDevCommands...)
 	}
-	return cli.Command{
+	return &cli.Command{
 		Name:        "tag",
 		Description: "Tags module actions",
 		Usage:       ``,
@@ -1085,7 +1087,7 @@ func TagCliFn() cli.Command {
 				Value: "en",
 			},
 		},
-		Subcommands: commands,
+		Commands: commands,
 	}
 }
 

@@ -51,6 +51,8 @@ var GetProductsCountActionCmd cli.Command = cli.Command{
 		query := fireback.CommonCliQueryDSLBuilderAuthorize(c, GetProductsCountSecurityModel)
 		result, err := GetProductsCountActionFn(query)
 		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+
+		return nil
 	},
 }
 
@@ -100,7 +102,7 @@ var ProductCliActionsBundle = &fireback.CliActionsBundle{
 	Usage: ``,
 	// Here we will include entities actions, as well as module level actions
 	Commands: []*cli.Command{
-		GetProductsCountActionCmd,
+		&GetProductsCountActionCmd,
 		ProductCliFn(),
 	},
 }
