@@ -29,10 +29,10 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 	requiresSessionSecret := false
 	if config != nil {
 
-		if config.EnableRecaptcha2.Bool && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
+		if config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
 			requiresSessionSecret = true
 		}
-		if config.RequireOtpOnSignin.Bool {
+		if config.RequireOtpOnSignin.OrDefault(false) {
 			requiresSessionSecret = true
 		}
 	}
@@ -63,9 +63,9 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 	}
 
 	// if user doesn't have totp setup, then move him
-	if config != nil && config.ForceTotp.Bool {
+	if config != nil && config.ForceTotp.OrDefault(false) {
 		if passport.TotpSecret == "" ||
-			!passport.TotpConfirmed.Bool {
+			!passport.TotpConfirmed.OrDefault(false) {
 
 			// Let's create and assign to passport
 			key, _ := totp.Generate(totp.GenerateOpts{
@@ -92,7 +92,7 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 		}
 	}
 
-	if passport.TotpSecret != "" && config != nil && config.EnableTotp.Bool {
+	if passport.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
 			return &ClassicSigninActionResponse{
@@ -219,7 +219,7 @@ func UnsafeGetUserByPassportValue(value string, q fireback.QueryDSL) (*PassportE
 	}
 
 	var user UserEntity
-	if err := fireback.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.String}).First(&user).Error; err != nil {
+	if err := fireback.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.OrDefault("")}).First(&user).Error; err != nil {
 		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 

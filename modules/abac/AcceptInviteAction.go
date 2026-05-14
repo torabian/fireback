@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func AcceptInviteAction(c AcceptInviteActionRequest, q fireback.QueryDSL) (*Acce
 		// In order to add a user to a workspace, we need to know the role which he will have.
 		// there for, adding a workspaceuser entity in the database, and deleting the invitation is enough.
 
-		q.WorkspaceId = invite.WorkspaceId.String
+		q.WorkspaceId = invite.WorkspaceId.OrDefault("")
 		uw, uwErr := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 			WorkspaceId: invite.WorkspaceId,
 
@@ -45,12 +46,12 @@ func AcceptInviteAction(c AcceptInviteActionRequest, q fireback.QueryDSL) (*Acce
 		}
 
 		wre := &WorkspaceRoleEntity{
-			UserWorkspaceId: fireback.NewString(uw.UniqueId),
+			UserWorkspaceId: emigo.NullableOf(uw.UniqueId),
 			RoleId:          invite.RoleId,
 			WorkspaceId:     invite.WorkspaceId,
 		}
 
-		q.WorkspaceId = invite.WorkspaceId.String
+		q.WorkspaceId = invite.WorkspaceId.OrDefault("")
 		if _, wrErr := WorkspaceRoleActions.Create(wre, q); err != wrErr {
 			return wrErr
 		}

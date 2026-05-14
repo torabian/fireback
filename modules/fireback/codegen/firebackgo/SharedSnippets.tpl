@@ -63,7 +63,7 @@ import  "{{ $key}}"
     
     {{ if eq .Type "one" }}
         {{ if and (ne .Name "user") (ne .Name "workspace") }}
-        {{ .PublicName }}Id {{ $wsprefix }}String `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id" xml:"{{ .PrivateName }}Id"  {{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
+        {{ .PublicName }}Id emigo.Nullable[string] `json:"{{ .PrivateName }}Id" yaml:"{{ .PrivateName }}Id" xml:"{{ .PrivateName }}Id"  {{ if .IdFieldGorm }} gorm:"{{ .IdFieldGorm }}" {{ end }}{{ if .Validate }} validate:"{{ .Validate }}" {{ end }}`
         {{ end }}
     {{ end }}
     
@@ -86,23 +86,23 @@ import  "{{ $key}}"
     // Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
     // by default, visibility of record are 0, means they are protected by the workspace
     // which are being created, and visible to every member of the workspace
-    Visibility       {{$prefix}}String                         `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+    Visibility       emigo.Nullable[string]                         `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 
     // The unique-id of the workspace which content belongs to. Upon creation this will be designated
     // to the selected workspace by user, if they have write access. You can change this value
     // or prevent changes to it manually (on root features for example modifying other workspace)
-    WorkspaceId      {{$prefix}}String                         `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if $v.GormMap.WorkspaceId }} gorm:"{{ $v.GormMap.WorkspaceId }}" {{ end }}{{ if eq $v.DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
+    WorkspaceId      emigo.Nullable[string]                         `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"{{ if $v.GormMap.WorkspaceId }} gorm:"{{ $v.GormMap.WorkspaceId }}" {{ end }}{{ if eq $v.DistinctBy "workspace" }} gorm:"unique;not null;" {{ end }}`
 
     // The unique-id of the parent table, which this record is being linked to.
     // used internally for making relations in fireback, generally does not need manual changes
     // or modification by the developer or user. For example, if you have a object inside an object
     // the unique-id of the parent will be written in the child.
-    LinkerId         {{$prefix}}String                         `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+    LinkerId         emigo.Nullable[string]                         `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 
     // Used for recursive or parent-child operations. Some tables, are having nested relations,
     // and this field makes the table self refrenceing. ParentId needs to exist in the table before
     // creating of modifying a record.
-    ParentId         {{$prefix}}String                         `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+    ParentId         emigo.Nullable[string]                         `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 
     // Makes a field deletable. Some records should not be deletable at all.
     // default it's true.
@@ -115,12 +115,12 @@ import  "{{ $key}}"
     // The unique-id of the user which is creating the record, or the record belongs to.
     // Administration might want to change this to any user, by default Fireback fills
     // it to the current authenticated user.
-    UserId           {{$prefix}}String                         `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"{{ if $v.GormMap.UserId }} gorm:"{{ $v.GormMap.UserId }}" {{ end }}`
+    UserId           emigo.Nullable[string]                         `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"{{ if $v.GormMap.UserId }} gorm:"{{ $v.GormMap.UserId }}" {{ end }}`
 
     // General mechanism to rank the elements. From code perspective, it's just a number,
     // but you can sort it based on any logic for records to make a ranking, sorting.
     // they should not be unique across a table.
-    Rank             {{$prefix}}Int64                           `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+    Rank             emigo.Nullable[int64]                           `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
     {{ end }}
 
     {{ if $v.DataFields.PrimaryId }}
@@ -206,7 +206,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionCreate(
   query {{ $.wsprefix }}QueryDSL,
 ) (*{{ $.e.Upper }}{{ .PublicName }} , *{{ $.wsprefix }}IError) {
 
-    dto.LinkerId = {{ $.wsprefix }}NewString(query.LinkerId)
+    dto.LinkerId = emigo.NullableOf(query.LinkerId)
 
     var dbref *gorm.DB = nil
     if query.Tx == nil {
@@ -233,7 +233,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionUpdate(
     dto *{{ $.e.Upper }}{{ .PublicName }},
 ) (*{{ $.e.Upper }}{{ .PublicName }}, *{{ $.wsprefix }}IError) {
 
-    dto.LinkerId = {{ $.wsprefix }}NewString(query.LinkerId)
+    dto.LinkerId = emigo.NullableOf(query.LinkerId)
 
     var dbref *gorm.DB = nil
     if query.Tx == nil {
@@ -243,7 +243,7 @@ func {{ $.e.Upper }}{{ .PublicName }}ActionUpdate(
     }
 
     query.Tx = dbref
-    cond2 := &{{ $.e.Upper }}{{ .PublicName }}{LinkerId: fireback.NewString(query.LinkerId), UniqueId: query.UniqueId}
+    cond2 := &{{ $.e.Upper }}{{ .PublicName }}{LinkerId: emigo.NullableOf(query.LinkerId), UniqueId: query.UniqueId}
     q := query.Tx.Where(cond2)
     err := q.UpdateColumns(&dto).Error
     if err != nil {
@@ -590,8 +590,8 @@ And here is the actual object signature:
     }
     
     {{ if .e.DataFields.Essentials }}
-    dto.WorkspaceId = {{ .wsprefix }}NewString(query.WorkspaceId)
-    dto.UserId = {{ .wsprefix }}NewString(query.UserId)
+    dto.WorkspaceId =  emigo.NullableOf(query.WorkspaceId)
+    dto.UserId = emigo.NullableOf(query.UserId)
     {{ end }}
 
     {{ .e.Upper }}RecursiveAddUniqueId(dto, query)
@@ -834,7 +834,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
   func (dto *{{ .e.EntityName }}) Add(nodes ...*{{ .e.EntityName }}) bool {
     var size = dto.Size()
     for _, n := range nodes {
-      if n.ParentId.Valid && n.ParentId.String == dto.UniqueId {
+      if !n.ParentId.IsNull() && n.ParentId.OrDefault("") == dto.UniqueId {
         dto.Children = append(dto.Children, n)
       } else {
         for _, c := range dto.Children {
@@ -875,7 +875,7 @@ func {{ .e.Upper }}MemJoin(items []uint) []*{{ .e.Upper }}Entity {
     var tree []*{{ .e.EntityName }}
 
     for _, item := range items {
-      if !item.ParentId.Valid {
+      if !item.ParentId.IsSet() {
         root := item
         root.Add(items...)
         tree = append(tree, root)
@@ -999,9 +999,9 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
     // if not, the unique Id is being used
 
     {{ if (eq .e.DistinctBy "workspace") }}
-      cond2 := &{{.e.EntityName }}{WorkspaceId: {{ .wsprefix }}NewString(query.WorkspaceId)}
+      cond2 := &{{.e.EntityName }}{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
     {{ else if (eq .e.DistinctBy "user") }}
-      cond2 := &{{.e.EntityName }}{UserId: {{ .wsprefix }}NewString(query.UserId)}
+      cond2 := &{{.e.EntityName }}{UserId: emigo.NullableOf(query.UserId)}
     {{ else }}
       cond2 := &{{.e.EntityName }}{UniqueId: uniqueId}
     {{ end }}
@@ -1072,14 +1072,14 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
             items := []*{{ $entityName }}{{ $m }}{}
             
             dbref.
-            Where(&{{ $entityName }}{{ $m }}{LinkerId: {{ $.wsprefix }}NewString(linkerId)}).
+            Where(&{{ $entityName }}{{ $m }}{LinkerId: emigo.NullableOf(linkerId)}).
             Find(&items)
             
         
             for _, item := range items {
            
               dbref.
-              Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: {{ $.wsprefix }}NewString(item.UniqueId)}).
+              Where(&{{ $entityName }}{{ $m }}{{ .PublicName }} {LinkerId: emigo.NullableOf(item.UniqueId)}).
               Delete(&{{ $entityName }}{{ $m }}{{ .PublicName }} {})
             }
           }
@@ -1088,12 +1088,12 @@ func {{ .e.Upper}}DeleteEntireChildren(query {{ .wsprefix }}QueryDSL, dto *{{.e.
         {{ end }}
            
         dbref.
-          Where(&{{ $entityName }}{{ .PublicName }} {LinkerId: {{ $.wsprefix }}NewString(linkerId)}).
+          Where(&{{ $entityName }}{{ .PublicName }} {LinkerId: emigo.NullableOf(linkerId)}).
           Delete(&{{ $entityName }}{{ .PublicName }} {})
   
         for _, newItem := range fields.{{ .PublicName }} {
           newItem.UniqueId = {{ $.wsprefix }}UUID()
-          newItem.LinkerId = {{ $.wsprefix }}NewString(linkerId)
+          newItem.LinkerId = emigo.NullableOf(linkerId)
           dbref.Create(&newItem)
         }
       }
@@ -1246,13 +1246,13 @@ func {{ .e.Upper }}ActionWipeClean(query {{ .wsprefix }}QueryDSL) (int64, error)
       // Because we are updating by workspace, the unique id and workspace id
       // are important to be the same.
       fields.UniqueId = query.WorkspaceId
-      fields.WorkspaceId = {{ .wsprefix }}NewString(query.WorkspaceId)
+      fields.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
     {{ else if (eq .e.DistinctBy "user" )}}
       entity, err := {{ .e.Upper }}Actions.GetOne(query)
 
       // It's distinct by user, then unique id and user needs to be equal
       fields.UniqueId = query.UserId
-      fields.UserId = {{ .wsprefix }}NewString(query.UserId)
+      fields.UserId =  emigo.NullableOf(query.UserId)
     {{ end }}
 
 
@@ -1742,7 +1742,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
 	  {{ end }}
     {{ if or (eq .Type "string?") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        template.{{ .PublicName }} = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
+        emigo.ParseNullable(c.String("{{ $prefix }}{{ .ComputedCliName }}"), &template.{{ .PublicName }})
       }
 	  {{ end }}
     {{ if or (eq .Type "complex") }}
@@ -1753,8 +1753,9 @@ type x{{$prefix}}{{ .PublicName}} struct {
       }
 	  {{ end }}
     {{ if or (eq .Type "bool?") }}
+      // Bool??
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}") {
-        template.{{ .PublicName }} = {{ $wsprefix }}NewBoolAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}"))
+        emigo.ParseNullable(c.String("{{ $prefix }}{{ .ComputedCliName }}"), &template.{{ .PublicName }})
       }
 	  {{ end }}
     {{ if or (eq .Type "xfile?") }}
@@ -1798,7 +1799,7 @@ type x{{$prefix}}{{ .PublicName}} struct {
     {{ end }}
     {{ if or (eq .Type "one") }}
       if c.IsSet("{{ $prefix }}{{ .ComputedCliName }}-id") {
-        template.{{ .PublicName }}Id = {{ $wsprefix }}NewStringAutoNull(c.String("{{ $prefix }}{{ .ComputedCliName }}-id"))
+        template.{{ .PublicName }}Id = emigo.NullableOf(c.String("{{ $prefix }}{{ .ComputedCliName }}-id"))
       }
 	  {{ end }}
     {{ if or (eq .Type "daterange") }}
@@ -1847,7 +1848,7 @@ func Cast{{ .e.Upper }}FromCli (c *cli.Command) *{{ .e.ObjectName }} {
 
   {{ if .e.DataFields.Essentials }}
 	if c.IsSet("pid") {
-		template.ParentId = {{ .wsprefix}}NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
   {{ end }}
 	

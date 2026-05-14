@@ -50,8 +50,8 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) 
 
 		q.ResolveStrategy = security.ResolveStrategy
 		q.InternalQuery = result.SqlContext
-		if result.UserId.Present && result.UserId.String != "" {
-			q.UserId = result.UserId.String
+		if result.UserId.IsSet() && result.UserId.OrDefault("") != "" {
+			q.UserId = result.UserId.OrDefault("")
 		}
 		q.UserAccessPerWorkspace = result.UserAccessPerWorkspace
 
@@ -775,7 +775,11 @@ func CommonCliExportCmd2[T any](
 	f.WithPreloads = append(f.WithPreloads, detectedPreloads...)
 
 	stream, count, err := fn(f)
-	bar := progressbar.Default(int64(count.TotalItems))
+	totalProgress := int64(0)
+	if count != nil {
+		totalProgress = count.TotalItems
+	}
+	bar := progressbar.Default(int64(totalProgress))
 
 	if err != nil {
 		log.Fatalln(err)

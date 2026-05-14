@@ -52,6 +52,10 @@ import (
 	{{ if .e.HasComplexes }}
 	"encoding"
 	{{ end }}
+	
+	{{ if .e.IncludeEmigo }}
+	"github.com/torabian/emi/emigo"
+	{{ end }}
    
 )
 
@@ -175,10 +179,10 @@ func (x *{{ .e.EntityName }}List) ToTree() *{{ $.wsprefix }}TreeOperation[{{ .e.
 	return {{ $.wsprefix }}NewTreeOperation(
 		x.Items,
 		func(t *{{ .e.EntityName }}) string {
-			if !t.ParentId.Valid{
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *{{ .e.EntityName }}) string {
 			return t.UniqueId

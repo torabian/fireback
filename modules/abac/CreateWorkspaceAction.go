@@ -1,6 +1,9 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
 func init() {
 	// Override the implementation with our actual code.
@@ -21,7 +24,7 @@ func CreateWorkspaceAction(c CreateWorkspaceActionRequest, q fireback.QueryDSL) 
 		},
 		user: &UserEntity{
 			UniqueId: q.UserId,
-			UserId:   fireback.NewString(q.UserId),
+			UserId:   emigo.NullableOf(q.UserId),
 		},
 		restricted: true,
 	}

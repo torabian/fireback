@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
 )
 
@@ -29,9 +30,7 @@ func CastAuthContextFromCli(c *cli.Command) *AuthContextDto {
 	if c.IsSet("token") {
 		template.Token = c.String("token")
 	}
-	if c.IsSet("security-id") {
-		template.SecurityId = NewStringAutoNull(c.String("security-id"))
-	}
+
 	return template
 }
 
@@ -81,12 +80,12 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 type AuthContextDto struct {
 	SkipWorkspaceId bool `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
 	// For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content
-	AllowCascade bool             `json:"allowCascade" yaml:"allowCascade"        `
-	WorkspaceId  string           `json:"workspaceId" yaml:"workspaceId"        `
-	Token        string           `json:"token" yaml:"token"        `
-	Security     *SecurityModel   `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
-	SecurityId   String           `json:"securityId" yaml:"securityId"`
-	Capabilities []PermissionInfo `json:"capabilities" yaml:"capabilities"        `
+	AllowCascade bool                   `json:"allowCascade" yaml:"allowCascade"        `
+	WorkspaceId  string                 `json:"workspaceId" yaml:"workspaceId"        `
+	Token        string                 `json:"token" yaml:"token"        `
+	Security     *SecurityModel         `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
+	SecurityId   emigo.Nullable[string] `json:"securityId" yaml:"securityId"`
+	Capabilities []PermissionInfo       `json:"capabilities" yaml:"capabilities"        `
 }
 type AuthContextDtoList struct {
 	Items []*AuthContextDto

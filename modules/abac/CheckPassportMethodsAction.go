@@ -19,7 +19,7 @@ func CheckPassportMethodsActionfunc(c CheckPassportMethodsActionRequest, query f
 	}
 
 	if config != nil {
-		state.EnabledRecaptcha2 = config.EnableRecaptcha2.Bool && config.Recaptcha2ClientKey != "" && config.Recaptcha2ServerKey != ""
+		state.EnabledRecaptcha2 = config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ClientKey != "" && config.Recaptcha2ServerKey != ""
 		state.Recaptcha2ClientKey = config.Recaptcha2ClientKey
 	}
 

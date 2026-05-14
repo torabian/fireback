@@ -171,7 +171,7 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 		return &UserEntity{}, err
 	}
 
-	user, _ := UserActions.GetOne(fireback.QueryDSL{UniqueId: item.UserId.String})
+	user, _ := UserActions.GetOne(fireback.QueryDSL{UniqueId: item.UserId.OrDefault("")})
 	return user, nil
 }
 

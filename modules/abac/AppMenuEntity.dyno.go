@@ -20,6 +20,7 @@ import (
 	//queries github.com/torabian/fireback - modules/abac"
 	"context"
 	"embed"
+	"github.com/torabian/emi/emigo"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/AppMenu"
@@ -75,20 +76,20 @@ type AppMenuEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -98,11 +99,11 @@ type AppMenuEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -139,7 +140,7 @@ type AppMenuEntity struct {
 	ActiveMatcher string `json:"activeMatcher" xml:"activeMatcher" yaml:"activeMatcher"        `
 	// The permission which is required for the menu to be visible.
 	Capability   *fireback.CapabilityEntity `json:"capability" xml:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
-	CapabilityId fireback.String            `json:"capabilityId" yaml:"capabilityId" xml:"capabilityId"  `
+	CapabilityId emigo.Nullable[string]     `json:"capabilityId" yaml:"capabilityId" xml:"capabilityId"  `
 	Translations []*AppMenuEntityPolyglot   `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
 	Children     []*AppMenuEntity           `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo     *AppMenuEntity             `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
@@ -185,10 +186,10 @@ func (x *AppMenuEntityList) ToTree() *fireback.TreeOperation[AppMenuEntity] {
 	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *AppMenuEntity) string {
-			if !t.ParentId.Valid {
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *AppMenuEntity) string {
 			return t.UniqueId
@@ -390,8 +391,8 @@ func AppMenuEntityBeforeCreateAppend(dto *AppMenuEntity, query fireback.QueryDSL
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
-	dto.UserId = fireback.NewString(query.UserId)
+	dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	dto.UserId = emigo.NullableOf(query.UserId)
 	AppMenuRecursiveAddUniqueId(dto, query)
 }
 func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query fireback.QueryDSL) {
@@ -548,7 +549,7 @@ func (dto *AppMenuEntity) Size() int {
 func (dto *AppMenuEntity) Add(nodes ...*AppMenuEntity) bool {
 	var size = dto.Size()
 	for _, n := range nodes {
-		if n.ParentId.Valid && n.ParentId.String == dto.UniqueId {
+		if !n.ParentId.IsNull() && n.ParentId.OrDefault("") == dto.UniqueId {
 			dto.Children = append(dto.Children, n)
 		} else {
 			for _, c := range dto.Children {
@@ -576,7 +577,7 @@ func AppMenuActionCteQueryFn(query fireback.QueryDSL) ([]*AppMenuEntity, *fireba
 	}
 	var tree []*AppMenuEntity
 	for _, item := range items {
-		if !item.ParentId.Valid {
+		if !item.ParentId.IsSet() {
 			root := item
 			root.Add(items...)
 			tree = append(tree, root)
@@ -939,7 +940,7 @@ func CastAppMenuFromCli(c *cli.Command) *AppMenuEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
 	if c.IsSet("label") {
 		template.Label = c.String("label")
@@ -954,7 +955,7 @@ func CastAppMenuFromCli(c *cli.Command) *AppMenuEntity {
 		template.ActiveMatcher = c.String("active-matcher")
 	}
 	if c.IsSet("capability-id") {
-		template.CapabilityId = fireback.NewStringAutoNull(c.String("capability-id"))
+		template.CapabilityId = emigo.NullableOf(c.String("capability-id"))
 	}
 	return template
 }

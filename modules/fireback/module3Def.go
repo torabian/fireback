@@ -13,6 +13,7 @@ package fireback
 import (
 	"context"
 	"encoding/json"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -594,6 +595,33 @@ func (x Module3Action) QSFields() []*Module3Field {
 
 func (x Module3Entity) HasClickHouse() bool {
 	return x.Replicas != nil && x.Replicas.Clickhouse != nil
+}
+
+func (x Module3Entity) IncludeEmigo() bool {
+	/// Because the rank is using that, it's now happening.
+	return true
+
+	includeEmigo := false
+	var walk func(fields []*Module3Field) []*core.EmiField
+	walk = func(fields []*Module3Field) []*core.EmiField {
+
+		emiFields := []*core.EmiField{}
+		for _, field := range fields {
+			if slices.Contains([]string{"int?", "int32?", "int64?", "float32?", "float64?", "bool?", "string?"}, field.Type) {
+				includeEmigo = true
+			}
+
+			if len(field.Fields) > 0 {
+				walk(field.Fields)
+			}
+		}
+
+		return emiFields
+	}
+
+	walk(x.Fields)
+
+	return includeEmigo
 }
 
 func hasComplexInFields(fields []*Module3Field) bool {

@@ -38,7 +38,7 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.
 	// 	)
 	// }
 
-	if olderEntity.IsInCreationProcess.Bool {
+	if olderEntity.IsInCreationProcess.OrDefault(false) {
 		// in some cases, the otp alone should be enough and can complete signup process.
 		// for example, phone number often is enough for authroization of sms or phone call
 		// has been through
@@ -105,7 +105,7 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.
 
 				// Delete the session so user cannot login again
 				err2 := fireback.GetDbRef().Where(
-					&PublicAuthenticationEntity{PassportId: fireback.NewString(passport.UniqueId), Otp: req.Otp},
+					&PublicAuthenticationEntity{PassportId: emigo.NullableOf(passport.UniqueId), Otp: req.Otp},
 				).Delete(&PublicAuthenticationEntity{}).Error
 
 				if err2 != nil {

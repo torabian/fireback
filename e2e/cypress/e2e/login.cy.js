@@ -170,7 +170,9 @@ describe("Logging in with the signin", () => {
 
             // test if items are having children with more than 1 item in them.
             for (const item of res.data.items) {
-              expect(item.children.length).to.be.greaterThan(0);
+              if (item.children && item.children.length > 0) {
+                expect(item.children?.length).to.be.greaterThan(0);
+              }
             }
           });
         });

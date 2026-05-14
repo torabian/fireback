@@ -1,6 +1,9 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
 func init() {
 	UserPassportsImpl = UserPassportsAction
@@ -9,7 +12,7 @@ func init() {
 func UserPassportsAction(c UserPassportsActionRequest, q fireback.QueryDSL) (*UserPassportsActionResponse, error) {
 
 	passports := []PassportEntity{}
-	err := fireback.GetRef(q).Where(PassportEntity{UserId: fireback.NewString(q.UserId)}).Find(&passports).Error
+	err := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
 	if err != nil {
 		return nil, fireback.CastToIError(err)
 	}
@@ -20,7 +23,7 @@ func UserPassportsAction(c UserPassportsActionRequest, q fireback.QueryDSL) (*Us
 			Value:         item.Value,
 			Type:          item.Type,
 			UniqueId:      item.UniqueId,
-			TotpConfirmed: item.TotpConfirmed.Bool,
+			TotpConfirmed: item.TotpConfirmed.OrDefault(false),
 		})
 	}
 

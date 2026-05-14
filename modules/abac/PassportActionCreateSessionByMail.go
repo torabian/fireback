@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -68,10 +69,10 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 	until := fireback.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{
 		UniqueId:    fireback.UUID(),
-		UserId:      fireback.NewString(x.UniqueId),
+		UserId:      emigo.NullableOf(x.UniqueId),
 		Token:       tokenString,
 		ValidUntil:  *until,
-		WorkspaceId: fireback.NewString(ROOT_VAR),
+		WorkspaceId: emigo.NullableOf(ROOT_VAR),
 	}
 	if err3 := ref.Create(token).Error; err3 != nil {
 		return "", err3

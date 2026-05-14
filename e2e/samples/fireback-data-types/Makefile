@@ -9,4 +9,6 @@ init:
 	go mod tidy && make
 
 refresh:
-	make && ../../../app gen gof --relative-to ${PWD} --def ${PWD}/modules/product/ProductModule3.yml --no-cache true --gof-module github.com/torabian/fireback/e2e/samples/fireback-data-types >> ${PWD}/artifacts/module3.log  && make
+	../../../app gen gof --relative-to ${PWD} --def ${PWD}/modules/product/ProductModule3.yml --no-cache true --gof-module github.com/torabian/fireback/e2e/samples/fireback-data-types >> ${PWD}/artifacts/module3.log && \
+	../../../app gen gof --relative-to ${PWD} --def ${PWD}/modules/product/tags/TagsModule3.yml --no-cache true --gof-module github.com/torabian/fireback/e2e/samples/fireback-data-types >> ${PWD}/artifacts/module3.log && \
+	make

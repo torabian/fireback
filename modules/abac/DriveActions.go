@@ -13,6 +13,7 @@ import (
 
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/tus/tusd/pkg/filestore"
 	tusd "github.com/tus/tusd/pkg/handler"
@@ -77,8 +78,8 @@ func afterTusUploadedOnDisk(event *tusd.HookEvent, q *fireback.QueryDSL, ctx *Fi
 		UniqueId:    event.Upload.ID,
 		Size:        fsize,
 		Type:        ftype,
-		WorkspaceId: fireback.NewString(q.WorkspaceId),
-		UserId:      fireback.NewString(q.UserId),
+		WorkspaceId: emigo.NullableOf(q.WorkspaceId),
+		UserId:      emigo.NullableOf(q.UserId),
 	}
 
 	if ctx != nil {
@@ -208,7 +209,7 @@ func LiftTusServerInHttp(app *gin.Engine) {
 			if result != nil {
 				q := fireback.QueryDSL{
 					WorkspaceId: wi,
-					UserId:      result.UserId.String,
+					UserId:      result.UserId.OrDefault(""),
 				}
 
 				afterTusUploadedOnDisk(&event, &q, GlobalTusFileUploadContext)

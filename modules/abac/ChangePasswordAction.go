@@ -1,6 +1,9 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
 func init() {
 	// Override the implementation with our actual code.
@@ -23,7 +26,7 @@ func ChangePasswordAction(c ChangePasswordActionRequest, q fireback.QueryDSL) (*
 	// Passports all belong to root workspace, so we need to query that
 	// thats why it's changed manually here. Passport needs to belong to current user.
 	passports := []PassportEntity{}
-	err := fireback.GetRef(q).Where(PassportEntity{UserId: fireback.NewString(q.UserId)}).Find(&passports).Error
+	err := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
 	if err != nil {
 		return nil, fireback.CastToIError(err)
 	}
