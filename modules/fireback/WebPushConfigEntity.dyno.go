@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/emi/emigo"
 	metas "github.com/torabian/fireback/modules/fireback/metas"
 	mocks "github.com/torabian/fireback/modules/fireback/mocks/WebPushConfig"
 	seeders "github.com/torabian/fireback/modules/fireback/seeders/WebPushConfig"
@@ -52,20 +53,20 @@ type WebPushConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -75,11 +76,11 @@ type WebPushConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -152,10 +153,10 @@ func (x *WebPushConfigEntityList) ToTree() *TreeOperation[WebPushConfigEntity] {
 	return NewTreeOperation(
 		x.Items,
 		func(t *WebPushConfigEntity) string {
-			if !t.ParentId.Valid {
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *WebPushConfigEntity) string {
 			return t.UniqueId
@@ -330,8 +331,8 @@ func WebPushConfigEntityBeforeCreateAppend(dto *WebPushConfigEntity, query Query
 	if dto.UniqueId == "" {
 		dto.UniqueId = UUID()
 	}
-	dto.WorkspaceId = NewString(query.WorkspaceId)
-	dto.UserId = NewString(query.UserId)
+	dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	dto.UserId = emigo.NullableOf(query.UserId)
 	WebPushConfigRecursiveAddUniqueId(dto, query)
 }
 func WebPushConfigRecursiveAddUniqueId(dto *WebPushConfigEntity, query QueryDSL) {
@@ -486,7 +487,7 @@ func WebPushConfigUpdateExec(dbref *gorm.DB, query QueryDSL, fields *WebPushConf
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &WebPushConfigEntity{UserId: NewString(query.UserId)}
+	cond2 := &WebPushConfigEntity{UserId: emigo.NullableOf(query.UserId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
@@ -763,7 +764,7 @@ func CastWebPushConfigFromCli(c *cli.Command) *WebPushConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
 	if c.IsSet("subscription") {
 		template.Subscription = JSONFrom(c.String("subscription"))
@@ -1367,7 +1368,7 @@ func WebPushConfigDistinctActionUpdate(
 	entity, err := WebPushConfigActions.GetOne(query)
 	// It's distinct by user, then unique id and user needs to be equal
 	fields.UniqueId = query.UserId
-	fields.UserId = NewString(query.UserId)
+	fields.UserId = emigo.NullableOf(query.UserId)
 	if err != nil || entity.UniqueId == "" {
 		return WebPushConfigActions.Create(fields, query)
 	} else {

@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/emi/emigo"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/NotificationConfig"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/NotificationConfig"
@@ -183,20 +184,20 @@ type NotificationConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -206,11 +207,11 @@ type NotificationConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -240,9 +241,9 @@ type NotificationConfigEntity struct {
 	CascadeToSubWorkspaces                 bool                        `json:"cascadeToSubWorkspaces" xml:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
 	ForcedCascadeEmailProvider             bool                        `json:"forcedCascadeEmailProvider" xml:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
 	GeneralEmailProvider                   *EmailProviderEntity        `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
-	GeneralEmailProviderId                 fireback.String             `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
+	GeneralEmailProviderId                 emigo.Nullable[string]      `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
 	GeneralGsmProvider                     *GsmProviderEntity          `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
-	GeneralGsmProviderId                   fireback.String             `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
+	GeneralGsmProviderId                   emigo.Nullable[string]      `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
 	InviteToWorkspaceContent               string                      `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
 	InviteToWorkspaceContentExcerpt        string                      `json:"inviteToWorkspaceContentExcerpt" xml:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
 	InviteToWorkspaceContentDefault        string                      `json:"inviteToWorkspaceContentDefault" xml:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
@@ -250,9 +251,9 @@ type NotificationConfigEntity struct {
 	InviteToWorkspaceTitle                 string                      `json:"inviteToWorkspaceTitle" xml:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
 	InviteToWorkspaceTitleDefault          string                      `json:"inviteToWorkspaceTitleDefault" xml:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
 	InviteToWorkspaceSender                *EmailSenderEntity          `json:"inviteToWorkspaceSender" xml:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"      `
-	InviteToWorkspaceSenderId              fireback.String             `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId" xml:"inviteToWorkspaceSenderId"  `
+	InviteToWorkspaceSenderId              emigo.Nullable[string]      `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId" xml:"inviteToWorkspaceSenderId"  `
 	AccountCenterEmailSender               *EmailSenderEntity          `json:"accountCenterEmailSender" xml:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"      `
-	AccountCenterEmailSenderId             fireback.String             `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId" xml:"accountCenterEmailSenderId"  `
+	AccountCenterEmailSenderId             emigo.Nullable[string]      `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId" xml:"accountCenterEmailSenderId"  `
 	ForgetPasswordContent                  string                      `json:"forgetPasswordContent" xml:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
 	ForgetPasswordContentExcerpt           string                      `json:"forgetPasswordContentExcerpt" xml:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
 	ForgetPasswordContentDefault           string                      `json:"forgetPasswordContentDefault" xml:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
@@ -260,10 +261,10 @@ type NotificationConfigEntity struct {
 	ForgetPasswordTitle                    string                      `json:"forgetPasswordTitle" xml:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
 	ForgetPasswordTitleDefault             string                      `json:"forgetPasswordTitleDefault" xml:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
 	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" xml:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
-	ForgetPasswordSenderId                 fireback.String             `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
+	ForgetPasswordSenderId                 emigo.Nullable[string]      `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
 	AcceptLanguage                         string                      `json:"acceptLanguage" xml:"acceptLanguage" yaml:"acceptLanguage"        `
 	ConfirmEmailSender                     *EmailSenderEntity          `json:"confirmEmailSender" xml:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"      `
-	ConfirmEmailSenderId                   fireback.String             `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
+	ConfirmEmailSenderId                   emigo.Nullable[string]      `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
 	ConfirmEmailContent                    string                      `json:"confirmEmailContent" xml:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
 	ConfirmEmailContentExcerpt             string                      `json:"confirmEmailContentExcerpt" xml:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
 	ConfirmEmailContentDefault             string                      `json:"confirmEmailContentDefault" xml:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
@@ -314,10 +315,10 @@ func (x *NotificationConfigEntityList) ToTree() *fireback.TreeOperation[Notifica
 	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *NotificationConfigEntity) string {
-			if !t.ParentId.Valid {
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *NotificationConfigEntity) string {
 			return t.UniqueId
@@ -544,8 +545,8 @@ func NotificationConfigEntityBeforeCreateAppend(dto *NotificationConfigEntity, q
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
-	dto.UserId = fireback.NewString(query.UserId)
+	dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	dto.UserId = emigo.NullableOf(query.UserId)
 	NotificationConfigRecursiveAddUniqueId(dto, query)
 }
 func NotificationConfigRecursiveAddUniqueId(dto *NotificationConfigEntity, query fireback.QueryDSL) {
@@ -700,7 +701,7 @@ func NotificationConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, field
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &NotificationConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}
+	cond2 := &NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
@@ -1409,7 +1410,7 @@ func CastNotificationConfigFromCli(c *cli.Command) *NotificationConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
 	if c.IsSet("cascade-to-sub-workspaces") {
 		value := c.Bool("cascade-to-sub-workspaces")
@@ -1420,10 +1421,10 @@ func CastNotificationConfigFromCli(c *cli.Command) *NotificationConfigEntity {
 		template.ForcedCascadeEmailProvider = value
 	}
 	if c.IsSet("general-email-provider-id") {
-		template.GeneralEmailProviderId = fireback.NewStringAutoNull(c.String("general-email-provider-id"))
+		template.GeneralEmailProviderId = emigo.NullableOf(c.String("general-email-provider-id"))
 	}
 	if c.IsSet("general-gsm-provider-id") {
-		template.GeneralGsmProviderId = fireback.NewStringAutoNull(c.String("general-gsm-provider-id"))
+		template.GeneralGsmProviderId = emigo.NullableOf(c.String("general-gsm-provider-id"))
 	}
 	if c.IsSet("invite-to-workspace-content") {
 		template.InviteToWorkspaceContent = c.String("invite-to-workspace-content")
@@ -1444,10 +1445,10 @@ func CastNotificationConfigFromCli(c *cli.Command) *NotificationConfigEntity {
 		template.InviteToWorkspaceTitleDefault = c.String("invite-to-workspace-title-default")
 	}
 	if c.IsSet("invite-to-workspace-sender-id") {
-		template.InviteToWorkspaceSenderId = fireback.NewStringAutoNull(c.String("invite-to-workspace-sender-id"))
+		template.InviteToWorkspaceSenderId = emigo.NullableOf(c.String("invite-to-workspace-sender-id"))
 	}
 	if c.IsSet("account-center-email-sender-id") {
-		template.AccountCenterEmailSenderId = fireback.NewStringAutoNull(c.String("account-center-email-sender-id"))
+		template.AccountCenterEmailSenderId = emigo.NullableOf(c.String("account-center-email-sender-id"))
 	}
 	if c.IsSet("forget-password-content") {
 		template.ForgetPasswordContent = c.String("forget-password-content")
@@ -1468,13 +1469,13 @@ func CastNotificationConfigFromCli(c *cli.Command) *NotificationConfigEntity {
 		template.ForgetPasswordTitleDefault = c.String("forget-password-title-default")
 	}
 	if c.IsSet("forget-password-sender-id") {
-		template.ForgetPasswordSenderId = fireback.NewStringAutoNull(c.String("forget-password-sender-id"))
+		template.ForgetPasswordSenderId = emigo.NullableOf(c.String("forget-password-sender-id"))
 	}
 	if c.IsSet("accept-language") {
 		template.AcceptLanguage = c.String("accept-language")
 	}
 	if c.IsSet("confirm-email-sender-id") {
-		template.ConfirmEmailSenderId = fireback.NewStringAutoNull(c.String("confirm-email-sender-id"))
+		template.ConfirmEmailSenderId = emigo.NullableOf(c.String("confirm-email-sender-id"))
 	}
 	if c.IsSet("confirm-email-content") {
 		template.ConfirmEmailContent = c.String("confirm-email-content")
@@ -2102,7 +2103,7 @@ func NotificationConfigDistinctActionUpdate(
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	fields.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return NotificationConfigActions.Create(fields, query)
 	} else {

@@ -18,7 +18,7 @@ var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
 var OS_SIGNIN_CAPABILITIES []*fireback.CapabilityEntity = []*fireback.CapabilityEntity{
-	{UniqueId: ROOT_ALL_ACCESS, Visibility: fireback.NewString("A"), Name: "Root"},
+	{UniqueId: ROOT_ALL_ACCESS, Visibility: emigo.NullableOf("A"), Name: "Root"},
 }
 
 var TokenParseInformation cli.Command = cli.Command{
@@ -92,7 +92,7 @@ func RepairTheWorkspaces() error {
 		err := fireback.GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
-			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: fireback.NewString(system), UniqueId: "root", RoleId: fireback.NewString(ROOT_VAR)}).Error
+			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: emigo.NullableOf(ROOT_VAR)}).Error
 			if err != nil {
 				return err
 			}
@@ -108,8 +108,8 @@ func RepairTheWorkspaces() error {
 		if err == gorm.ErrRecordNotFound {
 			err = fireback.GetDbRef().Create(&WorkspaceEntity{
 				UniqueId: "root", Name: ROOT_VAR, Description: description,
-				WorkspaceId: fireback.NewString(ROOT_VAR),
-				TypeId:      fireback.NewString(ROOT_VAR),
+				WorkspaceId: emigo.NullableOf(ROOT_VAR),
+				TypeId:      emigo.NullableOf(ROOT_VAR),
 			}).Error
 
 			if err != nil {
@@ -136,7 +136,7 @@ func RepairTheWorkspaces() error {
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
 			description := "The workspace content which applies to everyworkspace"
-			err = fireback.GetDbRef().Create(&WorkspaceEntity{WorkspaceId: fireback.NewString(system), UniqueId: "system", Name: system, Description: description}).Error
+			err = fireback.GetDbRef().Create(&WorkspaceEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "system", Name: system, Description: description}).Error
 
 			if err != nil {
 				return err
@@ -156,12 +156,12 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 	sampleName := "Root Access"
 	entity := &RoleEntity{
 		UniqueId:    "root",
-		WorkspaceId: fireback.NewString(ROOT_VAR),
+		WorkspaceId: emigo.NullableOf(ROOT_VAR),
 		Name:        sampleName,
 		Capabilities: []*fireback.CapabilityEntity{
 			{
-				WorkspaceId: fireback.NewString("system"),
-				Visibility:  fireback.NewString("A"),
+				WorkspaceId: emigo.NullableOf("system"),
+				Visibility:  emigo.NullableOf("A"),
 				UniqueId:    ROOT_ALL_ACCESS,
 			},
 		},
@@ -195,7 +195,10 @@ func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*WorkspaceTypeEntit
 			item := &WorkspaceTypeEntity{}
 			err := tx.
 				Model(&WorkspaceTypeEntity{}).
-				Where(&WorkspaceTypeEntity{WorkspaceId: fireback.NewString(ROOT_VAR), UniqueId: role.UniqueId}).First(item).Error
+				Where(&WorkspaceTypeEntity{
+					WorkspaceId: emigo.NullableOf(ROOT_VAR),
+					UniqueId:    role.UniqueId,
+				}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
 				_, err := WorkspaceTypeActionCreate(role, fireback.QueryDSL{Tx: tx, WorkspaceId: root})
@@ -225,7 +228,7 @@ func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
 				Where(&RoleEntity{WorkspaceId: role.WorkspaceId, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
-				_, err := RoleActions.Create(role, fireback.QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.String})
+				_, err := RoleActions.Create(role, fireback.QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.OrDefault("")})
 
 				if err != nil {
 					return err
@@ -369,18 +372,18 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 			return errors.New("User has no workspaces after generation")
 		}
 
-		workspaceAs := session.UserWorkspaces[0].WorkspaceId.String
+		workspaceAs := session.UserWorkspaces[0].WorkspaceId.OrDefault("")
 
 		if setForRoot {
 			user, _ := session.User.Get()
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = user.UserId.String
+			query.UserId = user.UserId.OrDefault("")
 			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
 				UserId:      user.UserId,
-				WorkspaceId: fireback.NewString(ROOT_VAR),
+				WorkspaceId: emigo.NullableOf(ROOT_VAR),
 			}, query)
 
 			if err2 != nil {
@@ -388,8 +391,8 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 			}
 
 			_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
-				RoleId:      fireback.NewString(ROOT_VAR),
-				WorkspaceId: fireback.NewString(ROOT_VAR),
+				RoleId:      emigo.NullableOf(ROOT_VAR),
+				WorkspaceId: emigo.NullableOf(ROOT_VAR),
 			}, query)
 
 			if err3 != nil {

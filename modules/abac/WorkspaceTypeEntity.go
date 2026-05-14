@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -35,10 +36,10 @@ func WorkspaceTypeActionUpdate(
 	return WorkspaceTypeActionUpdateFn(query, fields)
 }
 
-func ValidateRoleAndItsExistence(roleId fireback.String) (*RoleEntity, []*fireback.IErrorItem) {
+func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*RoleEntity, []*fireback.IErrorItem) {
 	items := []*fireback.IErrorItem{}
 
-	if !roleId.Valid {
+	if !roleId.IsNull() {
 		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNecessary,
@@ -47,7 +48,7 @@ func ValidateRoleAndItsExistence(roleId fireback.String) (*RoleEntity, []*fireba
 		return nil, items
 	}
 
-	if role, err := RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId.String}); err != nil {
+	if role, err := RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId.OrDefault("")}); err != nil {
 		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
@@ -85,7 +86,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IEr
 		return roleErrors
 	}
 
-	if !role.WorkspaceId.Valid || role.WorkspaceId.String != ROOT_VAR {
+	if !role.WorkspaceId.IsSet() || role.WorkspaceId.OrDefault("") != ROOT_VAR {
 		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.OnlyRootRoleIsAccepted,

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -58,9 +59,9 @@ func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest, q
 		Otp:                 otp,
 		RecoveryAbsoluteUrl: url,
 		PassportValue:       req.Value,
-		WorkspaceId:         fireback.NewString(ROOT_VAR),
+		WorkspaceId:         emigo.NullableOf(ROOT_VAR),
 		SessionSecret:       secret,
-		IsInCreationProcess: fireback.NewBool(false),
+		IsInCreationProcess: emigo.NullableOf(false),
 		Passport:            passport,
 		User:                user,
 	}
@@ -85,7 +86,7 @@ func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest, q
 	// we will store the entity with details, and after verifying, the account creation process starts
 	if passport == nil {
 
-		item.IsInCreationProcess = fireback.NewBool(true)
+		item.IsInCreationProcess = emigo.NullableOf(true)
 	}
 
 	if err := fireback.GetDbRef().Create(item).Error; err != nil {

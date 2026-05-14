@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -38,7 +39,7 @@ func ConfirmClassicPassportTotpAction(c ConfirmClassicPassportTotpActionRequest,
 	if _, err := PassportActions.Update(fireback.QueryDSL{
 		WorkspaceId: ROOT_VAR,
 		UniqueId:    passport.UniqueId,
-	}, &PassportEntity{TotpConfirmed: fireback.NewBool(true), UniqueId: passport.UniqueId}); err != nil {
+	}, &PassportEntity{TotpConfirmed: emigo.NullableOf(true), UniqueId: passport.UniqueId}); err != nil {
 		return nil, fireback.Create401Error(&AbacMessages.PassportTotpNotConfirmed, []string{})
 	}
 

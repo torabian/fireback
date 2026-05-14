@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -93,7 +94,7 @@ func init() {
 			LastName:       getRandomName(lastNames),
 			BirthDate:      fireback.XDate((getRandomBirthDate())),
 			Photo:          getRandomAvatarURL(),
-			Gender:         fireback.NewInt(randomZeroOrOne()),
+			Gender:         emigo.NullableOf(randomZeroOrOne()),
 			LastIpAddress:  randomPublicIP(),
 			PrimaryAddress: RandomUserPrimaryAddress(),
 		}
@@ -189,10 +190,10 @@ func RandomUserPrimaryAddress() *UserPrimaryAddress {
 	s := addresses[rand.Intn(len(addresses))]
 	return &UserPrimaryAddress{
 		AddressLine1:    (s.Address1),
-		AddressLine2:    fireback.NewString(s.Address2),
-		City:            fireback.NewString(s.City),
-		StateOrProvince: fireback.NewString(s.State),
-		PostalCode:      fireback.NewString(s.Postcode),
-		CountryCode:     fireback.NewString(s.CountryCode),
+		AddressLine2:    emigo.NullableOf(s.Address2),
+		City:            emigo.NullableOf(s.City),
+		StateOrProvince: emigo.NullableOf(s.State),
+		PostalCode:      emigo.NullableOf(s.Postcode),
+		CountryCode:     emigo.NullableOf(s.CountryCode),
 	}
 }

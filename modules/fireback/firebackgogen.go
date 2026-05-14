@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -16,7 +17,7 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 
 	case "string", "text", "enum":
 		return "string"
-	case "string?", "text?", "html?", "enum?":
+	case "text?", "html?", "enum?":
 		return prefix + "String"
 	case "duration?":
 		return prefix + "Duration"
@@ -41,8 +42,9 @@ func GolangComputedField(field *Module3Field, isWorkspace bool) string {
 		return "[]" + field.Primitive
 	case "int64", "int32", "int", "float64", "float32", "bool":
 		return field.Type
-	case "int64?", "int32?", "int?", "float64?", "float32?", "bool?":
-		return prefix + strings.ReplaceAll(ToUpper(field.Type), "?", "")
+	case "int64?", "int32?", "int?", "float64?", "float32?", "bool?", "string?":
+		return fmt.Sprintf("emigo.Nullable[%v]", strings.ReplaceAll((field.Type), "?", ""))
+		// return prefix + strings.ReplaceAll(ToUpper(field.Type), "?", "")
 	case "xfile?":
 		return prefix + "XFile"
 	case "money?":

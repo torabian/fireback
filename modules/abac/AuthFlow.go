@@ -300,11 +300,11 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				user, _ := res2.Session.User.Get()
 
 				query.WorkspaceId = ROOT_VAR
-				query.UserId = user.UserId.String
+				query.UserId = user.UserId.OrDefault("")
 				_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 					UniqueId:    fireback.UUID(),
 					UserId:      user.UserId,
-					WorkspaceId: fireback.NewString(ROOT_VAR),
+					WorkspaceId: emigo.NullableOf(ROOT_VAR),
 				}, query)
 
 				if err2 != nil {
@@ -312,8 +312,8 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				}
 
 				_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
-					RoleId:      fireback.NewString(ROOT_VAR),
-					WorkspaceId: fireback.NewString(ROOT_VAR),
+					RoleId:      emigo.NullableOf(ROOT_VAR),
+					WorkspaceId: emigo.NullableOf(ROOT_VAR),
 				}, query)
 
 				if err3 != nil {
@@ -364,7 +364,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				if len(signin.Session.UserWorkspaces) > 1 {
 					var workspaces = []string{}
 					for _, item := range signin.Session.UserWorkspaces {
-						workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.String))
+						workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.OrDefault("")))
 					}
 
 					selectedWorkspace = fireback.AskForSelect("You have more than one workspace assigned to your account. Choose which one to continue", workspaces)
@@ -457,7 +457,7 @@ func authenticateCliWithSession(session *UserSessionDto, workspaceTypeId string)
 	var selectedWorkspace = ""
 	var workspaces = []string{}
 	for _, item := range session.UserWorkspaces {
-		workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.String))
+		workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.OrDefault("")))
 	}
 
 	if workspaceTypeId == ROOT_VAR {

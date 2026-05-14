@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	queries "github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
@@ -45,7 +46,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 	q.WorkspaceId = workspaceId
 
 	q.UserId = dto.user.UniqueId
-	dto.workspace.WorkspaceId = fireback.NewString(workspaceId)
+	dto.workspace.WorkspaceId = emigo.NullableOf(workspaceId)
 
 	var actualWorkspace *WorkspaceEntity = nil
 	if existingWs, err9 := WorkspaceActions.GetOne(fireback.QueryDSL{UniqueId: dto.workspace.UniqueId, Tx: q.Tx}); err9 == nil && existingWs != nil {
@@ -74,12 +75,12 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 
 	// let's find that link, if not exists create it.
 	if errFinding := q.Tx.Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
-		WorkspaceId: fireback.NewString(workspaceId),
-		UserId:      fireback.NewString(q.UserId),
+		WorkspaceId: emigo.NullableOf(workspaceId),
+		UserId:      emigo.NullableOf(q.UserId),
 	}).Find(&userWorkspace); errFinding != nil {
 		if createdWorkspace, err := UserWorkspaceActions.Create(&UserWorkspaceEntity{
-			WorkspaceId: fireback.NewString(workspaceId),
-			UserId:      fireback.NewString(q.UserId),
+			WorkspaceId: emigo.NullableOf(workspaceId),
+			UserId:      emigo.NullableOf(q.UserId),
 		}, q); err == nil {
 			userWorkspace = createdWorkspace
 		}
@@ -114,10 +115,10 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 		q.Tx = tx
 
 		if dto.createPassport && dto.passport != nil {
-			dto.passport.UserId = fireback.NewString(dto.user.UniqueId)
+			dto.passport.UserId = emigo.NullableOf(dto.user.UniqueId)
 
 			// Passport and user always belong to the root workspace
-			dto.passport.WorkspaceId = fireback.NewString(ROOT_VAR)
+			dto.passport.WorkspaceId = emigo.NullableOf(ROOT_VAR)
 			q.WorkspaceId = ROOT_VAR
 			q.UserId = dto.user.UniqueId
 			if passportdb, err := PassportActions.Create(dto.passport, q); err != nil {
@@ -161,9 +162,9 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 			// Note: here we skipped to add the workspace role into the session
 			// this is used somewhere else
 			wre := &WorkspaceRoleEntity{
-				UserWorkspaceId: fireback.NewString(session.UserWorkspaces[0].UniqueId),
-				RoleId:          fireback.NewString(dto.role.UniqueId),
-				WorkspaceId:     fireback.NewString(dto.workspace.UniqueId),
+				UserWorkspaceId: emigo.NullableOf(session.UserWorkspaces[0].UniqueId),
+				RoleId:          emigo.NullableOf(dto.role.UniqueId),
+				WorkspaceId:     emigo.NullableOf(dto.workspace.UniqueId),
 			}
 
 			wsid := q.WorkspaceId
@@ -204,7 +205,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	name := osUser.Name + "'s workspace"
 	user := &UserEntity{
 		UniqueId:    "OS_USER_" + osUser.Uid,
-		WorkspaceId: fireback.NewString(ROOT_VAR),
+		WorkspaceId: emigo.NullableOf(ROOT_VAR),
 		FirstName:   osUser.Username,
 		LastName:    osUser.Username,
 	}
@@ -213,22 +214,22 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	workspace := &WorkspaceEntity{
 		Name:        name,
 		UniqueId:    wid,
-		WorkspaceId: fireback.NewString(wid),
-		LinkerId:    fireback.NewString(ROOT_VAR),
-		ParentId:    fireback.NewString(ROOT_VAR),
-		TypeId:      fireback.NewString(ROOT_VAR),
+		WorkspaceId: emigo.NullableOf(wid),
+		LinkerId:    emigo.NullableOf(ROOT_VAR),
+		ParentId:    emigo.NullableOf(ROOT_VAR),
+		TypeId:      emigo.NullableOf(ROOT_VAR),
 	}
 
 	osRole := "OS User"
 	role := &RoleEntity{
 		UniqueId:    "ROLE_WORKSPACE_" + osUser.Uid,
 		Name:        osRole,
-		WorkspaceId: fireback.NewString(workspace.UniqueId),
+		WorkspaceId: emigo.NullableOf(workspace.UniqueId),
 		Capabilities: []*fireback.CapabilityEntity{
 			{
 				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  fireback.NewString("A"),
-				WorkspaceId: fireback.NewString("system"),
+				Visibility:  emigo.NullableOf("A"),
+				WorkspaceId: emigo.NullableOf("system"),
 			},
 		},
 	}
@@ -268,21 +269,21 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 	workspace := &WorkspaceEntity{
 		UniqueId: workspaceId,
 		Name:     wname,
-		LinkerId: fireback.NewString(ROOT_VAR),
-		ParentId: fireback.NewString(ROOT_VAR),
-		TypeId:   fireback.NewString(dto.WorkspaceTypeId.OrDefault("")),
+		LinkerId: emigo.NullableOf(ROOT_VAR),
+		ParentId: emigo.NullableOf(ROOT_VAR),
+		TypeId:   emigo.NullableOf(dto.WorkspaceTypeId.OrDefault("")),
 	}
 
 	osRole := "Admin"
 	role := &RoleEntity{
 		UniqueId:    roleId,
 		Name:        osRole,
-		WorkspaceId: fireback.NewString(workspace.UniqueId),
+		WorkspaceId: emigo.NullableOf(workspace.UniqueId),
 		Capabilities: []*fireback.CapabilityEntity{
 			{
 				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  fireback.NewString("A"),
-				WorkspaceId: fireback.NewString("system"),
+				Visibility:  emigo.NullableOf("A"),
+				WorkspaceId: emigo.NullableOf("system"),
 			},
 		},
 	}

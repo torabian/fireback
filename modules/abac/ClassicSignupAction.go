@@ -83,10 +83,10 @@ func ClassicSignupAction(c ClassicSignupActionRequest, query fireback.QueryDSL) 
 
 	requiresSessionSecret := false
 	if config != nil {
-		if config.EnableRecaptcha2.Bool && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
+		if config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
 			requiresSessionSecret = true
 		}
-		if config.RequireOtpOnSignup.Bool {
+		if config.RequireOtpOnSignup.OrDefault(false) {
 			requiresSessionSecret = true
 		}
 	}
@@ -141,7 +141,7 @@ func completeClassicSignupProcess(
 	}
 
 	if config != nil {
-		if config.EnableTotp.Bool || config.ForceTotp.Bool {
+		if config.EnableTotp.OrDefault(false) || config.ForceTotp.OrDefault(false) {
 			// add time based dual factor information
 			key, _ := totp.Generate(totp.GenerateOpts{
 				Issuer:      "Fireback",
@@ -179,9 +179,9 @@ func completeClassicSignupProcess(
 		return ClassicSignupActionRes{}, sessionError
 	}
 
-	forcedTotp := config != nil && config.ForceTotp.Bool
+	forcedTotp := config != nil && config.ForceTotp.OrDefault(false)
 	// let's check for totp setup, if the session is successful.
-	if config != nil && config.ForceTotp.Bool && session != nil {
+	if config != nil && config.ForceTotp.OrDefault(false) && session != nil {
 		return ClassicSignupActionRes{
 			ContinueToTotp: true,
 			TotpUrl:        totpLink,

@@ -9,7 +9,7 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 	items, _, _ := AppMenuActions.Query(query)
 
 	for _, item := range items {
-		if !item.ParentId.Valid {
+		if !item.ParentId.IsSet() {
 			continue
 		}
 
@@ -18,7 +18,7 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 			Phrase:      item.Label,
 			Description: item.Label,
 			Icon:        item.Icon,
-			Group:       item.ParentId.String,
+			Group:       item.ParentId.OrDefault(""),
 			ActionFn:    actionFnNavigate,
 			UiLocation:  item.Href,
 			UniqueId:    uid,

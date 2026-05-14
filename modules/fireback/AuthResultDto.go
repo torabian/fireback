@@ -10,25 +10,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
 )
-
-func CastAuthResultFromCli(c *cli.Command) *AuthResultDto {
-	template := &AuthResultDto{}
-	if c.IsSet("user-access-per-workspace-id") {
-		template.UserAccessPerWorkspaceId = NewStringAutoNull(c.String("user-access-per-workspace-id"))
-	}
-	if c.IsSet("user-id") {
-		template.UserId = NewStringAutoNull(c.String("user-id"))
-	}
-	if c.IsSet("user-id") {
-		template.UserId = NewStringAutoNull(c.String("user-id"))
-	}
-	if c.IsSet("sql-context") {
-		template.SqlContext = c.String("sql-context")
-	}
-	return template
-}
 
 var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
@@ -70,11 +54,11 @@ var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
 
 type AuthResultDto struct {
 	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
-	UserAccessPerWorkspaceId String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
-	UserId                   String                     `json:"userId" yaml:"userId"        `
+	UserAccessPerWorkspaceId emigo.Nullable[string]     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
+	UserId                   emigo.Nullable[string]     `json:"userId" yaml:"userId"        `
 	User                     interface{}                `json:"-" yaml:"-"        `
-	WorkspaceId              String                     `json:"workspaceId" yaml:"workspaceId"        `
-	RoleId                   String                     `json:"roleId" yaml:"roleId"`
+	WorkspaceId              emigo.Nullable[string]     `json:"workspaceId" yaml:"workspaceId"        `
+	RoleId                   emigo.Nullable[string]     `json:"roleId" yaml:"roleId"`
 	// After authentication, this object contains the workspace permissions and current selected role permissions, to create context sql query based on that
 	SqlContext string `json:"sqlContext" yaml:"sqlContext"        `
 }

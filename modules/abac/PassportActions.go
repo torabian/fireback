@@ -14,7 +14,7 @@ func GetUserByPassport2(value string) (*UserEntity, *PassportEntity, *fireback.I
 	}
 
 	user := &UserEntity{}
-	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
+	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.OrDefault("")}).First(user)
 
 	return user, passport, nil
 }
@@ -24,7 +24,7 @@ func GetUserByPassport(value string) (*UserEntity, *PassportEntity, error) {
 	fireback.GetDbRef().Where(&PassportEntity{Value: value}).First(passport)
 
 	user := &UserEntity{}
-	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.String}).First(user)
+	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.OrDefault("")}).First(user)
 
 	return user, passport, nil
 }

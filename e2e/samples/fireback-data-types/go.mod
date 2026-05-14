@@ -4,9 +4,9 @@ go 1.25.1
 
 require (
 	github.com/gin-gonic/gin v1.12.0
-	github.com/gookit/event v1.0.6
 	github.com/json-iterator/go v1.1.12
 	github.com/schollz/progressbar/v3 v3.13.0
+	github.com/torabian/emi v1.1.2
 	github.com/torabian/fireback v1.2.1
 	github.com/urfave/cli/v3 v3.8.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -68,6 +68,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/gookit/event v1.0.6 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/h22rana/jsonlogic2sql v1.0.10 // indirect
@@ -171,7 +172,6 @@ require (
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	github.com/torabian/emi v1.1.1 // indirect
 	github.com/tus/tusd v1.10.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect

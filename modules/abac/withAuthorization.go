@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -64,7 +65,7 @@ func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.A
 		return nil, fireback.Create401Error(&AbacMessages.NotEnoughPermission, missing)
 	}
 
-	result.UserId = fireback.NewString(user.UniqueId)
+	result.UserId = emigo.NullableOf(user.UniqueId)
 	result.User = user
 	result.UserAccessPerWorkspace = access.UserAccessPerWorkspace
 	result.SqlContext = GetSqlContext(access.UserAccessPerWorkspace, context.WorkspaceId, context.AllowCascade)
@@ -175,7 +176,7 @@ func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerF
 
 		c.Set("internal_sql", result.SqlContext)
 		c.Set("urw", result.UserAccessPerWorkspace)
-		c.Set("user_id", result.UserId.String)
+		c.Set("user_id", result.UserId.OrDefault(""))
 		c.Set("uniqueId", uniqueId)
 		c.Set("workspaceId", workspaceId)
 		c.Set("workspace-id", workspaceId)
@@ -216,7 +217,7 @@ func WithAuthorizationFn(securityModel *fireback.SecurityModel) gin.HandlerFunc 
 		c.Set("resolveStrategy", securityModel.ResolveStrategy)
 		c.Set("internal_sql", result.SqlContext)
 		c.Set("role_id", ri)
-		c.Set("user_id", result.UserId.String)
+		c.Set("user_id", result.UserId.OrDefault(""))
 		c.Set("authResult", result)
 		c.Set("workspaceId", wi)
 	}

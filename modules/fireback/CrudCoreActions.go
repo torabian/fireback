@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"log/slog"
 	"os"
 	"reflect"
 	"regexp"
@@ -49,6 +50,9 @@ func ListGormSubEntities(entity reflect.Value) []string {
 		t := f.Type().String()
 		kind := f.Kind()
 
+		if strings.Contains(t, "emigo.Nullable") {
+			continue
+		}
 		if strings.Contains(field.Tag.Get("gorm"), "embedded") {
 			continue
 		}
@@ -564,7 +568,11 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 			countQ = countQ.Where(parsedQuery.Raw, sql_adaptor.StringSliceToInterfaceSlice(parsedQuery.Values)...)
 			q = q.Where(parsedQuery.Raw, sql_adaptor.StringSliceToInterfaceSlice(parsedQuery.Values)...)
 		} else {
-			fmt.Println("Query error", dslError)
+			slog.Error(
+				"Failed to parse query",
+				slog.String("dsl", dslError.Error()),
+				slog.String("query", query.Query),
+			)
 		}
 	}
 

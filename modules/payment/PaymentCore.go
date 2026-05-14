@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -99,7 +100,7 @@ func initiatePaymentFromInvoice(
 
 	transaction, err4 := InvoiceTransactionActions.Create(&InvoiceTransactionEntity{
 		Provider:          provider.Name(),
-		InvoiceId:         fireback.NewString(invoice.UniqueId),
+		InvoiceId:         emigo.NullableOf(invoice.UniqueId),
 		Amount:            invoice.Amount.Amount.Int64,
 		ExternalSessionId: result.SessionID,
 	}, q)

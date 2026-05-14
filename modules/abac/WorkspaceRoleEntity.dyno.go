@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/emi/emigo"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/WorkspaceRole"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/WorkspaceRole"
@@ -58,20 +59,20 @@ type WorkspaceRoleEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -81,11 +82,11 @@ type WorkspaceRoleEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -113,9 +114,9 @@ type WorkspaceRoleEntity struct {
 	// possible factors.
 	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	UserWorkspace    *UserWorkspaceEntity   `json:"userWorkspace" xml:"userWorkspace" yaml:"userWorkspace"    gorm:"foreignKey:UserWorkspaceId;references:UniqueId"      `
-	UserWorkspaceId  fireback.String        `json:"userWorkspaceId" yaml:"userWorkspaceId" xml:"userWorkspaceId"   gorm:"index:workspacerole_idx,unique" `
+	UserWorkspaceId  emigo.Nullable[string] `json:"userWorkspaceId" yaml:"userWorkspaceId" xml:"userWorkspaceId"   gorm:"index:workspacerole_idx,unique" `
 	Role             *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           fireback.String        `json:"roleId" yaml:"roleId" xml:"roleId"   gorm:"index:workspacerole_idx,unique" `
+	RoleId           emigo.Nullable[string] `json:"roleId" yaml:"roleId" xml:"roleId"   gorm:"index:workspacerole_idx,unique" `
 	Children         []*WorkspaceRoleEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo         *WorkspaceRoleEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
@@ -160,10 +161,10 @@ func (x *WorkspaceRoleEntityList) ToTree() *fireback.TreeOperation[WorkspaceRole
 	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceRoleEntity) string {
-			if !t.ParentId.Valid {
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *WorkspaceRoleEntity) string {
 			return t.UniqueId
@@ -340,8 +341,8 @@ func WorkspaceRoleEntityBeforeCreateAppend(dto *WorkspaceRoleEntity, query fireb
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
-	dto.UserId = fireback.NewString(query.UserId)
+	dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	dto.UserId = emigo.NullableOf(query.UserId)
 	WorkspaceRoleRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceRoleRecursiveAddUniqueId(dto *WorkspaceRoleEntity, query fireback.QueryDSL) {
@@ -780,13 +781,13 @@ func CastWorkspaceRoleFromCli(c *cli.Command) *WorkspaceRoleEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
 	if c.IsSet("user-workspace-id") {
-		template.UserWorkspaceId = fireback.NewStringAutoNull(c.String("user-workspace-id"))
+		template.UserWorkspaceId = emigo.NullableOf(c.String("user-workspace-id"))
 	}
 	if c.IsSet("role-id") {
-		template.RoleId = fireback.NewStringAutoNull(c.String("role-id"))
+		template.RoleId = emigo.NullableOf(c.String("role-id"))
 	}
 	return template
 }

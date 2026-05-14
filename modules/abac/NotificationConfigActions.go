@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -67,7 +68,7 @@ func NotificationWorkspaecConfigActionGet(query fireback.QueryDSL) (*Notificatio
 	if err == gorm.ErrRecordNotFound {
 		item = &NotificationConfigEntity{
 			UniqueId:       fireback.UUID(),
-			WorkspaceId:    fireback.NewString(query.WorkspaceId),
+			WorkspaceId:    emigo.NullableOf(query.WorkspaceId),
 			AcceptLanguage: "*",
 		}
 
@@ -151,7 +152,7 @@ func NotificationWorkspaceConfigActionUpdate(
 
 	var item NotificationConfigEntity
 	q := fireback.GetDbRef().
-		Where(&NotificationConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}).
+		Where(&NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
 		First(&item)
 
 	err := q.UpdateColumns(fields).Error
@@ -161,7 +162,7 @@ func NotificationWorkspaceConfigActionUpdate(
 
 	err = fireback.GetDbRef().
 		Preload(clause.Associations).
-		Where(&NotificationConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}).
+		Where(&NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
 		First(&item).Error
 
 	return &item, nil

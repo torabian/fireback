@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	metas "github.com/torabian/fireback/modules/payment/metas"
 	mocks "github.com/torabian/fireback/modules/payment/mocks/PaymentConfig"
@@ -63,20 +64,20 @@ type PaymentConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -86,11 +87,11 @@ type PaymentConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -118,7 +119,7 @@ type PaymentConfigEntity struct {
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	// Enables the stripe payment integration in the project
-	EnableStripe fireback.Bool `json:"enableStripe" xml:"enableStripe" yaml:"enableStripe"        `
+	EnableStripe emigo.Nullable[bool] `json:"enableStripe" xml:"enableStripe" yaml:"enableStripe"        `
 	// Stripe secret key to initiate a payment intent
 	StripeSecretKey string `json:"stripeSecretKey" xml:"stripeSecretKey" yaml:"stripeSecretKey"        `
 	// The endpoint which the payment module will handle response coming back from stripe.
@@ -167,10 +168,10 @@ func (x *PaymentConfigEntityList) ToTree() *fireback.TreeOperation[PaymentConfig
 	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *PaymentConfigEntity) string {
-			if !t.ParentId.Valid {
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *PaymentConfigEntity) string {
 			return t.UniqueId
@@ -349,8 +350,8 @@ func PaymentConfigEntityBeforeCreateAppend(dto *PaymentConfigEntity, query fireb
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
-	dto.UserId = fireback.NewString(query.UserId)
+	dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	dto.UserId = emigo.NullableOf(query.UserId)
 	PaymentConfigRecursiveAddUniqueId(dto, query)
 }
 func PaymentConfigRecursiveAddUniqueId(dto *PaymentConfigEntity, query fireback.QueryDSL) {
@@ -505,7 +506,7 @@ func PaymentConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *Pa
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &PaymentConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}
+	cond2 := &PaymentConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
@@ -822,10 +823,11 @@ func CastPaymentConfigFromCli(c *cli.Command) *PaymentConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
+	// Bool??
 	if c.IsSet("enable-stripe") {
-		template.EnableStripe = fireback.NewBoolAutoNull(c.String("enable-stripe"))
+		emigo.ParseNullable(c.String("enable-stripe"), &template.EnableStripe)
 	}
 	if c.IsSet("stripe-secret-key") {
 		template.StripeSecretKey = c.String("stripe-secret-key")
@@ -1444,7 +1446,7 @@ func PaymentConfigDistinctActionUpdate(
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	fields.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return PaymentConfigActions.Create(fields, query)
 	} else {

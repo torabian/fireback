@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/emi/emigo"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/WorkspaceConfig"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/WorkspaceConfig"
@@ -123,20 +124,20 @@ type WorkspaceConfigEntity struct {
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
 	// which are being created, and visible to every member of the workspace
-	Visibility fireback.String `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
 	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
 	// to the selected workspace by user, if they have write access. You can change this value
 	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId fireback.String `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty" gorm:"unique;not null;" `
 	// The unique-id of the parent table, which this record is being linked to.
 	// used internally for making relations in fireback, generally does not need manual changes
 	// or modification by the developer or user. For example, if you have a object inside an object
 	// the unique-id of the parent will be written in the child.
-	LinkerId fireback.String `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
 	// Used for recursive or parent-child operations. Some tables, are having nested relations,
 	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
 	// creating of modifying a record.
-	ParentId fireback.String `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
 	// Makes a field deletable. Some records should not be deletable at all.
 	// default it's true.
 	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
@@ -146,11 +147,11 @@ type WorkspaceConfigEntity struct {
 	// The unique-id of the user which is creating the record, or the record belongs to.
 	// Administration might want to change this to any user, by default Fireback fills
 	// it to the current authenticated user.
-	UserId fireback.String `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
 	// General mechanism to rank the elements. From code perspective, it's just a number,
 	// but you can sort it based on any logic for records to make a ranking, sorting.
 	// they should not be unique across a table.
-	Rank fireback.Int64 `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
 	// Primary numeric key in the database. This value is not meant to be exported to public
 	// or be used to access data at all. Rather a mechanism of indexing columns internally
 	// or cursor pagination in future releases of fireback, or better search performance.
@@ -178,40 +179,40 @@ type WorkspaceConfigEntity struct {
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 	// Enables the recaptcha2 for authentication flow.
-	EnableRecaptcha2 fireback.Bool `json:"enableRecaptcha2" xml:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
+	EnableRecaptcha2 emigo.Nullable[bool] `json:"enableRecaptcha2" xml:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
 	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
-	EnableOtp fireback.Bool `json:"enableOtp" xml:"enableOtp" yaml:"enableOtp"        `
+	EnableOtp emigo.Nullable[bool] `json:"enableOtp" xml:"enableOtp" yaml:"enableOtp"        `
 	// Forces the user to have otp verification before can create an account. They can define their password still.
-	RequireOtpOnSignup fireback.Bool `json:"requireOtpOnSignup" xml:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
+	RequireOtpOnSignup emigo.Nullable[bool] `json:"requireOtpOnSignup" xml:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
 	// Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
-	RequireOtpOnSignin fireback.Bool `json:"requireOtpOnSignin" xml:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
+	RequireOtpOnSignin emigo.Nullable[bool] `json:"requireOtpOnSignin" xml:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
 	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
 	Recaptcha2ServerKey string `json:"recaptcha2ServerKey" xml:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
 	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
 	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
 	// Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
-	EnableTotp fireback.Bool `json:"enableTotp" xml:"enableTotp" yaml:"enableTotp"        `
+	EnableTotp emigo.Nullable[bool] `json:"enableTotp" xml:"enableTotp" yaml:"enableTotp"        `
 	// Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
-	ForceTotp fireback.Bool `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
+	ForceTotp emigo.Nullable[bool] `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
 	// Forces users who want to create account using phone number to also set a password on their account
-	ForcePasswordOnPhone fireback.Bool `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
+	ForcePasswordOnPhone emigo.Nullable[bool] `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
 	// Forces the creation of account using phone number to ask for user first name and last name
-	ForcePersonNameOnPhone fireback.Bool `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
+	ForcePersonNameOnPhone emigo.Nullable[bool] `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
 	// Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
-	GeneralEmailProvider   *EmailProviderEntity `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
-	GeneralEmailProviderId fireback.String      `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
+	GeneralEmailProvider   *EmailProviderEntity   `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
+	GeneralEmailProviderId emigo.Nullable[string] `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
 	// General service which would be used to send text messages (sms) using it's services or API.
-	GeneralGsmProvider   *GsmProviderEntity `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
-	GeneralGsmProviderId fireback.String    `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
+	GeneralGsmProvider   *GsmProviderEntity     `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
+	GeneralGsmProviderId emigo.Nullable[string] `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
 	// This template would be used, as default when a user is inviting a third-party into their own workspace.
 	InviteToWorkspaceContent   *RegionalContentEntity `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"foreignKey:InviteToWorkspaceContentId;references:UniqueId"      `
-	InviteToWorkspaceContentId fireback.String        `json:"inviteToWorkspaceContentId" yaml:"inviteToWorkspaceContentId" xml:"inviteToWorkspaceContentId"  `
+	InviteToWorkspaceContentId emigo.Nullable[string] `json:"inviteToWorkspaceContentId" yaml:"inviteToWorkspaceContentId" xml:"inviteToWorkspaceContentId"  `
 	// Upon one time password request for email, the content will be read to fill the message which will go to user.
 	EmailOtpContent   *RegionalContentEntity `json:"emailOtpContent" xml:"emailOtpContent" yaml:"emailOtpContent"    gorm:"foreignKey:EmailOtpContentId;references:UniqueId"      `
-	EmailOtpContentId fireback.String        `json:"emailOtpContentId" yaml:"emailOtpContentId" xml:"emailOtpContentId"  `
+	EmailOtpContentId emigo.Nullable[string] `json:"emailOtpContentId" yaml:"emailOtpContentId" xml:"emailOtpContentId"  `
 	// Upon OTP text messages, this template will be used to create such text message, including the one time password code.
 	SmsOtpContent   *RegionalContentEntity   `json:"smsOtpContent" xml:"smsOtpContent" yaml:"smsOtpContent"    gorm:"foreignKey:SmsOtpContentId;references:UniqueId"      `
-	SmsOtpContentId fireback.String          `json:"smsOtpContentId" yaml:"smsOtpContentId" xml:"smsOtpContentId"  `
+	SmsOtpContentId emigo.Nullable[string]   `json:"smsOtpContentId" yaml:"smsOtpContentId" xml:"smsOtpContentId"  `
 	Children        []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo        *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
@@ -256,10 +257,10 @@ func (x *WorkspaceConfigEntityList) ToTree() *fireback.TreeOperation[WorkspaceCo
 	return fireback.NewTreeOperation(
 		x.Items,
 		func(t *WorkspaceConfigEntity) string {
-			if !t.ParentId.Valid {
+			if !t.ParentId.IsSet() || t.ParentId.IsNull() {
 				return ""
 			}
-			return t.ParentId.String
+			return t.ParentId.OrDefault("")
 		},
 		func(t *WorkspaceConfigEntity) string {
 			return t.UniqueId
@@ -462,8 +463,8 @@ func WorkspaceConfigEntityBeforeCreateAppend(dto *WorkspaceConfigEntity, query f
 	if dto.UniqueId == "" {
 		dto.UniqueId = fireback.UUID()
 	}
-	dto.WorkspaceId = fireback.NewString(query.WorkspaceId)
-	dto.UserId = fireback.NewString(query.UserId)
+	dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	dto.UserId = emigo.NullableOf(query.UserId)
 	WorkspaceConfigRecursiveAddUniqueId(dto, query)
 }
 func WorkspaceConfigRecursiveAddUniqueId(dto *WorkspaceConfigEntity, query fireback.QueryDSL) {
@@ -618,7 +619,7 @@ func WorkspaceConfigUpdateExec(dbref *gorm.DB, query fireback.QueryDSL, fields *
 	// If the entity is distinct by workspace, then the Query.WorkspaceId
 	// which is selected is being used as the condition for create or update
 	// if not, the unique Id is being used
-	cond2 := &WorkspaceConfigEntity{WorkspaceId: fireback.NewString(query.WorkspaceId)}
+	cond2 := &WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	q := dbref.
 		Where(cond2).
 		FirstOrCreate(&item)
@@ -1055,19 +1056,23 @@ func CastWorkspaceConfigFromCli(c *cli.Command) *WorkspaceConfigEntity {
 		template.UniqueId = c.String("uid")
 	}
 	if c.IsSet("pid") {
-		template.ParentId = fireback.NewStringAutoNull(c.String("pid"))
+		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
+	// Bool??
 	if c.IsSet("enable-recaptcha2") {
-		template.EnableRecaptcha2 = fireback.NewBoolAutoNull(c.String("enable-recaptcha2"))
+		emigo.ParseNullable(c.String("enable-recaptcha2"), &template.EnableRecaptcha2)
 	}
+	// Bool??
 	if c.IsSet("enable-otp") {
-		template.EnableOtp = fireback.NewBoolAutoNull(c.String("enable-otp"))
+		emigo.ParseNullable(c.String("enable-otp"), &template.EnableOtp)
 	}
+	// Bool??
 	if c.IsSet("require-otp-on-signup") {
-		template.RequireOtpOnSignup = fireback.NewBoolAutoNull(c.String("require-otp-on-signup"))
+		emigo.ParseNullable(c.String("require-otp-on-signup"), &template.RequireOtpOnSignup)
 	}
+	// Bool??
 	if c.IsSet("require-otp-on-signin") {
-		template.RequireOtpOnSignin = fireback.NewBoolAutoNull(c.String("require-otp-on-signin"))
+		emigo.ParseNullable(c.String("require-otp-on-signin"), &template.RequireOtpOnSignin)
 	}
 	if c.IsSet("recaptcha2-server-key") {
 		template.Recaptcha2ServerKey = c.String("recaptcha2-server-key")
@@ -1075,32 +1080,36 @@ func CastWorkspaceConfigFromCli(c *cli.Command) *WorkspaceConfigEntity {
 	if c.IsSet("recaptcha2-client-key") {
 		template.Recaptcha2ClientKey = c.String("recaptcha2-client-key")
 	}
+	// Bool??
 	if c.IsSet("enable-totp") {
-		template.EnableTotp = fireback.NewBoolAutoNull(c.String("enable-totp"))
+		emigo.ParseNullable(c.String("enable-totp"), &template.EnableTotp)
 	}
+	// Bool??
 	if c.IsSet("force-totp") {
-		template.ForceTotp = fireback.NewBoolAutoNull(c.String("force-totp"))
+		emigo.ParseNullable(c.String("force-totp"), &template.ForceTotp)
 	}
+	// Bool??
 	if c.IsSet("force-password-on-phone") {
-		template.ForcePasswordOnPhone = fireback.NewBoolAutoNull(c.String("force-password-on-phone"))
+		emigo.ParseNullable(c.String("force-password-on-phone"), &template.ForcePasswordOnPhone)
 	}
+	// Bool??
 	if c.IsSet("force-person-name-on-phone") {
-		template.ForcePersonNameOnPhone = fireback.NewBoolAutoNull(c.String("force-person-name-on-phone"))
+		emigo.ParseNullable(c.String("force-person-name-on-phone"), &template.ForcePersonNameOnPhone)
 	}
 	if c.IsSet("general-email-provider-id") {
-		template.GeneralEmailProviderId = fireback.NewStringAutoNull(c.String("general-email-provider-id"))
+		template.GeneralEmailProviderId = emigo.NullableOf(c.String("general-email-provider-id"))
 	}
 	if c.IsSet("general-gsm-provider-id") {
-		template.GeneralGsmProviderId = fireback.NewStringAutoNull(c.String("general-gsm-provider-id"))
+		template.GeneralGsmProviderId = emigo.NullableOf(c.String("general-gsm-provider-id"))
 	}
 	if c.IsSet("invite-to-workspace-content-id") {
-		template.InviteToWorkspaceContentId = fireback.NewStringAutoNull(c.String("invite-to-workspace-content-id"))
+		template.InviteToWorkspaceContentId = emigo.NullableOf(c.String("invite-to-workspace-content-id"))
 	}
 	if c.IsSet("email-otp-content-id") {
-		template.EmailOtpContentId = fireback.NewStringAutoNull(c.String("email-otp-content-id"))
+		template.EmailOtpContentId = emigo.NullableOf(c.String("email-otp-content-id"))
 	}
 	if c.IsSet("sms-otp-content-id") {
-		template.SmsOtpContentId = fireback.NewStringAutoNull(c.String("sms-otp-content-id"))
+		template.SmsOtpContentId = emigo.NullableOf(c.String("sms-otp-content-id"))
 	}
 	return template
 }
@@ -1713,7 +1722,7 @@ func WorkspaceConfigDistinctActionUpdate(
 	// Because we are updating by workspace, the unique id and workspace id
 	// are important to be the same.
 	fields.UniqueId = query.WorkspaceId
-	fields.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	fields.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
 	if err != nil || entity.UniqueId == "" {
 		return WorkspaceConfigActions.Create(fields, query)
 	} else {

@@ -145,7 +145,7 @@ func prepareTheClassicPassport(req *CheckClassicPassportActionReq, q fireback.Qu
 	}
 
 	// If recaptcha 2 is needed
-	if config != nil && config.EnableRecaptcha2.Bool && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
+	if config != nil && config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
 		if req.SecurityToken == "" {
 			return nil, &fireback.IError{Message: AbacMessages.Recaptcha2Needed}
 		}
@@ -202,7 +202,7 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	// if otp is forced, then user can only authenticate using otp.
 	// basically password and 2FA for signin will become useless, because the otp
 	// will be used to reset user access anyway.
-	envForcedOtp := config != nil && config.RequireOtpOnSignin.Bool
+	envForcedOtp := config != nil && config.RequireOtpOnSignin.OrDefault(false)
 	if envForcedOtp {
 		res.Next = []string{"otp"}
 		if otpInfo, err := implicitlyRequestForOtp(passport.Value, q); err != nil {
@@ -222,7 +222,7 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 
 	// check if otp is enabled, then we give the user 2 choices, either join with password
 	// or join with password.
-	envEnabledOtp := config != nil && config.EnableOtp.Bool
+	envEnabledOtp := config != nil && config.EnableOtp.OrDefault(false)
 	res.Next = []string{}
 
 	if envEnabledOtp {
@@ -255,8 +255,8 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
 	res := &CheckClassicPassportActionRes{}
 
-	enableTotp := config != nil && config.EnableTotp.Bool
-	forceTotp := config != nil && config.ForceTotp.Bool
+	enableTotp := config != nil && config.EnableTotp.OrDefault(false)
+	forceTotp := config != nil && config.ForceTotp.OrDefault(false)
 	if enableTotp {
 		res.Flags = append(res.Flags, "enable-totp")
 	}
@@ -268,7 +268,7 @@ func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity
 	// this condition has higher priority and needs to be checked first
 	// so it won't expose existing users for setups that they do not want to
 	// reveal that.
-	envForcedOtp := config != nil && config.RequireOtpOnSignup.Bool
+	envForcedOtp := config != nil && config.RequireOtpOnSignup.OrDefault(false)
 	if envForcedOtp {
 		res.Next = []string{"otp"}
 		if otpInfo, err := implicitlyRequestForOtp(value, q); err != nil {
@@ -286,7 +286,7 @@ func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity
 
 	// check if otp is enabled, then we give the user 2 choices, either join with password
 	// or join with password.
-	envEnabledOtp := config != nil && config.EnableOtp.Bool
+	envEnabledOtp := config != nil && config.EnableOtp.OrDefault(false)
 	if envEnabledOtp {
 		res.Next = []string{"otp", "create-with-password"}
 		return res, nil

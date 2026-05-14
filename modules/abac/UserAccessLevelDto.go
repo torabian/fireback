@@ -10,17 +10,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
-
-func CastUserAccessLevelFromCli(c *cli.Command) *UserAccessLevelDto {
-	template := &UserAccessLevelDto{}
-	if c.IsSet("user-access-per-workspace-id") {
-		template.UserAccessPerWorkspaceId = fireback.NewStringAutoNull(c.String("user-access-per-workspace-id"))
-	}
-	return template
-}
 
 var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 	&cli.StringFlag{
@@ -47,7 +40,7 @@ var UserAccessLevelDtoCommonCliFlagsOptional = []cli.Flag{
 
 type UserAccessLevelDto struct {
 	UserAccessPerWorkspace   *fireback.UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
-	UserAccessPerWorkspaceId fireback.String                     `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
+	UserAccessPerWorkspaceId emigo.Nullable[string]              `json:"userAccessPerWorkspaceId" yaml:"userAccessPerWorkspaceId"`
 }
 type UserAccessLevelDtoList struct {
 	Items []*UserAccessLevelDto

@@ -3,6 +3,7 @@ package abac
 import (
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -18,7 +19,7 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.Qu
 		return nil, err
 	}
 
-	_, roleErrors := ValidateRoleAndItsExistence(fireback.NewString(req.RoleId))
+	_, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(req.RoleId))
 	if len(roleErrors) != 0 {
 		return nil, &fireback.IError{
 			Errors: roleErrors,
@@ -32,7 +33,7 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.Qu
 
 	invite := WorkspaceInviteEntity{}
 
-	invite.WorkspaceId = fireback.NewString(query.WorkspaceId)
+	invite.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
 	invite.UniqueId = fireback.UUID()
 	invite.TargetUserLocale = userLocale
 
