@@ -145,12 +145,12 @@ export class FetchxContext {
      * Overrides the browser fetch function, for different purposes. It would recieve the same first 2 arguments as fetch,
      * as well as third one of fetchx context. If you pass the fetch itself to override, it should have no effect.
      */
-    public fetchOverrideFn: (
+    public fetchOverrideFn?: (
       input: RequestInfo | URL,
       init?: TypedRequestInit,
-    ) => Promise<Response> = null,
+    ) => Promise<Response>,
   ) {}
-  async apply<T>(
+  async apply(
     url: string,
     init: TypedRequestInit<any, any>,
   ): Promise<[string, TypedRequestInit<any, any>]> {
