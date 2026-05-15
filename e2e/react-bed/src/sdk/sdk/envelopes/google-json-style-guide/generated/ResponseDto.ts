@@ -191,12 +191,12 @@ export class ResponseDto<T> {
      * Single item returned by the API.
      * @type {any}
      **/
-    #item: T = null;
+    #item: T | null = null;
     /**
      * Single item returned by the API.
      * @returns {T}
      **/
-    get item(): T {
+    get item(): T | null {
       return this.#item;
     }
     /**
@@ -214,22 +214,22 @@ export class ResponseDto<T> {
      * List of items returned by the API.
      * @type {any}
      **/
-    #items: any = null;
+    #items: T[] = [];
     /**
      * List of items returned by the API.
-     * @returns {any}
+     * @returns {T[]}
      **/
-    get items() {
+    get items(): T[] {
       return this.#items;
     }
     /**
      * List of items returned by the API.
-     * @type {any}
+     * @type {T[]}
      **/
-    set items(value: any) {
+    set items(value: T[]) {
       this.#items = value;
     }
-    setItems(value: any) {
+    setItems(value: T[]) {
       this.items = value;
       return this;
     }
