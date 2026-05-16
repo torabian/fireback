@@ -497,9 +497,7 @@ func askProjectDatabase(projectName string) (Database, error) {
 			DATABASE_TYPE_SQLITE_MEMORY,
 			DATABASE_TYPE_MYSQL,
 			DATABASE_TYPE_MARIADB,
-			// Postgres is not well tested yet, we are not adding production ready
-			// features anymore in fireback at all.
-			// DATABASE_TYPE_POSTGRES,
+			DATABASE_TYPE_POSTGRES,
 		},
 	}
 
