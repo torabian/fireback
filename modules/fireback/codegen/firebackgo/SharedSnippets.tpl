@@ -707,8 +707,8 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
           tr.LinkerId = dto.UniqueId
         }
 
-        if err := tx.
-          Clauses(clause.OnConflict{
+        if tx.Dialector.Name() == "postgres" {
+          tx = tx.Clauses(clause.OnConflict{
             Columns: []clause.Column{
               {Name: "linker_id"},
               {Name: "language_id"},
@@ -720,7 +720,10 @@ func {{ .e.Upper }}ActionCreateFn(dto *{{ .e.EntityName }}, query {{ .wsprefix }
                 {{ end }}
               {{ end }}
             }),
-          }).
+          })
+        }
+
+        if err := tx.
           Create(&dto.Translations).Error; err != nil {
           return err
         }

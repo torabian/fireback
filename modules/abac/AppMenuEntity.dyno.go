@@ -473,8 +473,8 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 			for _, tr := range dto.Translations {
 				tr.LinkerId = dto.UniqueId
 			}
-			if err := tx.
-				Clauses(clause.OnConflict{
+			if tx.Dialector.Name() == "postgres" {
+				tx = tx.Clauses(clause.OnConflict{
 					Columns: []clause.Column{
 						{Name: "linker_id"},
 						{Name: "language_id"},
@@ -482,7 +482,9 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 					DoUpdates: clause.AssignmentColumns([]string{
 						"label",
 					}),
-				}).
+				})
+			}
+			if err := tx.
 				Create(&dto.Translations).Error; err != nil {
 				return err
 			}

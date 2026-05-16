@@ -438,8 +438,8 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 			for _, tr := range dto.Translations {
 				tr.LinkerId = dto.UniqueId
 			}
-			if err := tx.
-				Clauses(clause.OnConflict{
+			if tx.Dialector.Name() == "postgres" {
+				tx = tx.Clauses(clause.OnConflict{
 					Columns: []clause.Column{
 						{Name: "linker_id"},
 						{Name: "language_id"},
@@ -447,7 +447,9 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 					DoUpdates: clause.AssignmentColumns([]string{
 						"description",
 					}),
-				}).
+				})
+			}
+			if err := tx.
 				Create(&dto.Translations).Error; err != nil {
 				return err
 			}

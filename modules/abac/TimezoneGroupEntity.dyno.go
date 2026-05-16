@@ -432,8 +432,8 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query fireback.QueryD
 			for _, tr := range dto.Translations {
 				tr.LinkerId = dto.UniqueId
 			}
-			if err := tx.
-				Clauses(clause.OnConflict{
+			if tx.Dialector.Name() == "postgres" {
+				tx = tx.Clauses(clause.OnConflict{
 					Columns: []clause.Column{
 						{Name: "linker_id"},
 						{Name: "language_id"},
@@ -441,7 +441,9 @@ func TimezoneGroupActionCreateFn(dto *TimezoneGroupEntity, query fireback.QueryD
 					DoUpdates: clause.AssignmentColumns([]string{
 						"title",
 					}),
-				}).
+				})
+			}
+			if err := tx.
 				Create(&dto.Translations).Error; err != nil {
 				return err
 			}
