@@ -430,17 +430,6 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 		query.Tx = tx
 		if err := tx.
 			Omit("Translations").
-			Clauses(clause.OnConflict{
-				Columns: []clause.Column{
-					{Name: "unique_id"},
-				},
-				DoUpdates: clause.AssignmentColumns([]string{
-					"label",
-					"href",
-					"icon",
-					"active_matcher",
-				}),
-			}).
 			Create(&dto).Error; err != nil {
 			return err
 		}
@@ -456,7 +445,7 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 						{Name: "language_id"},
 					},
 					DoUpdates: clause.AssignmentColumns([]string{
-						"label",
+						"description",
 					}),
 				}).
 				Create(&dto.Translations).Error; err != nil {

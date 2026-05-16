@@ -460,17 +460,6 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query fireback.QueryD
 		query.Tx = tx
 		if err := tx.
 			Omit("Translations").
-			Clauses(clause.OnConflict{
-				Columns: []clause.Column{
-					{Name: "unique_id"},
-				},
-				DoUpdates: clause.AssignmentColumns([]string{
-					"label",
-					"href",
-					"icon",
-					"active_matcher",
-				}),
-			}).
 			Create(&dto).Error; err != nil {
 			return err
 		}
@@ -486,7 +475,8 @@ func WorkspaceTypeActionCreateFn(dto *WorkspaceTypeEntity, query fireback.QueryD
 						{Name: "language_id"},
 					},
 					DoUpdates: clause.AssignmentColumns([]string{
-						"label",
+						"title",
+						"description",
 					}),
 				}).
 				Create(&dto.Translations).Error; err != nil {

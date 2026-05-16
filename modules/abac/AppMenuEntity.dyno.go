@@ -465,17 +465,6 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 		query.Tx = tx
 		if err := tx.
 			Omit("Translations").
-			Clauses(clause.OnConflict{
-				Columns: []clause.Column{
-					{Name: "unique_id"},
-				},
-				DoUpdates: clause.AssignmentColumns([]string{
-					"label",
-					"href",
-					"icon",
-					"active_matcher",
-				}),
-			}).
 			Create(&dto).Error; err != nil {
 			return err
 		}
