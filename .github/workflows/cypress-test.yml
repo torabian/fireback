@@ -78,7 +78,7 @@ jobs:
 
           else
 
-            fireback config db-name /tmp/database.db
+            fireback config db-name set /tmp/database.db
             fireback config db-vendor set sqlite
 
           fi
