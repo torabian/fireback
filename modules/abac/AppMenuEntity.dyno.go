@@ -459,41 +459,63 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 	// 2. Append the necessary information about user, workspace
 	AppMenuEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = fireback.GetDbRef()
-	} else {
+	var dbref *gorm.DB
+
+	if query.Tx != nil {
 		dbref = query.Tx
-	}
-	query.Tx = dbref
-
-	err := dbref.Omit("Translations").Create(&dto).Error
-	if err != nil {
-		err := fireback.GormErrorToIError(err)
-		return nil, err
+	} else {
+		dbref = fireback.GetDbRef()
 	}
 
-	if len(dto.Translations) > 0 {
-		k, _ := json.MarshalIndent(dto.Translations, "", "  ")
-		fmt.Println(string(k))
+	err := dbref.Transaction(func(tx *gorm.DB) error {
 
-		for _, tr := range dto.Translations {
-			tr.LinkerId = dto.UniqueId
-		}
-		err = dbref.
+		query.Tx = tx
+
+		// create parent
+		if err := tx.
+			Omit("Translations").
 			Clauses(clause.OnConflict{
 				Columns: []clause.Column{
-					{Name: "linker_id"},
-					{Name: "language_id"},
+					{Name: "unique_id"},
 				},
-				DoUpdates: clause.AssignmentColumns([]string{"label"}),
+				DoUpdates: clause.AssignmentColumns([]string{
+					"label",
+					"href",
+					"icon",
+					"active_matcher",
+				}),
 			}).
-			Create(&dto.Translations).Error
-	}
+			Create(&dto).Error; err != nil {
+			return err
+		}
+
+		// create translations
+		if len(dto.Translations) > 0 {
+
+			for _, tr := range dto.Translations {
+				tr.LinkerId = dto.UniqueId
+			}
+
+			if err := tx.
+				Clauses(clause.OnConflict{
+					Columns: []clause.Column{
+						{Name: "linker_id"},
+						{Name: "language_id"},
+					},
+					DoUpdates: clause.AssignmentColumns([]string{
+						"label",
+					}),
+				}).
+				Create(&dto.Translations).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 
 	if err != nil {
-		err := fireback.GormErrorToIError(err)
-		return nil, err
+		return nil, fireback.GormErrorToIError(err)
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	AppMenuAssociationCreate(dto, query)
