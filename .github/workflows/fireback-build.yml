@@ -638,6 +638,13 @@ jobs:
     uses: ./.github/workflows/cypress-test.yml
     with:
       DB_TYPE: mysql
+  
+  run-cypress-postgres:
+    needs:
+      - build-ubuntu
+    uses: ./.github/workflows/cypress-test.yml
+    with:
+      DB_TYPE: postgres
 
   run-cypress-sqlite:
     needs:

@@ -10,6 +10,7 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+
     services:
       mysql:
         image: mysql:8
@@ -18,14 +19,29 @@ jobs:
           MYSQL_DATABASE: fireback_test
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot" --health-interval=10s --health-timeout=5s --health-retries=10
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fireback_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d fireback_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Print pwd
-        run: pwd
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -38,7 +54,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: cd e2e && npm install  
+        run: cd e2e && npm install
 
       - uses: actions/download-artifact@master
         with:
@@ -48,27 +64,40 @@ jobs:
       - name: Install Fireback
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
 
-      # - name: Setup Database
-      #   run: |
-      #     if [[ "${{ inputs.DB_TYPE }}" == "mysql" ]]; then
-      #       fireback config db-dsn set root:root@tcp(localhost:3306)/fireback_test?charset=utf8mb4&parseTime=True&loc=Local
-      #       fireback config db-vendor set mysql
-      #     else
-      #       fireback config db-name /tmp/database.db && \
-      #       fireback config db-vendor set sqlite
-      #     fi
-      #     fireback migration apply
+      - name: Setup Database
+        run: |
+          if [[ "${{ inputs.DB_TYPE }}" == "mysql" ]]; then
 
+            fireback config db-dsn set "root:root@tcp(localhost:3306)/fireback_test?charset=utf8mb4&parseTime=True&loc=Local"
+            fireback config db-vendor set mysql
 
-      # - name: Add admin account
-      #   run: fireback auth --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
-      # - name: Check the passport
-      #   run: fireback passport check-passport-methods
+          elif [[ "${{ inputs.DB_TYPE }}" == "postgres" ]]; then
 
-      
+            fireback config db-dsn set "host=localhost user=postgres password=postgres dbname=fireback_test port=5432 sslmode=disable TimeZone=UTC"
+            fireback config db-vendor set postgres
+
+          else
+
+            fireback config db-name /tmp/database.db
+            fireback config db-vendor set sqlite
+
+          fi
+
+          fireback migration apply
+
+      - name: Add admin account
+        run: |
+          fireback auth \
+            --in-root=true \
+            --value admin \
+            --workspace-type-id root \
+            --type email \
+            --password admin \
+            --first-name Ali \
+            --last-name Torabi
 
       - name: Run Cypress tests
-        run: cd e2e && DB_TYPE=${{ inputs.DB_TYPE }} npm test  
+        run: cd e2e && DB_TYPE=${{ inputs.DB_TYPE }} npm test
       
       - name: Change the fireback replacement to github actions
         run: cd e2e/samples/fireback-data-types && sed -i 's|/Users/ali/work/fireback|/home/runner/work/fireback/fireback|' go.mod
