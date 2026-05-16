@@ -34,7 +34,7 @@
     and app_menu_entity_polyglots.language_id = '(language)'
     {{ end }}
 {{ end }}
-{{ if .IsMysql }}
+{{ if or .IsMysql .IsPostgres }}
     {{ if .IsCounter }}
     select
         count(*) total_items

@@ -426,7 +426,45 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 		dbref = query.Tx
 	}
 	query.Tx = dbref
-	err := dbref.Create(&dto).Error
+	err := dbref.Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		if err := tx.
+			Omit("Translations").
+			Clauses(clause.OnConflict{
+				Columns: []clause.Column{
+					{Name: "unique_id"},
+				},
+				DoUpdates: clause.AssignmentColumns([]string{
+					"label",
+					"href",
+					"icon",
+					"active_matcher",
+				}),
+			}).
+			Create(&dto).Error; err != nil {
+			return err
+		}
+		// create translations
+		if len(dto.Translations) > 0 {
+			for _, tr := range dto.Translations {
+				tr.LinkerId = dto.UniqueId
+			}
+			if err := tx.
+				Clauses(clause.OnConflict{
+					Columns: []clause.Column{
+						{Name: "linker_id"},
+						{Name: "language_id"},
+					},
+					DoUpdates: clause.AssignmentColumns([]string{
+						"label",
+					}),
+				}).
+				Create(&dto.Translations).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		err := GormErrorToIError(err)
 		return nil, err

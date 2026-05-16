@@ -8,9 +8,6 @@ package abac
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -18,19 +15,19 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-
+	"log"
+	"strings"
 	//queries github.com/torabian/fireback - modules/abac"
 	"context"
 	"embed"
-	reflect "reflect"
-	"time"
-
 	"github.com/torabian/emi/emigo"
 	metas "github.com/torabian/fireback/modules/abac/metas"
 	mocks "github.com/torabian/fireback/modules/abac/mocks/AppMenu"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/AppMenu"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
+	reflect "reflect"
+	"time"
 )
 
 var appMenuSeedersFs = &seeders.ViewsFs
@@ -253,9 +250,9 @@ var AppMenuEntityMetaConfig map[string]int64 = map[string]int64{}
 var AppMenuEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&AppMenuEntity{}))
 
 type AppMenuEntityPolyglot struct {
-	LinkerId   string `gorm:"not null;size:100;uniqueIndex:idx_polyglot" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-	LanguageId string `gorm:"not null;size:100;uniqueIndex:idx_polyglot" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
-	Label      string `json:"label,omitempty" yaml:"label,omitempty"`
+	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+	Label      string `yaml:"label,omitempty" xml:"label,omitempty" json:"label,omitempty"`
 }
 
 func entityAppMenuFormatter(dto *AppMenuEntity, query fireback.QueryDSL) {
@@ -403,13 +400,11 @@ func AppMenuRecursiveAddUniqueId(dto *AppMenuEntity, query fireback.QueryDSL) {
 
 /*
 *
-
-		Batch inserts, do not have all features that create
-		operation does. Use it with unnormalized content,
-		or read the source code carefully.
-	  This is not marked as an action, because it should not be available publicly
-	  at this moment.
-
+	Batch inserts, do not have all features that create
+	operation does. Use it with unnormalized content,
+	or read the source code carefully.
+  This is not marked as an action, because it should not be available publicly
+  at this moment.
 *
 */
 func AppMenuMultiInsertFn(dtos []*AppMenuEntity, query fireback.QueryDSL) ([]*AppMenuEntity, *fireback.IError) {
@@ -459,19 +454,15 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 	// 2. Append the necessary information about user, workspace
 	AppMenuEntityBeforeCreateAppend(dto, query)
 	// 4. Create the entity
-	var dbref *gorm.DB
-
-	if query.Tx != nil {
-		dbref = query.Tx
-	} else {
+	var dbref *gorm.DB = nil
+	if query.Tx == nil {
 		dbref = fireback.GetDbRef()
+	} else {
+		dbref = query.Tx
 	}
-
+	query.Tx = dbref
 	err := dbref.Transaction(func(tx *gorm.DB) error {
-
 		query.Tx = tx
-
-		// create parent
 		if err := tx.
 			Omit("Translations").
 			Clauses(clause.OnConflict{
@@ -488,14 +479,11 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 			Create(&dto).Error; err != nil {
 			return err
 		}
-
 		// create translations
 		if len(dto.Translations) > 0 {
-
 			for _, tr := range dto.Translations {
 				tr.LinkerId = dto.UniqueId
 			}
-
 			if err := tx.
 				Clauses(clause.OnConflict{
 					Columns: []clause.Column{
@@ -510,12 +498,11 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 				return err
 			}
 		}
-
 		return nil
 	})
-
 	if err != nil {
-		return nil, fireback.GormErrorToIError(err)
+		err := fireback.GormErrorToIError(err)
+		return nil, err
 	}
 	// 5. Create sub entities, objects or arrays, association to other entities
 	AppMenuAssociationCreate(dto, query)
