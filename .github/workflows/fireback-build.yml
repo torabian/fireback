@@ -26,33 +26,33 @@ on:
       #     - windows-x64
       #     - macosx
       release_artifacts:
-        description: "Create a draft release with all artifacts"
+        description: "Create draft release"
         required: false
         default: false
         type: boolean
       github_pages:
-        description: "Deploy documents and fireback react to github pages"
+        description: "Deploy docs and demo to pages"
         required: false
         default: false
         type: boolean
 
       fireback_windows:
-        description: "Build for windows"
+        description: "Build Windows"
         required: false
         default: false
         type: boolean
       fireback_macos:
-        description: "Build for macos"
+        description: "Build Macosx"
         required: false
         default: false
         type: boolean
       fireback_react:
-        description: "Build Fireback React"
+        description: "Build Fireback React Front-end"
         required: false
         default: false
         type: boolean
       fireback_capacitor:
-        description: "Build Capacitor"
+        description: "Build Capacitor Demo"
         required: false
         default: false
         type: boolean
