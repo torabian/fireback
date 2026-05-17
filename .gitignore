@@ -20,9 +20,6 @@ dist
 ui/public/md
 cachemap.txt
 cachemap.json
-cmd/fireback-desktop/build/bin
-cmd/fireback-npm/**/*/fireback
-cmd/fireback-npm/**/*/fireback.exe
 google-java-format.jar
 *.msi
 *.wixpdb
