@@ -80,8 +80,18 @@ module.exports = defineConfig({
               // Drop and recreate database
               console.log(
                 await execAsync(
+                  `PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -c "DROP DATABASE IF EXISTS ${dbName};"`,
+                  CWD,
+                ),
+              );
+
               await execAsync(
-                `${BINARY} config db-dsn set "host=localhost user=postgres password=postgres dbname=fireback_test port=5432 sslmode=disable TimeZone=UTC"`,
+                `PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -c "CREATE DATABASE ${dbName};"`,
+                CWD,
+              );
+
+              await execAsync(
+                `${BINARY} config db-dsn set "host=localhost user=postgres password=postgres dbname=${dbName} port=5432 sslmode=disable TimeZone=UTC"`,
                 CWD,
               );
 
