@@ -69,10 +69,6 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
-		if t == "fireback.String" || t == "String" {
-			continue
-		}
-
 		if t == "fireback.Duration" || t == "Duration" {
 			continue
 		}
@@ -88,21 +84,7 @@ func ListGormSubEntities(entity reflect.Value) []string {
 		if t == "*fireback.XDateTime" || t == "*XDateTime" {
 			continue
 		}
-		if t == "fireback.Int64" || t == "Int64" {
-			continue
-		}
-		if t == "fireback.Int32" || t == "Int32" {
-			continue
-		}
-		if t == "fireback.Float64" || t == "Float64" {
-			continue
-		}
-		if t == "fireback.Float32" || t == "Float32" {
-			continue
-		}
-		if t == "fireback.Bool" || t == "Bool" {
-			continue
-		}
+
 		if t == "fireback.JSON" || t == "JSON" {
 			continue
 		}
