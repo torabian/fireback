@@ -213,8 +213,8 @@ var TimezoneGroupEntityMetaConfig map[string]int64 = map[string]int64{}
 var TimezoneGroupEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&TimezoneGroupEntity{}))
 
 type TimezoneGroupEntityPolyglot struct {
-	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+	LinkerId   string `gorm:"not null;index:idx_linker_language_timezoneGroup_TimezoneGroupEntityPolyglot,unique" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+	LanguageId string `gorm:"not null;index:idx_linker_language_timezoneGroup_TimezoneGroupEntityPolyglot,unique" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
 	Title      string `yaml:"title,omitempty" xml:"title,omitempty" json:"title,omitempty"`
 }
 

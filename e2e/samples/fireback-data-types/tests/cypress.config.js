@@ -5,7 +5,7 @@ let firebackProcess; // Store the Fireback process reference
 
 let BINARY = "/Users/ali/work/fireback/e2e/samples/fireback-data-types/app";
 let CWD = "/Users/ali/work/fireback/e2e/samples/fireback-data-types";
-const PORT = 7793;
+const PORT = 7794;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 

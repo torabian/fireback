@@ -218,8 +218,8 @@ var CapabilityEntityMetaConfig map[string]int64 = map[string]int64{}
 var CapabilityEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&CapabilityEntity{}))
 
 type CapabilityEntityPolyglot struct {
-	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-	LanguageId  string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+	LinkerId    string `gorm:"not null;index:idx_linker_language_capability_CapabilityEntityPolyglot,unique" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+	LanguageId  string `gorm:"not null;index:idx_linker_language_capability_CapabilityEntityPolyglot,unique" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
 	Description string `yaml:"description,omitempty" xml:"description,omitempty" json:"description,omitempty"`
 }
 

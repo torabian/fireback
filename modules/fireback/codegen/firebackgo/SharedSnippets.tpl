@@ -183,8 +183,10 @@ import  "{{ $key}}"
   {{ if .e.HasTranslations }}
 
   type {{ .e.PolyglotName}} struct {
-    LinkerId string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-    LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+    LinkerId string `gorm:"not null;index:idx_linker_language_{{.e.Name}}_{{.e.PolyglotName}},unique" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+    LanguageId string `gorm:"not null;index:idx_linker_language_{{.e.Name}}_{{.e.PolyglotName}},unique" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+
+
 
     {{ range .e.CompleteFields }}
       {{ if .Translate }}

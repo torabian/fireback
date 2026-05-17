@@ -5,7 +5,7 @@ let firebackProcess; // Store the Fireback process reference
 
 let BINARY = "/home/ali/work/fireback/app";
 let CWD = "/home/ali/work/fireback";
-const PORT = 7793;
+const PORT = 7794;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
@@ -72,8 +72,14 @@ module.exports = defineConfig({
             }
           } else if (vendor === "postgres") {
             try {
+              console.log("Using postgres");
               await execAsync(`${BINARY} config db-vendor set postgres`, CWD);
 
+              const dbName = "fireback_test";
+
+              // Drop and recreate database
+              console.log(
+                await execAsync(
               await execAsync(
                 `${BINARY} config db-dsn set "host=localhost user=postgres password=postgres dbname=fireback_test port=5432 sslmode=disable TimeZone=UTC"`,
                 CWD,

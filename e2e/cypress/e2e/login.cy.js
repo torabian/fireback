@@ -19,7 +19,7 @@ describe("Logging in with the signin", () => {
     it("get the data of the public", () => {
       cy.request(
         "GET",
-        "http://localhost:7793/passports/available-methods",
+        "http://localhost:7794/passports/available-methods",
       ).then((response) => {
         cy.task("log", response.body);
         expect(response.body.data.item.email).to.equal(false);
@@ -38,7 +38,7 @@ describe("Logging in with the signin", () => {
     it("get the data of the public", () => {
       cy.request(
         "GET",
-        "http://localhost:7793/passports/available-methods",
+        "http://localhost:7794/passports/available-methods",
       ).then((response) => {
         cy.task("log", response.body);
         expect(response.body.data.item.email).to.equal(true);
@@ -65,6 +65,7 @@ describe("Logging in with the signin", () => {
         "exec",
         ` role c --name testagentrole --capabilities "root.*"`,
       ).then((res) => {
+        console.log("Role created:", res)
         console.log((roleId = JSON.parse(res).uniqueId));
       });
     });

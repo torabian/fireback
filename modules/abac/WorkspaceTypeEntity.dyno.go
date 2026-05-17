@@ -235,8 +235,8 @@ var WorkspaceTypeEntityMetaConfig map[string]int64 = map[string]int64{}
 var WorkspaceTypeEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&WorkspaceTypeEntity{}))
 
 type WorkspaceTypeEntityPolyglot struct {
-	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-	LanguageId  string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+	LinkerId    string `gorm:"not null;index:idx_linker_language_workspaceType_WorkspaceTypeEntityPolyglot,unique" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+	LanguageId  string `gorm:"not null;index:idx_linker_language_workspaceType_WorkspaceTypeEntityPolyglot,unique" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
 	Title       string `yaml:"title,omitempty" xml:"title,omitempty" json:"title,omitempty"`
 	Description string `yaml:"description,omitempty" xml:"description,omitempty" json:"description,omitempty"`
 }
