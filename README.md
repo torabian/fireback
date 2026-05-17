@@ -11,7 +11,7 @@ Fireback with ABAC module, can handle large scale issues for Indie developers.
 
 ## Getting started
 
-If you want to build a new go project using fireback, easiest is to download the https://github.com/torabian/fireback/releases/download/latest/fireback-microservice-boilerplate.zip 
+If you want to build a new go project using fireback, easiest is to download the [https://github.com/torabian/fireback/releases/latest/download/fireback-microservice-boilerplate.zip](https://github.com/torabian/fireback/releases/latest/download/fireback-microservice-boilerplate.zip)
 
 and continue from there. Make sure you have installed necessary vscode extensions, for code completion.
 
