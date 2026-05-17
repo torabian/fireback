@@ -266,9 +266,10 @@ func UnsafeQuerySqlFromFs[T any](fsRef *embed.FS, queryName string, query QueryD
 }
 
 type VSqlContext struct {
-	IsMysql   bool
-	IsSqlite  bool
-	IsCounter bool
+	IsMysql    bool
+	IsSqlite   bool
+	IsPostgres bool
+	IsCounter  bool
 }
 
 func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) ([]*T, *QueryResultMeta, *IError) {
@@ -309,6 +310,10 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 			ctx.IsSqlite = true
 		}
 
+		if vendor == "postgres" {
+			ctx.IsPostgres = true
+		}
+
 		var output bytes.Buffer
 		tmpl, err := template.New("example").Parse(content)
 		if err != nil {
@@ -336,6 +341,11 @@ func ContextAwareVSqlOperation[T any](refl reflect.Value, fsRef *embed.FS, query
 
 		if vendor == "sqlite" {
 			ctx.IsSqlite = true
+		}
+
+		if vendor == "postgres" {
+
+			ctx.IsPostgres = true
 		}
 
 		var output bytes.Buffer

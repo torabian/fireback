@@ -5,7 +5,7 @@ let firebackProcess; // Store the Fireback process reference
 
 let BINARY = "/Users/ali/work/fireback/e2e/samples/fireback-payment/app";
 let CWD = "/Users/ali/work/fireback/e2e/samples/fireback-payment";
-const PORT = 7793;
+const PORT = 7794;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
@@ -61,7 +61,7 @@ module.exports = defineConfig({
               await execAsync(`${BINARY} config db-vendor set mysql`, CWD);
               await execAsync(
                 `${BINARY} config db-dsn set "root:root@tcp(localhost:3306)/fireback_test?charset=utf8mb4&parseTime=True&loc=Local"`,
-                CWD
+                CWD,
               );
               await execAsync(`${BINARY} migration apply`, CWD);
 
@@ -69,11 +69,26 @@ module.exports = defineConfig({
             } catch (err) {
               console.error("setup mysql failed:", err);
             }
+          } else if (vendor === "postgres") {
+            try {
+              await execAsync(`${BINARY} config db-vendor set postgres`, CWD);
+
+              await execAsync(
+                `${BINARY} config db-dsn set "host=localhost user=postgres password=postgres dbname=fireback_test port=5432 sslmode=disable TimeZone=UTC"`,
+                CWD,
+              );
+
+              await execAsync(`${BINARY} migration apply`, CWD);
+
+              return true;
+            } catch (err) {
+              console.error("setup postgres failed:", err);
+            }
           } else {
             await execAsync(`${BINARY} config db-vendor set sqlite`, CWD);
             await execAsync(
               `${BINARY} config db-name set /tmp/${dbname}.db`,
-              CWD
+              CWD,
             );
             await execAsync(`${BINARY} migration apply`, CWD);
 

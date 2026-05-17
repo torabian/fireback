@@ -218,8 +218,8 @@ var CapabilityEntityMetaConfig map[string]int64 = map[string]int64{}
 var CapabilityEntityJsonSchema = ExtractEntityFields(reflect.ValueOf(&CapabilityEntity{}))
 
 type CapabilityEntityPolyglot struct {
-	LinkerId    string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-	LanguageId  string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+	LinkerId    string `gorm:"not null;index:idx_linker_language_capability_CapabilityEntityPolyglot,unique" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+	LanguageId  string `gorm:"not null;index:idx_linker_language_capability_CapabilityEntityPolyglot,unique" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
 	Description string `yaml:"description,omitempty" xml:"description,omitempty" json:"description,omitempty"`
 }
 
@@ -426,7 +426,36 @@ func CapabilityActionCreateFn(dto *CapabilityEntity, query QueryDSL) (*Capabilit
 		dbref = query.Tx
 	}
 	query.Tx = dbref
-	err := dbref.Create(&dto).Error
+	err := dbref.Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		if err := tx.
+			Omit("Translations").
+			Create(&dto).Error; err != nil {
+			return err
+		}
+		// create translations
+		if len(dto.Translations) > 0 {
+			for _, tr := range dto.Translations {
+				tr.LinkerId = dto.UniqueId
+			}
+			if tx.Dialector.Name() == "postgres" {
+				tx = tx.Clauses(clause.OnConflict{
+					Columns: []clause.Column{
+						{Name: "linker_id"},
+						{Name: "language_id"},
+					},
+					DoUpdates: clause.AssignmentColumns([]string{
+						"description",
+					}),
+				})
+			}
+			if err := tx.
+				Create(&dto.Translations).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		err := GormErrorToIError(err)
 		return nil, err

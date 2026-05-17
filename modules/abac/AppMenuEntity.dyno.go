@@ -250,8 +250,8 @@ var AppMenuEntityMetaConfig map[string]int64 = map[string]int64{}
 var AppMenuEntityJsonSchema = fireback.ExtractEntityFields(reflect.ValueOf(&AppMenuEntity{}))
 
 type AppMenuEntityPolyglot struct {
-	LinkerId   string `gorm:"uniqueId;not null;size:100;" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
-	LanguageId string `gorm:"uniqueId;not null;size:100;" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
+	LinkerId   string `gorm:"not null;index:idx_linker_language_appMenu_AppMenuEntityPolyglot,unique" json:"linkerId,omitempty" yaml:"linkerId,omitempty" xml:"linkerId,omitempty"`
+	LanguageId string `gorm:"not null;index:idx_linker_language_appMenu_AppMenuEntityPolyglot,unique" json:"languageId,omitempty" xml:"languageId,omitempty" yaml:"languageId,omitempty"`
 	Label      string `yaml:"label,omitempty" xml:"label,omitempty" json:"label,omitempty"`
 }
 
@@ -461,7 +461,36 @@ func AppMenuActionCreateFn(dto *AppMenuEntity, query fireback.QueryDSL) (*AppMen
 		dbref = query.Tx
 	}
 	query.Tx = dbref
-	err := dbref.Create(&dto).Error
+	err := dbref.Transaction(func(tx *gorm.DB) error {
+		query.Tx = tx
+		if err := tx.
+			Omit("Translations").
+			Create(&dto).Error; err != nil {
+			return err
+		}
+		// create translations
+		if len(dto.Translations) > 0 {
+			for _, tr := range dto.Translations {
+				tr.LinkerId = dto.UniqueId
+			}
+			if tx.Dialector.Name() == "postgres" {
+				tx = tx.Clauses(clause.OnConflict{
+					Columns: []clause.Column{
+						{Name: "linker_id"},
+						{Name: "language_id"},
+					},
+					DoUpdates: clause.AssignmentColumns([]string{
+						"label",
+					}),
+				})
+			}
+			if err := tx.
+				Create(&dto.Translations).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 	if err != nil {
 		err := fireback.GormErrorToIError(err)
 		return nil, err

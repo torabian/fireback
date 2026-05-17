@@ -5,7 +5,7 @@ let firebackProcess; // Store the Fireback process reference
 
 let BINARY = "/home/ali/work/fireback/app";
 let CWD = "/home/ali/work/fireback";
-const PORT = 7793;
+const PORT = 7794;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
@@ -62,7 +62,7 @@ module.exports = defineConfig({
               await execAsync(`${BINARY} config db-vendor set mysql`, CWD);
               await execAsync(
                 `${BINARY} config db-dsn set "root:root@tcp(localhost:3306)/fireback_test?charset=utf8mb4&parseTime=True&loc=Local"`,
-                CWD
+                CWD,
               );
               await execAsync(`${BINARY} migration apply`, CWD);
 
@@ -70,11 +70,42 @@ module.exports = defineConfig({
             } catch (err) {
               console.error("setup mysql failed:", err);
             }
+          } else if (vendor === "postgres") {
+            try {
+              console.log("Using postgres");
+              await execAsync(`${BINARY} config db-vendor set postgres`, CWD);
+
+              const dbName = "fireback_test";
+
+              // Drop and recreate database
+              console.log(
+                await execAsync(
+                  `PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -c "DROP DATABASE IF EXISTS ${dbName};"`,
+                  CWD,
+                ),
+              );
+
+              await execAsync(
+                `PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -c "CREATE DATABASE ${dbName};"`,
+                CWD,
+              );
+
+              await execAsync(
+                `${BINARY} config db-dsn set "host=localhost user=postgres password=postgres dbname=${dbName} port=5432 sslmode=disable TimeZone=UTC"`,
+                CWD,
+              );
+
+              await execAsync(`${BINARY} migration apply`, CWD);
+
+              return true;
+            } catch (err) {
+              console.error("setup postgres failed:", err);
+            }
           } else {
             await execAsync(`${BINARY} config db-vendor set sqlite`, CWD);
             await execAsync(
               `${BINARY} config db-name set /tmp/${dbname}.db`,
-              CWD
+              CWD,
             );
             await execAsync(`${BINARY} migration apply`, CWD);
 

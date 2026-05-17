@@ -40,9 +40,7 @@
     {{"{{"}} end {{"}}"}}
 {{"{{"}} end {{"}}"}}
 
-
-
-{{"{{"}} if .IsMysql {{"}}"}}
+{{"{{"}} if or .IsMysql .IsPostgres {{"}}"}}
     {{"{{"}} if .IsCounter {{"}}"}}
     select
         count(*) total_items

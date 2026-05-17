@@ -19,7 +19,7 @@ describe("Logging in with the signin", () => {
     it("get the data of the public", () => {
       cy.request(
         "GET",
-        "http://localhost:7793/passports/available-methods"
+        "http://localhost:7794/passports/available-methods",
       ).then((response) => {
         cy.task("log", response.body);
         expect(response.body.data.item.email).to.equal(false);
@@ -38,7 +38,7 @@ describe("Logging in with the signin", () => {
     it("get the data of the public", () => {
       cy.request(
         "GET",
-        "http://localhost:7793/passports/available-methods"
+        "http://localhost:7794/passports/available-methods",
       ).then((response) => {
         cy.task("log", response.body);
         expect(response.body.data.item.email).to.equal(true);
@@ -63,8 +63,9 @@ describe("Logging in with the signin", () => {
     it("should be able to create a role in order to assign it into the workspace type.", () => {
       cy.task(
         "exec",
-        ` role c --name testagentrole --capabilities "root.*"`
+        ` role c --name testagentrole --capabilities "root.*"`,
       ).then((res) => {
+        console.log("Role created:", res)
         console.log((roleId = JSON.parse(res).uniqueId));
       });
     });
@@ -72,7 +73,7 @@ describe("Logging in with the signin", () => {
     it("should be able to create a workspace name", () => {
       cy.task(
         "exec",
-        ` ws type c --title customer --slug customer --role-id ${roleId}`
+        ` ws type c --title customer --slug customer --role-id ${roleId}`,
       );
     });
 
@@ -127,6 +128,7 @@ describe("Logging in with the signin", () => {
 
       it("should be able to generate back the menu items from seeder.", () => {
         cy.task("exec", `misc appmenu ssync`).then((content) => {
+          console.log(100, content);
           let countFilesImported = 0;
           for (const line of content.split("\n")) {
             if (line.startsWith("Success")) {
@@ -184,7 +186,7 @@ describe("Logging in with the signin", () => {
 
           cy.task(
             "exec",
-            `misc appmenu q --query "unique_id = ${item.uniqueId}"`
+            `misc appmenu q --query "unique_id = ${item.uniqueId}"`,
           ).then((content) => {
             const res = JSON.parse(content);
             console.log(res);
