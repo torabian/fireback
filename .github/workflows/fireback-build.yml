@@ -35,31 +35,26 @@ on:
         required: false
         default: false
         type: boolean
-      deploy_npm:
-        description: "Publish fireback ui libraries to npm"
-        required: false
-        default: false
-        type: boolean
-      
+
       fireback_windows:
         description: "Build for windows"
         required: false
-        default: true
+        default: false
         type: boolean
       fireback_macos:
         description: "Build for macos"
         required: false
-        default: true
+        default: false
         type: boolean
       fireback_react:
         description: "Build Fireback React"
         required: false
-        default: true
+        default: false
         type: boolean
       fireback_capacitor:
         description: "Build Capacitor"
         required: false
-        default: true
+        default: false
         type: boolean
 jobs:
 
