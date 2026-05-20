@@ -73,3 +73,9 @@ web:
 
 prepare:
 	make refresh && make rebuild-sdks && make bundle
+
+dockerbuild:
+	docker build -t fireback . 
+
+dockerpublish:
+	make dockerbuild && docker tag fireback fireback/fireback:latest && docker push fireback/fireback:latest
