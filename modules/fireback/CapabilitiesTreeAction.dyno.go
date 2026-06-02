@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -57,13 +57,19 @@ func GetCapabilitiesTreeActionResCliFlags(prefix string) []emigo.CliFlag {
 }
 func CastCapabilitiesTreeActionResFromCli(c emigo.CliCastable) CapabilitiesTreeActionRes {
 	data := CapabilitiesTreeActionRes{}
+	if c.IsSet("capabilities") {
+		data.Capabilities = emigo.CapturePossibleCollection(CastCapabilityInfoDtoFromCli, "capabilities", c)
+	}
+	if c.IsSet("nested") {
+		data.Nested = emigo.CapturePossibleCollection(CastCapabilityInfoDtoFromCli, "nested", c)
+	}
 	return data
 }
 
 // The base class definition for capabilitiesTreeActionRes
 type CapabilitiesTreeActionRes struct {
-	Capabilities []CapabilityInfoDto `json:"capabilities" yaml:"capabilities"`
-	Nested       []CapabilityInfoDto `json:"nested" yaml:"nested"`
+	Capabilities emigo.Collection[CapabilityInfoDto] `json:"capabilities" yaml:"capabilities"`
+	Nested       emigo.Collection[CapabilityInfoDto] `json:"nested" yaml:"nested"`
 }
 
 func (x *CapabilitiesTreeActionRes) Json() string {
@@ -128,63 +134,8 @@ func (x CapabilitiesTreeActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// CapabilitiesTreeActionRaw registers a raw Gin route for the CapabilitiesTreeAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func CapabilitiesTreeActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := CapabilitiesTreeActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type CapabilitiesTreeActionRequestSig = func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error)
-
-// CapabilitiesTreeActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CapabilitiesTreeAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func CapabilitiesTreeActionHandler(
-	handler CapabilitiesTreeActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := CapabilitiesTreeActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		// Build typed request wrapper
-		req := CapabilitiesTreeActionRequest{
-			Body:        nil,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// CapabilitiesTreeAction is a high-level convenience wrapper around CapabilitiesTreeActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func CapabilitiesTreeActionGin(r gin.IRoutes, handler CapabilitiesTreeActionRequestSig) {
-	method, url, h := CapabilitiesTreeActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for CapabilitiesTreeAction
@@ -215,9 +166,6 @@ func CapabilitiesTreeActionQueryFromString(rawQuery string) CapabilitiesTreeActi
 	v.mapped = mapped
 	return v
 }
-func CapabilitiesTreeActionQueryFromGin(c *gin.Context) CapabilitiesTreeActionQuery {
-	return CapabilitiesTreeActionQueryFromString(c.Request.URL.RawQuery)
-}
 func CapabilitiesTreeActionQueryFromHttp(r *http.Request) CapabilitiesTreeActionQuery {
 	return CapabilitiesTreeActionQueryFromString(r.URL.RawQuery)
 }
@@ -240,26 +188,24 @@ type CapabilitiesTreeActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x CapabilitiesTreeActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x CapabilitiesTreeActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type CapabilitiesTreeActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func CapabilitiesTreeActionClientCreateUrl(
 	req CapabilitiesTreeActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -336,4 +282,147 @@ func CapabilitiesTreeActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return CapabilitiesTreeActionClientExecuteTyped(r)
+}
+
+// CapabilitiesTreeActionRaw registers a raw Gin route for the CapabilitiesTreeAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func CapabilitiesTreeActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := CapabilitiesTreeActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// CapabilitiesTreeActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CapabilitiesTreeAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func CapabilitiesTreeActionHandler(
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := CapabilitiesTreeActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		// Build typed request wrapper
+		req := CapabilitiesTreeActionRequest{
+			Body:        nil,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// CapabilitiesTreeActionGin is a high-level convenience wrapper around CapabilitiesTreeActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func CapabilitiesTreeActionGin(r gin.IRoutes, handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error)) {
+	method, url, h := CapabilitiesTreeActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x CapabilitiesTreeActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func CapabilitiesTreeActionQueryFromGin(c *gin.Context) CapabilitiesTreeActionQuery {
+	return CapabilitiesTreeActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x CapabilitiesTreeActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// CapabilitiesTreeActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the CapabilitiesTreeAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *CapabilitiesTreeActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func CapabilitiesTreeActionHttpHandler(
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := CapabilitiesTreeActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := CapabilitiesTreeActionRequest{
+			Body:        nil,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// CapabilitiesTreeActionHttp is a high-level convenience wrapper around
+// CapabilitiesTreeActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func CapabilitiesTreeActionHttp(
+	mux *http.ServeMux,
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
+) {
+	method, pattern, h := CapabilitiesTreeActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

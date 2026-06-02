@@ -65,8 +65,8 @@ func addUserToEventBus(query QueryDSL) {
 }
 
 func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (chan []byte, error) {
-	query := ExtractQueryDslFromGinContext(session.Ctx)
-	query.RawSocketConnection = session.Socket
+	query := ExtractQueryDslFromGinContext(session.GinCtx())
+	query.RawSocketConnection = session.GetSocket()
 
 	LOG.Debug(
 		"Event bus subscription has been started",
