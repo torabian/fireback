@@ -2074,6 +2074,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
 		if err3 != nil {
 			log.Fatalln("Error on writing query content:", exportPath, err3)
+				if err3 != nil {
 		}
 	}
 

@@ -114,7 +114,7 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.
 
 				return &ClassicPassportOtpActionResponse{
 					Payload: fireback.GResponseSingleItem(ClassicPassportOtpActionRes{
-						Session: emigo.NullableOf(*session),
+						Session: emigo.NewOneNullable(*session),
 					}),
 				}, nil
 			}

@@ -79,6 +79,9 @@ func CastWorkspaceInvitationDtoFromCli(c emigo.CliCastable) WorkspaceInvitationD
 	if c.IsSet("phonenumber") {
 		data.Phonenumber = c.String("phonenumber")
 	}
+	if c.IsSet("workspace") {
+		data.Workspace = emigo.CapturePossibleOne(CastWorkspaceEntityFromCli, "workspace", c)
+	}
 	if c.IsSet("first-name") {
 		data.FirstName = c.String("first-name")
 	}
@@ -110,7 +113,7 @@ type WorkspaceInvitationDto struct {
 	// The phone number of the person which is invited.
 	Phonenumber string `json:"phonenumber" yaml:"phonenumber"`
 	// Workspace which user is being invite to.
-	Workspace WorkspaceEntity `json:"workspace" yaml:"workspace"`
+	Workspace emigo.One[WorkspaceEntity] `json:"workspace" yaml:"workspace"`
 	// First name of the person which is invited
 	FirstName string `json:"firstName" validate:"required" yaml:"firstName"`
 	// Last name of the person which is invited.

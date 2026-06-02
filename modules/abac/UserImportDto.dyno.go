@@ -36,9 +36,9 @@ func CastUserImportDtoFromCli(c emigo.CliCastable) UserImportDto {
 
 // The base class definition for userImportDto
 type UserImportDto struct {
-	Avatar    string                   `json:"avatar" yaml:"avatar"`
-	Passports []UserImportDtoPassports `json:"passports" yaml:"passports"`
-	Address   UserImportDtoAddress     `json:"address" yaml:"address"`
+	Avatar    string                              `json:"avatar" yaml:"avatar"`
+	Passports emigo.Array[UserImportDtoPassports] `json:"passports" yaml:"passports"`
+	Address   UserImportDtoAddress                `json:"address" yaml:"address"`
 }
 
 func GetUserImportDtoPassportsCliFlags(prefix string) []emigo.CliFlag {

@@ -26,7 +26,7 @@ func ConfirmClassicPassportTotpAction(c ConfirmClassicPassportTotpActionRequest,
 		return nil, signinError
 	}
 
-	passport, _ := singinResult.Session.Passport.Get()
+	passport, _ := singinResult.Session.Item.Passport.Get()
 	if passport.TotpSecret == "" {
 		return nil, fireback.Create401Error(&AbacMessages.TotpIsNotAvailableForThisPassport, []string{})
 	}

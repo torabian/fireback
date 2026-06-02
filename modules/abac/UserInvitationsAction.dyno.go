@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -188,63 +188,8 @@ func (x UserInvitationsActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// UserInvitationsActionRaw registers a raw Gin route for the UserInvitationsAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func UserInvitationsActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := UserInvitationsActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type UserInvitationsActionRequestSig = func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error)
-
-// UserInvitationsActionHandler returns the HTTP method, route URL, and a typed Gin handler for the UserInvitationsAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func UserInvitationsActionHandler(
-	handler UserInvitationsActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := UserInvitationsActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		// Build typed request wrapper
-		req := UserInvitationsActionRequest{
-			Body:        nil,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// UserInvitationsAction is a high-level convenience wrapper around UserInvitationsActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func UserInvitationsActionGin(r gin.IRoutes, handler UserInvitationsActionRequestSig) {
-	method, url, h := UserInvitationsActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for UserInvitationsAction
@@ -275,9 +220,6 @@ func UserInvitationsActionQueryFromString(rawQuery string) UserInvitationsAction
 	v.mapped = mapped
 	return v
 }
-func UserInvitationsActionQueryFromGin(c *gin.Context) UserInvitationsActionQuery {
-	return UserInvitationsActionQueryFromString(c.Request.URL.RawQuery)
-}
 func UserInvitationsActionQueryFromHttp(r *http.Request) UserInvitationsActionQuery {
 	return UserInvitationsActionQueryFromString(r.URL.RawQuery)
 }
@@ -300,26 +242,24 @@ type UserInvitationsActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x UserInvitationsActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x UserInvitationsActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type UserInvitationsActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func UserInvitationsActionClientCreateUrl(
 	req UserInvitationsActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -396,4 +336,147 @@ func UserInvitationsActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return UserInvitationsActionClientExecuteTyped(r)
+}
+
+// UserInvitationsActionRaw registers a raw Gin route for the UserInvitationsAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func UserInvitationsActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := UserInvitationsActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// UserInvitationsActionHandler returns the HTTP method, route URL, and a typed Gin handler for the UserInvitationsAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func UserInvitationsActionHandler(
+	handler func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := UserInvitationsActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		// Build typed request wrapper
+		req := UserInvitationsActionRequest{
+			Body:        nil,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// UserInvitationsActionGin is a high-level convenience wrapper around UserInvitationsActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func UserInvitationsActionGin(r gin.IRoutes, handler func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error)) {
+	method, url, h := UserInvitationsActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x UserInvitationsActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func UserInvitationsActionQueryFromGin(c *gin.Context) UserInvitationsActionQuery {
+	return UserInvitationsActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x UserInvitationsActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// UserInvitationsActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the UserInvitationsAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *UserInvitationsActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func UserInvitationsActionHttpHandler(
+	handler func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := UserInvitationsActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := UserInvitationsActionRequest{
+			Body:        nil,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// UserInvitationsActionHttp is a high-level convenience wrapper around
+// UserInvitationsActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func UserInvitationsActionHttp(
+	mux *http.ServeMux,
+	handler func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error),
+) {
+	method, pattern, h := UserInvitationsActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

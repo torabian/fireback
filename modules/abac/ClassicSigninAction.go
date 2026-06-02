@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -113,7 +114,7 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 
 	return &ClassicSigninActionResponse{
 		Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-			Session: *session,
+			Session: emigo.NewOne(*session),
 		}),
 	}, nil
 }
@@ -138,7 +139,7 @@ func classicSinginInternalUnsafe(req *ClassicSigninActionReq, q fireback.QueryDS
 	applyUserTokenAndWorkspacesToToken(session, q)
 
 	return &ClassicSigninActionRes{
-		Session: *session,
+		Session: emigo.NewOne(*session),
 	}, nil
 }
 
@@ -151,7 +152,10 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.Quer
 	if err != nil {
 		return fireback.GormErrorToIError(err)
 	}
-	session.UserWorkspaces = convertPointersToValuesUserWorkspaceEntity(workspacesItems)
+
+	session.UserWorkspaces = emigo.CollectionReplace(
+		convertPointersToValuesUserWorkspaceEntity(workspacesItems),
+	)
 
 	// Authorize the session, put the token
 	if token, err := user.AuthorizeWithToken(q); err != nil {
@@ -196,9 +200,8 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback
 	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
 		return nil, err
 	} else {
-		session.User.Set(user)
-
-		session.Passport.Set(passport)
+		session.User.Set(*user)
+		session.Passport.Set(*passport)
 		passportPassword = passport.Password
 	}
 

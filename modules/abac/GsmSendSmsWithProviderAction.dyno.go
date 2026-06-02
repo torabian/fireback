@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -171,68 +171,8 @@ func (x GsmSendSmsWithProviderActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// GsmSendSmsWithProviderActionRaw registers a raw Gin route for the GsmSendSmsWithProviderAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func GsmSendSmsWithProviderActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := GsmSendSmsWithProviderActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type GsmSendSmsWithProviderActionRequestSig = func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error)
-
-// GsmSendSmsWithProviderActionHandler returns the HTTP method, route URL, and a typed Gin handler for the GsmSendSmsWithProviderAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func GsmSendSmsWithProviderActionHandler(
-	handler GsmSendSmsWithProviderActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := GsmSendSmsWithProviderActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body GsmSendSmsWithProviderActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
-		// Build typed request wrapper
-		req := GsmSendSmsWithProviderActionRequest{
-			Body:        body,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// GsmSendSmsWithProviderAction is a high-level convenience wrapper around GsmSendSmsWithProviderActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func GsmSendSmsWithProviderActionGin(r gin.IRoutes, handler GsmSendSmsWithProviderActionRequestSig) {
-	method, url, h := GsmSendSmsWithProviderActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for GsmSendSmsWithProviderAction
@@ -263,9 +203,6 @@ func GsmSendSmsWithProviderActionQueryFromString(rawQuery string) GsmSendSmsWith
 	v.mapped = mapped
 	return v
 }
-func GsmSendSmsWithProviderActionQueryFromGin(c *gin.Context) GsmSendSmsWithProviderActionQuery {
-	return GsmSendSmsWithProviderActionQueryFromString(c.Request.URL.RawQuery)
-}
 func GsmSendSmsWithProviderActionQueryFromHttp(r *http.Request) GsmSendSmsWithProviderActionQuery {
 	return GsmSendSmsWithProviderActionQueryFromString(r.URL.RawQuery)
 }
@@ -288,26 +225,24 @@ type GsmSendSmsWithProviderActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x GsmSendSmsWithProviderActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x GsmSendSmsWithProviderActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type GsmSendSmsWithProviderActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func GsmSendSmsWithProviderActionClientCreateUrl(
 	req GsmSendSmsWithProviderActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -388,4 +323,164 @@ func GsmSendSmsWithProviderActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return GsmSendSmsWithProviderActionClientExecuteTyped(r)
+}
+
+// GsmSendSmsWithProviderActionRaw registers a raw Gin route for the GsmSendSmsWithProviderAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func GsmSendSmsWithProviderActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := GsmSendSmsWithProviderActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// GsmSendSmsWithProviderActionHandler returns the HTTP method, route URL, and a typed Gin handler for the GsmSendSmsWithProviderAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func GsmSendSmsWithProviderActionHandler(
+	handler func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := GsmSendSmsWithProviderActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body GsmSendSmsWithProviderActionReq
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+		// Build typed request wrapper
+		req := GsmSendSmsWithProviderActionRequest{
+			Body:        body,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// GsmSendSmsWithProviderActionGin is a high-level convenience wrapper around GsmSendSmsWithProviderActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func GsmSendSmsWithProviderActionGin(r gin.IRoutes, handler func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error)) {
+	method, url, h := GsmSendSmsWithProviderActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x GsmSendSmsWithProviderActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func GsmSendSmsWithProviderActionQueryFromGin(c *gin.Context) GsmSendSmsWithProviderActionQuery {
+	return GsmSendSmsWithProviderActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x GsmSendSmsWithProviderActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// GsmSendSmsWithProviderActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the GsmSendSmsWithProviderAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *GsmSendSmsWithProviderActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func GsmSendSmsWithProviderActionHttpHandler(
+	handler func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := GsmSendSmsWithProviderActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body GsmSendSmsWithProviderActionReq
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := GsmSendSmsWithProviderActionRequest{
+			Body:        body,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// GsmSendSmsWithProviderActionHttp is a high-level convenience wrapper around
+// GsmSendSmsWithProviderActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func GsmSendSmsWithProviderActionHttp(
+	mux *http.ServeMux,
+	handler func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error),
+) {
+	method, pattern, h := GsmSendSmsWithProviderActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }
