@@ -1837,8 +1837,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 	for _, entity := range x.Entities {
 
 		// Disabled now, but later we need to fix this.
-		ve := ConvertEntityToEmi(entity)
-		fmt.Println("Ve", ve.Json())
+		// ve := ConvertEntityToEmi(entity)
 		// mDtos = append(mDtos, ve.Dtos...)
 		// aktFields = append(aktFields, ve.Actions...)
 
@@ -2067,15 +2066,17 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
-			content = golang.AsFullDocument(res, x.Name)
-			exportPath = filepath.Join(exportDir, ToUpper(action.Name)+"Action.dyno.go")
+			for _, item := range res {
+				content = golang.AsFullDocument(item, x.Name)
+				exportPath = filepath.Join(exportDir, item.SuggestedFileName+".dyno"+item.SuggestedExtension)
+
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
+				if err3 != nil {
+					log.Fatalln("Error on writing query content:", exportPath, err3)
+				}
+			}
 		}
 
-		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
-		if err3 != nil {
-			log.Fatalln("Error on writing query content:", exportPath, err3)
-				if err3 != nil {
-		}
 	}
 
 	for _, query := range x.Queries {
