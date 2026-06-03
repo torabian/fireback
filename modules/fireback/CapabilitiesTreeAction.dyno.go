@@ -353,17 +353,6 @@ func (x CapabilitiesTreeActionRequest) IsGin() bool {
 func CapabilitiesTreeActionQueryFromGin(c *gin.Context) CapabilitiesTreeActionQuery {
 	return CapabilitiesTreeActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x CapabilitiesTreeActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // CapabilitiesTreeActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the CapabilitiesTreeAction action. Developers implement

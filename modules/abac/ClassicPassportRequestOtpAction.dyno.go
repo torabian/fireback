@@ -411,17 +411,6 @@ func (x ClassicPassportRequestOtpActionRequest) IsGin() bool {
 func ClassicPassportRequestOtpActionQueryFromGin(c *gin.Context) ClassicPassportRequestOtpActionQuery {
 	return ClassicPassportRequestOtpActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x ClassicPassportRequestOtpActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // ClassicPassportRequestOtpActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the ClassicPassportRequestOtpAction action. Developers implement

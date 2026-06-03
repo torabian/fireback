@@ -385,17 +385,6 @@ func (x AcceptInviteActionRequest) IsGin() bool {
 func AcceptInviteActionQueryFromGin(c *gin.Context) AcceptInviteActionQuery {
 	return AcceptInviteActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x AcceptInviteActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // AcceptInviteActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the AcceptInviteAction action. Developers implement

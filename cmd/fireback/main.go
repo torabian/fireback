@@ -7,7 +7,6 @@ import (
 	// "github.com/torabian/fireback/modules/abac"
 	"github.com/urfave/cli/v3"
 
-	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
@@ -67,8 +66,8 @@ var xapp = &fireback.FirebackApp{
 				fireback.NewProjectCli(),
 			},
 		},
-		// }),
-	}, abac.AbacCompleteModules()...),
+	}),
+	// }, abac.AbacCompleteModules()...),
 }
 
 func main() {

@@ -395,17 +395,6 @@ func (x ChangePasswordActionRequest) IsGin() bool {
 func ChangePasswordActionQueryFromGin(c *gin.Context) ChangePasswordActionQuery {
 	return ChangePasswordActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x ChangePasswordActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // ChangePasswordActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the ChangePasswordAction action. Developers implement

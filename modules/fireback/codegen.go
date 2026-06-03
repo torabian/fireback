@@ -1990,6 +1990,10 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 	}
 
+	emiGoContext := core.MicroGenContext{
+		Tags: "split-cli",
+	}
+
 	for _, dto := range mDtos {
 
 		// Fireback, has a naming convension which Emi, as a general compiler
@@ -2003,7 +2007,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			exportPath = filepath.Join(exportDir, dtoName+".dyno.go")
 			result, err := golang.GoCommonStructGenerator(
 				dto.Fields,
-				core.MicroGenContext{},
+				emiGoContext,
 				golang.GoCommonStructContext{
 					RootClassName:       dtoName,
 					EmiLocation:         "github.com/torabian/emi/emigo",
@@ -2062,7 +2066,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
-			res, err := golang.GoActionRender(action, core.MicroGenContext{}, goComplexes)
+			res, err := golang.GoActionRender(action, emiGoContext, goComplexes)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}

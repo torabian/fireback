@@ -401,17 +401,6 @@ func (x SendEmailActionRequest) IsGin() bool {
 func SendEmailActionQueryFromGin(c *gin.Context) SendEmailActionQuery {
 	return SendEmailActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x SendEmailActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // SendEmailActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the SendEmailAction action. Developers implement

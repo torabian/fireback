@@ -410,17 +410,6 @@ func (x QueryUserRoleWorkspacesActionRequest) IsGin() bool {
 func QueryUserRoleWorkspacesActionQueryFromGin(c *gin.Context) QueryUserRoleWorkspacesActionQuery {
 	return QueryUserRoleWorkspacesActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x QueryUserRoleWorkspacesActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // QueryUserRoleWorkspacesActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the QueryUserRoleWorkspacesAction action. Developers implement

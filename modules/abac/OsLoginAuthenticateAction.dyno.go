@@ -310,17 +310,6 @@ func (x OsLoginAuthenticateActionRequest) IsGin() bool {
 func OsLoginAuthenticateActionQueryFromGin(c *gin.Context) OsLoginAuthenticateActionQuery {
 	return OsLoginAuthenticateActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x OsLoginAuthenticateActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // OsLoginAuthenticateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the OsLoginAuthenticateAction action. Developers implement

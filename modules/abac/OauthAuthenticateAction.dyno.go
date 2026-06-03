@@ -405,17 +405,6 @@ func (x OauthAuthenticateActionRequest) IsGin() bool {
 func OauthAuthenticateActionQueryFromGin(c *gin.Context) OauthAuthenticateActionQuery {
 	return OauthAuthenticateActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x OauthAuthenticateActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // OauthAuthenticateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the OauthAuthenticateAction action. Developers implement

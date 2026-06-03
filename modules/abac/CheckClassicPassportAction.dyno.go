@@ -462,17 +462,6 @@ func (x CheckClassicPassportActionRequest) IsGin() bool {
 func CheckClassicPassportActionQueryFromGin(c *gin.Context) CheckClassicPassportActionQuery {
 	return CheckClassicPassportActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x CheckClassicPassportActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // CheckClassicPassportActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the CheckClassicPassportAction action. Developers implement

@@ -383,17 +383,6 @@ func (x CreateWorkspaceActionRequest) IsGin() bool {
 func CreateWorkspaceActionQueryFromGin(c *gin.Context) CreateWorkspaceActionQuery {
 	return CreateWorkspaceActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x CreateWorkspaceActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // CreateWorkspaceActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the CreateWorkspaceAction action. Developers implement

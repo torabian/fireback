@@ -478,17 +478,6 @@ func (x ClassicSignupActionRequest) IsGin() bool {
 func ClassicSignupActionQueryFromGin(c *gin.Context) ClassicSignupActionQuery {
 	return ClassicSignupActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x ClassicSignupActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // ClassicSignupActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the ClassicSignupAction action. Developers implement

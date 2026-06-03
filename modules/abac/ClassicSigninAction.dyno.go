@@ -441,17 +441,6 @@ func (x ClassicSigninActionRequest) IsGin() bool {
 func ClassicSigninActionQueryFromGin(c *gin.Context) ClassicSigninActionQuery {
 	return ClassicSigninActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x ClassicSigninActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // ClassicSigninActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the ClassicSigninAction action. Developers implement

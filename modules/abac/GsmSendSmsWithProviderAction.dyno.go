@@ -399,17 +399,6 @@ func (x GsmSendSmsWithProviderActionRequest) IsGin() bool {
 func GsmSendSmsWithProviderActionQueryFromGin(c *gin.Context) GsmSendSmsWithProviderActionQuery {
 	return GsmSendSmsWithProviderActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x GsmSendSmsWithProviderActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // GsmSendSmsWithProviderActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the GsmSendSmsWithProviderAction action. Developers implement

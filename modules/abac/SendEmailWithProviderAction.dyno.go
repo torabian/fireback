@@ -3,13 +3,12 @@ package abac
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 )
 
 /**
@@ -63,9 +62,9 @@ func GetSendEmailWithProviderActionReqCliFlags(prefix string) []emigo.CliFlag {
 }
 func CastSendEmailWithProviderActionReqFromCli(c emigo.CliCastable) SendEmailWithProviderActionReq {
 	data := SendEmailWithProviderActionReq{}
-	// if c.IsSet("email-provider") {
-	// 	data.EmailProvider = emigo.CapturePossibleOne(CastEmailProviderEntityFromCli, "email-provider", c)
-	// }
+	if c.IsSet("email-provider") {
+		data.EmailProvider = emigo.CapturePossibleOne(CastEmailProviderEntityFromCli, "email-provider", c)
+	}
 	if c.IsSet("to-address") {
 		data.ToAddress = c.String("to-address")
 	}
@@ -399,17 +398,6 @@ func (x SendEmailWithProviderActionRequest) IsGin() bool {
 }
 func SendEmailWithProviderActionQueryFromGin(c *gin.Context) SendEmailWithProviderActionQuery {
 	return SendEmailWithProviderActionQueryFromString(c.Request.URL.RawQuery)
-}
-func (x SendEmailWithProviderActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
 }
 
 // SendEmailWithProviderActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

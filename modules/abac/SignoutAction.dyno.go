@@ -383,17 +383,6 @@ func (x SignoutActionRequest) IsGin() bool {
 func SignoutActionQueryFromGin(c *gin.Context) SignoutActionQuery {
 	return SignoutActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x SignoutActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
 
 // SignoutActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
 // typed net/http handler for the SignoutAction action. Developers implement
