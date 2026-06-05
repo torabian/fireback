@@ -44,35 +44,6 @@ func SendEmailWithProviderActionMeta() struct {
 		Description: `Send a text message using an specific gsm provider`,
 	}
 }
-func GetSendEmailWithProviderActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "email-provider",
-			Type: "one",
-		},
-		{
-			Name: prefix + "to-address",
-			Type: "string",
-		},
-		{
-			Name: prefix + "body",
-			Type: "string",
-		},
-	}
-}
-func CastSendEmailWithProviderActionReqFromCli(c emigo.CliCastable) SendEmailWithProviderActionReq {
-	data := SendEmailWithProviderActionReq{}
-	if c.IsSet("email-provider") {
-		data.EmailProvider = emigo.CapturePossibleOne(CastEmailProviderEntityFromCli, "email-provider", c)
-	}
-	if c.IsSet("to-address") {
-		data.ToAddress = c.String("to-address")
-	}
-	if c.IsSet("body") {
-		data.Body = c.String("body")
-	}
-	return data
-}
 
 // The base class definition for sendEmailWithProviderActionReq
 type SendEmailWithProviderActionReq struct {
@@ -87,21 +58,6 @@ func (x *SendEmailWithProviderActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetSendEmailWithProviderActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "queue-id",
-			Type: "string",
-		},
-	}
-}
-func CastSendEmailWithProviderActionResFromCli(c emigo.CliCastable) SendEmailWithProviderActionRes {
-	data := SendEmailWithProviderActionRes{}
-	if c.IsSet("queue-id") {
-		data.QueueId = c.String("queue-id")
-	}
-	return data
 }
 
 // The base class definition for sendEmailWithProviderActionRes

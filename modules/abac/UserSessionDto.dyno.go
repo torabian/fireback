@@ -3,57 +3,6 @@ package abac
 import "encoding/json"
 import emigo "github.com/torabian/emi/emigo"
 
-func GetUserSessionDtoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "passport",
-			Type: "one?",
-		},
-		{
-			Name: prefix + "token",
-			Type: "string",
-		},
-		{
-			Name: prefix + "exchange-key",
-			Type: "string",
-		},
-		{
-			Name: prefix + "user-workspaces",
-			Type: "collection",
-		},
-		{
-			Name: prefix + "user",
-			Type: "one?",
-		},
-		{
-			Name: prefix + "user-id",
-			Type: "string?",
-		},
-	}
-}
-func CastUserSessionDtoFromCli(c emigo.CliCastable) UserSessionDto {
-	data := UserSessionDto{}
-	if c.IsSet("passport") {
-		data.Passport = emigo.CapturePossibleOneNullable(CastPassportEntityFromCli, "passport", c)
-	}
-	if c.IsSet("token") {
-		data.Token = c.String("token")
-	}
-	if c.IsSet("exchange-key") {
-		data.ExchangeKey = c.String("exchange-key")
-	}
-	if c.IsSet("user-workspaces") {
-		data.UserWorkspaces = emigo.CapturePossibleCollection(CastUserWorkspaceEntityFromCli, "user-workspaces", c)
-	}
-	if c.IsSet("user") {
-		data.User = emigo.CapturePossibleOneNullable(CastUserEntityFromCli, "user", c)
-	}
-	if c.IsSet("user-id") {
-		emigo.ParseNullable(c.String("user-id"), &data.UserId)
-	}
-	return data
-}
-
 // The base class definition for userSessionDto
 type UserSessionDto struct {
 	Passport       emigo.OneNullable[PassportEntity]     `json:"passport" yaml:"passport"`

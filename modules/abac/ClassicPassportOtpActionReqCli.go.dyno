@@ -1,0 +1,25 @@
+//go:build !wasm
+package abac
+import "github.com/torabian/emi/emigo"
+func GetClassicPassportOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name: prefix + "otp",
+			Type: "string",
+		},
+	}
+}
+func CastClassicPassportOtpActionReqFromCli(c emigo.CliCastable) ClassicPassportOtpActionReq {
+	data := ClassicPassportOtpActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("otp") {
+		data.Otp = c.String("otp")
+	}
+	return data
+}

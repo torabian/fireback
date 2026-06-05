@@ -44,28 +44,6 @@ func ClassicPassportOtpActionMeta() struct {
 		Description: `Authenticate the user publicly for classic methods using communication service, such as sms, call, or email. You need to call classicPassportRequestOtp beforehand to send a otp code, and then validate it with this API. Also checkClassicPassport action might already sent the otp, so make sure you don't send it twice.`,
 	}
 }
-func GetClassicPassportOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "value",
-			Type: "string",
-		},
-		{
-			Name: prefix + "otp",
-			Type: "string",
-		},
-	}
-}
-func CastClassicPassportOtpActionReqFromCli(c emigo.CliCastable) ClassicPassportOtpActionReq {
-	data := ClassicPassportOtpActionReq{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	if c.IsSet("otp") {
-		data.Otp = c.String("otp")
-	}
-	return data
-}
 
 // The base class definition for classicPassportOtpActionReq
 type ClassicPassportOtpActionReq struct {
@@ -79,46 +57,6 @@ func (x *ClassicPassportOtpActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetClassicPassportOtpActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "session",
-			Type:        "one?",
-			Description: "Upon successful authentication, there will be a session dto generated, which is a ground information of authorized user and can be stored in front-end.",
-		},
-		{
-			Name:        prefix + "totp-url",
-			Type:        "string",
-			Description: "If time based otp is available, we add it response to make it easier for ui.",
-		},
-		{
-			Name:        prefix + "session-secret",
-			Type:        "string",
-			Description: "The session secret will be used to call complete user registration api.",
-		},
-		{
-			Name:        prefix + "continue-with-creation",
-			Type:        "bool",
-			Description: "If return true, means the OTP is correct and user needs to be created before continue the authentication process.",
-		},
-	}
-}
-func CastClassicPassportOtpActionResFromCli(c emigo.CliCastable) ClassicPassportOtpActionRes {
-	data := ClassicPassportOtpActionRes{}
-	if c.IsSet("session") {
-		data.Session = emigo.CapturePossibleOneNullable(CastUserSessionDtoFromCli, "session", c)
-	}
-	if c.IsSet("totp-url") {
-		data.TotpUrl = c.String("totp-url")
-	}
-	if c.IsSet("session-secret") {
-		data.SessionSecret = c.String("session-secret")
-	}
-	if c.IsSet("continue-with-creation") {
-		data.ContinueWithCreation = bool(c.Bool("continue-with-creation"))
-	}
-	return data
 }
 
 // The base class definition for classicPassportOtpActionRes

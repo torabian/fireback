@@ -44,35 +44,6 @@ func GsmSendSmsWithProviderActionMeta() struct {
 		Description: `Send a text message using an specific gsm provider`,
 	}
 }
-func GetGsmSendSmsWithProviderActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "gsm-provider-id",
-			Type: "string",
-		},
-		{
-			Name: prefix + "to-number",
-			Type: "string",
-		},
-		{
-			Name: prefix + "body",
-			Type: "string",
-		},
-	}
-}
-func CastGsmSendSmsWithProviderActionReqFromCli(c emigo.CliCastable) GsmSendSmsWithProviderActionReq {
-	data := GsmSendSmsWithProviderActionReq{}
-	if c.IsSet("gsm-provider-id") {
-		data.GsmProviderId = c.String("gsm-provider-id")
-	}
-	if c.IsSet("to-number") {
-		data.ToNumber = c.String("to-number")
-	}
-	if c.IsSet("body") {
-		data.Body = c.String("body")
-	}
-	return data
-}
 
 // The base class definition for gsmSendSmsWithProviderActionReq
 type GsmSendSmsWithProviderActionReq struct {
@@ -87,21 +58,6 @@ func (x *GsmSendSmsWithProviderActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetGsmSendSmsWithProviderActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "queue-id",
-			Type: "string",
-		},
-	}
-}
-func CastGsmSendSmsWithProviderActionResFromCli(c emigo.CliCastable) GsmSendSmsWithProviderActionRes {
-	data := GsmSendSmsWithProviderActionRes{}
-	if c.IsSet("queue-id") {
-		data.QueueId = c.String("queue-id")
-	}
-	return data
 }
 
 // The base class definition for gsmSendSmsWithProviderActionRes

@@ -44,44 +44,6 @@ func ClassicSigninActionMeta() struct {
 		Description: `Signin publicly to and account using class passports (email, password)`,
 	}
 }
-func GetClassicSigninActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "value",
-			Type: "string",
-		},
-		{
-			Name: prefix + "password",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "totp-code",
-			Type:        "string",
-			Description: "Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.",
-		},
-		{
-			Name:        prefix + "session-secret",
-			Type:        "string",
-			Description: "Session secret when logging in to the application requires more steps to complete.",
-		},
-	}
-}
-func CastClassicSigninActionReqFromCli(c emigo.CliCastable) ClassicSigninActionReq {
-	data := ClassicSigninActionReq{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	if c.IsSet("password") {
-		data.Password = c.String("password")
-	}
-	if c.IsSet("totp-code") {
-		data.TotpCode = c.String("totp-code")
-	}
-	if c.IsSet("session-secret") {
-		data.SessionSecret = c.String("session-secret")
-	}
-	return data
-}
 
 // The base class definition for classicSigninActionReq
 type ClassicSigninActionReq struct {
@@ -99,45 +61,6 @@ func (x *ClassicSigninActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetClassicSigninActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "session",
-			Type: "one",
-		},
-		{
-			Name:        prefix + "next",
-			Type:        "slice",
-			Description: "The next possible action which is suggested.",
-		},
-		{
-			Name:        prefix + "totp-url",
-			Type:        "string",
-			Description: "In case the account doesn't have totp, but enforced by installation, this value will contain the link",
-		},
-		{
-			Name:        prefix + "session-secret",
-			Type:        "string",
-			Description: "Returns a secret session if the authentication requires more steps.",
-		},
-	}
-}
-func CastClassicSigninActionResFromCli(c emigo.CliCastable) ClassicSigninActionRes {
-	data := ClassicSigninActionRes{}
-	if c.IsSet("session") {
-		data.Session = emigo.CapturePossibleOne(CastUserSessionDtoFromCli, "session", c)
-	}
-	if c.IsSet("next") {
-		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
-	}
-	if c.IsSet("totp-url") {
-		data.TotpUrl = c.String("totp-url")
-	}
-	if c.IsSet("session-secret") {
-		data.SessionSecret = c.String("session-secret")
-	}
-	return data
 }
 
 // The base class definition for classicSigninActionRes

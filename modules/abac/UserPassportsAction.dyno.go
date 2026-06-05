@@ -43,46 +43,6 @@ func UserPassportsActionMeta() struct {
 		Description: `Returns list of passports belongs to an specific user.`,
 	}
 }
-func GetUserPassportsActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "value",
-			Type:        "string",
-			Description: "The passport value, such as email address or phone number",
-		},
-		{
-			Name:        prefix + "unique-id",
-			Type:        "string",
-			Description: "Unique identifier of the passport to operate some action on top of it",
-		},
-		{
-			Name:        prefix + "type",
-			Type:        "string",
-			Description: "The type of the passport, such as email, phone number",
-		},
-		{
-			Name:        prefix + "totp-confirmed",
-			Type:        "bool",
-			Description: "Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.",
-		},
-	}
-}
-func CastUserPassportsActionResFromCli(c emigo.CliCastable) UserPassportsActionRes {
-	data := UserPassportsActionRes{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("type") {
-		data.Type = c.String("type")
-	}
-	if c.IsSet("totp-confirmed") {
-		data.TotpConfirmed = bool(c.Bool("totp-confirmed"))
-	}
-	return data
-}
 
 // The base class definition for userPassportsActionRes
 type UserPassportsActionRes struct {

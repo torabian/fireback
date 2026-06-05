@@ -1,0 +1,19 @@
+//go:build !wasm
+package abac
+import "github.com/torabian/emi/emigo"
+func GetAcceptInviteActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "invitation-unique-id",
+			Type:        "string",
+			Description: "The invitation id which will be used to process",
+		},
+	}
+}
+func CastAcceptInviteActionReqFromCli(c emigo.CliCastable) AcceptInviteActionReq {
+	data := AcceptInviteActionReq{}
+	if c.IsSet("invitation-unique-id") {
+		data.InvitationUniqueId = c.String("invitation-unique-id")
+	}
+	return data
+}

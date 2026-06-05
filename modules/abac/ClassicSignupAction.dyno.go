@@ -44,75 +44,6 @@ func ClassicSignupActionMeta() struct {
 		Description: `Signup a user into system via public access (aka website visitors) using either email or phone number.`,
 	}
 }
-func GetClassicSignupActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "value",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "session-secret",
-			Type:        "string",
-			Description: "Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup.",
-		},
-		{
-			Name: prefix + "type",
-			Type: "enum",
-		},
-		{
-			Name: prefix + "password",
-			Type: "string",
-		},
-		{
-			Name: prefix + "first-name",
-			Type: "string",
-		},
-		{
-			Name: prefix + "last-name",
-			Type: "string",
-		},
-		{
-			Name: prefix + "invite-id",
-			Type: "string?",
-		},
-		{
-			Name: prefix + "public-join-key-id",
-			Type: "string?",
-		},
-		{
-			Name: prefix + "workspace-type-id",
-			Type: "string?",
-		},
-	}
-}
-func CastClassicSignupActionReqFromCli(c emigo.CliCastable) ClassicSignupActionReq {
-	data := ClassicSignupActionReq{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	if c.IsSet("session-secret") {
-		data.SessionSecret = c.String("session-secret")
-	}
-	if c.IsSet("password") {
-		data.Password = c.String("password")
-	}
-	if c.IsSet("first-name") {
-		data.FirstName = c.String("first-name")
-	}
-	if c.IsSet("last-name") {
-		data.LastName = c.String("last-name")
-	}
-	if c.IsSet("invite-id") {
-		emigo.ParseNullable(c.String("invite-id"), &data.InviteId)
-	}
-	if c.IsSet("public-join-key-id") {
-		emigo.ParseNullable(c.String("public-join-key-id"), &data.PublicJoinKeyId)
-	}
-	if c.IsSet("workspace-type-id") {
-		emigo.ParseNullable(c.String("workspace-type-id"), &data.WorkspaceTypeId)
-	}
-	return data
-}
 
 // The base class definition for classicSignupActionReq
 type ClassicSignupActionReq struct {
@@ -134,46 +65,6 @@ func (x *ClassicSignupActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetClassicSignupActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "session",
-			Type:        "one",
-			Description: "Returns the user session in case that signup is completely successful.",
-		},
-		{
-			Name:        prefix + "totp-url",
-			Type:        "string",
-			Description: "If time based otp is available, we add it response to make it easier for ui.",
-		},
-		{
-			Name:        prefix + "continue-to-totp",
-			Type:        "bool",
-			Description: "Returns true and session will be empty if, the totp is required by the installation. In such scenario, you need to forward user to setup totp screen.",
-		},
-		{
-			Name:        prefix + "forced-totp",
-			Type:        "bool",
-			Description: "Determines if user must complete totp in order to continue based on workspace or installation",
-		},
-	}
-}
-func CastClassicSignupActionResFromCli(c emigo.CliCastable) ClassicSignupActionRes {
-	data := ClassicSignupActionRes{}
-	if c.IsSet("session") {
-		data.Session = emigo.CapturePossibleOne(CastUserSessionDtoFromCli, "session", c)
-	}
-	if c.IsSet("totp-url") {
-		data.TotpUrl = c.String("totp-url")
-	}
-	if c.IsSet("continue-to-totp") {
-		data.ContinueToTotp = bool(c.Bool("continue-to-totp"))
-	}
-	if c.IsSet("forced-totp") {
-		data.ForcedTotp = bool(c.Bool("forced-totp"))
-	}
-	return data
 }
 
 // The base class definition for classicSignupActionRes

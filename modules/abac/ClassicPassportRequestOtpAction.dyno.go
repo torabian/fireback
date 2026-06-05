@@ -44,22 +44,6 @@ func ClassicPassportRequestOtpActionMeta() struct {
 		Description: `Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.`,
 	}
 }
-func GetClassicPassportRequestOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "value",
-			Type:        "string",
-			Description: "Passport value (email, phone number) which would be receiving the otp code.",
-		},
-	}
-}
-func CastClassicPassportRequestOtpActionReqFromCli(c emigo.CliCastable) ClassicPassportRequestOtpActionReq {
-	data := ClassicPassportRequestOtpActionReq{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	return data
-}
 
 // The base class definition for classicPassportRequestOtpActionReq
 type ClassicPassportRequestOtpActionReq struct {
@@ -73,43 +57,6 @@ func (x *ClassicPassportRequestOtpActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetClassicPassportRequestOtpActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "suspend-until",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "valid-until",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "blocked-until",
-			Type: "int64",
-		},
-		{
-			Name:        prefix + "seconds-to-unblock",
-			Type:        "int64",
-			Description: "The amount of time left to unblock for next request",
-		},
-	}
-}
-func CastClassicPassportRequestOtpActionResFromCli(c emigo.CliCastable) ClassicPassportRequestOtpActionRes {
-	data := ClassicPassportRequestOtpActionRes{}
-	if c.IsSet("suspend-until") {
-		data.SuspendUntil = int64(c.Int64("suspend-until"))
-	}
-	if c.IsSet("valid-until") {
-		data.ValidUntil = int64(c.Int64("valid-until"))
-	}
-	if c.IsSet("blocked-until") {
-		data.BlockedUntil = int64(c.Int64("blocked-until"))
-	}
-	if c.IsSet("seconds-to-unblock") {
-		data.SecondsToUnblock = int64(c.Int64("seconds-to-unblock"))
-	}
-	return data
 }
 
 // The base class definition for classicPassportRequestOtpActionRes

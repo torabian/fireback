@@ -43,28 +43,6 @@ func CapabilitiesTreeActionMeta() struct {
 		Description: `dLists all of the capabilities in database as a array of string as root access`,
 	}
 }
-func GetCapabilitiesTreeActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "capabilities",
-			Type: "collection",
-		},
-		{
-			Name: prefix + "nested",
-			Type: "collection",
-		},
-	}
-}
-func CastCapabilitiesTreeActionResFromCli(c emigo.CliCastable) CapabilitiesTreeActionRes {
-	data := CapabilitiesTreeActionRes{}
-	if c.IsSet("capabilities") {
-		data.Capabilities = emigo.CapturePossibleCollection(CastCapabilityInfoDtoFromCli, "capabilities", c)
-	}
-	if c.IsSet("nested") {
-		data.Nested = emigo.CapturePossibleCollection(CastCapabilityInfoDtoFromCli, "nested", c)
-	}
-	return data
-}
 
 // The base class definition for capabilitiesTreeActionRes
 type CapabilitiesTreeActionRes struct {

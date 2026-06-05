@@ -44,21 +44,6 @@ func SignoutActionMeta() struct {
 		Description: `Signout the user, clears cookies or does anything else if needed.`,
 	}
 }
-func GetSignoutActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "clear",
-			Type: "bool?",
-		},
-	}
-}
-func CastSignoutActionReqFromCli(c emigo.CliCastable) SignoutActionReq {
-	data := SignoutActionReq{}
-	if c.IsSet("clear") {
-		emigo.ParseNullable(c.String("clear"), &data.Clear)
-	}
-	return data
-}
 
 // The base class definition for signoutActionReq
 type SignoutActionReq struct {
@@ -71,21 +56,6 @@ func (x *SignoutActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetSignoutActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "okay",
-			Type: "bool",
-		},
-	}
-}
-func CastSignoutActionResFromCli(c emigo.CliCastable) SignoutActionRes {
-	data := SignoutActionRes{}
-	if c.IsSet("okay") {
-		data.Okay = bool(c.Bool("okay"))
-	}
-	return data
 }
 
 // The base class definition for signoutActionRes

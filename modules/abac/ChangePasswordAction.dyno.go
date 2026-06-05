@@ -44,30 +44,6 @@ func ChangePasswordActionMeta() struct {
 		Description: `Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.`,
 	}
 }
-func GetChangePasswordActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "password",
-			Type:        "string",
-			Description: "New password meeting the security requirements.",
-		},
-		{
-			Name:        prefix + "unique-id",
-			Type:        "string",
-			Description: "The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.",
-		},
-	}
-}
-func CastChangePasswordActionReqFromCli(c emigo.CliCastable) ChangePasswordActionReq {
-	data := ChangePasswordActionReq{}
-	if c.IsSet("password") {
-		data.Password = c.String("password")
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	return data
-}
 
 // The base class definition for changePasswordActionReq
 type ChangePasswordActionReq struct {
@@ -83,21 +59,6 @@ func (x *ChangePasswordActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetChangePasswordActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "changed",
-			Type: "bool",
-		},
-	}
-}
-func CastChangePasswordActionResFromCli(c emigo.CliCastable) ChangePasswordActionRes {
-	data := ChangePasswordActionRes{}
-	if c.IsSet("changed") {
-		data.Changed = bool(c.Bool("changed"))
-	}
-	return data
 }
 
 // The base class definition for changePasswordActionRes

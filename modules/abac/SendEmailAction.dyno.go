@@ -44,36 +44,6 @@ func SendEmailActionMeta() struct {
 		Description: `Send a email using default root notification configuration`,
 	}
 }
-func GetSendEmailActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "provider-id",
-			Type:        "string",
-			Description: "Sending a test email requires to be sent through an specific email provider.",
-		},
-		{
-			Name: prefix + "to-address",
-			Type: "string",
-		},
-		{
-			Name: prefix + "body",
-			Type: "string",
-		},
-	}
-}
-func CastSendEmailActionReqFromCli(c emigo.CliCastable) SendEmailActionReq {
-	data := SendEmailActionReq{}
-	if c.IsSet("provider-id") {
-		data.ProviderId = c.String("provider-id")
-	}
-	if c.IsSet("to-address") {
-		data.ToAddress = c.String("to-address")
-	}
-	if c.IsSet("body") {
-		data.Body = c.String("body")
-	}
-	return data
-}
 
 // The base class definition for sendEmailActionReq
 type SendEmailActionReq struct {
@@ -89,21 +59,6 @@ func (x *SendEmailActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetSendEmailActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "queue-id",
-			Type: "string",
-		},
-	}
-}
-func CastSendEmailActionResFromCli(c emigo.CliCastable) SendEmailActionRes {
-	data := SendEmailActionRes{}
-	if c.IsSet("queue-id") {
-		data.QueueId = c.String("queue-id")
-	}
-	return data
 }
 
 // The base class definition for sendEmailActionRes

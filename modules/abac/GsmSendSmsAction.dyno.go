@@ -44,28 +44,6 @@ func GsmSendSmsActionMeta() struct {
 		Description: `Send a text message using default root notification configuration`,
 	}
 }
-func GetGsmSendSmsActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "to-number",
-			Type: "string",
-		},
-		{
-			Name: prefix + "body",
-			Type: "string",
-		},
-	}
-}
-func CastGsmSendSmsActionReqFromCli(c emigo.CliCastable) GsmSendSmsActionReq {
-	data := GsmSendSmsActionReq{}
-	if c.IsSet("to-number") {
-		data.ToNumber = c.String("to-number")
-	}
-	if c.IsSet("body") {
-		data.Body = c.String("body")
-	}
-	return data
-}
 
 // The base class definition for gsmSendSmsActionReq
 type GsmSendSmsActionReq struct {
@@ -79,21 +57,6 @@ func (x *GsmSendSmsActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetGsmSendSmsActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "queue-id",
-			Type: "string",
-		},
-	}
-}
-func CastGsmSendSmsActionResFromCli(c emigo.CliCastable) GsmSendSmsActionRes {
-	data := GsmSendSmsActionRes{}
-	if c.IsSet("queue-id") {
-		data.QueueId = c.String("queue-id")
-	}
-	return data
 }
 
 // The base class definition for gsmSendSmsActionRes

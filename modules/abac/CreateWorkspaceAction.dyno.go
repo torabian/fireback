@@ -44,21 +44,6 @@ func CreateWorkspaceActionMeta() struct {
 		Description: ``,
 	}
 }
-func GetCreateWorkspaceActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "name",
-			Type: "string",
-		},
-	}
-}
-func CastCreateWorkspaceActionReqFromCli(c emigo.CliCastable) CreateWorkspaceActionReq {
-	data := CreateWorkspaceActionReq{}
-	if c.IsSet("name") {
-		data.Name = c.String("name")
-	}
-	return data
-}
 
 // The base class definition for createWorkspaceActionReq
 type CreateWorkspaceActionReq struct {
@@ -71,21 +56,6 @@ func (x *CreateWorkspaceActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetCreateWorkspaceActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "workspace-id",
-			Type: "string",
-		},
-	}
-}
-func CastCreateWorkspaceActionResFromCli(c emigo.CliCastable) CreateWorkspaceActionRes {
-	data := CreateWorkspaceActionRes{}
-	if c.IsSet("workspace-id") {
-		data.WorkspaceId = c.String("workspace-id")
-	}
-	return data
 }
 
 // The base class definition for createWorkspaceActionRes

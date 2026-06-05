@@ -44,22 +44,6 @@ func AcceptInviteActionMeta() struct {
 		Description: `Use it when user accepts an invitation, and it will complete the joining process`,
 	}
 }
-func GetAcceptInviteActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "invitation-unique-id",
-			Type:        "string",
-			Description: "The invitation id which will be used to process",
-		},
-	}
-}
-func CastAcceptInviteActionReqFromCli(c emigo.CliCastable) AcceptInviteActionReq {
-	data := AcceptInviteActionReq{}
-	if c.IsSet("invitation-unique-id") {
-		data.InvitationUniqueId = c.String("invitation-unique-id")
-	}
-	return data
-}
 
 // The base class definition for acceptInviteActionReq
 type AcceptInviteActionReq struct {
@@ -73,21 +57,6 @@ func (x *AcceptInviteActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetAcceptInviteActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "accepted",
-			Type: "bool",
-		},
-	}
-}
-func CastAcceptInviteActionResFromCli(c emigo.CliCastable) AcceptInviteActionRes {
-	data := AcceptInviteActionRes{}
-	if c.IsSet("accepted") {
-		data.Accepted = bool(c.Bool("accepted"))
-	}
-	return data
 }
 
 // The base class definition for acceptInviteActionRes

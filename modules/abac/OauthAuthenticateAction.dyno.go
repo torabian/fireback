@@ -44,30 +44,6 @@ func OauthAuthenticateActionMeta() struct {
 		Description: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
 	}
 }
-func GetOauthAuthenticateActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "token",
-			Type:        "string",
-			Description: "The token that Auth2 provider returned to the front-end, which will be used to validate the backend",
-		},
-		{
-			Name:        prefix + "service",
-			Type:        "string",
-			Description: "The service name, such as 'google' which later backend will use to authorize the token and create the user.",
-		},
-	}
-}
-func CastOauthAuthenticateActionReqFromCli(c emigo.CliCastable) OauthAuthenticateActionReq {
-	data := OauthAuthenticateActionReq{}
-	if c.IsSet("token") {
-		data.Token = c.String("token")
-	}
-	if c.IsSet("service") {
-		data.Service = c.String("service")
-	}
-	return data
-}
 
 // The base class definition for oauthAuthenticateActionReq
 type OauthAuthenticateActionReq struct {
@@ -83,29 +59,6 @@ func (x *OauthAuthenticateActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetOauthAuthenticateActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "session",
-			Type: "one",
-		},
-		{
-			Name:        prefix + "next",
-			Type:        "slice",
-			Description: "The next possible action which is suggested.",
-		},
-	}
-}
-func CastOauthAuthenticateActionResFromCli(c emigo.CliCastable) OauthAuthenticateActionRes {
-	data := OauthAuthenticateActionRes{}
-	if c.IsSet("session") {
-		data.Session = emigo.CapturePossibleOne(CastUserSessionDtoFromCli, "session", c)
-	}
-	if c.IsSet("next") {
-		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
-	}
-	return data
 }
 
 // The base class definition for oauthAuthenticateActionRes

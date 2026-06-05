@@ -43,42 +43,6 @@ func QueryWorkspaceTypesPubliclyActionMeta() struct {
 		Description: `Returns the workspaces types available in the project publicly without authentication, and the value could be used upon signup to go different route.`,
 	}
 }
-func GetQueryWorkspaceTypesPubliclyActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "title",
-			Type: "string",
-		},
-		{
-			Name: prefix + "description",
-			Type: "string",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name: prefix + "slug",
-			Type: "string",
-		},
-	}
-}
-func CastQueryWorkspaceTypesPubliclyActionResFromCli(c emigo.CliCastable) QueryWorkspaceTypesPubliclyActionRes {
-	data := QueryWorkspaceTypesPubliclyActionRes{}
-	if c.IsSet("title") {
-		data.Title = c.String("title")
-	}
-	if c.IsSet("description") {
-		data.Description = c.String("description")
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("slug") {
-		data.Slug = c.String("slug")
-	}
-	return data
-}
 
 // The base class definition for queryWorkspaceTypesPubliclyActionRes
 type QueryWorkspaceTypesPubliclyActionRes struct {

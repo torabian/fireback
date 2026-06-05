@@ -44,29 +44,6 @@ func CheckClassicPassportActionMeta() struct {
 		Description: `Checks if a classic passport (email, phone) exists or not, used in multi step authentication`,
 	}
 }
-func GetCheckClassicPassportActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "value",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "security-token",
-			Type:        "string",
-			Description: "This can be the value of ReCaptcha2, ReCaptcha3, or generate security image or voice for verification. Will be used based on the configuration.",
-		},
-	}
-}
-func CastCheckClassicPassportActionReqFromCli(c emigo.CliCastable) CheckClassicPassportActionReq {
-	data := CheckClassicPassportActionReq{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	if c.IsSet("security-token") {
-		data.SecurityToken = c.String("security-token")
-	}
-	return data
-}
 
 // The base class definition for checkClassicPassportActionReq
 type CheckClassicPassportActionReq struct {
@@ -82,38 +59,6 @@ func (x *CheckClassicPassportActionReq) Json() string {
 	}
 	return ""
 }
-func GetCheckClassicPassportActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "next",
-			Type:        "slice",
-			Description: "The next possible action which is suggested.",
-		},
-		{
-			Name:        prefix + "flags",
-			Type:        "slice",
-			Description: "Extra information that can be useful actually when doing onboarding. Make sure sensitive information doesn't go out.",
-		},
-		{
-			Name:        prefix + "otp-info",
-			Type:        "object?",
-			Description: "If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.",
-		},
-	}
-}
-func CastCheckClassicPassportActionResFromCli(c emigo.CliCastable) CheckClassicPassportActionRes {
-	data := CheckClassicPassportActionRes{}
-	if c.IsSet("next") {
-		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
-	}
-	if c.IsSet("flags") {
-		emigo.InflatePossibleSlice(c.String("flags"), &data.Flags)
-	}
-	if c.IsSet("otp-info") {
-		emigo.ParseNullable(c.String("otp-info"), &data.OtpInfo)
-	}
-	return data
-}
 
 // The base class definition for checkClassicPassportActionRes
 type CheckClassicPassportActionRes struct {
@@ -123,44 +68,6 @@ type CheckClassicPassportActionRes struct {
 	Flags []string `json:"flags" yaml:"flags"`
 	// If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.
 	OtpInfo emigo.Nullable[CheckClassicPassportActionResOtpInfo] `json:"otpInfo" yaml:"otpInfo"`
-}
-
-func GetCheckClassicPassportActionResOtpInfoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "suspend-until",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "valid-until",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "blocked-until",
-			Type: "int64",
-		},
-		{
-			Name:        prefix + "seconds-to-unblock",
-			Type:        "int64",
-			Description: "The amount of time left to unblock for next request",
-		},
-	}
-}
-func CastCheckClassicPassportActionResOtpInfoFromCli(c emigo.CliCastable) CheckClassicPassportActionResOtpInfo {
-	data := CheckClassicPassportActionResOtpInfo{}
-	if c.IsSet("suspend-until") {
-		data.SuspendUntil = int64(c.Int64("suspend-until"))
-	}
-	if c.IsSet("valid-until") {
-		data.ValidUntil = int64(c.Int64("valid-until"))
-	}
-	if c.IsSet("blocked-until") {
-		data.BlockedUntil = int64(c.Int64("blocked-until"))
-	}
-	if c.IsSet("seconds-to-unblock") {
-		data.SecondsToUnblock = int64(c.Int64("seconds-to-unblock"))
-	}
-	return data
 }
 
 // The base class definition for otpInfo

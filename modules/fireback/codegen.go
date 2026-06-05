@@ -2017,7 +2017,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
 			}
-			data = []byte(golang.AsFullDocument(result, x.Name))
+			data = []byte(golang.AsFullDocument(result.MainClass, x.Name))
 		}
 
 		if ctx.Catalog.LanguageName == "TypeScript" {

@@ -2,12 +2,15 @@ package abac
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 )
 
 /**
@@ -38,47 +41,10 @@ func QueryUserRoleWorkspacesActionMeta() struct {
 	}{
 		Name:        "QueryUserRoleWorkspacesAction",
 		CliName:     "urw",
-		URL:         "/urw/query",
+		URL:         "/urw/query/:ms",
 		Method:      "GET",
 		Description: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
 	}
-}
-func GetQueryUserRoleWorkspacesActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "name",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "capabilities",
-			Type:        "slice",
-			Description: "Workspace level capabilities which are available",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name: prefix + "roles",
-			Type: "array",
-		},
-	}
-}
-func CastQueryUserRoleWorkspacesActionResFromCli(c emigo.CliCastable) QueryUserRoleWorkspacesActionRes {
-	data := QueryUserRoleWorkspacesActionRes{}
-	if c.IsSet("name") {
-		data.Name = c.String("name")
-	}
-	if c.IsSet("capabilities") {
-		emigo.InflatePossibleSlice(c.String("capabilities"), &data.Capabilities)
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("roles") {
-		data.Roles = emigo.CapturePossibleArray(CastQueryUserRoleWorkspacesActionResRolesFromCli, "roles", c)
-	}
-	return data
 }
 
 // The base class definition for queryUserRoleWorkspacesActionRes
@@ -88,37 +54,6 @@ type QueryUserRoleWorkspacesActionRes struct {
 	Capabilities []string                                           `json:"capabilities" yaml:"capabilities"`
 	UniqueId     string                                             `json:"uniqueId" yaml:"uniqueId"`
 	Roles        emigo.Array[QueryUserRoleWorkspacesActionResRoles] `json:"roles" yaml:"roles"`
-}
-
-func GetQueryUserRoleWorkspacesActionResRolesCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "name",
-			Type: "string",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "capabilities",
-			Type:        "slice",
-			Description: "Capabilities related to this role which are available",
-		},
-	}
-}
-func CastQueryUserRoleWorkspacesActionResRolesFromCli(c emigo.CliCastable) QueryUserRoleWorkspacesActionResRoles {
-	data := QueryUserRoleWorkspacesActionResRoles{}
-	if c.IsSet("name") {
-		data.Name = c.String("name")
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("capabilities") {
-		emigo.InflatePossibleSlice(c.String("capabilities"), &data.Capabilities)
-	}
-	return data
 }
 
 // The base class definition for roles
@@ -195,6 +130,26 @@ func (x QueryUserRoleWorkspacesActionResponse) GetPayload() interface{} {
 type QueryUserRoleWorkspacesActionRequestSig = func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error)
 
 /**
+ * Path parameters for QueryUserRoleWorkspacesAction
+ */
+type QueryUserRoleWorkspacesActionPathParameter struct {
+	Ms string
+}
+
+// Converts a placeholder url, and applies the parameters to it.
+func QueryUserRoleWorkspacesActionPathParameterApply(params QueryUserRoleWorkspacesActionPathParameter, templateUrl string) string {
+	templateUrl = strings.ReplaceAll(templateUrl, ":ms", fmt.Sprintf("%v", params.Ms))
+	return templateUrl
+}
+
+// General purpose to extract the value and cast based on type.
+func QueryUserRoleWorkspacesActionPathParameterFromFn(fn func(key string) string) QueryUserRoleWorkspacesActionPathParameter {
+	res := QueryUserRoleWorkspacesActionPathParameter{}
+	res.Ms = fn("ms")
+	return res
+}
+
+/**
  * Query parameters for QueryUserRoleWorkspacesAction
  */
 // Query wrapper with private fields
@@ -241,6 +196,7 @@ func (q *QueryUserRoleWorkspacesActionQuery) SetMapped(m map[string]interface{})
 
 type QueryUserRoleWorkspacesActionRequest struct {
 	Body        interface{}
+	Params      QueryUserRoleWorkspacesActionPathParameter
 	QueryParams url.Values
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
@@ -270,6 +226,8 @@ func QueryUserRoleWorkspacesActionClientCreateUrl(
 	meta := QueryUserRoleWorkspacesActionMeta()
 	urlAddr := meta.URL
 	urlAddr = config.BaseURL + urlAddr
+	// In case there is a path parameter, we need to apply that.
+	urlAddr = QueryUserRoleWorkspacesActionPathParameterApply(req.Params, urlAddr)
 	// Build final URL with query string
 	u, err := url.Parse(urlAddr)
 	if err != nil {
@@ -340,6 +298,11 @@ func QueryUserRoleWorkspacesActionCall(
 	// This one would execute the request and cast the result.
 	return QueryUserRoleWorkspacesActionClientExecuteTyped(r)
 }
+func QueryUserRoleWorkspacesActionPathParameterFromGin(g *gin.Context) QueryUserRoleWorkspacesActionPathParameter {
+	return QueryUserRoleWorkspacesActionPathParameterFromFn(func(key string) string {
+		return g.Param(key)
+	})
+}
 
 // QueryUserRoleWorkspacesActionRaw registers a raw Gin route for the QueryUserRoleWorkspacesAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
@@ -359,6 +322,7 @@ func QueryUserRoleWorkspacesActionHandler(
 		// Build typed request wrapper
 		req := QueryUserRoleWorkspacesActionRequest{
 			Body:        nil,
+			Params:      QueryUserRoleWorkspacesActionPathParameterFromGin(m),
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -424,7 +388,10 @@ func QueryUserRoleWorkspacesActionHttpHandler(
 		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
 		// which is what the IsGin() helper keys off.
 		req := QueryUserRoleWorkspacesActionRequest{
-			Body:        nil,
+			Body: nil,
+			Params: QueryUserRoleWorkspacesActionPathParameterFromFn(func(key string) string {
+				return r.PathValue(key)
+			}),
 			QueryParams: r.URL.Query(),
 			Headers:     r.Header,
 		}
