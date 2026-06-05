@@ -1,0 +1,44 @@
+//go:build !wasm
+
+package abac
+
+import "github.com/torabian/emi/emigo"
+
+func GetClassicSigninActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name: prefix + "password",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "totp-code",
+			Type:        "string",
+			Description: "Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "Session secret when logging in to the application requires more steps to complete.",
+		},
+	}
+}
+func CastClassicSigninActionReqFromCli(c emigo.CliCastable) ClassicSigninActionReq {
+	data := ClassicSigninActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("password") {
+		data.Password = c.String("password")
+	}
+	if c.IsSet("totp-code") {
+		data.TotpCode = c.String("totp-code")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	return data
+}

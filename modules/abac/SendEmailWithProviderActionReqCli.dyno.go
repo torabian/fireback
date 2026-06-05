@@ -1,0 +1,35 @@
+//go:build !wasm
+
+package abac
+
+import "github.com/torabian/emi/emigo"
+
+func GetSendEmailWithProviderActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "email-provider",
+			Type: "one",
+		},
+		{
+			Name: prefix + "to-address",
+			Type: "string",
+		},
+		{
+			Name: prefix + "body",
+			Type: "string",
+		},
+	}
+}
+func CastSendEmailWithProviderActionReqFromCli(c emigo.CliCastable) SendEmailWithProviderActionReq {
+	data := SendEmailWithProviderActionReq{}
+	if c.IsSet("email-provider") {
+		data.EmailProvider = emigo.CapturePossibleOne(CastEmailProviderEntityFromCli, "email-provider", c)
+	}
+	if c.IsSet("to-address") {
+		data.ToAddress = c.String("to-address")
+	}
+	if c.IsSet("body") {
+		data.Body = c.String("body")
+	}
+	return data
+}
