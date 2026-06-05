@@ -1,9 +1,6 @@
 package abac
 
-import (
-	"encoding/json"
-	"github.com/torabian/emi/emigo"
-)
+import "encoding/json"
 
 // The base class definition for userRoleWorkspaceDto
 type UserRoleWorkspaceDto struct {

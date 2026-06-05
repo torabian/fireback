@@ -1,8 +1,6 @@
 package fireback
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 // The base class definition for okayResponseDto
 type OkayResponseDto struct {

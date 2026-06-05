@@ -2,8 +2,6 @@
 
 package abac
 
-import "github.com/torabian/emi/emigo"
-
 func GetClassicPassportOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
