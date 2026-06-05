@@ -1,7 +1,9 @@
 package abac
 
-import "encoding/json"
-import emigo "github.com/torabian/emi/emigo"
+import (
+	"encoding/json"
+	"github.com/torabian/emi/emigo"
+)
 
 // The base class definition for resetEmailDto
 type ResetEmailDto struct {

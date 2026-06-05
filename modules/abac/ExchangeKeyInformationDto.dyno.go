@@ -1,7 +1,8 @@
 package abac
 
-import "encoding/json"
-import emigo "github.com/torabian/emi/emigo"
+import (
+	"encoding/json"
+)
 
 // The base class definition for exchangeKeyInformationDto
 type ExchangeKeyInformationDto struct {
@@ -10,6 +11,7 @@ type ExchangeKeyInformationDto struct {
 }
 
 func (x *ExchangeKeyInformationDto) Json() string {
+
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return string(str)

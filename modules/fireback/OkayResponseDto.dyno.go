@@ -1,8 +1,8 @@
 package fireback
 
-import "encoding/json"
-
-// import emigo "github.com/torabian/emi/emigo"
+import (
+	"encoding/json"
+)
 
 // The base class definition for okayResponseDto
 type OkayResponseDto struct {
