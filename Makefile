@@ -4,7 +4,8 @@ default:
 mock:
 	cd modules/fireback/codegen/react-new && npm run start:mock
 
-
+wasm:
+	cd cmd/fireback-wasm && make
 
 mac-pkg:
 	cd cmd/fireback && make mac-pkg
