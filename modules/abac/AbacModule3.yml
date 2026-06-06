@@ -205,7 +205,7 @@ acts:
   
   - name: QueryUserRoleWorkspaces
     method: get
-    url: /urw/query/:ms
+    url: /urw/query
     cliName: urw
 
     security:

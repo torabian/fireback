@@ -28,13 +28,13 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 var xapp = &fireback.FirebackApp{
 	Title:              PRODUCT_DESCRIPTION,
 	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders:    []fireback.SearchProviderFn{
-		// abac.QueryMenusReact,
-		// abac.QueryRolesReact,
+	SearchProviders: []fireback.SearchProviderFn{
+		abac.QueryMenusReact,
+		abac.QueryRolesReact,
 	},
 	SeedersSync: func() {
-		// abac.PassportMethodSyncSeeders()
-		// abac.AppMenuSyncSeeders()
+		abac.PassportMethodSyncSeeders()
+		abac.AppMenuSyncSeeders()
 	},
 
 	PublicFolders: []fireback.PublicFolderInfo{
