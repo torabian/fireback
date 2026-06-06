@@ -1622,7 +1622,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 		err3 := WriteFileGen(ctx, moduleEntry, EscapeLines([]byte(goModule)), 0644)
 		if err3 != nil {
-			fmt.Println("Error on writing content:", moduleEntry, err3)
+			fmt.Println("Error writing module entry", moduleEntry, err3)
 		}
 
 	}
@@ -1635,7 +1635,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 	err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 	if err3 != nil {
-		fmt.Println("Error on writing content:", exportPath, err3)
+		fmt.Println("Error writing module dynamic", exportPath, err3)
 	}
 
 	if !HasQueries(ctx.Path) {
@@ -1657,7 +1657,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 	}
 	// Now after the queries is created, we need to convert the sql files in that directory into golang query predict files
 	err2 := ReadSQLFiles(DiskFS{Root: filepath.Join(ctx.Path, "queries")}, ".", 1, func(filePath string, data []byte) error {
-		fmt.Println("SQL Path: ", filePath)
+
 		doc.Queries = append(doc.Queries, querypredict.QuerySpec{
 			Name:  strings.ReplaceAll(path.Base(filePath), ".sql", ""),
 			Query: string(data),
@@ -1672,7 +1672,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 	files, err := querypredict.ProcessQueryPredicts(doc)
 	if err != nil {
-		fmt.Println("Error on writing content: err: %v", err)
+		fmt.Printf("Error parsing files in query predict: %v\n", err)
 	}
 
 	for _, file := range files {
@@ -1681,13 +1681,13 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 		os.MkdirAll(path.Dir(filePath), os.ModePerm)
 
 		if err := os.WriteFile(filePath, []byte(file.ActualScript), 0644); err != nil {
-			fmt.Println("error on writing file to disk: %v, %v, %w", file.Location, file.Name, err)
+			fmt.Printf("error on writing file to disk: %v, %v, %w\n", file.Location, file.Name, err)
 		}
 	}
 
 	if !HasMetasFolder(ctx.Path) {
 		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
-			fmt.Println("Error on writing content: err: %v", err9)
+			fmt.Printf("Error on writing content: %v \n", err9)
 		}
 	}
 }
