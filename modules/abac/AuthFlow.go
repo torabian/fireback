@@ -300,10 +300,10 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				user, _ := res2.Session.Item.User.Get()
 
 				query.WorkspaceId = ROOT_VAR
-				query.UserId = user.UserId.OrDefault("")
+				query.UserId = user.Item.UserId.OrDefault("")
 				_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 					UniqueId:    fireback.UUID(),
-					UserId:      user.UserId,
+					UserId:      user.Item.UserId,
 					WorkspaceId: emigo.NullableOf(ROOT_VAR),
 				}, query)
 

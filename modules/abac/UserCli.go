@@ -368,21 +368,21 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 			return errors.New("Session has not been created.")
 		}
 
-		if len(session.UserWorkspaces) == 0 {
+		if len(session.UserWorkspaces.Items) == 0 {
 			return errors.New("User has no workspaces after generation")
 		}
 
-		workspaceAs := session.UserWorkspaces[0].WorkspaceId.OrDefault("")
+		workspaceAs := session.UserWorkspaces.Items[0].WorkspaceId.OrDefault("")
 
 		if setForRoot {
 			user, _ := session.User.Get()
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = user.UserId.OrDefault("")
+			query.UserId = user.Item.UserId.OrDefault("")
 			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
-				UserId:      user.UserId,
+				UserId:      user.Item.UserId,
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
 			}, query)
 

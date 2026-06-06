@@ -185,7 +185,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 
 		// Token for the session is essential, a session without a token
 		// has absolutely no use.
-		if token, err := user.AuthorizeWithToken(q); err != nil {
+		if token, err := user.Item.AuthorizeWithToken(q); err != nil {
 			return err
 		} else {
 			session.Token = token

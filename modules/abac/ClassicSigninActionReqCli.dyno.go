@@ -2,6 +2,8 @@
 
 package abac
 
+import "github.com/torabian/emi/emigo"
+
 func GetClassicSigninActionReqCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{

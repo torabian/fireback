@@ -2,7 +2,11 @@
 
 package abac
 
-import "reflect"
+import (
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
+	"reflect"
+)
 
 func GetQueryUserRoleWorkspacesActionPathParameterCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
