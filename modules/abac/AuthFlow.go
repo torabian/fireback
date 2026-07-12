@@ -287,7 +287,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				var session *UserSessionDto
 
 				if cast, ok := m.Payload.(fireback.GoogleResponse[ConfirmClassicPassportTotpActionRes]); ok {
-					session = &cast.Data.Item.Session
+					session = &cast.Data.Item.Session.Item
 				} else {
 					fmt.Println("Process successful, but casting has failed:", err)
 					os.Exit(2)
@@ -296,14 +296,14 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				authenticateCliWithSession(session, workspaceType.UniqueId)
 			}
 
-			if workspaceType.UniqueId == ROOT_VAR && res2.Session.Token != "" {
-				user, _ := res2.Session.User.Get()
+			if workspaceType.UniqueId == ROOT_VAR && res2.Session.Item.Token != "" {
+				user, _ := res2.Session.Item.User.Get()
 
 				query.WorkspaceId = ROOT_VAR
-				query.UserId = user.UserId.OrDefault("")
+				query.UserId = user.Item.UserId.OrDefault("")
 				_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 					UniqueId:    fireback.UUID(),
-					UserId:      user.UserId,
+					UserId:      user.Item.UserId,
 					WorkspaceId: emigo.NullableOf(ROOT_VAR),
 				}, query)
 
@@ -321,8 +321,8 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				}
 			}
 
-			if res2.Session.Token != "" {
-				authenticateCliWithSession(&res2.Session, workspaceType.UniqueId)
+			if res2.Session.Item.Token != "" {
+				authenticateCliWithSession(&res2.Session.Item, workspaceType.UniqueId)
 			}
 
 		}
@@ -354,16 +354,16 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				// In case the session is available, it's successful and checking further steps
 				// is not required.
 				var selectedWorkspace = ""
-				if signin.Session.User.IsSet() && !signin.Session.User.IsNull() {
-					fmt.Println("Signin successful as: ", signin.Session.User.Ptr().FirstName, signin.Session.User.Ptr().LastName)
+				if signin.Session.Item.User.IsSet() {
+					fmt.Println("Signin successful as: ", signin.Session.Item.User.Item.FirstName, signin.Session.Item.User.Item.LastName)
 				} else {
 					fmt.Println("Successful signin, but no user is associated with this session")
 				}
 
 				// Check the workspaces. If there are more than 1, we ask user to choose.
-				if len(signin.Session.UserWorkspaces) > 1 {
+				if len(signin.Session.Item.UserWorkspaces.Items) > 1 {
 					var workspaces = []string{}
-					for _, item := range signin.Session.UserWorkspaces {
+					for _, item := range signin.Session.Item.UserWorkspaces.Items {
 						workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.OrDefault("")))
 					}
 
@@ -371,13 +371,13 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				}
 
 				fmt.Println("Completed with:")
-				fmt.Println("Token:", signin.Session.Token)
+				fmt.Println("Token:", signin.Session.Item.Token)
 				if selectedWorkspace != "" {
 					fmt.Println("Workspace Id:", selectedWorkspace)
 				}
 
 				config := fireback.GetConfig()
-				config.CliToken = signin.Session.Token
+				config.CliToken = signin.Session.Item.Token
 				config.CliWorkspace = selectedWorkspace
 
 				config.Save(".env")
@@ -456,7 +456,7 @@ func authenticateCliWithSession(session *UserSessionDto, workspaceTypeId string)
 	// Now we need to select a workspace.
 	var selectedWorkspace = ""
 	var workspaces = []string{}
-	for _, item := range session.UserWorkspaces {
+	for _, item := range session.UserWorkspaces.Items {
 		workspaces = append(workspaces, fmt.Sprintf("%v", item.WorkspaceId.OrDefault("")))
 	}
 

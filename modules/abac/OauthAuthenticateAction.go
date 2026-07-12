@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -90,7 +91,7 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 			return nil, err
 		}
 		return &OauthAuthenticateActionRes{
-			Session: *session,
+			Session: emigo.NewOne(*session),
 		}, nil
 	}
 }

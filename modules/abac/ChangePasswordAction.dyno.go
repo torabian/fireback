@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -44,30 +44,6 @@ func ChangePasswordActionMeta() struct {
 		Description: `Change the password for a given passport of the user. User needs to be authenticated in order to be able to change the password for a given account.`,
 	}
 }
-func GetChangePasswordActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "password",
-			Type:        "string",
-			Description: "New password meeting the security requirements.",
-		},
-		{
-			Name:        prefix + "unique-id",
-			Type:        "string",
-			Description: "The passport uniqueId (not the email or phone number) which password would be applied to. Don't confuse with value.",
-		},
-	}
-}
-func CastChangePasswordActionReqFromCli(c emigo.CliCastable) ChangePasswordActionReq {
-	data := ChangePasswordActionReq{}
-	if c.IsSet("password") {
-		data.Password = c.String("password")
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	return data
-}
 
 // The base class definition for changePasswordActionReq
 type ChangePasswordActionReq struct {
@@ -83,21 +59,6 @@ func (x *ChangePasswordActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetChangePasswordActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "changed",
-			Type: "bool",
-		},
-	}
-}
-func CastChangePasswordActionResFromCli(c emigo.CliCastable) ChangePasswordActionRes {
-	data := ChangePasswordActionRes{}
-	if c.IsSet("changed") {
-		data.Changed = bool(c.Bool("changed"))
-	}
-	return data
 }
 
 // The base class definition for changePasswordActionRes
@@ -167,68 +128,8 @@ func (x ChangePasswordActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// ChangePasswordActionRaw registers a raw Gin route for the ChangePasswordAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func ChangePasswordActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := ChangePasswordActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type ChangePasswordActionRequestSig = func(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error)
-
-// ChangePasswordActionHandler returns the HTTP method, route URL, and a typed Gin handler for the ChangePasswordAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func ChangePasswordActionHandler(
-	handler ChangePasswordActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := ChangePasswordActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body ChangePasswordActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
-		// Build typed request wrapper
-		req := ChangePasswordActionRequest{
-			Body:        body,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// ChangePasswordAction is a high-level convenience wrapper around ChangePasswordActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func ChangePasswordActionGin(r gin.IRoutes, handler ChangePasswordActionRequestSig) {
-	method, url, h := ChangePasswordActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for ChangePasswordAction
@@ -259,9 +160,6 @@ func ChangePasswordActionQueryFromString(rawQuery string) ChangePasswordActionQu
 	v.mapped = mapped
 	return v
 }
-func ChangePasswordActionQueryFromGin(c *gin.Context) ChangePasswordActionQuery {
-	return ChangePasswordActionQueryFromString(c.Request.URL.RawQuery)
-}
 func ChangePasswordActionQueryFromHttp(r *http.Request) ChangePasswordActionQuery {
 	return ChangePasswordActionQueryFromString(r.URL.RawQuery)
 }
@@ -284,26 +182,24 @@ type ChangePasswordActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x ChangePasswordActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x ChangePasswordActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type ChangePasswordActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func ChangePasswordActionClientCreateUrl(
 	req ChangePasswordActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -384,4 +280,153 @@ func ChangePasswordActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return ChangePasswordActionClientExecuteTyped(r)
+}
+
+// ChangePasswordActionRaw registers a raw Gin route for the ChangePasswordAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func ChangePasswordActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := ChangePasswordActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// ChangePasswordActionHandler returns the HTTP method, route URL, and a typed Gin handler for the ChangePasswordAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func ChangePasswordActionHandler(
+	handler func(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := ChangePasswordActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body ChangePasswordActionReq
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+		// Build typed request wrapper
+		req := ChangePasswordActionRequest{
+			Body:        body,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// ChangePasswordActionGin is a high-level convenience wrapper around ChangePasswordActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func ChangePasswordActionGin(r gin.IRoutes, handler func(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error)) {
+	method, url, h := ChangePasswordActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x ChangePasswordActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func ChangePasswordActionQueryFromGin(c *gin.Context) ChangePasswordActionQuery {
+	return ChangePasswordActionQueryFromString(c.Request.URL.RawQuery)
+}
+
+// ChangePasswordActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the ChangePasswordAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *ChangePasswordActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func ChangePasswordActionHttpHandler(
+	handler func(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := ChangePasswordActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body ChangePasswordActionReq
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := ChangePasswordActionRequest{
+			Body:        body,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// ChangePasswordActionHttp is a high-level convenience wrapper around
+// ChangePasswordActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func ChangePasswordActionHttp(
+	mux *http.ServeMux,
+	handler func(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error),
+) {
+	method, pattern, h := ChangePasswordActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

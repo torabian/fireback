@@ -1,24 +1,6 @@
 package fireback
 
 import "encoding/json"
-import emigo "github.com/torabian/emi/emigo"
-
-func GetDeleteRequestDtoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "query",
-			Type:        "string",
-			Description: "The query selector which would be used to delete the content.",
-		},
-	}
-}
-func CastDeleteRequestDtoFromCli(c emigo.CliCastable) DeleteRequestDto {
-	data := DeleteRequestDto{}
-	if c.IsSet("query") {
-		data.Query = c.String("query")
-	}
-	return data
-}
 
 // The base class definition for deleteRequestDto
 type DeleteRequestDto struct {

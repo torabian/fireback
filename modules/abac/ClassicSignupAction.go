@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -200,7 +201,7 @@ func completeClassicSignupProcess(
 	}
 
 	return ClassicSignupActionRes{
-		Session:        *session,
+		Session:        emigo.NewOne(*session),
 		ContinueToTotp: false,
 		ForcedTotp:     forcedTotp,
 	}, sessionError

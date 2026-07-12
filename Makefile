@@ -4,7 +4,8 @@ default:
 mock:
 	cd modules/fireback/codegen/react-new && npm run start:mock
 
-
+wasm:
+	cd cmd/fireback-wasm && make
 
 mac-pkg:
 	cd cmd/fireback && make mac-pkg
@@ -31,11 +32,10 @@ test_rebuild:
 	node e2e/scripts/rebuild.js $(PWD)
 
 refresh:
-	make && \
 	./artifacts/fireback/f gen gof --def modules/abac/AbacModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
+	./artifacts/fireback/f gen gof --def modules/fireback/FirebackModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	./artifacts/fireback/f gen gof --def modules/suggestion/SuggestionModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	./artifacts/fireback/f gen gof --def modules/payment/PaymentModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/fireback/FirebackModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
 	make
 
 bundle:

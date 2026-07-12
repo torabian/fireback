@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -44,30 +44,6 @@ func OauthAuthenticateActionMeta() struct {
 		Description: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
 	}
 }
-func GetOauthAuthenticateActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "token",
-			Type:        "string",
-			Description: "The token that Auth2 provider returned to the front-end, which will be used to validate the backend",
-		},
-		{
-			Name:        prefix + "service",
-			Type:        "string",
-			Description: "The service name, such as 'google' which later backend will use to authorize the token and create the user.",
-		},
-	}
-}
-func CastOauthAuthenticateActionReqFromCli(c emigo.CliCastable) OauthAuthenticateActionReq {
-	data := OauthAuthenticateActionReq{}
-	if c.IsSet("token") {
-		data.Token = c.String("token")
-	}
-	if c.IsSet("service") {
-		data.Service = c.String("service")
-	}
-	return data
-}
 
 // The base class definition for oauthAuthenticateActionReq
 type OauthAuthenticateActionReq struct {
@@ -84,30 +60,10 @@ func (x *OauthAuthenticateActionReq) Json() string {
 	}
 	return ""
 }
-func GetOauthAuthenticateActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "session",
-			Type: "one",
-		},
-		{
-			Name:        prefix + "next",
-			Type:        "slice",
-			Description: "The next possible action which is suggested.",
-		},
-	}
-}
-func CastOauthAuthenticateActionResFromCli(c emigo.CliCastable) OauthAuthenticateActionRes {
-	data := OauthAuthenticateActionRes{}
-	if c.IsSet("next") {
-		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
-	}
-	return data
-}
 
 // The base class definition for oauthAuthenticateActionRes
 type OauthAuthenticateActionRes struct {
-	Session UserSessionDto `json:"session" yaml:"session"`
+	Session emigo.One[UserSessionDto] `json:"session" yaml:"session"`
 	// The next possible action which is suggested.
 	Next []string `json:"next" yaml:"next"`
 }
@@ -174,68 +130,8 @@ func (x OauthAuthenticateActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// OauthAuthenticateActionRaw registers a raw Gin route for the OauthAuthenticateAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func OauthAuthenticateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type OauthAuthenticateActionRequestSig = func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error)
-
-// OauthAuthenticateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the OauthAuthenticateAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func OauthAuthenticateActionHandler(
-	handler OauthAuthenticateActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body OauthAuthenticateActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
-		// Build typed request wrapper
-		req := OauthAuthenticateActionRequest{
-			Body:        body,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// OauthAuthenticateAction is a high-level convenience wrapper around OauthAuthenticateActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func OauthAuthenticateActionGin(r gin.IRoutes, handler OauthAuthenticateActionRequestSig) {
-	method, url, h := OauthAuthenticateActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for OauthAuthenticateAction
@@ -266,9 +162,6 @@ func OauthAuthenticateActionQueryFromString(rawQuery string) OauthAuthenticateAc
 	v.mapped = mapped
 	return v
 }
-func OauthAuthenticateActionQueryFromGin(c *gin.Context) OauthAuthenticateActionQuery {
-	return OauthAuthenticateActionQueryFromString(c.Request.URL.RawQuery)
-}
 func OauthAuthenticateActionQueryFromHttp(r *http.Request) OauthAuthenticateActionQuery {
 	return OauthAuthenticateActionQueryFromString(r.URL.RawQuery)
 }
@@ -291,26 +184,24 @@ type OauthAuthenticateActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x OauthAuthenticateActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x OauthAuthenticateActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type OauthAuthenticateActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func OauthAuthenticateActionClientCreateUrl(
 	req OauthAuthenticateActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -391,4 +282,153 @@ func OauthAuthenticateActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return OauthAuthenticateActionClientExecuteTyped(r)
+}
+
+// OauthAuthenticateActionRaw registers a raw Gin route for the OauthAuthenticateAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func OauthAuthenticateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := OauthAuthenticateActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// OauthAuthenticateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the OauthAuthenticateAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func OauthAuthenticateActionHandler(
+	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := OauthAuthenticateActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body OauthAuthenticateActionReq
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+		// Build typed request wrapper
+		req := OauthAuthenticateActionRequest{
+			Body:        body,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// OauthAuthenticateActionGin is a high-level convenience wrapper around OauthAuthenticateActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func OauthAuthenticateActionGin(r gin.IRoutes, handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error)) {
+	method, url, h := OauthAuthenticateActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x OauthAuthenticateActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func OauthAuthenticateActionQueryFromGin(c *gin.Context) OauthAuthenticateActionQuery {
+	return OauthAuthenticateActionQueryFromString(c.Request.URL.RawQuery)
+}
+
+// OauthAuthenticateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the OauthAuthenticateAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *OauthAuthenticateActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func OauthAuthenticateActionHttpHandler(
+	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := OauthAuthenticateActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body OauthAuthenticateActionReq
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := OauthAuthenticateActionRequest{
+			Body:        body,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// OauthAuthenticateActionHttp is a high-level convenience wrapper around
+// OauthAuthenticateActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func OauthAuthenticateActionHttp(
+	mux *http.ServeMux,
+	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+) {
+	method, pattern, h := OauthAuthenticateActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

@@ -86,7 +86,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 		}
 	}
 	if userWorkspace != nil {
-		session.UserWorkspaces = []UserWorkspaceEntity{*userWorkspace}
+		session.UserWorkspaces = emigo.CollectionReplace([]UserWorkspaceEntity{*userWorkspace})
 	}
 
 	return nil
@@ -126,7 +126,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 					return err
 				}
 			} else {
-				session.Passport.Set(passportdb)
+				session.Passport.Set(*passportdb)
 				// dto.user.PassportsListId = []string{passportdb.UniqueId}
 			}
 		}
@@ -139,7 +139,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 				}
 			}
 
-			session.User.Set(dto.user)
+			session.User.Set(*dto.user)
 		}
 
 		if dto.createWorkspace && dto.workspace != nil {
@@ -162,7 +162,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 			// Note: here we skipped to add the workspace role into the session
 			// this is used somewhere else
 			wre := &WorkspaceRoleEntity{
-				UserWorkspaceId: emigo.NullableOf(session.UserWorkspaces[0].UniqueId),
+				UserWorkspaceId: emigo.NullableOf(session.UserWorkspaces.Items[0].UniqueId),
 				RoleId:          emigo.NullableOf(dto.role.UniqueId),
 				WorkspaceId:     emigo.NullableOf(dto.workspace.UniqueId),
 			}
@@ -185,7 +185,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 
 		// Token for the session is essential, a session without a token
 		// has absolutely no use.
-		if token, err := user.AuthorizeWithToken(q); err != nil {
+		if token, err := user.Item.AuthorizeWithToken(q); err != nil {
 			return err
 		} else {
 			session.Token = token

@@ -3,6 +3,8 @@ package fireback
 import (
 	"sort"
 	"strings"
+
+	"github.com/torabian/emi/emigo"
 )
 
 func init() {
@@ -57,8 +59,8 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest, query QueryDSL) (*C
 
 	return &CapabilitiesTreeActionResponse{
 		Payload: GResponseSingleItem(CapabilitiesTreeActionRes{
-			Capabilities: itemsFiltered,
-			Nested:       treeToCapabilityChild(itemsa),
+			Capabilities: emigo.CollectionReplace(itemsFiltered),
+			Nested:       emigo.CollectionReplace(treeToCapabilityChild(itemsa)),
 		}),
 	}, nil
 
@@ -77,7 +79,7 @@ func treeToCapabilityChild(items []NestedNode) []CapabilityInfoDto {
 
 		data = append(data, CapabilityInfoDto{
 			UniqueId: item.UniqueId,
-			Children: children,
+			Children: emigo.CollectionReplace(children),
 		})
 	}
 

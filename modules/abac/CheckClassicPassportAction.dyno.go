@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -44,29 +44,6 @@ func CheckClassicPassportActionMeta() struct {
 		Description: `Checks if a classic passport (email, phone) exists or not, used in multi step authentication`,
 	}
 }
-func GetCheckClassicPassportActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "value",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "security-token",
-			Type:        "string",
-			Description: "This can be the value of ReCaptcha2, ReCaptcha3, or generate security image or voice for verification. Will be used based on the configuration.",
-		},
-	}
-}
-func CastCheckClassicPassportActionReqFromCli(c emigo.CliCastable) CheckClassicPassportActionReq {
-	data := CheckClassicPassportActionReq{}
-	if c.IsSet("value") {
-		data.Value = c.String("value")
-	}
-	if c.IsSet("security-token") {
-		data.SecurityToken = c.String("security-token")
-	}
-	return data
-}
 
 // The base class definition for checkClassicPassportActionReq
 type CheckClassicPassportActionReq struct {
@@ -82,38 +59,6 @@ func (x *CheckClassicPassportActionReq) Json() string {
 	}
 	return ""
 }
-func GetCheckClassicPassportActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:        prefix + "next",
-			Type:        "slice",
-			Description: "The next possible action which is suggested.",
-		},
-		{
-			Name:        prefix + "flags",
-			Type:        "slice",
-			Description: "Extra information that can be useful actually when doing onboarding. Make sure sensitive information doesn't go out.",
-		},
-		{
-			Name:        prefix + "otp-info",
-			Type:        "object?",
-			Description: "If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.",
-		},
-	}
-}
-func CastCheckClassicPassportActionResFromCli(c emigo.CliCastable) CheckClassicPassportActionRes {
-	data := CheckClassicPassportActionRes{}
-	if c.IsSet("next") {
-		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
-	}
-	if c.IsSet("flags") {
-		emigo.InflatePossibleSlice(c.String("flags"), &data.Flags)
-	}
-	if c.IsSet("otp-info") {
-		emigo.ParseNullable(c.String("otp-info"), &data.OtpInfo)
-	}
-	return data
-}
 
 // The base class definition for checkClassicPassportActionRes
 type CheckClassicPassportActionRes struct {
@@ -123,44 +68,6 @@ type CheckClassicPassportActionRes struct {
 	Flags []string `json:"flags" yaml:"flags"`
 	// If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.
 	OtpInfo emigo.Nullable[CheckClassicPassportActionResOtpInfo] `json:"otpInfo" yaml:"otpInfo"`
-}
-
-func GetCheckClassicPassportActionResOtpInfoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "suspend-until",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "valid-until",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "blocked-until",
-			Type: "int64",
-		},
-		{
-			Name:        prefix + "seconds-to-unblock",
-			Type:        "int64",
-			Description: "The amount of time left to unblock for next request",
-		},
-	}
-}
-func CastCheckClassicPassportActionResOtpInfoFromCli(c emigo.CliCastable) CheckClassicPassportActionResOtpInfo {
-	data := CheckClassicPassportActionResOtpInfo{}
-	if c.IsSet("suspend-until") {
-		data.SuspendUntil = int64(c.Int64("suspend-until"))
-	}
-	if c.IsSet("valid-until") {
-		data.ValidUntil = int64(c.Int64("valid-until"))
-	}
-	if c.IsSet("blocked-until") {
-		data.BlockedUntil = int64(c.Int64("blocked-until"))
-	}
-	if c.IsSet("seconds-to-unblock") {
-		data.SecondsToUnblock = int64(c.Int64("seconds-to-unblock"))
-	}
-	return data
 }
 
 // The base class definition for otpInfo
@@ -234,68 +141,8 @@ func (x CheckClassicPassportActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// CheckClassicPassportActionRaw registers a raw Gin route for the CheckClassicPassportAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func CheckClassicPassportActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := CheckClassicPassportActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type CheckClassicPassportActionRequestSig = func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error)
-
-// CheckClassicPassportActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CheckClassicPassportAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func CheckClassicPassportActionHandler(
-	handler CheckClassicPassportActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := CheckClassicPassportActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body CheckClassicPassportActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
-		// Build typed request wrapper
-		req := CheckClassicPassportActionRequest{
-			Body:        body,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// CheckClassicPassportAction is a high-level convenience wrapper around CheckClassicPassportActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func CheckClassicPassportActionGin(r gin.IRoutes, handler CheckClassicPassportActionRequestSig) {
-	method, url, h := CheckClassicPassportActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for CheckClassicPassportAction
@@ -326,9 +173,6 @@ func CheckClassicPassportActionQueryFromString(rawQuery string) CheckClassicPass
 	v.mapped = mapped
 	return v
 }
-func CheckClassicPassportActionQueryFromGin(c *gin.Context) CheckClassicPassportActionQuery {
-	return CheckClassicPassportActionQueryFromString(c.Request.URL.RawQuery)
-}
 func CheckClassicPassportActionQueryFromHttp(r *http.Request) CheckClassicPassportActionQuery {
 	return CheckClassicPassportActionQueryFromString(r.URL.RawQuery)
 }
@@ -351,26 +195,24 @@ type CheckClassicPassportActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x CheckClassicPassportActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x CheckClassicPassportActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type CheckClassicPassportActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func CheckClassicPassportActionClientCreateUrl(
 	req CheckClassicPassportActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -451,4 +293,153 @@ func CheckClassicPassportActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return CheckClassicPassportActionClientExecuteTyped(r)
+}
+
+// CheckClassicPassportActionRaw registers a raw Gin route for the CheckClassicPassportAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func CheckClassicPassportActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := CheckClassicPassportActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// CheckClassicPassportActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CheckClassicPassportAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func CheckClassicPassportActionHandler(
+	handler func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := CheckClassicPassportActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body CheckClassicPassportActionReq
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+		// Build typed request wrapper
+		req := CheckClassicPassportActionRequest{
+			Body:        body,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// CheckClassicPassportActionGin is a high-level convenience wrapper around CheckClassicPassportActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func CheckClassicPassportActionGin(r gin.IRoutes, handler func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error)) {
+	method, url, h := CheckClassicPassportActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x CheckClassicPassportActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func CheckClassicPassportActionQueryFromGin(c *gin.Context) CheckClassicPassportActionQuery {
+	return CheckClassicPassportActionQueryFromString(c.Request.URL.RawQuery)
+}
+
+// CheckClassicPassportActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the CheckClassicPassportAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *CheckClassicPassportActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func CheckClassicPassportActionHttpHandler(
+	handler func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := CheckClassicPassportActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body CheckClassicPassportActionReq
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := CheckClassicPassportActionRequest{
+			Body:        body,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// CheckClassicPassportActionHttp is a high-level convenience wrapper around
+// CheckClassicPassportActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func CheckClassicPassportActionHttp(
+	mux *http.ServeMux,
+	handler func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error),
+) {
+	method, pattern, h := CheckClassicPassportActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

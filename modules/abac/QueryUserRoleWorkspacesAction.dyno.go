@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 /**
@@ -43,82 +43,14 @@ func QueryUserRoleWorkspacesActionMeta() struct {
 		Description: `Returns the workspaces that user belongs to, as well as his role in there, and the permissions for each role`,
 	}
 }
-func GetQueryUserRoleWorkspacesActionResCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "name",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "capabilities",
-			Type:        "slice",
-			Description: "Workspace level capabilities which are available",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name: prefix + "roles",
-			Type: "array",
-		},
-	}
-}
-func CastQueryUserRoleWorkspacesActionResFromCli(c emigo.CliCastable) QueryUserRoleWorkspacesActionRes {
-	data := QueryUserRoleWorkspacesActionRes{}
-	if c.IsSet("name") {
-		data.Name = c.String("name")
-	}
-	if c.IsSet("capabilities") {
-		emigo.InflatePossibleSlice(c.String("capabilities"), &data.Capabilities)
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("roles") {
-		data.Roles = emigo.CapturePossibleArray(CastQueryUserRoleWorkspacesActionResRolesFromCli, "roles", c)
-	}
-	return data
-}
 
 // The base class definition for queryUserRoleWorkspacesActionRes
 type QueryUserRoleWorkspacesActionRes struct {
 	Name string `json:"name" yaml:"name"`
 	// Workspace level capabilities which are available
-	Capabilities []string                                `json:"capabilities" yaml:"capabilities"`
-	UniqueId     string                                  `json:"uniqueId" yaml:"uniqueId"`
-	Roles        []QueryUserRoleWorkspacesActionResRoles `json:"roles" yaml:"roles"`
-}
-
-func GetQueryUserRoleWorkspacesActionResRolesCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "name",
-			Type: "string",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "capabilities",
-			Type:        "slice",
-			Description: "Capabilities related to this role which are available",
-		},
-	}
-}
-func CastQueryUserRoleWorkspacesActionResRolesFromCli(c emigo.CliCastable) QueryUserRoleWorkspacesActionResRoles {
-	data := QueryUserRoleWorkspacesActionResRoles{}
-	if c.IsSet("name") {
-		data.Name = c.String("name")
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("capabilities") {
-		emigo.InflatePossibleSlice(c.String("capabilities"), &data.Capabilities)
-	}
-	return data
+	Capabilities []string                                           `json:"capabilities" yaml:"capabilities"`
+	UniqueId     string                                             `json:"uniqueId" yaml:"uniqueId"`
+	Roles        emigo.Array[QueryUserRoleWorkspacesActionResRoles] `json:"roles" yaml:"roles"`
 }
 
 // The base class definition for roles
@@ -191,63 +123,8 @@ func (x QueryUserRoleWorkspacesActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
-// QueryUserRoleWorkspacesActionRaw registers a raw Gin route for the QueryUserRoleWorkspacesAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func QueryUserRoleWorkspacesActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := QueryUserRoleWorkspacesActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
 type QueryUserRoleWorkspacesActionRequestSig = func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error)
-
-// QueryUserRoleWorkspacesActionHandler returns the HTTP method, route URL, and a typed Gin handler for the QueryUserRoleWorkspacesAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func QueryUserRoleWorkspacesActionHandler(
-	handler QueryUserRoleWorkspacesActionRequestSig,
-) (method, url string, h gin.HandlerFunc) {
-	meta := QueryUserRoleWorkspacesActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		// Build typed request wrapper
-		req := QueryUserRoleWorkspacesActionRequest{
-			Body:        nil,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// QueryUserRoleWorkspacesAction is a high-level convenience wrapper around QueryUserRoleWorkspacesActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func QueryUserRoleWorkspacesActionGin(r gin.IRoutes, handler QueryUserRoleWorkspacesActionRequestSig) {
-	method, url, h := QueryUserRoleWorkspacesActionHandler(handler)
-	r.Handle(method, url, h)
-}
 
 /**
  * Query parameters for QueryUserRoleWorkspacesAction
@@ -278,9 +155,6 @@ func QueryUserRoleWorkspacesActionQueryFromString(rawQuery string) QueryUserRole
 	v.mapped = mapped
 	return v
 }
-func QueryUserRoleWorkspacesActionQueryFromGin(c *gin.Context) QueryUserRoleWorkspacesActionQuery {
-	return QueryUserRoleWorkspacesActionQueryFromString(c.Request.URL.RawQuery)
-}
 func QueryUserRoleWorkspacesActionQueryFromHttp(r *http.Request) QueryUserRoleWorkspacesActionQuery {
 	return QueryUserRoleWorkspacesActionQueryFromString(r.URL.RawQuery)
 }
@@ -303,26 +177,24 @@ type QueryUserRoleWorkspacesActionRequest struct {
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
 	// Gin context for each request in case of a direct access requirement
-	GinCtx *gin.Context
-	// Urfave context, per each request
-	CliCtx *cli.Command
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
 	// Reference to the application instance, in such scenarios that entire
 	// application is wrapped into a single struct that holds database connection,
 	// routes, etc.
 	Application interface{}
 }
 
-func (x QueryUserRoleWorkspacesActionRequest) IsGin() bool {
-	return x.GinCtx != nil
-}
-func (x QueryUserRoleWorkspacesActionRequest) IsCli() bool {
-	return x.CliCtx != nil
-}
-
-// type QueryUserRoleWorkspacesActionResult struct {
-// /resp *http.Response
-// /	Payload interface{}
-// /}
 func QueryUserRoleWorkspacesActionClientCreateUrl(
 	req QueryUserRoleWorkspacesActionRequest,
 	config *emigo.APIClient, // optional pre-built request
@@ -399,4 +271,136 @@ func QueryUserRoleWorkspacesActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return QueryUserRoleWorkspacesActionClientExecuteTyped(r)
+}
+
+// QueryUserRoleWorkspacesActionRaw registers a raw Gin route for the QueryUserRoleWorkspacesAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func QueryUserRoleWorkspacesActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := QueryUserRoleWorkspacesActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// QueryUserRoleWorkspacesActionHandler returns the HTTP method, route URL, and a typed Gin handler for the QueryUserRoleWorkspacesAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func QueryUserRoleWorkspacesActionHandler(
+	handler func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := QueryUserRoleWorkspacesActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		// Build typed request wrapper
+		req := QueryUserRoleWorkspacesActionRequest{
+			Body:        nil,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// QueryUserRoleWorkspacesActionGin is a high-level convenience wrapper around QueryUserRoleWorkspacesActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func QueryUserRoleWorkspacesActionGin(r gin.IRoutes, handler func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error)) {
+	method, url, h := QueryUserRoleWorkspacesActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x QueryUserRoleWorkspacesActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func QueryUserRoleWorkspacesActionQueryFromGin(c *gin.Context) QueryUserRoleWorkspacesActionQuery {
+	return QueryUserRoleWorkspacesActionQueryFromString(c.Request.URL.RawQuery)
+}
+
+// QueryUserRoleWorkspacesActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the QueryUserRoleWorkspacesAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *QueryUserRoleWorkspacesActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func QueryUserRoleWorkspacesActionHttpHandler(
+	handler func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := QueryUserRoleWorkspacesActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := QueryUserRoleWorkspacesActionRequest{
+			Body:        nil,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// QueryUserRoleWorkspacesActionHttp is a high-level convenience wrapper around
+// QueryUserRoleWorkspacesActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func QueryUserRoleWorkspacesActionHttp(
+	mux *http.ServeMux,
+	handler func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error),
+) {
+	method, pattern, h := QueryUserRoleWorkspacesActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

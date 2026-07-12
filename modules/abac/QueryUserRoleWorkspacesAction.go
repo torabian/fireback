@@ -3,6 +3,7 @@ package abac
 import (
 	"sort"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -31,7 +32,7 @@ func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest, q fir
 			items = append(items, &QueryUserRoleWorkspacesActionRes{
 				Name:         content.Name,
 				UniqueId:     workspaceId,
-				Roles:        roles,
+				Roles:        emigo.ArrayReplace(roles),
 				Capabilities: content.WorkspacesAccesses,
 			})
 		}

@@ -1,6 +1,9 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
 func init() {
 	// Override the implementation with our actual code.
@@ -10,7 +13,9 @@ func init() {
 func SignoutAction(c SignoutActionRequest, query fireback.QueryDSL) (*SignoutActionResponse, error) {
 
 	// Clear secure cookie
-	c.GinCtx.SetCookie("authorization", "", 3600*24, "/", "", true, true)
+	if c.IsGin() {
+		c.GinCtx.(*gin.Context).SetCookie("authorization", "", 3600*24, "/", "", true, true)
+	}
 
 	return &SignoutActionResponse{
 		Payload: SignoutActionRes{

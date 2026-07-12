@@ -1,0 +1,35 @@
+//go:build !wasm
+
+package abac
+
+import "github.com/torabian/emi/emigo"
+
+func GetGsmSendSmsWithProviderActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "gsm-provider-id",
+			Type: "string",
+		},
+		{
+			Name: prefix + "to-number",
+			Type: "string",
+		},
+		{
+			Name: prefix + "body",
+			Type: "string",
+		},
+	}
+}
+func CastGsmSendSmsWithProviderActionReqFromCli(c emigo.CliCastable) GsmSendSmsWithProviderActionReq {
+	data := GsmSendSmsWithProviderActionReq{}
+	if c.IsSet("gsm-provider-id") {
+		data.GsmProviderId = c.String("gsm-provider-id")
+	}
+	if c.IsSet("to-number") {
+		data.ToNumber = c.String("to-number")
+	}
+	if c.IsSet("body") {
+		data.Body = c.String("body")
+	}
+	return data
+}

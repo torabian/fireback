@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -64,8 +65,8 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 
 	// if user doesn't have totp setup, then move him
 	if config != nil && config.ForceTotp.OrDefault(false) {
-		if passport.TotpSecret == "" ||
-			!passport.TotpConfirmed.OrDefault(false) {
+		if passport.Item.TotpSecret == "" ||
+			!passport.Item.TotpConfirmed.OrDefault(false) {
 
 			// Let's create and assign to passport
 			key, _ := totp.Generate(totp.GenerateOpts{
@@ -77,7 +78,7 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 			totpLink := key.URL()
 
 			if _, err := PassportActions.Update(query, &PassportEntity{
-				UniqueId:   passport.UniqueId,
+				UniqueId:   passport.Item.UniqueId,
 				TotpSecret: totpSecret,
 			}); err != nil {
 				return nil, err
@@ -92,7 +93,7 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 		}
 	}
 
-	if passport.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
+	if passport.Item.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
 			return &ClassicSigninActionResponse{
@@ -102,7 +103,7 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 			}, nil
 		}
 
-		if !totp.Validate(req.TotpCode, passport.TotpSecret) {
+		if !totp.Validate(req.TotpCode, passport.Item.TotpSecret) {
 			return nil, fireback.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
 		}
 	}
@@ -113,7 +114,7 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 
 	return &ClassicSigninActionResponse{
 		Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-			Session: *session,
+			Session: emigo.NewOne(*session),
 		}),
 	}, nil
 }
@@ -138,23 +139,26 @@ func classicSinginInternalUnsafe(req *ClassicSigninActionReq, q fireback.QueryDS
 	applyUserTokenAndWorkspacesToToken(session, q)
 
 	return &ClassicSigninActionRes{
-		Session: *session,
+		Session: emigo.NewOne(*session),
 	}, nil
 }
 
 func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 	user, _ := session.User.Get()
 	// Get the user workspaces as well
-	q.UserId = user.UniqueId
+	q.UserId = user.Item.UniqueId
 	q.ResolveStrategy = "user"
 	workspacesItems, _, err := UserWorkspaceActions.Query(q)
 	if err != nil {
 		return fireback.GormErrorToIError(err)
 	}
-	session.UserWorkspaces = convertPointersToValuesUserWorkspaceEntity(workspacesItems)
+
+	session.UserWorkspaces = emigo.CollectionReplace(
+		convertPointersToValuesUserWorkspaceEntity(workspacesItems),
+	)
 
 	// Authorize the session, put the token
-	if token, err := user.AuthorizeWithToken(q); err != nil {
+	if token, err := user.Item.AuthorizeWithToken(q); err != nil {
 		return fireback.CastToIError(err)
 	} else {
 		session.Token = token
@@ -196,9 +200,8 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback
 	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
 		return nil, err
 	} else {
-		session.User.Set(user)
-
-		session.Passport.Set(passport)
+		session.User.Set(*user)
+		session.Passport.Set(*passport)
 		passportPassword = passport.Password
 	}
 

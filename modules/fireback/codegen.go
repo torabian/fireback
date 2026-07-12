@@ -1622,7 +1622,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 		err3 := WriteFileGen(ctx, moduleEntry, EscapeLines([]byte(goModule)), 0644)
 		if err3 != nil {
-			fmt.Println("Error on writing content:", moduleEntry, err3)
+			fmt.Println("Error writing module entry", moduleEntry, err3)
 		}
 
 	}
@@ -1635,7 +1635,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 	err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
 	if err3 != nil {
-		fmt.Println("Error on writing content:", exportPath, err3)
+		fmt.Println("Error writing module dynamic", exportPath, err3)
 	}
 
 	if !HasQueries(ctx.Path) {
@@ -1657,7 +1657,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 	}
 	// Now after the queries is created, we need to convert the sql files in that directory into golang query predict files
 	err2 := ReadSQLFiles(DiskFS{Root: filepath.Join(ctx.Path, "queries")}, ".", 1, func(filePath string, data []byte) error {
-		fmt.Println("SQL Path: ", filePath)
+
 		doc.Queries = append(doc.Queries, querypredict.QuerySpec{
 			Name:  strings.ReplaceAll(path.Base(filePath), ".sql", ""),
 			Query: string(data),
@@ -1672,7 +1672,7 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 
 	files, err := querypredict.ProcessQueryPredicts(doc)
 	if err != nil {
-		fmt.Println("Error on writing content: err: %v", err)
+		fmt.Printf("Error parsing files in query predict: %v\n", err)
 	}
 
 	for _, file := range files {
@@ -1681,13 +1681,13 @@ func GofModuleGenerationFlow(x *Module3, ctx *CodeGenContext, exportDir string, 
 		os.MkdirAll(path.Dir(filePath), os.ModePerm)
 
 		if err := os.WriteFile(filePath, []byte(file.ActualScript), 0644); err != nil {
-			fmt.Println("error on writing file to disk: %v, %v, %w", file.Location, file.Name, err)
+			fmt.Printf("error on writing file to disk: %v, %v, %w\n", file.Location, file.Name, err)
 		}
 	}
 
 	if !HasMetasFolder(ctx.Path) {
 		if err9 := CreateMetaDirectory(ctx.Path); err9 != nil {
-			fmt.Println("Error on writing content: err: %v", err9)
+			fmt.Printf("Error on writing content: %v \n", err9)
 		}
 	}
 }
@@ -1837,8 +1837,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 	for _, entity := range x.Entities {
 
 		// Disabled now, but later we need to fix this.
-		ve := ConvertEntityToEmi(entity)
-		fmt.Println("Ve", ve.Json())
+		// ve := ConvertEntityToEmi(entity)
 		// mDtos = append(mDtos, ve.Dtos...)
 		// aktFields = append(aktFields, ve.Actions...)
 
@@ -1991,6 +1990,10 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 
 	}
 
+	emiGoContext := core.MicroGenContext{
+		Tags: "split-cli",
+	}
+
 	for _, dto := range mDtos {
 
 		// Fireback, has a naming convension which Emi, as a general compiler
@@ -2004,7 +2007,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			exportPath = filepath.Join(exportDir, dtoName+".dyno.go")
 			result, err := golang.GoCommonStructGenerator(
 				dto.Fields,
-				core.MicroGenContext{},
+				emiGoContext,
 				golang.GoCommonStructContext{
 					RootClassName:       dtoName,
 					EmiLocation:         "github.com/torabian/emi/emigo",
@@ -2014,7 +2017,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			if err != nil {
 				log.Fatalln("Emi dto generation error:", err)
 			}
-			data = []byte(golang.AsFullDocument(result, x.Name))
+			data = []byte(golang.AsFullDocument(result.MainClass, x.Name))
 		}
 
 		if ctx.Catalog.LanguageName == "TypeScript" {
@@ -2063,18 +2066,21 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 
 		if ctx.Catalog.LanguageName == "FirebackGo" {
-			res, err := golang.GoActionRender(action, core.MicroGenContext{}, goComplexes)
+			res, err := golang.GoActionRender(action, emiGoContext, goComplexes)
 			if err != nil {
 				log.Fatalln("Emi actions (acts) generation error:", err)
 			}
-			content = golang.AsFullDocument(res, x.Name)
-			exportPath = filepath.Join(exportDir, ToUpper(action.Name)+"Action.dyno.go")
+			for _, item := range res {
+				content = golang.AsFullDocument(item, x.Name)
+				exportPath = filepath.Join(exportDir, item.SuggestedFileName+".dyno"+item.SuggestedExtension)
+
+				err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
+				if err3 != nil {
+					log.Fatalln("Error on writing query content:", exportPath, err3)
+				}
+			}
 		}
 
-		err3 := WriteFileGen(ctx, exportPath, EscapeLines([]byte(content)), 0644)
-		if err3 != nil {
-			log.Fatalln("Error on writing query content:", exportPath, err3)
-		}
 	}
 
 	for _, query := range x.Queries {
