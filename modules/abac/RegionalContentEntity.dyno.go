@@ -10,6 +10,10 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"time"
+
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	"github.com/torabian/emi/emigo"
@@ -19,9 +23,6 @@ import (
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"time"
 )
 
 var regionalContentSeedersFs = &seeders.ViewsFs
@@ -368,11 +369,13 @@ func RegionalContentRecursiveAddUniqueId(dto *RegionalContentEntity, query fireb
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func RegionalContentMultiInsertFn(dtos []*RegionalContentEntity, query fireback.QueryDSL) ([]*RegionalContentEntity, *fireback.IError) {
@@ -656,12 +659,12 @@ var RegionalContentEntityMeta = fireback.TableMetaData{
 func RegionalContentActionExport(
 	query fireback.QueryDSL,
 ) (chan []byte, *fireback.IError) {
-	return fireback.YamlExporterChannel[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
+	return fireback.YamlExporterChannel(query, RegionalContentActions.Query, RegionalContentPreloadRelations)
 }
 func RegionalContentActionExportT(
 	query fireback.QueryDSL,
 ) (chan []interface{}, *fireback.IError) {
-	return fireback.YamlExporterChannelT[RegionalContentEntity](query, RegionalContentActions.Query, RegionalContentPreloadRelations)
+	return fireback.YamlExporterChannelT(query, RegionalContentActions.Query, RegionalContentPreloadRelations)
 }
 func RegionalContentActionImport(
 	dto interface{}, query fireback.QueryDSL,
