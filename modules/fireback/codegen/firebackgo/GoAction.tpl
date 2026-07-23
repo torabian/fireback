@@ -59,9 +59,6 @@ var {{ .m.Upper }}CliActionsBundle = &{{ $.wsprefix }}CliActionsBundle{
         {{ range .m.Actions }}
             &{{ .Upper }}ActionCmd,
         {{ end }}
-        {{ range .m.Entities }}
-        {{ .Upper }}CliFn(),
-        {{ end }}
     },
 }
 

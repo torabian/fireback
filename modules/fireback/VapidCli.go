@@ -106,6 +106,5 @@ var PushNotificationCmd cli.Command = cli.Command{
 		VapidCmd(),
 		AutoConfig(),
 		SendWebPush(),
-		WebPushConfigCliFn(),
 	},
 }

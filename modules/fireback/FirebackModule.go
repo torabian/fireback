@@ -28,7 +28,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		Name:        "fireback",
 		Definitions: &Module3Definitions,
 		Actions: [][]Module3Action{
-			GetCapabilityModule3Actions(),
 			FirebackCustomActions(),
 		},
 		EntityBundles: []EntityBundle{
@@ -62,7 +61,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		CapabilityCliFn(),
 		&PushNotificationCmd,
 		CapabilitiesTreeActionDef.ToCli(),
 	})

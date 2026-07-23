@@ -7,7 +7,6 @@ package {{ .m.Name }}
 */
 
 import (
-    "github.com/gin-gonic/gin"
 
     {{ if ne .m.MetaWorkspace true}}
 	"github.com/torabian/fireback/modules/fireback"
@@ -16,7 +15,6 @@ import (
 	"log"
 	"fmt"
 	"encoding/json"
-	"strings"
 	"github.com/schollz/progressbar/v3"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -35,11 +33,6 @@ import (
 	"github.com/urfave/cli/v3"
 	seeders "{{ .gofModule }}/{{ .ctx.RelativePath }}/seeders/{{ .e.Upper }}"
 	mocks "{{ .gofModule }}/{{ .ctx.RelativePath }}/mocks/{{ .e.Upper }}"
-	{{ if .hasMetas }}
-	metas "{{ .gofModule }}/{{ .ctx.RelativePath }}/metas"
-	{{ end }}
-
-	"gopkg.in/yaml.v2"
 
 	{{ if .e.DataFields.DateTimestamp }}
 	"time"
@@ -282,8 +275,6 @@ func {{ .e.Upper }}ActionUpsertFn(dto *{{ .e.Upper }}Entity, query {{ $.wsprefix
 
 {{ template "cliFlags" . }}
 
-{{ template "entityCliCommands" . }}
-
 {{ template "entityCastFromCli" . }}
 
 {{ template "entityMockAndSeeders" . }}
@@ -315,11 +306,6 @@ func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]stri
 	return stringItems, meta, err
 }
 
-{{ template "entityCliImportExportCmd" . }}
-
-{{ template "entityCliActionsCmd" . }}
-
-{{ template "entityHttp" . }}
 
 {{ template "entityPermissions" . }}
 
@@ -346,14 +332,6 @@ func {{ .e.PluralNameUpper }}ActionQueryString(keyword string, page int) ([]stri
 
 var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 	Permissions: ALL_{{ .e.AllUpper }}_PERMISSIONS,
-
-	// Cli command has been exluded, since we use module to wrap all the entities
-	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	{{ .e.Upper }}CliFn(),
-	//},
-	Actions: Get{{ .e.Upper }}Module3Actions(),
 	MockProvider: {{ .e.Upper }}ImportMocks,
 	AutoMigrationEntities: []interface{}{
 		&{{ .e.EntityName }}{},

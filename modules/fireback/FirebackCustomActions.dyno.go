@@ -120,8 +120,6 @@ var FirebackCliActionsBundle = &CliActionsBundle{
 		ReactiveSearchActionDef.ToCli(),
 		EventBusSubscriptionActionDef.ToCli(),
 		CapabilitiesTreeActionDef.ToCli(),
-		WebPushConfigCliFn(),
-		CapabilityCliFn(),
 	},
 }
 
