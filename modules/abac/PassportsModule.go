@@ -39,11 +39,11 @@ func PassportsModuleSetup() *fireback.ModuleProvider {
 		ALL_USER_PERMISSIONS,
 	)
 
-	module.Actions = [][]fireback.Module3Action{
-		GetPassportMethodModule3Actions(),
-		GetPassportModule3Actions(),
-		GetPublicJoinKeyModule3Actions(),
-	}
+	// module.Actions = [][]fireback.Module3Action{
+	// 	GetPassportMethodModule3Actions(),
+	// 	GetPassportModule3Actions(),
+	// 	GetPublicJoinKeyModule3Actions(),
+	// }
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 

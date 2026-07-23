@@ -100,13 +100,13 @@ func init() {
 		}
 	}
 
-	// Tokens are related to users, so let's move them there.
-	UserCliCommands = append(
-		UserCliCommands,
-		TokenCliFn(),
-		AcceptInviteActionDef.ToCli(),
-		UserInvitationsActionDef.ToCli(),
-	)
+	// // Tokens are related to users, so let's move them there.
+	// UserCliCommands = append(
+	// 	UserCliCommands,
+	// 	TokenCliFn(),
+	// 	AcceptInviteActionDef.ToCli(),
+	// 	UserInvitationsActionDef.ToCli(),
+	// )
 }
 
 func randomPublicIP() string {

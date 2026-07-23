@@ -142,33 +142,11 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	})
 
 	module.Actions = [][]fireback.Module3Action{
-		GetUserModule3Actions(),
-		GetWorkspaceModule3Actions(),
-		GetRoleModule3Actions(),
-		GetWorkspaceTypeModule3Actions(),
-		GetGsmProviderModule3Actions(),
-		GetWorkspaceInviteModule3Actions(),
-		GetBackupTableMetaModule3Actions(),
-		GetTableViewSizingModule3Actions(),
-		GetAppMenuModule3Actions(),
-		GetEmailConfirmationModule3Actions(),
 		AbacCustomActions(),
-		GetUserWorkspaceModule3Actions(),
-		GetWorkspaceRoleModule3Actions(),
-		GetTimezoneGroupModule3Actions(),
-		GetWorkspaceConfigModule3Actions(),
-		GetRegionalContentModule3Actions(),
-		// {
-		// 	AS_FIREBACK_ACTION,
-		// },
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		RoleCliFn(),
-		UserCliFn(),
-		WorkspaceCliFn(),
 		&MiscCli,
-		TimezoneGroupCliFn(),
 	})
 
 	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})
@@ -177,19 +155,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 }
 
 var AbacActions cli.Command = cli.Command{
-	Name:  "abac",
-	Usage: "All actions which are available for abac module",
-	Commands: append(
-		[]*cli.Command{
-			{
-				Name:  "internal",
-				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",
-				Commands: []*cli.Command{
-					PublicJoinKeyCliFn(),
-					PublicAuthenticationCliFn(),
-				},
-			},
-		},
-		GetAbacActionsCli()...,
-	),
+	Name:     "abac",
+	Usage:    "All actions which are available for abac module",
+	Commands: GetAbacActionsCli(),
 }

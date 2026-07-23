@@ -49,10 +49,6 @@ var GsmProviderTestCmd cli.Command = cli.Command{
 	},
 }
 
-func init() {
-	GsmProviderCliCommands = append(GsmProviderCliCommands, &GsmProviderTestCmd)
-}
-
 func GsmProviderActionCreate(
 	dto *GsmProviderEntity, query fireback.QueryDSL,
 ) (*GsmProviderEntity, *fireback.IError) {

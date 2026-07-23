@@ -17,12 +17,6 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	)
 
-	module.Actions = [][]fireback.Module3Action{
-		GetEmailProviderModule3Actions(),
-		GetEmailSenderModule3Actions(),
-		GetNotificationConfigModule3Actions(),
-	}
-
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		return dbref.AutoMigrate(
 			&EmailProviderEntity{},
@@ -46,10 +40,6 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 			Commands: []*cli.Command{
 				&NotificationModuleAuditCmd,
 				&EmailProviderTestCmd,
-				EmailProviderCliFn(),
-				EmailSenderCliFn(),
-				GsmProviderCliFn(),
-				NotificationConfigCliFn(),
 			},
 		},
 	})

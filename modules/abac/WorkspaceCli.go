@@ -189,9 +189,7 @@ var MiscCli cli.Command = cli.Command{
 	Name:  "misc",
 	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
 	Commands: []*cli.Command{
-		TableViewSizingCliFn(),
-		RegionalContentCliFn(),
-		AppMenuCliFn(),
+
 		getCssMinCombineCli(),
 		&cli.Command{
 			Name:        "totp",
@@ -228,24 +226,24 @@ var MiscCli cli.Command = cli.Command{
 }
 
 func init() {
-	WorkspaceCliCommands = append(
-		WorkspaceCliCommands,
-		&GetUserAccessScope,
-		&CliConfigCmd,
-		&ViewAuthorize,
-		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
-		QueryUserRoleWorkspacesActionDef.ToCli(),
-		&CheckUserMeetsAPermissionCmd,
-		&WorkspaceAsCmd,
-		PublicAuthenticationCliFn(),
-		TimezoneGroupCliFn(),
-		WorkspaceTypeCliFn(),
-		WorkspaceConfigCliFn(),
-		WorkspaceInviteCliFn(),
-		WorkspaceRoleCliFn(),
-		UserWorkspaceCliFn(),
-		WorkspaceInviteCliFn(),
-		PublicJoinKeyCliFn(),
-	)
+	// WorkspaceCliCommands = append(
+	// 	WorkspaceCliCommands,
+	// 	&GetUserAccessScope,
+	// 	&CliConfigCmd,
+	// 	&ViewAuthorize,
+	// 	QueryWorkspaceTypesPubliclyActionDef.ToCli(),
+	// 	QueryUserRoleWorkspacesActionDef.ToCli(),
+	// 	&CheckUserMeetsAPermissionCmd,
+	// 	&WorkspaceAsCmd,
+	// 	PublicAuthenticationCliFn(),
+	// 	TimezoneGroupCliFn(),
+	// 	WorkspaceTypeCliFn(),
+	// 	WorkspaceConfigCliFn(),
+	// 	WorkspaceInviteCliFn(),
+	// 	WorkspaceRoleCliFn(),
+	// 	UserWorkspaceCliFn(),
+	// 	WorkspaceInviteCliFn(),
+	// 	PublicJoinKeyCliFn(),
+	// )
 
 }

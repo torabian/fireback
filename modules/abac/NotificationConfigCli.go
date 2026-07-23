@@ -21,9 +21,6 @@ var NotificationConfigTestCmd cli.Command = cli.Command{
 	},
 }
 
-func init() {
-	NotificationConfigCliCommands = append(NotificationConfigCliCommands, &NotificationConfigTestCmd)
-}
 func NotificationConfigActionGetOneByWorkspace(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
 	refl := reflect.ValueOf(&NotificationConfigEntity{})
 	item, err := fireback.GetOneEntityByWorkspace[NotificationConfigEntity](query, refl)

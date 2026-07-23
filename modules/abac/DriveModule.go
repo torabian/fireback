@@ -21,11 +21,11 @@ func DriveModuleSetup() *fireback.ModuleProvider {
 
 	// Drive is not coverting route definitions, needs to be fixed
 	module.Actions = [][]fireback.Module3Action{
-		GetFileModule3Actions(),
+		// GetFileModule3Actions(),
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		FileCliFn(),
+		// FileCliFn(),
 	})
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {

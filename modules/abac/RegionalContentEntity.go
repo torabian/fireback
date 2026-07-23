@@ -177,7 +177,3 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 		return nil
 	},
 }
-
-func init() {
-	RegionalContentCliCommands = append(RegionalContentCliCommands, &RegionalContentGetCmd)
-}
