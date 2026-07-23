@@ -198,7 +198,9 @@
           "enum": [
             "string",
             "int",
-            "any"
+            "any",
+            "object",
+            "slice"
           ],
           "description": "In case of type map this is the map key type"
         },

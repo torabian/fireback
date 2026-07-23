@@ -107,6 +107,19 @@ func (x *SendEmailWithProviderActionResponse) WithIdeal(payload SendEmailWithPro
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *SendEmailWithProviderActionResponse) AsIdeal() (*SendEmailWithProviderActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res SendEmailWithProviderActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *SendEmailWithProviderActionResponse) AsHTML(payload string) *SendEmailWithProviderActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -228,12 +241,12 @@ func SendEmailWithProviderActionClientExecuteTyped(httpReq *http.Request) (*Send
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &SendEmailWithProviderActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &SendEmailWithProviderActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &SendEmailWithProviderActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func SendEmailWithProviderActionClientBuildRequest(req SendEmailWithProviderActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := SendEmailWithProviderActionMeta()

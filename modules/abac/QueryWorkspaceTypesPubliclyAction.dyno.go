@@ -94,6 +94,19 @@ func (x *QueryWorkspaceTypesPubliclyActionResponse) WithIdeal(payload QueryWorks
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *QueryWorkspaceTypesPubliclyActionResponse) AsIdeal() (*QueryWorkspaceTypesPubliclyActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res QueryWorkspaceTypesPubliclyActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *QueryWorkspaceTypesPubliclyActionResponse) AsHTML(payload string) *QueryWorkspaceTypesPubliclyActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -215,12 +228,12 @@ func QueryWorkspaceTypesPubliclyActionClientExecuteTyped(httpReq *http.Request) 
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &QueryWorkspaceTypesPubliclyActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &QueryWorkspaceTypesPubliclyActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &QueryWorkspaceTypesPubliclyActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func QueryWorkspaceTypesPubliclyActionClientBuildRequest(req QueryWorkspaceTypesPubliclyActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := QueryWorkspaceTypesPubliclyActionMeta()

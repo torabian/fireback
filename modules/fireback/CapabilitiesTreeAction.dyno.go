@@ -92,6 +92,19 @@ func (x *CapabilitiesTreeActionResponse) WithIdeal(payload CapabilitiesTreeActio
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *CapabilitiesTreeActionResponse) AsIdeal() (*CapabilitiesTreeActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res CapabilitiesTreeActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *CapabilitiesTreeActionResponse) AsHTML(payload string) *CapabilitiesTreeActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -213,12 +226,12 @@ func CapabilitiesTreeActionClientExecuteTyped(httpReq *http.Request) (*Capabilit
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &CapabilitiesTreeActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &CapabilitiesTreeActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &CapabilitiesTreeActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func CapabilitiesTreeActionClientBuildRequest(req CapabilitiesTreeActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := CapabilitiesTreeActionMeta()

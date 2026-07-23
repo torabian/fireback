@@ -98,6 +98,19 @@ func (x *UserPassportsActionResponse) WithIdeal(payload UserPassportsActionRes) 
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *UserPassportsActionResponse) AsIdeal() (*UserPassportsActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res UserPassportsActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *UserPassportsActionResponse) AsHTML(payload string) *UserPassportsActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -219,12 +232,12 @@ func UserPassportsActionClientExecuteTyped(httpReq *http.Request) (*UserPassport
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &UserPassportsActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &UserPassportsActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &UserPassportsActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func UserPassportsActionClientBuildRequest(req UserPassportsActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := UserPassportsActionMeta()
