@@ -17,6 +17,7 @@ actions:
       fields:
         - name: totalProduct
           type: int
+
 entities:
   - name: product
     description: "Sample Product Table with Various Field Types"
