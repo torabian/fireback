@@ -60,7 +60,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.2.4
+	github.com/torabian/emi v1.2.5
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli/v3 v3.8.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
@@ -205,5 +205,3 @@ require (
 	golang.org/x/time v0.12.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
-
-replace github.com/torabian/emi => ../emi
