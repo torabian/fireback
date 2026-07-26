@@ -1,12 +1,11 @@
 import { useContext, useEffect } from "react";
-import { type IResponse } from "../../definitions/JSONStyle";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import type { ClassicSigninActionRes } from "../../sdk/modules/abac/ClassicSignin";
+import type { ClassicPassportOtpActionRes } from "../../sdk/modules/abac/ClassicPassportOtpAction";
+import type { ClassicSigninActionRes } from "../../sdk/modules/abac/ClassicSigninAction";
+import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignupAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
-import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
-import type { ClassicPassportOtpActionResDto } from "../../sdk/modules/abac/AbacActionsDto";
 
 export enum AuthMethod {
   Email = "email",
@@ -33,7 +32,7 @@ export const useCompleteAuth = () => {
     res: GResponse<
       | ClassicSigninActionRes
       | ClassicSignupActionRes
-      | ClassicPassportOtpActionResDto
+      | ClassicPassportOtpActionRes
     >,
   ) => {
     // Handle React Native WebView

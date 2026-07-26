@@ -1,13 +1,14 @@
 import { useState } from "react";
 
-import { useClassicSigninAction, ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
+import {
+  useClassicSigninAction,
+  ClassicSigninActionReq,
+} from "../../sdk/modules/abac/ClassicSigninAction";
 
 export function SignupTest() {
   const [dto, setDto] = useState<ClassicSigninActionReq>(
-    new ClassicSigninActionReq()
+    new ClassicSigninActionReq(),
   );
-
-
 
   const { mutateAsync } = useClassicSigninAction({});
 

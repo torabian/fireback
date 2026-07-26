@@ -2,7 +2,7 @@ import { Checkbox } from "@/modules/fireback/components/checkbox/Checkbox";
 import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
 import { type IndeterminateCheck } from "@/modules/fireback/definitions/definitions";
 import { type CapabilityChild } from "@/modules/fireback/sdk/core/react-tools";
-import { useCapabilitiesTreeActionQuery } from "@/modules/fireback/sdk/modules/fireback/CapabilitiesTree";
+import { useCapabilitiesTreeActionQuery } from "@/modules/fireback/sdk/modules/fireback/CapabilitiesTreeAction";
 
 type NodeChangeFn = (node: string, value: IndeterminateCheck) => void;
 
@@ -15,9 +15,8 @@ export function RolePermissionTree({
   onChange?: (value: string[]) => void;
   prefix?: string;
 }) {
+  const { data, error } = useCapabilitiesTreeActionQuery({});
 
-  const {data, error} = useCapabilitiesTreeActionQuery({});
-  
   const items = data?.data?.item?.nested || [];
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {
@@ -68,7 +67,7 @@ export function PermissionTree({
         }`;
 
         const checkValue: IndeterminateCheck = (value || []).includes(
-          completeKey
+          completeKey,
         )
           ? "checked"
           : "unchecked";
@@ -82,7 +81,7 @@ export function PermissionTree({
                   onChange={(e) => {
                     onNodeChange(
                       completeKey,
-                      checkValue === "checked" ? "unchecked" : "checked"
+                      checkValue === "checked" ? "unchecked" : "checked",
                     );
                   }}
                 />

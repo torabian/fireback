@@ -79,3 +79,9 @@ dockerbuild:
 
 dockerpublish:
 	make dockerbuild && docker tag fireback fireback/fireback:latest && docker push fireback/fireback:latest
+
+
+client:
+	rm -rf xxx && \
+	emi js --path modules/fireback/FirebackModule3.yml --output modules/fireback/codegen/react-new/src/modules/fireback/sdk/modules/fireback --tags react,typescript,no-package,no-sdk --react-query="react-query@^3.39.3" --js-sdk-location="../../sdk" && \
+	emi js --path modules/abac/AbacModule3.yml --output modules/fireback/codegen/react-new/src/modules/fireback/sdk/modules/abac --tags react,typescript,no-package,no-sdk --react-query="react-query@^3.39.3" --js-sdk-location="../../sdk"

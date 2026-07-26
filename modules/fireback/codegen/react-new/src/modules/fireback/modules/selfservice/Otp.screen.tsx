@@ -7,9 +7,9 @@ import { useS } from "../../hooks/useS";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input/index";
 import { usePresenter } from "./Otp.presenter";
 import { strings } from "./strings/translations";
-import { ClassicPassportOtpActionReq } from "../../sdk/modules/abac/ClassicPassportOtp";
+import { ClassicPassportOtpActionReq } from "../../sdk/modules/abac/ClassicPassportOtpAction";
 
-export const OtpScreen = ({ }: {}) => {
+export const OtpScreen = ({}: {}) => {
   const { goBack, submit, mutation, form, s } = usePresenter();
 
   return (
@@ -53,7 +53,7 @@ const Form = ({
           form.setFieldValue(
             ClassicPassportOtpActionReq.Fields.otp,
             value,
-            false
+            false,
           )
         }
         className="otp-react-code-input"

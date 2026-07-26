@@ -6,7 +6,7 @@ import { useQueryClient } from "react-query";
 import { useLocale } from "./useLocale";
 import { RemoteQueryContext } from "../sdk/core/react-tools";
 import { userMeetsAccess2 } from "./accessLevels";
-import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/modules/abac/QueryUserRoleWorkspaces";
+import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/modules/abac/QueryUserRoleWorkspacesAction";
 
 /**
  *

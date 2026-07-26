@@ -6,10 +6,9 @@ import { FormText } from "../../components/forms/form-text/FormText";
 import { useS } from "../../hooks/useS";
 import { usePresenter } from "./ClassicSigninPassword.presenter";
 import { strings } from "./strings/translations";
-import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
+import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
 
-
-export const ClassicSigninPassword = ({ }: {}) => {
+export const ClassicSigninPassword = ({}: {}) => {
   const { goBack, mutation, form, continueWithOtp, otpEnabled, s } =
     usePresenter();
 
@@ -69,7 +68,7 @@ const Form = ({
           form.setFieldValue(
             ClassicSigninActionReq.Fields.password,
             value,
-            false
+            false,
           )
         }
       />

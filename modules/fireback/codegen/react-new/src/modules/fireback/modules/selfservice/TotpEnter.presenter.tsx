@@ -2,10 +2,13 @@ import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "../../hooks/api";
 import { useRouter } from "../../hooks/useRouter";
 
-import { ClassicSigninActionReq, ClassicSigninActionRes, useClassicSigninAction } from "../../sdk/modules/abac/ClassicSignin";
+import {
+  ClassicSigninActionReq,
+  ClassicSigninActionRes,
+  useClassicSigninAction,
+} from "../../sdk/modules/abac/ClassicSigninAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
-
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
@@ -18,7 +21,8 @@ export const usePresenter = () => {
   const value = state?.value;
 
   const submit = (values: Partial<ClassicSigninActionReq>) => {
-    mutation.mutateAsync(new ClassicSigninActionReq({ ...values, password, value }))
+    mutation
+      .mutateAsync(new ClassicSigninActionReq({ ...values, password, value }))
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
@@ -28,7 +32,7 @@ export const usePresenter = () => {
   const form = useFormik<Partial<ClassicSigninActionReq>>({
     initialValues: {},
     onSubmit: (values, helpers) => {
-      mutation.mutateAsync(new ClassicSigninActionReq(values))
+      mutation.mutateAsync(new ClassicSigninActionReq(values));
     },
   });
 

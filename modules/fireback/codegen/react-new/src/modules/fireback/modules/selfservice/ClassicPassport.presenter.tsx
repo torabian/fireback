@@ -8,11 +8,14 @@ import { useS } from "../../hooks/useS";
 import {
   CheckPassportMethodsActionRes,
   useCheckPassportMethodsActionQuery,
-} from "../../sdk/modules/abac/CheckPassportMethods";
+} from "../../sdk/modules/abac/CheckPassportMethodsAction";
 import { GResponse } from "../../sdk/sdk/envelopes";
 import { AuthMethod } from "./auth.common";
 import { strings } from "./strings/translations";
-import { CheckClassicPassportActionReq, useCheckClassicPassportAction } from "../../sdk/modules/abac/CheckClassicPassport";
+import {
+  CheckClassicPassportActionReq,
+  useCheckClassicPassportAction,
+} from "../../sdk/modules/abac/CheckClassicPassportAction";
 
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const s = useS(strings);
@@ -38,7 +41,8 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
   }
 
   const submit = (data: Partial<CheckClassicPassportActionReq>) => {
-    mutation.mutateAsync(new CheckClassicPassportActionReq(data))
+    mutation
+      .mutateAsync(new CheckClassicPassportActionReq(data))
       .then((res: any) => {
         const { next, flags } = res?.data?.item;
 

@@ -6,9 +6,9 @@ import { useS } from "../../hooks/useS";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpEnter.presenter";
-import { ConfirmClassicPassportTotpActionReq } from "../../sdk/modules/abac/ConfirmClassicPassportTotp";
+import { ConfirmClassicPassportTotpActionReq } from "../../sdk/modules/abac/ConfirmClassicPassportTotpAction";
 
-export const TotpEnter = ({ }: {}) => {
+export const TotpEnter = ({}: {}) => {
   const { goBack, mutation, form } = usePresenter();
   const s = useS(strings);
 
@@ -54,7 +54,7 @@ const Form = ({
           form.setFieldValue(
             ConfirmClassicPassportTotpActionReq.Fields.totpCode,
             value,
-            false
+            false,
           )
         }
         className="otp-react-code-input"

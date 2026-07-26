@@ -1,5 +1,6 @@
 // @ts-nocheck 
  // This no check has been added via fireback. 
+import { MCollection } from "../../sdk/common/operators";
 import { type PartialDeep } from "../../sdk/common/fetchx";
 import { withPrefix } from "../../sdk/common/withPrefix";
 /**
@@ -56,7 +57,7 @@ export class CapabilityInfoDto {
    *
    * @type {CapabilityInfoDto}
    **/
-  #children: CapabilityInfoDto[] = [];
+  #children: MCollection<CapabilityInfoDto> = MCollection.of([]);
   /**
    *
    * @returns {CapabilityInfoDto}
@@ -68,18 +69,44 @@ export class CapabilityInfoDto {
    *
    * @type {CapabilityInfoDto}
    **/
-  set children(value: CapabilityInfoDto[]) {
-    // For arrays, you only can pass arrays to the object
-    if (!Array.isArray(value)) {
+  set children(
+    value:
+      | MCollection<CapabilityInfoDto>
+      | InstanceType<typeof CapabilityInfoDto>[],
+  ) {
+    // When the passed value is already an array, we check if we need to
+    // cast the inner items into class instance.
+    if (Array.isArray(value)) {
+      if (value.length > 0 && value[0] instanceof CapabilityInfoDto) {
+        this.#children = MCollection.of(value);
+      } else {
+        this.#children = MCollection.of(
+          value.map((item) => new CapabilityInfoDto(item)),
+        );
+      }
       return;
     }
-    if (value.length > 0 && value[0] instanceof CapabilityInfoDto) {
+    // If the instance is already an MCollection, we assume it's all good.
+    if (value instanceof MCollection) {
       this.#children = value;
-    } else {
-      this.#children = value.map((item) => new CapabilityInfoDto(item));
+      return;
     }
+    // If the value is not array, and is not a MCollection, we need to be consider,
+    // it might be eligible to be casted into MCollection.
+    const { ok, value: mcastValue } = MCollection.cast<unknown>(value);
+    if (ok) {
+      this.#children = mcastValue as any;
+      return;
+    }
+    console.warn(
+      "Cannot assing value to children, because it needs MCollection instance or an Array.",
+    );
   }
-  setChildren(value: CapabilityInfoDto[]) {
+  setChildren(
+    value:
+      | MCollection<CapabilityInfoDto>
+      | InstanceType<typeof CapabilityInfoDto>[],
+  ) {
     this.children = value;
     return this;
   }

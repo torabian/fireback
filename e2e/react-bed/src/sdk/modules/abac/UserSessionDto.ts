@@ -1,5 +1,6 @@
 // @ts-nocheck 
  // This no check has been added via fireback. 
+import { MCollection, MOne } from "../../sdk/common/operators";
 import { PassportEntity } from "./PassportEntity";
 import { UserEntity } from "./UserEntity";
 import { UserWorkspaceEntity } from "./UserWorkspaceEntity";
@@ -13,7 +14,7 @@ export class UserSessionDto {
    *
    * @type {PassportEntity}
    **/
-  #passport?: PassportEntity | null = undefined;
+  #passport?: MOne<PassportEntity> | null = undefined;
   /**
    *
    * @returns {PassportEntity}
@@ -25,15 +26,29 @@ export class UserSessionDto {
    *
    * @type {PassportEntity}
    **/
-  set passport(value: PassportEntity | null | undefined) {
+  set passport(
+    value:
+      | MOne<PassportEntity>
+      | InstanceType<typeof PassportEntity>
+      | null
+      | undefined,
+  ) {
     // For objects, the sub type needs to always be instance of the sub class.
-    if (value instanceof PassportEntity) {
+    if (value instanceof MOne) {
       this.#passport = value;
+    } else if (value instanceof PassportEntity) {
+      this.#passport = MOne.of(value);
     } else {
-      this.#passport = new PassportEntity(value);
+      this.#passport = MOne.of(new PassportEntity(value));
     }
   }
-  setPassport(value: PassportEntity | null | undefined) {
+  setPassport(
+    value:
+      | MOne<PassportEntity>
+      | InstanceType<typeof PassportEntity>
+      | null
+      | undefined,
+  ) {
     this.passport = value;
     return this;
   }
@@ -87,7 +102,7 @@ export class UserSessionDto {
    *
    * @type {UserWorkspaceEntity[]}
    **/
-  #userWorkspaces: UserWorkspaceEntity[] = [];
+  #userWorkspaces: MCollection<UserWorkspaceEntity> = MCollection.of([]);
   /**
    *
    * @returns {UserWorkspaceEntity[]}
@@ -99,18 +114,44 @@ export class UserSessionDto {
    *
    * @type {UserWorkspaceEntity[]}
    **/
-  set userWorkspaces(value: UserWorkspaceEntity[]) {
-    // For arrays, you only can pass arrays to the object
-    if (!Array.isArray(value)) {
+  set userWorkspaces(
+    value:
+      | MCollection<UserWorkspaceEntity>
+      | InstanceType<typeof UserWorkspaceEntity>[],
+  ) {
+    // When the passed value is already an array, we check if we need to
+    // cast the inner items into class instance.
+    if (Array.isArray(value)) {
+      if (value.length > 0 && value[0] instanceof UserWorkspaceEntity) {
+        this.#userWorkspaces = MCollection.of(value);
+      } else {
+        this.#userWorkspaces = MCollection.of(
+          value.map((item) => new UserWorkspaceEntity(item)),
+        );
+      }
       return;
     }
-    if (value.length > 0 && value[0] instanceof UserWorkspaceEntity) {
+    // If the instance is already an MCollection, we assume it's all good.
+    if (value instanceof MCollection) {
       this.#userWorkspaces = value;
-    } else {
-      this.#userWorkspaces = value.map((item) => new UserWorkspaceEntity(item));
+      return;
     }
+    // If the value is not array, and is not a MCollection, we need to be consider,
+    // it might be eligible to be casted into MCollection.
+    const { ok, value: mcastValue } = MCollection.cast<unknown>(value);
+    if (ok) {
+      this.#userWorkspaces = mcastValue as any;
+      return;
+    }
+    console.warn(
+      "Cannot assing value to userWorkspaces, because it needs MCollection instance or an Array.",
+    );
   }
-  setUserWorkspaces(value: UserWorkspaceEntity[]) {
+  setUserWorkspaces(
+    value:
+      | MCollection<UserWorkspaceEntity>
+      | InstanceType<typeof UserWorkspaceEntity>[],
+  ) {
     this.userWorkspaces = value;
     return this;
   }
@@ -118,7 +159,7 @@ export class UserSessionDto {
    *
    * @type {UserEntity}
    **/
-  #user?: UserEntity | null = undefined;
+  #user?: MOne<UserEntity> | null = undefined;
   /**
    *
    * @returns {UserEntity}
@@ -130,15 +171,29 @@ export class UserSessionDto {
    *
    * @type {UserEntity}
    **/
-  set user(value: UserEntity | null | undefined) {
+  set user(
+    value:
+      | MOne<UserEntity>
+      | InstanceType<typeof UserEntity>
+      | null
+      | undefined,
+  ) {
     // For objects, the sub type needs to always be instance of the sub class.
-    if (value instanceof UserEntity) {
+    if (value instanceof MOne) {
       this.#user = value;
+    } else if (value instanceof UserEntity) {
+      this.#user = MOne.of(value);
     } else {
-      this.#user = new UserEntity(value);
+      this.#user = MOne.of(new UserEntity(value));
     }
   }
-  setUser(value: UserEntity | null | undefined) {
+  setUser(
+    value:
+      | MOne<UserEntity>
+      | InstanceType<typeof UserEntity>
+      | null
+      | undefined,
+  ) {
     this.user = value;
     return this;
   }

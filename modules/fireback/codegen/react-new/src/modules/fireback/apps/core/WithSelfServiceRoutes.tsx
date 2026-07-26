@@ -12,7 +12,7 @@ import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { SelectWorkspaceScreen } from "../../modules/selfservice/SelectWorkspace.screen";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspaces";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -28,7 +28,7 @@ export const WithSelfServiceRoutes = ({
 
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
     cacheTime: 50,
-    enabled: false
+    enabled: false,
   });
 
   useEffect(() => {

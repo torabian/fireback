@@ -9,8 +9,12 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
-import { OauthAuthenticateActionReq, OauthAuthenticateActionRes, useOauthAuthenticateAction } from "../../sdk/modules/abac/OauthAuthenticate";
+import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
+import {
+  OauthAuthenticateActionReq,
+  OauthAuthenticateActionRes,
+  useOauthAuthenticateAction,
+} from "../../sdk/modules/abac/OauthAuthenticateAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { FacebookLogin } from "./FacebookLogin";
@@ -25,7 +29,7 @@ export const WelcomeScreen = () => {
     isLoadingMethods,
     passportMethodsQuery,
   } = usePresenter();
-  const form = useFormik({ initialValues: {}, onSubmit: () => { } });
+  const form = useFormik({ initialValues: {}, onSubmit: () => {} });
 
   if (passportMethodsQuery.isError || passportMethodsQuery.error) {
     return (

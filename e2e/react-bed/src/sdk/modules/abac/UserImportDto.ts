@@ -1,5 +1,6 @@
 // @ts-nocheck 
  // This no check has been added via fireback. 
+import { MArray } from "../../sdk/common/operators";
 import { type PartialDeep } from "../../sdk/common/fetchx";
 import { withPrefix } from "../../sdk/common/withPrefix";
 /**
@@ -33,7 +34,9 @@ export class UserImportDto {
    *
    * @type {UserImportDto.Passports}
    **/
-  #passports: InstanceType<typeof UserImportDto.Passports>[] = [];
+  #passports: MArray<InstanceType<typeof UserImportDto.Passports>> = MArray.of(
+    [],
+  );
   /**
    *
    * @returns {UserImportDto.Passports}
@@ -45,18 +48,44 @@ export class UserImportDto {
    *
    * @type {UserImportDto.Passports}
    **/
-  set passports(value: InstanceType<typeof UserImportDto.Passports>[]) {
-    // For arrays, you only can pass arrays to the object
-    if (!Array.isArray(value)) {
+  set passports(
+    value:
+      | MArray<InstanceType<typeof UserImportDto.Passports>>
+      | InstanceType<typeof UserImportDto.Passports>[],
+  ) {
+    // When the passed value is already an array, we check if we need to
+    // cast the inner items into class instance.
+    if (Array.isArray(value)) {
+      if (value.length > 0 && value[0] instanceof UserImportDto.Passports) {
+        this.#passports = MArray.of(value);
+      } else {
+        this.#passports = MArray.of(
+          value.map((item) => new UserImportDto.Passports(item)),
+        );
+      }
       return;
     }
-    if (value.length > 0 && value[0] instanceof UserImportDto.Passports) {
+    // If the instance is already an MArray, we assume it's all good.
+    if (value instanceof MArray) {
       this.#passports = value;
-    } else {
-      this.#passports = value.map((item) => new UserImportDto.Passports(item));
+      return;
     }
+    // If the value is not array, and is not a MArray, we need to be consider,
+    // it might be eligible to be casted into MArray.
+    const { ok, value: mcastValue } = MArray.cast<unknown>(value);
+    if (ok) {
+      this.#passports = mcastValue as any;
+      return;
+    }
+    console.warn(
+      "Cannot assing value to passports, because it needs MArray instance or an Array.",
+    );
   }
-  setPassports(value: InstanceType<typeof UserImportDto.Passports>[]) {
+  setPassports(
+    value:
+      | MArray<InstanceType<typeof UserImportDto.Passports>>
+      | InstanceType<typeof UserImportDto.Passports>[],
+  ) {
     this.passports = value;
     return this;
   }

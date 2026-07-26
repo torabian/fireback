@@ -10,11 +10,11 @@ import {
   ClassicSignupActionReq,
   ClassicSignupActionRes,
   useClassicSignupAction,
-} from "../../sdk/modules/abac/ClassicSignup";
+} from "../../sdk/modules/abac/ClassicSignupAction";
 import {
   QueryWorkspaceTypesPubliclyActionRes,
   useQueryWorkspaceTypesPubliclyActionQuery,
-} from "../../sdk/modules/abac/QueryWorkspaceTypesPublicly";
+} from "../../sdk/modules/abac/QueryWorkspaceTypesPubliclyAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";

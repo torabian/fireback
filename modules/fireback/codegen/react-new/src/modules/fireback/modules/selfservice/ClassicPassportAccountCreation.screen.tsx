@@ -7,9 +7,9 @@ import { useS } from "../../hooks/useS";
 import { usePresenter } from "./ClassicPassportAccountCreation.presenter";
 import { strings } from "./strings/translations";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
-import { ClassicSignupActionReq } from "../../sdk/modules/abac/ClassicSignup";
+import { ClassicSignupActionReq } from "../../sdk/modules/abac/ClassicSignupAction";
 
-export const ClassicPassportAccountCreation = ({ }: {}) => {
+export const ClassicPassportAccountCreation = ({}: {}) => {
   const {
     goBack,
     submit,
@@ -123,7 +123,7 @@ const Form = ({
           form.setFieldValue(
             ClassicSignupActionReq.Fields.firstName,
             value,
-            false
+            false,
           )
         }
       />
@@ -136,7 +136,7 @@ const Form = ({
           form.setFieldValue(
             ClassicSignupActionReq.Fields.lastName,
             value,
-            false
+            false,
           )
         }
       />
@@ -151,7 +151,7 @@ const Form = ({
           form.setFieldValue(
             ClassicSignupActionReq.Fields.password,
             value,
-            false
+            false,
           )
         }
       />

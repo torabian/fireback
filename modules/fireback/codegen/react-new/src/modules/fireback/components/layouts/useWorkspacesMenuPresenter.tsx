@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { MacTagsColor, type MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspaces";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
 
 /**
  * It computes the menu items related to the workspaces, and active role generally

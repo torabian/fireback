@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { usePresenter } from "./SelectWorkspace.presenter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspaces";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
 
 export const SelectWorkspaceScreen = () => {
   const { s } = usePresenter();

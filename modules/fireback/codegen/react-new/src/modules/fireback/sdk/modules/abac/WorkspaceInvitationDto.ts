@@ -1,5 +1,4 @@
-// @ts-nocheck 
- // This no check has been added via fireback. 
+import { MOne } from "../../sdk/common/operators";
 import { WorkspaceEntity } from "./WorkspaceEntity";
 import { type PartialDeep } from "../../sdk/common/fetchx";
 import { withPrefix } from "../../sdk/common/withPrefix";
@@ -126,7 +125,7 @@ export class WorkspaceInvitationDto {
    * Workspace which user is being invite to.
    * @type {WorkspaceEntity}
    **/
-  #workspace!: WorkspaceEntity;
+  #workspace!: MOne<WorkspaceEntity>;
   /**
    * Workspace which user is being invite to.
    * @returns {WorkspaceEntity}
@@ -138,15 +137,21 @@ export class WorkspaceInvitationDto {
    * Workspace which user is being invite to.
    * @type {WorkspaceEntity}
    **/
-  set workspace(value: WorkspaceEntity) {
+  set workspace(
+    value: MOne<WorkspaceEntity> | InstanceType<typeof WorkspaceEntity>,
+  ) {
     // For objects, the sub type needs to always be instance of the sub class.
-    if (value instanceof WorkspaceEntity) {
+    if (value instanceof MOne) {
       this.#workspace = value;
+    } else if (value instanceof WorkspaceEntity) {
+      this.#workspace = MOne.of(value);
     } else {
-      this.#workspace = new WorkspaceEntity(value);
+      this.#workspace = MOne.of(new WorkspaceEntity(value));
     }
   }
-  setWorkspace(value: WorkspaceEntity) {
+  setWorkspace(
+    value: MOne<WorkspaceEntity> | InstanceType<typeof WorkspaceEntity>,
+  ) {
     this.workspace = value;
     return this;
   }
@@ -353,7 +358,7 @@ export class WorkspaceInvitationDto {
   #lateInitFields(data = {}) {
     const d = data as Partial<WorkspaceInvitationDto>;
     if (!(d.workspace instanceof WorkspaceEntity)) {
-      this.workspace = new WorkspaceEntity(d.workspace || {});
+      this.workspace = MOne.of(new WorkspaceEntity(d.workspace || {}));
     }
   }
   /**

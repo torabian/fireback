@@ -5,11 +5,18 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 
-import { ClassicSigninActionReq, ClassicSigninActionRes, useClassicSigninAction } from "../../sdk/modules/abac/ClassicSignin";
+import {
+  ClassicSigninActionReq,
+  ClassicSigninActionRes,
+  useClassicSigninAction,
+} from "../../sdk/modules/abac/ClassicSigninAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
-import { ClassicPassportRequestOtpActionReq, useClassicPassportRequestOtpAction } from "../../sdk/modules/abac/ClassicPassportRequestOtp";
+import {
+  ClassicPassportRequestOtpActionReq,
+  useClassicPassportRequestOtpAction,
+} from "../../sdk/modules/abac/ClassicPassportRequestOtpAction";
 
 export const usePresenter = () => {
   const s = useS(strings);
@@ -21,7 +28,13 @@ export const usePresenter = () => {
   const requestOtpMutation = useClassicPassportRequestOtpAction();
 
   const submit = (values: Partial<ClassicSigninActionReq>) => {
-    mutation.mutateAsync(new ClassicSigninActionReq({ value: values.value, password: values.password }))
+    mutation
+      .mutateAsync(
+        new ClassicSigninActionReq({
+          value: values.value,
+          password: values.password,
+        }),
+      )
       .then(successful)
       .catch((error) => {
         form?.setErrors(mutationErrorsToFormik(error));
@@ -34,7 +47,10 @@ export const usePresenter = () => {
   });
 
   const continueWithOtp = () => {
-    requestOtpMutation.mutateAsync(new ClassicPassportRequestOtpActionReq({ value: form.values.value }))
+    requestOtpMutation
+      .mutateAsync(
+        new ClassicPassportRequestOtpActionReq({ value: form.values.value }),
+      )
       .then((res) => {
         push(`../otp`, undefined, {
           value: form.values.value,

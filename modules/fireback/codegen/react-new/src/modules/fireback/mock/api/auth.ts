@@ -7,10 +7,10 @@ import {
   uriMatch,
 } from "../../hooks/mock-tools";
 
-import type { CheckClassicPassportActionRes } from "../../sdk/modules/abac/CheckClassicPassport";
-import { CheckPassportMethodsActionRes } from "../../sdk/modules/abac/CheckPassportMethods";
-import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignup";
-import type { ConfirmClassicPassportTotpActionRes } from "../../sdk/modules/abac/ConfirmClassicPassportTotp";
+import type { CheckClassicPassportActionRes } from "../../sdk/modules/abac/CheckClassicPassportAction";
+import { CheckPassportMethodsActionRes } from "../../sdk/modules/abac/CheckPassportMethodsAction";
+import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignupAction";
+import type { ConfirmClassicPassportTotpActionRes } from "../../sdk/modules/abac/ConfirmClassicPassportTotpAction";
 import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
@@ -95,7 +95,7 @@ export class AuthMockServer {
             next: ["otp", "create-with-password"],
             flags: ["enable-totp", "force-totp"],
             otpInfo: null,
-          }
+          },
         },
       };
     } else {
@@ -105,7 +105,7 @@ export class AuthMockServer {
             next: ["otp"],
             flags: ["enable-totp", "force-totp"],
             otpInfo: null,
-          }
+          },
         },
       };
     }
@@ -126,7 +126,7 @@ export class AuthMockServer {
             "otpauth://totp/Fireback:ali@ali.com?algorithm=SHA1\u0026digits=6\u0026issuer=Fireback\u0026period=30\u0026secret=R2AQ4NPS7FKECL3ZVTF3JMTLBYGDAAVU",
           continueToTotp: true,
           forcedTotp: true,
-        }
+        },
       },
     };
   }
@@ -140,7 +140,7 @@ export class AuthMockServer {
       data: {
         item: {
           session: commonSession.data,
-        }
+        },
       },
     };
   }
@@ -154,7 +154,7 @@ export class AuthMockServer {
       data: {
         item: {
           session: commonSession.data,
-        }
+        },
       },
     };
   }

@@ -6,8 +6,11 @@ import { userInvitationColumns } from "./UserInvitationColumns";
 import { ModalContext } from "@/modules/fireback/components/modal/Modal";
 import { useContext } from "react";
 import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
-import { useAcceptInviteAction, AcceptInviteActionReq } from "@/modules/fireback/sdk/modules/abac/AcceptInvite";
-import { useUserInvitationsActionQuery } from "@/modules/fireback/sdk/modules/abac/UserInvitations";
+import {
+  useAcceptInviteAction,
+  AcceptInviteActionReq,
+} from "@/modules/fireback/sdk/modules/abac/AcceptInviteAction";
+import { useUserInvitationsActionQuery } from "@/modules/fireback/sdk/modules/abac/UserInvitationsAction";
 
 export const UserInvitationList = () => {
   const s = useS(strings);
@@ -22,13 +25,15 @@ export const UserInvitationList = () => {
       confirmButtonLabel: s.acceptBtn,
       component: () => <div>{s.confirmAcceptDescription}</div>,
       onSubmit: async () => {
-        return mutation.mutateAsync(new AcceptInviteActionReq({ invitationUniqueId: dto.uniqueId })).then(
-          (res) => {
-            alert("Successful.")
-          }
-        );
+        return mutation
+          .mutateAsync(
+            new AcceptInviteActionReq({ invitationUniqueId: dto.uniqueId }),
+          )
+          .then((res) => {
+            alert("Successful.");
+          });
       },
-    })
+    });
   };
 
   const onReject = (dto: UserInvitationsQueryColumns) => {

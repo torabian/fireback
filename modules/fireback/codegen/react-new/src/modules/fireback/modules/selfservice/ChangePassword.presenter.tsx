@@ -2,9 +2,11 @@ import { useFormik } from "formik";
 import { useEffect } from "react";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { ChangePasswordActionReq, useChangePasswordAction } from "../../sdk/modules/abac/ChangePassword";
+import {
+  ChangePasswordActionReq,
+  useChangePasswordAction,
+} from "../../sdk/modules/abac/ChangePasswordAction";
 import { strings } from "./strings/translations";
-
 
 export const usePresenter = () => {
   const s = useS(strings);
@@ -13,9 +15,11 @@ export const usePresenter = () => {
   const uniqueId = query?.uniqueId as string;
 
   const submit = () => {
-    mutation.mutateAsync(new ChangePasswordActionReq(form.values)).then((res) => {
-      goBack();
-    });
+    mutation
+      .mutateAsync(new ChangePasswordActionReq(form.values))
+      .then((res) => {
+        goBack();
+      });
   };
 
   const form = useFormik<ChangePasswordActionReq>({

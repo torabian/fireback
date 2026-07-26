@@ -7,8 +7,7 @@ import { useS } from "../../hooks/useS";
 import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicPassport.presenter";
 import { strings } from "./strings/translations";
-import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSignin";
-
+import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
 
 export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
   const {
@@ -92,11 +91,7 @@ const Form = ({
         value={form?.values?.value}
         errorMessage={form?.errors.value}
         onChange={(value) =>
-          form.setFieldValue(
-            ClassicSigninActionReq.Fields.value,
-            value,
-            false
-          )
+          form.setFieldValue(ClassicSigninActionReq.Fields.value, value, false)
         }
       />
       <FormButton

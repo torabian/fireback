@@ -24,7 +24,7 @@ export async function fetchx<
 >(
   input: RequestInfo | URL,
   init?: TypedRequestInit<TBody, THeaders>,
-  ctx?: FetchxContext,
+  ctx?: FetchxContext | null,
 ): Promise<TypedResponse<TResponse>> {
   let url = input.toString();
   let reqInit: TypedRequestInit<TBody, THeaders> = init || {};
