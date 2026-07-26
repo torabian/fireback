@@ -192,12 +192,12 @@ func OsLoginAuthenticateActionClientExecuteTyped(httpReq *http.Request) (*OsLogi
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &OsLoginAuthenticateActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &OsLoginAuthenticateActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &OsLoginAuthenticateActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func OsLoginAuthenticateActionClientBuildRequest(req OsLoginAuthenticateActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := OsLoginAuthenticateActionMeta()

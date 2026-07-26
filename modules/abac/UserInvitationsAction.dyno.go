@@ -104,6 +104,19 @@ func (x *UserInvitationsActionResponse) WithIdeal(payload UserInvitationsActionR
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *UserInvitationsActionResponse) AsIdeal() (*UserInvitationsActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res UserInvitationsActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *UserInvitationsActionResponse) AsHTML(payload string) *UserInvitationsActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -225,12 +238,12 @@ func UserInvitationsActionClientExecuteTyped(httpReq *http.Request) (*UserInvita
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &UserInvitationsActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &UserInvitationsActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &UserInvitationsActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func UserInvitationsActionClientBuildRequest(req UserInvitationsActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := UserInvitationsActionMeta()

@@ -103,6 +103,19 @@ func (x *QueryUserRoleWorkspacesActionResponse) WithIdeal(payload QueryUserRoleW
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *QueryUserRoleWorkspacesActionResponse) AsIdeal() (*QueryUserRoleWorkspacesActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res QueryUserRoleWorkspacesActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *QueryUserRoleWorkspacesActionResponse) AsHTML(payload string) *QueryUserRoleWorkspacesActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -224,12 +237,12 @@ func QueryUserRoleWorkspacesActionClientExecuteTyped(httpReq *http.Request) (*Qu
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &QueryUserRoleWorkspacesActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &QueryUserRoleWorkspacesActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &QueryUserRoleWorkspacesActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func QueryUserRoleWorkspacesActionClientBuildRequest(req QueryUserRoleWorkspacesActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := QueryUserRoleWorkspacesActionMeta()

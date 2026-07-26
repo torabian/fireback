@@ -121,6 +121,19 @@ func (x *ClassicSignupActionResponse) WithIdeal(payload ClassicSignupActionRes) 
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *ClassicSignupActionResponse) AsIdeal() (*ClassicSignupActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res ClassicSignupActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *ClassicSignupActionResponse) AsHTML(payload string) *ClassicSignupActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -242,12 +255,12 @@ func ClassicSignupActionClientExecuteTyped(httpReq *http.Request) (*ClassicSignu
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &ClassicSignupActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &ClassicSignupActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &ClassicSignupActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func ClassicSignupActionClientBuildRequest(req ClassicSignupActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := ClassicSignupActionMeta()

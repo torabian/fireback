@@ -108,6 +108,19 @@ func (x *ChangePasswordActionResponse) WithIdeal(payload ChangePasswordActionRes
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *ChangePasswordActionResponse) AsIdeal() (*ChangePasswordActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res ChangePasswordActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *ChangePasswordActionResponse) AsHTML(payload string) *ChangePasswordActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -229,12 +242,12 @@ func ChangePasswordActionClientExecuteTyped(httpReq *http.Request) (*ChangePassw
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &ChangePasswordActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &ChangePasswordActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &ChangePasswordActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func ChangePasswordActionClientBuildRequest(req ChangePasswordActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := ChangePasswordActionMeta()

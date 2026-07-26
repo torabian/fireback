@@ -116,6 +116,19 @@ func (x *ClassicSigninActionResponse) WithIdeal(payload ClassicSigninActionRes) 
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *ClassicSigninActionResponse) AsIdeal() (*ClassicSigninActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res ClassicSigninActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *ClassicSigninActionResponse) AsHTML(payload string) *ClassicSigninActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -237,12 +250,12 @@ func ClassicSigninActionClientExecuteTyped(httpReq *http.Request) (*ClassicSigni
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &ClassicSigninActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &ClassicSigninActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &ClassicSigninActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func ClassicSigninActionClientBuildRequest(req ClassicSigninActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := ClassicSigninActionMeta()

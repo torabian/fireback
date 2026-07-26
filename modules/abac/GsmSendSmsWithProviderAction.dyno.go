@@ -107,6 +107,19 @@ func (x *GsmSendSmsWithProviderActionResponse) WithIdeal(payload GsmSendSmsWithP
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *GsmSendSmsWithProviderActionResponse) AsIdeal() (*GsmSendSmsWithProviderActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res GsmSendSmsWithProviderActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *GsmSendSmsWithProviderActionResponse) AsHTML(payload string) *GsmSendSmsWithProviderActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -228,12 +241,12 @@ func GsmSendSmsWithProviderActionClientExecuteTyped(httpReq *http.Request) (*Gsm
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &GsmSendSmsWithProviderActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &GsmSendSmsWithProviderActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &GsmSendSmsWithProviderActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func GsmSendSmsWithProviderActionClientBuildRequest(req GsmSendSmsWithProviderActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := GsmSendSmsWithProviderActionMeta()

@@ -98,6 +98,19 @@ func (x *CheckPassportMethodsActionResponse) WithIdeal(payload CheckPassportMeth
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *CheckPassportMethodsActionResponse) AsIdeal() (*CheckPassportMethodsActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res CheckPassportMethodsActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *CheckPassportMethodsActionResponse) AsHTML(payload string) *CheckPassportMethodsActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -219,12 +232,12 @@ func CheckPassportMethodsActionClientExecuteTyped(httpReq *http.Request) (*Check
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &CheckPassportMethodsActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &CheckPassportMethodsActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &CheckPassportMethodsActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func CheckPassportMethodsActionClientBuildRequest(req CheckPassportMethodsActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := CheckPassportMethodsActionMeta()

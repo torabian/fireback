@@ -193,12 +193,12 @@ func InviteToWorkspaceActionClientExecuteTyped(httpReq *http.Request) (*InviteTo
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &InviteToWorkspaceActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &InviteToWorkspaceActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &InviteToWorkspaceActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func InviteToWorkspaceActionClientBuildRequest(req InviteToWorkspaceActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := InviteToWorkspaceActionMeta()

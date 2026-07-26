@@ -105,6 +105,19 @@ func (x *SignoutActionResponse) WithIdeal(payload SignoutActionRes) *SignoutActi
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *SignoutActionResponse) AsIdeal() (*SignoutActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res SignoutActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *SignoutActionResponse) AsHTML(payload string) *SignoutActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -226,12 +239,12 @@ func SignoutActionClientExecuteTyped(httpReq *http.Request) (*SignoutActionRespo
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &SignoutActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &SignoutActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &SignoutActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func SignoutActionClientBuildRequest(req SignoutActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := SignoutActionMeta()

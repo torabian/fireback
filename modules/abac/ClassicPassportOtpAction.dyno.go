@@ -113,6 +113,19 @@ func (x *ClassicPassportOtpActionResponse) WithIdeal(payload ClassicPassportOtpA
 	x.Payload = payload
 	return x
 }
+
+// Use this for client calls, so the payload is being casted
+func (x *ClassicPassportOtpActionResponse) AsIdeal() (*ClassicPassportOtpActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res ClassicPassportOtpActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
 func (x *ClassicPassportOtpActionResponse) AsHTML(payload string) *ClassicPassportOtpActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
@@ -234,12 +247,12 @@ func ClassicPassportOtpActionClientExecuteTyped(httpReq *http.Request) (*Classic
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return &ClassicPassportOtpActionResponse{Payload: result}, err
+		return &result, err
 	}
 	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
-		return &ClassicPassportOtpActionResponse{Payload: result}, err
+		return &result, err
 	}
-	return &ClassicPassportOtpActionResponse{Payload: result}, nil
+	return &result, nil
 }
 func ClassicPassportOtpActionClientBuildRequest(req ClassicPassportOtpActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
 	meta := ClassicPassportOtpActionMeta()
