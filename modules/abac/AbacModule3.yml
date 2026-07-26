@@ -5,7 +5,7 @@ description:
   Using this module is not essential to create fireback projects, but provides a great
   possibility to avoid building most user management flow.
   Some other helpers, such as timezone are added here.
-dtom:
+dtos:
   - name: userImport
     fields:
       - name: avatar

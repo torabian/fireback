@@ -507,7 +507,7 @@
           "type": "array",
           "description": "Actions based on Emi compiler - aims to replace the actions from Fireback"
         },
-        "dtom": {
+        "dtos": {
           "items": {
             "$ref": "#/definitions/EmiDto"
           },

@@ -65,7 +65,7 @@ type Module3 struct {
 	Acts []*FirebackEmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
 
 	// Dtos based on Emi definitions
-	Dtom []*emi.EmiDto `yaml:"dtom,omitempty" json:"dtom,omitempty" jsonschema:"description=Dtos based on Emi definitions"`
+	Dtos []*emi.EmiDto `yaml:"dtos,omitempty" json:"dtos,omitempty" jsonschema:"description=Dtos based on Emi definitions"`
 
 	// Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures.
 	Macros []Module3Macro `yaml:"macros,omitempty" json:"macros,omitempty" jsonschema:"description=Macros are extra definition or templates which will modify the module and able to add extra fields or tables before the codegen occures."`

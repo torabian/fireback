@@ -1803,7 +1803,7 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 	}
 
 	mDtos := []*core.EmiDto{}
-	mDtos = append(mDtos, x.Dtom...)
+	mDtos = append(mDtos, x.Dtos...)
 	aktFields := []*FirebackEmiAction{}
 	aktFields = append(aktFields, x.Acts...)
 

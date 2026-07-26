@@ -226,7 +226,7 @@ acts:
         - name: nested
           type: collection
           target: CapabilityInfoDto
-dtom:
+dtos:
   - name: deleteRequest
     fields:
       - name: query
