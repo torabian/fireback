@@ -1,3 +1,5 @@
+// @ts-nocheck 
+ // This no check has been added via fireback. 
 import { type PartialDeep } from "../../sdk/common/fetchx";
 /**
  * The base class definition for deleteRequestDto

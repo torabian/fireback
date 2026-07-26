@@ -370,7 +370,7 @@ jobs:
       - name: Refresh the fireback dependencies
         run: make refresh
       - name: Clean ui installation logs
-        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock && git checkout modules/fireback/codegen/react-new/package-lock.json
+        run: git checkout modules/fireback/codegen/react-new/yarn.lock && git checkout modules/fireback/codegen/react-new/package-lock.json
 
       - name: 
           Refreshing golang modules should not make a commit.
@@ -417,16 +417,12 @@ jobs:
         run: sudo npm i -g prettier
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
-      - name: generate-sdk
-        run: fireback gen react --path e2e/react-bed/src/sdk
-      - name: Test the react bed
-        run: cd e2e/react-bed && npm i --force && npm run build
       - name: install dependencies for react-new
         run: cd modules/fireback/codegen/react-new  && yarn
       - name: regenerate SDKs
         run: make rebuild-sdks-ci
       - name: checkout yarn lock because it's unrelated
-        run: git checkout e2e/react-bed/yarn.lock && git checkout modules/fireback/codegen/react-new/yarn.lock
+        run: git checkout modules/fireback/codegen/react-new/yarn.lock
       - name: 
           Check if the sdk generated is already committed to the codebase.
           Fireback changes should not be out of sync with react.js

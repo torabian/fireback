@@ -49,18 +49,15 @@ bundle:
 # sure, that running this command on main (or release tag) make any code diff.
 
 rebuild-sdks:
-	rm -rf e2e/react-bed/src/sdk && \
 	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
-	./app gen react --path e2e/react-bed/src/sdk --no-cache true && \
+	make client && \
 	./app gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/fireback/codegen/react-new && npm run build && cd - && \
-	cd e2e/react-bed && npm run build
+	cd modules/fireback/codegen/react-new && npm run build && cd -
 
 ## This is different because we use the fireback built on ci-cd for this purpose.
 rebuild-sdks-ci:
-	rm -rf e2e/react-bed/src/sdk && \
 	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
-	fireback gen react --path e2e/react-bed/src/sdk --no-cache true && \
+	make client && \
 	fireback gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
 	cd modules/fireback/codegen/react-new && npm run build
 
@@ -82,6 +79,5 @@ dockerpublish:
 
 
 client:
-	rm -rf xxx && \
 	emi js --path modules/fireback/FirebackModule3.yml --output modules/fireback/codegen/react-new/src/modules/fireback/sdk/modules/fireback --tags react,typescript,no-package,no-sdk --react-query="react-query@^3.39.3" --js-sdk-location="../../sdk" && \
 	emi js --path modules/abac/AbacModule3.yml --output modules/fireback/codegen/react-new/src/modules/fireback/sdk/modules/abac --tags react,typescript,no-package,no-sdk --react-query="react-query@^3.39.3" --js-sdk-location="../../sdk"

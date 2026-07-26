@@ -1,3 +1,5 @@
+// @ts-nocheck 
+ // This no check has been added via fireback. 
 import { type PartialDeep } from "../../sdk/common/fetchx";
 import { withPrefix } from "../../sdk/common/withPrefix";
 /**

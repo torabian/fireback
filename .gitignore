@@ -25,7 +25,6 @@ google-java-format.jar
 *.wixpdb
 *.wixobj
 test2
-clients/react-bed/src/sdk
 .env.local
 .env
 .db-journal
