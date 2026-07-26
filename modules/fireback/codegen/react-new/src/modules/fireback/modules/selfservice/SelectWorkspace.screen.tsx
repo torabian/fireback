@@ -1,7 +1,11 @@
 import { useContext } from "react";
 import { usePresenter } from "./SelectWorkspace.presenter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
+import {
+  QueryUserRoleWorkspacesActionRes,
+  useQueryUserRoleWorkspacesActionQuery,
+} from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
+import type { MArray } from "../../sdk/sdk/common/operators";
 
 export const SelectWorkspaceScreen = () => {
   const { s } = usePresenter();
@@ -23,7 +27,7 @@ export const SelectWorkspaceScreen = () => {
         <div key={workspace.uniqueId} className="mb-4">
           <h2 className="h5">{workspace.name}</h2>
           <div className="d-flex flex-wrap gap-2 mt-2">
-            {workspace.roles.map((role) => (
+            {(workspace.roles as MArray<any>).get().map((role) => (
               <button
                 key={role.uniqueId}
                 className="btn btn-outline-primary w-100"

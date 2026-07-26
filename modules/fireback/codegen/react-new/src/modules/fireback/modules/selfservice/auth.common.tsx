@@ -6,6 +6,8 @@ import type { ClassicPassportOtpActionRes } from "../../sdk/modules/abac/Classic
 import type { ClassicSigninActionRes } from "../../sdk/modules/abac/ClassicSigninAction";
 import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignupAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
+import type { MOne } from "../../sdk/sdk/common/operators";
+import type { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
 
 export enum AuthMethod {
   Email = "email",
@@ -47,15 +49,17 @@ export const useCompleteAuth = () => {
     // check also, if there is localstorage to redirect regardless
     const redirect2 = sessionStorage.getItem("redirect_temporary");
 
+    const session = (res?.data?.item?.session as MOne<UserSessionDto>)?.get();
+
     // Get the token from session response
-    const token = res.data?.item.session?.token; // Adjust based on your API response
+    const token = session.token;
 
     if (!token) {
       alert("Authentication has failed.");
       return;
     }
 
-    setSession(res.data.item.session);
+    setSession(session);
 
     // Clean up url options which are set earlier.
     sessionStorage.removeItem("redirect_temporary");

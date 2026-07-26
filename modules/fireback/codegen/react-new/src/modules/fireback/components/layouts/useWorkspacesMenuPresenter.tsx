@@ -3,6 +3,7 @@ import { MacTagsColor, type MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
+import type { MArray } from "../../sdk/sdk/common/operators";
 
 /**
  * It computes the menu items related to the workspaces, and active role generally
@@ -29,7 +30,7 @@ export function useWorkspacesMenuPresenter() {
   const menus: MenuItem[] = useMemo(() => {
     const workspacesAndRolesList: MenuItem[] = [];
     items.forEach((workspace) => {
-      workspace.roles.forEach((role) => {
+      (workspace.roles as MArray<any>).get().forEach((role) => {
         workspacesAndRolesList.push({
           key: `${role.uniqueId}_${workspace.uniqueId}`,
           label: `${workspace.name} (${role.name})`,

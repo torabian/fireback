@@ -1,6 +1,7 @@
 import { type DisplayDetectionProps } from "../definitions/common";
-import type { QueryUserRoleWorkspacesActionRes } from "../sdk/modules/abac/QueryUserRoleWorkspaces";
+import type { QueryUserRoleWorkspacesActionRes } from "../sdk/modules/abac/QueryUserRoleWorkspacesAction";
 import { CapabilityEntity } from "../sdk/modules/fireback/CapabilityEntity";
+import type { MArray } from "../sdk/sdk/common/operators";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;
@@ -23,7 +24,7 @@ export function userMeetsAccess(urw: any, perm: string): boolean {
 export function userMeetsAccess2(
   state: { roleId: string; workspaceId: string },
   urw: QueryUserRoleWorkspacesActionRes[],
-  perm: string
+  perm: string,
 ): boolean {
   let workspaceMeets = false;
   let roleMeets = false;
@@ -46,8 +47,8 @@ export function userMeetsAccess2(
     }
   }
 
-  const role = (workspace.roles || []).find(
-    (role) => role.uniqueId === state.roleId
+  const role = ((workspace.roles as MArray<any>).get() || []).find(
+    (role) => role.uniqueId === state.roleId,
   );
 
   // If there is not role, means there is no chance.
