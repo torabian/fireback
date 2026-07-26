@@ -59,7 +59,7 @@ type Module3 struct {
 	Tasks []*Module3Task `yaml:"tasks,omitempty" json:"tasks,omitempty" jsonschema:"description=Tasks are actions which are triggered by a queue message or a cron job."`
 
 	// Actions based on Emi compiler - aims to replace the actions from Fireback
-	Acts []*FirebackEmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
+	Acts []*FirebackEmiAction `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
 
 	// Dtos based on Emi definitions
 	Dtos []*emi.EmiDto `yaml:"dtos,omitempty" json:"dtos,omitempty" jsonschema:"description=Dtos based on Emi definitions"`

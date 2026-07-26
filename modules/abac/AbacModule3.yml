@@ -201,7 +201,7 @@ dtos:
         description: The role which invitee get if they accept the request.
         tags:
           validate: required
-acts:
+actions:
   
   - name: QueryUserRoleWorkspaces
     method: get

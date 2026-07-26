@@ -493,7 +493,7 @@
           "type": "array",
           "description": "Tasks are actions which are triggered by a queue message or a cron job."
         },
-        "acts": {
+        "actions": {
           "items": {
             "$ref": "#/definitions/FirebackEmiAction"
           },
