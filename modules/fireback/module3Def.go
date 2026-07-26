@@ -58,9 +58,6 @@ type Module3 struct {
 	// Tasks are actions which are triggered by a queue message or a cron job.
 	Tasks []*Module3Task `yaml:"tasks,omitempty" json:"tasks,omitempty" jsonschema:"description=Tasks are actions which are triggered by a queue message or a cron job."`
 
-	// Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic
-	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
-
 	// Actions based on Emi compiler - aims to replace the actions from Fireback
 	Acts []*FirebackEmiAction `yaml:"acts,omitempty" json:"acts,omitempty" jsonschema:"description=Actions based on Emi compiler - aims to replace the actions from Fireback"`
 
@@ -655,20 +652,6 @@ func (x Module3Action) ToCli() *cli.Command {
 			return x.CliAction(c, x.SecurityModel)
 		},
 		Flags: x.Flags,
-	}
-}
-
-func (x *Module3) ToModuleProvider() *ModuleProvider {
-
-	actions := []Module3Action{}
-	for _, item := range x.Actions {
-		actions = append(actions, *item)
-	}
-	return &ModuleProvider{
-		Name: x.Name,
-		Actions: [][]Module3Action{
-			actions,
-		},
 	}
 }
 

@@ -965,62 +965,6 @@ func GenRpcCode(ctx *CodeGenContext, modules []*ModuleProvider, mode string) {
 
 func GenRpcCodeExternal(ctx *CodeGenContext, modules []*Module3, mode string) {
 
-	for _, item := range modules {
-
-		exportDir := filepath.Join(ctx.Path, item.Name)
-		// perr := os.MkdirAll(exportDir, os.ModePerm)
-		// if perr != nil {
-		// 	log.Fatalln(perr)
-		// }
-
-		if mode == "disk" {
-			for _, action := range item.Actions {
-				action.RootModule = item
-				GenerateRpcCodeOnDisk(ctx, action, exportDir)
-			}
-		}
-
-		if mode == "class" {
-			if len(item.Actions) > 0 {
-
-				importMap := ImportMap{}
-				fileToWrite := filepath.Join(exportDir, ctx.Catalog.EntityClassDiskName(item.Actions[0]))
-				content := []byte("")
-
-				for _, action := range item.Actions {
-					if action.Skip {
-						fmt.Println("Skipping action:", action.Name)
-						continue
-					}
-					action.RootModule = item
-					maps := action.ImportDependecies()
-					importMap = mergeImportMaps(importMap, maps)
-					partial, _ := GenerateRpcCodeString(ctx, action, exportDir)
-
-					content = append(content, []byte("\r\n")...)
-					content = append(content, EscapeLines(partial)...)
-					content = append(content, []byte("\r\n")...)
-				}
-
-				render, err2 := RenderRpcGroupClassBody(
-					ctx,
-					ctx.Catalog.Templates,
-					ctx.Catalog.EntityClassTemplate,
-					content,
-					importMap,
-				)
-				if err2 != nil {
-					log.Fatalln("Error on rendering the content", err2)
-				}
-
-				err3 := WriteFileGen(ctx, fileToWrite, (render), 0644)
-				if err3 != nil {
-					log.Fatalln("Error on writing content for Actions class file:", fileToWrite, err3)
-				}
-			}
-
-		}
-	}
 }
 
 // For openapi3, we create FirebackApp not from internal, rather an external json
@@ -1501,75 +1445,7 @@ func DiscoverGoComplexes(module *Module3) []golang.RecognizedComplex {
 	return items
 }
 
-// This one would add the webrtc requirement
-func WebrtcMacro(x *Module3) {
-	hasWebRtc := false
-	for _, action := range x.Actions {
-		if action.MethodUpper() == "WEBRTC" {
-			hasWebRtc = true
-			if action.In == nil {
-				action.In = &Module3ActionBody{}
-			}
-			if action.Out == nil {
-				action.Out = &Module3ActionBody{}
-			}
-
-			if !findFieldByName(action.In.Fields, "offer") {
-				action.In.Fields = append(action.In.Fields, &Module3Field{
-					Name:   "offer",
-					Type:   "one",
-					Target: "SessionDescription",
-					Module: "webrtc",
-				})
-			}
-
-			if !findFieldByName(action.Out.Fields, "sessionDescription") {
-				action.Out.Fields = append(action.Out.Fields, &Module3Field{
-					Name:   "sessionDescription",
-					Type:   "one",
-					Target: "SessionDescription",
-					Module: "webrtc",
-				})
-			}
-		}
-	}
-
-	if hasWebRtc {
-		x.ActionsCustomImport = append(x.ActionsCustomImport, "github.com/pion/webrtc/v3")
-	}
-
-	for _, entity := range x.Entities {
-		for _, action := range entity.Actions {
-			if action.In == nil {
-				action.In = &Module3ActionBody{}
-			}
-			if action.Out == nil {
-				action.Out = &Module3ActionBody{}
-			}
-
-			if !findFieldByName(action.In.Fields, "offer") {
-				action.In.Fields = append(action.In.Fields, &Module3Field{
-					Name:   "offer",
-					Type:   "one",
-					Target: "SessionDescription",
-					Module: "webrtc",
-				})
-			}
-
-			if !findFieldByName(action.Out.Fields, "sessionDescription") {
-				action.Out.Fields = append(action.Out.Fields, &Module3Field{
-					Name:   "sessionDescription",
-					Type:   "one",
-					Target: "SessionDescription",
-					Module: "webrtc",
-				})
-			}
-		}
-	}
-}
-
 func ComputeMacros(x *Module3) {
-	WebrtcMacro(x)
 
 	for _, item := range x.Macros {
 		if item.Using == "eav" {
@@ -2081,113 +1957,6 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 			}
 		}
 
-	}
-
-	// Render actions specific dtos if they have their own
-	if ctx.Catalog.ActionDiskName != nil {
-
-		exportPath := filepath.Join(exportDir, ctx.Catalog.ActionDiskName(x.Name))
-
-		if len(x.Actions) > 0 || ctx.Catalog.LanguageName == "FirebackGo" {
-
-			data, err := x.RenderActions(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.ActionGeneratorTemplate,
-			)
-
-			if err != nil {
-				fmt.Println("Error on action generation:", err)
-			} else {
-				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-				if err3 != nil {
-					fmt.Println("Error on writing content:", exportPath, err3)
-				}
-			}
-
-			if ctx.Catalog.LanguageName == "FirebackGo" {
-				// Let's also check if the actions files are there, if not skip them.
-				for _, action := range x.Actions {
-					actionImplementationFile := filepath.Join(exportDir, action.Upper()+"Action.go")
-					hasFile := Exists(actionImplementationFile)
-
-					if !hasFile {
-
-						wsPrefix := "fireback."
-						if x.MetaWorkspace {
-							wsPrefix = ""
-							isWorkspace = true
-						}
-
-						params := gin.H{
-							"m":        x,
-							"a":        action,
-							"wsprefix": wsPrefix,
-						}
-						data, err5 := getActionTemplate(params)
-						if err5 != nil {
-							fmt.Println("Error creating action default template:", exportPath, err5)
-						}
-						err4 := WriteFileGen(ctx, actionImplementationFile, EscapeLines(data), 0644)
-						if err4 != nil {
-							fmt.Println("Error creating action default template:", exportPath, err4)
-						}
-					}
-				}
-
-				for _, action := range x.Acts {
-					actionImplementationFile := filepath.Join(exportDir, action.Upper()+"Action.go")
-					hasFile := Exists(actionImplementationFile)
-
-					if !hasFile {
-
-						wsPrefix := "fireback."
-						if x.MetaWorkspace {
-							wsPrefix = ""
-							isWorkspace = true
-						}
-
-						params := gin.H{
-							"m":        x,
-							"a":        action,
-							"wsprefix": wsPrefix,
-						}
-						data, err5 := getEmiActionTemplate(params)
-						if err5 != nil {
-							fmt.Println("Error creating action default template:", exportPath, err5)
-						}
-						err4 := WriteFileGen(ctx, actionImplementationFile, EscapeLines(data), 0644)
-						if err4 != nil {
-							fmt.Println("Error creating action default template:", exportPath, err4)
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if ctx.Catalog.SingleActionDiskName != nil {
-		if len(x.Actions) > 0 {
-
-			for _, action := range x.Actions {
-				exportPath := filepath.Join(exportDir, ctx.Catalog.SingleActionDiskName(action, x.Name))
-
-				data, err := action.Render(
-					x,
-					ctx,
-					ctx.Catalog.Templates,
-					ctx.Catalog.ActionGeneratorTemplate,
-				)
-				if err != nil {
-					fmt.Println("Error on action generation:", err)
-				} else {
-					err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-					if err3 != nil {
-						fmt.Println("Error on writing content:", exportPath, err3)
-					}
-				}
-			}
-		}
 	}
 
 }
@@ -2840,43 +2609,6 @@ func (x *Module3Entity) ImportGroupResolver(prefix string) ImportMap {
 func (x *Module3) TsActionsImport() ImportMap {
 	m := ImportMap{}
 
-	for _, action := range x.Actions {
-
-		if action.In != nil {
-
-			deps := ImportDependecies(action.In.Fields)
-
-			for _, dep := range deps {
-				if m[dep.Path] == nil {
-					m[dep.Path] = &ImportMapRow{}
-				}
-
-				for _, klass := range dep.Items {
-					if !Contains(m[dep.Path].Items, klass) {
-						m[dep.Path].Items = append(m[dep.Path].Items, klass)
-					}
-				}
-
-			}
-		}
-
-		if action.Out != nil {
-			deps := ImportDependecies(action.Out.Fields)
-
-			for _, dep := range deps {
-				if m[dep.Path] == nil {
-					m[dep.Path] = &ImportMapRow{}
-				}
-
-				for _, klass := range dep.Items {
-					if !Contains(m[dep.Path].Items, klass) {
-						m[dep.Path].Items = append(m[dep.Path].Items, klass)
-					}
-				}
-
-			}
-		}
-	}
 	return m
 
 }
@@ -3393,20 +3125,6 @@ func (x *Module3) RenderActions(
 		}
 	}
 
-	for _, action := range x.Actions {
-
-		ComputeFieldTypesAbsolute(action.Query, isWorkspace, ctx.Catalog.ComputeField)
-		itemsIn = append(itemsIn, ChildItemsActionIn(action, ctx, isWorkspace))
-		itemsOut = append(itemsOut, ChildItemsActionOut(action, ctx, isWorkspace))
-		// if len(action.In.Fields) > 0 {
-		// 	ComputeFieldTypes(action.In.Fields, isWorkspace, ctx.Catalog.ComputeField)
-		// }
-		// if len(action.Out.Fields) > 0 {
-		// 	ComputeFieldTypes(action.Out.Fields, isWorkspace, ctx.Catalog.ComputeField)
-		// }
-
-	}
-
 	err = t.ExecuteTemplate(&tpl, fname, gin.H{
 		"m":                   x,
 		"fv":                  FIREBACK_VERSION,
@@ -3414,7 +3132,7 @@ func (x *Module3) RenderActions(
 		"woo":                 31,
 		"childrenIn":          itemsIn,
 		"childrenOut":         itemsOut,
-		"remoteQueryChildren": RemoteActionsAppend(ctx, x.Actions, isWorkspace),
+		"remoteQueryChildren": [][]*Module3Field{},
 		"taskChildren":        RemoteTaskAppend(ctx, x.Tasks, isWorkspace),
 		"queriesChildren":     QueryAppend(ctx, x.Queries, isWorkspace),
 		"gofModule":           ctx.GofModuleName,
@@ -3759,8 +3477,6 @@ func (x *Module3) RenderTemplate(
 		"gofModule":            ctx.GofModuleName,
 		"remoteResChildrenMap": RemoteChildrenMapResponse(ctx, x.Remotes, isWorkspace),
 		"remoteReqChildrenMap": RemoteChildrenMapRequest(ctx, x.Remotes, isWorkspace),
-		"actionResChildrenMap": ActionChildrenMapResponse(ctx, x.Actions, isWorkspace),
-		"actionReqChildrenMap": ActionChildrenMapRequest(ctx, x.Actions, isWorkspace),
 		"wsprefix":             wsPrefix,
 		"ctx":                  ctx,
 	})

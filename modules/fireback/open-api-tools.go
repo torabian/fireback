@@ -201,6 +201,5 @@ func OpenApiToFireback(s openapi3.Spec) *Module3 {
 		Name:    s.Info.Title,
 		Version: s.Info.Version,
 		// Description: *s.Info.Description,
-		Actions: actions,
 	}
 }

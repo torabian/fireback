@@ -493,13 +493,6 @@
           "type": "array",
           "description": "Tasks are actions which are triggered by a queue message or a cron job."
         },
-        "actions": {
-          "items": {
-            "$ref": "#/definitions/Module3Action"
-          },
-          "type": "array",
-          "description": "Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"
-        },
         "acts": {
           "items": {
             "$ref": "#/definitions/FirebackEmiAction"
