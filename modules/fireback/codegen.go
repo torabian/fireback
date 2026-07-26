@@ -1802,33 +1802,6 @@ func (x *Module3) Generate(ctx *CodeGenContext) {
 		}
 	}
 
-	for _, dto := range x.Dto {
-
-		// Computing field types is important for target writter.
-		ComputeFieldTypes(dto.CompleteFields(), isWorkspace, ctx.Catalog.ComputeField)
-
-		// Step 0: Generate the Entity
-		if ctx.Catalog.DtoGeneratorTemplate != "" {
-			exportPath := filepath.Join(exportDir, ctx.Catalog.DtoDiskName(&dto))
-
-			data, err := dto.RenderTemplate(
-				ctx,
-				ctx.Catalog.Templates,
-				ctx.Catalog.DtoGeneratorTemplate,
-				x,
-			)
-			if err != nil {
-				fmt.Println("Error on dto generation:", err)
-			} else {
-				err3 := WriteFileGen(ctx, exportPath, EscapeLines(data), 0644)
-				if err3 != nil {
-					fmt.Println("Error on writing content:", exportPath, err3)
-				}
-			}
-		}
-
-	}
-
 	mDtos := []*core.EmiDto{}
 	mDtos = append(mDtos, x.Dtom...)
 	aktFields := []*FirebackEmiAction{}

@@ -198,7 +198,9 @@
           "enum": [
             "string",
             "int",
-            "any"
+            "any",
+            "object",
+            "slice"
           ],
           "description": "In case of type map this is the map key type"
         },
@@ -490,13 +492,6 @@
           },
           "type": "array",
           "description": "Tasks are actions which are triggered by a queue message or a cron job."
-        },
-        "dtos": {
-          "items": {
-            "$ref": "#/definitions/Module3Dto"
-          },
-          "type": "array",
-          "description": "Dtos are basically golang structs with some additional functionality which can be used for request/response actions"
         },
         "actions": {
           "items": {
@@ -807,23 +802,6 @@
           "type": "boolean",
           "description": "adds created - updated - deleted fields as timestamps",
           "default": false
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Module3Dto": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of the dto in camel case the rest of the code related to this dto is being generated based on this"
-        },
-        "fields": {
-          "items": {
-            "$ref": "#/definitions/Module3Field"
-          },
-          "type": "array",
-          "description": "List of fields and body definitions of the dto"
         }
       },
       "additionalProperties": false,

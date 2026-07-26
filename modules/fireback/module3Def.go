@@ -58,9 +58,6 @@ type Module3 struct {
 	// Tasks are actions which are triggered by a queue message or a cron job.
 	Tasks []*Module3Task `yaml:"tasks,omitempty" json:"tasks,omitempty" jsonschema:"description=Tasks are actions which are triggered by a queue message or a cron job."`
 
-	// Dtos are basically golang structs with some additional functionality which can be used for request/response actions
-	Dto []Module3Dto `yaml:"dtos,omitempty" json:"dtos,omitempty" jsonschema:"description=Dtos are basically golang structs with some additional functionality which can be used for request/response actions"`
-
 	// Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic
 	Actions []*Module3Action `yaml:"actions,omitempty" json:"actions,omitempty" jsonschema:"description=Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"`
 
