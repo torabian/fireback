@@ -54,6 +54,10 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 						ReactiveSearchActionReactiveHandler(CreateReactiveSearchHanlder(x)),
 					)
 				}
+				{
+					method, url, x := GetCapabilitiesActionHandler(GetCapabilitiesAction)
+					g.Handle(method, url, x)
+				}
 
 				return nil
 			},
@@ -65,6 +69,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		CapabilityCliFn(),
 		&PushNotificationCmd,
 		CapabilitiesTreeActionDef.ToCli(),
+		GetCapabilitiesActionCliHandler(GetCapabilitiesAction),
 	})
 
 	module.ProvidePermissionHandler(

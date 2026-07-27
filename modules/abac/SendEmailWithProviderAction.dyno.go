@@ -212,6 +212,15 @@ type SendEmailWithProviderActionRequest struct {
 	Application interface{}
 }
 
+// Returns the gin ctx. You need to manually cast this to .(*gin.Context)
+func (x SendEmailWithProviderActionRequest) GetGinCtx() interface{} {
+	return x.GinCtx
+}
+
+// Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
+func (x SendEmailWithProviderActionRequest) GetCliCtx() interface{} {
+	return x.GinCtx
+}
 func SendEmailWithProviderActionClientCreateUrl(
 	req SendEmailWithProviderActionRequest,
 	config *emigo.APIClient, // optional pre-built request

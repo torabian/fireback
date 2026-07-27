@@ -45,6 +45,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	// Default Fireback authorization. You can Override this on microservices
 	fireback.WithAuthorizationPure = WithAuthorizationPureDefault
 	fireback.WithAuthorizationFn = WithAuthorizationFn
+	fireback.AuthorizeRequest = AuthorizeRequest
 	fireback.WithSocketAuthorization = WithSocketAuthorization
 
 	module := &fireback.ModuleProvider{

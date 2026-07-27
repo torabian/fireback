@@ -184,42 +184,47 @@ func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerF
 	}
 }
 
+// Returns if the request became authroizated true, if false, do not continue.
+func AuthorizeRequest(securityModel *fireback.SecurityModel, c *gin.Context) bool {
+	q := fireback.ExtractQueryDslFromGinContext(c)
+	wi := c.GetHeader("Workspace-id")
+	ri := c.GetHeader("Role-id")
+	tk := c.GetHeader("Authorization")
+	ck, ckerr := c.Cookie("authorization")
+
+	if ckerr == nil && ck != "" {
+		// If on secure cookie we have the authorization, we prefer that one.
+		tk = ck
+	}
+
+	context := &fireback.AuthContextDto{
+		WorkspaceId:  wi,
+		Token:        tk,
+		Capabilities: securityModel.ActionRequires,
+		Security:     securityModel,
+	}
+
+	result, err := WithAuthorizationPureDefault(context)
+
+	if err != nil {
+		c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
+		return false
+	}
+
+	c.Set("urw", result.UserAccessPerWorkspace)
+	c.Set("resolveStrategy", securityModel.ResolveStrategy)
+	c.Set("internal_sql", result.SqlContext)
+	c.Set("role_id", ri)
+	c.Set("user_id", result.UserId.OrDefault(""))
+	c.Set("authResult", result)
+	c.Set("workspaceId", wi)
+
+	return true
+}
+
 func WithAuthorizationFn(securityModel *fireback.SecurityModel) gin.HandlerFunc {
-
 	return func(c *gin.Context) {
-
-		q := fireback.ExtractQueryDslFromGinContext(c)
-		wi := c.GetHeader("Workspace-id")
-		ri := c.GetHeader("Role-id")
-		tk := c.GetHeader("Authorization")
-		ck, ckerr := c.Cookie("authorization")
-
-		if ckerr == nil && ck != "" {
-			// If on secure cookie we have the authorization, we prefer that one.
-			tk = ck
-		}
-
-		context := &fireback.AuthContextDto{
-			WorkspaceId:  wi,
-			Token:        tk,
-			Capabilities: securityModel.ActionRequires,
-			Security:     securityModel,
-		}
-
-		result, err := WithAuthorizationPureDefault(context)
-
-		if err != nil {
-			c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
-			return
-		}
-
-		c.Set("urw", result.UserAccessPerWorkspace)
-		c.Set("resolveStrategy", securityModel.ResolveStrategy)
-		c.Set("internal_sql", result.SqlContext)
-		c.Set("role_id", ri)
-		c.Set("user_id", result.UserId.OrDefault(""))
-		c.Set("authResult", result)
-		c.Set("workspaceId", wi)
+		AuthorizeRequest(securityModel, c)
 	}
 }
 

@@ -123,6 +123,11 @@ var WithSocketAuthorization = func(securityModel *SecurityModel) gin.HandlerFunc
 	}
 }
 
+// By default everything is authorized
+var AuthorizeRequest = func(securityModel *SecurityModel, c *gin.Context) bool {
+	return true
+}
+
 var WithAuthorizationFn = func(securityModel *SecurityModel) gin.HandlerFunc {
 
 	return func(c *gin.Context) {

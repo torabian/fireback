@@ -209,6 +209,15 @@ type UserInvitationsActionRequest struct {
 	Application interface{}
 }
 
+// Returns the gin ctx. You need to manually cast this to .(*gin.Context)
+func (x UserInvitationsActionRequest) GetGinCtx() interface{} {
+	return x.GinCtx
+}
+
+// Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
+func (x UserInvitationsActionRequest) GetCliCtx() interface{} {
+	return x.GinCtx
+}
 func UserInvitationsActionClientCreateUrl(
 	req UserInvitationsActionRequest,
 	config *emigo.APIClient, // optional pre-built request

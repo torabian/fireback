@@ -1,7 +1,6 @@
-package abac
+package suggestion
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
@@ -12,18 +11,18 @@ import (
 )
 
 /**
-* Action to communicate with the action OauthAuthenticateAction
+* Action to communicate with the action RestoreAction
  */
 /*
 Here is a quick function implementation to make your life easier:
-// Actual implementation of OauthAuthenticateAction
-func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error) {
-	return &OauthAuthenticateActionResponse{
+// Actual implementation of RestoreAction
+func RestoreAction(c RestoreActionRequest) (*RestoreActionResponse, error) {
+	return &RestoreActionResponse{
 		// Payload is an interface. Use it at carefully.
 	}, nil
 }
 */
-func OauthAuthenticateActionMeta() struct {
+func RestoreActionMeta() struct {
 	Name        string
 	CliName     string
 	URL         string
@@ -37,46 +36,15 @@ func OauthAuthenticateActionMeta() struct {
 		Method      string
 		Description string
 	}{
-		Name:        "OauthAuthenticateAction",
-		CliName:     "oauth-authenticate-action",
-		URL:         "/passport/via-oauth",
+		Name:        "RestoreAction",
+		CliName:     "restore-action",
+		URL:         "",
 		Method:      "POST",
-		Description: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
+		Description: `Deletes the FTS5 table (sqlite) and recreates it.`,
 	}
 }
 
-// The base class definition for oauthAuthenticateActionReq
-type OauthAuthenticateActionReq struct {
-	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
-	Token string `json:"token" yaml:"token"`
-	// The service name, such as 'google' which later backend will use to authorize the token and create the user.
-	Service string `json:"service" yaml:"service"`
-}
-
-func (x *OauthAuthenticateActionReq) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return string(str)
-	}
-	return ""
-}
-
-// The base class definition for oauthAuthenticateActionRes
-type OauthAuthenticateActionRes struct {
-	Session emigo.One[UserSessionDto] `json:"session" yaml:"session"`
-	// The next possible action which is suggested.
-	Next []string `json:"next" yaml:"next"`
-}
-
-func (x *OauthAuthenticateActionRes) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return string(str)
-	}
-	return ""
-}
-
-type OauthAuthenticateActionResponse struct {
+type RestoreActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
@@ -86,78 +54,58 @@ type OauthAuthenticateActionResponse struct {
 	resp *http.Response
 }
 
-func (x *OauthAuthenticateActionResponse) SetContentType(contentType string) *OauthAuthenticateActionResponse {
+func (x *RestoreActionResponse) SetContentType(contentType string) *RestoreActionResponse {
 	if x.Headers == nil {
 		x.Headers = make(map[string]string)
 	}
 	x.Headers["Content-Type"] = contentType
 	return x
 }
-func (x *OauthAuthenticateActionResponse) AsStream(r io.Reader, contentType string) *OauthAuthenticateActionResponse {
+func (x *RestoreActionResponse) AsStream(r io.Reader, contentType string) *RestoreActionResponse {
 	x.Payload = r
 	x.SetContentType(contentType)
 	return x
 }
-func (x *OauthAuthenticateActionResponse) AsJSON(payload any) *OauthAuthenticateActionResponse {
+func (x *RestoreActionResponse) AsJSON(payload any) *RestoreActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
 }
-
-// When the response is expected as documentation, you call this to get some type
-// safety for the action which is happening.
-func (x *OauthAuthenticateActionResponse) WithIdeal(payload OauthAuthenticateActionRes) *OauthAuthenticateActionResponse {
-	x.Payload = payload
-	return x
-}
-
-// Use this for client calls, so the payload is being casted
-func (x *OauthAuthenticateActionResponse) AsIdeal() (*OauthAuthenticateActionRes, error) {
-	b, err := json.Marshal(x.GetPayload())
-	if err != nil {
-		return nil, err
-	}
-	var res OauthAuthenticateActionRes
-	if err := json.Unmarshal(b, &res); err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
-func (x *OauthAuthenticateActionResponse) AsHTML(payload string) *OauthAuthenticateActionResponse {
+func (x *RestoreActionResponse) AsHTML(payload string) *RestoreActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
 	return x
 }
-func (x *OauthAuthenticateActionResponse) AsBytes(payload []byte) *OauthAuthenticateActionResponse {
+func (x *RestoreActionResponse) AsBytes(payload []byte) *RestoreActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/octet-stream")
 	return x
 }
-func (x OauthAuthenticateActionResponse) GetStatusCode() int {
+func (x RestoreActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x OauthAuthenticateActionResponse) GetRespHeaders() map[string]string {
+func (x RestoreActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x OauthAuthenticateActionResponse) GetPayload() interface{} {
+func (x RestoreActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
 // Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
-type OauthAuthenticateActionRequestSig = func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error)
+type RestoreActionRequestSig = func(c RestoreActionRequest) (*RestoreActionResponse, error)
 
 /**
- * Query parameters for OauthAuthenticateAction
+ * Query parameters for RestoreAction
  */
 // Query wrapper with private fields
-type OauthAuthenticateActionQuery struct {
+type RestoreActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
 }
 
-func OauthAuthenticateActionQueryFromString(rawQuery string) OauthAuthenticateActionQuery {
-	v := OauthAuthenticateActionQuery{}
+func RestoreActionQueryFromString(rawQuery string) RestoreActionQuery {
+	v := RestoreActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -175,24 +123,24 @@ func OauthAuthenticateActionQueryFromString(rawQuery string) OauthAuthenticateAc
 	v.mapped = mapped
 	return v
 }
-func OauthAuthenticateActionQueryFromHttp(r *http.Request) OauthAuthenticateActionQuery {
-	return OauthAuthenticateActionQueryFromString(r.URL.RawQuery)
+func RestoreActionQueryFromHttp(r *http.Request) RestoreActionQuery {
+	return RestoreActionQueryFromString(r.URL.RawQuery)
 }
-func (q OauthAuthenticateActionQuery) Values() url.Values {
+func (q RestoreActionQuery) Values() url.Values {
 	return q.values
 }
-func (q OauthAuthenticateActionQuery) Mapped() map[string]interface{} {
+func (q RestoreActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *OauthAuthenticateActionQuery) SetValues(v url.Values) {
+func (q *RestoreActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *OauthAuthenticateActionQuery) SetMapped(m map[string]interface{}) {
+func (q *RestoreActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type OauthAuthenticateActionRequest struct {
-	Body        OauthAuthenticateActionReq
+type RestoreActionRequest struct {
+	Body        interface{}
 	QueryParams url.Values
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
@@ -216,19 +164,19 @@ type OauthAuthenticateActionRequest struct {
 }
 
 // Returns the gin ctx. You need to manually cast this to .(*gin.Context)
-func (x OauthAuthenticateActionRequest) GetGinCtx() interface{} {
+func (x RestoreActionRequest) GetGinCtx() interface{} {
 	return x.GinCtx
 }
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
-func (x OauthAuthenticateActionRequest) GetCliCtx() interface{} {
+func (x RestoreActionRequest) GetCliCtx() interface{} {
 	return x.GinCtx
 }
-func OauthAuthenticateActionClientCreateUrl(
-	req OauthAuthenticateActionRequest,
+func RestoreActionClientCreateUrl(
+	req RestoreActionRequest,
 	config *emigo.APIClient, // optional pre-built request
 ) (*url.URL, error) {
-	meta := OauthAuthenticateActionMeta()
+	meta := RestoreActionMeta()
 	urlAddr := meta.URL
 	urlAddr = config.BaseURL + urlAddr
 	// Build final URL with query string
@@ -242,13 +190,13 @@ func OauthAuthenticateActionClientCreateUrl(
 	}
 	return u, nil
 }
-func OauthAuthenticateActionClientExecuteTyped(httpReq *http.Request) (*OauthAuthenticateActionResponse, error) {
+func RestoreActionClientExecuteTyped(httpReq *http.Request) (*RestoreActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	// At this point, response is valid, and we need to return the results.
-	var result OauthAuthenticateActionResponse
+	var result RestoreActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
@@ -260,13 +208,9 @@ func OauthAuthenticateActionClientExecuteTyped(httpReq *http.Request) (*OauthAut
 	}
 	return &result, nil
 }
-func OauthAuthenticateActionClientBuildRequest(req OauthAuthenticateActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
-	meta := OauthAuthenticateActionMeta()
-	bodyBytes, err := json.Marshal(req.Body)
-	if err != nil {
-		return nil, err
-	}
-	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+func RestoreActionClientBuildRequest(req RestoreActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := RestoreActionMeta()
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -286,49 +230,44 @@ func OauthAuthenticateActionClientBuildRequest(req OauthAuthenticateActionReques
 	}
 	return httpReq, nil
 }
-func OauthAuthenticateActionCall(
-	req OauthAuthenticateActionRequest,
+func RestoreActionCall(
+	req RestoreActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*OauthAuthenticateActionResponse, error) {
+) (*RestoreActionResponse, error) {
 	// This function intentionally is split into 3 different sections, so in case
 	// of some modifications that we did not anticipate, at least a part would become quite useful.
 	// first we create url, apply all path parameters, query params, etc
-	u, err := OauthAuthenticateActionClientCreateUrl(req, config)
+	u, err := RestoreActionClientCreateUrl(req, config)
 	if err != nil {
 		return nil, err
 	}
 	// We create the request from the body in second stage
-	r, err := OauthAuthenticateActionClientBuildRequest(req, u, config)
+	r, err := RestoreActionClientBuildRequest(req, u, config)
 	if err != nil {
 		return nil, err
 	}
 	// This one would execute the request and cast the result.
-	return OauthAuthenticateActionClientExecuteTyped(r)
+	return RestoreActionClientExecuteTyped(r)
 }
 
-// OauthAuthenticateActionRaw registers a raw Gin route for the OauthAuthenticateAction action.
+// RestoreActionRaw registers a raw Gin route for the RestoreAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func OauthAuthenticateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
+func RestoreActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := RestoreActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-// OauthAuthenticateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the OauthAuthenticateAction action.
+// RestoreActionHandler returns the HTTP method, route URL, and a typed Gin handler for the RestoreAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func OauthAuthenticateActionHandler(
-	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+func RestoreActionHandler(
+	handler func(c RestoreActionRequest) (*RestoreActionResponse, error),
 ) (method, url string, h gin.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
+	meta := RestoreActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body OauthAuthenticateActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
 		// Build typed request wrapper
-		req := OauthAuthenticateActionRequest{
-			Body:        body,
+		req := RestoreActionRequest{
+			Body:        nil,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -359,14 +298,14 @@ func OauthAuthenticateActionHandler(
 	}
 }
 
-// OauthAuthenticateActionGin is a high-level convenience wrapper around OauthAuthenticateActionHandler.
+// RestoreActionGin is a high-level convenience wrapper around RestoreActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func OauthAuthenticateActionGin(r gin.IRoutes, handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error)) {
-	method, url, h := OauthAuthenticateActionHandler(handler)
+func RestoreActionGin(r gin.IRoutes, handler func(c RestoreActionRequest) (*RestoreActionResponse, error)) {
+	method, url, h := RestoreActionHandler(handler)
 	r.Handle(method, url, h)
 }
-func (x OauthAuthenticateActionRequest) IsGin() bool {
+func (x RestoreActionRequest) IsGin() bool {
 	if x.GinCtx == nil {
 		return false
 	}
@@ -377,36 +316,24 @@ func (x OauthAuthenticateActionRequest) IsGin() bool {
 	}
 	return true
 }
-func OauthAuthenticateActionQueryFromGin(c *gin.Context) OauthAuthenticateActionQuery {
-	return OauthAuthenticateActionQueryFromString(c.Request.URL.RawQuery)
+func RestoreActionQueryFromGin(c *gin.Context) RestoreActionQuery {
+	return RestoreActionQueryFromString(c.Request.URL.RawQuery)
 }
 
-// OauthAuthenticateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
-// typed net/http handler for the OauthAuthenticateAction action. Developers implement
+// RestoreActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the RestoreAction action. Developers implement
 // their business logic as a function that receives a typed request object and
-// returns either an *OauthAuthenticateActionResponse or nil. JSON marshalling, headers,
+// returns either an *RestoreActionResponse or nil. JSON marshalling, headers,
 // status codes, and errors are handled automatically.
-func OauthAuthenticateActionHttpHandler(
-	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+func RestoreActionHttpHandler(
+	handler func(c RestoreActionRequest) (*RestoreActionResponse, error),
 ) (method, pattern string, h http.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
+	meta := RestoreActionMeta()
 	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
-		var body OauthAuthenticateActionReq
-		if r.Body != nil {
-			defer r.Body.Close()
-			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
-				if err := json.Unmarshal(data, &body); err != nil {
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusBadRequest)
-					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
-					return
-				}
-			}
-		}
 		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
 		// which is what the IsGin() helper keys off.
-		req := OauthAuthenticateActionRequest{
-			Body:        body,
+		req := RestoreActionRequest{
+			Body:        nil,
 			QueryParams: r.URL.Query(),
 			Headers:     r.Header,
 		}
@@ -443,14 +370,14 @@ func OauthAuthenticateActionHttpHandler(
 	}
 }
 
-// OauthAuthenticateActionHttp is a high-level convenience wrapper around
-// OauthAuthenticateActionHttpHandler. It registers the typed route on a standard
+// RestoreActionHttp is a high-level convenience wrapper around
+// RestoreActionHttpHandler. It registers the typed route on a standard
 // *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
 // Use this when you don't need custom middleware.
-func OauthAuthenticateActionHttp(
+func RestoreActionHttp(
 	mux *http.ServeMux,
-	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+	handler func(c RestoreActionRequest) (*RestoreActionResponse, error),
 ) {
-	method, pattern, h := OauthAuthenticateActionHttpHandler(handler)
+	method, pattern, h := RestoreActionHttpHandler(handler)
 	mux.HandleFunc(method+" "+pattern, h)
 }

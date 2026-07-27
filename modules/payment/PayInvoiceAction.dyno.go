@@ -1,29 +1,30 @@
-package abac
+package payment
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
+	"strings"
 )
 
 /**
-* Action to communicate with the action OauthAuthenticateAction
+* Action to communicate with the action PayInvoiceAction
  */
 /*
 Here is a quick function implementation to make your life easier:
-// Actual implementation of OauthAuthenticateAction
-func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error) {
-	return &OauthAuthenticateActionResponse{
+// Actual implementation of PayInvoiceAction
+func PayInvoiceAction(c PayInvoiceActionRequest) (*PayInvoiceActionResponse, error) {
+	return &PayInvoiceActionResponse{
 		// Payload is an interface. Use it at carefully.
 	}, nil
 }
 */
-func OauthAuthenticateActionMeta() struct {
+func PayInvoiceActionMeta() struct {
 	Name        string
 	CliName     string
 	URL         string
@@ -37,46 +38,15 @@ func OauthAuthenticateActionMeta() struct {
 		Method      string
 		Description string
 	}{
-		Name:        "OauthAuthenticateAction",
-		CliName:     "oauth-authenticate-action",
-		URL:         "/passport/via-oauth",
-		Method:      "POST",
-		Description: `When a token is got from a oauth service such as google, we send the token here to authenticate the user. To me seems this doesn't need to have 2FA or anything, so we return the session directly, or maybe there needs to be next step.`,
+		Name:        "PayInvoiceAction",
+		CliName:     "pay-invoice-action",
+		URL:         "/payment/invoice/:uniqueId",
+		Method:      "GET",
+		Description: `Pay an invoice created independently`,
 	}
 }
 
-// The base class definition for oauthAuthenticateActionReq
-type OauthAuthenticateActionReq struct {
-	// The token that Auth2 provider returned to the front-end, which will be used to validate the backend
-	Token string `json:"token" yaml:"token"`
-	// The service name, such as 'google' which later backend will use to authorize the token and create the user.
-	Service string `json:"service" yaml:"service"`
-}
-
-func (x *OauthAuthenticateActionReq) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return string(str)
-	}
-	return ""
-}
-
-// The base class definition for oauthAuthenticateActionRes
-type OauthAuthenticateActionRes struct {
-	Session emigo.One[UserSessionDto] `json:"session" yaml:"session"`
-	// The next possible action which is suggested.
-	Next []string `json:"next" yaml:"next"`
-}
-
-func (x *OauthAuthenticateActionRes) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return string(str)
-	}
-	return ""
-}
-
-type OauthAuthenticateActionResponse struct {
+type PayInvoiceActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
@@ -86,78 +56,79 @@ type OauthAuthenticateActionResponse struct {
 	resp *http.Response
 }
 
-func (x *OauthAuthenticateActionResponse) SetContentType(contentType string) *OauthAuthenticateActionResponse {
+func (x *PayInvoiceActionResponse) SetContentType(contentType string) *PayInvoiceActionResponse {
 	if x.Headers == nil {
 		x.Headers = make(map[string]string)
 	}
 	x.Headers["Content-Type"] = contentType
 	return x
 }
-func (x *OauthAuthenticateActionResponse) AsStream(r io.Reader, contentType string) *OauthAuthenticateActionResponse {
+func (x *PayInvoiceActionResponse) AsStream(r io.Reader, contentType string) *PayInvoiceActionResponse {
 	x.Payload = r
 	x.SetContentType(contentType)
 	return x
 }
-func (x *OauthAuthenticateActionResponse) AsJSON(payload any) *OauthAuthenticateActionResponse {
+func (x *PayInvoiceActionResponse) AsJSON(payload any) *PayInvoiceActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
 }
-
-// When the response is expected as documentation, you call this to get some type
-// safety for the action which is happening.
-func (x *OauthAuthenticateActionResponse) WithIdeal(payload OauthAuthenticateActionRes) *OauthAuthenticateActionResponse {
-	x.Payload = payload
-	return x
-}
-
-// Use this for client calls, so the payload is being casted
-func (x *OauthAuthenticateActionResponse) AsIdeal() (*OauthAuthenticateActionRes, error) {
-	b, err := json.Marshal(x.GetPayload())
-	if err != nil {
-		return nil, err
-	}
-	var res OauthAuthenticateActionRes
-	if err := json.Unmarshal(b, &res); err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
-func (x *OauthAuthenticateActionResponse) AsHTML(payload string) *OauthAuthenticateActionResponse {
+func (x *PayInvoiceActionResponse) AsHTML(payload string) *PayInvoiceActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
 	return x
 }
-func (x *OauthAuthenticateActionResponse) AsBytes(payload []byte) *OauthAuthenticateActionResponse {
+func (x *PayInvoiceActionResponse) AsBytes(payload []byte) *PayInvoiceActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/octet-stream")
 	return x
 }
-func (x OauthAuthenticateActionResponse) GetStatusCode() int {
+func (x PayInvoiceActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x OauthAuthenticateActionResponse) GetRespHeaders() map[string]string {
+func (x PayInvoiceActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x OauthAuthenticateActionResponse) GetPayload() interface{} {
+func (x PayInvoiceActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
 // Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
-type OauthAuthenticateActionRequestSig = func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error)
+type PayInvoiceActionRequestSig = func(c PayInvoiceActionRequest) (*PayInvoiceActionResponse, error)
 
 /**
- * Query parameters for OauthAuthenticateAction
+ * Path parameters for PayInvoiceAction
+ */
+type PayInvoiceActionPathParameter struct {
+	UniqueId string
+}
+
+// Converts a placeholder url, and applies the parameters to it.
+func PayInvoiceActionPathParameterApply(params PayInvoiceActionPathParameter, templateUrl string) string {
+	templateUrl = strings.ReplaceAll(templateUrl, ":uniqueId", fmt.Sprintf("%v", params.UniqueId))
+	return templateUrl
+}
+
+// General purpose to extract the value and cast based on type.
+func PayInvoiceActionPathParameterFromFn(fn func(key string) string) PayInvoiceActionPathParameter {
+	res := PayInvoiceActionPathParameter{}
+	res.UniqueId = fn("uniqueId")
+	return res
+}
+
+/**
+ * Query parameters for PayInvoiceAction
  */
 // Query wrapper with private fields
-type OauthAuthenticateActionQuery struct {
+type PayInvoiceActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
+	InvoiceId string `json:"invoiceId"`
 }
 
-func OauthAuthenticateActionQueryFromString(rawQuery string) OauthAuthenticateActionQuery {
-	v := OauthAuthenticateActionQuery{}
+func PayInvoiceActionQueryFromString(rawQuery string) PayInvoiceActionQuery {
+	v := PayInvoiceActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -175,24 +146,25 @@ func OauthAuthenticateActionQueryFromString(rawQuery string) OauthAuthenticateAc
 	v.mapped = mapped
 	return v
 }
-func OauthAuthenticateActionQueryFromHttp(r *http.Request) OauthAuthenticateActionQuery {
-	return OauthAuthenticateActionQueryFromString(r.URL.RawQuery)
+func PayInvoiceActionQueryFromHttp(r *http.Request) PayInvoiceActionQuery {
+	return PayInvoiceActionQueryFromString(r.URL.RawQuery)
 }
-func (q OauthAuthenticateActionQuery) Values() url.Values {
+func (q PayInvoiceActionQuery) Values() url.Values {
 	return q.values
 }
-func (q OauthAuthenticateActionQuery) Mapped() map[string]interface{} {
+func (q PayInvoiceActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *OauthAuthenticateActionQuery) SetValues(v url.Values) {
+func (q *PayInvoiceActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *OauthAuthenticateActionQuery) SetMapped(m map[string]interface{}) {
+func (q *PayInvoiceActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type OauthAuthenticateActionRequest struct {
-	Body        OauthAuthenticateActionReq
+type PayInvoiceActionRequest struct {
+	Body        interface{}
+	Params      PayInvoiceActionPathParameter
 	QueryParams url.Values
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
@@ -216,21 +188,23 @@ type OauthAuthenticateActionRequest struct {
 }
 
 // Returns the gin ctx. You need to manually cast this to .(*gin.Context)
-func (x OauthAuthenticateActionRequest) GetGinCtx() interface{} {
+func (x PayInvoiceActionRequest) GetGinCtx() interface{} {
 	return x.GinCtx
 }
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
-func (x OauthAuthenticateActionRequest) GetCliCtx() interface{} {
+func (x PayInvoiceActionRequest) GetCliCtx() interface{} {
 	return x.GinCtx
 }
-func OauthAuthenticateActionClientCreateUrl(
-	req OauthAuthenticateActionRequest,
+func PayInvoiceActionClientCreateUrl(
+	req PayInvoiceActionRequest,
 	config *emigo.APIClient, // optional pre-built request
 ) (*url.URL, error) {
-	meta := OauthAuthenticateActionMeta()
+	meta := PayInvoiceActionMeta()
 	urlAddr := meta.URL
 	urlAddr = config.BaseURL + urlAddr
+	// In case there is a path parameter, we need to apply that.
+	urlAddr = PayInvoiceActionPathParameterApply(req.Params, urlAddr)
 	// Build final URL with query string
 	u, err := url.Parse(urlAddr)
 	if err != nil {
@@ -242,13 +216,13 @@ func OauthAuthenticateActionClientCreateUrl(
 	}
 	return u, nil
 }
-func OauthAuthenticateActionClientExecuteTyped(httpReq *http.Request) (*OauthAuthenticateActionResponse, error) {
+func PayInvoiceActionClientExecuteTyped(httpReq *http.Request) (*PayInvoiceActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	// At this point, response is valid, and we need to return the results.
-	var result OauthAuthenticateActionResponse
+	var result PayInvoiceActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
@@ -260,13 +234,9 @@ func OauthAuthenticateActionClientExecuteTyped(httpReq *http.Request) (*OauthAut
 	}
 	return &result, nil
 }
-func OauthAuthenticateActionClientBuildRequest(req OauthAuthenticateActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
-	meta := OauthAuthenticateActionMeta()
-	bodyBytes, err := json.Marshal(req.Body)
-	if err != nil {
-		return nil, err
-	}
-	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+func PayInvoiceActionClientBuildRequest(req PayInvoiceActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := PayInvoiceActionMeta()
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -286,49 +256,50 @@ func OauthAuthenticateActionClientBuildRequest(req OauthAuthenticateActionReques
 	}
 	return httpReq, nil
 }
-func OauthAuthenticateActionCall(
-	req OauthAuthenticateActionRequest,
+func PayInvoiceActionCall(
+	req PayInvoiceActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*OauthAuthenticateActionResponse, error) {
+) (*PayInvoiceActionResponse, error) {
 	// This function intentionally is split into 3 different sections, so in case
 	// of some modifications that we did not anticipate, at least a part would become quite useful.
 	// first we create url, apply all path parameters, query params, etc
-	u, err := OauthAuthenticateActionClientCreateUrl(req, config)
+	u, err := PayInvoiceActionClientCreateUrl(req, config)
 	if err != nil {
 		return nil, err
 	}
 	// We create the request from the body in second stage
-	r, err := OauthAuthenticateActionClientBuildRequest(req, u, config)
+	r, err := PayInvoiceActionClientBuildRequest(req, u, config)
 	if err != nil {
 		return nil, err
 	}
 	// This one would execute the request and cast the result.
-	return OauthAuthenticateActionClientExecuteTyped(r)
+	return PayInvoiceActionClientExecuteTyped(r)
+}
+func PayInvoiceActionPathParameterFromGin(g *gin.Context) PayInvoiceActionPathParameter {
+	return PayInvoiceActionPathParameterFromFn(func(key string) string {
+		return g.Param(key)
+	})
 }
 
-// OauthAuthenticateActionRaw registers a raw Gin route for the OauthAuthenticateAction action.
+// PayInvoiceActionRaw registers a raw Gin route for the PayInvoiceAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func OauthAuthenticateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
+func PayInvoiceActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := PayInvoiceActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-// OauthAuthenticateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the OauthAuthenticateAction action.
+// PayInvoiceActionHandler returns the HTTP method, route URL, and a typed Gin handler for the PayInvoiceAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func OauthAuthenticateActionHandler(
-	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+func PayInvoiceActionHandler(
+	handler func(c PayInvoiceActionRequest) (*PayInvoiceActionResponse, error),
 ) (method, url string, h gin.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
+	meta := PayInvoiceActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body OauthAuthenticateActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
 		// Build typed request wrapper
-		req := OauthAuthenticateActionRequest{
-			Body:        body,
+		req := PayInvoiceActionRequest{
+			Body:        nil,
+			Params:      PayInvoiceActionPathParameterFromGin(m),
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -359,14 +330,14 @@ func OauthAuthenticateActionHandler(
 	}
 }
 
-// OauthAuthenticateActionGin is a high-level convenience wrapper around OauthAuthenticateActionHandler.
+// PayInvoiceActionGin is a high-level convenience wrapper around PayInvoiceActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func OauthAuthenticateActionGin(r gin.IRoutes, handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error)) {
-	method, url, h := OauthAuthenticateActionHandler(handler)
+func PayInvoiceActionGin(r gin.IRoutes, handler func(c PayInvoiceActionRequest) (*PayInvoiceActionResponse, error)) {
+	method, url, h := PayInvoiceActionHandler(handler)
 	r.Handle(method, url, h)
 }
-func (x OauthAuthenticateActionRequest) IsGin() bool {
+func (x PayInvoiceActionRequest) IsGin() bool {
 	if x.GinCtx == nil {
 		return false
 	}
@@ -377,36 +348,27 @@ func (x OauthAuthenticateActionRequest) IsGin() bool {
 	}
 	return true
 }
-func OauthAuthenticateActionQueryFromGin(c *gin.Context) OauthAuthenticateActionQuery {
-	return OauthAuthenticateActionQueryFromString(c.Request.URL.RawQuery)
+func PayInvoiceActionQueryFromGin(c *gin.Context) PayInvoiceActionQuery {
+	return PayInvoiceActionQueryFromString(c.Request.URL.RawQuery)
 }
 
-// OauthAuthenticateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
-// typed net/http handler for the OauthAuthenticateAction action. Developers implement
+// PayInvoiceActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the PayInvoiceAction action. Developers implement
 // their business logic as a function that receives a typed request object and
-// returns either an *OauthAuthenticateActionResponse or nil. JSON marshalling, headers,
+// returns either an *PayInvoiceActionResponse or nil. JSON marshalling, headers,
 // status codes, and errors are handled automatically.
-func OauthAuthenticateActionHttpHandler(
-	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+func PayInvoiceActionHttpHandler(
+	handler func(c PayInvoiceActionRequest) (*PayInvoiceActionResponse, error),
 ) (method, pattern string, h http.HandlerFunc) {
-	meta := OauthAuthenticateActionMeta()
+	meta := PayInvoiceActionMeta()
 	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
-		var body OauthAuthenticateActionReq
-		if r.Body != nil {
-			defer r.Body.Close()
-			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
-				if err := json.Unmarshal(data, &body); err != nil {
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusBadRequest)
-					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
-					return
-				}
-			}
-		}
 		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
 		// which is what the IsGin() helper keys off.
-		req := OauthAuthenticateActionRequest{
-			Body:        body,
+		req := PayInvoiceActionRequest{
+			Body: nil,
+			Params: PayInvoiceActionPathParameterFromFn(func(key string) string {
+				return r.PathValue(key)
+			}),
 			QueryParams: r.URL.Query(),
 			Headers:     r.Header,
 		}
@@ -443,14 +405,14 @@ func OauthAuthenticateActionHttpHandler(
 	}
 }
 
-// OauthAuthenticateActionHttp is a high-level convenience wrapper around
-// OauthAuthenticateActionHttpHandler. It registers the typed route on a standard
+// PayInvoiceActionHttp is a high-level convenience wrapper around
+// PayInvoiceActionHttpHandler. It registers the typed route on a standard
 // *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
 // Use this when you don't need custom middleware.
-func OauthAuthenticateActionHttp(
+func PayInvoiceActionHttp(
 	mux *http.ServeMux,
-	handler func(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error),
+	handler func(c PayInvoiceActionRequest) (*PayInvoiceActionResponse, error),
 ) {
-	method, pattern, h := OauthAuthenticateActionHttpHandler(handler)
+	method, pattern, h := PayInvoiceActionHttpHandler(handler)
 	mux.HandleFunc(method+" "+pattern, h)
 }

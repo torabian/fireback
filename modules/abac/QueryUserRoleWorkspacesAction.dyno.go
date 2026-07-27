@@ -208,6 +208,15 @@ type QueryUserRoleWorkspacesActionRequest struct {
 	Application interface{}
 }
 
+// Returns the gin ctx. You need to manually cast this to .(*gin.Context)
+func (x QueryUserRoleWorkspacesActionRequest) GetGinCtx() interface{} {
+	return x.GinCtx
+}
+
+// Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
+func (x QueryUserRoleWorkspacesActionRequest) GetCliCtx() interface{} {
+	return x.GinCtx
+}
 func QueryUserRoleWorkspacesActionClientCreateUrl(
 	req QueryUserRoleWorkspacesActionRequest,
 	config *emigo.APIClient, // optional pre-built request

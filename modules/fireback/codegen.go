@@ -1137,6 +1137,7 @@ func RunCodeGen(xapp *FirebackApp, ctx *CodeGenContext) error {
 	// Generate the classes, definitions, structs
 	for _, item := range modules {
 		item.Generate(ctx)
+
 	}
 
 	mode := "disk"
