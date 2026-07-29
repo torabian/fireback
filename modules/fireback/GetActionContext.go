@@ -26,6 +26,11 @@ func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *Secur
 		if !AuthorizeRequest(securityModel, GinCtx.(*gin.Context)) {
 			return nil, errors.New("Authorization general failed")
 		}
+
+		// Important because now we have more details of security
+		if value, ok := GinCtx.(*gin.Context); ok {
+			qsdl = ExtractQueryDslFromGinContext(value)
+		}
 	}
 
 	if !IsNilish(CliCtx) {

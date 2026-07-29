@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -69,54 +70,23 @@ func GetMainLanguageFromAcceptLanguage(acceptLanguage string) string {
 	// default language
 	return "en"
 }
-
 func GinMiddleware() gin.HandlerFunc {
-
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
+		h := c.Writer.Header()
 
-		headers := []string{
-			"accept",
-			"authorization",
-			"content-type",
-			"content-length",
-			"x-csrf-token",
-			"token",
-			"session",
-			"origin",
-			"host",
-			"connection",
-			"accept-encoding",
-			"accept-language",
-			"x-requested-with",
-			"workspace",
-			"workspace-id",
-			"role-id",
-			"deep",
-			"query",
-			"x-request-id",
-			"x-http-method-override",
-			"upload-length",
-			"upload-offset",
-			"tus-resumable",
-			"upload-metadata",
-			"upload-defer-length",
-			"upload-concat",
-			"user-agent",
-			"referrer",
-		}
-		c.Writer.Header().Set("Access-Control-Allow-Headers", strings.Join(headers, ","))
+		h.Set("Access-Control-Allow-Origin", "*")
+		h.Set("Access-Control-Allow-Methods", "*")
+		h.Set("Access-Control-Allow-Headers", "*")
+		h.Set("Access-Control-Expose-Headers", "*")
+		h.Set("Access-Control-Max-Age", "86400")
 
-		c.Writer.Header().Set("Access-Control-Expose-Headers", "Upload-Offset, Location, Tus-Resumable")
+		// Only enable this if you're NOT using "*"
+		// h.Set("Access-Control-Allow-Credentials", "true")
 
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
-
-		c.Request.Header.Del("Origin")
 
 		c.Next()
 	}

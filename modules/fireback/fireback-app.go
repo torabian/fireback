@@ -235,7 +235,23 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 	r := gin.New()
 
 	r.Use(GinMiddleware())
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	// Range requests (used for resumable downloads and media seeking, e.g. an
+	// HTML5 <video> tag) return a slice of the underlying resource picked
+	// after the byte length is known. Gzip-encoding just that slice produces
+	// a self-contained stream whose Content-Range still describes offsets in
+	// the *original* file, a combination browsers' media/range handling
+	// doesn't tolerate (Chrome fails such responses with
+	// ERR_CONTENT_DECODING_FAILED). So skip compression whenever a Range
+	// header is present, the same way nginx/Apache do.
+	gzipMiddleware := gzip.Gzip(gzip.DefaultCompression)
+	r.Use(func(c *gin.Context) {
+		if c.GetHeader("Range") != "" {
+			c.Next()
+			return
+		}
+		gzipMiddleware(c)
+	})
 
 	r.Use(func(c *gin.Context) {
 		cacheableSuffixes := []string{
