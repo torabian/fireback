@@ -49,8 +49,9 @@ import (
 	"context"
 	{{ end }}
 	
+
 	{{ if .e.HasComplexes }}
-	"encoding"
+	"encoding"  //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	{{ end }}
 	
 	{{ if .e.IncludeEmigo }}
@@ -84,13 +85,15 @@ func Reset{{ .e.Upper }}Seeders(fs *embed.FS) {
 
 {{ range .children }}
 type {{ .FullName }} struct {
-	{{ if ne .IsVirtualObject true }}
-		{{ template "defaultgofields" (arr $.e  $.wsprefix)}}
-	{{ end }}
+
     {{ template "definitionrow" (arr .CompleteFields $.wsprefix) }}
 
 	{{ if .LinkedTo }}
 	LinkedTo *{{ .LinkedTo }} `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	{{ end }}
+
+	{{ if ne .IsVirtualObject true }}
+		{{ template "defaultgofields" (arr $.e  $.wsprefix)}}
 	{{ end }}
 }
 
@@ -115,7 +118,6 @@ var {{ .e.Upper }}QsFlags = []cli.Flag{
 }
 
 type {{ .e.EntityName }} struct {
-    {{ template "defaultgofields" (arr .e $.wsprefix) }}
     {{ template "definitionrow" (arr .e.CompleteFields $.wsprefix) }}
 
     {{ if .e.HasTranslations }}
@@ -125,6 +127,8 @@ type {{ .e.EntityName }} struct {
     Children []*{{ .e.EntityName }} `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 
     LinkedTo *{{ .e.EntityName }} `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	{{ template "defaultgofields" (arr .e $.wsprefix) }}
+
 }
 
 
@@ -349,10 +353,10 @@ var {{ .e.EntityName }}Bundle = {{ $.wsprefix }}EntityBundle{
 
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	{{ .e.Upper }}CliFn(),
-	//},
+	
+	CliCommands: []*cli.Command{
+		{{ .e.Upper }}CliFn(),
+	},
 	Actions: Get{{ .e.Upper }}Module3Actions(),
 	MockProvider: {{ .e.Upper }}ImportMocks,
 	AutoMigrationEntities: []interface{}{
