@@ -65,6 +65,15 @@ var WorkspaceTypeQsFlags = []cli.Flag{
 }
 
 type WorkspaceTypeEntity struct {
+	Title       string `json:"title" xml:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true"  `
+	Description string `json:"description" xml:"description" yaml:"description"        translate:"true"  `
+	Slug        string `json:"slug" xml:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"        `
+	// The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected
+	Role         *RoleEntity                    `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId       emigo.Nullable[string]         `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
+	Translations []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*WorkspaceTypeEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *WorkspaceTypeEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -123,15 +132,6 @@ type WorkspaceTypeEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Title            string `json:"title" xml:"title" yaml:"title"  validate:"required,omitempty,min=1,max=250"        translate:"true"  `
-	Description      string `json:"description" xml:"description" yaml:"description"        translate:"true"  `
-	Slug             string `json:"slug" xml:"slug" yaml:"slug"  validate:"required,omitempty,min=2,max=50"        `
-	// The role which will be used to define the functionality of this workspace, Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected
-	Role         *RoleEntity                    `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId       emigo.Nullable[string]         `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
-	Translations []*WorkspaceTypeEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children     []*WorkspaceTypeEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo     *WorkspaceTypeEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func WorkspaceTypeEntityStream(q fireback.QueryDSL) (chan []*WorkspaceTypeEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1495,10 +1495,9 @@ var WorkspaceTypeEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_TYPE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	WorkspaceTypeCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		WorkspaceTypeCliFn(),
+	},
 	Actions:      GetWorkspaceTypeModule3Actions(),
 	MockProvider: WorkspaceTypeImportMocks,
 	AutoMigrationEntities: []interface{}{

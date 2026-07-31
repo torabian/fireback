@@ -26,7 +26,7 @@ func ReactiveSearchActionMeta() struct {
 		Name:        "ReactiveSearchAction",
 		URL:         "/reactive-search",
 		Method:      "REACTIVE",
-		CliName:     "",
+		CliName:     "reactive-search-action",
 		Description: "Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.",
 	}
 }

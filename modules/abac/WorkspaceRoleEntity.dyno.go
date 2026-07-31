@@ -55,6 +55,12 @@ var WorkspaceRoleQsFlags = []cli.Flag{
 }
 
 type WorkspaceRoleEntity struct {
+	UserWorkspace   *UserWorkspaceEntity   `json:"userWorkspace" xml:"userWorkspace" yaml:"userWorkspace"    gorm:"foreignKey:UserWorkspaceId;references:UniqueId"      `
+	UserWorkspaceId emigo.Nullable[string] `json:"userWorkspaceId" yaml:"userWorkspaceId" xml:"userWorkspaceId"   gorm:"index:workspacerole_idx,unique" `
+	Role            *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId          emigo.Nullable[string] `json:"roleId" yaml:"roleId" xml:"roleId"   gorm:"index:workspacerole_idx,unique" `
+	Children        []*WorkspaceRoleEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo        *WorkspaceRoleEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -112,13 +118,7 @@ type WorkspaceRoleEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	UserWorkspace    *UserWorkspaceEntity   `json:"userWorkspace" xml:"userWorkspace" yaml:"userWorkspace"    gorm:"foreignKey:UserWorkspaceId;references:UniqueId"      `
-	UserWorkspaceId  emigo.Nullable[string] `json:"userWorkspaceId" yaml:"userWorkspaceId" xml:"userWorkspaceId"   gorm:"index:workspacerole_idx,unique" `
-	Role             *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           emigo.Nullable[string] `json:"roleId" yaml:"roleId" xml:"roleId"   gorm:"index:workspacerole_idx,unique" `
-	Children         []*WorkspaceRoleEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *WorkspaceRoleEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func WorkspaceRoleEntityStream(q fireback.QueryDSL) (chan []*WorkspaceRoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1357,10 +1357,9 @@ var WorkspaceRoleEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_ROLE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	WorkspaceRoleCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		WorkspaceRoleCliFn(),
+	},
 	Actions:      GetWorkspaceRoleModule3Actions(),
 	MockProvider: WorkspaceRoleImportMocks,
 	AutoMigrationEntities: []interface{}{

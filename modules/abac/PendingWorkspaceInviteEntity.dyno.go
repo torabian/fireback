@@ -70,6 +70,14 @@ var PendingWorkspaceInviteQsFlags = []cli.Flag{
 }
 
 type PendingWorkspaceInviteEntity struct {
+	Value         string                          `json:"value" xml:"value" yaml:"value"        `
+	Type          string                          `json:"type" xml:"type" yaml:"type"        `
+	CoverLetter   string                          `json:"coverLetter" xml:"coverLetter" yaml:"coverLetter"        `
+	WorkspaceName string                          `json:"workspaceName" xml:"workspaceName" yaml:"workspaceName"        `
+	Role          *RoleEntity                     `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId        emigo.Nullable[string]          `json:"roleId" yaml:"roleId" xml:"roleId"  `
+	Children      []*PendingWorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo      *PendingWorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -127,15 +135,7 @@ type PendingWorkspaceInviteEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                          `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Value            string                          `json:"value" xml:"value" yaml:"value"        `
-	Type             string                          `json:"type" xml:"type" yaml:"type"        `
-	CoverLetter      string                          `json:"coverLetter" xml:"coverLetter" yaml:"coverLetter"        `
-	WorkspaceName    string                          `json:"workspaceName" xml:"workspaceName" yaml:"workspaceName"        `
-	Role             *RoleEntity                     `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           emigo.Nullable[string]          `json:"roleId" yaml:"roleId" xml:"roleId"  `
-	Children         []*PendingWorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *PendingWorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func PendingWorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*PendingWorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1451,10 +1451,9 @@ var PendingWorkspaceInviteEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PendingWorkspaceInviteCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PendingWorkspaceInviteCliFn(),
+	},
 	Actions:      GetPendingWorkspaceInviteModule3Actions(),
 	MockProvider: PendingWorkspaceInviteImportMocks,
 	AutoMigrationEntities: []interface{}{

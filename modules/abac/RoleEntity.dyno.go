@@ -55,6 +55,11 @@ var RoleQsFlags = []cli.Flag{
 }
 
 type RoleEntity struct {
+	Name               string                       `json:"name" xml:"name" yaml:"name"  validate:"required,omitempty,min=1,max=200"        `
+	Capabilities       []*fireback.CapabilityEntity `json:"capabilities" xml:"capabilities" yaml:"capabilities"    gorm:"many2many:role_capabilities;foreignKey:UniqueId;references:UniqueId"      `
+	CapabilitiesListId []string                     `json:"capabilitiesListId" yaml:"capabilitiesListId" xml:"capabilitiesListId" gorm:"-" sql:"-"`
+	Children           []*RoleEntity                `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo           *RoleEntity                  `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -112,12 +117,7 @@ type RoleEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted   string                       `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name               string                       `json:"name" xml:"name" yaml:"name"  validate:"required,omitempty,min=1,max=200"        `
-	Capabilities       []*fireback.CapabilityEntity `json:"capabilities" xml:"capabilities" yaml:"capabilities"    gorm:"many2many:role_capabilities;foreignKey:UniqueId;references:UniqueId"      `
-	CapabilitiesListId []string                     `json:"capabilitiesListId" yaml:"capabilitiesListId" xml:"capabilitiesListId" gorm:"-" sql:"-"`
-	Children           []*RoleEntity                `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo           *RoleEntity                  `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func RoleEntityStream(q fireback.QueryDSL) (chan []*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1432,10 +1432,9 @@ var RoleEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_ROLE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	RoleCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		RoleCliFn(),
+	},
 	Actions:      GetRoleModule3Actions(),
 	MockProvider: RoleImportMocks,
 	AutoMigrationEntities: []interface{}{

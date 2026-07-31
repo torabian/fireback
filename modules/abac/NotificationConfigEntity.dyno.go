@@ -180,6 +180,41 @@ var NotificationConfigQsFlags = []cli.Flag{
 }
 
 type NotificationConfigEntity struct {
+	CascadeToSubWorkspaces                 bool                        `json:"cascadeToSubWorkspaces" xml:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
+	ForcedCascadeEmailProvider             bool                        `json:"forcedCascadeEmailProvider" xml:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
+	GeneralEmailProvider                   *EmailProviderEntity        `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
+	GeneralEmailProviderId                 emigo.Nullable[string]      `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
+	GeneralGsmProvider                     *GsmProviderEntity          `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
+	GeneralGsmProviderId                   emigo.Nullable[string]      `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
+	InviteToWorkspaceContent               string                      `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
+	InviteToWorkspaceContentExcerpt        string                      `json:"inviteToWorkspaceContentExcerpt" xml:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
+	InviteToWorkspaceContentDefault        string                      `json:"inviteToWorkspaceContentDefault" xml:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
+	InviteToWorkspaceContentDefaultExcerpt string                      `json:"inviteToWorkspaceContentDefaultExcerpt" xml:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
+	InviteToWorkspaceTitle                 string                      `json:"inviteToWorkspaceTitle" xml:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
+	InviteToWorkspaceTitleDefault          string                      `json:"inviteToWorkspaceTitleDefault" xml:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
+	InviteToWorkspaceSender                *EmailSenderEntity          `json:"inviteToWorkspaceSender" xml:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"      `
+	InviteToWorkspaceSenderId              emigo.Nullable[string]      `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId" xml:"inviteToWorkspaceSenderId"  `
+	AccountCenterEmailSender               *EmailSenderEntity          `json:"accountCenterEmailSender" xml:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"      `
+	AccountCenterEmailSenderId             emigo.Nullable[string]      `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId" xml:"accountCenterEmailSenderId"  `
+	ForgetPasswordContent                  string                      `json:"forgetPasswordContent" xml:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
+	ForgetPasswordContentExcerpt           string                      `json:"forgetPasswordContentExcerpt" xml:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
+	ForgetPasswordContentDefault           string                      `json:"forgetPasswordContentDefault" xml:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
+	ForgetPasswordContentDefaultExcerpt    string                      `json:"forgetPasswordContentDefaultExcerpt" xml:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
+	ForgetPasswordTitle                    string                      `json:"forgetPasswordTitle" xml:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
+	ForgetPasswordTitleDefault             string                      `json:"forgetPasswordTitleDefault" xml:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
+	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" xml:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
+	ForgetPasswordSenderId                 emigo.Nullable[string]      `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
+	AcceptLanguage                         string                      `json:"acceptLanguage" xml:"acceptLanguage" yaml:"acceptLanguage"        `
+	ConfirmEmailSender                     *EmailSenderEntity          `json:"confirmEmailSender" xml:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"      `
+	ConfirmEmailSenderId                   emigo.Nullable[string]      `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
+	ConfirmEmailContent                    string                      `json:"confirmEmailContent" xml:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
+	ConfirmEmailContentExcerpt             string                      `json:"confirmEmailContentExcerpt" xml:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
+	ConfirmEmailContentDefault             string                      `json:"confirmEmailContentDefault" xml:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
+	ConfirmEmailContentDefaultExcerpt      string                      `json:"confirmEmailContentDefaultExcerpt" xml:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
+	ConfirmEmailTitle                      string                      `json:"confirmEmailTitle" xml:"confirmEmailTitle" yaml:"confirmEmailTitle"        `
+	ConfirmEmailTitleDefault               string                      `json:"confirmEmailTitleDefault" xml:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"-"   `
+	Children                               []*NotificationConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -237,42 +272,7 @@ type NotificationConfigEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted                       string                      `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	CascadeToSubWorkspaces                 bool                        `json:"cascadeToSubWorkspaces" xml:"cascadeToSubWorkspaces" yaml:"cascadeToSubWorkspaces"        `
-	ForcedCascadeEmailProvider             bool                        `json:"forcedCascadeEmailProvider" xml:"forcedCascadeEmailProvider" yaml:"forcedCascadeEmailProvider"        `
-	GeneralEmailProvider                   *EmailProviderEntity        `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
-	GeneralEmailProviderId                 emigo.Nullable[string]      `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
-	GeneralGsmProvider                     *GsmProviderEntity          `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
-	GeneralGsmProviderId                   emigo.Nullable[string]      `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
-	InviteToWorkspaceContent               string                      `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"text"      `
-	InviteToWorkspaceContentExcerpt        string                      `json:"inviteToWorkspaceContentExcerpt" xml:"inviteToWorkspaceContentExcerpt" yaml:"inviteToWorkspaceContentExcerpt"    gorm:"text"      `
-	InviteToWorkspaceContentDefault        string                      `json:"inviteToWorkspaceContentDefault" xml:"inviteToWorkspaceContentDefault" yaml:"inviteToWorkspaceContentDefault"    gorm:"text"     sql:"-"   `
-	InviteToWorkspaceContentDefaultExcerpt string                      `json:"inviteToWorkspaceContentDefaultExcerpt" xml:"inviteToWorkspaceContentDefaultExcerpt" yaml:"inviteToWorkspaceContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
-	InviteToWorkspaceTitle                 string                      `json:"inviteToWorkspaceTitle" xml:"inviteToWorkspaceTitle" yaml:"inviteToWorkspaceTitle"        `
-	InviteToWorkspaceTitleDefault          string                      `json:"inviteToWorkspaceTitleDefault" xml:"inviteToWorkspaceTitleDefault" yaml:"inviteToWorkspaceTitleDefault"       sql:"-"   `
-	InviteToWorkspaceSender                *EmailSenderEntity          `json:"inviteToWorkspaceSender" xml:"inviteToWorkspaceSender" yaml:"inviteToWorkspaceSender"    gorm:"foreignKey:InviteToWorkspaceSenderId;references:UniqueId"      `
-	InviteToWorkspaceSenderId              emigo.Nullable[string]      `json:"inviteToWorkspaceSenderId" yaml:"inviteToWorkspaceSenderId" xml:"inviteToWorkspaceSenderId"  `
-	AccountCenterEmailSender               *EmailSenderEntity          `json:"accountCenterEmailSender" xml:"accountCenterEmailSender" yaml:"accountCenterEmailSender"    gorm:"foreignKey:AccountCenterEmailSenderId;references:UniqueId"      `
-	AccountCenterEmailSenderId             emigo.Nullable[string]      `json:"accountCenterEmailSenderId" yaml:"accountCenterEmailSenderId" xml:"accountCenterEmailSenderId"  `
-	ForgetPasswordContent                  string                      `json:"forgetPasswordContent" xml:"forgetPasswordContent" yaml:"forgetPasswordContent"    gorm:"text"      `
-	ForgetPasswordContentExcerpt           string                      `json:"forgetPasswordContentExcerpt" xml:"forgetPasswordContentExcerpt" yaml:"forgetPasswordContentExcerpt"    gorm:"text"      `
-	ForgetPasswordContentDefault           string                      `json:"forgetPasswordContentDefault" xml:"forgetPasswordContentDefault" yaml:"forgetPasswordContentDefault"    gorm:"text"     sql:"-"   `
-	ForgetPasswordContentDefaultExcerpt    string                      `json:"forgetPasswordContentDefaultExcerpt" xml:"forgetPasswordContentDefaultExcerpt" yaml:"forgetPasswordContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
-	ForgetPasswordTitle                    string                      `json:"forgetPasswordTitle" xml:"forgetPasswordTitle" yaml:"forgetPasswordTitle"    gorm:"text"      `
-	ForgetPasswordTitleDefault             string                      `json:"forgetPasswordTitleDefault" xml:"forgetPasswordTitleDefault" yaml:"forgetPasswordTitleDefault"    gorm:"text"     sql:"-"   `
-	ForgetPasswordSender                   *EmailSenderEntity          `json:"forgetPasswordSender" xml:"forgetPasswordSender" yaml:"forgetPasswordSender"    gorm:"foreignKey:ForgetPasswordSenderId;references:UniqueId"      `
-	ForgetPasswordSenderId                 emigo.Nullable[string]      `json:"forgetPasswordSenderId" yaml:"forgetPasswordSenderId" xml:"forgetPasswordSenderId"  `
-	AcceptLanguage                         string                      `json:"acceptLanguage" xml:"acceptLanguage" yaml:"acceptLanguage"        `
-	ConfirmEmailSender                     *EmailSenderEntity          `json:"confirmEmailSender" xml:"confirmEmailSender" yaml:"confirmEmailSender"    gorm:"foreignKey:ConfirmEmailSenderId;references:UniqueId"      `
-	ConfirmEmailSenderId                   emigo.Nullable[string]      `json:"confirmEmailSenderId" yaml:"confirmEmailSenderId" xml:"confirmEmailSenderId"  `
-	ConfirmEmailContent                    string                      `json:"confirmEmailContent" xml:"confirmEmailContent" yaml:"confirmEmailContent"    gorm:"text"      `
-	ConfirmEmailContentExcerpt             string                      `json:"confirmEmailContentExcerpt" xml:"confirmEmailContentExcerpt" yaml:"confirmEmailContentExcerpt"    gorm:"text"      `
-	ConfirmEmailContentDefault             string                      `json:"confirmEmailContentDefault" xml:"confirmEmailContentDefault" yaml:"confirmEmailContentDefault"    gorm:"text"     sql:"-"   `
-	ConfirmEmailContentDefaultExcerpt      string                      `json:"confirmEmailContentDefaultExcerpt" xml:"confirmEmailContentDefaultExcerpt" yaml:"confirmEmailContentDefaultExcerpt"    gorm:"text"     sql:"-"   `
-	ConfirmEmailTitle                      string                      `json:"confirmEmailTitle" xml:"confirmEmailTitle" yaml:"confirmEmailTitle"        `
-	ConfirmEmailTitleDefault               string                      `json:"confirmEmailTitleDefault" xml:"confirmEmailTitleDefault" yaml:"confirmEmailTitleDefault"       sql:"-"   `
-	Children                               []*NotificationConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo                               *NotificationConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func NotificationConfigEntityStream(q fireback.QueryDSL) (chan []*NotificationConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -2163,10 +2163,9 @@ var NotificationConfigEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	NotificationConfigCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		NotificationConfigCliFn(),
+	},
 	Actions:      GetNotificationConfigModule3Actions(),
 	MockProvider: NotificationConfigImportMocks,
 	AutoMigrationEntities: []interface{}{

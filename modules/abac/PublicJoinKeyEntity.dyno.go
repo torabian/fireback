@@ -55,6 +55,11 @@ var PublicJoinKeyQsFlags = []cli.Flag{
 }
 
 type PublicJoinKeyEntity struct {
+	Role      *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId    emigo.Nullable[string] `json:"roleId" yaml:"roleId" xml:"roleId"  `
+	Workspace *WorkspaceEntity       `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
+	Children  []*PublicJoinKeyEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo  *PublicJoinKeyEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -112,12 +117,7 @@ type PublicJoinKeyEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Role             *RoleEntity            `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId           emigo.Nullable[string] `json:"roleId" yaml:"roleId" xml:"roleId"  `
-	Workspace        *WorkspaceEntity       `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	Children         []*PublicJoinKeyEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *PublicJoinKeyEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func PublicJoinKeyEntityStream(q fireback.QueryDSL) (chan []*PublicJoinKeyEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1355,10 +1355,9 @@ var PublicJoinKeyEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PUBLIC_JOIN_KEY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PublicJoinKeyCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PublicJoinKeyCliFn(),
+	},
 	Actions:      GetPublicJoinKeyModule3Actions(),
 	MockProvider: PublicJoinKeyImportMocks,
 	AutoMigrationEntities: []interface{}{

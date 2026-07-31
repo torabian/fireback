@@ -217,7 +217,7 @@ func (x SignoutActionRequest) GetGinCtx() interface{} {
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
 func (x SignoutActionRequest) GetCliCtx() interface{} {
-	return x.GinCtx
+	return x.CliCtx
 }
 func SignoutActionClientCreateUrl(
 	req SignoutActionRequest,

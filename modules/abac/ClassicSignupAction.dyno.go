@@ -233,7 +233,7 @@ func (x ClassicSignupActionRequest) GetGinCtx() interface{} {
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
 func (x ClassicSignupActionRequest) GetCliCtx() interface{} {
-	return x.GinCtx
+	return x.CliCtx
 }
 func ClassicSignupActionClientCreateUrl(
 	req ClassicSignupActionRequest,

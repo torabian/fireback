@@ -100,6 +100,31 @@ var WorkspaceInviteQsFlags = []cli.Flag{
 }
 
 type WorkspaceInviteEntity struct {
+	// A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.
+	PublicKey string `json:"publicKey" xml:"publicKey" yaml:"publicKey"        `
+	// The content that user will receive to understand the reason of the letter.
+	CoverLetter string `json:"coverLetter" xml:"coverLetter" yaml:"coverLetter"        `
+	// If the invited person has a different language, then you can define that so the interface for him will be automatically translated.
+	TargetUserLocale string `json:"targetUserLocale" xml:"targetUserLocale" yaml:"targetUserLocale"        `
+	// The email address of the person which is invited.
+	Email string `json:"email" xml:"email" yaml:"email"        `
+	// The phone number of the person which is invited.
+	Phonenumber string `json:"phonenumber" xml:"phonenumber" yaml:"phonenumber"        `
+	// Workspace which user is being invite to.
+	Workspace *WorkspaceEntity `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
+	// First name of the person which is invited
+	FirstName string `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
+	// Last name of the person which is invited.
+	LastName string `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
+	// If forced, the email address cannot be changed by the user which has been invited.
+	ForceEmailAddress emigo.Nullable[bool] `json:"forceEmailAddress" xml:"forceEmailAddress" yaml:"forceEmailAddress"        `
+	// If forced, user cannot change the phone number and needs to complete signup.
+	ForcePhoneNumber emigo.Nullable[bool] `json:"forcePhoneNumber" xml:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
+	// The role which invitee get if they accept the request.
+	Role     *RoleEntity              `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
+	RoleId   emigo.Nullable[string]   `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
+	Children []*WorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -158,31 +183,6 @@ type WorkspaceInviteEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.
-	PublicKey string `json:"publicKey" xml:"publicKey" yaml:"publicKey"        `
-	// The content that user will receive to understand the reason of the letter.
-	CoverLetter string `json:"coverLetter" xml:"coverLetter" yaml:"coverLetter"        `
-	// If the invited person has a different language, then you can define that so the interface for him will be automatically translated.
-	TargetUserLocale string `json:"targetUserLocale" xml:"targetUserLocale" yaml:"targetUserLocale"        `
-	// The email address of the person which is invited.
-	Email string `json:"email" xml:"email" yaml:"email"        `
-	// The phone number of the person which is invited.
-	Phonenumber string `json:"phonenumber" xml:"phonenumber" yaml:"phonenumber"        `
-	// Workspace which user is being invite to.
-	Workspace *WorkspaceEntity `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	// First name of the person which is invited
-	FirstName string `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
-	// Last name of the person which is invited.
-	LastName string `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
-	// If forced, the email address cannot be changed by the user which has been invited.
-	ForceEmailAddress emigo.Nullable[bool] `json:"forceEmailAddress" xml:"forceEmailAddress" yaml:"forceEmailAddress"        `
-	// If forced, user cannot change the phone number and needs to complete signup.
-	ForcePhoneNumber emigo.Nullable[bool] `json:"forcePhoneNumber" xml:"forcePhoneNumber" yaml:"forcePhoneNumber"        `
-	// The role which invitee get if they accept the request.
-	Role     *RoleEntity              `json:"role" xml:"role" yaml:"role"    gorm:"foreignKey:RoleId;references:UniqueId"      `
-	RoleId   emigo.Nullable[string]   `json:"roleId" yaml:"roleId" xml:"roleId"   validate:"required" `
-	Children []*WorkspaceInviteEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo *WorkspaceInviteEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func WorkspaceInviteEntityStream(q fireback.QueryDSL) (chan []*WorkspaceInviteEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1615,10 +1615,9 @@ var WorkspaceInviteEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_INVITE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	WorkspaceInviteCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		WorkspaceInviteCliFn(),
+	},
 	Actions:      GetWorkspaceInviteModule3Actions(),
 	MockProvider: WorkspaceInviteImportMocks,
 	AutoMigrationEntities: []interface{}{

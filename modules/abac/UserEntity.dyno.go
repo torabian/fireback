@@ -8,7 +8,7 @@ package abac
 import (
 	"context"
 	"embed"
-	"encoding"
+	"encoding" //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -138,6 +138,19 @@ var UserQsFlags = []cli.Flag{
 }
 
 type UserEntity struct {
+	FirstName string              `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
+	LastName  string              `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
+	Photo     string              `json:"photo" xml:"photo" yaml:"photo"        `
+	Gender    emigo.Nullable[int] `json:"gender" xml:"gender" yaml:"gender"        `
+	Title     string              `json:"title" xml:"title" yaml:"title"        `
+	BirthDate fireback.XDate      `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
+	Avatar    string              `json:"avatar" xml:"avatar" yaml:"avatar"        `
+	// User last connecting ip address
+	LastIpAddress string `json:"lastIpAddress" xml:"lastIpAddress" yaml:"lastIpAddress"        `
+	// User primary address location. Can be useful for simple projects that a user is associated with a single address.
+	PrimaryAddress *UserPrimaryAddress `json:"primaryAddress" xml:"primaryAddress" yaml:"primaryAddress"    gorm:"embedded"      `
+	Children       []*UserEntity       `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo       *UserEntity         `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -195,20 +208,7 @@ type UserEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string              `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	FirstName        string              `json:"firstName" xml:"firstName" yaml:"firstName"  validate:"required"        `
-	LastName         string              `json:"lastName" xml:"lastName" yaml:"lastName"  validate:"required"        `
-	Photo            string              `json:"photo" xml:"photo" yaml:"photo"        `
-	Gender           emigo.Nullable[int] `json:"gender" xml:"gender" yaml:"gender"        `
-	Title            string              `json:"title" xml:"title" yaml:"title"        `
-	BirthDate        fireback.XDate      `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
-	Avatar           string              `json:"avatar" xml:"avatar" yaml:"avatar"        `
-	// User last connecting ip address
-	LastIpAddress string `json:"lastIpAddress" xml:"lastIpAddress" yaml:"lastIpAddress"        `
-	// User primary address location. Can be useful for simple projects that a user is associated with a single address.
-	PrimaryAddress *UserPrimaryAddress `json:"primaryAddress" xml:"primaryAddress" yaml:"primaryAddress"    gorm:"embedded"      `
-	Children       []*UserEntity       `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo       *UserEntity         `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func UserEntityStream(q fireback.QueryDSL) (chan []*UserEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1710,10 +1710,9 @@ var UserEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_USER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	UserCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		UserCliFn(),
+	},
 	Actions:      GetUserModule3Actions(),
 	MockProvider: UserImportMocks,
 	AutoMigrationEntities: []interface{}{

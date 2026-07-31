@@ -171,7 +171,7 @@ func (x InviteToWorkspaceActionRequest) GetGinCtx() interface{} {
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
 func (x InviteToWorkspaceActionRequest) GetCliCtx() interface{} {
-	return x.GinCtx
+	return x.CliCtx
 }
 func InviteToWorkspaceActionClientCreateUrl(
 	req InviteToWorkspaceActionRequest,

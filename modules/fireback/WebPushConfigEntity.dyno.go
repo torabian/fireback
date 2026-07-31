@@ -49,6 +49,10 @@ var WebPushConfigQsFlags = []cli.Flag{
 }
 
 type WebPushConfigEntity struct {
+	// The json content of the web push after getting it from browser
+	Subscription *JSON                  `json:"subscription" xml:"subscription" yaml:"subscription"  validate:"required"        `
+	Children     []*WebPushConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *WebPushConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -107,10 +111,6 @@ type WebPushConfigEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// The json content of the web push after getting it from browser
-	Subscription *JSON                  `json:"subscription" xml:"subscription" yaml:"subscription"  validate:"required"        `
-	Children     []*WebPushConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo     *WebPushConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func WebPushConfigEntityStream(q QueryDSL) (chan []*WebPushConfigEntity, *QueryResultMeta, *IError) {
@@ -1429,10 +1429,9 @@ var WebPushConfigEntityBundle = EntityBundle{
 	Permissions: ALL_WEB_PUSH_CONFIG_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	WebPushConfigCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		WebPushConfigCliFn(),
+	},
 	Actions:      GetWebPushConfigModule3Actions(),
 	MockProvider: WebPushConfigImportMocks,
 	AutoMigrationEntities: []interface{}{

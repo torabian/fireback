@@ -120,6 +120,43 @@ var WorkspaceConfigQsFlags = []cli.Flag{
 }
 
 type WorkspaceConfigEntity struct {
+	// Enables the recaptcha2 for authentication flow.
+	EnableRecaptcha2 emigo.Nullable[bool] `json:"enableRecaptcha2" xml:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
+	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
+	EnableOtp emigo.Nullable[bool] `json:"enableOtp" xml:"enableOtp" yaml:"enableOtp"        `
+	// Forces the user to have otp verification before can create an account. They can define their password still.
+	RequireOtpOnSignup emigo.Nullable[bool] `json:"requireOtpOnSignup" xml:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
+	// Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
+	RequireOtpOnSignin emigo.Nullable[bool] `json:"requireOtpOnSignin" xml:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
+	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
+	Recaptcha2ServerKey string `json:"recaptcha2ServerKey" xml:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
+	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
+	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
+	// Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
+	EnableTotp emigo.Nullable[bool] `json:"enableTotp" xml:"enableTotp" yaml:"enableTotp"        `
+	// Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
+	ForceTotp emigo.Nullable[bool] `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
+	// Forces users who want to create account using phone number to also set a password on their account
+	ForcePasswordOnPhone emigo.Nullable[bool] `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
+	// Forces the creation of account using phone number to ask for user first name and last name
+	ForcePersonNameOnPhone emigo.Nullable[bool] `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
+	// Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
+	GeneralEmailProvider   *EmailProviderEntity   `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
+	GeneralEmailProviderId emigo.Nullable[string] `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
+	// General service which would be used to send text messages (sms) using it's services or API.
+	GeneralGsmProvider   *GsmProviderEntity     `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
+	GeneralGsmProviderId emigo.Nullable[string] `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
+	// This template would be used, as default when a user is inviting a third-party into their own workspace.
+	InviteToWorkspaceContent   *RegionalContentEntity `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"foreignKey:InviteToWorkspaceContentId;references:UniqueId"      `
+	InviteToWorkspaceContentId emigo.Nullable[string] `json:"inviteToWorkspaceContentId" yaml:"inviteToWorkspaceContentId" xml:"inviteToWorkspaceContentId"  `
+	// Upon one time password request for email, the content will be read to fill the message which will go to user.
+	EmailOtpContent   *RegionalContentEntity `json:"emailOtpContent" xml:"emailOtpContent" yaml:"emailOtpContent"    gorm:"foreignKey:EmailOtpContentId;references:UniqueId"      `
+	EmailOtpContentId emigo.Nullable[string] `json:"emailOtpContentId" yaml:"emailOtpContentId" xml:"emailOtpContentId"  `
+	// Upon OTP text messages, this template will be used to create such text message, including the one time password code.
+	SmsOtpContent   *RegionalContentEntity   `json:"smsOtpContent" xml:"smsOtpContent" yaml:"smsOtpContent"    gorm:"foreignKey:SmsOtpContentId;references:UniqueId"      `
+	SmsOtpContentId emigo.Nullable[string]   `json:"smsOtpContentId" yaml:"smsOtpContentId" xml:"smsOtpContentId"  `
+	Children        []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo        *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -178,43 +215,6 @@ type WorkspaceConfigEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// Enables the recaptcha2 for authentication flow.
-	EnableRecaptcha2 emigo.Nullable[bool] `json:"enableRecaptcha2" xml:"enableRecaptcha2" yaml:"enableRecaptcha2"        `
-	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.
-	EnableOtp emigo.Nullable[bool] `json:"enableOtp" xml:"enableOtp" yaml:"enableOtp"        `
-	// Forces the user to have otp verification before can create an account. They can define their password still.
-	RequireOtpOnSignup emigo.Nullable[bool] `json:"requireOtpOnSignup" xml:"requireOtpOnSignup" yaml:"requireOtpOnSignup"        `
-	// Forces the user to use otp when signing in. Even if they have password set, they won't use it and only will be able to signin using that otp.
-	RequireOtpOnSignin emigo.Nullable[bool] `json:"requireOtpOnSignin" xml:"requireOtpOnSignin" yaml:"requireOtpOnSignin"        `
-	// Secret which would be used to decrypt if the recaptcha is correct. Should not be available publicly.
-	Recaptcha2ServerKey string `json:"recaptcha2ServerKey" xml:"recaptcha2ServerKey" yaml:"recaptcha2ServerKey"        `
-	// Secret which would be used for recaptcha2 on the client side. Can be publicly visible, and upon authenticating users it would be sent to front-end.
-	Recaptcha2ClientKey string `json:"recaptcha2ClientKey" xml:"recaptcha2ClientKey" yaml:"recaptcha2ClientKey"        `
-	// Enables user to make 2FA using apps such as google authenticator or microsoft authenticator.
-	EnableTotp emigo.Nullable[bool] `json:"enableTotp" xml:"enableTotp" yaml:"enableTotp"        `
-	// Forces the user to setup a 2FA in order to access their account. Users which did not setup this won't be affected.
-	ForceTotp emigo.Nullable[bool] `json:"forceTotp" xml:"forceTotp" yaml:"forceTotp"        `
-	// Forces users who want to create account using phone number to also set a password on their account
-	ForcePasswordOnPhone emigo.Nullable[bool] `json:"forcePasswordOnPhone" xml:"forcePasswordOnPhone" yaml:"forcePasswordOnPhone"        `
-	// Forces the creation of account using phone number to ask for user first name and last name
-	ForcePersonNameOnPhone emigo.Nullable[bool] `json:"forcePersonNameOnPhone" xml:"forcePersonNameOnPhone" yaml:"forcePersonNameOnPhone"        `
-	// Email provider service, which will be used to send the messages using it's service. It doesn't affect the message content, rather, you can choose via which third-party service, or even your own smtp service to send emails.
-	GeneralEmailProvider   *EmailProviderEntity   `json:"generalEmailProvider" xml:"generalEmailProvider" yaml:"generalEmailProvider"    gorm:"foreignKey:GeneralEmailProviderId;references:UniqueId"      `
-	GeneralEmailProviderId emigo.Nullable[string] `json:"generalEmailProviderId" yaml:"generalEmailProviderId" xml:"generalEmailProviderId"  `
-	// General service which would be used to send text messages (sms) using it's services or API.
-	GeneralGsmProvider   *GsmProviderEntity     `json:"generalGsmProvider" xml:"generalGsmProvider" yaml:"generalGsmProvider"    gorm:"foreignKey:GeneralGsmProviderId;references:UniqueId"      `
-	GeneralGsmProviderId emigo.Nullable[string] `json:"generalGsmProviderId" yaml:"generalGsmProviderId" xml:"generalGsmProviderId"  `
-	// This template would be used, as default when a user is inviting a third-party into their own workspace.
-	InviteToWorkspaceContent   *RegionalContentEntity `json:"inviteToWorkspaceContent" xml:"inviteToWorkspaceContent" yaml:"inviteToWorkspaceContent"    gorm:"foreignKey:InviteToWorkspaceContentId;references:UniqueId"      `
-	InviteToWorkspaceContentId emigo.Nullable[string] `json:"inviteToWorkspaceContentId" yaml:"inviteToWorkspaceContentId" xml:"inviteToWorkspaceContentId"  `
-	// Upon one time password request for email, the content will be read to fill the message which will go to user.
-	EmailOtpContent   *RegionalContentEntity `json:"emailOtpContent" xml:"emailOtpContent" yaml:"emailOtpContent"    gorm:"foreignKey:EmailOtpContentId;references:UniqueId"      `
-	EmailOtpContentId emigo.Nullable[string] `json:"emailOtpContentId" yaml:"emailOtpContentId" xml:"emailOtpContentId"  `
-	// Upon OTP text messages, this template will be used to create such text message, including the one time password code.
-	SmsOtpContent   *RegionalContentEntity   `json:"smsOtpContent" xml:"smsOtpContent" yaml:"smsOtpContent"    gorm:"foreignKey:SmsOtpContentId;references:UniqueId"      `
-	SmsOtpContentId emigo.Nullable[string]   `json:"smsOtpContentId" yaml:"smsOtpContentId" xml:"smsOtpContentId"  `
-	Children        []*WorkspaceConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo        *WorkspaceConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func WorkspaceConfigEntityStream(q fireback.QueryDSL) (chan []*WorkspaceConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1784,10 +1784,9 @@ var WorkspaceConfigEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_WORKSPACE_CONFIG_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	WorkspaceConfigCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		WorkspaceConfigCliFn(),
+	},
 	Actions:      GetWorkspaceConfigModule3Actions(),
 	MockProvider: WorkspaceConfigImportMocks,
 	AutoMigrationEntities: []interface{}{

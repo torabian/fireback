@@ -65,6 +65,12 @@ var EmailSenderQsFlags = []cli.Flag{
 }
 
 type EmailSenderEntity struct {
+	FromName         string               `json:"fromName" xml:"fromName" yaml:"fromName"  validate:"required"        `
+	FromEmailAddress string               `json:"fromEmailAddress" xml:"fromEmailAddress" yaml:"fromEmailAddress"  validate:"required"    gorm:"unique"      `
+	ReplyTo          string               `json:"replyTo" xml:"replyTo" yaml:"replyTo"  validate:"required"        `
+	NickName         string               `json:"nickName" xml:"nickName" yaml:"nickName"  validate:"required"        `
+	Children         []*EmailSenderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo         *EmailSenderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -122,13 +128,7 @@ type EmailSenderEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string               `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	FromName         string               `json:"fromName" xml:"fromName" yaml:"fromName"  validate:"required"        `
-	FromEmailAddress string               `json:"fromEmailAddress" xml:"fromEmailAddress" yaml:"fromEmailAddress"  validate:"required"    gorm:"unique"      `
-	ReplyTo          string               `json:"replyTo" xml:"replyTo" yaml:"replyTo"  validate:"required"        `
-	NickName         string               `json:"nickName" xml:"nickName" yaml:"nickName"  validate:"required"        `
-	Children         []*EmailSenderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *EmailSenderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func EmailSenderEntityStream(q fireback.QueryDSL) (chan []*EmailSenderEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1438,10 +1438,9 @@ var EmailSenderEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_EMAIL_SENDER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	EmailSenderCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		EmailSenderCliFn(),
+	},
 	Actions:      GetEmailSenderModule3Actions(),
 	MockProvider: EmailSenderImportMocks,
 	AutoMigrationEntities: []interface{}{

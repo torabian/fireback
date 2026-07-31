@@ -60,6 +60,14 @@ var PaymentConfigQsFlags = []cli.Flag{
 }
 
 type PaymentConfigEntity struct {
+	// Enables the stripe payment integration in the project
+	EnableStripe emigo.Nullable[bool] `json:"enableStripe" xml:"enableStripe" yaml:"enableStripe"        `
+	// Stripe secret key to initiate a payment intent
+	StripeSecretKey string `json:"stripeSecretKey" xml:"stripeSecretKey" yaml:"stripeSecretKey"        `
+	// The endpoint which the payment module will handle response coming back from stripe.
+	StripeCallbackUrl string                 `json:"stripeCallbackUrl" xml:"stripeCallbackUrl" yaml:"stripeCallbackUrl"        `
+	Children          []*PaymentConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo          *PaymentConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -118,14 +126,6 @@ type PaymentConfigEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// Enables the stripe payment integration in the project
-	EnableStripe emigo.Nullable[bool] `json:"enableStripe" xml:"enableStripe" yaml:"enableStripe"        `
-	// Stripe secret key to initiate a payment intent
-	StripeSecretKey string `json:"stripeSecretKey" xml:"stripeSecretKey" yaml:"stripeSecretKey"        `
-	// The endpoint which the payment module will handle response coming back from stripe.
-	StripeCallbackUrl string                 `json:"stripeCallbackUrl" xml:"stripeCallbackUrl" yaml:"stripeCallbackUrl"        `
-	Children          []*PaymentConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo          *PaymentConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func PaymentConfigEntityStream(q fireback.QueryDSL) (chan []*PaymentConfigEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1508,10 +1508,9 @@ var PaymentConfigEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PAYMENT_CONFIG_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PaymentConfigCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PaymentConfigCliFn(),
+	},
 	Actions:      GetPaymentConfigModule3Actions(),
 	MockProvider: PaymentConfigImportMocks,
 	AutoMigrationEntities: []interface{}{

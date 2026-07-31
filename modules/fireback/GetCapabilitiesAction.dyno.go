@@ -2,13 +2,12 @@ package fireback
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 )
 
 /**

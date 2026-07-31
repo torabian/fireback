@@ -50,6 +50,11 @@ var TimezoneGroupQsFlags = []cli.Flag{
 }
 
 type TimezoneGroupEntity struct {
+	// Title which is shown to the user and allows them to select.
+	Title        string                         `json:"title" xml:"title" yaml:"title"        translate:"true"  `
+	Translations []*TimezoneGroupEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*TimezoneGroupEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *TimezoneGroupEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -108,11 +113,6 @@ type TimezoneGroupEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// Title which is shown to the user and allows them to select.
-	Title        string                         `json:"title" xml:"title" yaml:"title"        translate:"true"  `
-	Translations []*TimezoneGroupEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children     []*TimezoneGroupEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo     *TimezoneGroupEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func TimezoneGroupEntityStream(q fireback.QueryDSL) (chan []*TimezoneGroupEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1376,10 +1376,9 @@ var TimezoneGroupEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_TIMEZONE_GROUP_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	TimezoneGroupCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		TimezoneGroupCliFn(),
+	},
 	Actions:      GetTimezoneGroupModule3Actions(),
 	MockProvider: TimezoneGroupImportMocks,
 	AutoMigrationEntities: []interface{}{

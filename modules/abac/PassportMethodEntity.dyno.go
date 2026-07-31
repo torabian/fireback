@@ -60,6 +60,13 @@ var PassportMethodQsFlags = []cli.Flag{
 }
 
 type PassportMethodEntity struct {
+	Type string `json:"type" xml:"type" yaml:"type"  validate:"oneof=email phone google facebook,required"        `
+	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
+	Region string `json:"region" xml:"region" yaml:"region"  validate:"required,oneof=global"        `
+	// Client key for those methods such as 'google' which require oauth client key
+	ClientKey string                  `json:"clientKey" xml:"clientKey" yaml:"clientKey"        `
+	Children  []*PassportMethodEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo  *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -118,13 +125,6 @@ type PassportMethodEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Type             string `json:"type" xml:"type" yaml:"type"  validate:"oneof=email phone google facebook,required"        `
-	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
-	Region string `json:"region" xml:"region" yaml:"region"  validate:"required,oneof=global"        `
-	// Client key for those methods such as 'google' which require oauth client key
-	ClientKey string                  `json:"clientKey" xml:"clientKey" yaml:"clientKey"        `
-	Children  []*PassportMethodEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo  *PassportMethodEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*PassportMethodEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1409,10 +1409,9 @@ var PassportMethodEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PASSPORT_METHOD_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PassportMethodCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PassportMethodCliFn(),
+	},
 	Actions:      GetPassportMethodModule3Actions(),
 	MockProvider: PassportMethodImportMocks,
 	AutoMigrationEntities: []interface{}{

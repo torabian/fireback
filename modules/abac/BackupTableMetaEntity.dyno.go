@@ -50,6 +50,9 @@ var BackupTableMetaQsFlags = []cli.Flag{
 }
 
 type BackupTableMetaEntity struct {
+	TableNameInDb string                   `json:"tableNameInDb" xml:"tableNameInDb" yaml:"tableNameInDb"        `
+	Children      []*BackupTableMetaEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo      *BackupTableMetaEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -107,10 +110,7 @@ type BackupTableMetaEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	TableNameInDb    string                   `json:"tableNameInDb" xml:"tableNameInDb" yaml:"tableNameInDb"        `
-	Children         []*BackupTableMetaEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *BackupTableMetaEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func BackupTableMetaEntityStream(q fireback.QueryDSL) (chan []*BackupTableMetaEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1342,10 +1342,9 @@ var BackupTableMetaEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_BACKUP_TABLE_META_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	BackupTableMetaCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		BackupTableMetaCliFn(),
+	},
 	Actions:      GetBackupTableMetaModule3Actions(),
 	MockProvider: BackupTableMetaImportMocks,
 	AutoMigrationEntities: []interface{}{

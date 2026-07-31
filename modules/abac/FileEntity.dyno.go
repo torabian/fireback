@@ -35,118 +35,8 @@ func ResetFileSeeders(fs *embed.FS) {
 }
 
 type FileVariations struct {
-	// Defines the visibility of the record in the table.
-	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
-	// by default, visibility of record are 0, means they are protected by the workspace
-	// which are being created, and visible to every member of the workspace
-	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
-	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
-	// to the selected workspace by user, if they have write access. You can change this value
-	// or prevent changes to it manually (on root features for example modifying other workspace)
-	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
-	// The unique-id of the parent table, which this record is being linked to.
-	// used internally for making relations in fireback, generally does not need manual changes
-	// or modification by the developer or user. For example, if you have a object inside an object
-	// the unique-id of the parent will be written in the child.
-	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
-	// Used for recursive or parent-child operations. Some tables, are having nested relations,
-	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
-	// creating of modifying a record.
-	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
-	// Makes a field deletable. Some records should not be deletable at all.
-	// default it's true.
-	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
-	// Makes a field updatable. Some records should not be updatable at all.
-	// default it's true.
-	IsUpdatable *bool `json:"isUpdatable,omitempty" xml:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
-	// The unique-id of the user which is creating the record, or the record belongs to.
-	// Administration might want to change this to any user, by default Fireback fills
-	// it to the current authenticated user.
-	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
-	// General mechanism to rank the elements. From code perspective, it's just a number,
-	// but you can sort it based on any logic for records to make a ranking, sorting.
-	// they should not be unique across a table.
-	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
-	// Primary numeric key in the database. This value is not meant to be exported to public
-	// or be used to access data at all. Rather a mechanism of indexing columns internally
-	// or cursor pagination in future releases of fireback, or better search performance.
-	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-" xml:"-"`
-	// Unique id of the record across the table. This value will be accessed from public APIs,
-	// and many other places intead of numeric ID property.
-	// Upon generation, a UUID automatically is being assigned, and if user has specified the
-	// Unique id in the post body, it will be used. This mechanism allows to manage unsaved
-	// content on front-end much easier than requiring parent to exists first.
-	UniqueId string `json:"uniqueId,omitempty" xml:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
-	// The time that the record has been updated in datetime.
-	// the field will be automatically populated by gorm orm.
-	UpdatedAt *time.Time `json:"updatedAt,omitempty" xml:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
-	// The time that the record has been created in datetime.
-	// the field will be automatically populated by gorm orm.
-	CreatedAt *time.Time `json:"createdAt,omitempty" xml:"createdAt,omitempty" yaml:"createdAt,omitempty"`
-	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
-	// you need to make sure check this field if writing custom sql queries.
-	// the field will be automatically populated by gorm orm.
-	DeletedAt *time.Time `json:"deletedAt,omitempty" xml:"deletedAt,omitempty" yaml:"deletedAt,omitempty"`
-	// Record creation date time formatting based on locale of the headers, or other
-	// possible factors.
-	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
-	// Record update date time formatting based on locale of the headers, or other
-	// possible factors.
-	UpdatedFormatted string      `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             string      `json:"name" xml:"name" yaml:"name"        `
-	LinkedTo         *FileEntity `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
-}
-
-func (x *FileVariations) RootObjectName() string {
-	return "FileEntity"
-}
-
-type FileEntityQs struct {
-	Name        fireback.QueriableField `cli:"name" table:"file" typeof:"string" column:"name" qs:"name"`
-	OperationId fireback.QueriableField `cli:"operation-id" table:"file" typeof:"string" column:"operation_id" qs:"operationId"`
-	DiskPath    fireback.QueriableField `cli:"disk-path" table:"file" typeof:"string" column:"disk_path" qs:"diskPath"`
-	Size        fireback.QueriableField `cli:"size" table:"file" typeof:"int64" column:"size" qs:"size"`
-	VirtualPath fireback.QueriableField `cli:"virtual-path" table:"file" typeof:"string" column:"virtual_path" qs:"virtualPath"`
-	Type        fireback.QueriableField `cli:"type" table:"file" typeof:"string" column:"type" qs:"type"`
-	Variations  fireback.QueriableField `cli:"variations" table:"file" typeof:"array" column:"variations" qs:"variations"`
-}
-
-func (x *FileEntityQs) GetQuery() string {
-	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
-}
-
-var FileQsFlags = []cli.Flag{
-	&cli.StringFlag{
-		Name:  "name",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "operation-id",
-		Usage: "For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.",
-	},
-	&cli.StringFlag{
-		Name:  "disk-path",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "size",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "virtual-path",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "type",
-		Usage: "",
-	},
-	&cli.StringFlag{
-		Name:  "variations",
-		Usage: "",
-	},
-}
-
-type FileEntity struct {
+	Name     string      `json:"name" xml:"name" yaml:"name"        `
+	LinkedTo *FileEntity `yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -205,7 +95,59 @@ type FileEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             string `json:"name" xml:"name" yaml:"name"        `
+}
+
+func (x *FileVariations) RootObjectName() string {
+	return "FileEntity"
+}
+
+type FileEntityQs struct {
+	Name        fireback.QueriableField `cli:"name" table:"file" typeof:"string" column:"name" qs:"name"`
+	OperationId fireback.QueriableField `cli:"operation-id" table:"file" typeof:"string" column:"operation_id" qs:"operationId"`
+	DiskPath    fireback.QueriableField `cli:"disk-path" table:"file" typeof:"string" column:"disk_path" qs:"diskPath"`
+	Size        fireback.QueriableField `cli:"size" table:"file" typeof:"int64" column:"size" qs:"size"`
+	VirtualPath fireback.QueriableField `cli:"virtual-path" table:"file" typeof:"string" column:"virtual_path" qs:"virtualPath"`
+	Type        fireback.QueriableField `cli:"type" table:"file" typeof:"string" column:"type" qs:"type"`
+	Variations  fireback.QueriableField `cli:"variations" table:"file" typeof:"array" column:"variations" qs:"variations"`
+}
+
+func (x *FileEntityQs) GetQuery() string {
+	return fireback.GenerateQueryStringStyle(reflect.ValueOf(x), "")
+}
+
+var FileQsFlags = []cli.Flag{
+	&cli.StringFlag{
+		Name:  "name",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "operation-id",
+		Usage: "For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.",
+	},
+	&cli.StringFlag{
+		Name:  "disk-path",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "size",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "virtual-path",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "type",
+		Usage: "",
+	},
+	&cli.StringFlag{
+		Name:  "variations",
+		Usage: "",
+	},
+}
+
+type FileEntity struct {
+	Name string `json:"name" xml:"name" yaml:"name"        `
 	// For each upload, we need to assign a operation id, so if the operation has been cancelled, it would be cleared automatically, and there won't be orphant files in the database.
 	OperationId string            `json:"operationId" xml:"operationId" yaml:"operationId"        `
 	DiskPath    string            `json:"diskPath" xml:"diskPath" yaml:"diskPath"        `
@@ -215,6 +157,64 @@ type FileEntity struct {
 	Variations  []*FileVariations `json:"variations" xml:"variations" yaml:"variations"    gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"      `
 	Children    []*FileEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo    *FileEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	// Defines the visibility of the record in the table.
+	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
+	// by default, visibility of record are 0, means they are protected by the workspace
+	// which are being created, and visible to every member of the workspace
+	Visibility emigo.Nullable[string] `json:"visibility,omitempty" yaml:"visibility,omitempty" xml:"visibility,omitempty"`
+	// The unique-id of the workspace which content belongs to. Upon creation this will be designated
+	// to the selected workspace by user, if they have write access. You can change this value
+	// or prevent changes to it manually (on root features for example modifying other workspace)
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId,omitempty" xml:"workspaceId,omitempty" yaml:"workspaceId,omitempty"`
+	// The unique-id of the parent table, which this record is being linked to.
+	// used internally for making relations in fireback, generally does not need manual changes
+	// or modification by the developer or user. For example, if you have a object inside an object
+	// the unique-id of the parent will be written in the child.
+	LinkerId emigo.Nullable[string] `json:"linkerId,omitempty" xml:"linkerId,omitempty" yaml:"linkerId,omitempty"`
+	// Used for recursive or parent-child operations. Some tables, are having nested relations,
+	// and this field makes the table self refrenceing. ParentId needs to exist in the table before
+	// creating of modifying a record.
+	ParentId emigo.Nullable[string] `json:"parentId,omitempty" xml:"parentId,omitempty" yaml:"parentId,omitempty"`
+	// Makes a field deletable. Some records should not be deletable at all.
+	// default it's true.
+	IsDeletable *bool `json:"isDeletable,omitempty" xml:"isDeletable,omitempty" yaml:"isDeletable,omitempty" gorm:"default:true"`
+	// Makes a field updatable. Some records should not be updatable at all.
+	// default it's true.
+	IsUpdatable *bool `json:"isUpdatable,omitempty" xml:"isUpdatable,omitempty" yaml:"isUpdatable,omitempty" gorm:"default:true"`
+	// The unique-id of the user which is creating the record, or the record belongs to.
+	// Administration might want to change this to any user, by default Fireback fills
+	// it to the current authenticated user.
+	UserId emigo.Nullable[string] `json:"userId,omitempty" xml:"userId,omitempty" yaml:"userId,omitempty"`
+	// General mechanism to rank the elements. From code perspective, it's just a number,
+	// but you can sort it based on any logic for records to make a ranking, sorting.
+	// they should not be unique across a table.
+	Rank emigo.Nullable[int64] `json:"rank,omitempty" yaml:"rank,omitempty" xml:"rank,omitempty" gorm:"type:int;name:rank"`
+	// Primary numeric key in the database. This value is not meant to be exported to public
+	// or be used to access data at all. Rather a mechanism of indexing columns internally
+	// or cursor pagination in future releases of fireback, or better search performance.
+	ID uint `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-" xml:"-"`
+	// Unique id of the record across the table. This value will be accessed from public APIs,
+	// and many other places intead of numeric ID property.
+	// Upon generation, a UUID automatically is being assigned, and if user has specified the
+	// Unique id in the post body, it will be used. This mechanism allows to manage unsaved
+	// content on front-end much easier than requiring parent to exists first.
+	UniqueId string `json:"uniqueId,omitempty" xml:"uniqueId,omitempty" gorm:"unique;not null;size:100;" yaml:"uniqueId,omitempty"`
+	// The time that the record has been updated in datetime.
+	// the field will be automatically populated by gorm orm.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty" xml:"updatedAt,omitempty" yaml:"updatedAt,omitempty"`
+	// The time that the record has been created in datetime.
+	// the field will be automatically populated by gorm orm.
+	CreatedAt *time.Time `json:"createdAt,omitempty" xml:"createdAt,omitempty" yaml:"createdAt,omitempty"`
+	// The time that the record has been deleted softly (means the data still exists in database, but no longer visible to any feature) in nano datatime
+	// you need to make sure check this field if writing custom sql queries.
+	// the field will be automatically populated by gorm orm.
+	DeletedAt *time.Time `json:"deletedAt,omitempty" xml:"deletedAt,omitempty" yaml:"deletedAt,omitempty"`
+	// Record creation date time formatting based on locale of the headers, or other
+	// possible factors.
+	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
+	// Record update date time formatting based on locale of the headers, or other
+	// possible factors.
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func FileEntityStream(q fireback.QueryDSL) (chan []*FileEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1727,10 +1727,9 @@ var FileEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_FILE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	FileCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		FileCliFn(),
+	},
 	Actions:      GetFileModule3Actions(),
 	MockProvider: FileImportMocks,
 	AutoMigrationEntities: []interface{}{

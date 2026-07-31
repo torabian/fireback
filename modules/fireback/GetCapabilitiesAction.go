@@ -1,13 +1,5 @@
 package fireback
 
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-
-	"github.com/urfave/cli/v3"
-)
-
 func GetCapabilitiesAction(c GetCapabilitiesActionRequest) (*GetCapabilitiesActionResponse, error) {
 	query, err := ResolveActionContext(c, &SecurityModel{
 		AllowOnRoot:    true,
@@ -28,31 +20,31 @@ func GetCapabilitiesAction(c GetCapabilitiesActionRequest) (*GetCapabilitiesActi
 	}, nil
 }
 
-func GetCapabilitiesActionCliHandler(
-	handler func(c GetCapabilitiesActionRequest) (*GetCapabilitiesActionResponse, error),
-) *cli.Command {
-	meta := GetCapabilitiesActionMeta()
+// func GetCapabilitiesActionCliHandler(
+// 	handler func(c GetCapabilitiesActionRequest) (*GetCapabilitiesActionResponse, error),
+// ) *cli.Command {
+// 	meta := GetCapabilitiesActionMeta()
 
-	return &cli.Command{
-		Name:        meta.Name,
-		Description: meta.Description,
-		Action: func(ctx context.Context, c *cli.Command) error {
-			req := GetCapabilitiesActionRequest{
-				CliCtx: c,
-			}
+// 	return &cli.Command{
+// 		Name:        meta.Name,
+// 		Description: meta.Description,
+// 		Action: func(ctx context.Context, c *cli.Command) error {
+// 			req := GetCapabilitiesActionRequest{
+// 				CliCtx: c,
+// 			}
 
-			res, err := handler(req)
-			if err != nil {
-				return err
-			}
+// 			res, err := handler(req)
+// 			if err != nil {
+// 				return err
+// 			}
 
-			v, err := json.MarshalIndent(res, "", "  ")
-			if err != nil {
-				return err
-			}
+// 			v, err := json.MarshalIndent(res, "", "  ")
+// 			if err != nil {
+// 				return err
+// 			}
 
-			fmt.Print(string(v), err)
-			return nil
-		},
-	}
-}
+// 			fmt.Print(string(v), err)
+// 			return nil
+// 		},
+// 	}
+// }

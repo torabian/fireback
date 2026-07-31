@@ -70,6 +70,13 @@ var GsmProviderQsFlags = []cli.Flag{
 }
 
 type GsmProviderEntity struct {
+	ApiKey           string               `json:"apiKey" xml:"apiKey" yaml:"apiKey"        `
+	MainSenderNumber string               `json:"mainSenderNumber" xml:"mainSenderNumber" yaml:"mainSenderNumber"  validate:"required"        `
+	Type             string               `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	InvokeUrl        string               `json:"invokeUrl" xml:"invokeUrl" yaml:"invokeUrl"        `
+	InvokeBody       string               `json:"invokeBody" xml:"invokeBody" yaml:"invokeBody"        `
+	Children         []*GsmProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo         *GsmProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -127,14 +134,7 @@ type GsmProviderEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string               `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	ApiKey           string               `json:"apiKey" xml:"apiKey" yaml:"apiKey"        `
-	MainSenderNumber string               `json:"mainSenderNumber" xml:"mainSenderNumber" yaml:"mainSenderNumber"  validate:"required"        `
-	Type             string               `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	InvokeUrl        string               `json:"invokeUrl" xml:"invokeUrl" yaml:"invokeUrl"        `
-	InvokeBody       string               `json:"invokeBody" xml:"invokeBody" yaml:"invokeBody"        `
-	Children         []*GsmProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *GsmProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func GsmProviderEntityStream(q fireback.QueryDSL) (chan []*GsmProviderEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1473,10 +1473,9 @@ var GsmProviderEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_GSM_PROVIDER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	GsmProviderCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		GsmProviderCliFn(),
+	},
 	Actions:      GetGsmProviderModule3Actions(),
 	MockProvider: GsmProviderImportMocks,
 	AutoMigrationEntities: []interface{}{

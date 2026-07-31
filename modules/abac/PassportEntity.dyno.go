@@ -90,6 +90,20 @@ var PassportQsFlags = []cli.Flag{
 }
 
 type PassportEntity struct {
+	// When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.
+	ThirdPartyVerifier string      `json:"thirdPartyVerifier" xml:"thirdPartyVerifier" yaml:"thirdPartyVerifier"        `
+	Type               string      `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	User               *UserEntity `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Value              string      `json:"value" xml:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
+	// Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
+	TotpSecret string `json:"totpSecret" xml:"totpSecret" yaml:"totpSecret"        `
+	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
+	TotpConfirmed emigo.Nullable[bool] `json:"totpConfirmed" xml:"totpConfirmed" yaml:"totpConfirmed"        `
+	Password      string               `json:"-" xml:"password" yaml:"-"        `
+	Confirmed     emigo.Nullable[bool] `json:"confirmed" xml:"confirmed" yaml:"confirmed"        `
+	AccessToken   string               `json:"accessToken" xml:"accessToken" yaml:"accessToken"        `
+	Children      []*PassportEntity    `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo      *PassportEntity      `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -148,20 +162,6 @@ type PassportEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.
-	ThirdPartyVerifier string      `json:"thirdPartyVerifier" xml:"thirdPartyVerifier" yaml:"thirdPartyVerifier"        `
-	Type               string      `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	User               *UserEntity `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Value              string      `json:"value" xml:"value" yaml:"value"  validate:"required"    gorm:"unique"      `
-	// Store the secret of 2FA using time based dual factor authentication here for this specific passport. If set, during authorization will be asked.
-	TotpSecret string `json:"totpSecret" xml:"totpSecret" yaml:"totpSecret"        `
-	// Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.
-	TotpConfirmed emigo.Nullable[bool] `json:"totpConfirmed" xml:"totpConfirmed" yaml:"totpConfirmed"        `
-	Password      string               `json:"-" xml:"password" yaml:"-"        `
-	Confirmed     emigo.Nullable[bool] `json:"confirmed" xml:"confirmed" yaml:"confirmed"        `
-	AccessToken   string               `json:"accessToken" xml:"accessToken" yaml:"accessToken"        `
-	Children      []*PassportEntity    `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo      *PassportEntity      `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func PassportEntityStream(q fireback.QueryDSL) (chan []*PassportEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1564,10 +1564,9 @@ var PassportEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PASSPORT_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PassportCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PassportCliFn(),
+	},
 	Actions:      GetPassportModule3Actions(),
 	MockProvider: PassportImportMocks,
 	AutoMigrationEntities: []interface{}{

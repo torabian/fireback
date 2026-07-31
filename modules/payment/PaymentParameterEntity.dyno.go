@@ -100,6 +100,30 @@ var PaymentParameterQsFlags = []cli.Flag{
 }
 
 type PaymentParameterEntity struct {
+	// User it's the same value as posId
+	PosId string `json:"posId" xml:"posId" yaml:"posId"        `
+	// Merchant Id is said to be same as posId, but we collect it anyway
+	MerchantId string `json:"merchantId" xml:"merchantId" yaml:"merchantId"        `
+	// CRC is got from the payment provider
+	Crc string `json:"crc" xml:"crc" yaml:"crc"        `
+	// secretId it's the samevalue as key for reports (API key).
+	SecretId string `json:"secretId" xml:"secretId" yaml:"secretId"        `
+	// Used when transaction is done on payment provider side
+	UrlReturn string `json:"urlReturn" xml:"urlReturn" yaml:"urlReturn"        `
+	// Used to send notification from payment provider.
+	UrlStatus string `json:"urlStatus" xml:"urlStatus" yaml:"urlStatus"        `
+	// The currency that transactions will be.
+	Currency string `json:"currency" xml:"currency" yaml:"currency"        `
+	// Country codes compatible with ISO, e.g. PL, DE, etc.
+	Country string `json:"country" xml:"country" yaml:"country"        `
+	// The location that transaction would go when it's already registered. You can use {Token} placeholder and it would be replaced.
+	PaymentPageUrl string `json:"paymentPageUrl" xml:"paymentPageUrl" yaml:"paymentPageUrl"        `
+	// Url that would be used to register a transaction
+	RegisterApiUrl string `json:"registerApiUrl" xml:"registerApiUrl" yaml:"registerApiUrl"        `
+	// The url which will be used to verify the transaction notification
+	VerifyApiUrl string                    `json:"verifyApiUrl" xml:"verifyApiUrl" yaml:"verifyApiUrl"        `
+	Children     []*PaymentParameterEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *PaymentParameterEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -158,30 +182,6 @@ type PaymentParameterEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// User it's the same value as posId
-	PosId string `json:"posId" xml:"posId" yaml:"posId"        `
-	// Merchant Id is said to be same as posId, but we collect it anyway
-	MerchantId string `json:"merchantId" xml:"merchantId" yaml:"merchantId"        `
-	// CRC is got from the payment provider
-	Crc string `json:"crc" xml:"crc" yaml:"crc"        `
-	// secretId it's the samevalue as key for reports (API key).
-	SecretId string `json:"secretId" xml:"secretId" yaml:"secretId"        `
-	// Used when transaction is done on payment provider side
-	UrlReturn string `json:"urlReturn" xml:"urlReturn" yaml:"urlReturn"        `
-	// Used to send notification from payment provider.
-	UrlStatus string `json:"urlStatus" xml:"urlStatus" yaml:"urlStatus"        `
-	// The currency that transactions will be.
-	Currency string `json:"currency" xml:"currency" yaml:"currency"        `
-	// Country codes compatible with ISO, e.g. PL, DE, etc.
-	Country string `json:"country" xml:"country" yaml:"country"        `
-	// The location that transaction would go when it's already registered. You can use {Token} placeholder and it would be replaced.
-	PaymentPageUrl string `json:"paymentPageUrl" xml:"paymentPageUrl" yaml:"paymentPageUrl"        `
-	// Url that would be used to register a transaction
-	RegisterApiUrl string `json:"registerApiUrl" xml:"registerApiUrl" yaml:"registerApiUrl"        `
-	// The url which will be used to verify the transaction notification
-	VerifyApiUrl string                    `json:"verifyApiUrl" xml:"verifyApiUrl" yaml:"verifyApiUrl"        `
-	Children     []*PaymentParameterEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo     *PaymentParameterEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func PaymentParameterEntityStream(q fireback.QueryDSL) (chan []*PaymentParameterEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1741,10 +1741,9 @@ var PaymentParameterEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PAYMENT_PARAMETER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PaymentParameterCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PaymentParameterCliFn(),
+	},
 	Actions:      GetPaymentParameterModule3Actions(),
 	MockProvider: PaymentParameterImportMocks,
 	AutoMigrationEntities: []interface{}{

@@ -216,7 +216,7 @@ func (x UserInvitationsActionRequest) GetGinCtx() interface{} {
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
 func (x UserInvitationsActionRequest) GetCliCtx() interface{} {
-	return x.GinCtx
+	return x.CliCtx
 }
 func UserInvitationsActionClientCreateUrl(
 	req UserInvitationsActionRequest,

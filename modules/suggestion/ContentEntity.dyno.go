@@ -60,6 +60,14 @@ var ContentQsFlags = []cli.Flag{
 }
 
 type ContentEntity struct {
+	// The content title, such as video title, course title, post title.
+	Title string `json:"title" xml:"title" yaml:"title"        `
+	// Excerpt of the content, useful for search and sometimes showing on different location of the website or app, in lists or feeds.
+	Excerpt string `json:"excerpt" xml:"excerpt" yaml:"excerpt"        `
+	// The content title, such as video title, course title, post title.
+	ContentType string           `json:"contentType" xml:"contentType" yaml:"contentType"        `
+	Children    []*ContentEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo    *ContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -118,14 +126,6 @@ type ContentEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// The content title, such as video title, course title, post title.
-	Title string `json:"title" xml:"title" yaml:"title"        `
-	// Excerpt of the content, useful for search and sometimes showing on different location of the website or app, in lists or feeds.
-	Excerpt string `json:"excerpt" xml:"excerpt" yaml:"excerpt"        `
-	// The content title, such as video title, course title, post title.
-	ContentType string           `json:"contentType" xml:"contentType" yaml:"contentType"        `
-	Children    []*ContentEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo    *ContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func ContentEntityStream(q fireback.QueryDSL) (chan []*ContentEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1403,10 +1403,9 @@ var ContentEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_CONTENT_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	ContentCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		ContentCliFn(),
+	},
 	Actions:      GetContentModule3Actions(),
 	MockProvider: ContentImportMocks,
 	AutoMigrationEntities: []interface{}{

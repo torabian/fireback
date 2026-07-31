@@ -55,6 +55,10 @@ var UserProfileQsFlags = []cli.Flag{
 }
 
 type UserProfileEntity struct {
+	FirstName string               `json:"firstName" xml:"firstName" yaml:"firstName"        `
+	LastName  string               `json:"lastName" xml:"lastName" yaml:"lastName"        `
+	Children  []*UserProfileEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo  *UserProfileEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -112,11 +116,7 @@ type UserProfileEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string               `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	FirstName        string               `json:"firstName" xml:"firstName" yaml:"firstName"        `
-	LastName         string               `json:"lastName" xml:"lastName" yaml:"lastName"        `
-	Children         []*UserProfileEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *UserProfileEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func UserProfileEntityStream(q fireback.QueryDSL) (chan []*UserProfileEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1371,10 +1371,9 @@ var UserProfileEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_USER_PROFILE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	UserProfileCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		UserProfileCliFn(),
+	},
 	Actions:      GetUserProfileModule3Actions(),
 	MockProvider: UserProfileImportMocks,
 	AutoMigrationEntities: []interface{}{

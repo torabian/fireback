@@ -72,6 +72,20 @@ var AppMenuQsFlags = []cli.Flag{
 }
 
 type AppMenuEntity struct {
+	// Label that will be visible to user
+	Label string `json:"label" xml:"label" yaml:"label"        translate:"true"  `
+	// Location that will be navigated in case of click or selection on ui
+	Href string `json:"href" xml:"href" yaml:"href"        `
+	// Icon string address which matches the resources on the front-end apps.
+	Icon string `json:"icon" xml:"icon" yaml:"icon"        `
+	// Custom window location url matchers, for inner screens.
+	ActiveMatcher string `json:"activeMatcher" xml:"activeMatcher" yaml:"activeMatcher"        `
+	// The permission which is required for the menu to be visible.
+	Capability   *fireback.CapabilityEntity `json:"capability" xml:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
+	CapabilityId emigo.Nullable[string]     `json:"capabilityId" yaml:"capabilityId" xml:"capabilityId"  `
+	Translations []*AppMenuEntityPolyglot   `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*AppMenuEntity           `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *AppMenuEntity             `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -130,20 +144,6 @@ type AppMenuEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// Label that will be visible to user
-	Label string `json:"label" xml:"label" yaml:"label"        translate:"true"  `
-	// Location that will be navigated in case of click or selection on ui
-	Href string `json:"href" xml:"href" yaml:"href"        `
-	// Icon string address which matches the resources on the front-end apps.
-	Icon string `json:"icon" xml:"icon" yaml:"icon"        `
-	// Custom window location url matchers, for inner screens.
-	ActiveMatcher string `json:"activeMatcher" xml:"activeMatcher" yaml:"activeMatcher"        `
-	// The permission which is required for the menu to be visible.
-	Capability   *fireback.CapabilityEntity `json:"capability" xml:"capability" yaml:"capability"    gorm:"foreignKey:CapabilityId;references:UniqueId"      `
-	CapabilityId emigo.Nullable[string]     `json:"capabilityId" yaml:"capabilityId" xml:"capabilityId"  `
-	Translations []*AppMenuEntityPolyglot   `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children     []*AppMenuEntity           `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo     *AppMenuEntity             `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func AppMenuEntityStream(q fireback.QueryDSL) (chan []*AppMenuEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1575,10 +1575,9 @@ var AppMenuEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_APP_MENU_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	AppMenuCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		AppMenuCliFn(),
+	},
 	Actions:      GetAppMenuModule3Actions(),
 	MockProvider: AppMenuImportMocks,
 	AutoMigrationEntities: []interface{}{

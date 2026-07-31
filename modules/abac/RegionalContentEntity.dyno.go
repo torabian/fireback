@@ -70,6 +70,13 @@ var RegionalContentQsFlags = []cli.Flag{
 }
 
 type RegionalContentEntity struct {
+	Content    string                   `json:"content" xml:"content" yaml:"content"  validate:"required"        `
+	Region     string                   `json:"region" xml:"region" yaml:"region"  validate:"required"        `
+	Title      string                   `json:"title" xml:"title" yaml:"title"        `
+	LanguageId string                   `json:"languageId" xml:"languageId" yaml:"languageId"  validate:"required"    gorm:"index:regional_content_index,unique"      `
+	KeyGroup   string                   `json:"keyGroup" xml:"keyGroup" yaml:"keyGroup"  validate:"required"    gorm:"index:regional_content_index,unique"      `
+	Children   []*RegionalContentEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo   *RegionalContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -127,14 +134,7 @@ type RegionalContentEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Content          string                   `json:"content" xml:"content" yaml:"content"  validate:"required"        `
-	Region           string                   `json:"region" xml:"region" yaml:"region"  validate:"required"        `
-	Title            string                   `json:"title" xml:"title" yaml:"title"        `
-	LanguageId       string                   `json:"languageId" xml:"languageId" yaml:"languageId"  validate:"required"    gorm:"index:regional_content_index,unique"      `
-	KeyGroup         string                   `json:"keyGroup" xml:"keyGroup" yaml:"keyGroup"  validate:"required"    gorm:"index:regional_content_index,unique"      `
-	Children         []*RegionalContentEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *RegionalContentEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func RegionalContentEntityStream(q fireback.QueryDSL) (chan []*RegionalContentEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1481,10 +1481,9 @@ var RegionalContentEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_REGIONAL_CONTENT_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	RegionalContentCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		RegionalContentCliFn(),
+	},
 	Actions:      GetRegionalContentModule3Actions(),
 	MockProvider: RegionalContentImportMocks,
 	AutoMigrationEntities: []interface{}{

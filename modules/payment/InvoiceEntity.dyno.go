@@ -70,6 +70,19 @@ var InvoiceQsFlags = []cli.Flag{
 }
 
 type InvoiceEntity struct {
+	// Explanation about the invoice, the reason someone needs to pay
+	Title        string  `json:"title" xml:"title" yaml:"title"  validate:"required"    gorm:"text"      `
+	TitleExcerpt *string `json:"titleExcerpt" yaml:"titleExcerpt" xml:"titleExcerpt"`
+	// Amount of the invoice which has to be payed
+	Amount fireback.Money `json:"amount" xml:"amount" yaml:"amount"  validate:"required"    gorm:"embedded"      `
+	// The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.
+	NotificationKey string `json:"notificationKey" xml:"notificationKey" yaml:"notificationKey"        `
+	// When the payment is successful, it might use this url to make a redirect.
+	RedirectAfterSuccess string `json:"redirectAfterSuccess" xml:"redirectAfterSuccess" yaml:"redirectAfterSuccess"        `
+	// Final status of the invoice from a accounting perspective
+	FinalStatus string           `json:"finalStatus" xml:"finalStatus" yaml:"finalStatus"  validate:"required"        `
+	Children    []*InvoiceEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo    *InvoiceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -128,19 +141,6 @@ type InvoiceEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// Explanation about the invoice, the reason someone needs to pay
-	Title        string  `json:"title" xml:"title" yaml:"title"  validate:"required"    gorm:"text"      `
-	TitleExcerpt *string `json:"titleExcerpt" yaml:"titleExcerpt" xml:"titleExcerpt"`
-	// Amount of the invoice which has to be payed
-	Amount fireback.Money `json:"amount" xml:"amount" yaml:"amount"  validate:"required"    gorm:"embedded"      `
-	// The unique key, when an event related to the invoice happened it would be triggered. For example if another module wants to initiate the payment, and after payment success, wants to run some code, it would be listening to invoice events and notificationKey will come.
-	NotificationKey string `json:"notificationKey" xml:"notificationKey" yaml:"notificationKey"        `
-	// When the payment is successful, it might use this url to make a redirect.
-	RedirectAfterSuccess string `json:"redirectAfterSuccess" xml:"redirectAfterSuccess" yaml:"redirectAfterSuccess"        `
-	// Final status of the invoice from a accounting perspective
-	FinalStatus string           `json:"finalStatus" xml:"finalStatus" yaml:"finalStatus"  validate:"required"        `
-	Children    []*InvoiceEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo    *InvoiceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func InvoiceEntityStream(q fireback.QueryDSL) (chan []*InvoiceEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1477,10 +1477,9 @@ var InvoiceEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_INVOICE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	InvoiceCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		InvoiceCliFn(),
+	},
 	Actions:      GetInvoiceModule3Actions(),
 	MockProvider: InvoiceImportMocks,
 	AutoMigrationEntities: []interface{}{

@@ -210,7 +210,7 @@ func (x UserPassportsActionRequest) GetGinCtx() interface{} {
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
 func (x UserPassportsActionRequest) GetCliCtx() interface{} {
-	return x.GinCtx
+	return x.CliCtx
 }
 func UserPassportsActionClientCreateUrl(
 	req UserPassportsActionRequest,

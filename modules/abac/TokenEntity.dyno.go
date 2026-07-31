@@ -8,7 +8,7 @@ package abac
 import (
 	"context"
 	"embed"
-	"encoding"
+	"encoding" //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -61,6 +61,11 @@ var TokenQsFlags = []cli.Flag{
 }
 
 type TokenEntity struct {
+	User       *UserEntity        `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Token      string             `json:"token" xml:"token" yaml:"token"        `
+	ValidUntil fireback.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
+	Children   []*TokenEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo   *TokenEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -118,12 +123,7 @@ type TokenEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string             `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User             *UserEntity        `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Token            string             `json:"token" xml:"token" yaml:"token"        `
-	ValidUntil       fireback.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
-	Children         []*TokenEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *TokenEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func TokenEntityStream(q fireback.QueryDSL) (chan []*TokenEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1396,10 +1396,9 @@ var TokenEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_TOKEN_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	TokenCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		TokenCliFn(),
+	},
 	Actions:      GetTokenModule3Actions(),
 	MockProvider: TokenImportMocks,
 	AutoMigrationEntities: []interface{}{

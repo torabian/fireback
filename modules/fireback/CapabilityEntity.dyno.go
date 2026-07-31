@@ -54,6 +54,11 @@ var CapabilityQsFlags = []cli.Flag{
 }
 
 type CapabilityEntity struct {
+	Name         string                      `json:"name" xml:"name" yaml:"name"        `
+	Description  string                      `json:"description" xml:"description" yaml:"description"        translate:"true"  `
+	Translations []*CapabilityEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
+	Children     []*CapabilityEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo     *CapabilityEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -111,12 +116,7 @@ type CapabilityEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                      `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	Name             string                      `json:"name" xml:"name" yaml:"name"        `
-	Description      string                      `json:"description" xml:"description" yaml:"description"        translate:"true"  `
-	Translations     []*CapabilityEntityPolyglot `json:"translations,omitempty" xml:"translations,omitempty" yaml:"translations,omitempty" gorm:"foreignKey:LinkerId;references:UniqueId;constraint:OnDelete:CASCADE"`
-	Children         []*CapabilityEntity         `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *CapabilityEntity           `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func CapabilityEntityStream(q QueryDSL) (chan []*CapabilityEntity, *QueryResultMeta, *IError) {
@@ -1427,10 +1427,9 @@ var CapabilityEntityBundle = EntityBundle{
 	Permissions: ALL_CAPABILITY_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	CapabilityCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		CapabilityCliFn(),
+	},
 	Actions:      GetCapabilityModule3Actions(),
 	MockProvider: CapabilityImportMocks,
 	AutoMigrationEntities: []interface{}{

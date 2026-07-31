@@ -26,7 +26,7 @@ func EventBusSubscriptionActionMeta() struct {
 		Name:        "EventBusSubscriptionAction",
 		URL:         "/ws",
 		Method:      "REACTIVE",
-		CliName:     "",
+		CliName:     "event-bus-subscription-action",
 		Description: "Connects a client to all events related to their user profile, or workspace they are in",
 	}
 }

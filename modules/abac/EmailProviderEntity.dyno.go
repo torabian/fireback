@@ -8,7 +8,7 @@ package abac
 import (
 	"context"
 	"embed"
-	"encoding"
+	"encoding" //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -61,6 +61,14 @@ var EmailProviderQsFlags = []cli.Flag{
 }
 
 type EmailProviderEntity struct {
+	// Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
+	Type string `json:"type" xml:"type" yaml:"type"  validate:"required"        `
+	// Give the email provider configuration a name, which makes it easier later to query.
+	Title string `json:"title" xml:"title" yaml:"title"        `
+	// JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
+	Config   fireback.JSON          `json:"config" xml:"config" yaml:"config"        `
+	Children []*EmailProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo *EmailProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -119,14 +127,6 @@ type EmailProviderEntity struct {
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
 	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	// Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
-	Type string `json:"type" xml:"type" yaml:"type"  validate:"required"        `
-	// Give the email provider configuration a name, which makes it easier later to query.
-	Title string `json:"title" xml:"title" yaml:"title"        `
-	// JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
-	Config   fireback.JSON          `json:"config" xml:"config" yaml:"config"        `
-	Children []*EmailProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo *EmailProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 }
 
 func EmailProviderEntityStream(q fireback.QueryDSL) (chan []*EmailProviderEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1433,10 +1433,9 @@ var EmailProviderEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_EMAIL_PROVIDER_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	EmailProviderCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		EmailProviderCliFn(),
+	},
 	Actions:      GetEmailProviderModule3Actions(),
 	MockProvider: EmailProviderImportMocks,
 	AutoMigrationEntities: []interface{}{

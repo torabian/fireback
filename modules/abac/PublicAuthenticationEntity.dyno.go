@@ -100,6 +100,23 @@ var PublicAuthenticationQsFlags = []cli.Flag{
 }
 
 type PublicAuthenticationEntity struct {
+	User *UserEntity `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	// If the application requires totp dual factor upon account creation, we create a secret here and pass the link
+	TotpSecret string `json:"totpSecret" xml:"totpSecret" yaml:"totpSecret"        `
+	// The url which will be converted into QR code on client side to scan
+	TotpLink   string                 `json:"totpLink" xml:"totpLink" yaml:"totpLink"        `
+	Passport   *PassportEntity        `json:"passport" xml:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
+	PassportId emigo.Nullable[string] `json:"passportId" yaml:"passportId" xml:"passportId"  `
+	// This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account
+	SessionSecret       string                        `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
+	PassportValue       string                        `json:"passportValue" xml:"passportValue" yaml:"passportValue"        `
+	IsInCreationProcess emigo.Nullable[bool]          `json:"isInCreationProcess" xml:"isInCreationProcess" yaml:"isInCreationProcess"        `
+	Status              string                        `json:"status" xml:"status" yaml:"status"        `
+	BlockedUntil        int64                         `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
+	Otp                 string                        `json:"otp" xml:"otp" yaml:"otp"        `
+	RecoveryAbsoluteUrl string                        `json:"recoveryAbsoluteUrl" xml:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
+	Children            []*PublicAuthenticationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo            *PublicAuthenticationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -157,24 +174,7 @@ type PublicAuthenticationEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string      `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User             *UserEntity `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	// If the application requires totp dual factor upon account creation, we create a secret here and pass the link
-	TotpSecret string `json:"totpSecret" xml:"totpSecret" yaml:"totpSecret"        `
-	// The url which will be converted into QR code on client side to scan
-	TotpLink   string                 `json:"totpLink" xml:"totpLink" yaml:"totpLink"        `
-	Passport   *PassportEntity        `json:"passport" xml:"passport" yaml:"passport"    gorm:"foreignKey:PassportId;references:UniqueId"      `
-	PassportId emigo.Nullable[string] `json:"passportId" yaml:"passportId" xml:"passportId"  `
-	// This is a long hash generated and will be used to authenticate user after he confirmed the otp to finish the signup process and add more information before creating an account
-	SessionSecret       string                        `json:"sessionSecret" xml:"sessionSecret" yaml:"sessionSecret"        `
-	PassportValue       string                        `json:"passportValue" xml:"passportValue" yaml:"passportValue"        `
-	IsInCreationProcess emigo.Nullable[bool]          `json:"isInCreationProcess" xml:"isInCreationProcess" yaml:"isInCreationProcess"        `
-	Status              string                        `json:"status" xml:"status" yaml:"status"        `
-	BlockedUntil        int64                         `json:"blockedUntil" xml:"blockedUntil" yaml:"blockedUntil"        `
-	Otp                 string                        `json:"otp" xml:"otp" yaml:"otp"        `
-	RecoveryAbsoluteUrl string                        `json:"recoveryAbsoluteUrl" xml:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"       sql:"-"   `
-	Children            []*PublicAuthenticationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo            *PublicAuthenticationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func PublicAuthenticationEntityStream(q fireback.QueryDSL) (chan []*PublicAuthenticationEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1624,10 +1624,9 @@ var PublicAuthenticationEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PUBLIC_AUTHENTICATION_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PublicAuthenticationCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PublicAuthenticationCliFn(),
+	},
 	Actions:      GetPublicAuthenticationModule3Actions(),
 	MockProvider: PublicAuthenticationImportMocks,
 	AutoMigrationEntities: []interface{}{

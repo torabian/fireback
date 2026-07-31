@@ -70,6 +70,13 @@ var PhoneConfirmationQsFlags = []cli.Flag{
 }
 
 type PhoneConfirmationEntity struct {
+	User        *UserEntity                `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Status      string                     `json:"status" xml:"status" yaml:"status"        `
+	PhoneNumber string                     `json:"phoneNumber" xml:"phoneNumber" yaml:"phoneNumber"        `
+	Key         string                     `json:"key" xml:"key" yaml:"key"        `
+	ExpiresAt   string                     `json:"expiresAt" xml:"expiresAt" yaml:"expiresAt"        `
+	Children    []*PhoneConfirmationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo    *PhoneConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -127,14 +134,7 @@ type PhoneConfirmationEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                     `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User             *UserEntity                `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Status           string                     `json:"status" xml:"status" yaml:"status"        `
-	PhoneNumber      string                     `json:"phoneNumber" xml:"phoneNumber" yaml:"phoneNumber"        `
-	Key              string                     `json:"key" xml:"key" yaml:"key"        `
-	ExpiresAt        string                     `json:"expiresAt" xml:"expiresAt" yaml:"expiresAt"        `
-	Children         []*PhoneConfirmationEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *PhoneConfirmationEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func PhoneConfirmationEntityStream(q fireback.QueryDSL) (chan []*PhoneConfirmationEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1450,10 +1450,9 @@ var PhoneConfirmationEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_PHONE_CONFIRMATION_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	PhoneConfirmationCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		PhoneConfirmationCliFn(),
+	},
 	Actions:      GetPhoneConfirmationModule3Actions(),
 	MockProvider: PhoneConfirmationImportMocks,
 	AutoMigrationEntities: []interface{}{

@@ -70,6 +70,13 @@ var UserWorkspaceQsFlags = []cli.Flag{
 }
 
 type UserWorkspaceEntity struct {
+	User                 *UserEntity            `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Workspace            *WorkspaceEntity       `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
+	UserPermissions      []string               `json:"userPermissions" xml:"userPermissions" yaml:"userPermissions"    gorm:"-"     sql:"-"   `
+	RolePermission       []UserRoleWorkspaceDto `json:"rolePermission" xml:"rolePermission" yaml:"rolePermission"    gorm:"-"     sql:"-"   `
+	WorkspacePermissions []string               `json:"workspacePermissions" xml:"workspacePermissions" yaml:"workspacePermissions"    gorm:"-"     sql:"-"   `
+	Children             []*UserWorkspaceEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo             *UserWorkspaceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -127,14 +134,7 @@ type UserWorkspaceEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted     string                 `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	User                 *UserEntity            `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Workspace            *WorkspaceEntity       `json:"workspace" xml:"workspace" yaml:"workspace"    gorm:"foreignKey:WorkspaceId;references:UniqueId"      `
-	UserPermissions      []string               `json:"userPermissions" xml:"userPermissions" yaml:"userPermissions"    gorm:"-"     sql:"-"   `
-	RolePermission       []UserRoleWorkspaceDto `json:"rolePermission" xml:"rolePermission" yaml:"rolePermission"    gorm:"-"     sql:"-"   `
-	WorkspacePermissions []string               `json:"workspacePermissions" xml:"workspacePermissions" yaml:"workspacePermissions"    gorm:"-"     sql:"-"   `
-	Children             []*UserWorkspaceEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo             *UserWorkspaceEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func UserWorkspaceEntityStream(q fireback.QueryDSL) (chan []*UserWorkspaceEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1393,10 +1393,9 @@ var UserWorkspaceEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_USER_WORKSPACE_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	UserWorkspaceCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		UserWorkspaceCliFn(),
+	},
 	Actions:      GetUserWorkspaceModule3Actions(),
 	MockProvider: UserWorkspaceImportMocks,
 	AutoMigrationEntities: []interface{}{

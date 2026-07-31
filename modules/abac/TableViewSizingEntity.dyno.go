@@ -55,6 +55,10 @@ var TableViewSizingQsFlags = []cli.Flag{
 }
 
 type TableViewSizingEntity struct {
+	TableName string                   `json:"tableName" xml:"tableName" yaml:"tableName"  validate:"required"        `
+	Sizes     string                   `json:"sizes" xml:"sizes" yaml:"sizes"        `
+	Children  []*TableViewSizingEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo  *TableViewSizingEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -112,11 +116,7 @@ type TableViewSizingEntity struct {
 	CreatedFormatted string `json:"createdFormatted,omitempty" xml:"createdFormatted,omitempty" yaml:"createdFormatted,omitempty" sql:"-" gorm:"-"`
 	// Record update date time formatting based on locale of the headers, or other
 	// possible factors.
-	UpdatedFormatted string                   `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
-	TableName        string                   `json:"tableName" xml:"tableName" yaml:"tableName"  validate:"required"        `
-	Sizes            string                   `json:"sizes" xml:"sizes" yaml:"sizes"        `
-	Children         []*TableViewSizingEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo         *TableViewSizingEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	UpdatedFormatted string `json:"updatedFormatted,omitempty" xml:"updatedFormatted,omitempty" yaml:"updatedFormatted,omitempty" sql:"-" gorm:"-"`
 }
 
 func TableViewSizingEntityStream(q fireback.QueryDSL) (chan []*TableViewSizingEntity, *fireback.QueryResultMeta, *fireback.IError) {
@@ -1372,10 +1372,9 @@ var TableViewSizingEntityBundle = fireback.EntityBundle{
 	Permissions: ALL_TABLE_VIEW_SIZING_PERMISSIONS,
 	// Cli command has been exluded, since we use module to wrap all the entities
 	// to be more easier to wrap up.
-	// Create your own bundle if you need with Cli
-	//CliCommands: []*cli.Command{
-	//	TableViewSizingCliFn(),
-	//},
+	CliCommands: []*cli.Command{
+		TableViewSizingCliFn(),
+	},
 	Actions:      GetTableViewSizingModule3Actions(),
 	MockProvider: TableViewSizingImportMocks,
 	AutoMigrationEntities: []interface{}{
