@@ -131,3 +131,19 @@ func regexReplace(input, pattern, replacement string) (string, error) {
 	}
 	return re.ReplaceAllString(input, replacement), nil
 }
+
+func toCamelCase(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToLower(s[:1]) + s[1:]
+}
+
+// dotToCamelCase converts "person.FirstName.LastName" to "person.firstName.lastName"
+func dotToCamelCase(input string) string {
+	parts := strings.Split(input, ".")
+	for i, part := range parts {
+		parts[i] = toCamelCase(part)
+	}
+	return strings.Join(parts, ".")
+}

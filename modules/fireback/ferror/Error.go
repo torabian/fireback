@@ -21,9 +21,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/go-sql-driver/mysql"
-	"github.com/xeipuuv/gojsonschema"
 )
 
 // ErrorItem is a language-code -> message-text map, e.g.
@@ -197,54 +194,4 @@ func Create401ErrorWithItems(msg *ErrorItem, items []*FieldError) *Error {
 	}
 
 	return &result
-}
-
-// CastToError is the renamed CastToIError.
-func CastToError(err error) *Error {
-	if err == nil {
-		return nil
-	}
-
-	if ierr, ok := err.(*mysql.MySQLError); ok {
-		return &Error{
-			Message: ErrorItem{
-				"en": ierr.Message,
-			},
-		}
-	}
-
-	if ierr, ok := err.(*Error); ok {
-		return ierr
-	}
-
-	return &Error{
-		Message: ErrorItem{
-			"en": err.Error(),
-		},
-	}
-}
-
-// JsonSchemaToError is the renamed JsonSchemaToIError.
-func JsonSchemaToError(result *gojsonschema.Result) *Error {
-	if result.Valid() || len(result.Errors()) == 0 {
-		return nil
-	}
-
-	err := &Error{}
-	for _, er := range result.Errors() {
-		d := er.Details()
-
-		location := ""
-		if msg, ok := d["property"].(string); ok {
-			location = msg
-		} else if msg, ok := d["field"].(string); ok {
-			location = msg
-		}
-		err.Errors = append(err.Errors, &FieldError{
-			Location: location,
-			// Message:  er.Description(),
-		})
-	}
-
-	return err
 }
