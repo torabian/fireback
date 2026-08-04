@@ -18,6 +18,19 @@ type embedFileSystem struct {
 }
 
 func (e embedFileSystem) Exists(prefix string, path string) bool {
+	// Folders mounted below root need the mount prefix stripped before
+	// looking the file up inside their own embedded sub-filesystem.
+	if prefix != "/" {
+		p := strings.TrimPrefix(path, prefix)
+		if len(p) == len(path) {
+			return false
+		}
+		path = p
+		if path == "" {
+			path = "/"
+		}
+	}
+
 	f, err := e.Open(path)
 	if err != nil {
 		return false
@@ -43,45 +56,90 @@ func EmbedFolder(fsEmbed embed.FS, targetPath string, index bool) static.ServeFi
 	}
 }
 
-func EmbedFolderForGin(ui *embed.FS, folder string, r *gin.Engine, prefix string) {
-
-	// I am not sure about this.
+// mountEmbedFolder mounts a public folder as static-file middleware (rather
+// than a route) so that requests for paths it doesn't have a file for simply
+// fall through instead of terminating in a raw 404 - letting the combined
+// NoRoute handler in EmbedFoldersForGin decide on a SPA fallback. It returns
+// that fallback handler, which re-serves the folder's index.html for
+// SPA-style client-side routing (e.g. a React Router deep link on refresh).
+func mountEmbedFolder(ui *embed.FS, folder string, r *gin.Engine, prefix string) func(c *gin.Context) {
 	if prefix == "" {
 		prefix = "/"
 	}
 
 	fs := EmbedFolder(*ui, folder, true)
+	staticServer := static.Serve(prefix, fs)
+	r.Use(staticServer)
 
-	if prefix == "/" {
-		staticServer := static.Serve("/", fs)
-
-		r.Use(staticServer)
-		r.NoRoute(func(c *gin.Context) {
-			if c.Request.Method == http.MethodGet &&
-				!strings.ContainsRune(c.Request.URL.Path, '.') &&
-				!strings.HasPrefix(c.Request.URL.Path, "/api/") {
-				c.Request.URL.Path = prefix
-				staticServer(c)
-			}
-		})
-	} else {
-
-		fileServer := http.StripPrefix(prefix, http.FileServer(fs))
-
-		r.GET(prefix+"/*filepath", func(c *gin.Context) {
-			fileServer.ServeHTTP(c.Writer, c.Request)
-		})
-
-		r.NoRoute(func(c *gin.Context) {
-			if c.Request.Method == http.MethodGet &&
-				!strings.ContainsRune(c.Request.URL.Path, '.') &&
-				!strings.HasPrefix(c.Request.URL.Path, "/api/") {
-				c.Request.URL.Path = "/"
-				fileServer.ServeHTTP(c.Writer, c.Request)
-			}
-		})
-
+	return func(c *gin.Context) {
+		c.Request.URL.Path = prefix
+		staticServer(c)
 	}
+}
+
+// EmbedFolderForGin mounts a single embedded folder and wires up its own
+// SPA fallback via NoRoute. Kept for backward compatibility with callers
+// mounting exactly one public folder; when mounting several folders (as
+// FirebackApp.PublicFolders does), prefer EmbedFoldersForGin so their
+// fallbacks don't clobber each other - gin.Engine.NoRoute keeps only the
+// handlers from the most recent call, so calling it once per folder means
+// only the last-registered folder's fallback is ever reachable.
+func EmbedFolderForGin(ui *embed.FS, folder string, r *gin.Engine, prefix string) {
+	EmbedFoldersForGin([]PublicFolderInfo{{Fs: ui, Folder: folder, Prefix: prefix}}, r)
+}
+
+// EmbedFoldersForGin mounts every given public folder and registers a single
+// combined NoRoute fallback, so a browser refresh on a deep client-side route
+// (e.g. /scores/abc123) still resolves to the right SPA's index.html instead
+// of 404ing. The most specific (longest) matching prefix wins; folders
+// mounted at "/" act as the default fallback when no other prefix matches.
+func EmbedFoldersForGin(items []PublicFolderInfo, r *gin.Engine) {
+	type fallback struct {
+		prefix string
+		handle func(c *gin.Context)
+	}
+
+	fallbacks := make([]fallback, 0, len(items))
+	for _, item := range items {
+		prefix := item.Prefix
+		if prefix == "" {
+			prefix = "/"
+		}
+		fallbacks = append(fallbacks, fallback{
+			prefix: prefix,
+			handle: mountEmbedFolder(item.Fs, item.Folder, r, item.Prefix),
+		})
+	}
+
+	r.NoRoute(func(c *gin.Context) {
+		if c.Request.Method != http.MethodGet ||
+			strings.ContainsRune(c.Request.URL.Path, '.') ||
+			strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			return
+		}
+
+		path := c.Request.URL.Path
+		best := -1
+		for i, f := range fallbacks {
+			if f.prefix == "/" {
+				continue
+			}
+			if strings.HasPrefix(path, f.prefix) && (best == -1 || len(f.prefix) > len(fallbacks[best].prefix)) {
+				best = i
+			}
+		}
+		if best != -1 {
+			fallbacks[best].handle(c)
+			return
+		}
+
+		for _, f := range fallbacks {
+			if f.prefix == "/" {
+				f.handle(c)
+				return
+			}
+		}
+	})
 }
 
 func HasChildren(key string, items []string) bool {

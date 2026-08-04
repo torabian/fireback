@@ -441,8 +441,8 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		}
 	})
 
-	for _, item := range x.PublicFolders {
-		EmbedFolderForGin(item.Fs, item.Folder, r, item.Prefix)
+	if len(x.PublicFolders) > 0 {
+		EmbedFoldersForGin(x.PublicFolders, r)
 	}
 
 	// Enable the mvc app from here, if it's needed. Work on your static website on
