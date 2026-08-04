@@ -1,4 +1,4 @@
-package fireback
+package terminal
 
 import (
 	"encoding/json"

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback/terminal"
 )
 
 func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error) {
@@ -32,7 +33,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 		return items[i].UniqueId < items[j].UniqueId
 	})
 
-	tree := Tree{}
+	tree := terminal.Tree{}
 
 	for _, item := range items {
 		if item == nil || item.UniqueId == "" {
@@ -70,7 +71,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 }
 
-func treeToCapabilityChild(items []NestedNode) []CapabilityInfoDto {
+func treeToCapabilityChild(items []terminal.NestedNode) []CapabilityInfoDto {
 	data := []CapabilityInfoDto{}
 
 	for _, item := range items {
