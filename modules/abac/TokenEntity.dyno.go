@@ -11,6 +11,11 @@ import (
 	"encoding" //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -19,14 +24,11 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/Token"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/Token"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var tokenSeedersFs = &seeders.ViewsFs
@@ -61,11 +63,11 @@ var TokenQsFlags = []cli.Flag{
 }
 
 type TokenEntity struct {
-	User       *UserEntity        `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
-	Token      string             `json:"token" xml:"token" yaml:"token"        `
-	ValidUntil fireback.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
-	Children   []*TokenEntity     `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
-	LinkedTo   *TokenEntity       `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
+	User       *UserEntity         `json:"user" xml:"user" yaml:"user"    gorm:"foreignKey:UserId;references:UniqueId"      `
+	Token      string              `json:"token" xml:"token" yaml:"token"        `
+	ValidUntil complexes.XDateTime `json:"validUntil" xml:"validUntil" yaml:"validUntil"        `
+	Children   []*TokenEntity      `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
+	LinkedTo   *TokenEntity        `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
 	// Visibility is a detailed topic, you can check all of the visibility values in fireback/visibility.go
 	// by default, visibility of record are 0, means they are protected by the workspace
@@ -357,11 +359,13 @@ func TokenRecursiveAddUniqueId(dto *TokenEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func TokenMultiInsertFn(dtos []*TokenEntity, query fireback.QueryDSL) ([]*TokenEntity, *fireback.IError) {

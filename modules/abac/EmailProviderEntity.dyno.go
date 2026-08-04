@@ -11,6 +11,11 @@ import (
 	"encoding" //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -19,14 +24,11 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/EmailProvider"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/EmailProvider"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var emailProviderSeedersFs = &seeders.ViewsFs
@@ -66,7 +68,7 @@ type EmailProviderEntity struct {
 	// Give the email provider configuration a name, which makes it easier later to query.
 	Title string `json:"title" xml:"title" yaml:"title"        `
 	// JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
-	Config   fireback.JSON          `json:"config" xml:"config" yaml:"config"        `
+	Config   complexes.JSON         `json:"config" xml:"config" yaml:"config"        `
 	Children []*EmailProviderEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo *EmailProviderEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
@@ -360,11 +362,13 @@ func EmailProviderRecursiveAddUniqueId(dto *EmailProviderEntity, query fireback.
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func EmailProviderMultiInsertFn(dtos []*EmailProviderEntity, query fireback.QueryDSL) ([]*EmailProviderEntity, *fireback.IError) {

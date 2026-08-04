@@ -121,14 +121,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
 	})
 
-	module.ProvideTests(fireback.UserTests,
-		[]fireback.Test{
-			fireback.TestNewModuleProjectGen,
-		},
-		AppMenuTests,
-		fireback.IntelisenseTest,
-	)
-
 	module.ProvideSeederImportHandler(func() {
 		// We do not use syncing here.
 		// Because fireback is being imported by other modules,

@@ -12,13 +12,12 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
-	"net/http"
 	"os"
 	reflect "reflect"
 	"regexp"
-	"strings"
 
 	"github.com/schollz/progressbar/v3"
+	remotefile "github.com/torabian/fireback/modules/fireback/remote-file"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
@@ -80,23 +79,8 @@ func AutoUniqueIdItems(input any) {
 	addUniqueIdRecursively(v)
 }
 
-func detectMimeType(blob []byte, filename string) string {
-	// Check extension
-	if strings.HasSuffix(strings.ToLower(filename), ".svg") {
-		return "image/svg+xml"
-	}
-
-	// Check content
-	if len(blob) > 10 && strings.Contains(string(blob[:min(len(blob), 512)]), "<svg") {
-		return "image/svg+xml"
-	}
-
-	// Fallback to built-in detection
-	return http.DetectContentType(blob)
-}
-
 func ConvertBlobToDataURI(blob []byte, filename string) (string, error) {
-	mimeType := detectMimeType(blob, filename) // detects from first 512 bytes
+	mimeType := remotefile.DetectMimeType(blob, filename) // detects from first 512 bytes
 	b64 := base64.StdEncoding.EncodeToString(blob)
 	dataURI := fmt.Sprintf("data:%s;base64,%s", mimeType, b64)
 	return dataURI, nil

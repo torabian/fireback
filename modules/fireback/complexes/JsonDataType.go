@@ -1,4 +1,4 @@
-package fireback
+package complexes
 
 import (
 	"context"
@@ -497,4 +497,23 @@ func (e *JSON) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	return nil
+}
+
+func CastJsonDataTypeTo[T any](x *JSON) *T {
+
+	var d T
+	if x == nil {
+		return nil
+	}
+
+	data, err := x.MarshalJSON()
+
+	if err != nil {
+		return nil
+	}
+
+	json.Unmarshal(data, &d)
+
+	return &d
+
 }

@@ -157,13 +157,6 @@ func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
 
 }
 
-func intRange(start, end int) []int {
-	slice := make([]int, end-start+1)
-	for i := range slice {
-		slice[i] = start + i
-	}
-	return slice
-}
 func link(items []interface{}) string {
 	var strItems []string
 	for _, item := range items {
@@ -214,15 +207,6 @@ func loadSharedTemplatesEmbed(efs fs.FS, root string) ([]string, error) {
 	return files, nil
 }
 
-func loadSharedTemplates(sharedDir string) ([]string, error) {
-	// Find all .html files in the shared directory
-	files, err := filepath.Glob(filepath.Join(sharedDir, "*.html"))
-	if err != nil {
-		return nil, err
-	}
-
-	return files, nil
-}
 func prependFileQuery(htmlContent string) string {
 	re := regexp.MustCompile(`(?i)<(img|script|link)[^>]*\s(href|src)=["'](\.\/)?([^"']+)["']`)
 
@@ -273,11 +257,6 @@ func resolveCssImportsFS(fsx fs.FS, path string, visited map[string]bool) (strin
 	})
 
 	return content, nil
-}
-
-// Do not use FS until find out a way to embed properly
-func renderPageFromEmbed(fsx fs.FS, c *gin.Context, page string, params any) {
-
 }
 
 func serveJavascript(data []byte, ginPath string) []byte {

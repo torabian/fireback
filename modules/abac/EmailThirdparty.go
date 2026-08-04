@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/474420502/gcurl"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
 func sendViaSendGrid(msg EmailMessageContent, apiKey string) error {
@@ -206,27 +206,27 @@ func SendMail(msg EmailMessageContent, p *EmailProviderEntity) error {
 	switch p.Type {
 
 	case "curl":
-		m, _ := fireback.JSONTo[curlInfo](p.Config)
+		m, _ := complexes.JSONTo[curlInfo](p.Config)
 		return SendWithCurl(msg, m.Curl)
 
 	case "sendgrid":
-		m, _ := fireback.JSONTo[sendGridInfo](p.Config)
+		m, _ := complexes.JSONTo[sendGridInfo](p.Config)
 		return sendViaSendGrid(msg, m.APIKey)
 
 	case "mailgun":
-		m, _ := fireback.JSONTo[mailGunInfo](p.Config)
+		m, _ := complexes.JSONTo[mailGunInfo](p.Config)
 		return sendViaMailgun(msg, m.ApiKey, m.Domain)
 
 	case "postmark":
-		m, _ := fireback.JSONTo[postmarkInfo](p.Config)
+		m, _ := complexes.JSONTo[postmarkInfo](p.Config)
 		return sendViaPostmark(msg, m.ApiKey)
 
 	case "resend":
-		m, _ := fireback.JSONTo[resendInfo](p.Config)
+		m, _ := complexes.JSONTo[resendInfo](p.Config)
 		return sendViaResend(msg, m.ApiKey)
 
 	case "smtp":
-		m, _ := fireback.JSONTo[smtpInfo](p.Config)
+		m, _ := complexes.JSONTo[smtpInfo](p.Config)
 		return sendViaSMTP(
 			msg,
 			m.Host,

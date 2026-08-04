@@ -5,25 +5,7 @@ import (
 	reflect "reflect"
 
 	"gopkg.in/yaml.v2"
-	"gorm.io/gorm"
 )
-
-type Product struct {
-	gorm.Model
-	Code  string
-	Price uint
-}
-
-type ActivePortType string
-
-type ActiveImportJob struct {
-	Filename        string
-	TotalLines      int32
-	LinesProccessed int32
-	SecondsLeft     int32
-	TimeLeft        string
-	Ref             string
-}
 
 type Database struct {
 	Username string `yaml:"username,omitempty"`
@@ -38,14 +20,6 @@ type Database struct {
 // @meta(include)
 type Gin struct {
 	Mode string `yaml:"mode,omitempty"`
-}
-
-// @meta(include)
-type ForgetPasswordRequest struct {
-	Enabled      bool   `yaml:"enabled,omitempty"`
-	url          string `yaml:"url,omitempty"`
-	Subject      string `yaml:"subject,omitempty"`
-	TemplateFile string `yaml:"templateFile,omitempty"`
 }
 
 // @meta(include)

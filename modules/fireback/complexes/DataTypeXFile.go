@@ -1,15 +1,19 @@
-package fireback
+package complexes
 
 import (
 	"database/sql/driver"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+
+	remotefile "github.com/torabian/fireback/modules/fireback/remote-file"
 )
 
 func (x XFileMeta) Json() string {
@@ -158,7 +162,7 @@ func (f *XFile) parseXFileInput(obj interface{}) error {
 
 			// Let's handle the http files
 			if strings.HasPrefix(v, "http") {
-				file, errDl := FetchFileFromURL(v)
+				file, errDl := remotefile.FetchFileFromURL(v)
 				if errDl == nil {
 					f.Blob = file.Content
 					f.Meta.Mime = file.Mime
@@ -221,7 +225,7 @@ func encodeBlobDataURL(blob []byte, filename string) string {
 		return ""
 	}
 
-	mime := detectMimeType(blob, filename)
+	mime := remotefile.DetectMimeType(blob, filename)
 	encoded := base64.StdEncoding.EncodeToString(blob)
 	return fmt.Sprintf("data:%s;base64,%s", mime, encoded)
 }
@@ -262,6 +266,16 @@ func (f XFile) MarshalJSON() ([]byte, error) {
 func (f XFile) MarshalYAML() (interface{}, error) {
 	return f.marshalStructWithEncodedBlob(), nil
 }
+
+func Exists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
+}
+
 func NewXFileAutoNull(value string) XFile {
 	if Exists(value) {
 		fmt.Println("File exists", value)
@@ -290,4 +304,29 @@ func NewXFileAutoNull(value string) XFile {
 		}
 	}
 	return XFile{}
+}
+
+func ConvertToXFile(fileHeader *multipart.FileHeader) (*XFile, error) {
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	blob, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	mime := fileHeader.Header.Get("Content-Type")
+
+	return &XFile{
+		Meta: XFileMeta{
+			FileName: fileHeader.Filename,
+			Mime:     mime,
+		},
+		Filesize: uint64(fileHeader.Size),
+		Blob:     blob,
+		// FileID, //URL: populate after upload or save
+	}, nil
 }

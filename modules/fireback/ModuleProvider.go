@@ -38,7 +38,6 @@ type MigrationScript struct {
 // Entities also can be bundled into one
 type EntityBundle struct {
 	Permissions           []PermissionInfo
-	Tests                 []Test
 	Actions               []Module3Action
 	AutoMigrationEntities []interface{}
 	CliCommands           []*cli.Command
@@ -62,7 +61,6 @@ type ModuleProvider struct {
 	Definitions         *embed.FS
 	Actions             [][]Module3Action
 	Translations        map[string]map[string]string
-	Tests               []Test
 
 	GoMigrateDirectory *embed.FS
 
@@ -113,12 +111,6 @@ func (x *ModuleProvider) ProvideSeederImportHandler(t func()) {
 
 func (x *ModuleProvider) ProvideMockWriterHandler(t func(languages []string)) {
 	x.MockWriterHandler = t
-}
-
-func (x *ModuleProvider) ProvideTests(tests ...[]Test) {
-	for _, t := range tests {
-		x.Tests = append(x.Tests, t...)
-	}
 }
 
 func (x *ModuleProvider) ProvideEntityHandlers(t func(*gorm.DB) error) {

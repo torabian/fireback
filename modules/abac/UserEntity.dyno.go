@@ -11,6 +11,11 @@ import (
 	"encoding" //Not sure this is needed, regarding complexes. Check fireback GoEntity.tpl
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -19,14 +24,11 @@ import (
 	mocks "github.com/torabian/fireback/modules/abac/mocks/User"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/User"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var userSeedersFs = &seeders.ViewsFs
@@ -143,7 +145,7 @@ type UserEntity struct {
 	Photo     string              `json:"photo" xml:"photo" yaml:"photo"        `
 	Gender    emigo.Nullable[int] `json:"gender" xml:"gender" yaml:"gender"        `
 	Title     string              `json:"title" xml:"title" yaml:"title"        `
-	BirthDate fireback.XDate      `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
+	BirthDate complexes.XDate     `json:"birthDate" xml:"birthDate" yaml:"birthDate"        `
 	Avatar    string              `json:"avatar" xml:"avatar" yaml:"avatar"        `
 	// User last connecting ip address
 	LastIpAddress string `json:"lastIpAddress" xml:"lastIpAddress" yaml:"lastIpAddress"        `
@@ -456,11 +458,13 @@ func UserRecursiveAddUniqueId(dto *UserEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func UserMultiInsertFn(dtos []*UserEntity, query fireback.QueryDSL) ([]*UserEntity, *fireback.IError) {

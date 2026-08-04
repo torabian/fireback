@@ -1,4 +1,4 @@
-package fireback
+package complexes
 
 import (
 	"database/sql"
@@ -43,11 +43,11 @@ type XDateComputed struct {
 	EndFormatted    *string `json:"endFormatted,omitempty"`
 }
 
-func GetDateLocaleInfo(startTime time.Time, query QueryDSL) (int64, string, string) {
+func GetDateLocaleInfo(startTime time.Time, region string) (int64, string, string) {
 	DaysLeftToStart := int64(startTime.Sub(time.Now()).Hours() / 24)
 	locale := startTime.Format("2006-01-02")
 	StartFormatted := startTime.Format("Monday, 02 Jan 2006")
-	switch query.Region {
+	switch region {
 	case "IR":
 		pt := ptime.New(startTime)
 		locale = (pt.Format("yyyy-MM-dd"))
@@ -57,12 +57,12 @@ func GetDateLocaleInfo(startTime time.Time, query QueryDSL) (int64, string, stri
 	return DaysLeftToStart, locale, StartFormatted
 }
 
-func ComputeXDateMetaData(date *XDate, query QueryDSL) XDateMetaData {
+func ComputeXDateMetaData(date *XDate, region string) XDateMetaData {
 	data := XDateMetaData{}
 	endTime, err1 := date.GetTime()
 
 	if err1 == nil {
-		count, locale, formatter := GetDateLocaleInfo(endTime, query)
+		count, locale, formatter := GetDateLocaleInfo(endTime, region)
 		data.DaysLeft = &count
 		data.Formatted = &formatter
 		data.Locale = &locale
@@ -72,7 +72,7 @@ func ComputeXDateMetaData(date *XDate, query QueryDSL) XDateMetaData {
 
 }
 
-func ComputeDateRange(start XDate, end XDate, query QueryDSL) XDateComputed {
+func ComputeDateRange(start XDate, end XDate, region string) XDateComputed {
 
 	data := XDateComputed{}
 
@@ -90,14 +90,14 @@ func ComputeDateRange(start XDate, end XDate, query QueryDSL) XDateComputed {
 	}
 
 	if err2 == nil {
-		count, locale, formatter := GetDateLocaleInfo(startTime, query)
+		count, locale, formatter := GetDateLocaleInfo(startTime, region)
 		data.DaysLeftToStart = &count
 		data.StartFormatted = &formatter
 		data.StartLocale = &locale
 	}
 
 	if err1 == nil {
-		count, locale, formatter := GetDateLocaleInfo(endTime, query)
+		count, locale, formatter := GetDateLocaleInfo(endTime, region)
 		data.DaysLeftToEnd = &count
 		data.EndFormatted = &formatter
 		data.EndLocale = &locale

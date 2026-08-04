@@ -2,10 +2,9 @@ package fireback
 
 import (
 	"encoding/json"
-	"io"
-	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
 func BindMultiPartFormDataWithDetails(c *gin.Context, target any) *IError {
@@ -22,7 +21,7 @@ func BindMultiPartFormDataWithDetails(c *gin.Context, target any) *IError {
 
 	for fieldName, files := range formData.File {
 		for _, fileHeader := range files {
-			xfile, err := ConvertToXFile(fileHeader)
+			xfile, err := complexes.ConvertToXFile(fileHeader)
 			if err != nil {
 				return CastToIError(err)
 			}
@@ -62,29 +61,4 @@ func BindMultiPartFormDataWithDetails(c *gin.Context, target any) *IError {
 
 	return nil
 
-}
-
-func ConvertToXFile(fileHeader *multipart.FileHeader) (*XFile, error) {
-	file, err := fileHeader.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	blob, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	mime := fileHeader.Header.Get("Content-Type")
-
-	return &XFile{
-		Meta: XFileMeta{
-			FileName: fileHeader.Filename,
-			Mime:     mime,
-		},
-		Filesize: uint64(fileHeader.Size),
-		Blob:     blob,
-		// FileID, //URL: populate after upload or save
-	}, nil
 }

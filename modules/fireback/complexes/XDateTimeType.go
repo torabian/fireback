@@ -1,4 +1,4 @@
-package fireback
+package complexes
 
 import (
 	"context"
@@ -47,11 +47,11 @@ type XDateTimeComputed struct {
 	EndFormatted    *string `json:"endFormatted,omitempty"`
 }
 
-func GetXDateTimeLocaleInfo(startTime time.Time, query QueryDSL) (int64, string, string) {
+func GetXDateTimeLocaleInfo(startTime time.Time, region string) (int64, string, string) {
 	DaysLeftToStart := int64(startTime.Sub(time.Now()).Hours() / 24)
 	locale := startTime.Format(time.RFC3339)
 	StartFormatted := startTime.Format("Monday, 02 Jan 2006")
-	switch query.Region {
+	switch region {
 	case "IR":
 		pt := ptime.New(startTime)
 		locale = (pt.Format("yyyy-MM-dd"))
@@ -61,12 +61,12 @@ func GetXDateTimeLocaleInfo(startTime time.Time, query QueryDSL) (int64, string,
 	return DaysLeftToStart, locale, StartFormatted
 }
 
-func ComputeXDateTimeMetaData(date *XDate, query QueryDSL) XDateTimeMetaData {
+func ComputeXDateTimeMetaData(date *XDate, region string) XDateTimeMetaData {
 	data := XDateTimeMetaData{}
 	endTime, err1 := date.GetTime()
 
 	if err1 == nil {
-		count, locale, formatter := GetXDateTimeLocaleInfo(endTime, query)
+		count, locale, formatter := GetXDateTimeLocaleInfo(endTime, region)
 		data.DaysLeft = &count
 		data.Formatted = &formatter
 		data.Locale = &locale
@@ -76,7 +76,7 @@ func ComputeXDateTimeMetaData(date *XDate, query QueryDSL) XDateTimeMetaData {
 
 }
 
-func XDateTimeComputeDateRange(start XDateTime, end XDateTime, query QueryDSL) XDateTimeComputed {
+func XDateTimeComputeDateRange(start XDateTime, end XDateTime, region string) XDateTimeComputed {
 
 	data := XDateTimeComputed{}
 
@@ -94,14 +94,14 @@ func XDateTimeComputeDateRange(start XDateTime, end XDateTime, query QueryDSL) X
 	}
 
 	if err2 == nil {
-		count, locale, formatter := GetXDateTimeLocaleInfo(startTime, query)
+		count, locale, formatter := GetXDateTimeLocaleInfo(startTime, region)
 		data.DaysLeftToStart = &count
 		data.StartFormatted = &formatter
 		data.StartLocale = &locale
 	}
 
 	if err1 == nil {
-		count, locale, formatter := GetXDateTimeLocaleInfo(endTime, query)
+		count, locale, formatter := GetXDateTimeLocaleInfo(endTime, region)
 		data.DaysLeftToEnd = &count
 		data.EndFormatted = &formatter
 		data.EndLocale = &locale

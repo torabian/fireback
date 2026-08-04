@@ -318,27 +318,6 @@ func HttpStreamFileChannel(
 
 }
 
-func getFilterQuery(qs interface{}, f *QueryDSL) {
-
-	method := reflect.ValueOf(qs).MethodByName("GetQuery")
-	if method.IsValid() {
-		results := method.Call(nil) // Call the method with no arguments
-		if len(results) > 0 {
-			f.FilterQuery = results[0].Interface().(string)
-		}
-	}
-}
-func getJqQuery(qs interface{}, f *QueryDSL) {
-
-	method := reflect.ValueOf(qs).MethodByName("GetJq")
-	if method.IsValid() {
-		results := method.Call(nil) // Call the method with no arguments
-		if len(results) > 0 {
-			f.JqQuery = results[0].Interface().(string)
-		}
-	}
-}
-
 func isYaml(headerValue string) bool {
 
 	return slices.Contains([]string{

@@ -10,10 +10,16 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 	metas "github.com/torabian/fireback/modules/fireback/metas"
 	mocks "github.com/torabian/fireback/modules/fireback/mocks/WebPushConfig"
 	seeders "github.com/torabian/fireback/modules/fireback/seeders/WebPushConfig"
@@ -21,10 +27,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var webPushConfigSeedersFs = &seeders.ViewsFs
@@ -50,7 +52,7 @@ var WebPushConfigQsFlags = []cli.Flag{
 
 type WebPushConfigEntity struct {
 	// The json content of the web push after getting it from browser
-	Subscription *JSON                  `json:"subscription" xml:"subscription" yaml:"subscription"  validate:"required"        `
+	Subscription *complexes.JSON        `json:"subscription" xml:"subscription" yaml:"subscription"  validate:"required"        `
 	Children     []*WebPushConfigEntity `csv:"-" gorm:"-" sql:"-" json:"children,omitempty" xml:"children,omitempty"  yaml:"children,omitempty"`
 	LinkedTo     *WebPushConfigEntity   `csv:"-" yaml:"-" gorm:"-" json:"-" sql:"-" xml:"-"`
 	// Defines the visibility of the record in the table.
@@ -340,11 +342,13 @@ func WebPushConfigRecursiveAddUniqueId(dto *WebPushConfigEntity, query QueryDSL)
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func WebPushConfigMultiInsertFn(dtos []*WebPushConfigEntity, query QueryDSL) ([]*WebPushConfigEntity, *IError) {
@@ -767,7 +771,7 @@ func CastWebPushConfigFromCli(c *cli.Command) *WebPushConfigEntity {
 		template.ParentId = emigo.NullableOf(c.String("pid"))
 	}
 	if c.IsSet("subscription") {
-		template.Subscription = JSONFrom(c.String("subscription"))
+		template.Subscription = complexes.JSONFrom(c.String("subscription"))
 	}
 	return template
 }

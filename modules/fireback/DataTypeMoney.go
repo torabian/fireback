@@ -39,9 +39,6 @@ func currencyMultiplier(currency string) int64 {
 	return pow10(CurrencyPrecision(currency))
 }
 
-func normalizeRawAmount(val float64, currency string) int64 {
-	return int64(val * float64(currencyMultiplier(currency)))
-}
 func (m *Money) parseMoneyInput(input interface{}) error {
 	m.Present = true
 

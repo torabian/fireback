@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/torabian/emi/emigo"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
 func (x *UserEntity) FullName() string {
@@ -92,7 +92,7 @@ func init() {
 		return &UserEntity{
 			FirstName:      getRandomName(firstNames),
 			LastName:       getRandomName(lastNames),
-			BirthDate:      fireback.XDate((getRandomBirthDate())),
+			BirthDate:      complexes.XDate((getRandomBirthDate())),
 			Photo:          getRandomAvatarURL(),
 			Gender:         emigo.NullableOf(randomZeroOrOne()),
 			LastIpAddress:  randomPublicIP(),
