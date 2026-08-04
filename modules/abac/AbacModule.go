@@ -34,7 +34,6 @@ type MicroserviceSetupConfig struct {
 func AbacCompleteModules() []*fireback.ModuleProvider {
 	return []*fireback.ModuleProvider{
 		WorkspaceModuleSetup(),
-		DriveModuleSetup(),
 		NotificationModuleSetup(),
 		PassportsModuleSetup(),
 	}
