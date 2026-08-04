@@ -41,13 +41,6 @@ bundle:
 # this function need to do that, and before making any release we need to make
 # sure, that running this command on main (or release tag) make any code diff.
 
-# For development purposes
-
-web:
-	cd modules/fireback/codegen/react-new && npm start
-
-# When we want to open pr, we use this.
-
 prepare:
 	make refresh && make rebuild-sdks && make bundle
 
