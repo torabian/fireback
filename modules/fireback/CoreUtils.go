@@ -168,6 +168,16 @@ func (x *GeneralDoctorData) Yaml() string {
 	return ""
 }
 
+type Database struct {
+	Username string `yaml:"username,omitempty"`
+	Port     string `yaml:"port,omitempty"`
+	Host     string `yaml:"host,omitempty"`
+	Password string `yaml:"password,omitempty"`
+	Database string `yaml:"database,omitempty"`
+	Vendor   string `yaml:"vendor,omitempty"`
+	Dsn      string `yaml:"dsn,omitempty"`
+}
+
 func Doctor() {
 
 	uri, _ := ResolveConfigurationUri()

@@ -4,16 +4,6 @@ import (
 	"encoding/json"
 )
 
-type Database struct {
-	Username string `yaml:"username,omitempty"`
-	Port     string `yaml:"port,omitempty"`
-	Host     string `yaml:"host,omitempty"`
-	Password string `yaml:"password,omitempty"`
-	Database string `yaml:"database,omitempty"`
-	Vendor   string `yaml:"vendor,omitempty"`
-	Dsn      string `yaml:"dsn,omitempty"`
-}
-
 type QueryResultMeta struct {
 	TotalItems          int64   `json:"totalItems" yaml:"totalItems"`
 	TotalAvailableItems int64   `json:"totalAvailableItems" yaml:"totalAvailableItems"`
