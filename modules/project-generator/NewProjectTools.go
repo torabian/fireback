@@ -1,4 +1,4 @@
-package fireback
+package project_generator
 
 import (
 	"context"
@@ -13,10 +13,11 @@ import (
 	"text/template"
 
 	"github.com/gin-gonic/gin"
-	tmplCordova "github.com/torabian/fireback/modules/fireback/codegen/capacitor"
-	tmplGoDesktop "github.com/torabian/fireback/modules/fireback/codegen/go-desktop"
-	tmpl "github.com/torabian/fireback/modules/fireback/codegen/go-new"
-	tmplReact "github.com/torabian/fireback/modules/fireback/codegen/react-new"
+	"github.com/torabian/fireback/modules/fireback"
+	tmplCordova "github.com/torabian/fireback/modules/project-generator/capacitor"
+	tmplGoDesktop "github.com/torabian/fireback/modules/project-generator/go-desktop"
+	tmpl "github.com/torabian/fireback/modules/project-generator/go-new"
+	tmplReact "github.com/torabian/fireback/modules/project-generator/react-new"
 	"github.com/urfave/cli/v3"
 )
 
@@ -55,7 +56,7 @@ func newProjectContentWriter(fsys embed.FS, ctx *NewProjectContext, prefix strin
 
 		// Check file extension
 		if filepath.Ext(path) == ".tpl" {
-			t, err := template.New("").Funcs(CommonMap).Parse(c)
+			t, err := template.New("").Funcs(fireback.CommonMap).Parse(c)
 			if err != nil {
 				return err
 			}
@@ -214,19 +215,19 @@ func NewProjectCli() *cli.Command {
 		Usage: "Generate a new fireback project or microservice.",
 		Action: func(ctx0 context.Context, c *cli.Command) error {
 			ctx := &NewProjectContext{
-				FirebackVersion: FIREBACK_VERSION,
+				FirebackVersion: fireback.FIREBACK_VERSION,
 				IsMonolith:      false,
 			}
 
 			if c.NumFlags() == 0 {
-				ctx.Name = AskForInput("Give the project a name", "new-app")
-				githubAccount := AskForInput("Your github account (for prefixing the module location)", "torabian")
-				ctx.ModuleName = AskForInput("What is the golang module name?", fmt.Sprintf("github.com/%v/%v", githubAccount, ctx.Name))
-				if r := AskForSelect("Architecture type of the project?", []string{"monolith", "microservice"}); r == "monolith" {
+				ctx.Name = fireback.AskForInput("Give the project a name", "new-app")
+				githubAccount := fireback.AskForInput("Your github account (for prefixing the module location)", "torabian")
+				ctx.ModuleName = fireback.AskForInput("What is the golang module name?", fmt.Sprintf("github.com/%v/%v", githubAccount, ctx.Name))
+				if r := fireback.AskForSelect("Architecture type of the project?", []string{"monolith", "microservice"}); r == "monolith" {
 					ctx.IsMonolith = true
 				}
 
-				if r := AskForSelect("Do you want to use a local copy of fireback instead of mod?", []string{"yes", "no"}); r == "yes" {
+				if r := fireback.AskForSelect("Do you want to use a local copy of fireback instead of mod?", []string{"yes", "no"}); r == "yes" {
 					for {
 
 						firebackLocation := ""
@@ -234,9 +235,9 @@ func NewProjectCli() *cli.Command {
 							firebackLocation = loc
 						}
 
-						ctx.ReplaceFireback = AskForInput("Set the fireback absolute folder:", firebackLocation)
-						if !Exists(filepath.Join(ctx.ReplaceFireback, "modules", "fireback")) {
-							if r := AskForSelect("Fireback not found in directory. Try again?", []string{"yes", "no"}); r == "no" {
+						ctx.ReplaceFireback = fireback.AskForInput("Set the fireback absolute folder:", firebackLocation)
+						if !fireback.Exists(filepath.Join(ctx.ReplaceFireback, "modules", "fireback")) {
+							if r := fireback.AskForSelect("Fireback not found in directory. Try again?", []string{"yes", "no"}); r == "no" {
 								break
 							}
 						} else {
@@ -246,31 +247,31 @@ func NewProjectCli() *cli.Command {
 					}
 				}
 
-				ctx.Path = AskForInput("Name of the folder which will be generated", ctx.Name)
+				ctx.Path = fireback.AskForInput("Name of the folder which will be generated", ctx.Name)
 				if ctx.Description == "" {
 					ctx.Description = "Built with fireback :)"
 				}
-				ctx.Description = AskForInput("Any description for the project created", ctx.Description)
+				ctx.Description = fireback.AskForInput("Any description for the project created", ctx.Description)
 
-				if r := AskForSelect("Do you want to have front-end project in react.js?", []string{"yes", "no"}); r == "yes" {
+				if r := fireback.AskForSelect("Do you want to have front-end project in react.js?", []string{"yes", "no"}); r == "yes" {
 					ctx.CreateReactProject = true
 
-					if r := AskForSelect("Do you want to have capacitor created?", []string{"yes", "no"}); r == "yes" {
+					if r := fireback.AskForSelect("Do you want to have capacitor created?", []string{"yes", "no"}); r == "yes" {
 						ctx.CreateCapacitorProject = true
 					}
 				}
 
-				if r := AskForSelect("Do you want to have fireback 'manage' admin panel react.js built independent in project?", []string{"yes", "no"}); r == "yes" {
+				if r := fireback.AskForSelect("Do you want to have fireback 'manage' admin panel react.js built independent in project?", []string{"yes", "no"}); r == "yes" {
 					ctx.FirebackManage = true
 				}
 
 				if ctx.IsMonolith {
-					if r := AskForSelect("Do you want Go wails desktop toolkit added?", []string{"no", "yes"}); r == "yes" {
+					if r := fireback.AskForSelect("Do you want Go wails desktop toolkit added?", []string{"no", "yes"}); r == "yes" {
 						ctx.IncludeWailsDesktop = true
 					}
 				}
 
-				if r := AskForSelect("Do you want to add fireback self-service ui as well into your project?", []string{"yes", "no"}); r == "yes" {
+				if r := fireback.AskForSelect("Do you want to add fireback self-service ui as well into your project?", []string{"yes", "no"}); r == "yes" {
 					ctx.SelfService = true
 				}
 
@@ -293,7 +294,7 @@ func NewProjectCli() *cli.Command {
 					pathd = c.String("name")
 				}
 				ctx = &NewProjectContext{
-					FirebackVersion:        FIREBACK_VERSION,
+					FirebackVersion:        fireback.FIREBACK_VERSION,
 					IsMonolith:             true,
 					Name:                   c.String("name"),
 					Description:            c.String("description"),

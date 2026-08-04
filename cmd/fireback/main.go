@@ -9,9 +9,10 @@ import (
 
 	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/fireback"
-	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
-	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
 	"github.com/torabian/fireback/modules/fireback/gintools"
+	FBManage "github.com/torabian/fireback/modules/fireback/interfaces/fireback-manage"
+	FbSelfService "github.com/torabian/fireback/modules/fireback/interfaces/selfservice"
+	project_generator "github.com/torabian/fireback/modules/project-generator"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -65,7 +66,7 @@ var xapp = &fireback.FirebackApp{
 		// suggestion.SuggestionModuleSetup(nil),
 		{
 			CliHandlers: []*cli.Command{
-				fireback.NewProjectCli(),
+				project_generator.NewProjectCli(),
 			},
 		},
 		// }),
