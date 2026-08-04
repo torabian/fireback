@@ -41,7 +41,6 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 		// Report tools is not really ever used.
 		// GetReportsTool(xapp),
 		GetCapabilityRefreshCommand(xapp),
-		ClickHouseTestConnectionCli,
 
 		// Keep these in the last
 		&CLIAboutCommand,

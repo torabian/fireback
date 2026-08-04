@@ -5,7 +5,6 @@ package fireback
 import (
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -235,23 +234,3 @@ const (
 )
 
 var clickhouseInstance driver.Conn = nil
-
-func GetReplica(name ReplicaService) (*ReplicaRef, error) {
-
-	if name == ClickHouse {
-		if clickhouseInstance == nil {
-			conn, err := connectToClickHouse()
-			if err != nil {
-				return nil, err
-			}
-			clickhouseInstance = conn
-		}
-
-		return &ReplicaRef{
-			Clickhouse: clickhouseInstance,
-		}, nil
-
-	}
-
-	return nil, errors.New("Not implemented yet")
-}
