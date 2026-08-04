@@ -3,8 +3,6 @@
 package fireback
 
 import (
-	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-
 	"fmt"
 	"log"
 	"os"
@@ -223,15 +221,3 @@ func CreateDatabasePool() (*gorm.DB, error) {
 }
 
 var DB_ORDER_DESC = "Created desc"
-
-type ReplicaRef struct {
-	Clickhouse driver.Conn
-}
-
-type ReplicaService = string
-
-const (
-	ClickHouse ReplicaService = "clickhouse"
-)
-
-var clickhouseInstance driver.Conn = nil
