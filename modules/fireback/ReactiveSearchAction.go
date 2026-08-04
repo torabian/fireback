@@ -1,62 +1,116 @@
 package fireback
 
 import (
-	"encoding/json"
-	"sync"
+	"github.com/torabian/emi/emigo"
+	"net/http"
+	"net/url"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	// ReactiveSearchImpl = // Trigger intelisense, it would auto complete.
-}
-
-func CreateReactiveSearchHanlder(app *FirebackApp) func(
-	session ReactiveSearchActionSession,
-) (chan []byte, error) {
-
-	return func(
-		session ReactiveSearchActionSession,
-	) (chan []byte, error) {
-		query := ExtractQueryDslFromGinContext(session.GinCtx())
-		query.RawSocketConnection = session.GetSocket()
-		resultChan := make(chan *ReactiveSearchResultDto)
-
-		go func() {
-			var wg sync.WaitGroup
-
-			for _, handler := range app.SearchProviders {
-				wg.Add(1)
-
-				go func(h SearchProviderFn) {
-					defer wg.Done()
-					h(query, resultChan)
-				}(handler)
-			}
-
-			wg.Wait()
-
-			close(resultChan)
-		}()
-
-		return AdaptResultsToBytes(resultChan), nil
+/**
+* Action to communicate with the action ReactiveSearchAction
+ */
+func ReactiveSearchActionMeta() struct {
+	Name        string
+	URL         string
+	Method      string
+	CliName     string
+	Description string
+} {
+	return struct {
+		Name        string
+		URL         string
+		Method      string
+		CliName     string
+		Description string
+	}{
+		Name:        "ReactiveSearchAction",
+		URL:         "/reactive-search",
+		Method:      "REACTIVE",
+		CliName:     "reactive-search-action",
+		Description: "Reactive search is a general purpose search mechanism for different modules, and could be used in mobile apps or front-end to quickly search for a entity.",
 	}
-
 }
 
-func AdaptResultsToBytes(input chan *ReactiveSearchResultDto) chan []byte {
-	out := make(chan []byte)
+/**
+ * Query parameters for ReactiveSearchAction
+ */
+// Query wrapper with private fields
+type ReactiveSearchActionQuery struct {
+	values url.Values
+	mapped map[string]interface{}
+	// Typesafe fields
+}
 
-	go func() {
-		defer close(out)
+func ReactiveSearchActionQueryFromString(rawQuery string) ReactiveSearchActionQuery {
+	v := ReactiveSearchActionQuery{}
+	values, _ := url.ParseQuery(rawQuery)
+	mapped := map[string]interface{}{}
+	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
+		mapped = result
+	}
+	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
+		TagName:          "json", // reuse json tags
+		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
+		Result:           &v,
+	})
+	if err == nil {
+		_ = decoder.Decode(mapped)
+	}
+	v.values = values
+	v.mapped = mapped
+	return v
+}
+func ReactiveSearchActionQueryFromHttp(r *http.Request) ReactiveSearchActionQuery {
+	return ReactiveSearchActionQueryFromString(r.URL.RawQuery)
+}
+func (q ReactiveSearchActionQuery) Values() url.Values {
+	return q.values
+}
+func (q ReactiveSearchActionQuery) Mapped() map[string]interface{} {
+	return q.mapped
+}
+func (q *ReactiveSearchActionQuery) SetValues(v url.Values) {
+	q.values = v
+}
+func (q *ReactiveSearchActionQuery) SetMapped(m map[string]interface{}) {
+	q.mapped = m
+}
 
-		for res := range input {
-			b, err := json.Marshal(res)
-			if err != nil {
-				continue // or log error
-			}
-			out <- b
-		}
-	}()
+type ReactiveSearchActionMessage struct {
+	Raw []byte
+	// Conn *websocket.Conn
+	Conn        interface{}
+	MessageType int
+	Error       error
+}
 
-	return out
+// Developer handler type
+type ReactiveSearchActionHandler func(msg ReactiveSearchActionMessage) error
+type ReactiveSearchActionSession struct {
+	// Ctx    *gin.Context
+	// Socket *websocket.Conn
+	Ctx         interface{}
+	Socket      interface{}
+	Done        chan bool
+	Read        chan ReactiveSearchActionReadChan
+	QueryParams ReactiveSearchActionQuery
+}
+type ReactiveSearchActionHandlerDuplex func(*ReactiveSearchActionSession)
+type ReactiveSearchActionReadChan struct {
+	Data        []byte
+	Error       error
+	MessageType int
+}
+
+// ReactiveSearchActionClientSession is the client-side mirror of
+// ReactiveSearchActionSession. Receive frames on Read, send frames on Write,
+// and close Write (or send on Done) to tear the connection down. Done also
+// fires when the server closes or the socket errors, so the caller can use it
+// as a single disconnect signal.
+type ReactiveSearchActionClientSession struct {
+	// Socket *websocket.Conn
+	Socket interface{}
+	Done   chan bool
+	Read   chan ReactiveSearchActionReadChan
+	Write  chan []byte
 }

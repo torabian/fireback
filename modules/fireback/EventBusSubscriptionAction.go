@@ -1,117 +1,116 @@
 package fireback
 
 import (
-	"github.com/gorilla/websocket"
-	"go.uber.org/zap"
+	"github.com/torabian/emi/emigo"
+	"net/http"
+	"net/url"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	// EventBusSubscriptionActionImp = EventBusSubscriptionAction
+/**
+* Action to communicate with the action EventBusSubscriptionAction
+ */
+func EventBusSubscriptionActionMeta() struct {
+	Name        string
+	URL         string
+	Method      string
+	CliName     string
+	Description string
+} {
+	return struct {
+		Name        string
+		URL         string
+		Method      string
+		CliName     string
+		Description string
+	}{
+		Name:        "EventBusSubscriptionAction",
+		URL:         "/ws",
+		Method:      "REACTIVE",
+		CliName:     "event-bus-subscription-action",
+		Description: "Connects a client to all events related to their user profile, or workspace they are in",
+	}
 }
 
-func cleanUserFromSocketPool(query QueryDSL) {
-	workspaceId := query.WorkspaceId
-	userId := query.UserId
-
-	// Automatically happens, perhaps should not be called anymore.
-	query.RawSocketConnection.Close()
-
-	socketMutex.Lock()
-	conns := SocketSessionPool[workspaceId][userId]
-	for i, conn := range conns {
-		if conn.Connection == query.RawSocketConnection {
-			conns = append(conns[:i], conns[i+1:]...)
-			break
-		}
-	}
-	if len(conns) == 0 {
-		delete(SocketSessionPool[workspaceId], userId)
-	} else {
-		SocketSessionPool[workspaceId][userId] = conns
-	}
-	if len(SocketSessionPool[workspaceId]) == 0 {
-		delete(SocketSessionPool, workspaceId)
-	}
-	socketMutex.Unlock()
-
-	GetEventBusInstance().RemoveUser(SERVER_INSTANCE, userId)
+/**
+ * Query parameters for EventBusSubscriptionAction
+ */
+// Query wrapper with private fields
+type EventBusSubscriptionActionQuery struct {
+	values url.Values
+	mapped map[string]interface{}
+	// Typesafe fields
 }
 
-func addUserToEventBus(query QueryDSL) {
-
-	workspaceId := query.WorkspaceId
-	userId := query.UserId
-
-	GetEventBusInstance().AddUser(SERVER_INSTANCE, userId)
-
-	socket := &SocketConnection{
-		UserId:     userId,
-		Connection: query.RawSocketConnection,
-		UniqueId:   UUID_SHORT(),
+func EventBusSubscriptionActionQueryFromString(rawQuery string) EventBusSubscriptionActionQuery {
+	v := EventBusSubscriptionActionQuery{}
+	values, _ := url.ParseQuery(rawQuery)
+	mapped := map[string]interface{}{}
+	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
+		mapped = result
 	}
-
-	if query.UserAccessPerWorkspace != nil {
-		socket.URW = *query.UserAccessPerWorkspace
+	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
+		TagName:          "json", // reuse json tags
+		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
+		Result:           &v,
+	})
+	if err == nil {
+		_ = decoder.Decode(mapped)
 	}
-
-	socketMutex.Lock()
-	if SocketSessionPool[workspaceId] == nil {
-		SocketSessionPool[workspaceId] = make(map[string][]*SocketConnection)
-	}
-	SocketSessionPool[workspaceId][userId] = append(SocketSessionPool[workspaceId][userId], socket)
-	socketMutex.Unlock()
-
+	v.values = values
+	v.mapped = mapped
+	return v
+}
+func EventBusSubscriptionActionQueryFromHttp(r *http.Request) EventBusSubscriptionActionQuery {
+	return EventBusSubscriptionActionQueryFromString(r.URL.RawQuery)
+}
+func (q EventBusSubscriptionActionQuery) Values() url.Values {
+	return q.values
+}
+func (q EventBusSubscriptionActionQuery) Mapped() map[string]interface{} {
+	return q.mapped
+}
+func (q *EventBusSubscriptionActionQuery) SetValues(v url.Values) {
+	q.values = v
+}
+func (q *EventBusSubscriptionActionQuery) SetMapped(m map[string]interface{}) {
+	q.mapped = m
 }
 
-func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (chan []byte, error) {
-	query := ExtractQueryDslFromGinContext(session.GinCtx())
-	query.RawSocketConnection = session.GetSocket()
+type EventBusSubscriptionActionMessage struct {
+	Raw []byte
+	// Conn *websocket.Conn
+	Conn        interface{}
+	MessageType int
+	Error       error
+}
 
-	LOG.Debug(
-		"Event bus subscription has been started",
-		zap.String("workspace-id", query.WorkspaceId),
-		zap.String("user", query.UserId),
-	)
+// Developer handler type
+type EventBusSubscriptionActionHandler func(msg EventBusSubscriptionActionMessage) error
+type EventBusSubscriptionActionSession struct {
+	// Ctx    *gin.Context
+	// Socket *websocket.Conn
+	Ctx         interface{}
+	Socket      interface{}
+	Done        chan bool
+	Read        chan EventBusSubscriptionActionReadChan
+	QueryParams EventBusSubscriptionActionQuery
+}
+type EventBusSubscriptionActionHandlerDuplex func(*EventBusSubscriptionActionSession)
+type EventBusSubscriptionActionReadChan struct {
+	Data        []byte
+	Error       error
+	MessageType int
+}
 
-	addUserToEventBus(query)
-
-	out := make(chan []byte)
-
-	go func() {
-		defer close(out)
-		defer cleanUserFromSocketPool(query)
-
-		for {
-			select {
-			case msg, ok := <-session.Read:
-				if !ok {
-					return
-				}
-
-				if websocket.IsCloseError(
-					msg.Error,
-					websocket.CloseNormalClosure,
-					websocket.CloseAbnormalClosure,
-					websocket.CloseGoingAway,
-					websocket.CloseInternalServerErr,
-					websocket.CloseInvalidFramePayloadData,
-					websocket.CloseTLSHandshake,
-				) {
-					LOG.Debug("WebSocket closed", zap.String("user", query.UserId), zap.String("ws", query.WorkspaceId))
-					cleanUserFromSocketPool(query)
-					break
-				} else {
-					// We need to handle this kinda.
-					LOG.Debug("WebSocket read error", zap.Error(msg.Error))
-					out <- []byte("Socket interaction with webserver only supports json at this moment.")
-				}
-
-			case <-session.Done:
-				return
-			}
-		}
-	}()
-
-	return out, nil
+// EventBusSubscriptionActionClientSession is the client-side mirror of
+// EventBusSubscriptionActionSession. Receive frames on Read, send frames on Write,
+// and close Write (or send on Done) to tear the connection down. Done also
+// fires when the server closes or the socket errors, so the caller can use it
+// as a single disconnect signal.
+type EventBusSubscriptionActionClientSession struct {
+	// Socket *websocket.Conn
+	Socket interface{}
+	Done   chan bool
+	Read   chan EventBusSubscriptionActionReadChan
+	Write  chan []byte
 }

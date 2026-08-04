@@ -29,7 +29,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		Definitions: &Module3Definitions,
 		Actions: [][]Module3Action{
 			GetCapabilityModule3Actions(),
-			FirebackCustomActions(),
 		},
 		EntityBundles: []EntityBundle{
 			WebPushConfigEntityBundle,
@@ -40,20 +39,18 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 				{
 					meta := EventBusSubscriptionActionMeta()
-					g.GET(
-						meta.URL,
-						WithSocketAuthorization(EventBusSubscriptionSecurityModel),
-						EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig),
-					)
+					g.GET(meta.URL, EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
+
 				}
+
 				{
 					meta := ReactiveSearchActionMeta()
 					g.GET(
 						meta.URL,
-						WithSocketAuthorization(ReactiveSearchSecurityModel),
 						ReactiveSearchActionReactiveHandler(CreateReactiveSearchHanlder(x)),
 					)
 				}
+
 				{
 					method, url, x := GetCapabilitiesActionHandler(GetCapabilitiesAction)
 					g.Handle(method, url, x)
@@ -68,7 +65,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 	module.ProvideCliHandlers([]*cli.Command{
 		CapabilityCliFn(),
 		&PushNotificationCmd,
-		CapabilitiesTreeActionDef.ToCli(),
 		GetCapabilitiesActionCliHandler(GetCapabilitiesAction),
 	})
 

@@ -71,3 +71,34 @@ actions:
         - name: nested
           type: collection
           target: CapabilityInfoDto
+
+  # - name: GetCapabilities
+  #   description: Get the capabilities inside a system
+  #   url: /capabilities2
+  #   method: get
+  #   out:
+  #     envelope: GResponse
+  #     fields:
+  #       - name: capabilities
+  #         type: collection
+  #         target: CapabilityInfoDto
+  #       - name: nested
+  #         type: collection
+  #         target: CapabilityInfoDto
+
+      
+  - name: ReactiveSearch
+    description:
+      Reactive search is a general purpose search mechanism for different modules,
+      and could be used in mobile apps or front-end to quickly search for a entity.
+    url: /reactive-search
+    method: reactive
+    security:
+      resolveStrategy: workspace
+
+  - name: EventBusSubscription
+    description: Connects a client to all events related to their user profile, or workspace they are in
+    method: reactive
+    url: /ws
+    security:
+      resolveStrategy: workspace
