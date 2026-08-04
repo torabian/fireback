@@ -11,29 +11,9 @@
       }
     ]
   },
-  "files.associations": {
-    "*.ejs": "html",
-    "__bit_reference": "cpp",
-    "__node_handle": "cpp",
-    "bitset": "cpp",
-    "chrono": "cpp",
-    "fireback.h": "c",
-    "gpiomodehttp.dyno.h": "c",
-    "locale": "cpp",
-    "map": "cpp",
-    "memorystatcjson.dyno.h": "c",
-    "memorystatdefinitions.dyno.h": "c",
-    "memorystathttp.dyno.h": "c",
-    "set": "cpp",
-    "unordered_map": "cpp",
-    "unordered_set": "cpp"
-  },
-  "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
-  "go.useLanguageServer": true,
   "yaml.schemas": {
     ".jsonschemas/module3-json-schema.json": ["*Module3.yml"],
     "./.vscode/emi-module-spec.json": ["*.emi.yml", "*.emi.yaml"],
     "./modules/fireback/module3-json-schema.json": ["*Module3.yml"]
-  },
-  "java.compile.nullAnalysis.mode": "disabled"
+  }
 }
