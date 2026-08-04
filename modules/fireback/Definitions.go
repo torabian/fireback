@@ -14,12 +14,6 @@ type Database struct {
 	Dsn      string `yaml:"dsn,omitempty"`
 }
 
-type Service struct {
-	MacIdentifier     string `yaml:"macIdentifier,omitempty"`
-	WindowsIdentifier string `yaml:"windowsIdentifier,omitempty"`
-	DebianIdentifier  string `yaml:"DebianIdentifier,omitempty"`
-}
-
 type QueryResultMeta struct {
 	TotalItems          int64   `json:"totalItems" yaml:"totalItems"`
 	TotalAvailableItems int64   `json:"totalAvailableItems" yaml:"totalAvailableItems"`
