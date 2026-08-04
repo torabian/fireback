@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/vdomain"
 	"go.uber.org/zap"
 )
 
@@ -39,7 +40,7 @@ func createHttpServer(handler *gin.Engine, config2 fireback.HttpServerInstanceCo
 			continue
 		}
 
-		fmt.Println("Starting virtual domain: ", vd, fireback.EnableDomain(vd))
+		fmt.Println("Starting virtual domain: ", vd, vdomain.EnableDomain(vd))
 	}
 
 	mainServer := &http.Server{
@@ -118,7 +119,7 @@ func createHttpServer(handler *gin.Engine, config2 fireback.HttpServerInstanceCo
 		if vd == "" {
 			continue
 		}
-		fmt.Println("Stopping virtual domain: ", vd, fireback.DisableDomain(vd))
+		fmt.Println("Stopping virtual domain: ", vd, vdomain.DisableDomain(vd))
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
