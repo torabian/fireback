@@ -51,6 +51,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 					)
 				}
 
+				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
 				{
 					method, url, x := GetCapabilitiesActionHandler(GetCapabilitiesAction)
 					g.Handle(method, url, x)

@@ -21,9 +21,11 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 	}
 
 	query.ItemsPerPage = 9999
-	items, _, err := CapabilityActions.Query(*query)
-	if err != nil {
-		return nil, GormErrorToIError(err)
+	query.WorkspaceId = "system"
+	query.UserId = "system"
+	items, _, err2 := CapabilityActions.Query(*query)
+	if err2 != nil {
+		return nil, GormErrorToIError(err2)
 	}
 
 	itemsFiltered := []CapabilityInfoDto{}
