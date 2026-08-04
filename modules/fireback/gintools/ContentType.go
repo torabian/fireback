@@ -1,4 +1,4 @@
-package fireback
+package gintools
 
 import (
 	"strings"

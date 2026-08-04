@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/torabian/fireback/modules/fireback/gintools"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -291,20 +292,20 @@ func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any, f QueryDSL) (
 		return abortWithError(c, err, f)
 	}
 
-	switch DetectGinContentType(c) {
-	case ContentTypeYAML:
+	switch gintools.DetectGinContentType(c) {
+	case gintools.ContentTypeYAML:
 		if err := BindYamlStringWithDetails(bodyBytes, body); err != nil {
 			return abortWithError(c, err, f)
 		}
-	case ContentTypeFormData:
+	case gintools.ContentTypeFormData:
 		if err := BindMultiPartFormDataWithDetails(c, body); err != nil {
 			return abortWithError(c, err, f)
 		}
-	case ContentTypeURLEncoded:
+	case gintools.ContentTypeURLEncoded:
 		if err := BindFormUrlEncodedWithDetails(c, body); err != nil {
 			return abortWithError(c, err, f)
 		}
-	case ContentTypeXML:
+	case gintools.ContentTypeXML:
 		if err := BindXmlStringWithDetails(bodyBytes, body); err != nil {
 			return abortWithError(c, err, f)
 		}
