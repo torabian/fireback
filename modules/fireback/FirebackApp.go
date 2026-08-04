@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log"
@@ -22,7 +21,6 @@ import (
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
-	"gopkg.in/yaml.v2"
 )
 
 // Fireback app, is a wrapper, of actions, and configuration which will be needed to create
@@ -368,46 +366,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 </html>
 
 		`)
-	})
-
-	r.GET("/openapi.yml", func(c *gin.Context) {
-		data, err := ConvertStructToOpenAPIYaml(x)
-
-		if err != nil {
-			c.AbortWithStatusJSON(400, err)
-			return
-		}
-
-		c.Header("content-type", "application/yaml")
-
-		// Marshal the OpenAPI document to YAML
-		yamlData, err := yaml.Marshal(data)
-		if err != nil {
-			c.AbortWithStatusJSON(400, err)
-			return
-		}
-
-		c.String(200, string(yamlData))
-	})
-
-	r.GET("/openapi.json", func(c *gin.Context) {
-		data, err := ConvertStructToOpenAPIYaml(x)
-
-		if err != nil {
-			c.AbortWithStatusJSON(400, err)
-			return
-		}
-
-		c.Header("content-type", "application/json")
-
-		// Marshal the OpenAPI document to YAML
-		jsonData, err := json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			c.AbortWithStatusJSON(400, err)
-			return
-		}
-
-		c.String(200, string(jsonData))
 	})
 
 	// r.Use(GinPostTranslateErrorMessages(translations))
