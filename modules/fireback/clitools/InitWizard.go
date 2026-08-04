@@ -20,7 +20,7 @@ import (
 // config is a pointer to the core package's package-level config instance
 // (via fireback.GetConfigRef()), so mutating config.Field here mutates the
 // same storage the core package reads from.
-var config = fireback.GetConfigRef()
+var config = fireback.GetConfig()
 
 func init() {
 	fireback.CLIInit = cliInit
@@ -385,7 +385,7 @@ func cliInit(xapp *fireback.FirebackApp) *cli.Command {
 		Flags: fireback.GetConfigCliFlags(),
 		Action: func(ctx context.Context, c *cli.Command) error {
 			if c.NumFlags() > 0 {
-				fireback.CastConfigFromCli(config, c)
+				fireback.CastConfigFromCli(&config, c)
 
 				if !c.IsSet("mac-identifier") {
 					config.MacIdentifier = config.Name
@@ -428,7 +428,7 @@ func dataBaseConfigEnv(xapp *fireback.FirebackApp) error {
 		config.DbVendor = databaseData.Vendor
 		config.DbDsn = databaseData.Dsn
 
-		db, err := fireback.DirectConnectToDb(*config)
+		db, err := fireback.DirectConnectToDb(config)
 		if err == nil && db.Exec("select 1").Error == nil {
 			config.Save(".env")
 			fmt.Println("✔ connection is successful")
@@ -501,7 +501,7 @@ func initEnvironment(xapp *fireback.FirebackApp, envFileName string, c *cli.Comm
 		return err
 	}
 
-	askSqlLogLevel(config)
+	askSqlLogLevel(&config)
 
 	// 4. Ask for the ports, it's important.
 	po, _ := strconv.Atoi(askPortName("Http port which fireback will be lifted:", fmt.Sprintf("%v", config.Port)))
@@ -513,7 +513,7 @@ func initEnvironment(xapp *fireback.FirebackApp, envFileName string, c *cli.Comm
 
 	executeSeeders(xapp)
 
-	askSSL(config)
+	askSSL(&config)
 
 	config.Save(".env")
 

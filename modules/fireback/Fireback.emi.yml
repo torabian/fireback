@@ -225,3 +225,15 @@ actions:
     description: Connects a client to all events related to their user profile, or workspace they are in
     method: reactive
     url: /ws
+
+entities:
+  - name: capability
+    cliShort: cap
+    description: >-
+      Manage the capabilities inside the application, both builtin to core and
+      custom defined ones
+    fields:
+      - name: name
+        type: string
+      - name: description
+        type: string

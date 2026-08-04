@@ -10,6 +10,11 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"log"
+	reflect "reflect"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/schollz/progressbar/v3"
@@ -22,10 +27,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"log"
-	reflect "reflect"
-	"strings"
-	"time"
 )
 
 var roleSeedersFs = &seeders.ViewsFs
@@ -370,11 +371,13 @@ func RoleRecursiveAddUniqueId(dto *RoleEntity, query fireback.QueryDSL) {
 
 /*
 *
-	Batch inserts, do not have all features that create
-	operation does. Use it with unnormalized content,
-	or read the source code carefully.
-  This is not marked as an action, because it should not be available publicly
-  at this moment.
+
+		Batch inserts, do not have all features that create
+		operation does. Use it with unnormalized content,
+		or read the source code carefully.
+	  This is not marked as an action, because it should not be available publicly
+	  at this moment.
+
 *
 */
 func RoleMultiInsertFn(dtos []*RoleEntity, query fireback.QueryDSL) ([]*RoleEntity, *fireback.IError) {
@@ -788,10 +791,7 @@ var RoleCreateInteractiveCmd cli.Command = cli.Command{
 		})
 		entity := &RoleEntity{}
 		fireback.PopulateInteractively(entity, c, RoleCommonInteractiveCliFlags)
-		entity.CapabilitiesListId = fireback.CliInteractiveSearchAndSelect(
-			"Select Capabilities",
-			fireback.CapabilitiesActionQueryString,
-		)
+
 		if entity, err := RoleActions.Create(entity, query); err != nil {
 			fmt.Println(err.Error())
 		} else {
@@ -839,10 +839,7 @@ func CastRoleFromCli(c *cli.Command) *RoleEntity {
 	if c.IsSet("capabilities") {
 		template.CapabilitiesListId = c.StringSlice("capabilities")
 	} else {
-		template.CapabilitiesListId = fireback.CliInteractiveSearchAndSelect(
-			"Select Capabilities",
-			fireback.CapabilitiesActionQueryString,
-		)
+
 	}
 	return template
 }

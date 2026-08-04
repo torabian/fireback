@@ -18,7 +18,7 @@ var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
 var OS_SIGNIN_CAPABILITIES []*fireback.CapabilityEntity = []*fireback.CapabilityEntity{
-	{UniqueId: ROOT_ALL_ACCESS, Visibility: emigo.NullableOf("A"), Name: "Root"},
+	{UniqueId: ROOT_ALL_ACCESS, Name: "Root"},
 }
 
 var TokenParseInformation cli.Command = cli.Command{
@@ -160,9 +160,7 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 		Name:        sampleName,
 		Capabilities: []*fireback.CapabilityEntity{
 			{
-				WorkspaceId: emigo.NullableOf("system"),
-				Visibility:  emigo.NullableOf("A"),
-				UniqueId:    ROOT_ALL_ACCESS,
+				UniqueId: ROOT_ALL_ACCESS,
 			},
 		},
 	}

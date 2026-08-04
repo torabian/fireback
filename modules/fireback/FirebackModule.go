@@ -15,7 +15,6 @@ var Module3Definitions embed.FS
 
 var EverRunEntities []interface{} = []interface{}{
 	&CapabilityEntity{},
-	&CapabilityEntityPolyglot{},
 }
 
 type FirebackModuleConfig struct{}
@@ -27,9 +26,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 	module := &ModuleProvider{
 		Name:        "fireback",
 		Definitions: &Module3Definitions,
-		Actions: [][]Module3Action{
-			GetCapabilityModule3Actions(),
-		},
+
 		EntityBundles: []EntityBundle{
 			WebPushConfigEntityBundle,
 		},
@@ -64,7 +61,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		CapabilityCliFn(),
 		&PushNotificationCmd,
 		GetCapabilitiesActionCliHandler(GetCapabilitiesAction),
 	})

@@ -17,7 +17,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
@@ -78,13 +77,9 @@ func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
 		perm = perm + ".*"
 	}
 
-	system := "system"
-
 	if (db.Where(CapabilityEntity{UniqueId: perm}).First(&entity).Error != nil) {
 		err := db.Create(&CapabilityEntity{
 			UniqueId:    perm,
-			WorkspaceId: emigo.NullableOf(system),
-			Visibility:  emigo.NullableOf("A"),
 			Description: permInfo.Description,
 			Name:        permInfo.Name,
 		}).Error

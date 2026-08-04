@@ -10,12 +10,15 @@ func GetCapabilitiesAction(c GetCapabilitiesActionRequest) (*GetCapabilitiesActi
 		return nil, err
 	}
 
-	res, qrm, err2 := CapabilityActions.Query(*query)
+	res, qrm, err2 := CapabilityEntityActions.Browse(GetDbRef(), CapabilityBrowseActionQuery{}, "")
 	if err2 != nil {
 		return nil, err
 	}
 
 	return &GetCapabilitiesActionResponse{
-		Payload: GResponseQuery(res, qrm, query),
+		Payload: GResponseQuery(res, &QueryResultMeta{
+			TotalItems: qrm.TotalItems,
+			Cursor:     qrm.Cursor,
+		}, query),
 	}, nil
 }

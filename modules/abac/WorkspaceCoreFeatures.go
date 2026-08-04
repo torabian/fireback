@@ -228,9 +228,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 		WorkspaceId: emigo.NullableOf(workspace.UniqueId),
 		Capabilities: []*fireback.CapabilityEntity{
 			{
-				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  emigo.NullableOf("A"),
-				WorkspaceId: emigo.NullableOf("system"),
+				UniqueId: ROOT_ALL_MODULES,
 			},
 		},
 	}
@@ -282,9 +280,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 		WorkspaceId: emigo.NullableOf(workspace.UniqueId),
 		Capabilities: []*fireback.CapabilityEntity{
 			{
-				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  emigo.NullableOf("A"),
-				WorkspaceId: emigo.NullableOf("system"),
+				UniqueId: ROOT_ALL_MODULES,
 			},
 		},
 	}
