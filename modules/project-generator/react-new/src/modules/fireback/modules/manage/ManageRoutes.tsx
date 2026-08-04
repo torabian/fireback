@@ -8,7 +8,6 @@
 
 import { Route } from "react-router-dom";
 import { useCapabilityRoutes } from "./capabilities/CapabilityRoutes";
-import { useDriveRoutes } from "./drive/DriveRoutes";
 import { useEmailProviderRoutes } from "./mail-providers/EmailProviderRoutes";
 import { useEmailSenderRoutes } from "./mail-senders/EmailSenderRoutes";
 import { usePassportMethodRoutes } from "./passport-method/PassportMethodRoutes";
@@ -21,7 +20,6 @@ import { useGsmProviderRoutes } from "./gsm-provider/GsmProviderRoutes";
 
 export function useManageRoutes() {
   const capabilityRoutes = useCapabilityRoutes();
-  const driveRoutes = useDriveRoutes();
   const mailProviderRoutes = useEmailProviderRoutes();
   const gsmProviderRoutes = useGsmProviderRoutes();
   const mailSenderRoutes = useEmailSenderRoutes();
@@ -35,7 +33,6 @@ export function useManageRoutes() {
   return (
     <Route path="manage">
       {capabilityRoutes}
-      {driveRoutes}
       {mailProviderRoutes}
       {mailSenderRoutes}
       {passportMethodRoutes}

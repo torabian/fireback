@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { type MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
-import { UploaderStatsCard } from "../../modules/manage/drive/UploaderStatsCard";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
 import Navbar from "./Navbar";
 
@@ -57,7 +56,7 @@ const Layout = ({
         <div
           className={classNames(
             "sidebar-overlay",
-            sidebarVisible ? "open" : ""
+            sidebarVisible ? "open" : "",
           )}
           onClick={(e) => {
             toggleSidebar$();
@@ -83,8 +82,6 @@ const Layout = ({
             </div>
           </div>
         </div>
-
-        <UploaderStatsCard />
       </div>
       <span className="general-action-menu mobile-view">
         <ActionMenuManager />

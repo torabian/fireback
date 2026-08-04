@@ -3,7 +3,6 @@ import { Editor } from "@tinymce/tinymce-react";
 import classNames from "classnames";
 import { useContext, useEffect, useRef, useState } from "react";
 
-import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useT } from "../../../hooks/useT";
@@ -65,7 +64,7 @@ export const FormRichText = (props: FormRichTextProps) => {
   const isTinyMceLoaded = useRef<boolean>(false);
   const [editorType, setEditorType] = useState(EditorTypes.TinyMCE);
 
-  const { upload } = useFileUploader();
+  // const { upload } = useFileUploader();
   const { directPath } = useRemoteInformation();
 
   useEffect(() => {
@@ -85,16 +84,16 @@ export const FormRichText = (props: FormRichTextProps) => {
     }
   }, []);
 
-  const uploadUploadHandler: any = async (
-    blobInfo: { blob: Blob },
-    progress: () => void,
-  ) => {
-    const resp = await upload(
-      [new File([(blobInfo.blob as any)()], "filename")],
-      true,
-    )[0];
-    return directPath({ diskPath: resp as any } as any);
-  };
+  // const uploadUploadHandler: any = async (
+  //   blobInfo: { blob: Blob },
+  //   progress: () => void,
+  // ) => {
+  //   const resp = await upload(
+  //     [new File([(blobInfo.blob as any)()], "filename")],
+  //     true,
+  //   )[0];
+  //   return directPath({ diskPath: resp as any } as any);
+  // };
 
   const isDark =
     window.matchMedia("(prefers-color-scheme: dark)").matches ||
@@ -130,7 +129,7 @@ export const FormRichText = (props: FormRichTextProps) => {
           init={{
             menubar: false,
             height: height || 400,
-            images_upload_handler: uploadUploadHandler,
+            // images_upload_handler: uploadUploadHandler,
             // language: "fa",
             skin: isDark ? "oxide-dark" : "oxide",
             content_css: isDark ? "dark" : "default",

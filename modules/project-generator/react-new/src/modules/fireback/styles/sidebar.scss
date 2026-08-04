@@ -4,7 +4,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  left: 0;  
+  left: 0;
   background: #000000a6;
   z-index: 99999;
 
@@ -23,9 +23,9 @@
 .application-panels {
   height: 100vh;
 
-  &.has-bottom-tab {
-    height: calc(100vh - 60px) !important;
-  }
+  // &.has-bottom-tab {
+  //   height: calc(100vh - 60px) !important;
+  // }
 }
 
 .sidebar {
@@ -40,9 +40,9 @@
     color: #8a8fa4;
   }
 
-  &.has-bottom-tab {
-    height: calc(100vh - 60px) !important;
-  }
+  // &.has-bottom-tab {
+  //   height: calc(100vh - 60px) !important;
+  // }
 
   .category {
     color: black;

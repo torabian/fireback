@@ -39,7 +39,7 @@ export function SidebarMultiRouterSetup({
       direction="horizontal"
       className={classNames(
         "application-panels",
-        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined
+        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined,
       )}
     >
       {computedRouters.map((router, count) => {
@@ -57,7 +57,7 @@ export function SidebarMultiRouterSetup({
                 queryClient={queryClient}
               />
             </router.Wrapper>
-            {detectDeviceType().isMobileView ? <TabbarMenu /> : undefined}
+            {/* {detectDeviceType().isMobileView ? <TabbarMenu /> : undefined} */}
           </router.Router>
         );
       })}
