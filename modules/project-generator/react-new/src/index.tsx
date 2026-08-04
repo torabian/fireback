@@ -14,23 +14,18 @@ import ReactDOM from "react-dom/client";
 import App from "./apps/projectname/App";
 // #v-endif
 
-// #v-ifdef VITE_TARGET_APP == 'designer'
-import App from "./apps/designer/App";
-// #v-endif
-
 // #v-ifdef VITE_TARGET_APP == 'self-service'
 import App from "./apps/self-service/App";
 // #v-endif
 
-
 // @fireback-append-app
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root") as HTMLElement,
 );
 
 root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );
