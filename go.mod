@@ -2,6 +2,8 @@ module github.com/torabian/fireback
 
 go 1.25.1
 
+replace github.com/torabian/emi => ../emi
+
 require (
 	github.com/474420502/gcurl v1.2.1
 	github.com/ClickHouse/clickhouse-go/v2 v2.43.0

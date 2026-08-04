@@ -5,13 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	// "github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/emi/lib/gorunner"
 	"github.com/urfave/cli/v3"
 
 	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/gintools"
-	FBManage "github.com/torabian/fireback/modules/fireback/interfaces/fireback-manage"
-	FbSelfService "github.com/torabian/fireback/modules/fireback/interfaces/selfservice"
+	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
+	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"
 	project_generator "github.com/torabian/fireback/modules/project-generator"
 )
 
@@ -29,11 +30,18 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
 func main() {
 
+	emiCommand := &cli.Command{
+		Name:     "emi",
+		Usage:    "Emi compiler - Backend-for-Frontend with automatic SDK generation.",
+		Commands: gorunner.BuildCommands(),
+	}
+
 	modules := []*fireback.ModuleProvider{
 		fireback.FirebackModuleSetup(nil),
 		{
 			CliHandlers: []*cli.Command{
 				project_generator.NewProjectCli(),
+				emiCommand,
 			},
 		},
 	}
