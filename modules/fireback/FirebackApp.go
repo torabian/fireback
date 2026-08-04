@@ -23,6 +23,8 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+var SERVER_INSTANCE string = UUID_Long()
+
 // Fireback app, is a wrapper, of actions, and configuration which will be needed to create
 // a gin server simply.
 type FirebackApp struct {

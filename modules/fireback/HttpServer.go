@@ -11,17 +11,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
 var (
 	g errgroup.Group
 )
-
-var SERVER_INSTANCE string = UUID_Long()
-
-var LOG *zap.Logger
 
 // CreateHttpServer lifts the gin engine into a real HTTP(S) server with
 // graceful shutdown on OS signals - unavailable under wasm. Real
