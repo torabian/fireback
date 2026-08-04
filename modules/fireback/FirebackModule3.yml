@@ -1,6 +1,7 @@
 name: fireback
 meta-workspace: true
 
+
 messages:
   invalidContent:
     en: Body content is not correct. You need a valid json.
@@ -51,57 +52,6 @@ messages:
     en: The form data submitted is malformed or contains invalid fields. Please check the form and ensure all required fields are properly filled out.
   invalidFormDataContentType:
     en: The content type of the form data is not supported. Please ensure you are sending data with the correct content type, such as 'application/x-www-form-urlencoded' or 'multipart/form-data'.
-
-actions:
-
-  - name: GetCapabilities
-    description: Get the capabilities inside a system
-    url: /capabilities2
-    method: get
-    out:
-      envelope: GResponse
-      fields:
-        - name: capabilities
-          type: collection
-          target: CapabilityInfoDto
-        - name: nested
-          type: collection
-          target: CapabilityInfoDto
-
-      
-  - name: ReactiveSearch
-    description:
-      Reactive search is a general purpose search mechanism for different modules,
-      and could be used in mobile apps or front-end to quickly search for a entity.
-    url: /reactive-search
-    method: reactive
-    security:
-      resolveStrategy: workspace
-
-  - name: EventBusSubscription
-    description: Connects a client to all events related to their user profile, or workspace they are in
-    method: reactive
-    url: /ws
-    security:
-      resolveStrategy: workspace
-  # - name: CapabilitiesTree
-  #   cliName: treex
-  #   url: /capabilitiesTree
-  #   method: get
-  #   security:
-  #     requires:
-  #       - completeKey: root.manage.fireback.capability.query
-  #     resolveStrategy: workspace
-  #   description: dLists all of the capabilities in database as a array of string as root access
-  #   out:
-  #     envelope: GResponse
-  #     fields:
-  #       - name: capabilities
-  #         type: collection
-  #         target: CapabilityInfoDto
-  #       - name: nested
-  #         type: collection
-  #         target: CapabilityInfoDto
 
 # Entities are not generated anymore via fireback code gen. They are hard coded.
 # Next time use emi to generate the entities

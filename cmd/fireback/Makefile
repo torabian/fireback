@@ -6,8 +6,7 @@ deb:
 dev:
 	go build --tags "fts5" -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
-	cp ../../artifacts/$(project)/$(projectBinary) ../../artifacts/$(project)/$(projectBinary).exe && \
-	../../app gen module3spec --out ../../modules/fireback/module3-json-schema.json
+	cp ../../artifacts/$(project)/$(projectBinary) ../../artifacts/$(project)/$(projectBinary).exe
 
 # Ui2 also copies the fireback-manage, in case it has a different built required
 # make sure you change it here too.

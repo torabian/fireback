@@ -19,56 +19,6 @@ import (
 
 // Converts a list of string into hireachical module 2 structure
 
-func ToModule3Fields(list []string) []*Module3Field {
-	fields := []*Module3Field{}
-
-	for _, item := range list {
-		fields = append(fields, &Module3Field{
-			Name: ToCamelCaseClean(item),
-			Type: FIELD_TYPE_STRING,
-		})
-	}
-
-	return fields
-}
-
-func CastJsonFileToModule3Fields(importFilePath string) []*Module3Field {
-
-	file, err := os.Open(importFilePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	file.Close()
-
-	file, err = os.Open(importFilePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	// read csv values using csv.Reader
-	csvReader := csv.NewReader(file)
-
-	var index int64 = -1
-	for {
-		index++
-
-		data, err := csvReader.Read()
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		if index == 0 {
-			return ToModule3Fields(data)
-
-		}
-
-	}
-
-	return []*Module3Field{}
-}
-
 func SetValue(obj interface{}, field string, value interface{}) {
 	ref := reflect.ValueOf(obj)
 

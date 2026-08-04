@@ -28,7 +28,6 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 	return []*cli.Command{
 		CLIInit(xapp),
 		EnvManagement(xapp),
-		CodeGenTools(xapp),
 		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
@@ -53,7 +52,6 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 
 	return []*cli.Command{
 		CLIInit(xapp),
-		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,

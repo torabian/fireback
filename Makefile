@@ -31,13 +31,6 @@ bed:
 test_rebuild:
 	node e2e/scripts/rebuild.js $(PWD)
 
-refresh:
-	./artifacts/fireback/f gen gof --def modules/abac/AbacModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/fireback/FirebackModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/suggestion/SuggestionModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	./artifacts/fireback/f gen gof --def modules/payment/PaymentModule3.yml --relative-to . --gof-module github.com/torabian/fireback --no-cache true && \
-	make
-
 bundle:
 	cd cmd/fireback && make ui2 && cd ../.. && make
 
@@ -47,19 +40,6 @@ bundle:
 # to typescript builder for example, and forget to update the codegen projects.
 # this function need to do that, and before making any release we need to make
 # sure, that running this command on main (or release tag) make any code diff.
-
-rebuild-sdks:
-	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
-	make client && \
-	./app gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/fireback/codegen/react-new && npm run build && cd -
-
-## This is different because we use the fireback built on ci-cd for this purpose.
-rebuild-sdks-ci:
-	rm -rf modules/fireback/codegen/react-new/src/modules/fireback/sdk && \
-	make client && \
-	fireback gen react --path modules/fireback/codegen/react-new/src/modules/fireback/sdk --no-cache true && \
-	cd modules/fireback/codegen/react-new && npm run build
 
 # For development purposes
 

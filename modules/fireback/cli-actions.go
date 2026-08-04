@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -503,62 +502,6 @@ func (x QuerySelectionInfo) Json() string {
 	str, _ := json.MarshalIndent(x, "", "  ")
 	return (string(str))
 
-}
-
-func DatabaseColumnsResolver(
-	v reflect.Value,
-	parent string,
-	requestedFields []string,
-	value QuerySelectionInfo,
-	autoInclude bool,
-) QuerySelectionInfo {
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return value
-	}
-
-	t := v.Type()
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		qs := field.Tag.Get("qs")
-		column := field.Tag.Get("column")
-		preload := field.Tag.Get("preload")
-		typeof := field.Tag.Get("typeof")
-		fieldValue := v.Field(i)
-
-		fullName := parent + qs
-
-		if qs == "" {
-			continue
-		}
-
-		// Nested struct
-		if typeof == "one" || typeof == "array" || typeof == "collection" {
-			if slices.Contains(requestedFields, qs) {
-				if preload != "" {
-					value.Preloads = append(value.Preloads, preload)
-				}
-			}
-
-			value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, false)
-		} else if typeof == FIELD_TYPE_OBJECT {
-			if slices.Contains(requestedFields, qs) {
-				value = DatabaseColumnsResolver(fieldValue, fullName+".", requestedFields, value, true)
-			}
-		} else {
-			if fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
-				if slices.Contains(requestedFields, qs) || autoInclude {
-					value.Columns = append(value.Columns, column)
-				}
-			}
-		}
-
-	}
-
-	return value
 }
 
 func GenerateQueryStringStyle(v reflect.Value, parent string) string {

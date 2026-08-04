@@ -172,19 +172,6 @@ func SmartSplit(input string) []string {
 	return smartSplitRegex.Split(input, -1)
 }
 
-// Computes which columns from database need to be selected
-func DetectSelectFieldsInSQL(qs interface{}, f *QueryDSL) {
-	if len(f.SelectableColumn) > 0 {
-		res := DatabaseColumnsResolver(reflect.ValueOf(qs), "", []string(f.SelectableColumn), QuerySelectionInfo{}, false)
-
-		f.SelectableColumnSql = res.Columns
-
-		if len(res.Preloads) > 0 {
-			f.WithPreloads = append(f.WithPreloads, res.Preloads...)
-		}
-	}
-}
-
 func CommonCliQueryCmd3[T any](
 	c *cli.Command,
 	fn func(query QueryDSL) ([]T, *QueryResultMeta, *IError),

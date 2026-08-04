@@ -3,17 +3,14 @@ package fireback
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"reflect"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
-	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stoewer/go-strcase"
@@ -368,13 +365,8 @@ func (x Module3Action) ResponseEntityComputed() string {
 		return x.Out.Dto
 	}
 
-	if len(x.Out.Fields) > 0 {
-		return x.Upper() + "ActionResDto"
-	}
-
 	return "any"
-	// j := EntityFromString(GetTypeString(route.ResponseEntity))
-	// return j.ClassName
+
 }
 
 func (route Module3Action) ResponseEntityComputedSplit() string {
@@ -399,10 +391,6 @@ func (x Module3Action) RequestEntityComputed() string {
 	}
 	if x.In.Dto != "" {
 		return x.In.Dto
-	}
-
-	if len(x.In.Fields) > 0 {
-		return x.Upper() + "ActionReqDto"
 	}
 
 	return ""
@@ -513,24 +501,4 @@ func DocumentTestResult(testResult TestResult) {
 	str, _ := json.MarshalIndent(testResult, "", "  ")
 	os.Mkdir("TestResults", 0777)
 	os.WriteFile("TestResults/"+testResult.Name+".json", str, 0777)
-}
-
-func RenderTemplateToGin(ctx *gin.Context, path string, ui fs.FS, data any) {
-
-	filename := filepath.Base(path)
-	tmpl, err := template.New("").Funcs(CommonMap).ParseFS(ui, path, "SharedParticles.tpl")
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"error1": err.Error(),
-		})
-		return
-	}
-
-	err = tmpl.ExecuteTemplate(ctx.Writer, filename, data)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"error2": err.Error(),
-		})
-		return
-	}
 }

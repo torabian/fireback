@@ -3,32 +3,9 @@ package fireback
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
-	"github.com/gin-gonic/gin"
-	firebackgo "github.com/torabian/fireback/modules/fireback/codegen/firebackgo"
 	"github.com/xeipuuv/gojsonschema"
 )
-
-func prependCreateScript(name string) string {
-	return `
-	if fields, err := Cast` + ToUpper(name) + `FieldsFromJson(dto.JsonSchema); err != nil {
-		return nil, err
-	} else {
-		dto.Fields = fields
-	}
-	`
-}
-
-func prependUpdateScript(name string) string {
-	return `
-	if fields2, err := Cast` + ToUpper(name) + `FieldsFromJson(fields.JsonSchema); err != nil {
-		return nil, err
-	} else {
-		fields.Fields = fields2
-	}
-	`
-}
 
 // Cast the Params interface{} into this struct to generate eav model.
 type EavMacroParams struct {
@@ -37,132 +14,6 @@ type EavMacroParams struct {
 
 	// Some macros such as EAV can benefit from a list of fields. You can define them here or in Params object
 	Fields []*Module3Field `yaml:"fields,omitempty" json:"fields,omitempty" jsonschema:"description=Some macros such as EAV can benefit from a list of fields. You can define them here or in Params object"`
-}
-
-func EavMacro(macro Module3Macro, x *Module3) {
-
-	params, err := Module3MacroCastParams[EavMacroParams](&macro)
-	if err != nil {
-		log.Fatalln("Eav macro failed to parse the params:", err)
-	}
-
-	if params == nil || params.Name == "" {
-		log.Fatal("Eav macro needs params, at least name needs to be available")
-	}
-
-	wsPrefix := "fireback."
-	if x.MetaWorkspace {
-		wsPrefix = ""
-	}
-
-	key := params.Name
-	eavMacroTools, err := CompileString(&firebackgo.FbGoTpl, "EavMacro.tpl", gin.H{
-		"Key":      ToUpper(key),
-		"key":      key,
-		"wsprefix": wsPrefix,
-	})
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	form := Module3Entity{
-		Name:                key,
-		PrependScript:       eavMacroTools,
-		PrependCreateScript: prependCreateScript(key),
-		PrependUpdateScript: prependUpdateScript(key),
-		Fields: []*Module3Field{
-			{
-				Name:     "name",
-				Type:     "string",
-				Validate: "required",
-			},
-			{
-				Name: "description",
-				Type: "string",
-			},
-			{
-				Name: "uiSchema",
-				Type: "json",
-			},
-			{
-				Name: "jsonSchema",
-				Type: "json",
-			},
-			{
-				Name: "fields",
-				Type: "array",
-				Fields: []*Module3Field{
-					{
-						Name:   key,
-						Type:   "one",
-						Target: ToUpper(key) + "Entity",
-					},
-					{
-						Name: "name",
-						Type: "string",
-					},
-					{
-						Name: "type",
-						Type: "string",
-					},
-				},
-			},
-		},
-	}
-
-	submissionFields := []*Module3Field{
-		{
-			Name:     key,
-			Type:     "one",
-			Target:   ToUpper(key) + "Entity",
-			Validate: "required",
-		},
-		{
-			Name: "data",
-			Type: "json",
-		},
-		{
-			Name: "values",
-			Type: "array",
-			Fields: []*Module3Field{
-				{
-					Name:      key + "Field",
-					Type:      "one",
-					Target:    ToUpper(key) + "Fields",
-					RootClass: ToUpper(key) + "Entity",
-				},
-				{
-					Name: "valueInt64",
-					Type: "int64",
-				},
-				{
-					Name: "valueFloat64",
-					Type: "float64",
-				},
-				{
-					Name: "valueString",
-					Type: "string",
-				},
-				{
-					Name: "valueBoolean",
-					Type: "bool",
-				},
-			},
-		},
-	}
-
-	if params.Fields != nil {
-		submissionFields = append(submissionFields, params.Fields...)
-	}
-
-	formSubmission := Module3Entity{
-		Name:                key + "Submission",
-		Fields:              submissionFields,
-		PrependCreateScript: ToUpper(key) + `SubmissionCastFieldsToEavAndValidate(dto, query)`,
-		PrependUpdateScript: ToUpper(key) + `SubmissionCastFieldsToEavAndValidate(fields, query)`,
-	}
-
-	x.Entities = append(x.Entities, form, formSubmission)
 }
 
 type UISchema struct {
