@@ -2,7 +2,6 @@ package fireback
 
 import (
 	"encoding/json"
-	reflect "reflect"
 )
 
 type Database struct {
@@ -26,26 +25,10 @@ type Headers struct {
 	AccessControlAllowHeaders string `yaml:"access-control-allow-headers,omitempty"`
 }
 
-// @meta(include)
-type Drive struct {
-	Storage string `yaml:"storage,omitempty"`
-	Port    string `yaml:"port,omitempty"`
-	Enabled bool   `yaml:"enabled,omitempty"`
-}
-
-type Log struct {
-	StdErr string `yaml:"stderr,omitempty"`
-	StdOut string `yaml:"stdout,omitempty"`
-}
-
 type Service struct {
 	MacIdentifier     string `yaml:"macIdentifier,omitempty"`
 	WindowsIdentifier string `yaml:"windowsIdentifier,omitempty"`
 	DebianIdentifier  string `yaml:"DebianIdentifier,omitempty"`
-}
-
-type License struct {
-	MacIdentifier string `yaml:"macIdentifier,omitempty"`
 }
 
 type WorkerConfig struct {
@@ -66,10 +49,4 @@ func (x *QueryResultMeta) Json() string {
 		return (string(str))
 	}
 	return ""
-}
-
-// Checks if the underlying value is a nil error.
-// Using IError sometimes causes the err to not be nil, but underlying value is nil
-func IsErr(err error) bool {
-	return err != nil && !reflect.ValueOf(err).IsNil()
 }

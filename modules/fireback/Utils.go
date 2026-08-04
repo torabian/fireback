@@ -184,3 +184,9 @@ func PolyglotUpdateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL)
 
 	dbref.Model(dtoPolyGlot).Create(t)
 }
+
+// Checks if the underlying value is a nil error.
+// Using IError sometimes causes the err to not be nil, but underlying value is nil
+func IsErr(err error) bool {
+	return err != nil && !reflect.ValueOf(err).IsNil()
+}
