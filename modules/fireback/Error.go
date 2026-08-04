@@ -7,12 +7,10 @@
 package fireback
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -36,30 +34,6 @@ type IErrorItem = ferror.FieldError
 type IPublicError = ferror.PublicError
 type IPublicErrorItem = ferror.PublicFieldError
 type ErrorItem = ferror.ErrorItem
-
-func ReplacePlaceholders(input string, values map[string]interface{}) string {
-	if values == nil {
-		return input
-	}
-	for key, val := range values {
-		placeholder := "%" + key
-
-		var strVal string
-		switch v := val.(type) {
-		case string:
-			strVal = v
-		case int, int64, float64, float32:
-			strVal = fmt.Sprintf("%v", v)
-		case bool:
-			strVal = strconv.FormatBool(v)
-		default:
-			strVal = fmt.Sprintf("%v", v)
-		}
-
-		input = strings.ReplaceAll(input, placeholder, strVal)
-	}
-	return input
-}
 
 func Create401Error(msg *ErrorItem, list []string) *IError {
 	result := IError{
@@ -118,21 +92,6 @@ func CastToIError(err error) *IError {
 	}
 }
 
-func IResponseFromString[T any](err string) *IResponse[T] {
-	if err == "" {
-		return nil
-	}
-
-	body := &IResponse[T]{}
-	uncastErr := json.Unmarshal([]byte(err), &body)
-
-	if uncastErr != nil {
-		return nil
-	}
-
-	return body
-}
-
 func GormErrorToIError(err error) *IError {
 	if err == nil {
 		return nil
@@ -186,21 +145,6 @@ func SliceValidator[T any](items []*T, isPatch bool, prefix string) []*IErrorIte
 	}
 
 	return errItems
-}
-
-func AppendSliceErrors[T any](items []*T, isPatch bool, prefix string, err *IError) {
-	if items == nil {
-		return
-	}
-
-	subErrors := SliceValidator(items, isPatch, prefix)
-	if len(subErrors) > 0 {
-		if err == nil {
-			err = &IError{}
-		}
-
-		err.Errors = append(err.Errors, subErrors...)
-	}
 }
 
 func IsNilish(val any) bool {

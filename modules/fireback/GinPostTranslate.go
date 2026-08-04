@@ -49,6 +49,21 @@ func GinPostTranslateErrorMessages(dic map[string]map[string]string) gin.Handler
 	}
 }
 
+func IResponseFromString[T any](err string) *IResponse[T] {
+	if err == "" {
+		return nil
+	}
+
+	body := &IResponse[T]{}
+	uncastErr := json.Unmarshal([]byte(err), &body)
+
+	if uncastErr != nil {
+		return nil
+	}
+
+	return body
+}
+
 type toolBodyWriter struct {
 	gin.ResponseWriter
 	body   *bytes.Buffer
