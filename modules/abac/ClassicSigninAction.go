@@ -6,6 +6,7 @@ import (
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/security"
 )
 
 func init() {
@@ -184,7 +185,7 @@ func fetchPureUserAndPassToSession(value string, password string, session *UserS
 		return err
 	}
 
-	if !fireback.CheckPasswordHash(password, *passportPassword) {
+	if !security.CheckPasswordHash(password, *passportPassword) {
 		return fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 

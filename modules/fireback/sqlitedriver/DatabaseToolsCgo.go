@@ -1,4 +1,4 @@
-package fireback
+package sqlitedriver
 
 import (
 

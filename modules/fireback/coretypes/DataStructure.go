@@ -1,4 +1,4 @@
-package fireback
+package coretypes
 
 func Flatten(m map[string]interface{}) map[string]interface{} {
 	o := make(map[string]interface{})

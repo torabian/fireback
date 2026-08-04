@@ -7,6 +7,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	queries "github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/security"
 	"gorm.io/gorm"
 )
 
@@ -291,7 +292,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 	method, _ := DetectSignupMechanismOverValue(dto.Value)
 	passwordHashed := ""
 	if strings.TrimSpace(dto.Password) != "" {
-		genPass, _ := fireback.HashPassword(dto.Password)
+		genPass, _ := security.HashPassword(dto.Password)
 		passwordHashed = genPass
 	}
 

@@ -1,4 +1,4 @@
-package fireback
+package coretypes
 
 // VisibilityLevel represents the various visibility levels for an entity.
 // These levels determine who can access the data and under what conditions.

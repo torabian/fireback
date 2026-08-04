@@ -1,4 +1,4 @@
-package fireback
+package strutil
 
 import "strings"
 

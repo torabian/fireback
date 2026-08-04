@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/security"
 )
 
 func init() {
@@ -37,7 +38,7 @@ func ChangePasswordAction(c ChangePasswordActionRequest, q fireback.QueryDSL) (*
 
 	previousPassword := passports[0].Password
 
-	passwordHashed, err1 := fireback.HashPassword(req.Password)
+	passwordHashed, err1 := security.HashPassword(req.Password)
 	if err1 != nil {
 		return nil, fireback.CastToIError(err)
 	}

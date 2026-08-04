@@ -1,4 +1,4 @@
-package fireback
+package connmonitor
 
 import (
 	"sync"
@@ -13,7 +13,7 @@ var (
 )
 
 // Middleware to track active connections
-func trackConnectionsMiddleware() gin.HandlerFunc {
+func TrackConnectionsMiddleware() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		// Increment the active connection count

@@ -15,6 +15,7 @@ import (
 	// on Android and IOS the golang version does not work. On the server, it's better not use cgo
 	// to make it portable on more operating systems.
 
+	"github.com/torabian/fireback/modules/fireback/sqlitedriver"
 	"github.com/urfave/cli/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -177,7 +178,7 @@ func DirectConnectToDb(config Config) (*gorm.DB, error) {
 	} else if vendor == "postgres" {
 		dialector = postgres.Open(dsn)
 	} else if vendor == "sqlite" {
-		dialector = GetSQLiteDialector(dsn)
+		dialector = sqlitedriver.GetSQLiteDialector(dsn)
 	}
 
 	db, err := gorm.Open(dialector, gormConfig)

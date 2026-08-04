@@ -1,4 +1,4 @@
-package fireback
+package security
 
 import "github.com/microcosm-cc/bluemonday"
 

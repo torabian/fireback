@@ -16,6 +16,7 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/pressly/goose/v3"
+	"github.com/torabian/fireback/modules/fireback/connmonitor"
 	statics "github.com/torabian/fireback/modules/fireback/static"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
@@ -272,7 +273,7 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		c.Next()
 	})
 
-	r.Use(trackConnectionsMiddleware())
+	r.Use(connmonitor.TrackConnectionsMiddleware())
 
 	if config.WithTaskServer {
 		go taskServerLifter(x)
