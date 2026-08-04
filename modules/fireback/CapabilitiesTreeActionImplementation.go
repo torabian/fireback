@@ -1,6 +1,7 @@
 package fireback
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -23,7 +24,10 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 	query.ItemsPerPage = 9999
 	query.WorkspaceId = "system"
 	query.UserId = "system"
-	items, _, err2 := CapabilityActions.Query(*query)
+
+	var items []*CapabilityEntity
+
+	err2 := GetDbRef().Debug().Model(&CapabilityEntity{}).Limit(1000).Find(&items).Error
 	if err2 != nil {
 		return nil, GormErrorToIError(err2)
 	}
@@ -34,6 +38,8 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})
+
+	fmt.Println(4, workspaceAccesses, rolesPermission)
 
 	tree := terminal.Tree{}
 
@@ -46,6 +52,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 		meetsUser := MeetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
 		meetsWorkspace := MeetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
 
+		fmt.Println("1", meetsUser, meetsWorkspace, item.UniqueId, rolesPermission, workspaceAccesses)
 		if !meetsUser || !meetsWorkspace {
 			continue
 		}

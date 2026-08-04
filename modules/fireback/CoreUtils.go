@@ -7,6 +7,7 @@ package fireback
  */
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -143,6 +144,12 @@ type UserAccessPerWorkspaceDto map[string]*struct {
 		Name     string
 		Accesses []string
 	}
+}
+
+func (x UserAccessPerWorkspaceDto) Json() string {
+	str, _ := json.MarshalIndent(x, "", "  ")
+	return (string(str))
+
 }
 
 var WithAuthorizationPure = func(context *AuthContextDto) (*AuthResultDto, *IError) {

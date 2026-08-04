@@ -174,7 +174,6 @@ func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerF
 			return
 		}
 
-		c.Set("internal_sql", result.SqlContext)
 		c.Set("urw", result.UserAccessPerWorkspace)
 		c.Set("user_id", result.UserId.OrDefault(""))
 		c.Set("uniqueId", uniqueId)
@@ -213,7 +212,6 @@ func AuthorizeRequest(securityModel *fireback.SecurityModel, c *gin.Context) boo
 
 	c.Set("urw", result.UserAccessPerWorkspace)
 	c.Set("resolveStrategy", securityModel.ResolveStrategy)
-	c.Set("internal_sql", result.SqlContext)
 	c.Set("role_id", ri)
 	c.Set("user_id", result.UserId.OrDefault(""))
 	c.Set("authResult", result)

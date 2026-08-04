@@ -16,7 +16,6 @@ func TemplateQueryDSL(c *gin.Context) QueryDSL {
 
 func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	workspaceId := c.GetString("workspaceId")
-	internal_sql := c.GetString("internal_sql")
 	id := c.Param("uniqueId")
 	sort := c.Query("sort")
 
@@ -84,7 +83,6 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		G:                      c,
 		UserAccessPerWorkspace: urw,
 		Cursor:                 &cursor,
-		InternalQuery:          internal_sql,
 		UserHas:                userHas,
 		WorkspaceHas:           workspaceHas,
 		Sort:                   sort,

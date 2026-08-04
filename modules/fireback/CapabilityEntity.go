@@ -2,12 +2,15 @@ package fireback
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
 func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
+
+	fmt.Println(4, query.UserAccessPerWorkspace.Json(), query.WorkspaceId)
 
 	if query.UserAccessPerWorkspace == nil {
 		return []string{}, []string{}
@@ -26,6 +29,7 @@ func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
 		}
 	}
 
+	fmt.Println(5, workspaceAccesses, rolesPermission)
 	return workspaceAccesses, rolesPermission
 }
 
