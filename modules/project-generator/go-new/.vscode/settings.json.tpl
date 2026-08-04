@@ -2,14 +2,9 @@
   "emeraldwalk.runonsave": {
     "commands": [
       {
-        "match": "\\Module3.yml$",
-        "cmd": "${workspaceFolder}/artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen gof --relative-to ${workspaceFolder} --def ${file} --no-cache true --gof-module {{ .ctx.ModuleName }} && ./artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}"
+        "match": "\\.emi.yml$",
+        "cmd": "${workspaceFolder}/artifacts/{{ .ctx.Name}}-server/{{ .ctx.Name}} emi --path ${file}"
       },
-    ]
-  },
-  "yaml.schemas": {
-    ".jsonschemas/module3-json-schema.json": [
-      "*Module3.yml"
     ]
   }
 }
