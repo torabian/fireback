@@ -1,15 +1,11 @@
 package fireback
 
 import (
-	"bytes"
-	"embed"
 	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
 	"text/template"
-
-	"github.com/gin-gonic/gin"
 )
 
 func ToUpper(t string) string {
@@ -45,18 +41,6 @@ func ToCamelCaseClean(input string) string {
 	result = nonAlphaNumeric.ReplaceAllString(result, "")
 
 	return ToLower(result)
-}
-
-func CompileString(fs *embed.FS, fname string, params gin.H) (string, error) {
-	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname)
-	if err != nil {
-		return "", err
-	}
-	var tpl bytes.Buffer
-
-	err = t.ExecuteTemplate(&tpl, fname, params)
-
-	return tpl.String(), err
 }
 
 var CommonMap = template.FuncMap{

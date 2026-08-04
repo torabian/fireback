@@ -1,7 +1,9 @@
 package fireback
 
 import (
+	"bytes"
 	"embed"
+	"text/template"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,6 +62,18 @@ func NativeQuery[T any](fsRef *embed.FS, queryName string, query QueryDSL, value
 type ResolvedSql struct {
 	SqlBody    string
 	SqlCounter string
+}
+
+func CompileString(fs *embed.FS, fname string, params gin.H) (string, error) {
+	t, err := template.New("").Funcs(CommonMap).ParseFS(fs, fname)
+	if err != nil {
+		return "", err
+	}
+	var tpl bytes.Buffer
+
+	err = t.ExecuteTemplate(&tpl, fname, params)
+
+	return tpl.String(), err
 }
 
 func NativeQueryResolver(ctx SqlExecuteContext, fsRef *embed.FS, queryName string, query QueryDSL, values ...interface{}) (*ResolvedSql, error) {
