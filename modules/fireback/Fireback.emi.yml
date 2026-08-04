@@ -55,3 +55,19 @@ dtos:
         name: uiLocation
       - type: string
         name: actionFn
+
+actions:
+  - name: CapabilitiesTree
+    cliName: treex
+    url: /capabilitiesTree
+    method: get
+    description: dLists all of the capabilities in database as a array of string as root access
+    out:
+      envelope: GResponse
+      fields:
+        - name: capabilities
+          type: collection
+          target: CapabilityInfoDto
+        - name: nested
+          type: collection
+          target: CapabilityInfoDto

@@ -243,30 +243,32 @@ actions:
           type: collection
           target: CapabilityInfoDto
 
-entities:
-  - name: webPushConfig
-    security:
-      resolveStrategy: user
-    distinctBy: user
-    description: Keep the web push notification configuration for each user
-    fields:
-      - name: subscription
-        type: json
-        validate: required
-        description: The json content of the web push after getting it from browser
-  - name: capability
-    permRewrite:
-      replace: root.modules
-      with: root.manage
-    cliShort: cap
-    security:
-      writeOnRoot: true
-    description: >-
-      Manage the capabilities inside the application, both builtin to core and
-      custom defined ones
-    fields:
-      - name: name
-        type: string
-      - name: description
-        type: string
-        translate: true
+# Entities are not generated anymore via fireback code gen. They are hard coded.
+# Next time use emi to generate the entities
+# entities:
+#   - name: webPushConfig
+#     security:
+#       resolveStrategy: user
+#     distinctBy: user
+#     description: Keep the web push notification configuration for each user
+#     fields:
+#       - name: subscription
+#         type: json
+#         validate: required
+#         description: The json content of the web push after getting it from browser
+#   - name: capability
+#     permRewrite:
+#       replace: root.modules
+#       with: root.manage
+#     cliShort: cap
+#     security:
+#       writeOnRoot: true
+#     description: >-
+#       Manage the capabilities inside the application, both builtin to core and
+#       custom defined ones
+#     fields:
+#       - name: name
+#         type: string
+#       - name: description
+#         type: string
+#         translate: true
