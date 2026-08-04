@@ -1,4 +1,4 @@
-package fireback
+package arura
 
 import (
 	"bytes"
@@ -84,7 +84,7 @@ func ServeFileInliner(c *gin.Context, page string, file string, fsx fs.FS) {
 	c.Data(http.StatusOK, contentType, data)
 }
 
-func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
+func RenderPage(fsx fs.FS, c *gin.Context, page string, params any, isProd bool) {
 
 	file := c.Query("file")
 	if file != "" {
@@ -142,7 +142,7 @@ func RenderPage(fsx fs.FS, c *gin.Context, page string, params any) {
 		htmlMinifier := minify.New()
 		htmlMinifier.AddFunc("text/html", html.Minify)
 
-		if config.Production {
+		if isProd {
 			var minified bytes.Buffer
 			err := htmlMinifier.Minify("text/html", &minified, bytes.NewBufferString(htmlWithPrependedFiles))
 			if err == nil {
@@ -289,8 +289,8 @@ func serveJavascript(data []byte, ginPath string) []byte {
 	return []byte(content)
 }
 
-func ResolveScreens(embedscreesn embed.FS) fs.FS {
-	if !GetConfig().Production {
+func ResolveScreens(embedscreesn embed.FS, isProd bool) fs.FS {
+	if !isProd {
 		_, filename, _, _ := runtime.Caller(1)
 		dir := filepath.Join(filepath.Dir(filename))
 		return os.DirFS(dir) // OK because DirFS returns fs.FS

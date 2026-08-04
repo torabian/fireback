@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback/arura"
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
@@ -214,14 +215,14 @@ func HttpPost[V any](c *gin.Context, fn func(QueryDSL) (V, *IError)) {
 	}
 }
 
-func HttpPostXhtml(c *gin.Context, fn func(QueryDSL) (*XHtml, *IError)) {
+func HttpPostXhtml(c *gin.Context, fn func(QueryDSL) (*arura.XHtml, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
 	if result, err := fn(f); err != nil {
 		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": result})
 	} else {
 		if result != nil {
-			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
+			arura.RenderPage(result.ScreensFs, c, result.TemplateName, result.Params, GetConfig().Production)
 		} else {
 			c.AbortWithStatus(404)
 		}
@@ -262,7 +263,7 @@ func HttpPostEntity[T any, V any](c *gin.Context, fn func(T, QueryDSL) (V, *IErr
 	GinWriteContent(c, 200, gin.H{"data": entity})
 }
 
-func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*XHtml, *IError)) {
+func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*arura.XHtml, *IError)) {
 	f := ExtractQueryDslFromGinContext(c)
 
 	id := c.Param("uniqueId")
@@ -280,7 +281,7 @@ func HttpPostEntityXhtml[T any](c *gin.Context, fn func(T, QueryDSL) (*XHtml, *I
 		GinWriteContent(c, int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&f), "data": result})
 	} else {
 		if result != nil {
-			RenderPage(result.ScreensFs, c, result.TemplateName, result.Params)
+			arura.RenderPage(result.ScreensFs, c, result.TemplateName, result.Params, GetConfig().Production)
 		}
 	}
 }
@@ -427,7 +428,7 @@ func HttpGetEntity[T any](
 
 func HttpGetXHtml(
 	c *gin.Context,
-	fn func(QueryDSL) (*XHtml, *IError),
+	fn func(QueryDSL) (*arura.XHtml, *IError),
 ) {
 	id := c.Param("uniqueId")
 	f := ExtractQueryDslFromGinContext(c)
@@ -447,7 +448,7 @@ func HttpGetXHtml(
 		})
 	} else {
 		if item != nil {
-			RenderPage(item.ScreensFs, c, item.TemplateName, item.Params)
+			arura.RenderPage(item.ScreensFs, c, item.TemplateName, item.Params, GetConfig().Production)
 		} else {
 			c.AbortWithStatus(404)
 		}
