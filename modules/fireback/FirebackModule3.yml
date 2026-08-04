@@ -242,56 +242,7 @@ actions:
         - name: nested
           type: collection
           target: CapabilityInfoDto
-dtos:
-  - name: deleteRequest
-    fields:
-      - name: query
-        type: string
-        description: The query selector which would be used to delete the content.
-  - name: deleteResponse
-    fields:
-      - name: data
-        type: object
-        fields:
-          - name: item
-            type: object
-            fields:
-            - name: executed
-              type: bool
-              description: 
-                If the deletion executed immediately.
-            - name: rowsAffected
-              type: int64
-              description: The query selector which would be used to delete the content.
 
-  - name: reactiveSearchResult
-    fields:
-      - type: string
-        name: uniqueId
-      - type: string
-        name: phrase
-      - type: string
-        name: icon
-      - type: string
-        name: description
-      - type: string
-        name: group
-      - type: string
-        name: uiLocation
-      - type: string
-        name: actionFn
-  - name: capabilityInfo
-    description: Capability and permission level which is suitable for front-end application to interact...
-    fields:
-      - name: uniqueId
-        type: string
-      - name: name
-        type: string
-      - name: children
-        type: collection
-        target: self@
-
-  - name: okayResponse
 entities:
   - name: webPushConfig
     security:
