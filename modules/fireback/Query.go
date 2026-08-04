@@ -9,15 +9,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"reflect"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/alexeyco/simpletable"
-	"github.com/gin-gonic/gin"
 	"github.com/schollz/progressbar/v3"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
@@ -952,22 +949,3 @@ func SetFieldString[T any](v T, field string, value string) {
 // 		fmt.Println("Field is not a string or pointer to string type")
 // 	}
 // }
-
-func GinStreamFromChannel(c *gin.Context, chanStream chan []byte) {
-	rc := http.NewResponseController(c.Writer)
-	rc.SetWriteDeadline(time.Time{})
-
-	c.Header("Content-Type", "application/x-yaml")
-	c.Header("Connection", "Keep-Alive")
-	c.Header("Transfer-Encoding", "chunked")
-	c.Header("Content-Disposition", `inline; filename="myfile.txt"`)
-	c.Writer.Header().Set("X-Content-Type-Options", "nosniff")
-
-	Stream(c, func(w io.Writer) bool {
-		if msg, ok := <-chanStream; ok {
-			WriteToStream(c, msg)
-			return true
-		}
-		return false
-	})
-}

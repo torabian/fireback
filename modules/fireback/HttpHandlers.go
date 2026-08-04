@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback/gintools"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -314,7 +315,7 @@ func HttpStreamFileChannel(
 		})
 	}
 
-	GinStreamFromChannel(c, chanStream)
+	gintools.GinStreamFromChannel(c, chanStream)
 
 }
 

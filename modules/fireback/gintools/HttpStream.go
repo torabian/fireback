@@ -1,8 +1,9 @@
-package fireback
+package gintools
 
 import (
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -79,5 +80,24 @@ func Stream(c *gin.Context, step func(w io.Writer) bool) bool {
 func WriteToStream(c *gin.Context, data []byte) {
 	c.Render(-1, HttpEvent{
 		Data: data,
+	})
+}
+
+func GinStreamFromChannel(c *gin.Context, chanStream chan []byte) {
+	rc := http.NewResponseController(c.Writer)
+	rc.SetWriteDeadline(time.Time{})
+
+	c.Header("Content-Type", "application/x-yaml")
+	c.Header("Connection", "Keep-Alive")
+	c.Header("Transfer-Encoding", "chunked")
+	c.Header("Content-Disposition", `inline; filename="myfile.txt"`)
+	c.Writer.Header().Set("X-Content-Type-Options", "nosniff")
+
+	Stream(c, func(w io.Writer) bool {
+		if msg, ok := <-chanStream; ok {
+			WriteToStream(c, msg)
+			return true
+		}
+		return false
 	})
 }
