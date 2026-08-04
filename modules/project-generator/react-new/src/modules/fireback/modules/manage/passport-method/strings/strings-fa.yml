@@ -1,0 +1,13 @@
+extends: []
+content:
+  passportMethods:
+    archiveTitle: روش‌های پاسپورت
+    clientKey: کلید کلاینت
+    clientKeyHint: کلید کلاینت برای روش‌هایی مانند گوگل، جهت احراز هویت OAuth2 استفاده
+      می‌شود
+    editPassportMethod: ویرایش روش پاسپورت
+    newPassportMethod: روش پاسپورت جدید
+    region: منطقه
+    regionHint: منطقه
+    type: نوع
+    typeHint: نوع

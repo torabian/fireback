@@ -1,0 +1,15 @@
+extends: []
+content:
+  accept: پذیرفتن
+  acceptBtn: بله
+  actions: عملیات
+  confirmAcceptDescription: آیا مطمئن هستید که می‌خواهید عضویت را تأیید کنید؟
+  confirmAcceptTitle: تأیید دعوت‌نامه
+  confirmRejectDescription: آیا مطمئن هستید که می‌خواهید این دعوت‌نامه را رد کنید؟
+    برای عضویت مجدد باید دوباره از سوی مدیران دعوت شوید.
+  confirmRejectTitle: رد دعوت‌نامه
+  method: روش
+  passport: پاسپورت
+  reject: رد کردن
+  roleName: نام نقش
+  workspaceName: نام فضای کاری

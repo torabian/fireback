@@ -3,13 +3,39 @@
 */
 export const en = {
   capabilities: {
-    nameHint: "Name",
-    newCapability: "New capability",
     archiveTitle: "Capabilities",
     description: "Description",
     descriptionHint: "Description",
     editCapability: "Edit capability",
     name: "Name",
+    nameHint: "Name",
+    newCapability: "New capability",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  capabilities: {
+    archiveTitle: "Capabilities",
+    description: "Description",
+    descriptionHint: "Description",
+    editCapability: "Edit capability",
+    name: "Name",
+    nameHint: "Name",
+    newCapability: "New capability",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const fa = {
+  capabilities: {
+    archiveTitle: "قابلیت‌ها",
+    description: "توضیحات",
+    descriptionHint: "توضیحات",
+    editCapability: "ویرایش قابلیت",
+    name: "نام",
+    nameHint: "نام",
+    newCapability: "قابلیت جدید",
   },
 };
- export const strings = {...en, };
+ export const strings = {...en, $pl:pl,$fa:fa};

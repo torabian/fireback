@@ -1,0 +1,6 @@
+extends: []
+content:
+  editPassport: ویرایش پاسپورت
+  newPassport: پاسپورت جدید
+  value: شناسه (ایمیل، شماره تلفن)
+  valueHint: شناسه واقعی پاسپورت؛ برای ایمیل، آدرس کامل ایمیل است

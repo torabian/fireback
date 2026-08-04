@@ -36,5 +36,24 @@ export const pl = {
     type: "Type",
     typeHint: "Type",
   },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const fa = {
+  gsmProviders: {
+    apiKey: "کلید API",
+    apiKeyHint: "کلید API",
+    archiveTitle: "ارائه‌دهندگان پیامک",
+    editGsmProvider: "ویرایش ارائه‌دهنده پیامک",
+    invokeBody: "بدنه درخواست",
+    invokeBodyHint: "بدنه درخواست",
+    invokeUrl: "آدرس درخواست",
+    invokeUrlHint: "آدرس درخواست",
+    mainSenderNumber: "شماره فرستنده اصلی",
+    mainSenderNumberHint: "شماره فرستنده اصلی",
+    newGsmProvider: "ارائه‌دهنده پیامک جدید",
+    type: "نوع",
+    typeHint: "نوع",
+  },
 };
- export const strings = {...en, $pl:pl};
+ export const strings = {...en, $pl:pl,$fa:fa};

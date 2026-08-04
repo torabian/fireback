@@ -1,0 +1,10 @@
+extends: []
+content:
+  capabilities:
+    archiveTitle: قابلیت‌ها
+    description: توضیحات
+    descriptionHint: توضیحات
+    editCapability: ویرایش قابلیت
+    name: نام
+    nameHint: نام
+    newCapability: قابلیت جدید

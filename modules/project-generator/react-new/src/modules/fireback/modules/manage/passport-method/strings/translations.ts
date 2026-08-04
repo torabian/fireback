@@ -3,30 +3,45 @@
 */
 export const en = {
   passportMethods: {
-    clientKeyHint: "Klucz klienta dla metod takich jak Google, służący do autoryzacji OAuth2",
-    archiveTitle: "Metody paszportowe",
+    archiveTitle: "Passport methods",
+    clientKey: "Client Key",
+    clientKeyHint: "Client key for methods such as google, to authroize the oauth2",
+    editPassportMethod: "Edit passport method",
+    newPassportMethod: "New passport method",
     region: "Region",
     regionHint: "Region",
-    type: "Typ",
-    editPassportMethod: "Edytuj metodę paszportową",
-    newPassportMethod: "Nowa metoda paszportowa",
-    typeHint: "Typ",
-    clientKey: "Klucz klienta",
+    type: "Type",
+    typeHint: "Type",
   },
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const pl = {
   passportMethods: {
-    archiveTitle: "Passport methods",
-    clientKey: "Client Key",
-    editPassportMethod: "Edit passport method",
-    newPassportMethod: "New passport method",
+    archiveTitle: "Metody paszportowe",
+    clientKey: "Klucz klienta",
+    clientKeyHint: "Klucz klienta dla metod takich jak Google, służący do autoryzacji OAuth2",
+    editPassportMethod: "Edytuj metodę paszportową",
+    newPassportMethod: "Nowa metoda paszportowa",
     region: "Region",
-    typeHint: "Type",
-    clientKeyHint: "Client key for methods such as google, to authroize the oauth2",
     regionHint: "Region",
-    type: "Type",
+    type: "Typ",
+    typeHint: "Typ",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const fa = {
+  passportMethods: {
+    archiveTitle: "روش‌های پاسپورت",
+    clientKey: "کلید کلاینت",
+    clientKeyHint: "کلید کلاینت برای روش‌هایی مانند گوگل، جهت احراز هویت OAuth2 استفاده می‌شود",
+    editPassportMethod: "ویرایش روش پاسپورت",
+    newPassportMethod: "روش پاسپورت جدید",
+    region: "منطقه",
+    regionHint: "منطقه",
+    type: "نوع",
+    typeHint: "نوع",
   },
 };
- export const strings = {...en, $pl:pl};
+ export const strings = {...en, $pl:pl,$fa:fa};

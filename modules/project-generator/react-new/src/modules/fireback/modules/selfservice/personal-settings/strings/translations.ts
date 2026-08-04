@@ -2,7 +2,14 @@
 * Auto generated file by fireback language & translation manager.
 */
 export const en = {
-  remoteTitle: "Remote service",
+  accessibility: {
+    description: "Handle the accessibility settings",
+    title: "Accessibility",
+  },
+  debugSettings: {
+    description: "See the debug information of the app, for developers or help desks",
+    title: "Debug Settings",
+  },
   grpcMethod: "Over grpc",
   hostAddress: "Host address",
   httpMethod: "Over http",
@@ -12,44 +19,19 @@ export const en = {
   },
   port: "Port",
   remoteDescription: "Remote service, is the place that all data, logics, and services are installed there. It could be cloud, or locally. Only advanced users, changing it to wrong address might cause inaccessibility.",
+  remoteTitle: "Remote service",
   richTextEditor: {
     description: "Manage how you want to edit textual content in the app",
     title: "Text Editor",
   },
   theme: {
-    title: "Theme",
     description: "Change the interface theme color",
-  },
-  accessibility: {
-    description: "Handle the accessibility settings",
-    title: "Accessibility",
-  },
-  debugSettings: {
-    description: "See the debug information of the app, for developers or help desks",
-    title: "Debug Settings",
+    title: "Theme",
   },
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const pl = {
-  interfaceLang: {
-    description: "Tutaj możesz zmienić ustawienia języka interfejsu oprogramowania",
-    title: "Język i Region",
-  },
-  port: "Port",
-  remoteDescription: "Usługa zdalna, to miejsce, w którym zainstalowane są wszystkie dane, logiki i usługi. Może to być chmura lub lokalnie. Tylko zaawansowani użytkownicy, zmieniając go na błędny adres, mogą spowodować niedostępność.",
-  theme: {
-    description: "Zmień kolor motywu interfejsu",
-    title: "Motyw",
-  },
-  grpcMethod: "Przez gRPC",
-  httpMethod: "Przez HTTP",
-  hostAddress: "Adres hosta",
-  remoteTitle: "Usługa zdalna",
-  richTextEditor: {
-    description: "Zarządzaj sposobem edycji treści tekstowej w aplikacji",
-    title: "Edytor tekstu",
-  },
   accessibility: {
     description: "Obsługa ustawień dostępności",
     title: "Dostępność",
@@ -57,6 +39,24 @@ export const pl = {
   debugSettings: {
     description: "Wyświetl informacje debugowania aplikacji, dla programistów lub biur pomocy",
     title: "Ustawienia debugowania",
+  },
+  grpcMethod: "Przez gRPC",
+  hostAddress: "Adres hosta",
+  httpMethod: "Przez HTTP",
+  interfaceLang: {
+    description: "Tutaj możesz zmienić ustawienia języka interfejsu oprogramowania",
+    title: "Język i Region",
+  },
+  port: "Port",
+  remoteDescription: "Usługa zdalna, to miejsce, w którym zainstalowane są wszystkie dane, logiki i usługi. Może to być chmura lub lokalnie. Tylko zaawansowani użytkownicy, zmieniając go na błędny adres, mogą spowodować niedostępność.",
+  remoteTitle: "Usługa zdalna",
+  richTextEditor: {
+    description: "Zarządzaj sposobem edycji treści tekstowej w aplikacji",
+    title: "Edytor tekstu",
+  },
+  theme: {
+    description: "Zmień kolor motywu interfejsu",
+    title: "Motyw",
   },
 };/**
 * Auto generated file by fireback language & translation manager.
@@ -70,6 +70,8 @@ export const fa = {
     description: "نمایش اطلاعات اشکال زدایی برنامه، برای توسعه‌دهندگان یا مراکز کمک",
     title: "تنظیمات اشکال زدایی",
   },
+  grpcMethod: "از طریق gRPC",
+  hostAddress: "آدرس میزبان",
   httpMethod: "از طریق HTTP",
   interfaceLang: {
     description: "در اینجا می‌توانید تنظیمات زبان و منطقه رابط کاربری نرم‌افزار را تغییر دهید",
@@ -78,11 +80,9 @@ export const fa = {
   port: "پورت",
   remoteDescription: "سرویس از راه دور، مکانی است که تمام داده‌ها، منطق‌ها و خدمات در آن نصب می‌شوند. ممکن است این ابری یا محلی باشد. تنها کاربران پیشرفته با تغییر آن به آدرس نادرست، ممکن است بر ندسترسی برخورد کنند.",
   remoteTitle: "سرویس از راه دور",
-  grpcMethod: "از طریق gRPC",
-  hostAddress: "آدرس میزبان",
   richTextEditor: {
-    title: "ویرایشگر متن",
     description: "مدیریت نحوه ویرایش محتوای متنی در برنامه",
+    title: "ویرایشگر متن",
   },
   theme: {
     description: "تغییر رنگ موضوع رابط کاربری",

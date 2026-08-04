@@ -10,5 +10,11 @@ export const en = {
 export const pl = {
   roleName: "Nazwa roli",
   uniqueId: "Unikalny identyfikator",
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const fa = {
+  roleName: "نام نقش",
+  uniqueId: "شناسه یکتا",
 };
- export const strings = {...en, $pl:pl};
+ export const strings = {...en, $pl:pl,$fa:fa};

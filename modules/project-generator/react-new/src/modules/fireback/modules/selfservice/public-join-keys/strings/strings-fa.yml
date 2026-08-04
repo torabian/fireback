@@ -1,0 +1,4 @@
+extends: []
+content:
+  roleName: نام نقش
+  uniqueId: شناسه یکتا
