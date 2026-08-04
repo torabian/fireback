@@ -27,53 +27,51 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 // //go:embed all:ui
 // var ui embed.FS
 
-var xapp = &fireback.FirebackApp{
-	Title:              PRODUCT_DESCRIPTION,
-	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders: []fireback.SearchProviderFn{
-		abac.QueryMenusReact,
-		abac.QueryRolesReact,
-	},
-	SeedersSync: func() {
-		abac.PassportMethodSyncSeeders()
-		abac.AppMenuSyncSeeders()
-	},
+func main() {
 
-	PublicFolders: []gintools.PublicFolderInfo{
-		// You can set a series of static folders to be served along with fireback.
-		// This is only for static content. For advanced MVX render templates, you need to
-		// Bootstrap those themes
-		// Add these two lines on the top of the file
-		/////go:embed all:ui
-		// var ui embed.FS
-		// and then uncomment this, for example to serve static react or angular content
-
-		// 		//go:embed all:selfservice
-		// var selfservice embed.FS
-		{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
-		{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
-	},
-	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
-
-	},
-	Modules: append([]*fireback.ModuleProvider{
-		// Add the very core module, such as capabilities
+	modules := []*fireback.ModuleProvider{
 		fireback.FirebackModuleSetup(nil),
-
-		// // Add fireback payment module also
-		// payment.PaymentModuleSetup(nil),
-
-		// suggestion.SuggestionModuleSetup(nil),
 		{
 			CliHandlers: []*cli.Command{
 				project_generator.NewProjectCli(),
 			},
 		},
-		// }),
-	}, abac.AbacCompleteModules()...),
-}
+	}
 
-func main() {
+	// For fireback we have abac module added.
+	modules = append(modules, abac.AbacCompleteModules()...)
+
+	var xapp = &fireback.FirebackApp{
+		Title:              PRODUCT_DESCRIPTION,
+		SupportedLanguages: PRODUCT_LANGUAGES,
+		SearchProviders: []fireback.SearchProviderFn{
+			abac.QueryMenusReact,
+			abac.QueryRolesReact,
+		},
+		SeedersSync: func() {
+			abac.PassportMethodSyncSeeders()
+			abac.AppMenuSyncSeeders()
+		},
+
+		PublicFolders: []gintools.PublicFolderInfo{
+			// You can set a series of static folders to be served along with fireback.
+			// This is only for static content. For advanced MVX render templates, you need to
+			// Bootstrap those themes
+			// Add these two lines on the top of the file
+			/////go:embed all:ui
+			// var ui embed.FS
+			// and then uncomment this, for example to serve static react or angular content
+
+			// 		//go:embed all:selfservice
+			// var selfservice embed.FS
+			{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
+			{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
+		},
+		SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
+
+		},
+		Modules: modules,
+	}
 
 	// This is an important setting for some kind of app which will be installed
 	// it makes it easier for fireback to find the configuration.
