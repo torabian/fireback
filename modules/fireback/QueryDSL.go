@@ -99,9 +99,6 @@ type QueryDSL struct {
 	// Those capabilities which user has
 	ActionRequires []PermissionInfo `json:"-"`
 
-	// List of permissions that this request is affecting
-	RequestAffectingScopes []string `json:"-"`
-
 	// This is the capabilities that user has
 	UserHas []string `json:"-"`
 
