@@ -168,5 +168,5 @@ func taskServerLifter(xapp *FirebackApp) {
 		}
 	}
 
-	liftAsyncqWorkerServer(tasks)
+	LiftAsyncqWorkerServer(tasks)
 }

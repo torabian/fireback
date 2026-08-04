@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -13,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/manifoldco/promptui"
 	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
@@ -199,108 +197,17 @@ type CliInteractiveFlag struct {
 	Type        string
 }
 
-func AskForSelect(label string, items []string) string {
-	prompt := promptui.Select{
-		Label: label,
-		Items: items,
-	}
-
-	_, result, err := prompt.Run()
-
-	if err != nil {
-		if err.Error() == "^C" {
-			os.Exit(35)
-			return ""
-		}
-		return ""
-	}
-
-	index := strings.Index(result, ">>>")
-	if index <= 0 {
-		return result
-	}
-	return strings.Trim(result[0:index], " ")
-
-}
-
-func AskBoolean(label string) bool {
-	if r := AskForSelect(label, []string{"true", "false"}); r == "true" {
-		return true
-	}
-
-	return false
-}
-
-func AskForInputOptional(label string, defaultV string) (string, bool, error) {
-
-	promptVariable := promptui.Prompt{
-		Label:   label,
-		Default: defaultV,
-	}
-
-	value, err := promptVariable.Run()
-	if err != nil {
-		if err.Error() == "^C" {
-			os.Exit(35)
-			return "", true, err
-		}
-		return "", false, err
-	}
-
-	return value, false, nil
-}
-
-func AskForInput(label string, defaultV string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("this is necessary")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    label,
-		Validate: validate,
-		Default:  defaultV,
-	}
-
-	value, err := promptVariable.Run()
-	if err != nil {
-		if err.Error() == "^C" {
-			os.Exit(35)
-			return ""
-		}
-		return ""
-	}
-
-	return value
-}
-
-func AskForPassword(label string, defaultV string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("this is necessary")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    label,
-		Mask:     '*',
-		Validate: validate,
-		Default:  defaultV,
-	}
-
-	value, err := promptVariable.Run()
-	if err != nil {
-		if err.Error() == "^C" {
-			os.Exit(35)
-			return ""
-		}
-		return ""
-	}
-	return value
-}
+// AskForSelect, AskBoolean, AskForInputOptional, AskForInput and AskForPassword
+// are interactive terminal prompts. Their real implementation lives in the
+// modules/fireback/terminal package (tagged !wasm) and registers itself here
+// via init(). Building without importing that package (e.g. cmd/fireback-wasm)
+// leaves these nil - callers only reach them from CLI flows that aren't part
+// of a wasm build.
+var AskForSelect func(label string, items []string) string
+var AskBoolean func(label string) bool
+var AskForInputOptional func(label string, defaultV string) (string, bool, error)
+var AskForInput func(label string, defaultV string) string
+var AskForPassword func(label string, defaultV string) string
 
 func WriteResponseCLI(w io.Writer, status int, resp emigo.EmiActionResult) error {
 	payload := resp.GetPayload()

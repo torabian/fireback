@@ -1,11 +1,19 @@
-package fireback
+//go:build !wasm
+
+package clitools
 
 import (
 	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/torabian/fireback/modules/fireback"
 )
+
+func init() {
+	fireback.QueryStringCastCli = queryStringCastCli
+	fireback.CliInteractiveSearchAndSelect = cliInteractiveSearchAndSelect
+}
 
 // Generic autocomplete model
 type cliQueryModel struct {
@@ -17,8 +25,8 @@ type cliQueryModel struct {
 	onComplete func([]string)
 	selection  []string
 	title      string
-	queryFunc  func(string, int) ([]string, *QueryResultMeta, *IError) // Generic query func
-	page       int                                                     // Keep track of pagination page
+	queryFunc  func(string, int) ([]string, *fireback.QueryResultMeta, *fireback.IError) // Generic query func
+	page       int                                                                       // Keep track of pagination page
 }
 
 func (m cliQueryModel) Init() tea.Cmd {
@@ -27,7 +35,7 @@ func (m cliQueryModel) Init() tea.Cmd {
 	return m.querySuggestions("")
 }
 
-func CaptureIds(items []string) []string {
+func captureIds(items []string) []string {
 	result := []string{}
 	for _, item := range items {
 		value := item
@@ -59,7 +67,7 @@ func (m cliQueryModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, tea.Batch(
 				func() tea.Msg {
-					m.onComplete(CaptureIds(selectedItems))
+					m.onComplete(captureIds(selectedItems))
 					return nil
 				},
 				tea.ClearScreen,
@@ -164,9 +172,9 @@ func (m cliQueryModel) querySuggestions(input string) tea.Cmd {
 	}
 }
 
-func CliInteractiveSearchAndSelect(
+func cliInteractiveSearchAndSelect(
 	title string,
-	fn func(keyword string, page int) ([]string, *QueryResultMeta, *IError),
+	fn func(keyword string, page int) ([]string, *fireback.QueryResultMeta, *fireback.IError),
 ) []string {
 	selection := []string{}
 	model := cliQueryModel{
@@ -183,7 +191,7 @@ func CliInteractiveSearchAndSelect(
 	return selection
 }
 
-func QueryStringCastCli(searchFields []string, keyword string, page int) QueryDSL {
+func queryStringCastCli(searchFields []string, keyword string, page int) fireback.QueryDSL {
 	searchFieldsNew := []string{}
 	for _, item := range searchFields {
 		searchFieldsNew = append(searchFieldsNew, strings.ReplaceAll(item, "{keyword}", keyword))
@@ -191,7 +199,7 @@ func QueryStringCastCli(searchFields []string, keyword string, page int) QueryDS
 
 	query2 := strings.Join(searchFieldsNew, " or ")
 
-	query := QueryDSL{
+	query := fireback.QueryDSL{
 		ItemsPerPage: 10,
 		Query:        query2,
 		StartIndex:   page,

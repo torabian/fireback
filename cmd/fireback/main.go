@@ -10,6 +10,11 @@ import (
 
 	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/fireback"
+	// clitools registers every terminal/CLI-interactive fireback feature
+	// (promptui/bubbletea prompts, os/exec service management, asynq
+	// workers, graceful HTTP shutdown) via init(). It's tagged !wasm and
+	// deliberately not imported by cmd/fireback-wasm.
+	_ "github.com/torabian/fireback/modules/fireback/clitools"
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"

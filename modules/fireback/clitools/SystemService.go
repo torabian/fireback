@@ -1,4 +1,6 @@
-package fireback
+//go:build !wasm
+
+package clitools
 
 import (
 	"fmt"
@@ -9,21 +11,27 @@ import (
 	"runtime"
 	"text/template"
 
+	"github.com/torabian/fireback/modules/fireback"
 	systemconfigs "github.com/torabian/fireback/modules/fireback/systemconfigs"
 	"github.com/urfave/cli/v3"
 )
 
+func init() {
+	fireback.SystemServiceHandler = systemServiceHandler
+	fireback.GetMacDaemon = getMacDaemon
+}
+
 // ~/Library/LaunchAgents Per-user agents provided by the user.
-var SCOPE_USER_FOR_USER = "~/Library/LaunchAgents"
+var scopeUserForUser = "~/Library/LaunchAgents"
 
 // /Library/LaunchAgents Per-user agents provided by the administrator.
-var SCOPE_SUDO_FOR_USER = "/Library/LaunchAgents"
+var scopeSudoForUser = "/Library/LaunchAgents"
 
 // /Library/LaunchDaemons System-wide daemons provided by the administrator.
 // /System/Library/LaunchAgents Per-user agents provided by Mac OS X.
 // /System/Library/LaunchDaemons System-wide daemons provided by Mac OS X.
 
-type SystemServiceInfo struct {
+type systemServiceInfo struct {
 	Label       string
 	Program     string
 	StdOut      string
@@ -31,32 +39,32 @@ type SystemServiceInfo struct {
 	StdErr      string
 }
 
-func SystemServiceHandler(action string, c *cli.Command) {
+func systemServiceHandler(action string, c *cli.Command) {
 	switch os := runtime.GOOS; os {
 	case "darwin":
 		if action == "load" {
-			ServiceLoadMac(c)
+			serviceLoadMac(c)
 		} else if action == "unload" {
-			ServiceUnloadMac(c)
+			serviceUnloadMac(c)
 		} else if action == "reload" {
-			ServiceUnloadMac(c)
-			ServiceLoadMac(c)
+			serviceUnloadMac(c)
+			serviceLoadMac(c)
 		}
 	case "linux":
 		if action == "load" {
-			ServiceLoadDebian(c)
+			serviceLoadDebian(c)
 		} else if action == "unload" {
-			ServiceUnloadDebian(c)
+			serviceUnloadDebian(c)
 		} else if action == "reload" {
-			ServiceUnloadDebian(c)
-			ServiceLoadDebian(c)
+			serviceUnloadDebian(c)
+			serviceLoadDebian(c)
 		}
 	default:
 		fmt.Printf("Other %v", os)
 	}
 }
 
-func ServiceUnloadDebian(c *cli.Command) error {
+func serviceUnloadDebian(c *cli.Command) error {
 
 	serviceName := config.DebianIdentifier
 	serviceFileName := serviceName + ".service"
@@ -84,14 +92,14 @@ func ServiceUnloadDebian(c *cli.Command) error {
 	return nil
 }
 
-func ServiceLoadDebian(c *cli.Command) error {
+func serviceLoadDebian(c *cli.Command) error {
 	binaryPath, err := os.Executable()
 	if err != nil {
 		panic(err)
 	}
 
-	uri, err := ResolveConfigurationUri()
-	td := SystemServiceInfo{
+	uri, err := fireback.ResolveConfigurationUri()
+	td := systemServiceInfo{
 		Label:       config.DebianIdentifier,
 		Program:     binaryPath,
 		CONFIG_PATH: uri,
@@ -150,7 +158,7 @@ func ServiceLoadDebian(c *cli.Command) error {
 	return nil
 }
 
-func GetMacDaemon() string {
+func getMacDaemon() string {
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
@@ -161,7 +169,7 @@ func GetMacDaemon() string {
 	return daemonPath
 }
 
-func ServiceLoadMac(c *cli.Command) error {
+func serviceLoadMac(c *cli.Command) error {
 	binaryPath, err := os.Executable()
 	if err != nil {
 		panic(err)
@@ -172,15 +180,15 @@ func ServiceLoadMac(c *cli.Command) error {
 		log.Println(err)
 	}
 
-	td := SystemServiceInfo{
+	td := systemServiceInfo{
 		Label:   config.MacIdentifier,
 		Program: binaryPath,
 	}
 
-	uri, err := ResolveConfigurationUri()
+	uri, err := fireback.ResolveConfigurationUri()
 	possibleConfigPath := filepath.Join(workingDirectory, uri)
 
-	if Exists(possibleConfigPath) {
+	if fireback.Exists(possibleConfigPath) {
 		td.CONFIG_PATH = possibleConfigPath
 	}
 
@@ -200,7 +208,7 @@ func ServiceLoadMac(c *cli.Command) error {
 		panic(err)
 	}
 
-	daemonPath := GetMacDaemon()
+	daemonPath := getMacDaemon()
 	file, err := os.OpenFile(daemonPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		panic(err)
@@ -228,9 +236,9 @@ func ServiceLoadMac(c *cli.Command) error {
 	return nil
 }
 
-func ServiceUnloadMac(c *cli.Command) {
+func serviceUnloadMac(c *cli.Command) {
 
-	daemonPath := GetMacDaemon()
+	daemonPath := getMacDaemon()
 	cmd := exec.Command("launchctl", "unload", "-w", daemonPath)
 
 	fmt.Println("Path:", daemonPath)

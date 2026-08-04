@@ -1337,6 +1337,13 @@ func GetConfigCli() []*cli.Command {
 	}
 }
 
+// GetConfigRef returns a pointer to the package-level config instance, so
+// packages that can't see the unexported `config` var directly (such as
+// modules/fireback/clitools) can still read and mutate it.
+func GetConfigRef() *Config {
+	return &config
+}
+
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{
 	RedisEventsUrl:          "127.0.0.1:6379",
