@@ -76,9 +76,6 @@ type Module3 struct {
 	// Events are internal changes that can be triggered by different sources
 	Events []*Module3Event `yaml:"events,omitempty" json:"events,omitempty" jsonschema:"description=Events are internal changes that can be triggered by different sources"`
 
-	// Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code.
-	Queries []*Module3Query `yaml:"queries,omitempty" json:"queries,omitempty" jsonschema:"description=Queries are set of SQL queries that developer writes and Fireback generates tools for fetching them from database to golang code."`
-
 	// An interesting way of defining env variables
 	Config []*Module3ConfigField `yaml:"config,omitempty" json:"config,omitempty" jsonschema:"description=An interesting way of defining env variables"`
 
