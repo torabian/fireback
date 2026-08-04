@@ -17,8 +17,13 @@ func CreateReactiveSearchHanlder(app *FirebackApp) func(
 	return func(
 		session ReactiveSearchActionSession,
 	) (chan []byte, error) {
+		query, err := ResolveActionContextFromGinContext(session.GinCtx(), &SecurityModel{
+			ResolveStrategy: ResolveStrategyWorkspace,
+		})
+		if err != nil {
+			return nil, err
+		}
 
-		query := ExtractQueryDslFromGinContext(session.GinCtx())
 		query.RawSocketConnection = session.GetSocket()
 		resultChan := make(chan *ReactiveSearchResultDto)
 
@@ -30,7 +35,7 @@ func CreateReactiveSearchHanlder(app *FirebackApp) func(
 
 				go func(h SearchProviderFn) {
 					defer wg.Done()
-					h(query, resultChan)
+					h(*query, resultChan)
 				}(handler)
 			}
 

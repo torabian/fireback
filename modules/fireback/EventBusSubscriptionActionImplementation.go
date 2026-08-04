@@ -65,7 +65,13 @@ func addUserToEventBus(query QueryDSL) {
 }
 
 func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (chan []byte, error) {
-	query := ExtractQueryDslFromGinContext(session.GinCtx())
+	query, err := ResolveActionContextFromGinContext(session.GinCtx(), &SecurityModel{
+		ResolveStrategy: ResolveStrategyWorkspace,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	query.RawSocketConnection = session.GetSocket()
 
 	LOG.Debug(
@@ -74,13 +80,13 @@ func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (c
 		zap.String("user", query.UserId),
 	)
 
-	addUserToEventBus(query)
+	addUserToEventBus(*query)
 
 	out := make(chan []byte)
 
 	go func() {
 		defer close(out)
-		defer cleanUserFromSocketPool(query)
+		defer cleanUserFromSocketPool(*query)
 
 		for {
 			select {
@@ -99,7 +105,7 @@ func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (c
 					websocket.CloseTLSHandshake,
 				) {
 					LOG.Debug("WebSocket closed", zap.String("user", query.UserId), zap.String("ws", query.WorkspaceId))
-					cleanUserFromSocketPool(query)
+					cleanUserFromSocketPool(*query)
 					break
 				} else {
 					// We need to handle this kinda.
