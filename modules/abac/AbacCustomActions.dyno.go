@@ -872,7 +872,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		TimezoneGroupCliFn(),
 		TableViewSizingCliFn(),
 		AppMenuCliFn(),
-		BackupTableMetaCliFn(),
 		NotificationConfigCliFn(),
 		PassportMethodCliFn(),
 		WorkspaceInviteCliFn(),
