@@ -1,4 +1,4 @@
-package fireback
+package complexes
 
 import (
 	"context"
@@ -12,6 +12,10 @@ import (
 	"strings"
 
 	"github.com/Rhymond/go-money"
+	"golang.org/x/text/currency"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+	"golang.org/x/text/number"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -485,4 +489,25 @@ func (m Money) Negate() Money {
 		return Money{}
 	}
 	return NewMoney(-m.Amount.Int64, m.Currency.String)
+}
+
+// func CurrencyFormat(curr string, amount float64, lang language.Tag) string {
+func CurrencyFormat(curr string, amount float64, language2 string) string {
+	if curr == "" || amount == 0 {
+		return ""
+	}
+
+	lang := language.English
+	if language2 == "fa" {
+		lang = language.Persian
+	}
+	cur, err := currency.ParseISO(curr)
+
+	if err != nil {
+		return fmt.Sprintf("%v", amount)
+	}
+	scale, _ := currency.Cash.Rounding(cur)
+	dec := number.Decimal(amount, number.Scale(scale))
+	p := message.NewPrinter(lang)
+	return p.Sprintf("%v%v", dec, currency.Symbol(cur))
 }
