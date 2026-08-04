@@ -3,8 +3,6 @@ package fireback
 import (
 	"encoding/json"
 	reflect "reflect"
-
-	"gopkg.in/yaml.v2"
 )
 
 type Database struct {
@@ -54,39 +52,6 @@ type WorkerConfig struct {
 	Type        string `yaml:"type,omitempty"`
 	Address     string `yaml:"address,omitempty"`
 	Concurrency int64  `yaml:"concurrency,omitempty"`
-}
-
-type AppConfig struct {
-	Name        string       `yaml:"name,omitempty"`
-	WorkspaceAs string       `yaml:"workspaceAs,omitempty"`
-	Token       string       `yaml:"token,omitempty"`
-	Worker      WorkerConfig `yaml:"worker,omitempty"`
-	CliLanguage string       `yaml:"cliLanguage,omitempty"`
-	CliRegion   string       `yaml:"cliRegion,omitempty"`
-	SelfHosted  bool         `yaml:"selfHosted,omitempty"`
-	License     `yaml:"license,omitempty"`
-	Service     `yaml:"service,omitempty"`
-	Log         `yaml:"log,omitempty"`
-	Database    `yaml:"database,omitempty"`
-	Gin         `yaml:"gin,omitempty"`
-	Headers     `yaml:"headers,omitempty"`
-	Drive       `yaml:"drive,omitempty"`
-}
-
-func (x *AppConfig) Yaml() string {
-	if x != nil {
-		str, _ := yaml.Marshal(x)
-		return (string(str))
-	}
-	return ""
-}
-
-func (x *AppConfig) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return (string(str))
-	}
-	return ""
 }
 
 type QueryResultMeta struct {
