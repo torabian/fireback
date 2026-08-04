@@ -14,27 +14,10 @@ type Database struct {
 	Dsn      string `yaml:"dsn,omitempty"`
 }
 
-// @meta(include)
-type Gin struct {
-	Mode string `yaml:"mode,omitempty"`
-}
-
-// @meta(include)
-type Headers struct {
-	AccessControlAllowOrigin  string `yaml:"access-control-allow-origin,omitempty"`
-	AccessControlAllowHeaders string `yaml:"access-control-allow-headers,omitempty"`
-}
-
 type Service struct {
 	MacIdentifier     string `yaml:"macIdentifier,omitempty"`
 	WindowsIdentifier string `yaml:"windowsIdentifier,omitempty"`
 	DebianIdentifier  string `yaml:"DebianIdentifier,omitempty"`
-}
-
-type WorkerConfig struct {
-	Type        string `yaml:"type,omitempty"`
-	Address     string `yaml:"address,omitempty"`
-	Concurrency int64  `yaml:"concurrency,omitempty"`
 }
 
 type QueryResultMeta struct {
