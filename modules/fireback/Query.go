@@ -917,35 +917,3 @@ func SetFieldString[T any](v T, field string, value string) {
 		fmt.Println(field, "Field is not a string or pointer to string type:", f.Kind())
 	}
 }
-
-// func SetFieldString[T any](v *T, field string, value string) {
-// 	r := reflect.ValueOf(v)
-// 	fmt.Println("::", reflect.Indirect(r).FieldByName("Name"))
-// 	f := reflect.Indirect(r).FieldByName(field)
-// 	f.SetString(value)
-// }
-
-// func SetFieldString[T any](v *T, field string, value string) {
-// 	r := reflect.ValueOf(v)
-// 	if r.Kind() != reflect.Ptr {
-// 		fmt.Println("Input must be a pointer")
-// 		return
-// 	}
-
-// 	r = reflect.Indirect(r)
-// 	f := r.FieldByName(field)
-
-// 	if !f.IsValid() {
-// 		fmt.Printf("Field %s not found\n", field)
-// 		return
-// 	}
-
-// 	fmt.Println("0", f.Kind(), f.Elem().Kind())
-// 	if f.Kind() == reflect.String {
-// 		f.SetString(value)
-// 	} else if f.Type().Kind() == reflect.Ptr && f.Elem().Kind() == reflect.String {
-// 		f.Elem().SetString(value)
-// 	} else {
-// 		fmt.Println("Field is not a string or pointer to string type")
-// 	}
-// }

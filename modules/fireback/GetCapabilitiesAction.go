@@ -19,32 +19,3 @@ func GetCapabilitiesAction(c GetCapabilitiesActionRequest) (*GetCapabilitiesActi
 		Payload: GResponseQuery(res, qrm, query),
 	}, nil
 }
-
-// func GetCapabilitiesActionCliHandler(
-// 	handler func(c GetCapabilitiesActionRequest) (*GetCapabilitiesActionResponse, error),
-// ) *cli.Command {
-// 	meta := GetCapabilitiesActionMeta()
-
-// 	return &cli.Command{
-// 		Name:        meta.Name,
-// 		Description: meta.Description,
-// 		Action: func(ctx context.Context, c *cli.Command) error {
-// 			req := GetCapabilitiesActionRequest{
-// 				CliCtx: c,
-// 			}
-
-// 			res, err := handler(req)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			v, err := json.MarshalIndent(res, "", "  ")
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			fmt.Print(string(v), err)
-// 			return nil
-// 		},
-// 	}
-// }
