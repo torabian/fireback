@@ -369,17 +369,7 @@ export const enTranslations = {
   deleteConfirmation: "Are you sure?",
 
   diagram: "Diagram",
-  drive: {
-    attachFile: "Attach file",
-    driveTitle: "Drive",
-    menu: "Drive & Files",
-    name: "Name",
-    size: "Size",
-    title: "Title",
-    type: "Type",
-    viewPath: "View Path",
-    virtualPath: "Virtual Path",
-  },
+
   dropNFiles: "Drop {n} file(s) to begin the upload",
   edit: "Edit",
   errors: {

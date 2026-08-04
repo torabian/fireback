@@ -125,21 +125,7 @@ items:
       label: gsm Provider
   parentId: root-actions
   capabilityId: root.manage.abac.gsm-provider.query
-
-- href: "/manage/drive"
-  workspaceId: system
-  icon: common/drive.svg
-  uniqueId: drive_files
-  visibility: A
-  label: Drive & Files
-  translations:
-    - languageId: fa
-      label: فایل ها
-    - languageId: en
-      label: Drive & Files
-  activeMatcher: drives
-  parentId: root-actions
-  capabilityId: root.manage.abac.file.query
+ 
 - href: "/manage/users"
   workspaceId: system
   icon: common/user.svg

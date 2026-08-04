@@ -192,7 +192,7 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       { name: "desktop", value: 150 },
     ],
     handleThresholds,
-    handleThresholds
+    handleThresholds,
   );
 
   const sidebarItemSelected = () => {

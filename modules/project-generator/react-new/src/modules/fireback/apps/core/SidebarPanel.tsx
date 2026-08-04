@@ -40,7 +40,6 @@ export const SidebarPanel = () => {
         overflowY: "hidden",
         height: "100vh",
       }}
-      minSize={0}
       defaultSize={getSize()}
       ref={onRef}
     >
