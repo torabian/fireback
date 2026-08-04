@@ -1,4 +1,4 @@
-package fireback
+package gintools
 
 import (
 	"embed"
@@ -11,6 +11,16 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
+
+/*
+Public folders are used when you want to make a embed folder available though the web
+server publicly. Quite useful on serving static content, also you can prefix them
+*/
+type PublicFolderInfo struct {
+	Fs     *embed.FS
+	Folder string
+	Prefix string
+}
 
 type embedFileSystem struct {
 	http.FileSystem
@@ -140,17 +150,6 @@ func EmbedFoldersForGin(items []PublicFolderInfo, r *gin.Engine) {
 			}
 		}
 	})
-}
-
-func HasChildren(key string, items []string) bool {
-
-	for _, perm := range items {
-		if strings.Contains(perm, key+"/") {
-			return true
-		}
-	}
-
-	return false
 }
 
 func LoadHTMLFromEmbedFS(engine *gin.Engine, embedFS embed.FS, pattern string) {

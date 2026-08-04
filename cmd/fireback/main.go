@@ -11,6 +11,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
+	"github.com/torabian/fireback/modules/fireback/gintools"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -37,7 +38,7 @@ var xapp = &fireback.FirebackApp{
 		abac.AppMenuSyncSeeders()
 	},
 
-	PublicFolders: []fireback.PublicFolderInfo{
+	PublicFolders: []gintools.PublicFolderInfo{
 		// You can set a series of static folders to be served along with fireback.
 		// This is only for static content. For advanced MVX render templates, you need to
 		// Bootstrap those themes

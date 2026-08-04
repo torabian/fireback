@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pressly/goose/v3"
 	"github.com/torabian/fireback/modules/fireback/connmonitor"
+	"github.com/torabian/fireback/modules/fireback/gintools"
 	statics "github.com/torabian/fireback/modules/fireback/static"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
@@ -51,17 +52,7 @@ type FirebackApp struct {
 	SearchProviders    []SearchProviderFn
 	SeedersSync        func()
 	MockSync           func()
-	PublicFolders      []PublicFolderInfo
-}
-
-/*
-Public folders are used when you want to make a embed folder available though the web
-server publicly. Quite useful on serving static content, also you can prefix them
-*/
-type PublicFolderInfo struct {
-	Fs     *embed.FS
-	Folder string
-	Prefix string
+	PublicFolders      []gintools.PublicFolderInfo
 }
 
 type SearchProviderFn = func(query QueryDSL, chanStream chan *ReactiveSearchResultDto)
@@ -443,7 +434,7 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 	})
 
 	if len(x.PublicFolders) > 0 {
-		EmbedFoldersForGin(x.PublicFolders, r)
+		gintools.EmbedFoldersForGin(x.PublicFolders, r)
 	}
 
 	// Enable the mvc app from here, if it's needed. Work on your static website on

@@ -1132,3 +1132,14 @@ var CLIAboutCommand cli.Command = cli.Command{
 		return nil
 	},
 }
+
+func HasChildren(key string, items []string) bool {
+
+	for _, perm := range items {
+		if strings.Contains(perm, key+"/") {
+			return true
+		}
+	}
+
+	return false
+}
