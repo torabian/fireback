@@ -12,6 +12,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback/arura"
 	"github.com/torabian/fireback/modules/fireback/gintools"
+	"github.com/torabian/fireback/modules/fireback/socket"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -137,7 +138,7 @@ func HttpReactiveQuery[T any](ctx *gin.Context, fn func(QueryDSL, chan bool, cha
 
 }
 
-func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, SocketReadChan)) {
+func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, socket.SocketReadChan)) {
 	f := ExtractQueryDslFromGinContext(ctx)
 
 	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -154,7 +155,7 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead
 		for {
 			_, k, err := c.ReadMessage()
 
-			onRead(f, SocketReadChan{
+			onRead(f, socket.SocketReadChan{
 				Data:  k,
 				Error: err,
 			})
@@ -170,7 +171,7 @@ func HttpSocketRequest(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead
 	})
 }
 
-func HttpSocketRequest2(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, SocketReadChan)) {
+func HttpSocketRequest2(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRead func(QueryDSL, socket.SocketReadChan)) {
 	f := ExtractQueryDslFromGinContext(ctx)
 
 	c, err := Upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -187,7 +188,7 @@ func HttpSocketRequest2(ctx *gin.Context, fn func(QueryDSL, func([]byte)), onRea
 		for {
 			_, k, err := c.ReadMessage()
 
-			onRead(f, SocketReadChan{
+			onRead(f, socket.SocketReadChan{
 				Data:  k,
 				Error: err,
 			})

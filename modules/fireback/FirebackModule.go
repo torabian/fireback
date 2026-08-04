@@ -20,7 +20,7 @@ var EverRunEntities []interface{} = []interface{}{
 
 type FirebackModuleConfig struct{}
 
-type X = func(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error)
+// type X = func(query QueryDSL, done chan bool, read chan socket.SocketReadChan) (chan []byte, error)
 
 func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
