@@ -1,6 +1,11 @@
 project = fireback
 projectBinary = f
 
+# modules/backup embeds wal-g in-process (see modules/backup/Exec.go), which
+# depends on the experimental encoding/json/v2 stdlib package - every build
+# target needs this, same as cmd/nima-server/Makefile.
+export GOEXPERIMENT = jsonv2
+
 deb:
 	bash ./fireback-deb.sh
 dev:

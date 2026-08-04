@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/fireback/modules/backup"
 	"github.com/torabian/fireback/modules/fireback"
 	// clitools registers every terminal/CLI-interactive fireback feature
 	// (promptui/bubbletea prompts, os/exec service management, asynq
@@ -19,6 +20,7 @@ import (
 	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"
 	project_generator "github.com/torabian/fireback/modules/project-generator"
+	"github.com/torabian/fireback/modules/storage"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
@@ -35,6 +37,12 @@ var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
 func main() {
 
+	// wal-g is embedded directly in this binary (see modules/backup/Exec.go)
+	// rather than shelling out to a separate installed executable. This
+	// must run before any normal CLI parsing below, since it re-execs into
+	// wal-g's own command tree when invoked with its hidden marker arg.
+	backup.MaybeRunEmbeddedWalg()
+
 	emiCommand := &cli.Command{
 		Name:     "emi",
 		Usage:    "Emi compiler - Backend-for-Frontend with automatic SDK generation.",
@@ -49,6 +57,16 @@ func main() {
 				emiCommand,
 			},
 		},
+		{
+			CliHandlers: []*cli.Command{
+				{
+					Name:     "backup",
+					Usage:    "Take and restore point-in-time Postgres backups via wal-g",
+					Commands: backup.Commands(),
+				},
+			},
+		},
+		storage.StorageModuleSetup(nil),
 	}
 
 	// For fireback we have abac module added.
