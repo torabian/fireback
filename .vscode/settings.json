@@ -12,6 +12,10 @@
       {
         "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --langs en,pl --path ${file}",
         "match": "strings-([a-z][a-z]).yml$"
+      },
+      {
+        "cmd": "emi compile --path ${relativeFile}",
+        "match": "\\.emi.yml$"
       }
     ]
   },
@@ -35,9 +39,9 @@
   "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
   "go.useLanguageServer": true,
   "yaml.schemas": {
-    "./modules/fireback/module3-json-schema.json": [
-      "*Module3.yml"
-    ]
+    ".jsonschemas/module3-json-schema.json": ["*Module3.yml"],
+    "./.vscode/emi-module-spec.json": ["*.emi.yml", "*.emi.yaml"],
+    "./modules/fireback/module3-json-schema.json": ["*Module3.yml"]
   },
   "java.compile.nullAnalysis.mode": "disabled"
 }

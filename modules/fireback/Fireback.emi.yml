@@ -1,0 +1,12 @@
+targets:
+  - compiler: go
+    output: ./
+    flags:
+      pkg: fireback
+
+dtos:
+  - name: deleteRequest
+    fields:
+      - name: query
+        type: string
+        description: The query selector which would be used to delete the content.
