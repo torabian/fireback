@@ -142,20 +142,6 @@ func ExecuteMockImport(x *FirebackApp) {
 	}
 
 }
-func ExecuteSeederImport(x *FirebackApp) {
-
-	for _, item := range x.Modules {
-		if item.SeederHandler != nil {
-
-			item.SeederHandler()
-		}
-
-	}
-
-	if x.SeedersSync != nil {
-		x.SeedersSync()
-	}
-}
 
 func GetAppReportsString(items []Report) ([]string, error) {
 
@@ -497,8 +483,14 @@ func RunApp(xapp *FirebackApp) {
 	app := &cli.Command{
 		EnableShellCompletion: true,
 		Name:                  xapp.Title,
-		Flags:                 cliGlobalFlags,
-		Commands:              GetCliCommands(xapp),
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "al",
+				Usage: "Set's the language of the query, equal to accept-language header in http requests",
+				Value: "en-us",
+			},
+		},
+		Commands: GetCliCommands(xapp),
 	}
 
 	err := app.Run(context.Background(), os.Args)
