@@ -1,15 +1,25 @@
-package fireback
+package exporting
 
 import (
-	"encoding/json"
 	"os"
+
+	"github.com/gocarina/gocsv"
 )
 
-func JsonExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
+// CSV2Exporter exports data from a channel to a CSV format using the provided io.Writer.
+func CSV2ExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate, error) {
 	progress := make(chan ProgressUpdate) // Channel to send progress updates
+	value, err := gocsv.MarshalBytes([]T{})
+	if err != nil {
+		return nil, err
+	}
 
 	writer, err := os.Create(fp)
 	if err != nil {
+		return nil, err
+	}
+
+	if _, err := writer.Write(value); err != nil {
 		return nil, err
 	}
 
@@ -26,8 +36,9 @@ func JsonExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate
 
 			if len(batch) >= batchSize {
 
-				if res, err := json.MarshalIndent(batch, "", "  "); err == nil {
+				if res, err := gocsv.MarshalStringWithoutHeaders(batch); err == nil {
 					if _, err := writer.Write([]byte(res)); err != nil {
+						// return err
 						progress <- ProgressUpdate{
 							ItemsProcessed: 0,
 							Error:          err,
@@ -44,7 +55,7 @@ func JsonExporterWriter[T any](source chan []*T, fp string) (chan ProgressUpdate
 		}
 
 		if len(batch) > 0 {
-			if res, err := json.MarshalIndent(batch, "", "  "); err == nil {
+			if res, err := gocsv.MarshalStringWithoutHeaders(batch); err == nil {
 				if _, err := writer.Write([]byte(res)); err != nil {
 					progress <- ProgressUpdate{
 						ItemsProcessed: 0,

@@ -16,6 +16,7 @@ import (
 
 	"github.com/alexeyco/simpletable"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback/exporting"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -773,18 +774,18 @@ func CommonCliExportCmd2[T any](
 	translationBox := map[string]interface{}{}
 	ReadYamlFileEmbed[map[string]interface{}](translationRef, fsFileName, &translationBox)
 
-	var exporter func(source chan []*T, fp string) (chan ProgressUpdate, error)
+	var exporter func(source chan []*T, fp string) (chan exporting.ProgressUpdate, error)
 
 	if strings.Contains(exportFilePath, ".csv") {
-		exporter = CSV2ExporterWriter
+		exporter = exporting.CSV2ExporterWriter
 	}
 
 	if strings.Contains(exportFilePath, ".yml") || strings.Contains(exportFilePath, ".yaml") {
-		exporter = YamlExporterWriter
+		exporter = exporting.YamlExporterWriter
 	}
 
 	if strings.Contains(exportFilePath, ".json") {
-		exporter = JsonExporterWriter
+		exporter = exporting.JsonExporterWriter
 	}
 
 	stats, err3 := exporter(stream, exportFilePath)
