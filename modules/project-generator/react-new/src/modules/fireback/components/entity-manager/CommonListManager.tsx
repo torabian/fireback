@@ -18,6 +18,18 @@ import { type CardComponentType, FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
 import { useReindexedContent } from "../common-data-table/useReindex";
 
+// `queryHook` is a *hook function* (e.g. `useGetCapabilities` from the old
+// "react-query" v3 generator, or `useCapabilityBrowseActionQuery` from the
+// newer "@tanstack/react-query" v5 action generator), not a resolved query
+// result — the two generators don't even share the same UseQueryResult
+// shape, so the return type is kept loose here and narrowed with `any`
+// where it's consumed below. It's called from inside this component and,
+// on the older generated hooks, also carries a static `UKEY` string used
+// as a cache/storage key (not yet present on the newer action hooks).
+type QueryHook = ((args: { query?: any; queryClient?: any }) => any) & {
+  UKEY?: string;
+};
+
 const media = matchMedia("(max-width: 600px)");
 
 function useViewMode() {
@@ -79,7 +91,7 @@ export const CommonListManager = ({
   urlMask,
   CardComponent,
 }: {
-  queryHook: any;
+  queryHook: QueryHook;
   RowDetail?: any;
   bulkEditHook?: any;
   inlineInsertHook?: any;
