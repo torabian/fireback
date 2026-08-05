@@ -3,14 +3,15 @@ package fireback
 import (
 	"context"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 )
 
 /**
@@ -124,51 +125,51 @@ type WebPushConfigBrowseActionRequestSig = func(c WebPushConfigBrowseActionReque
  * Query parameters for WebPushConfigBrowseAction
  */
 // Query wrapper with private fields
-type WebPushConfigBrowseActionQuery struct {
-	values url.Values
-	mapped map[string]interface{}
-	// Typesafe fields
-	Filter       string `json:"filter"`
-	Sort         string `json:"sort"`
-	StartIndex   int    `json:"startIndex"`
-	ItemsPerPage int    `json:"itemsPerPage"`
-	Cursor       string `json:"cursor"`
-}
+// type WebPushConfigBrowseActionQuery struct {
+// 	values url.Values
+// 	mapped map[string]interface{}
+// 	// Typesafe fields
+// 	Filter       string `json:"filter"`
+// 	Sort         string `json:"sort"`
+// 	StartIndex   int    `json:"startIndex"`
+// 	ItemsPerPage int    `json:"itemsPerPage"`
+// 	Cursor       string `json:"cursor"`
+// }
 
-func WebPushConfigBrowseActionQueryFromString(rawQuery string) WebPushConfigBrowseActionQuery {
-	v := WebPushConfigBrowseActionQuery{}
-	values, _ := url.ParseQuery(rawQuery)
-	mapped := map[string]interface{}{}
-	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
-		mapped = result
-	}
-	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
-		TagName:          "json", // reuse json tags
-		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
-		Result:           &v,
-	})
-	if err == nil {
-		_ = decoder.Decode(mapped)
-	}
-	v.values = values
-	v.mapped = mapped
-	return v
-}
-func WebPushConfigBrowseActionQueryFromHttp(r *http.Request) WebPushConfigBrowseActionQuery {
-	return WebPushConfigBrowseActionQueryFromString(r.URL.RawQuery)
-}
-func (q WebPushConfigBrowseActionQuery) Values() url.Values {
-	return q.values
-}
-func (q WebPushConfigBrowseActionQuery) Mapped() map[string]interface{} {
-	return q.mapped
-}
-func (q *WebPushConfigBrowseActionQuery) SetValues(v url.Values) {
-	q.values = v
-}
-func (q *WebPushConfigBrowseActionQuery) SetMapped(m map[string]interface{}) {
-	q.mapped = m
-}
+// func WebPushConfigBrowseActionQueryFromString(rawQuery string) WebPushConfigBrowseActionQuery {
+// 	v := WebPushConfigBrowseActionQuery{}
+// 	values, _ := url.ParseQuery(rawQuery)
+// 	mapped := map[string]interface{}{}
+// 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
+// 		mapped = result
+// 	}
+// 	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
+// 		TagName:          "json", // reuse json tags
+// 		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
+// 		Result:           &v,
+// 	})
+// 	if err == nil {
+// 		_ = decoder.Decode(mapped)
+// 	}
+// 	v.values = values
+// 	v.mapped = mapped
+// 	return v
+// }
+// func WebPushConfigBrowseActionQueryFromHttp(r *http.Request) WebPushConfigBrowseActionQuery {
+// 	return WebPushConfigBrowseActionQueryFromString(r.URL.RawQuery)
+// }
+// func (q WebPushConfigBrowseActionQuery) Values() url.Values {
+// 	return q.values
+// }
+// func (q WebPushConfigBrowseActionQuery) Mapped() map[string]interface{} {
+// 	return q.mapped
+// }
+// func (q *WebPushConfigBrowseActionQuery) SetValues(v url.Values) {
+// 	q.values = v
+// }
+// func (q *WebPushConfigBrowseActionQuery) SetMapped(m map[string]interface{}) {
+// 	q.mapped = m
+// }
 
 type WebPushConfigBrowseActionRequest struct {
 	Body        interface{}
