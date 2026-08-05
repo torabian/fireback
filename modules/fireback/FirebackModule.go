@@ -34,6 +34,11 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
 			func(g *gin.RouterGroup, x *FirebackApp) error {
 
+				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
+				CapabilityGetActionGin(g, CapabilityGetAction)
+				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
+				CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
+
 				{
 					meta := EventBusSubscriptionActionMeta()
 					g.GET(meta.URL, EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
@@ -49,10 +54,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 				}
 
 				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
-				{
-					method, url, x := GetCapabilitiesActionHandler(GetCapabilitiesAction)
-					g.Handle(method, url, x)
-				}
 
 				return nil
 			},
@@ -62,7 +63,10 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 	module.ProvideCliHandlers([]*cli.Command{
 		&PushNotificationCmd,
-		GetCapabilitiesActionCliHandler(GetCapabilitiesAction),
+		CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
+		CapabilityGetActionCliHandler(CapabilityGetAction),
+		CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
+		CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
 	})
 
 	module.ProvidePermissionHandler(

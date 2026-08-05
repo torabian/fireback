@@ -139,7 +139,7 @@ export const CommonListManager = ({
 
   const udf = useDatatableFiltering({
     urlMask: "",
-    submitDelete: delHook?.submit,
+    submitDelete: delHook?.mutateAsync,
     onRecordsDeleted: onRecordsDeleted$,
   });
 

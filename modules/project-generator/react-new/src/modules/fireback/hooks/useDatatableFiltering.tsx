@@ -147,7 +147,10 @@ export function useDatatableFiltering({
     })
       .promise.then(({ type }) => {
         if (type === "resolved") {
-          return submitDelete(idsToQuery(selection), null as any);
+          return submitDelete(
+            JSON.stringify({ uniqueIds: selection }),
+            null as any,
+          );
         }
       })
       .then(() => {

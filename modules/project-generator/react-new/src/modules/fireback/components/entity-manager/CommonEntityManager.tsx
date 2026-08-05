@@ -72,28 +72,21 @@ export const CommonEntityManager = ({
   const { selectedUrw } = useContext(RemoteQueryContext);
   usePageTitle((isEditing || forceEdit ? onEditTitle : onCreateTitle) || "");
 
-  const { query: getQuery } = getSingleHook;
+  const getQuery = getSingleHook;
 
   useEffect(() => {
-    if (getQuery.data?.data) {
+    const item = getQuery?.data?.data?.item?.toJSON();
+    if (item) {
       formik.current?.setValues(
-        beforeSetValues
-          ? beforeSetValues({
-              ...getQuery.data.data,
-            })
-          : {
-              ...getQuery.data.data,
-            },
+        beforeSetValues ? beforeSetValues({ ...item }) : { ...item },
       );
 
-      setInitialData(getQuery.data?.data);
+      setInitialData(item);
     }
-  }, [getQuery.data]);
+  }, [getQuery?.data]);
 
   useEffect(() => {
-    formik.current?.setSubmitting(
-      postHook?.mutation.isLoading || patchHook?.mutation.isLoading,
-    );
+    formik.current?.setSubmitting(postHook?.isLoading || patchHook?.isLoading);
   }, [postHook?.isLoading, patchHook?.isLoading]);
 
   const onSubmit = (p: Partial<any>, d: FormikHelpers<Partial<any>>) => {
@@ -105,8 +98,8 @@ export const CommonEntityManager = ({
 
     const op =
       isEditing || forceEdit
-        ? patchHook?.submit(values, d)
-        : postHook?.submit(values, d);
+        ? patchHook?.mutateAsync(JSON.stringify(values), d)
+        : postHook?.mutateAsync(JSON.stringify(values), d);
 
     op.then((response: any) => {
       if (response.data?.uniqueId) {
@@ -122,7 +115,7 @@ export const CommonEntityManager = ({
   };
 
   const formWorking =
-    getSingleHook?.query?.isLoading ||
+    getSingleHook?.isLoading ||
     false ||
     postHook?.query?.isLoading ||
     false ||

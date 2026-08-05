@@ -1,16 +1,19 @@
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useGetCapabilityByUniqueId } from "@/modules/fireback/sdk/modules/fireback/useGetCapabilityByUniqueId";
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
 import { useS } from "@/modules/fireback/hooks/useS";
+import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/fireback/CapabilityGetAction";
+import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
 import { strings } from "./strings/translations";
+import { usePageTitle } from "@/modules/fireback/hooks/authContext";
+
 export const CapabilitySingleScreen = () => {
-  const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
-  const getSingleHook = useGetCapabilityByUniqueId({ query: { uniqueId } });
-  var d: CapabilityEntity | undefined = getSingleHook.query.data?.data;
+  const { uniqueId } = useCommonEntityManager<Partial<any>>({});
+  const getSingleHook = useCapabilityGetActionQuery({ params: { uniqueId } });
+  var d = getSingleHook.data?.data?.item;
+
   const t = useS(strings);
-  // usePageTitle(`${d?.name}`);
+  usePageTitle(`${d?.name}`);
   return (
     <>
       <CommonSingleManager

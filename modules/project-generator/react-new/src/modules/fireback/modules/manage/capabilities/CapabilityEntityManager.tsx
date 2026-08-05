@@ -10,24 +10,24 @@ import { usePostCapability } from "@/modules/fireback/sdk/modules/fireback/usePo
 import { usePatchCapability } from "@/modules/fireback/sdk/modules/fireback/usePatchCapability";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
+import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/fireback/CapabilityGetAction";
+import { useCapabilityCreateAction } from "@/modules/fireback/sdk/fireback/CapabilityCreateAction";
+import { useCapabilityUpdateAction } from "@/modules/fireback/sdk/fireback/CapabilityUpdateAction";
 export const CapabilityEntityManager = ({
   data,
 }: DtoEntity<CapabilityEntity>) => {
   const s = useS(strings);
-  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
+  const { router, uniqueId, locale } = useCommonEntityManager<
     Partial<CapabilityEntity>
   >({
     data,
   });
-  const getSingleHook = useGetCapabilityByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useCapabilityGetActionQuery({
+    params: { uniqueId },
   });
-  const postHook = usePostCapability({
-    queryClient,
-  });
-  const patchHook = usePatchCapability({
-    queryClient,
-  });
+  const postHook = useCapabilityCreateAction({});
+  const patchHook = useCapabilityUpdateAction({ params: { uniqueId } });
+
   return (
     <CommonEntityManager
       postHook={postHook}
@@ -35,7 +35,7 @@ export const CapabilityEntityManager = ({
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          CapabilityEntity.Navigation.query(undefined, locale)
+          CapabilityEntity.Navigation.query(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>

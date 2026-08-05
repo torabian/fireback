@@ -3,6 +3,16 @@ targets:
     output: ./
     flags:
       pkg: fireback
+  - compiler: js
+    output: ../project-generator/react-new/src/modules/fireback/sdk/fireback
+    flags:
+      js-sdk-location: ../sdk
+    tags:
+      - typescript
+      - react
+      - no-sdk
+  - compiler: preprocessor
+    output: ./
 
 config:
   - name: cookieAuthOnly

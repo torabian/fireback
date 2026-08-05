@@ -8,6 +8,10 @@ import "../../../..//modules/fireback/styles/apple-family/styles.scss";
 
 import { UIStateProvider } from "../../hooks/uiStateContext";
 
+import {
+  QueryClient as QueryClient2,
+  QueryClientProvider as QueryClientProvider2,
+} from "@tanstack/react-query";
 import React, { useContext, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 
@@ -32,6 +36,7 @@ export function EssentialApp({
   apiPrefix?: string;
 }) {
   const [queryClient] = React.useState(() => new QueryClient());
+  const [queryClient2] = React.useState(() => new QueryClient2());
   const { config } = useContext(AppConfigContext);
 
   useEffect(() => {
@@ -44,38 +49,40 @@ export function EssentialApp({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <UIStateProvider>
-        <AuthProvider>
-          <ErrorBoundary
-            FallbackComponent={Fallback}
-            onReset={(details) => {
-              // Reset the state of your app so the error doesn't happen again
-            }}
-          >
-            <WithFireback
-              mockServer={mockServer}
-              config={config}
-              prefix={apiPrefix}
-              queryClient={queryClient}
-              locale={locale}
+      <QueryClientProvider2 client={queryClient2}>
+        <UIStateProvider>
+          <AuthProvider>
+            <ErrorBoundary
+              FallbackComponent={Fallback}
+              onReset={(details) => {
+                // Reset the state of your app so the error doesn't happen again
+              }}
             >
-              <WithSdk
+              <WithFireback
                 mockServer={mockServer}
-                prefix={apiPrefix}
                 config={config}
+                prefix={apiPrefix}
                 queryClient={queryClient}
+                locale={locale}
               >
-                <WithSelfServiceRoutes>
-                  <SidebarMultiRouterSetup
-                    queryClient={queryClient}
-                    ApplicationRoutes={ApplicationRoutes}
-                  />
-                </WithSelfServiceRoutes>
-              </WithSdk>
-            </WithFireback>
-          </ErrorBoundary>
-        </AuthProvider>
-      </UIStateProvider>
+                <WithSdk
+                  mockServer={mockServer}
+                  prefix={apiPrefix}
+                  config={config}
+                  queryClient={queryClient}
+                >
+                  <WithSelfServiceRoutes>
+                    <SidebarMultiRouterSetup
+                      queryClient={queryClient}
+                      ApplicationRoutes={ApplicationRoutes}
+                    />
+                  </WithSelfServiceRoutes>
+                </WithSdk>
+              </WithFireback>
+            </ErrorBoundary>
+          </AuthProvider>
+        </UIStateProvider>
+      </QueryClientProvider2>
     </QueryClientProvider>
   );
 }
