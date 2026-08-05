@@ -7,11 +7,13 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	SendEmailWithProviderImpl = func(c SendEmailWithProviderActionRequest, query fireback.QueryDSL) (*SendEmailWithProviderActionResponse, error) {
-		return nil, nil
+func SendEmailWithProviderAction(c SendEmailWithProviderActionRequest) (*SendEmailWithProviderActionResponse, error) {
+	_, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
 	}
+
+	return nil, nil
 }
 
 func CastEmailProviderEntityFromCli(c emigo.CliCastable) EmailProviderEntity {

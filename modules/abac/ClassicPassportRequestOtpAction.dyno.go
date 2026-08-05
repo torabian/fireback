@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -58,6 +60,22 @@ func (x *ClassicPassportRequestOtpActionReq) Json() string {
 	}
 	return ""
 }
+func GetClassicPassportRequestOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "value",
+			Type:        "string",
+			Description: "Passport value (email, phone number) which would be receiving the otp code.",
+		},
+	}
+}
+func CastClassicPassportRequestOtpActionReqFromCli(c emigo.CliCastable) ClassicPassportRequestOtpActionReq {
+	data := ClassicPassportRequestOtpActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	return data
+}
 
 // The base class definition for classicPassportRequestOtpActionRes
 type ClassicPassportRequestOtpActionRes struct {
@@ -74,6 +92,43 @@ func (x *ClassicPassportRequestOtpActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetClassicPassportRequestOtpActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "suspend-until",
+			Type: "int64",
+		},
+		{
+			Name: prefix + "valid-until",
+			Type: "int64",
+		},
+		{
+			Name: prefix + "blocked-until",
+			Type: "int64",
+		},
+		{
+			Name:        prefix + "seconds-to-unblock",
+			Type:        "int64",
+			Description: "The amount of time left to unblock for next request",
+		},
+	}
+}
+func CastClassicPassportRequestOtpActionResFromCli(c emigo.CliCastable) ClassicPassportRequestOtpActionRes {
+	data := ClassicPassportRequestOtpActionRes{}
+	if c.IsSet("suspend-until") {
+		data.SuspendUntil = int64(c.Int64("suspend-until"))
+	}
+	if c.IsSet("valid-until") {
+		data.ValidUntil = int64(c.Int64("valid-until"))
+	}
+	if c.IsSet("blocked-until") {
+		data.BlockedUntil = int64(c.Int64("blocked-until"))
+	}
+	if c.IsSet("seconds-to-unblock") {
+		data.SecondsToUnblock = int64(c.Int64("seconds-to-unblock"))
+	}
+	return data
 }
 
 type ClassicPassportRequestOtpActionResponse struct {
@@ -379,6 +434,71 @@ func (x ClassicPassportRequestOtpActionRequest) IsGin() bool {
 }
 func ClassicPassportRequestOtpActionQueryFromGin(c *gin.Context) ClassicPassportRequestOtpActionQuery {
 	return ClassicPassportRequestOtpActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x ClassicPassportRequestOtpActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// ClassicPassportRequestOtpActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the ClassicPassportRequestOtpAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func ClassicPassportRequestOtpActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetClassicPassportRequestOtpActionReqCliFlags(""))...)
+	return flags
+}
+
+// ClassicPassportRequestOtpActionCliHandler builds a full *cli.Command for the
+// ClassicPassportRequestOtpAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a ClassicPassportRequestOtpActionRequest the same way
+// ClassicPassportRequestOtpActionHandler (Gin) and ClassicPassportRequestOtpActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func ClassicPassportRequestOtpActionCliHandler(
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) *cli.Command {
+	meta := ClassicPassportRequestOtpActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: ClassicPassportRequestOtpActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := ClassicPassportRequestOtpActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastClassicPassportRequestOtpActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// ClassicPassportRequestOtpActionCli is a high-level convenience wrapper around
+// ClassicPassportRequestOtpActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way ClassicPassportRequestOtpActionGin
+// registers a route on a Gin engine.
+func ClassicPassportRequestOtpActionCli(
+	app *cli.Command,
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) {
+	app.Commands = append(app.Commands, ClassicPassportRequestOtpActionCliHandler(handler))
 }
 
 // ClassicPassportRequestOtpActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

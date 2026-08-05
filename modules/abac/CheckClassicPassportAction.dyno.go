@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -59,6 +61,29 @@ func (x *CheckClassicPassportActionReq) Json() string {
 	}
 	return ""
 }
+func GetCheckClassicPassportActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "security-token",
+			Type:        "string",
+			Description: "This can be the value of ReCaptcha2, ReCaptcha3, or generate security image or voice for verification. Will be used based on the configuration.",
+		},
+	}
+}
+func CastCheckClassicPassportActionReqFromCli(c emigo.CliCastable) CheckClassicPassportActionReq {
+	data := CheckClassicPassportActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("security-token") {
+		data.SecurityToken = c.String("security-token")
+	}
+	return data
+}
 
 // The base class definition for checkClassicPassportActionRes
 type CheckClassicPassportActionRes struct {
@@ -85,6 +110,75 @@ func (x *CheckClassicPassportActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetCheckClassicPassportActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "next",
+			Type:        "slice",
+			Description: "The next possible action which is suggested.",
+		},
+		{
+			Name:        prefix + "flags",
+			Type:        "slice",
+			Description: "Extra information that can be useful actually when doing onboarding. Make sure sensitive information doesn't go out.",
+		},
+		{
+			Name:        prefix + "otp-info",
+			Type:        "object?",
+			Description: "If the endpoint automatically triggers a send otp, then it would be holding that information, Also the otp information can become available.",
+		},
+	}
+}
+func CastCheckClassicPassportActionResFromCli(c emigo.CliCastable) CheckClassicPassportActionRes {
+	data := CheckClassicPassportActionRes{}
+	if c.IsSet("next") {
+		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
+	}
+	if c.IsSet("flags") {
+		emigo.InflatePossibleSlice(c.String("flags"), &data.Flags)
+	}
+	if c.IsSet("otp-info") {
+		emigo.ParseNullable(c.String("otp-info"), &data.OtpInfo)
+	}
+	return data
+}
+func GetCheckClassicPassportActionResOtpInfoCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "suspend-until",
+			Type: "int64",
+		},
+		{
+			Name: prefix + "valid-until",
+			Type: "int64",
+		},
+		{
+			Name: prefix + "blocked-until",
+			Type: "int64",
+		},
+		{
+			Name:        prefix + "seconds-to-unblock",
+			Type:        "int64",
+			Description: "The amount of time left to unblock for next request",
+		},
+	}
+}
+func CastCheckClassicPassportActionResOtpInfoFromCli(c emigo.CliCastable) CheckClassicPassportActionResOtpInfo {
+	data := CheckClassicPassportActionResOtpInfo{}
+	if c.IsSet("suspend-until") {
+		data.SuspendUntil = int64(c.Int64("suspend-until"))
+	}
+	if c.IsSet("valid-until") {
+		data.ValidUntil = int64(c.Int64("valid-until"))
+	}
+	if c.IsSet("blocked-until") {
+		data.BlockedUntil = int64(c.Int64("blocked-until"))
+	}
+	if c.IsSet("seconds-to-unblock") {
+		data.SecondsToUnblock = int64(c.Int64("seconds-to-unblock"))
+	}
+	return data
 }
 
 type CheckClassicPassportActionResponse struct {
@@ -390,6 +484,71 @@ func (x CheckClassicPassportActionRequest) IsGin() bool {
 }
 func CheckClassicPassportActionQueryFromGin(c *gin.Context) CheckClassicPassportActionQuery {
 	return CheckClassicPassportActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x CheckClassicPassportActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// CheckClassicPassportActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the CheckClassicPassportAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func CheckClassicPassportActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetCheckClassicPassportActionReqCliFlags(""))...)
+	return flags
+}
+
+// CheckClassicPassportActionCliHandler builds a full *cli.Command for the
+// CheckClassicPassportAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a CheckClassicPassportActionRequest the same way
+// CheckClassicPassportActionHandler (Gin) and CheckClassicPassportActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func CheckClassicPassportActionCliHandler(
+	handler func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error),
+) *cli.Command {
+	meta := CheckClassicPassportActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: CheckClassicPassportActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := CheckClassicPassportActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastCheckClassicPassportActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// CheckClassicPassportActionCli is a high-level convenience wrapper around
+// CheckClassicPassportActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way CheckClassicPassportActionGin
+// registers a route on a Gin engine.
+func CheckClassicPassportActionCli(
+	app *cli.Command,
+	handler func(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error),
+) {
+	app.Commands = append(app.Commands, CheckClassicPassportActionCliHandler(handler))
 }
 
 // CheckClassicPassportActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

@@ -9,14 +9,26 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	ClassicSignupImpl = ClassicSignupAction
+// Responsible for user creation from public flows in the application.
+func ClassicSignupAction(c ClassicSignupActionRequest) (*ClassicSignupActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := classicSignupCore(c.Body, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &ClassicSignupActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
 }
 
-// Responsible for user creation from public flows in the application.
-func ClassicSignupAction(c ClassicSignupActionRequest, query fireback.QueryDSL) (*ClassicSignupActionResponse, error) {
-
-	dto := c.Body
+// classicSignupCore holds the actual implementation, reusable by callers which
+// already have a resolved QueryDSL (such as the cli-only AuthFlow).
+func classicSignupCore(dto ClassicSignupActionReq, query fireback.QueryDSL) (*ClassicSignupActionRes, *fireback.IError) {
 
 	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
 		fmt.Println(err)
@@ -111,9 +123,7 @@ func ClassicSignupAction(c ClassicSignupActionRequest, query fireback.QueryDSL) 
 		return nil, err
 	}
 
-	return &ClassicSignupActionResponse{
-		Payload: fireback.GResponseSingleItem(res),
-	}, nil
+	return &res, nil
 }
 
 // This function will complete the signup process.

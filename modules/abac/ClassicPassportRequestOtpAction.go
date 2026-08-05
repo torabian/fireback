@@ -9,13 +9,25 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	ClassicPassportRequestOtpImpl = ClassicPassportRequestOtpAction
+func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := classicPassportRequestOtpCore(c.Body, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &ClassicPassportRequestOtpActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
 }
 
-func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionResponse, error) {
-	req := c.Body
+// classicPassportRequestOtpCore holds the actual implementation, reusable by callers
+// which already have a resolved QueryDSL (such as checkClassicPassportCore, or the cli-only AuthFlow).
+func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionRes, *fireback.IError) {
 
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
@@ -28,11 +40,9 @@ func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest, q
 
 	if olderEntity != nil && time.Now().UnixNano() < olderEntity.BlockedUntil {
 		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
-		return &ClassicPassportRequestOtpActionResponse{
-			Payload: fireback.GResponseSingleItem(ClassicPassportRequestOtpActionRes{
-				BlockedUntil:     olderEntity.BlockedUntil,
-				SecondsToUnblock: remaining,
-			}),
+		return &ClassicPassportRequestOtpActionRes{
+			BlockedUntil:     olderEntity.BlockedUntil,
+			SecondsToUnblock: remaining,
 		}, fireback.Create401Error(&AbacMessages.OtaRequestBlockedUntil, []string{})
 	} else {
 		// Let's delete the record, to start the process fresh
@@ -143,10 +153,7 @@ func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest, q
 		return nil, &fireback.IError{Message: AbacMessages.OtpNotAvailableForThisType}
 	}
 
-	return &ClassicPassportRequestOtpActionResponse{
-		Payload: fireback.GResponseSingleItem(ClassicPassportRequestOtpActionRes{
-			SecondsToUnblock: secondsToUnblock,
-		}),
+	return &ClassicPassportRequestOtpActionRes{
+		SecondsToUnblock: secondsToUnblock,
 	}, nil
-
 }

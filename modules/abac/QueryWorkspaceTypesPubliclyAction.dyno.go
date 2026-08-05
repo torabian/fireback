@@ -1,9 +1,11 @@
 package abac
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -58,6 +60,42 @@ func (x *QueryWorkspaceTypesPubliclyActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetQueryWorkspaceTypesPubliclyActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "title",
+			Type: "string",
+		},
+		{
+			Name: prefix + "description",
+			Type: "string",
+		},
+		{
+			Name: prefix + "unique-id",
+			Type: "string",
+		},
+		{
+			Name: prefix + "slug",
+			Type: "string",
+		},
+	}
+}
+func CastQueryWorkspaceTypesPubliclyActionResFromCli(c emigo.CliCastable) QueryWorkspaceTypesPubliclyActionRes {
+	data := QueryWorkspaceTypesPubliclyActionRes{}
+	if c.IsSet("title") {
+		data.Title = c.String("title")
+	}
+	if c.IsSet("description") {
+		data.Description = c.String("description")
+	}
+	if c.IsSet("unique-id") {
+		data.UniqueId = c.String("unique-id")
+	}
+	if c.IsSet("slug") {
+		data.Slug = c.String("slug")
+	}
+	return data
 }
 
 type QueryWorkspaceTypesPubliclyActionResponse struct {
@@ -354,6 +392,69 @@ func (x QueryWorkspaceTypesPubliclyActionRequest) IsGin() bool {
 }
 func QueryWorkspaceTypesPubliclyActionQueryFromGin(c *gin.Context) QueryWorkspaceTypesPubliclyActionQuery {
 	return QueryWorkspaceTypesPubliclyActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x QueryWorkspaceTypesPubliclyActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// QueryWorkspaceTypesPubliclyActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the QueryWorkspaceTypesPubliclyAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func QueryWorkspaceTypesPubliclyActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	return flags
+}
+
+// QueryWorkspaceTypesPubliclyActionCliHandler builds a full *cli.Command for the
+// QueryWorkspaceTypesPubliclyAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a QueryWorkspaceTypesPubliclyActionRequest the same way
+// QueryWorkspaceTypesPubliclyActionHandler (Gin) and QueryWorkspaceTypesPubliclyActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func QueryWorkspaceTypesPubliclyActionCliHandler(
+	handler func(c QueryWorkspaceTypesPubliclyActionRequest) (*QueryWorkspaceTypesPubliclyActionResponse, error),
+) *cli.Command {
+	meta := QueryWorkspaceTypesPubliclyActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: QueryWorkspaceTypesPubliclyActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := QueryWorkspaceTypesPubliclyActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// QueryWorkspaceTypesPubliclyActionCli is a high-level convenience wrapper around
+// QueryWorkspaceTypesPubliclyActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way QueryWorkspaceTypesPubliclyActionGin
+// registers a route on a Gin engine.
+func QueryWorkspaceTypesPubliclyActionCli(
+	app *cli.Command,
+	handler func(c QueryWorkspaceTypesPubliclyActionRequest) (*QueryWorkspaceTypesPubliclyActionResponse, error),
+) {
+	app.Commands = append(app.Commands, QueryWorkspaceTypesPubliclyActionCliHandler(handler))
 }
 
 // QueryWorkspaceTypesPubliclyActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

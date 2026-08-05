@@ -7,12 +7,14 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	QueryUserRoleWorkspacesImpl = QueryUserRoleWorkspacesAction
-}
-
-func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest, q fireback.QueryDSL) (*QueryUserRoleWorkspacesActionResponse, error) {
+func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyUser,
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
 
 	items := []*QueryUserRoleWorkspacesActionRes{}
 

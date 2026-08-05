@@ -9,14 +9,14 @@ import {
   ClassicSigninActionReq,
   ClassicSigninActionRes,
   useClassicSigninAction,
-} from "../../sdk/modules/abac/ClassicSigninAction";
+} from "../../sdk/abac/ClassicSigninAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
 import {
   ClassicPassportRequestOtpActionReq,
   useClassicPassportRequestOtpAction,
-} from "../../sdk/modules/abac/ClassicPassportRequestOtpAction";
+} from "../../sdk/abac/ClassicPassportRequestOtpAction";
 
 export const usePresenter = () => {
   const s = useS(strings);

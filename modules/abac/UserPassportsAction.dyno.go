@@ -1,9 +1,11 @@
 package abac
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -62,6 +64,46 @@ func (x *UserPassportsActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetUserPassportsActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "value",
+			Type:        "string",
+			Description: "The passport value, such as email address or phone number",
+		},
+		{
+			Name:        prefix + "unique-id",
+			Type:        "string",
+			Description: "Unique identifier of the passport to operate some action on top of it",
+		},
+		{
+			Name:        prefix + "type",
+			Type:        "string",
+			Description: "The type of the passport, such as email, phone number",
+		},
+		{
+			Name:        prefix + "totp-confirmed",
+			Type:        "bool",
+			Description: "Regardless of the secret, user needs to confirm his secret. There is an extra action to confirm user totp, could be used after signup or prior to login.",
+		},
+	}
+}
+func CastUserPassportsActionResFromCli(c emigo.CliCastable) UserPassportsActionRes {
+	data := UserPassportsActionRes{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("unique-id") {
+		data.UniqueId = c.String("unique-id")
+	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
+	if c.IsSet("totp-confirmed") {
+		data.TotpConfirmed = bool(c.Bool("totp-confirmed"))
+	}
+	return data
 }
 
 type UserPassportsActionResponse struct {
@@ -358,6 +400,69 @@ func (x UserPassportsActionRequest) IsGin() bool {
 }
 func UserPassportsActionQueryFromGin(c *gin.Context) UserPassportsActionQuery {
 	return UserPassportsActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x UserPassportsActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// UserPassportsActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the UserPassportsAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func UserPassportsActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	return flags
+}
+
+// UserPassportsActionCliHandler builds a full *cli.Command for the
+// UserPassportsAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a UserPassportsActionRequest the same way
+// UserPassportsActionHandler (Gin) and UserPassportsActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func UserPassportsActionCliHandler(
+	handler func(c UserPassportsActionRequest) (*UserPassportsActionResponse, error),
+) *cli.Command {
+	meta := UserPassportsActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: UserPassportsActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := UserPassportsActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// UserPassportsActionCli is a high-level convenience wrapper around
+// UserPassportsActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way UserPassportsActionGin
+// registers a route on a Gin engine.
+func UserPassportsActionCli(
+	app *cli.Command,
+	handler func(c UserPassportsActionRequest) (*UserPassportsActionResponse, error),
+) {
+	app.Commands = append(app.Commands, UserPassportsActionCliHandler(handler))
 }
 
 // UserPassportsActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

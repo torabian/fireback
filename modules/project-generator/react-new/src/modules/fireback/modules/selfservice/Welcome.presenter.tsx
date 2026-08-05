@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
-import { useCheckPassportMethodsActionQuery } from "../../sdk/modules/abac/CheckPassportMethodsAction";
+import { useCheckPassportMethodsActionQuery } from "../../sdk/abac/CheckPassportMethodsAction";
 import {
   type AuthAvailableMethods,
   AuthMethod,
   useTemporaryParamOptions,
 } from "./auth.common";
-import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
+import type { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";
 
 export const usePresenter = () => {
   const t = useT();

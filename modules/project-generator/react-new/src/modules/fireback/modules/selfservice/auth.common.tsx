@@ -2,12 +2,12 @@ import { useContext, useEffect } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import type { ClassicPassportOtpActionRes } from "../../sdk/modules/abac/ClassicPassportOtpAction";
-import type { ClassicSigninActionRes } from "../../sdk/modules/abac/ClassicSigninAction";
-import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignupAction";
+import type { ClassicPassportOtpActionRes } from "../../sdk/abac/ClassicPassportOtpAction";
+import type { ClassicSigninActionRes } from "../../sdk/abac/ClassicSigninAction";
+import type { ClassicSignupActionRes } from "../../sdk/abac/ClassicSignupAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import type { MOne } from "../../sdk/sdk/common/operators";
-import type { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
+import type { UserSessionDto } from "../../sdk/abac/UserSessionDto";
 
 export enum AuthMethod {
   Email = "email",

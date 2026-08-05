@@ -7,13 +7,25 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	ClassicPassportOtpImpl = ClassicPassportOtpAction
+func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest) (*ClassicPassportOtpActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := classicPassportOtpCore(c.Body, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &ClassicPassportOtpActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
 }
 
-func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.QueryDSL) (*ClassicPassportOtpActionResponse, error) {
-	req := c.Body
+// classicPassportOtpCore holds the actual implementation, reusable by callers which
+// already have a resolved QueryDSL (such as the cli-only AuthFlow).
+func classicPassportOtpCore(req ClassicPassportOtpActionReq, query fireback.QueryDSL) (*ClassicPassportOtpActionRes, *fireback.IError) {
 	ClearPassportValue(&req.Value)
 
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
@@ -30,55 +42,14 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.
 		return nil, fireback.Create401Error(&AbacMessages.OtpCodeInvalid, []string{})
 	}
 
-	// if olderEntity.IsInCreationProcess.Bool {
-	// 	completeClassicSignupProcess(
-	// 		ClassicSignupActionReq{},
-	// 		query,
-	// 		olderEntity,
-	// 	)
-	// }
-
 	if olderEntity.IsInCreationProcess.OrDefault(false) {
 		// in some cases, the otp alone should be enough and can complete signup process.
 		// for example, phone number often is enough for authroization of sms or phone call
 		// has been through
-
-		// Not possible, because user needs to choose workspace type id
-		// ALLOW_PHONE_PASS := true
-		// if ok, ptype := validatePassportType(*req.Value); ok && ptype == PASSPORT_METHOD_PHONE && ALLOW_PHONE_PASS {
-
-		// 	user, role, workspace, passport := getPhoneQuickMechanism(*req.Value,)
-		// 	session, sessionError := UnsafeGenerateUser(&GenerateUserDto{
-
-		// 		createUser:      true,
-		// 		createWorkspace: true,
-		// 		createRole:      true,
-		// 		createPassport:  true,
-
-		// 		user:      user,
-		// 		role:      role,
-		// 		workspace: workspace,
-		// 		passport:  passport,
-
-		// 		// We want always to be able to login regardless
-		// 		restricted: true,
-		// 	}, q)
-
-		// 	if sessionError != nil {
-		// 		return nil, sessionError
-		// 	} else {
-		// 		return &ClassicPassportOtpActionResDto{
-		// 			Session: session,
-		// 		}, nil
-		// 	}
-		// }
-
-		return &ClassicPassportOtpActionResponse{
-			Payload: fireback.GResponseSingleItem(ClassicPassportOtpActionRes{
-				ContinueWithCreation: true,
-				SessionSecret:        olderEntity.SessionSecret,
-				TotpUrl:              olderEntity.TotpLink,
-			}),
+		return &ClassicPassportOtpActionRes{
+			ContinueWithCreation: true,
+			SessionSecret:        olderEntity.SessionSecret,
+			TotpUrl:              olderEntity.TotpLink,
 		}, nil
 	}
 
@@ -99,23 +70,17 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest, query fireback.
 					session.Token = token
 				}
 
-				if err != nil {
-					return nil, fireback.GormErrorToIError(err)
-				}
-
 				// Delete the session so user cannot login again
 				err2 := fireback.GetDbRef().Where(
 					&PublicAuthenticationEntity{PassportId: emigo.NullableOf(passport.UniqueId), Otp: req.Otp},
 				).Delete(&PublicAuthenticationEntity{}).Error
 
 				if err2 != nil {
-					return nil, fireback.GormErrorToIError(err)
+					return nil, fireback.GormErrorToIError(err2)
 				}
 
-				return &ClassicPassportOtpActionResponse{
-					Payload: fireback.GResponseSingleItem(ClassicPassportOtpActionRes{
-						Session: emigo.NewOneNullable(*session),
-					}),
+				return &ClassicPassportOtpActionRes{
+					Session: emigo.NewOneNullable(*session),
 				}, nil
 			}
 		}

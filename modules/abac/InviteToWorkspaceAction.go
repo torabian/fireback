@@ -7,12 +7,13 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	InviteToWorkspaceImpl = InviteToWorkspaceAction
-}
+func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest) (*InviteToWorkspaceActionResponse, error) {
+	queryPtr, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+	query := *queryPtr
 
-func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.QueryDSL) (*InviteToWorkspaceActionResponse, error) {
 	req := c.Body
 
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
@@ -50,12 +51,7 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest, query fireback.Qu
 	if invite.Phonenumber != "" {
 		inviteBody := "You are invite " + invite.FirstName + " " + invite.LastName
 
-		if _, err7 := GsmSendSmsImpl(GsmSendSmsActionRequest{
-			Body: GsmSendSmsActionReq{
-				ToNumber: invite.Phonenumber,
-				Body:     inviteBody,
-			},
-		}, query); err7 != nil {
+		if _, err7 := GsmSendSMSUsingNotificationConfig(inviteBody, []string{invite.Phonenumber}); err7 != nil {
 			return nil, fireback.GormErrorToIError(err7)
 		}
 	}

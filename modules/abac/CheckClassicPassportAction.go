@@ -3,7 +3,6 @@ package abac
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,13 +13,19 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	CheckClassicPassportImpl = CheckClassicPassportAction
+func CheckClassicPassportAction(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := checkClassicPassportCore(c.Body, *query)
+	return wrapCheckPassportResult(res, err2)
 }
 
-func CheckClassicPassportAction(c CheckClassicPassportActionRequest, query fireback.QueryDSL) (*CheckClassicPassportActionResponse, error) {
-
-	req := c.Body
+// checkClassicPassportCore holds the actual implementation, reusable by callers which
+// already have a resolved QueryDSL (such as the cli-only AuthFlow).
+func checkClassicPassportCore(req CheckClassicPassportActionReq, query fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
 	if err := validateValueFormat(req.Value); err != nil {
 		return nil, err
 	}
@@ -35,9 +40,9 @@ func CheckClassicPassportAction(c CheckClassicPassportActionRequest, query fireb
 
 	// from here we divide the work flow to existing and non exists passport
 	if passport == nil {
-		return wrapCheckPassportResult(checkStepsForNonExistingAccount(req.Value, config, query))
+		return checkStepsForNonExistingAccount(req.Value, config, query)
 	} else {
-		return wrapCheckPassportResult(checkStepsForExistingAccount(passport, config, query))
+		return checkStepsForExistingAccount(passport, config, query)
 	}
 }
 
@@ -50,16 +55,7 @@ func wrapCheckPassportResult(res *CheckClassicPassportActionRes, err *fireback.I
 // in some operations, the only option is otp either on signin or signup.
 // so we send the otp anyway, and next step can be immediately signup.
 func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckClassicPassportActionResOtpInfo, *fireback.IError) {
-	otpResponse, err := ClassicPassportRequestOtpAction(ClassicPassportRequestOtpActionRequest{
-		Body:   ClassicPassportRequestOtpActionReq{Value: passportValue},
-		CliCtx: q.C,
-	}, q)
-
-	var otpFailed *fireback.IError
-
-	if err != nil {
-		otpFailed = fireback.CastToIError(otpFailed)
-	}
+	otpResponse, otpFailed := classicPassportRequestOtpCore(ClassicPassportRequestOtpActionReq{Value: passportValue}, q)
 
 	// No point of continuing if the type doesn't support otp
 	if otpFailed != nil {
@@ -68,20 +64,12 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 		}
 	}
 
-	if otpResponse != nil && otpResponse.Payload != nil {
-		var otpInfo *CheckClassicPassportActionResOtpInfo
-
-		if casted, ok := otpResponse.Payload.(fireback.GoogleResponse[ClassicPassportRequestOtpActionRes]); ok {
-
-			otpInfo = &CheckClassicPassportActionResOtpInfo{
-				SuspendUntil:     casted.Data.Item.SuspendUntil,
-				ValidUntil:       casted.Data.Item.ValidUntil,
-				BlockedUntil:     casted.Data.Item.BlockedUntil,
-				SecondsToUnblock: casted.Data.Item.SecondsToUnblock,
-			}
-		} else {
-			j, _ := json.MarshalIndent(otpResponse, "", "  ")
-			fmt.Println("Not okay!", ok, casted, string(j))
+	if otpResponse != nil {
+		otpInfo := &CheckClassicPassportActionResOtpInfo{
+			SuspendUntil:     otpResponse.SuspendUntil,
+			ValidUntil:       otpResponse.ValidUntil,
+			BlockedUntil:     otpResponse.BlockedUntil,
+			SecondsToUnblock: otpResponse.SecondsToUnblock,
 		}
 
 		// if request is blocked, we actually did not sent the otp.
@@ -91,14 +79,7 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 			}
 		}
 
-		fmt.Println(1, otpFailed, otpInfo, otpResponse)
-
-		return &CheckClassicPassportActionResOtpInfo{
-			SuspendUntil:     otpInfo.SuspendUntil,
-			ValidUntil:       otpInfo.ValidUntil,
-			BlockedUntil:     otpInfo.BlockedUntil,
-			SecondsToUnblock: otpInfo.SecondsToUnblock,
-		}, nil
+		return otpInfo, nil
 	}
 
 	return nil, otpFailed

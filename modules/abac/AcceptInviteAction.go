@@ -6,12 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	AcceptInviteImpl = AcceptInviteAction
-}
+func AcceptInviteAction(c AcceptInviteActionRequest) (*AcceptInviteActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyUser,
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
 
-func AcceptInviteAction(c AcceptInviteActionRequest, q fireback.QueryDSL) (*AcceptInviteActionResponse, error) {
 	req := c.Body
 
 	// First of all, we will find the invitation and gather some information.

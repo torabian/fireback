@@ -2,7 +2,7 @@ import { useContext, useMemo } from "react";
 import { MacTagsColor, type MenuItem } from "../../definitions/common";
 import { useT } from "../../hooks/useT";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/abac/QueryUserRoleWorkspacesAction";
 import type { MArray } from "../../sdk/sdk/common/operators";
 
 /**

@@ -7,7 +7,7 @@ import { useS } from "../../hooks/useS";
 import { usePresenter } from "./ClassicPassportAccountCreation.presenter";
 import { strings } from "./strings/translations";
 import { AuthLoader } from "../../components/auth-loader/AuthLoader";
-import { ClassicSignupActionReq } from "../../sdk/modules/abac/ClassicSignupAction";
+import { ClassicSignupActionReq } from "../../sdk/abac/ClassicSignupAction";
 
 export const ClassicPassportAccountCreation = ({}: {}) => {
   const {

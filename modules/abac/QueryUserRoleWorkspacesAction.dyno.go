@@ -1,9 +1,11 @@
 package abac
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -67,6 +69,73 @@ func (x *QueryUserRoleWorkspacesActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetQueryUserRoleWorkspacesActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "name",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "capabilities",
+			Type:        "slice",
+			Description: "Workspace level capabilities which are available",
+		},
+		{
+			Name: prefix + "unique-id",
+			Type: "string",
+		},
+		{
+			Name: prefix + "roles",
+			Type: "array",
+		},
+	}
+}
+func CastQueryUserRoleWorkspacesActionResFromCli(c emigo.CliCastable) QueryUserRoleWorkspacesActionRes {
+	data := QueryUserRoleWorkspacesActionRes{}
+	if c.IsSet("name") {
+		data.Name = c.String("name")
+	}
+	if c.IsSet("capabilities") {
+		emigo.InflatePossibleSlice(c.String("capabilities"), &data.Capabilities)
+	}
+	if c.IsSet("unique-id") {
+		data.UniqueId = c.String("unique-id")
+	}
+	if c.IsSet("roles") {
+		data.Roles = emigo.CapturePossibleArray(CastQueryUserRoleWorkspacesActionResRolesFromCli, "roles", c)
+	}
+	return data
+}
+func GetQueryUserRoleWorkspacesActionResRolesCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "name",
+			Type: "string",
+		},
+		{
+			Name: prefix + "unique-id",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "capabilities",
+			Type:        "slice",
+			Description: "Capabilities related to this role which are available",
+		},
+	}
+}
+func CastQueryUserRoleWorkspacesActionResRolesFromCli(c emigo.CliCastable) QueryUserRoleWorkspacesActionResRoles {
+	data := QueryUserRoleWorkspacesActionResRoles{}
+	if c.IsSet("name") {
+		data.Name = c.String("name")
+	}
+	if c.IsSet("unique-id") {
+		data.UniqueId = c.String("unique-id")
+	}
+	if c.IsSet("capabilities") {
+		emigo.InflatePossibleSlice(c.String("capabilities"), &data.Capabilities)
+	}
+	return data
 }
 
 type QueryUserRoleWorkspacesActionResponse struct {
@@ -363,6 +432,69 @@ func (x QueryUserRoleWorkspacesActionRequest) IsGin() bool {
 }
 func QueryUserRoleWorkspacesActionQueryFromGin(c *gin.Context) QueryUserRoleWorkspacesActionQuery {
 	return QueryUserRoleWorkspacesActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x QueryUserRoleWorkspacesActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// QueryUserRoleWorkspacesActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the QueryUserRoleWorkspacesAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func QueryUserRoleWorkspacesActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	return flags
+}
+
+// QueryUserRoleWorkspacesActionCliHandler builds a full *cli.Command for the
+// QueryUserRoleWorkspacesAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a QueryUserRoleWorkspacesActionRequest the same way
+// QueryUserRoleWorkspacesActionHandler (Gin) and QueryUserRoleWorkspacesActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func QueryUserRoleWorkspacesActionCliHandler(
+	handler func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error),
+) *cli.Command {
+	meta := QueryUserRoleWorkspacesActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: QueryUserRoleWorkspacesActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := QueryUserRoleWorkspacesActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// QueryUserRoleWorkspacesActionCli is a high-level convenience wrapper around
+// QueryUserRoleWorkspacesActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way QueryUserRoleWorkspacesActionGin
+// registers a route on a Gin engine.
+func QueryUserRoleWorkspacesActionCli(
+	app *cli.Command,
+	handler func(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error),
+) {
+	app.Commands = append(app.Commands, QueryUserRoleWorkspacesActionCliHandler(handler))
 }
 
 // QueryUserRoleWorkspacesActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

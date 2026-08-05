@@ -4,7 +4,7 @@ import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import {
   QueryUserRoleWorkspacesActionRes,
   useQueryUserRoleWorkspacesActionQuery,
-} from "../../sdk/modules/abac/QueryUserRoleWorkspacesAction";
+} from "../../sdk/abac/QueryUserRoleWorkspacesAction";
 import type { MArray } from "../../sdk/sdk/common/operators";
 
 export const SelectWorkspaceScreen = () => {

@@ -6,12 +6,15 @@ import (
 	"github.com/torabian/fireback/modules/fireback/security"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	ChangePasswordImpl = ChangePasswordAction
-}
+func ChangePasswordAction(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyUser,
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
 
-func ChangePasswordAction(c ChangePasswordActionRequest, q fireback.QueryDSL) (*ChangePasswordActionResponse, error) {
 	req := c.Body
 
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
@@ -27,9 +30,9 @@ func ChangePasswordAction(c ChangePasswordActionRequest, q fireback.QueryDSL) (*
 	// Passports all belong to root workspace, so we need to query that
 	// thats why it's changed manually here. Passport needs to belong to current user.
 	passports := []PassportEntity{}
-	err := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
-	if err != nil {
-		return nil, fireback.CastToIError(err)
+	err2 := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
+	if err2 != nil {
+		return nil, fireback.CastToIError(err2)
 	}
 
 	if len(passports) == 0 {
@@ -40,15 +43,15 @@ func ChangePasswordAction(c ChangePasswordActionRequest, q fireback.QueryDSL) (*
 
 	passwordHashed, err1 := security.HashPassword(req.Password)
 	if err1 != nil {
-		return nil, fireback.CastToIError(err)
+		return nil, fireback.CastToIError(err1)
 	}
 
-	updated, err2 := PassportActions.Update(q, &PassportEntity{
+	updated, err3 := PassportActions.Update(q, &PassportEntity{
 		Password: passwordHashed,
 		UniqueId: passports[0].UniqueId,
 	})
-	if err2 != nil {
-		return nil, fireback.CastToIError(err)
+	if err3 != nil {
+		return nil, fireback.CastToIError(err3)
 	}
 
 	if updated.Password == previousPassword {

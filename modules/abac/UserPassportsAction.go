@@ -5,16 +5,19 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	UserPassportsImpl = UserPassportsAction
-}
-
-func UserPassportsAction(c UserPassportsActionRequest, q fireback.QueryDSL) (*UserPassportsActionResponse, error) {
+func UserPassportsAction(c UserPassportsActionRequest) (*UserPassportsActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyUser,
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
 
 	passports := []PassportEntity{}
-	err := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
-	if err != nil {
-		return nil, fireback.CastToIError(err)
+	err2 := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
+	if err2 != nil {
+		return nil, fireback.CastToIError(err2)
 	}
 
 	result := []UserPassportsActionRes{}

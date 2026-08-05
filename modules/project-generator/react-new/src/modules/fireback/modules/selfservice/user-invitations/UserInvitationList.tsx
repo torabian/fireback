@@ -9,8 +9,8 @@ import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac
 import {
   useAcceptInviteAction,
   AcceptInviteActionReq,
-} from "@/modules/fireback/sdk/modules/abac/AcceptInviteAction";
-import { useUserInvitationsActionQuery } from "@/modules/fireback/sdk/modules/abac/UserInvitationsAction";
+} from "@/modules/fireback/sdk/abac/AcceptInviteAction";
+import { useUserInvitationsActionQuery } from "@/modules/fireback/sdk/abac/UserInvitationsAction";
 
 export const UserInvitationList = () => {
   const s = useS(strings);

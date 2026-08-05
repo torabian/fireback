@@ -104,8 +104,8 @@ func init() {
 	UserCliCommands = append(
 		UserCliCommands,
 		TokenCliFn(),
-		AcceptInviteActionDef.ToCli(),
-		UserInvitationsActionDef.ToCli(),
+		AcceptInviteActionCliHandler(AcceptInviteAction),
+		UserInvitationsActionCliHandler(UserInvitationsAction),
 	)
 }
 

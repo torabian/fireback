@@ -8,7 +8,7 @@ import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailPr
 import {
   SendEmailActionReq,
   useSendEmailAction,
-} from "@/modules/fireback/sdk/modules/abac/SendEmailAction";
+} from "@/modules/fireback/sdk/abac/SendEmailAction";
 import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
 
 export const EmailProviderSingleScreen = () => {

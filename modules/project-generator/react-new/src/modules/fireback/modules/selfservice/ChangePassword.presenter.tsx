@@ -5,7 +5,7 @@ import { useS } from "../../hooks/useS";
 import {
   ChangePasswordActionReq,
   useChangePasswordAction,
-} from "../../sdk/modules/abac/ChangePasswordAction";
+} from "../../sdk/abac/ChangePasswordAction";
 import { strings } from "./strings/translations";
 
 export const usePresenter = () => {

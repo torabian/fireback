@@ -1,9 +1,11 @@
 package abac
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -68,6 +70,70 @@ func (x *UserInvitationsActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetUserInvitationsActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "user-id",
+			Type:        "string",
+			Description: "UserUniqueId",
+		},
+		{
+			Name:        prefix + "unique-id",
+			Type:        "string",
+			Description: "Invitation unique id",
+		},
+		{
+			Name:        prefix + "value",
+			Type:        "string",
+			Description: "The value of the passport (email/phone)",
+		},
+		{
+			Name:        prefix + "role-name",
+			Type:        "string",
+			Description: "Name of the role that user will get",
+		},
+		{
+			Name:        prefix + "workspace-name",
+			Type:        "string",
+			Description: "Name of the workspace which user is invited to.",
+		},
+		{
+			Name:        prefix + "type",
+			Type:        "string",
+			Description: "The method of the invitation, such as email.",
+		},
+		{
+			Name:        prefix + "cover-letter",
+			Type:        "string",
+			Description: "The content that user will receive to understand the reason of the letter.",
+		},
+	}
+}
+func CastUserInvitationsActionResFromCli(c emigo.CliCastable) UserInvitationsActionRes {
+	data := UserInvitationsActionRes{}
+	if c.IsSet("user-id") {
+		data.UserId = c.String("user-id")
+	}
+	if c.IsSet("unique-id") {
+		data.UniqueId = c.String("unique-id")
+	}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("role-name") {
+		data.RoleName = c.String("role-name")
+	}
+	if c.IsSet("workspace-name") {
+		data.WorkspaceName = c.String("workspace-name")
+	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
+	if c.IsSet("cover-letter") {
+		data.CoverLetter = c.String("cover-letter")
+	}
+	return data
 }
 
 type UserInvitationsActionResponse struct {
@@ -364,6 +430,69 @@ func (x UserInvitationsActionRequest) IsGin() bool {
 }
 func UserInvitationsActionQueryFromGin(c *gin.Context) UserInvitationsActionQuery {
 	return UserInvitationsActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x UserInvitationsActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// UserInvitationsActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the UserInvitationsAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func UserInvitationsActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	return flags
+}
+
+// UserInvitationsActionCliHandler builds a full *cli.Command for the
+// UserInvitationsAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a UserInvitationsActionRequest the same way
+// UserInvitationsActionHandler (Gin) and UserInvitationsActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func UserInvitationsActionCliHandler(
+	handler func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error),
+) *cli.Command {
+	meta := UserInvitationsActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: UserInvitationsActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := UserInvitationsActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// UserInvitationsActionCli is a high-level convenience wrapper around
+// UserInvitationsActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way UserInvitationsActionGin
+// registers a route on a Gin engine.
+func UserInvitationsActionCli(
+	app *cli.Command,
+	handler func(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error),
+) {
+	app.Commands = append(app.Commands, UserInvitationsActionCliHandler(handler))
 }
 
 // UserInvitationsActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

@@ -9,13 +9,25 @@ import (
 	"github.com/torabian/fireback/modules/fireback/security"
 )
 
-func init() {
-	// ClassicSigninActionImp = ClassicSigninAction
-	ClassicSigninImpl = ClassicSigninAction
+func ClassicSigninAction(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := classicSigninCore(c.Body, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &ClassicSigninActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
 }
 
-func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) (*ClassicSigninActionResponse, error) {
-	dto := c.Body
+// classicSigninCore holds the actual implementation, reusable by callers which
+// already have a resolved QueryDSL (such as the cli-only AuthFlow).
+func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
 	req := dto
 	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
 		return nil, err
@@ -85,11 +97,9 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 				return nil, err
 			}
 
-			return &ClassicSigninActionResponse{
-				Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-					TotpUrl: totpLink,
-					Next:    []string{"setup-totp"},
-				}),
+			return &ClassicSigninActionRes{
+				TotpUrl: totpLink,
+				Next:    []string{"setup-totp"},
 			}, nil
 		}
 	}
@@ -97,10 +107,8 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 	if passport.Item.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
-			return &ClassicSigninActionResponse{
-				Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-					Next: []string{"enter-totp"},
-				}),
+			return &ClassicSigninActionRes{
+				Next: []string{"enter-totp"},
 			}, nil
 		}
 
@@ -113,10 +121,8 @@ func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) 
 		return nil, err
 	}
 
-	return &ClassicSigninActionResponse{
-		Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-			Session: emigo.NewOne(*session),
-		}),
+	return &ClassicSigninActionRes{
+		Session: emigo.NewOne(*session),
 	}, nil
 }
 

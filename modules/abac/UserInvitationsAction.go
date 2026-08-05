@@ -2,12 +2,14 @@ package abac
 
 import "github.com/torabian/fireback/modules/fireback"
 
-func init() {
-	// Override the implementation with our actual code.
-	UserInvitationsImpl = UserInvitationsAction
-}
-
-func UserInvitationsAction(c UserInvitationsActionRequest, q fireback.QueryDSL) (*UserInvitationsActionResponse, error) {
+func UserInvitationsAction(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyUser,
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
 
 	invitations, qrm, err3 := UserInvitationsQuery(q)
 

@@ -5,7 +5,7 @@ import {
   ConfirmClassicPassportTotpActionReq,
   useConfirmClassicPassportTotpAction,
   type ConfirmClassicPassportTotpActionRes,
-} from "../../sdk/modules/abac/ConfirmClassicPassportTotpAction";
+} from "../../sdk/abac/ConfirmClassicPassportTotpAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 

@@ -69,11 +69,11 @@ var PassportCli cli.Command = cli.Command{
 	Commands: []*cli.Command{
 		&AppendEmailPassportToUser,
 		&PassportUpdateCmd,
-		OsLoginAuthenticateActionDef.ToCli(),
+		OsLoginAuthenticateActionCliHandler(OsLoginAuthenticateAction),
 		PassportMethodCliFn(),
-		CheckPassportMethodsActionDef.ToCli(),
-		UserPassportsActionDef.ToCli(),
-		OauthAuthenticateActionDef.ToCli(),
+		CheckPassportMethodsActionCliHandler(CheckPassportMethodsAction),
+		UserPassportsActionCliHandler(UserPassportsAction),
+		OauthAuthenticateActionCliHandler(OauthAuthenticateAction),
 		&PassportWipeCmd,
 		&PassportUpdateCmd,
 		fireback.GetCommonRemoveQuery(

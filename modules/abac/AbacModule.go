@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -52,6 +53,38 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		Definitions:        &Module3Definitions,
 		OnEnvInit:          OnInitEnvHook,
 		GoMigrateDirectory: &migrations.MigrationsFs,
+
+		// Actions declared in Abac.emi.yml (moved out of AbacModule3.yml's old actions:
+		// section) are wired directly here, the same way FirebackModuleSetup wires the
+		// Capability* actions - rather than through the legacy Module3Action/Impl glue.
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
+			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+				QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
+				InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
+				UserInvitationsActionGin(g, UserInvitationsAction)
+				SignoutActionGin(g, SignoutAction)
+				OauthAuthenticateActionGin(g, OauthAuthenticateAction)
+				AcceptInviteActionGin(g, AcceptInviteAction)
+				ConfirmClassicPassportTotpActionGin(g, ConfirmClassicPassportTotpAction)
+				ChangePasswordActionGin(g, ChangePasswordAction)
+				UserPassportsActionGin(g, UserPassportsAction)
+				CreateWorkspaceActionGin(g, CreateWorkspaceAction)
+				ClassicPassportRequestOtpActionGin(g, ClassicPassportRequestOtpAction)
+				ClassicPassportOtpActionGin(g, ClassicPassportOtpAction)
+				CheckClassicPassportActionGin(g, CheckClassicPassportAction)
+				ClassicSignupActionGin(g, ClassicSignupAction)
+				ClassicSigninActionGin(g, ClassicSigninAction)
+				QueryWorkspaceTypesPubliclyActionGin(g, QueryWorkspaceTypesPubliclyAction)
+				CheckPassportMethodsActionGin(g, CheckPassportMethodsAction)
+				OsLoginAuthenticateActionGin(g, OsLoginAuthenticateAction)
+				SendEmailActionGin(g, SendEmailAction)
+				SendEmailWithProviderActionGin(g, SendEmailWithProviderAction)
+				GsmSendSmsActionGin(g, GsmSendSmsAction)
+				GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
+
+				return nil
+			},
+		},
 	}
 
 	module.ProvidePermissionHandler(
@@ -141,7 +174,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		GetTableViewSizingModule3Actions(),
 		GetAppMenuModule3Actions(),
 		GetEmailConfirmationModule3Actions(),
-		AbacCustomActions(),
 		GetUserWorkspaceModule3Actions(),
 		GetWorkspaceRoleModule3Actions(),
 		GetTimezoneGroupModule3Actions(),
@@ -158,6 +190,25 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		WorkspaceCliFn(),
 		&MiscCli,
 		TimezoneGroupCliFn(),
+		// The actions below moved to Abac.emi.yml and don't have a home yet among the
+		// entity-scoped cli groups above (AcceptInvite/UserInvitations live under UserCliFn,
+		// QueryUserRoleWorkspaces/QueryWorkspaceTypesPublicly under WorkspaceCliFn,
+		// OsLoginAuthenticate/CheckPassportMethods/UserPassports/OauthAuthenticate under
+		// PassportCliFn - see UserEntity.go/WorkspaceCli.go/PassportCli.go).
+		SignoutActionCliHandler(SignoutAction),
+		InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
+		ConfirmClassicPassportTotpActionCliHandler(ConfirmClassicPassportTotpAction),
+		ChangePasswordActionCliHandler(ChangePasswordAction),
+		CreateWorkspaceActionCliHandler(CreateWorkspaceAction),
+		ClassicPassportRequestOtpActionCliHandler(ClassicPassportRequestOtpAction),
+		ClassicPassportOtpActionCliHandler(ClassicPassportOtpAction),
+		CheckClassicPassportActionCliHandler(CheckClassicPassportAction),
+		ClassicSignupActionCliHandler(ClassicSignupAction),
+		ClassicSigninActionCliHandler(ClassicSigninAction),
+		SendEmailActionCliHandler(SendEmailAction),
+		SendEmailWithProviderActionCliHandler(SendEmailWithProviderAction),
+		GsmSendSmsActionCliHandler(GsmSendSmsAction),
+		GsmSendSmsWithProviderActionCliHandler(GsmSendSmsWithProviderAction),
 	})
 
 	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})

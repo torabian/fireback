@@ -4,18 +4,15 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	OsLoginAuthenticateImpl = OsLoginAuthenticateAction
-}
+func OsLoginAuthenticateAction(c OsLoginAuthenticateActionRequest) (*OsLoginAuthenticateActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
 
-func OsLoginAuthenticateAction(
-	c OsLoginAuthenticateActionRequest, query fireback.QueryDSL,
-) (*OsLoginAuthenticateActionResponse, error) {
-
-	res, err := SigninWithOsUser2(query)
+	res, err2 := SigninWithOsUser2(*query)
 
 	return &OsLoginAuthenticateActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
-	}, err
+	}, err2
 }

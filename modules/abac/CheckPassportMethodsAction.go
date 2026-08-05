@@ -2,12 +2,12 @@ package abac
 
 import "github.com/torabian/fireback/modules/fireback"
 
-func init() {
-	// Override the implementation with our actual code.
-	CheckPassportMethodsImpl = CheckPassportMethodsActionfunc
-}
+func CheckPassportMethodsAction(c CheckPassportMethodsActionRequest) (*CheckPassportMethodsActionResponse, error) {
+	_, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
 
-func CheckPassportMethodsActionfunc(c CheckPassportMethodsActionRequest, query fireback.QueryDSL) (*CheckPassportMethodsActionResponse, error) {
 	state := &CheckPassportMethodsActionRes{}
 
 	// Get the workspacec configuration as well, for different reasons such as captcha info
@@ -32,9 +32,9 @@ func CheckPassportMethodsActionfunc(c CheckPassportMethodsActionRequest, query f
 	// Known unsafe operation. We need all the records in the database, in order
 	// to determine the best authentication option for the user.
 	// configuration field are not being returned publicly, only the final state.
-	stream, _, err := PassportMethodEntityStream(fireback.QueryDSL{})
-	if err != nil {
-		return nil, fireback.CastToIError(err)
+	stream, _, err3 := PassportMethodEntityStream(fireback.QueryDSL{})
+	if err3 != nil {
+		return nil, fireback.CastToIError(err3)
 	}
 
 	for items := range stream {

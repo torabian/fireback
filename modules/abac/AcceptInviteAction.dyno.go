@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -58,6 +60,22 @@ func (x *AcceptInviteActionReq) Json() string {
 	}
 	return ""
 }
+func GetAcceptInviteActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "invitation-unique-id",
+			Type:        "string",
+			Description: "The invitation id which will be used to process",
+		},
+	}
+}
+func CastAcceptInviteActionReqFromCli(c emigo.CliCastable) AcceptInviteActionReq {
+	data := AcceptInviteActionReq{}
+	if c.IsSet("invitation-unique-id") {
+		data.InvitationUniqueId = c.String("invitation-unique-id")
+	}
+	return data
+}
 
 // The base class definition for acceptInviteActionRes
 type AcceptInviteActionRes struct {
@@ -70,6 +88,21 @@ func (x *AcceptInviteActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetAcceptInviteActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "accepted",
+			Type: "bool",
+		},
+	}
+}
+func CastAcceptInviteActionResFromCli(c emigo.CliCastable) AcceptInviteActionRes {
+	data := AcceptInviteActionRes{}
+	if c.IsSet("accepted") {
+		data.Accepted = bool(c.Bool("accepted"))
+	}
+	return data
 }
 
 type AcceptInviteActionResponse struct {
@@ -375,6 +408,71 @@ func (x AcceptInviteActionRequest) IsGin() bool {
 }
 func AcceptInviteActionQueryFromGin(c *gin.Context) AcceptInviteActionQuery {
 	return AcceptInviteActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x AcceptInviteActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// AcceptInviteActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the AcceptInviteAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func AcceptInviteActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetAcceptInviteActionReqCliFlags(""))...)
+	return flags
+}
+
+// AcceptInviteActionCliHandler builds a full *cli.Command for the
+// AcceptInviteAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a AcceptInviteActionRequest the same way
+// AcceptInviteActionHandler (Gin) and AcceptInviteActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func AcceptInviteActionCliHandler(
+	handler func(c AcceptInviteActionRequest) (*AcceptInviteActionResponse, error),
+) *cli.Command {
+	meta := AcceptInviteActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: AcceptInviteActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := AcceptInviteActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastAcceptInviteActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// AcceptInviteActionCli is a high-level convenience wrapper around
+// AcceptInviteActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way AcceptInviteActionGin
+// registers a route on a Gin engine.
+func AcceptInviteActionCli(
+	app *cli.Command,
+	handler func(c AcceptInviteActionRequest) (*AcceptInviteActionResponse, error),
+) {
+	app.Commands = append(app.Commands, AcceptInviteActionCliHandler(handler))
 }
 
 // AcceptInviteActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

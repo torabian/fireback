@@ -7,11 +7,11 @@ import {
   uriMatch,
 } from "../../hooks/mock-tools";
 
-import type { CheckClassicPassportActionRes } from "../../sdk/modules/abac/CheckClassicPassportAction";
-import { CheckPassportMethodsActionRes } from "../../sdk/modules/abac/CheckPassportMethodsAction";
-import type { ClassicSignupActionRes } from "../../sdk/modules/abac/ClassicSignupAction";
-import type { ConfirmClassicPassportTotpActionRes } from "../../sdk/modules/abac/ConfirmClassicPassportTotpAction";
-import { UserSessionDto } from "../../sdk/modules/abac/UserSessionDto";
+import type { CheckClassicPassportActionRes } from "../../sdk/abac/CheckClassicPassportAction";
+import { CheckPassportMethodsActionRes } from "../../sdk/abac/CheckPassportMethodsAction";
+import type { ClassicSignupActionRes } from "../../sdk/abac/ClassicSignupAction";
+import type { ConfirmClassicPassportTotpActionRes } from "../../sdk/abac/ConfirmClassicPassportTotpAction";
+import { UserSessionDto } from "../../sdk/abac/UserSessionDto";
 import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
 
 import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";

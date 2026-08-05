@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -66,6 +68,75 @@ func (x *ClassicSignupActionReq) Json() string {
 	}
 	return ""
 }
+func GetClassicSignupActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "Required when the account creation requires recaptcha, or otp approval first. If such requirements are there, you first need to follow the otp apis, get the session secret and pass it here to complete the setup.",
+		},
+		{
+			Name: prefix + "type",
+			Type: "enum",
+		},
+		{
+			Name: prefix + "password",
+			Type: "string",
+		},
+		{
+			Name: prefix + "first-name",
+			Type: "string",
+		},
+		{
+			Name: prefix + "last-name",
+			Type: "string",
+		},
+		{
+			Name: prefix + "invite-id",
+			Type: "string?",
+		},
+		{
+			Name: prefix + "public-join-key-id",
+			Type: "string?",
+		},
+		{
+			Name: prefix + "workspace-type-id",
+			Type: "string?",
+		},
+	}
+}
+func CastClassicSignupActionReqFromCli(c emigo.CliCastable) ClassicSignupActionReq {
+	data := ClassicSignupActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	if c.IsSet("password") {
+		data.Password = c.String("password")
+	}
+	if c.IsSet("first-name") {
+		data.FirstName = c.String("first-name")
+	}
+	if c.IsSet("last-name") {
+		data.LastName = c.String("last-name")
+	}
+	if c.IsSet("invite-id") {
+		emigo.ParseNullable(c.String("invite-id"), &data.InviteId)
+	}
+	if c.IsSet("public-join-key-id") {
+		emigo.ParseNullable(c.String("public-join-key-id"), &data.PublicJoinKeyId)
+	}
+	if c.IsSet("workspace-type-id") {
+		emigo.ParseNullable(c.String("workspace-type-id"), &data.WorkspaceTypeId)
+	}
+	return data
+}
 
 // The base class definition for classicSignupActionRes
 type ClassicSignupActionRes struct {
@@ -85,6 +156,46 @@ func (x *ClassicSignupActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetClassicSignupActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "session",
+			Type:        "one",
+			Description: "Returns the user session in case that signup is completely successful.",
+		},
+		{
+			Name:        prefix + "totp-url",
+			Type:        "string",
+			Description: "If time based otp is available, we add it response to make it easier for ui.",
+		},
+		{
+			Name:        prefix + "continue-to-totp",
+			Type:        "bool",
+			Description: "Returns true and session will be empty if, the totp is required by the installation. In such scenario, you need to forward user to setup totp screen.",
+		},
+		{
+			Name:        prefix + "forced-totp",
+			Type:        "bool",
+			Description: "Determines if user must complete totp in order to continue based on workspace or installation",
+		},
+	}
+}
+func CastClassicSignupActionResFromCli(c emigo.CliCastable) ClassicSignupActionRes {
+	data := ClassicSignupActionRes{}
+	if c.IsSet("session") {
+		data.Session = emigo.CapturePossibleOne(CastUserSessionDtoFromCli, "session", c)
+	}
+	if c.IsSet("totp-url") {
+		data.TotpUrl = c.String("totp-url")
+	}
+	if c.IsSet("continue-to-totp") {
+		data.ContinueToTotp = bool(c.Bool("continue-to-totp"))
+	}
+	if c.IsSet("forced-totp") {
+		data.ForcedTotp = bool(c.Bool("forced-totp"))
+	}
+	return data
 }
 
 type ClassicSignupActionResponse struct {
@@ -390,6 +501,71 @@ func (x ClassicSignupActionRequest) IsGin() bool {
 }
 func ClassicSignupActionQueryFromGin(c *gin.Context) ClassicSignupActionQuery {
 	return ClassicSignupActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x ClassicSignupActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// ClassicSignupActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the ClassicSignupAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func ClassicSignupActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetClassicSignupActionReqCliFlags(""))...)
+	return flags
+}
+
+// ClassicSignupActionCliHandler builds a full *cli.Command for the
+// ClassicSignupAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a ClassicSignupActionRequest the same way
+// ClassicSignupActionHandler (Gin) and ClassicSignupActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func ClassicSignupActionCliHandler(
+	handler func(c ClassicSignupActionRequest) (*ClassicSignupActionResponse, error),
+) *cli.Command {
+	meta := ClassicSignupActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: ClassicSignupActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := ClassicSignupActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastClassicSignupActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// ClassicSignupActionCli is a high-level convenience wrapper around
+// ClassicSignupActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way ClassicSignupActionGin
+// registers a route on a Gin engine.
+func ClassicSignupActionCli(
+	app *cli.Command,
+	handler func(c ClassicSignupActionRequest) (*ClassicSignupActionResponse, error),
+) {
+	app.Commands = append(app.Commands, ClassicSignupActionCliHandler(handler))
 }
 
 // ClassicSignupActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

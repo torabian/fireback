@@ -1,5 +1,5 @@
 import { type DisplayDetectionProps } from "../definitions/common";
-import type { QueryUserRoleWorkspacesActionRes } from "../sdk/modules/abac/QueryUserRoleWorkspacesAction";
+import type { QueryUserRoleWorkspacesActionRes } from "../sdk/abac/QueryUserRoleWorkspacesAction";
 import { CapabilityEntity } from "../sdk/modules/fireback/CapabilityEntity";
 import type { MArray } from "../sdk/sdk/common/operators";
 

@@ -6,7 +6,7 @@ import {
   ClassicSigninActionReq,
   ClassicSigninActionRes,
   useClassicSigninAction,
-} from "../../sdk/modules/abac/ClassicSigninAction";
+} from "../../sdk/abac/ClassicSigninAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 

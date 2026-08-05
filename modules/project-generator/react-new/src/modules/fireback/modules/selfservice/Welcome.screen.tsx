@@ -9,12 +9,12 @@ import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import type { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
+import type { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";
 import {
   OauthAuthenticateActionReq,
   OauthAuthenticateActionRes,
   useOauthAuthenticateAction,
-} from "../../sdk/modules/abac/OauthAuthenticateAction";
+} from "../../sdk/abac/OauthAuthenticateAction";
 import type { GResponse } from "../../sdk/sdk/envelopes";
 import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { FacebookLogin } from "./FacebookLogin";

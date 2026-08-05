@@ -2,22 +2,24 @@ package abac
 
 import "github.com/torabian/fireback/modules/fireback"
 
-func init() {
-	// Override the implementation with our actual code.
-	GsmSendSmsImpl = func(c GsmSendSmsActionRequest, query fireback.QueryDSL) (*GsmSendSmsActionResponse, error) {
-		req := c.Body
+func GsmSendSmsAction(c GsmSendSmsActionRequest) (*GsmSendSmsActionResponse, error) {
+	_, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
 
-		if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
-			return nil, err
-		}
-		if res, err := GsmSendSMSUsingNotificationConfig(req.Body, []string{req.ToNumber}); err != nil {
-			return nil, err
-		} else {
-			return &GsmSendSmsActionResponse{
-				Payload: GsmSendSmsActionRes{
-					QueueId: res.QueueId,
-				},
-			}, nil
-		}
+	req := c.Body
+
+	if err2 := fireback.CommonStructValidatorPointer(&req, false); err2 != nil {
+		return nil, err2
+	}
+	if res, err2 := GsmSendSMSUsingNotificationConfig(req.Body, []string{req.ToNumber}); err2 != nil {
+		return nil, err2
+	} else {
+		return &GsmSendSmsActionResponse{
+			Payload: GsmSendSmsActionRes{
+				QueueId: res.QueueId,
+			},
+		}, nil
 	}
 }

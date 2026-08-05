@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -58,6 +60,28 @@ func (x *ClassicPassportOtpActionReq) Json() string {
 	}
 	return ""
 }
+func GetClassicPassportOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name: prefix + "otp",
+			Type: "string",
+		},
+	}
+}
+func CastClassicPassportOtpActionReqFromCli(c emigo.CliCastable) ClassicPassportOtpActionReq {
+	data := ClassicPassportOtpActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("otp") {
+		data.Otp = c.String("otp")
+	}
+	return data
+}
 
 // The base class definition for classicPassportOtpActionRes
 type ClassicPassportOtpActionRes struct {
@@ -77,6 +101,46 @@ func (x *ClassicPassportOtpActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetClassicPassportOtpActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "session",
+			Type:        "one?",
+			Description: "Upon successful authentication, there will be a session dto generated, which is a ground information of authorized user and can be stored in front-end.",
+		},
+		{
+			Name:        prefix + "totp-url",
+			Type:        "string",
+			Description: "If time based otp is available, we add it response to make it easier for ui.",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "The session secret will be used to call complete user registration api.",
+		},
+		{
+			Name:        prefix + "continue-with-creation",
+			Type:        "bool",
+			Description: "If return true, means the OTP is correct and user needs to be created before continue the authentication process.",
+		},
+	}
+}
+func CastClassicPassportOtpActionResFromCli(c emigo.CliCastable) ClassicPassportOtpActionRes {
+	data := ClassicPassportOtpActionRes{}
+	if c.IsSet("session") {
+		data.Session = emigo.CapturePossibleOneNullable(CastUserSessionDtoFromCli, "session", c)
+	}
+	if c.IsSet("totp-url") {
+		data.TotpUrl = c.String("totp-url")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	if c.IsSet("continue-with-creation") {
+		data.ContinueWithCreation = bool(c.Bool("continue-with-creation"))
+	}
+	return data
 }
 
 type ClassicPassportOtpActionResponse struct {
@@ -382,6 +446,71 @@ func (x ClassicPassportOtpActionRequest) IsGin() bool {
 }
 func ClassicPassportOtpActionQueryFromGin(c *gin.Context) ClassicPassportOtpActionQuery {
 	return ClassicPassportOtpActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x ClassicPassportOtpActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// ClassicPassportOtpActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the ClassicPassportOtpAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func ClassicPassportOtpActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetClassicPassportOtpActionReqCliFlags(""))...)
+	return flags
+}
+
+// ClassicPassportOtpActionCliHandler builds a full *cli.Command for the
+// ClassicPassportOtpAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a ClassicPassportOtpActionRequest the same way
+// ClassicPassportOtpActionHandler (Gin) and ClassicPassportOtpActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func ClassicPassportOtpActionCliHandler(
+	handler func(c ClassicPassportOtpActionRequest) (*ClassicPassportOtpActionResponse, error),
+) *cli.Command {
+	meta := ClassicPassportOtpActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: ClassicPassportOtpActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := ClassicPassportOtpActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastClassicPassportOtpActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// ClassicPassportOtpActionCli is a high-level convenience wrapper around
+// ClassicPassportOtpActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way ClassicPassportOtpActionGin
+// registers a route on a Gin engine.
+func ClassicPassportOtpActionCli(
+	app *cli.Command,
+	handler func(c ClassicPassportOtpActionRequest) (*ClassicPassportOtpActionResponse, error),
+) {
+	app.Commands = append(app.Commands, ClassicPassportOtpActionCliHandler(handler))
 }
 
 // ClassicPassportOtpActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

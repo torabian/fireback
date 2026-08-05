@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -62,6 +64,44 @@ func (x *ClassicSigninActionReq) Json() string {
 	}
 	return ""
 }
+func GetClassicSigninActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name: prefix + "password",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "totp-code",
+			Type:        "string",
+			Description: "Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "Session secret when logging in to the application requires more steps to complete.",
+		},
+	}
+}
+func CastClassicSigninActionReqFromCli(c emigo.CliCastable) ClassicSigninActionReq {
+	data := ClassicSigninActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("password") {
+		data.Password = c.String("password")
+	}
+	if c.IsSet("totp-code") {
+		data.TotpCode = c.String("totp-code")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	return data
+}
 
 // The base class definition for classicSigninActionRes
 type ClassicSigninActionRes struct {
@@ -80,6 +120,45 @@ func (x *ClassicSigninActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetClassicSigninActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "session",
+			Type: "one",
+		},
+		{
+			Name:        prefix + "next",
+			Type:        "slice",
+			Description: "The next possible action which is suggested.",
+		},
+		{
+			Name:        prefix + "totp-url",
+			Type:        "string",
+			Description: "In case the account doesn't have totp, but enforced by installation, this value will contain the link",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "Returns a secret session if the authentication requires more steps.",
+		},
+	}
+}
+func CastClassicSigninActionResFromCli(c emigo.CliCastable) ClassicSigninActionRes {
+	data := ClassicSigninActionRes{}
+	if c.IsSet("session") {
+		data.Session = emigo.CapturePossibleOne(CastUserSessionDtoFromCli, "session", c)
+	}
+	if c.IsSet("next") {
+		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
+	}
+	if c.IsSet("totp-url") {
+		data.TotpUrl = c.String("totp-url")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	return data
 }
 
 type ClassicSigninActionResponse struct {
@@ -385,6 +464,71 @@ func (x ClassicSigninActionRequest) IsGin() bool {
 }
 func ClassicSigninActionQueryFromGin(c *gin.Context) ClassicSigninActionQuery {
 	return ClassicSigninActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x ClassicSigninActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// ClassicSigninActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the ClassicSigninAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func ClassicSigninActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetClassicSigninActionReqCliFlags(""))...)
+	return flags
+}
+
+// ClassicSigninActionCliHandler builds a full *cli.Command for the
+// ClassicSigninAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a ClassicSigninActionRequest the same way
+// ClassicSigninActionHandler (Gin) and ClassicSigninActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func ClassicSigninActionCliHandler(
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) *cli.Command {
+	meta := ClassicSigninActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: ClassicSigninActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := ClassicSigninActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastClassicSigninActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// ClassicSigninActionCli is a high-level convenience wrapper around
+// ClassicSigninActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way ClassicSigninActionGin
+// registers a route on a Gin engine.
+func ClassicSigninActionCli(
+	app *cli.Command,
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) {
+	app.Commands = append(app.Commands, ClassicSigninActionCliHandler(handler))
 }
 
 // ClassicSigninActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

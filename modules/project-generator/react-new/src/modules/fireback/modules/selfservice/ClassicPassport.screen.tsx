@@ -7,7 +7,7 @@ import { useS } from "../../hooks/useS";
 import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicPassport.presenter";
 import { strings } from "./strings/translations";
-import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
+import { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";
 
 export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
   const {

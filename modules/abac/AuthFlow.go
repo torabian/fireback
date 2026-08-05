@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -27,10 +26,7 @@ func discoverPassportMethodsAndPrint(c *cli.Command) []string {
 		fmt.Sprintf("%v >>> %v", ANONYMOUS_AUTHENTICATION, "Anonymous, can be also created as root, with a unique identifier"),
 	}
 
-	// Since it's public, no need for any query dsl creation
-	query := fireback.QueryDSL{ItemsPerPage: 9999}
-
-	res, err := CheckPassportMethodsImpl(CheckPassportMethodsActionRequest{CliCtx: c}, query)
+	res, err := CheckPassportMethodsAction(CheckPassportMethodsActionRequest{CliCtx: c})
 	if err != nil {
 		log.Fatalln("Error on checking passport methods: %w", err)
 	}
@@ -124,21 +120,12 @@ func IntegrateAuthFlow(c *cli.Command) error {
 
 		value := fireback.AskForInput(label, prefix)
 		query.C = c
-		mresponse, err := CheckClassicPassportAction(CheckClassicPassportActionRequest{
-			Body: CheckClassicPassportActionReq{
-				Value: value,
-			},
-			CliCtx: c,
+		m, err := checkClassicPassportCore(CheckClassicPassportActionReq{
+			Value: value,
 		}, query)
 
-		if err != nil && !reflect.ValueOf(err).IsNil() {
+		if err != nil {
 			return err
-		}
-
-		var m *CheckClassicPassportActionRes
-
-		if mf, ok := mresponse.Payload.(fireback.GoogleResponse[*CheckClassicPassportActionRes]); ok {
-			m = mf.Data.Item
 		}
 
 		fmt.Println("Flags we got: ", strings.Join(m.Flags, ","))
@@ -168,18 +155,12 @@ func IntegrateAuthFlow(c *cli.Command) error {
 		if nextStep == "otp" {
 			otpCode := fireback.AskForInput("Enter the otp code. You might see it a bit above this command.", "")
 
-			var res *ClassicPassportOtpActionRes = nil
-			if result, err := ClassicPassportOtpAction(ClassicPassportOtpActionRequest{
-				Body: ClassicPassportOtpActionReq{
-					Value: value, Otp: otpCode,
-				},
-			}, query); err != nil {
+			res, err := classicPassportOtpCore(ClassicPassportOtpActionReq{
+				Value: value, Otp: otpCode,
+			}, query)
+			if err != nil {
 				fmt.Println("Not nil")
 				return err
-			} else {
-				if casted, ok := result.Payload.(fireback.GoogleResponse[ClassicPassportOtpActionRes]); ok {
-					res = &casted.Data.Item
-				}
 			}
 
 			if res.ContinueWithCreation {
@@ -231,21 +212,11 @@ func IntegrateAuthFlow(c *cli.Command) error {
 			}
 
 			query.WorkspaceId = ROOT_VAR
-			result, err := ClassicSignupAction(ClassicSignupActionRequest{
-				Body:   dto,
-				CliCtx: c,
-			}, query)
+			res2, err := classicSignupCore(dto, query)
 
 			if err != nil {
 				return err
 			}
-
-			resEnvelope, ok := result.Payload.(fireback.GoogleResponse[ClassicSignupActionRes])
-			if !ok {
-				fmt.Println("Internal error on getting account creation results")
-				os.Exit(4)
-			}
-			res2 := resEnvelope.Data.Item
 
 			if res2.ContinueToTotp {
 				fmt.Println("You need to setup time based token (totp) for this account.")
@@ -271,12 +242,10 @@ func IntegrateAuthFlow(c *cli.Command) error {
 					return err
 				}
 
-				m, err := ConfirmClassicPassportTotpAction(ConfirmClassicPassportTotpActionRequest{
-					Body: ConfirmClassicPassportTotpActionReq{
-						Value:    value,
-						Password: dto.Password,
-						TotpCode: code,
-					},
+				m, err := confirmClassicPassportTotpCore(ConfirmClassicPassportTotpActionReq{
+					Value:    value,
+					Password: dto.Password,
+					TotpCode: code,
 				}, query)
 
 				if err != nil {
@@ -284,14 +253,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 					os.Exit(2)
 				}
 
-				var session *UserSessionDto
-
-				if cast, ok := m.Payload.(fireback.GoogleResponse[ConfirmClassicPassportTotpActionRes]); ok {
-					session = &cast.Data.Item.Session.Item
-				} else {
-					fmt.Println("Process successful, but casting has failed:", err)
-					os.Exit(2)
-				}
+				session := &m.Session.Item
 
 				authenticateCliWithSession(session, workspaceType.UniqueId)
 			}
@@ -333,22 +295,13 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				password = result
 			}
 
-			if result, err := ClassicSigninAction(ClassicSigninActionRequest{
-				Body: ClassicSigninActionReq{
-					Value:    value,
-					Password: password,
-				},
+			if signin, err := classicSigninCore(ClassicSigninActionReq{
+				Value:    value,
+				Password: password,
 			}, query); err != nil {
 				return err
 			} else {
 
-				resEnvelope, ok := result.Payload.(fireback.GoogleResponse[ClassicSigninActionRes])
-				if !ok {
-					fmt.Println("Critical internal error on casting signin result")
-					os.Exit(1)
-				}
-
-				signin := resEnvelope.Data.Item
 				fmt.Println("Signin next steps: ", signin.Next)
 
 				// In case the session is available, it's successful and checking further steps

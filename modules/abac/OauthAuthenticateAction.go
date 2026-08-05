@@ -10,10 +10,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	OauthAuthenticateImpl = OauthAuthenticateAction
-}
-
 // Supported OAuth providers
 const (
 	ProviderGoogle   = "google"
@@ -29,7 +25,13 @@ type TokenInfo struct {
 }
 
 // OauthAuthenticateAction authenticates a user via OAuth
-func OauthAuthenticateAction(c OauthAuthenticateActionRequest, q fireback.QueryDSL) (*OauthAuthenticateActionResponse, error) {
+func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+	q := *query
+
 	req := c.Body
 	switch req.Service {
 	case ProviderGoogle:

@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -71,6 +73,26 @@ func (x *InviteToWorkspaceActionResponse) AsJSON(payload any) *InviteToWorkspace
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
+}
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *InviteToWorkspaceActionResponse) WithIdeal(payload WorkspaceInvitationDto) *InviteToWorkspaceActionResponse {
+	x.Payload = payload
+	return x
+}
+
+// Use this for client calls, so the payload is being casted
+func (x *InviteToWorkspaceActionResponse) AsIdeal() (*WorkspaceInvitationDto, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res WorkspaceInvitationDto
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 func (x *InviteToWorkspaceActionResponse) AsHTML(payload string) *InviteToWorkspaceActionResponse {
 	x.Payload = payload
@@ -328,6 +350,69 @@ func (x InviteToWorkspaceActionRequest) IsGin() bool {
 }
 func InviteToWorkspaceActionQueryFromGin(c *gin.Context) InviteToWorkspaceActionQuery {
 	return InviteToWorkspaceActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x InviteToWorkspaceActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// InviteToWorkspaceActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the InviteToWorkspaceAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func InviteToWorkspaceActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	return flags
+}
+
+// InviteToWorkspaceActionCliHandler builds a full *cli.Command for the
+// InviteToWorkspaceAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a InviteToWorkspaceActionRequest the same way
+// InviteToWorkspaceActionHandler (Gin) and InviteToWorkspaceActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func InviteToWorkspaceActionCliHandler(
+	handler func(c InviteToWorkspaceActionRequest) (*InviteToWorkspaceActionResponse, error),
+) *cli.Command {
+	meta := InviteToWorkspaceActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: InviteToWorkspaceActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := InviteToWorkspaceActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// InviteToWorkspaceActionCli is a high-level convenience wrapper around
+// InviteToWorkspaceActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way InviteToWorkspaceActionGin
+// registers a route on a Gin engine.
+func InviteToWorkspaceActionCli(
+	app *cli.Command,
+	handler func(c InviteToWorkspaceActionRequest) (*InviteToWorkspaceActionResponse, error),
+) {
+	app.Commands = append(app.Commands, InviteToWorkspaceActionCliHandler(handler))
 }
 
 // InviteToWorkspaceActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

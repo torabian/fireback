@@ -5,16 +5,16 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	CreateWorkspaceImpl = CreateWorkspaceAction
-}
-
 /**
 *	Creates a workspace, considering the parent workspace,
 *	Who creates it, and might accept even manager and roles in the first
 **/
-func CreateWorkspaceAction(c CreateWorkspaceActionRequest, q fireback.QueryDSL) (*CreateWorkspaceActionResponse, error) {
+func CreateWorkspaceAction(c CreateWorkspaceActionRequest) (*CreateWorkspaceActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+	q := *query
 
 	context := &GenerateUserDto{
 		createUser:      false,

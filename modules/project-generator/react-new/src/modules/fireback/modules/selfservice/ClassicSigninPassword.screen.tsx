@@ -6,7 +6,7 @@ import { FormText } from "../../components/forms/form-text/FormText";
 import { useS } from "../../hooks/useS";
 import { usePresenter } from "./ClassicSigninPassword.presenter";
 import { strings } from "./strings/translations";
-import { ClassicSigninActionReq } from "../../sdk/modules/abac/ClassicSigninAction";
+import { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";
 
 export const ClassicSigninPassword = ({}: {}) => {
   const { goBack, mutation, form, continueWithOtp, otpEnabled, s } =

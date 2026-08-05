@@ -2,9 +2,11 @@ package abac
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -59,6 +61,35 @@ func (x *GsmSendSmsWithProviderActionReq) Json() string {
 	}
 	return ""
 }
+func GetGsmSendSmsWithProviderActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "gsm-provider-id",
+			Type: "string",
+		},
+		{
+			Name: prefix + "to-number",
+			Type: "string",
+		},
+		{
+			Name: prefix + "body",
+			Type: "string",
+		},
+	}
+}
+func CastGsmSendSmsWithProviderActionReqFromCli(c emigo.CliCastable) GsmSendSmsWithProviderActionReq {
+	data := GsmSendSmsWithProviderActionReq{}
+	if c.IsSet("gsm-provider-id") {
+		data.GsmProviderId = c.String("gsm-provider-id")
+	}
+	if c.IsSet("to-number") {
+		data.ToNumber = c.String("to-number")
+	}
+	if c.IsSet("body") {
+		data.Body = c.String("body")
+	}
+	return data
+}
 
 // The base class definition for gsmSendSmsWithProviderActionRes
 type GsmSendSmsWithProviderActionRes struct {
@@ -71,6 +102,21 @@ func (x *GsmSendSmsWithProviderActionRes) Json() string {
 		return string(str)
 	}
 	return ""
+}
+func GetGsmSendSmsWithProviderActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "queue-id",
+			Type: "string",
+		},
+	}
+}
+func CastGsmSendSmsWithProviderActionResFromCli(c emigo.CliCastable) GsmSendSmsWithProviderActionRes {
+	data := GsmSendSmsWithProviderActionRes{}
+	if c.IsSet("queue-id") {
+		data.QueueId = c.String("queue-id")
+	}
+	return data
 }
 
 type GsmSendSmsWithProviderActionResponse struct {
@@ -376,6 +422,71 @@ func (x GsmSendSmsWithProviderActionRequest) IsGin() bool {
 }
 func GsmSendSmsWithProviderActionQueryFromGin(c *gin.Context) GsmSendSmsWithProviderActionQuery {
 	return GsmSendSmsWithProviderActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x GsmSendSmsWithProviderActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// GsmSendSmsWithProviderActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the GsmSendSmsWithProviderAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func GsmSendSmsWithProviderActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetGsmSendSmsWithProviderActionReqCliFlags(""))...)
+	return flags
+}
+
+// GsmSendSmsWithProviderActionCliHandler builds a full *cli.Command for the
+// GsmSendSmsWithProviderAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a GsmSendSmsWithProviderActionRequest the same way
+// GsmSendSmsWithProviderActionHandler (Gin) and GsmSendSmsWithProviderActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func GsmSendSmsWithProviderActionCliHandler(
+	handler func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error),
+) *cli.Command {
+	meta := GsmSendSmsWithProviderActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: GsmSendSmsWithProviderActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := GsmSendSmsWithProviderActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastGsmSendSmsWithProviderActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// GsmSendSmsWithProviderActionCli is a high-level convenience wrapper around
+// GsmSendSmsWithProviderActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way GsmSendSmsWithProviderActionGin
+// registers a route on a Gin engine.
+func GsmSendSmsWithProviderActionCli(
+	app *cli.Command,
+	handler func(c GsmSendSmsWithProviderActionRequest) (*GsmSendSmsWithProviderActionResponse, error),
+) {
+	app.Commands = append(app.Commands, GsmSendSmsWithProviderActionCliHandler(handler))
 }
 
 // GsmSendSmsWithProviderActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

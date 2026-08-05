@@ -11,7 +11,7 @@ import {
   ClassicPassportOtpActionReq,
   useClassicPassportOtpAction,
   type ClassicPassportOtpActionRes,
-} from "../../sdk/modules/abac/ClassicPassportOtpAction";
+} from "../../sdk/abac/ClassicPassportOtpAction";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();

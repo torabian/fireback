@@ -6,7 +6,7 @@ import { useS } from "../../hooks/useS";
 import ReactCodeInput from "../../thirdparty/react-verification-code-input";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpEnter.presenter";
-import { ConfirmClassicPassportTotpActionReq } from "../../sdk/modules/abac/ConfirmClassicPassportTotpAction";
+import { ConfirmClassicPassportTotpActionReq } from "../../sdk/abac/ConfirmClassicPassportTotpAction";
 
 export const TotpEnter = ({}: {}) => {
   const { goBack, mutation, form } = usePresenter();
