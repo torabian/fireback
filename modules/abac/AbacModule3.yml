@@ -6,28 +6,7 @@ description:
   possibility to avoid building most user management flow.
   Some other helpers, such as timezone are added here.
 dtos:
-  - name: userImport
-    fields:
-      - name: avatar
-        type: string
-      - name: passports
-        type: array
-        fields:
-          - name: value
-            type: string
-          - name: password
-            type: string
-      - name: address
-        type: object
-        fields:
-          - name: street
-            type: string
-          - name: zipCode
-            type: string
-          - name: city
-            type: string
-          - name: country
-            type: string
+ 
   - name: okayResponse
 
   - name: resetEmail
