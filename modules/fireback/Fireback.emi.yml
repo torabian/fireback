@@ -254,13 +254,13 @@ entities:
       - name: description
         type: string
   - name: webPushConfig
-    # security:
-    #   resolveStrategy: user
-    # distinctBy: user
+    features:
+      actions: false
     description: Keep the web push notification configuration for each user
     fields:
       - name: subscription
         type: complex
         complex: JSON
-        validate: required
+        tags:
+          validate: required
         description: The json content of the web push after getting it from browser

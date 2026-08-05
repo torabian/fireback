@@ -113,11 +113,15 @@ entities:
   description: Manage the capabilities inside the application, both builtin to core
     and custom defined ones
 - name: webPushConfig
+  features:
+    actions: false
   fields:
   - name: subscription
     description: The json content of the web push after getting it from browser
     type: complex
     complex: JSON
+    tags:
+      validate: required
   description: Keep the web push notification configuration for each user
 complexes:
 - name: JSON
@@ -226,86 +230,6 @@ actions:
   method: post
   description: Deletes the given "capability" uniqueIds, along with everything capabilityAwareDeletePreview
     reports.
-  in:
-    fields:
-    - name: uniqueIds
-      type: slice
-      primitive: string
-- name: webPushConfigCreate
-  cliShort: webPushConfig-c
-  url: /webPushConfig
-  method: post
-  description: Creates a new "webPushConfig" row.
-  in:
-    dto: WebPushConfigDto
-  out:
-    envelope: GResponse
-    dto: WebPushConfigDto
-- name: webPushConfigUpdate
-  cliShort: webPushConfig-u
-  url: /webPushConfig/:uniqueId
-  method: patch
-  description: Applies a partial update to a "webPushConfig" row by uniqueId.
-  in:
-    dto: WebPushConfigOptionalDto
-  out:
-    envelope: GResponse
-    dto: WebPushConfigDto
-- name: webPushConfigGet
-  cliShort: webPushConfig-g
-  url: /webPushConfig/:uniqueId
-  method: get
-  description: Looks up a single "webPushConfig" row by uniqueId.
-  out:
-    envelope: GResponse
-    dto: WebPushConfigDto
-- name: webPushConfigBrowse
-  cliShort: webPushConfig-b
-  url: /webPushConfig/browse
-  method: get
-  qs:
-  - name: filter
-    type: string
-  - name: sort
-    type: string
-  - name: startIndex
-    type: int
-  - name: itemsPerPage
-    type: int
-  - name: cursor
-    type: string
-  description: Returns "webPushConfig" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
-  out:
-    envelope: GResponse
-    dto: WebPushConfigOptionalDto
-- name: webPushConfigAwareDeletePreview
-  cliShort: webPushConfig-dp
-  url: /webPushConfig/delete-preview
-  method: get
-  qs:
-  - name: uniqueIds
-    type: slice
-    primitive: string
-  description: Reports what deleting the given "webPushConfig" uniqueIds would affect,
-    without deleting anything.
-  out:
-    envelope: GResponse
-    fields:
-    - name: message
-      type: string
-    - name: affected
-      type: array
-      fields:
-      - name: relation
-        type: string
-      - name: count
-        type: int64
-- name: webPushConfigAwareDelete
-  cliShort: webPushConfig-d
-  url: /webPushConfig/delete
-  method: post
-  description: Deletes the given "webPushConfig" uniqueIds, along with everything
-    webPushConfigAwareDeletePreview reports.
   in:
     fields:
     - name: uniqueIds

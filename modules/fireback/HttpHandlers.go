@@ -422,7 +422,9 @@ func HttpGetEntity[T any](
 
 		data := PolyglotQueryHandler(item, &f)
 		GinWriteContent(c, 200, gin.H{
-			"data": data,
+			"data": gin.H{
+				"item": data,
+			},
 		})
 	}
 }

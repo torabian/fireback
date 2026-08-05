@@ -8,6 +8,8 @@ import (
 	"github.com/torabian/emi/emigorm"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 	"gorm.io/gorm"
+	"net/http"
+	"net/url"
 )
 
 // The base class definition for webPushConfigEntity
@@ -15,7 +17,7 @@ type WebPushConfigEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The json content of the web push after getting it from browser
-	Subscription complexes.JSON `json:"subscription" yaml:"subscription"`
+	Subscription complexes.JSON `json:"subscription" validate:"required" yaml:"subscription"`
 }
 
 func (x *WebPushConfigEntity) Json() string {
@@ -149,6 +151,56 @@ func WebPushConfigEntityBrowseFn(tx *gorm.DB, qs WebPushConfigBrowseActionQuery,
 		Cursor:     emigorm.BuildQueryCursor(items),
 	}
 	return items, meta, nil
+}
+
+/**
+ * Query parameters for WebPushConfigBrowseAction
+ */
+// Query wrapper with private fields
+type WebPushConfigBrowseActionQuery struct {
+	values url.Values
+	mapped map[string]interface{}
+	// Typesafe fields
+	Filter       string `json:"filter"`
+	Sort         string `json:"sort"`
+	StartIndex   int    `json:"startIndex"`
+	ItemsPerPage int    `json:"itemsPerPage"`
+	Cursor       string `json:"cursor"`
+}
+
+func WebPushConfigBrowseActionQueryFromString(rawQuery string) WebPushConfigBrowseActionQuery {
+	v := WebPushConfigBrowseActionQuery{}
+	values, _ := url.ParseQuery(rawQuery)
+	mapped := map[string]interface{}{}
+	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
+		mapped = result
+	}
+	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
+		TagName:          "json", // reuse json tags
+		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
+		Result:           &v,
+	})
+	if err == nil {
+		_ = decoder.Decode(mapped)
+	}
+	v.values = values
+	v.mapped = mapped
+	return v
+}
+func WebPushConfigBrowseActionQueryFromHttp(r *http.Request) WebPushConfigBrowseActionQuery {
+	return WebPushConfigBrowseActionQueryFromString(r.URL.RawQuery)
+}
+func (q WebPushConfigBrowseActionQuery) Values() url.Values {
+	return q.values
+}
+func (q WebPushConfigBrowseActionQuery) Mapped() map[string]interface{} {
+	return q.mapped
+}
+func (q *WebPushConfigBrowseActionQuery) SetValues(v url.Values) {
+	q.values = v
+}
+func (q *WebPushConfigBrowseActionQuery) SetMapped(m map[string]interface{}) {
+	q.mapped = m
 }
 
 // WebPushConfigEntityAwareDeleteAffected reports one relation of WebPushConfigEntity that would be affected by
