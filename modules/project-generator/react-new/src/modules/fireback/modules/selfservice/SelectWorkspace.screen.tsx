@@ -23,7 +23,7 @@ export const SelectWorkspaceScreen = () => {
         <p className="text-muted">{s.selectWorkspace}</p>
       </div>
 
-      {items.map((workspace) => (
+      {(items || []).map((workspace) => (
         <div key={workspace.uniqueId} className="mb-4">
           <h2 className="h5">{workspace.name}</h2>
           <div className="d-flex flex-wrap gap-2 mt-2">

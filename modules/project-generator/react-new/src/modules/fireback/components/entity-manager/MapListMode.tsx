@@ -34,7 +34,7 @@ export const MapListMode = ({
   return (
     <>
       {total === 0 && <p>{t.table.noRecords}</p>}
-      {items.map((item: any) => {
+      {(items || []).map((item: any) => {
         return (
           <AutoCardDrawer
             key={item.uniqueId}

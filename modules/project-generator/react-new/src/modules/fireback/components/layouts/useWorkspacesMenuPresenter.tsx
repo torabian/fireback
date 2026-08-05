@@ -21,7 +21,7 @@ export function useWorkspacesMenuPresenter() {
 
   const items = queryUrw.data?.data?.items || [];
   const recomputeKey =
-    items.map((item) => item.uniqueId).join("-") +
+    (items || []).map((item) => item.uniqueId).join("-") +
     "_" +
     selectedUrw?.roleId +
     "_" +

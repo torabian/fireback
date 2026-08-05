@@ -133,7 +133,7 @@ export function useDatatableFiltering({
 
   const idsToQuery = (items: string[]): DeleteRequest => {
     return {
-      query: items.map((t) => `unique_id = ${t}`).join(" or "),
+      query: (items || []).map((t) => `unique_id = ${t}`).join(" or "),
       uniqueId: "",
     };
   };

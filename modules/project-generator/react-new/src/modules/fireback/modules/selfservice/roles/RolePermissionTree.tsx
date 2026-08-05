@@ -3,6 +3,7 @@ import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
 import { type IndeterminateCheck } from "@/modules/fireback/definitions/definitions";
 import { type CapabilityChild } from "@/modules/fireback/sdk/core/react-tools";
 import { useCapabilitiesTreeActionQuery } from "@/modules/fireback/sdk/modules/fireback/CapabilitiesTreeAction";
+import { MCollection } from "@/modules/fireback/sdk/sdk/common/operators";
 
 type NodeChangeFn = (node: string, value: IndeterminateCheck) => void;
 
@@ -17,7 +18,10 @@ export function RolePermissionTree({
 }) {
   const { data, error } = useCapabilitiesTreeActionQuery({});
 
-  const items = data?.data?.item?.nested || [];
+  let items = data?.data?.item?.nested || [];
+  if (items instanceof MCollection) {
+    items = items.get();
+  }
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {
     let newValue: string[] = [...(value || [])];
@@ -61,7 +65,7 @@ export function PermissionTree({
   const pref = prefix ? prefix + "." : "";
   return (
     <>
-      {items.map((item) => {
+      {(items || []).map((item) => {
         const completeKey = `${pref}${item.uniqueId}${
           item.children?.length ? ".*" : ""
         }`;

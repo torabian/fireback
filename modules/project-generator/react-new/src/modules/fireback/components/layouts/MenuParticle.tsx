@@ -18,7 +18,7 @@ function renderMenu(
     urw?: any;
     urws: any[];
     asPath: string;
-  }
+  },
 ): MenuRendered | null {
   let hasChildren = false;
   const children = menu.children?.map((item): MenuItemRendered => {
@@ -118,7 +118,7 @@ export function MenuParticle({
 function MenuUl({ items }: { items: MenuItemRendered[] }) {
   return (
     <ul className="nav nav-pills flex-column mb-auto">
-      {items.map((item) => {
+      {(items || []).map((item) => {
         return <LiItem key={item.label + "_" + item.href} item={item} />;
       })}
     </ul>

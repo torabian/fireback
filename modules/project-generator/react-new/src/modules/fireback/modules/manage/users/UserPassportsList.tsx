@@ -13,7 +13,7 @@ export const UserPassportList = ({ userId }: { userId: string }) => {
     <div>
       {/* <Link href={"/passport"}>Add passport</Link> */}
       <PageSection title="Passports">
-        {items.map((item) => {
+        {(items || []).map((item) => {
           return <UserPassportItem passport={item} key={item.uniqueId} />;
         })}
       </PageSection>
