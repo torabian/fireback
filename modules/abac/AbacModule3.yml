@@ -819,35 +819,7 @@ entities:
         type: string
         description: Title which is shown to the user and allows them to select.
         translate: true
-
-  - name: file
-    description: Tus file uploading reference of the content.
-      Every files being uploaded using tus will be stored in this table.
-    permRewrite:
-      replace: root.modules
-      with: root.manage
-    fields:
-      - name: name
-        type: string
-      - name: operationId
-        type: string
-        description:
-          For each upload, we need to assign a operation id, so if the operation
-          has been cancelled, it would be cleared automatically, and there won't be orphant
-          files in the database.
-      - name: diskPath
-        type: string
-      - name: size
-        type: int64
-      - name: virtualPath
-        type: string
-      - name: type
-        type: string
-      - name: variations
-        type: array
-        fields:
-          - name: name
-            type: string
+ 
   - name: tableViewSizing
     cliShort: tvs
     description: >-
@@ -885,17 +857,7 @@ entities:
         fields: []
         module: fireback
         description: The permission which is required for the menu to be visible.
-  - name: backupTableMeta
-    cliName: backup
-    permRewrite:
-      replace: root.modules
-      with: root.manage
-    description: >-
-      Keeps information about which tables to be used during backup (mostly
-      internal)
-    fields:
-      - name: tableNameInDb
-        type: string
+  
   - name: notificationConfig
     distinctBy: workspace
     permRewrite:

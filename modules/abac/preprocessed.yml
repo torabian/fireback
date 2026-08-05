@@ -1,0 +1,54 @@
+targets:
+- compiler: go
+  flags:
+    pkg: abac
+  output: ./
+- compiler: js
+  flags:
+    js-sdk-location: ../sdk
+  output: ../project-generator/react-new/src/modules/fireback/sdk/abac
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+- compiler: preprocessor
+  output: ./
+description: Fireback ABAC module provides user authentication, basic support for
+  most projects, including advanced role, permission module on top of fireback core
+  module. Using this module is not essential to create fireback projects, but provides
+  a great possibility to avoid building most user management flow. Some other helpers,
+  such as timezone are added here.
+name: abac
+dtos:
+- name: userImport
+  fields:
+  - name: avatar
+    type: string
+  - name: passports
+    type: array
+    fields:
+    - name: value
+      type: string
+    - name: password
+      type: string
+  - name: address
+    type: object
+    fields:
+    - name: street
+      type: string
+    - name: zipCode
+      type: string
+    - name: city
+      type: string
+    - name: country
+      type: string
+complexes:
+- name: JSON
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go
+- name: XDate
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go

@@ -1,0 +1,58 @@
+complexes:
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: JSON
+    namespace: complexes
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: XDate
+    namespace: complexes
+    
+targets:
+  - compiler: go
+    output: ./
+    flags:
+      pkg: abac
+  - compiler: js
+    output: ../project-generator/react-new/src/modules/fireback/sdk/abac
+    flags:
+      js-sdk-location: ../sdk
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: preprocessor
+    output: ./
+
+name: abac
+description:
+  Fireback ABAC module provides user authentication, basic support for most projects,
+  including advanced role, permission module on top of fireback core module.
+  Using this module is not essential to create fireback projects, but provides a great
+  possibility to avoid building most user management flow.
+  Some other helpers, such as timezone are added here.
+
+dtos:
+  - name: userImport
+    fields:
+      - name: avatar
+        type: string
+      - name: passports
+        type: array
+        fields:
+          - name: value
+            type: string
+          - name: password
+            type: string
+      - name: address
+        type: object
+        fields:
+          - name: street
+            type: string
+          - name: zipCode
+            type: string
+          - name: city
+            type: string
+          - name: country
+            type: string
