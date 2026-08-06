@@ -17,10 +17,10 @@ export const PassportMethodForm = ({
   const s = useS(strings);
 
   const source = createQuerySource([
-    { name: "Google", uniqueId: "google" },
-    { name: "Facebook", uniqueId: "facebook" },
-    { name: "Email", uniqueId: "email" },
-    { name: "Phone", uniqueId: "phone" },
+    { name: s.passportMethods.methodGoogle, uniqueId: "google" },
+    { name: s.passportMethods.methodFacebook, uniqueId: "facebook" },
+    { name: s.passportMethods.methodEmail, uniqueId: "email" },
+    { name: s.passportMethods.methodPhone, uniqueId: "phone" },
   ]);
 
   return (

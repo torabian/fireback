@@ -16,25 +16,8 @@ export const en = {
     newGsmProvider: "New gsm provider",
     type: "Type",
     typeHint: "Type",
-  },
-};/**
-* Auto generated file by fireback language & translation manager.
-*/
-export const pl = {
-  gsmProviders: {
-    apiKey: "Api key",
-    apiKeyHint: "Api key",
-    archiveTitle: "Gsm providers",
-    editGsmProvider: "Edit gsm provider",
-    invokeBody: "Invoke body",
-    invokeBodyHint: "Invoke body",
-    invokeUrl: "Invoke url",
-    invokeUrlHint: "Invoke url",
-    mainSenderNumber: "Main sender number",
-    mainSenderNumberHint: "Main sender number",
-    newGsmProvider: "New gsm provider",
-    type: "Type",
-    typeHint: "Type",
+    typeTerminal: "Terminal",
+    typeUrl: "Url",
   },
 };/**
 * Auto generated file by fireback language & translation manager.
@@ -54,6 +37,29 @@ export const fa = {
     newGsmProvider: "ارائه‌دهنده پیامک جدید",
     type: "نوع",
     typeHint: "نوع",
+    typeTerminal: "ترمینال",
+    typeUrl: "آدرس",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  gsmProviders: {
+    apiKey: "Api key",
+    apiKeyHint: "Api key",
+    archiveTitle: "Gsm providers",
+    editGsmProvider: "Edit gsm provider",
+    invokeBody: "Invoke body",
+    invokeBodyHint: "Invoke body",
+    invokeUrl: "Invoke url",
+    invokeUrlHint: "Invoke url",
+    mainSenderNumber: "Main sender number",
+    mainSenderNumberHint: "Main sender number",
+    newGsmProvider: "New gsm provider",
+    type: "Type",
+    typeHint: "Type",
+    typeTerminal: "Terminal",
+    typeUrl: "URL",
   },
 };
- export const strings = {...en, $pl:pl,$fa:fa};
+ export const strings = {...en, $fa:fa,$pl:pl};

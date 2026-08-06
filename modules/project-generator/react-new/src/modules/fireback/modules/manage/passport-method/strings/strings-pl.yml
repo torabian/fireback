@@ -6,8 +6,13 @@ content:
     clientKeyHint: Klucz klienta dla metod takich jak Google, służący do autoryzacji
       OAuth2
     editPassportMethod: Edytuj metodę paszportową
+    methodEmail: E-mail
+    methodFacebook: Facebook
+    methodGoogle: Google
+    methodPhone: Telefon
     newPassportMethod: Nowa metoda paszportowa
     region: Region
     regionHint: Region
     type: Typ
     typeHint: Typ
+    uniqueId: Identyfikator

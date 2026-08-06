@@ -10,19 +10,7 @@ export const en = {
     name: "Name",
     nameHint: "Name",
     newCapability: "New capability",
-  },
-};/**
-* Auto generated file by fireback language & translation manager.
-*/
-export const pl = {
-  capabilities: {
-    archiveTitle: "Capabilities",
-    description: "Description",
-    descriptionHint: "Description",
-    editCapability: "Edit capability",
-    name: "Name",
-    nameHint: "Name",
-    newCapability: "New capability",
+    uniqueId: "Id",
   },
 };/**
 * Auto generated file by fireback language & translation manager.
@@ -36,6 +24,21 @@ export const fa = {
     name: "نام",
     nameHint: "نام",
     newCapability: "قابلیت جدید",
+    uniqueId: "شناسه",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  capabilities: {
+    archiveTitle: "Capabilities",
+    description: "Description",
+    descriptionHint: "Description",
+    editCapability: "Edit capability",
+    name: "Name",
+    nameHint: "Name",
+    newCapability: "New capability",
+    uniqueId: "Identyfikator",
   },
 };
- export const strings = {...en, $pl:pl,$fa:fa};
+ export const strings = {...en, $fa:fa,$pl:pl};

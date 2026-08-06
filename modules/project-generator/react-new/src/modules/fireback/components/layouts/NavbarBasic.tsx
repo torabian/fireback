@@ -2,8 +2,11 @@ import { type MenuItem } from "../../definitions/common";
 import classNames from "classnames";
 import React from "react";
 import ActiveLink from "../link/ActiveLink";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 function Navbar({ menu }: { menu?: MenuItem }) {
+  const s = useS(strings);
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
@@ -17,7 +20,7 @@ function Navbar({ menu }: { menu?: MenuItem }) {
           data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent"
           aria-expanded="false"
-          aria-label="Toggle navigation"
+          aria-label={s.components.toggleNavigation}
         >
           <span className="navbar-toggler-icon"></span>
         </button>

@@ -2,9 +2,11 @@ import { useFileListener } from "../../window-drop/WindowDrop";
 import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import { FileEntity } from "../../../sdk/modules/abac/FileEntity";
 import { debounce } from "lodash";
 import { useRef } from "react";
+import { strings } from "../../strings/translations";
 
 interface FormUploaderProps {
   onChange?: (value: FileEntity[]) => void;
@@ -15,12 +17,13 @@ interface FormUploaderProps {
 
 function AttachmentViewer({ attachments }: { attachments: FileEntity[] }) {
   const { directPath, downloadPath } = useRemoteInformation();
+  const s = useS(strings);
 
   return (
     <div className="file-viewer-files">
       {(attachments || []).map((attachment) => {
         if (!attachment) {
-          return <div>No attachment data</div>;
+          return <div>{s.components.noAttachmentData}</div>;
         }
         return (
           <div className="file-viewer-file" key={attachment.uniqueId}>
@@ -35,10 +38,10 @@ function AttachmentViewer({ attachments }: { attachments: FileEntity[] }) {
                 href={directPath(attachment) || ""}
                 className="btn"
               >
-                View
+                {s.components.view}
               </a>
               <a href={downloadPath(attachment)} className="btn">
-                Download
+                {s.components.download}
               </a>
             </div>
           </div>
@@ -53,6 +56,7 @@ export const FormUploader = ({ onChange, value, label }: FormUploaderProps) => {
   const { upload } = useFileUploader();
   const data = useRef<FileEntity[]>([]);
   const t = useT();
+  const s = useS(strings);
   // Use debounced onChange
   const onChangeDebounced = debounce(
     (items: FileEntity[]) => {
@@ -76,7 +80,7 @@ export const FormUploader = ({ onChange, value, label }: FormUploaderProps) => {
 
   useFileListener({
     enabled: !readonly,
-    label: "Attach documents about the payment",
+    label: s.components.attachDocumentsAboutThePayment,
     extentions: ["*"],
     onCaptureFile(files) {
       Promise.all(uploadFn(files)).then((result) => {});

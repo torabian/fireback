@@ -1,3 +1,21 @@
 extends: []
 content:
+  addressLine1: Linia adresu 1
+  addressLine1Hint: Linia adresu 1 powiązana z użytkownikiem.
+  addressLine2: Linia adresu 2
+  addressLine2Hint: Linia adresu 2 powiązana z użytkownikiem.
   birthDate: Data urodzenia
+  city: Miasto
+  cityName: Nazwa miasta
+  cityNameHint: Miasto adresu powiązane z użytkownikiem.
+  confirmed: 'Potwierdzone:'
+  countryCode: Kod kraju
+  gender: Płeć
+  image: Obraz
+  na: brak danych
+  "no": Nie
+  passports: Paszporty
+  postalCode: Kod pocztowy
+  type: 'Typ:'
+  value: 'Wartość:'
+  "yes": Tak

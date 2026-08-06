@@ -2,6 +2,7 @@ import { FormCheckbox } from "../../../components/forms/form-switch/FormSwitch";
 import Link from "../../../components/link/Link";
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import { useGetUserWorkspaces } from "../../../sdk/modules/abac/useGetUserWorkspaces";
 import { useContext, useState } from "react";
 import { useQueryClient } from "react-query";
@@ -9,6 +10,7 @@ import {
   RemoteQueryContext as FirebackContext,
   RemoteQueryContext,
 } from "../../../sdk/core/react-tools";
+import { strings } from "./strings/translations";
 
 function UserRoleWorkspaceDebug() {
   const queryClient = useQueryClient();
@@ -19,13 +21,14 @@ function UserRoleWorkspaceDebug() {
       cacheTime: 0,
     },
   });
+  const s = useS(strings);
 
   return (
     <>
-      <h2>User Role Workspaces</h2>
-      <p>Data:</p>
+      <h2>{s.debugger.userRoleWorkspaces}</h2>
+      <p>{s.debugger.data}</p>
       <pre>{JSON.stringify(queryWorkspaces.data, null, 2)}</pre>
-      <p>Error:</p>
+      <p>{s.debugger.error}</p>
       <pre>{JSON.stringify(queryWorkspaces.error, null, 2)}</pre>
     </>
   );
@@ -33,10 +36,11 @@ function UserRoleWorkspaceDebug() {
 
 export function SessionDebug() {
   const fireback = useContext(RemoteQueryContext);
+  const s = useS(strings);
 
   return (
     <>
-      <h2>Fireback context:</h2>
+      <h2>{s.debugger.firebackContext}</h2>
       <pre>{JSON.stringify(fireback, null, 2)}</pre>
     </>
   );
@@ -47,6 +51,7 @@ export function DebuggerSettings({}: {}) {
   const firebackContext = useContext(FirebackContext);
 
   const t = useT();
+  const s = useS(strings);
 
   return (
     <PageSection title={t.generalSettings.debugSettings.title}>
@@ -60,8 +65,8 @@ export function DebuggerSettings({}: {}) {
       {debugVisible && (
         <>
           <pre></pre>
-          <Link href="/lalaland">Go to Lalaland</Link>
-          <Link href="/view3d">View 3D</Link>
+          <Link href="/lalaland">{s.debugger.goToLalaland}</Link>
+          <Link href="/view3d">{s.debugger.view3d}</Link>
           <UserRoleWorkspaceDebug />
           <SessionDebug />
         </>

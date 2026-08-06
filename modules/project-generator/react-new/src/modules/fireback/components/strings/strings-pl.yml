@@ -1,0 +1,37 @@
+extends: []
+content:
+  components:
+    attachDocumentsAboutThePayment: Załącz dokumenty dotyczące płatności
+    autoReroute: Automatyczne przekierowanie
+    close: Zamknij
+    confirmLeaveApp: Czy na pewno chcesz opuścić aplikację?
+    defaultSelectExample: Domyślny przykład wyboru
+    demo: Demo
+    done: Gotowe
+    download: Pobierz
+    dropFileHere: Upuść plik tutaj
+    errorPrefix: 'Błąd:'
+    fileSizeExceeds5kb: Rozmiar pliku przekracza 5 KB.
+    fileTooLarge: Plik jest zbyt duży. Maksymalny dozwolony rozmiar to {size}MB.
+    fileTypeNotAllowed: Ten typ pliku nie jest dozwolony.
+    findASetting: Znajdź ustawienie
+    formDateTime: Formularz daty/czasu
+    formSelect: Formularz wyboru
+    home: Strona główna
+    noAttachmentData: Brak danych załącznika
+    noQuerySourceToRender: Brak źródła danych do wyświetlenia
+    onlyPngSvgAllowed: Dozwolone są tylko pliki PNG lub SVG.
+    overlaysAndModal: Nakładki i okna modalne
+    pdfPreview: Podgląd PDF
+    preview: Podgląd
+    profile: Profil
+    reset: Resetuj
+    retry: Ponów
+    selected: Wybrano
+    settings: Ustawienia
+    somethingWentWrong: 'Coś poszło nie tak:'
+    submit: Wyślij
+    toggleNavigation: Przełącz nawigację
+    unknownError: Wystąpił nieznany błąd podczas pobierania informacji, jeśli problem
+      się powtarza, skontaktuj się z dostawcą oprogramowania.
+    view: Widok

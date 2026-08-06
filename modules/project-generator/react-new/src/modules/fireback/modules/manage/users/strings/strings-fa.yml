@@ -1,3 +1,21 @@
 extends: []
 content:
+  addressLine1: آدرس خط ۱
+  addressLine1Hint: خط آدرس ۱ مرتبط با کاربر.
+  addressLine2: آدرس خط ۲
+  addressLine2Hint: خط آدرس ۲ مرتبط با کاربر.
   birthDate: تاریخ تولد
+  city: شهر
+  cityName: نام شهر
+  cityNameHint: شهر آدرس مرتبط با کاربر.
+  confirmed: 'تأیید شده:'
+  countryCode: کد کشور
+  gender: جنسیت
+  image: تصویر
+  na: موجود نیست
+  "no": خیر
+  passports: پاسپورت‌ها
+  postalCode: کد پستی
+  type: 'نوع:'
+  value: 'مقدار:'
+  "yes": بله

@@ -33,7 +33,7 @@ export const FacebookLogin = ({
   const loginWithFacebook = () => {
     const FB = (window as any).FB;
     if (!FB) {
-      alert("Facebook SDK not loaded");
+      alert(s.facebookSdkNotLoaded);
       return;
     }
 
@@ -43,7 +43,7 @@ export const FacebookLogin = ({
         if (response.authResponse?.accessToken) {
           continueWithResult(response.authResponse.accessToken);
         } else {
-          alert("Facebook login failed");
+          alert(s.facebookLoginFailed);
         }
       },
       { scope: "email,public_profile" }
@@ -53,7 +53,7 @@ export const FacebookLogin = ({
   return (
     <button id="using-facebook" type="button" onClick={loginWithFacebook}>
       <img className="button-icon" src={source("/common/facebook.png")} />
-      Facebook
+      {s.facebook}
     </button>
   );
 };

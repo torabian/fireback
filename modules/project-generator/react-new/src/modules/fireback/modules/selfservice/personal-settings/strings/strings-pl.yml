@@ -7,12 +7,30 @@ content:
     description: Wyświetl informacje debugowania aplikacji, dla programistów lub biur
       pomocy
     title: Ustawienia debugowania
+  debugger:
+    data: 'Dane:'
+    error: 'Błąd:'
+    firebackContext: 'Kontekst Fireback:'
+    goToLalaland: Przejdź do Lalaland
+    userRoleWorkspaces: Przestrzenie robocze ról użytkownika
+    view3d: Widok 3D
   grpcMethod: Przez gRPC
   hostAddress: Adres hosta
   httpMethod: Przez HTTP
   interfaceLang:
     description: Tutaj możesz zmienić ustawienia języka interfejsu oprogramowania
     title: Język i Region
+  languages:
+    russian: Rosyjski (Русский)
+    ukrainian: Ukraiński (українська)
+  notifications:
+    description: Tutaj możesz zarządzać swoimi powiadomieniami
+    failedToSubscribe: Subskrypcja nie powiodła się.
+    failedToUnsubscribe: Anulowanie subskrypcji nie powiodło się.
+    noSubscriptionFound: Nie znaleziono subskrypcji
+    subscribe: Subskrybuj
+    title: Ustawienia powiadomień
+    unsubscribe: Anuluj subskrypcję
   port: Port
   remoteDescription: Usługa zdalna, to miejsce, w którym zainstalowane są wszystkie
     dane, logiki i usługi. Może to być chmura lub lokalnie. Tylko zaawansowani użytkownicy,
@@ -21,6 +39,10 @@ content:
   richTextEditor:
     description: Zarządzaj sposobem edycji treści tekstowej w aplikacji
     title: Edytor tekstu
+  richThemes:
+    macAutomatic: MacOSX automatyczny
+    macDark: MacOSX ciemny
+    macLight: MacOSX jasny
   theme:
     description: Zmień kolor motywu interfejsu
     title: Motyw

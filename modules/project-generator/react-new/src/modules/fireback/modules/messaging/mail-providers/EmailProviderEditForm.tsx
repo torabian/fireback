@@ -3,8 +3,10 @@ import { FormSelect } from "@/modules/fireback/components/forms/form-select/Form
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
+import { useS } from "@/modules/fireback/hooks/useS";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { strings } from "./strings/translations";
 
 const placeholder = `
 curl -X POST https://api.sendgrid.com/v3/mail/send \
@@ -41,18 +43,19 @@ export const EmailProviderEditForm = ({
 }: EntityFormProps<EmailProviderEntity>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
+  const s = useS(strings);
 
   // =====================
   // Providers
   // =====================
   const emailProviders = [
-    { label: "SendGrid", value: "sendgrid" },
-    { label: "Mailgun", value: "mailgun" },
-    { label: "Postmark", value: "postmark" },
-    { label: "Resend", value: "resend" },
-    { label: "Curl", value: "curl" },
-    { label: "SMTP", value: "smtp" },
-    { label: "Terminal (Debug)", value: "terminal" },
+    { label: s.emailProviders.typeSendgrid, value: "sendgrid" },
+    { label: s.emailProviders.typeMailgun, value: "mailgun" },
+    { label: s.emailProviders.typePostmark, value: "postmark" },
+    { label: s.emailProviders.typeResend, value: "resend" },
+    { label: s.emailProviders.typeCurl, value: "curl" },
+    { label: s.emailProviders.typeSmtp, value: "smtp" },
+    { label: s.emailProviders.typeTerminal, value: "terminal" },
   ];
 
   const querySource = createQuerySource(emailProviders);
@@ -70,46 +73,31 @@ export const EmailProviderEditForm = ({
       placeholder?: string;
     }[]
   > = {
-    sendgrid: [{ key: "apiKey", label: "API Key" }],
+    sendgrid: [{ key: "apiKey", label: s.emailProviders.fieldApiKey }],
 
     mailgun: [
-      { key: "apiKey", label: "API Key" },
-      { key: "domain", label: "Domain" },
+      { key: "apiKey", label: s.emailProviders.fieldApiKey },
+      { key: "domain", label: s.emailProviders.fieldDomain },
     ],
 
-    postmark: [{ key: "apiKey", label: "Server Token" }],
+    postmark: [{ key: "apiKey", label: s.emailProviders.fieldServerToken }],
     curl: [
       {
         key: "curl",
-        label: "Curl script",
+        label: s.emailProviders.fieldCurlScript,
         type: "textarea",
         placeholder,
-        description: `Curl script, which would be called upon sending email. 
-          Kindly beaware, this is semantic rather 
-          than actual bash script, so use limited features and no extra bash calls.
-          <br />
-          Make sure, you put the secrets, templates, credentials, here, there will be no
-          other place to use. While sending an email, following variables will be
-          replaced in your curl message.
-          <br />
-          
-          %FromName%  string <br />
-          %FromEmail% string <br />
-          %ToName%    string <br />
-          %ToEmail%   string <br />
-          %Subject%   string <br />
-          %Content%   string (It will be escaped with \", so use double qoutes) <br />
-          `,
+        description: s.emailProviders.fieldCurlScriptDescription,
       },
     ],
 
-    resend: [{ key: "apiKey", label: "API Key" }],
+    resend: [{ key: "apiKey", label: s.emailProviders.fieldApiKey }],
 
     smtp: [
-      { key: "host", label: "Host" },
-      { key: "port", label: "Port" },
-      { key: "user", label: "Username" },
-      { key: "pass", label: "Password", type: "password" },
+      { key: "host", label: s.emailProviders.fieldHost },
+      { key: "port", label: s.emailProviders.fieldPort },
+      { key: "user", label: s.emailProviders.fieldUsername },
+      { key: "pass", label: s.emailProviders.fieldPassword, type: "password" },
     ],
 
     terminal: [],
@@ -125,8 +113,8 @@ export const EmailProviderEditForm = ({
       <FormText
         value={values.title}
         onChange={(value) => setFieldValue(`title`, value, false)}
-        label={"Title"}
-        hint="Title of the email provider, to search and allocate easier."
+        label={s.emailProviders.title}
+        hint={s.emailProviders.titleHint}
         autoFocus={!isEditing}
       />
 

@@ -9,6 +9,7 @@ items:
 
 - label:
     en: Capabilities & Permissions
+    fa: سطوح دسترسی
   description:
     Manage the capabilities within the application, both custom added and internal.
   uniqueId: root-capabilities

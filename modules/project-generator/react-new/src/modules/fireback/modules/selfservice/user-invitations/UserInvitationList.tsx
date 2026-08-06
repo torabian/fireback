@@ -30,7 +30,7 @@ export const UserInvitationList = () => {
             new AcceptInviteActionReq({ invitationUniqueId: dto.uniqueId }),
           )
           .then((res) => {
-            alert("Successful.");
+            alert(s.successful);
           });
       },
     });

@@ -33,7 +33,7 @@ export const TotpSetup = ({}: {}) => {
         className="btn  w-100 d-block"
         onClick={goBack}
       >
-        Try another account
+        {s.tryAnotherAccount}
       </button>
     </div>
   );

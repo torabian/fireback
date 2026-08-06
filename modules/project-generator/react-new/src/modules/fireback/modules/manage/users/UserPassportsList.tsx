@@ -1,6 +1,8 @@
 import { PageSection } from "../../../components/page-section/PageSection";
+import { useS } from "../../../hooks/useS";
 import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
 import { useGetPassports } from "../../../sdk/modules/abac/useGetPassports";
+import { strings } from "./strings/translations";
 
 export const UserPassportList = ({ userId }: { userId: string }) => {
   const { items } = useGetPassports({
@@ -8,49 +10,56 @@ export const UserPassportList = ({ userId }: { userId: string }) => {
       query: userId ? "user_id = " + userId : null,
     },
   });
+  const s = useS(strings);
 
   return (
     <div>
       {/* <Link href={"/passport"}>Add passport</Link> */}
-      <PageSection title="Passports">
+      <PageSection title={s.passports}>
         {(items || []).map((item) => {
-          return <UserPassportItem passport={item} key={item.uniqueId} />;
+          return <UserPassportItem passport={item} key={item.uniqueId} s={s} />;
         })}
       </PageSection>
     </div>
   );
 };
 
-function booleanToHuman(value?: boolean): string {
+function booleanToHuman(value: boolean | undefined, s: typeof strings): string {
   if (value === null || value === undefined) {
-    return "n/a";
+    return s.na;
   }
 
   if (value === true) {
-    return "Yes";
+    return s.yes;
   }
 
   if (value === false) {
-    return "No";
+    return s.no;
   }
 }
 
-const UserPassportItem = ({ passport }: { passport: PassportEntity }) => {
+const UserPassportItem = ({
+  passport,
+  s,
+}: {
+  passport: PassportEntity;
+  s: typeof strings;
+}) => {
   return (
     <div>
       <div className="general-entity-view ">
         <div className="entity-view-row entity-view-head">
-          <div className="field-info">Value:</div>
+          <div className="field-info">{s.value}</div>
           <div className="field-value">{passport.value}</div>
         </div>
         <div className="entity-view-row entity-view-head">
-          <div className="field-info">Type:</div>
+          <div className="field-info">{s.type}</div>
           <div className="field-value">{passport.type}</div>
         </div>
         <div className="entity-view-row entity-view-head">
-          <div className="field-info">Confirmed:</div>
+          <div className="field-info">{s.confirmed}</div>
           <div className="field-value">
-            {booleanToHuman(passport.confirmed)}
+            {booleanToHuman(passport.confirmed, s)}
           </div>
         </div>
       </div>

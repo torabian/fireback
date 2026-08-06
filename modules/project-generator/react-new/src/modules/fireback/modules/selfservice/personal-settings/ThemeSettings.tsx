@@ -9,7 +9,9 @@ import { type StringKeyValue } from "../../../definitions/definitions";
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import { createQuerySource } from "../../../hooks/useAsQuery";
+import { strings } from "./strings/translations";
 
 interface ThemeConfig {
   theme: string;
@@ -38,17 +40,17 @@ const updateSettings = (
   }
 };
 
-const availableRichThemes: StringKeyValue[] = [
+const availableRichThemes = (s: typeof strings): StringKeyValue[] => [
   {
-    label: "MacOSX Automatic",
+    label: s.richThemes.macAutomatic,
     value: "mac-theme",
   },
   {
-    label: "MacOSX Light",
+    label: s.richThemes.macLight,
     value: "mac-theme light-theme",
   },
   {
-    label: "MacOSX Dark",
+    label: s.richThemes.macDark,
     value: "mac-theme dark-theme",
   },
 ];
@@ -57,6 +59,7 @@ export function ThemeSettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
   const t = useT();
+  const s = useS(strings);
   const { formik } = useCommonEntityManager<Partial<ThemeConfig>>({});
 
   const onSubmit = (
@@ -75,7 +78,7 @@ export function ThemeSettings({}: {}) {
     formik.current?.setValues({ theme: config.theme });
   }, [config.remote]);
 
-  const themeQuerySource = createQuerySource(availableRichThemes);
+  const themeQuerySource = createQuerySource(availableRichThemes(s));
 
   return (
     <PageSection title={t.generalSettings.theme.title}>

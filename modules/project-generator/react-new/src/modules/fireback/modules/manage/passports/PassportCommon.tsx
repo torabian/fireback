@@ -1,38 +1,38 @@
 import { type KeyValue } from "../../../definitions/definitions";
-import { enTranslations } from "../../../translations/en";
+import { strings } from "./strings/translations";
 
-export const getPassportOptions = (t: typeof enTranslations): KeyValue[] => {
+export const getPassportOptions = (s: typeof strings): KeyValue[] => {
   return [
     {
-      label: "Email and Password",
+      label: s.optionEmailPassword,
       value: "EmailPassword",
     },
     {
-      label: "Phone number",
+      label: s.optionPhoneNumber,
       value: "PhoneNumber",
     },
   ];
 };
 
-export const getPasswordOptions = (t: typeof enTranslations): KeyValue[] => {
+export const getPasswordOptions = (s: typeof strings): KeyValue[] => {
   return [
     {
-      label: "Send an email to user, containing their temporary password",
+      label: s.passwordByEmail,
       value: "ByEmail",
     },
     {
-      label: "Show me their temporary password",
+      label: s.passwordShowPassword,
       value: "ShowPassword",
     },
   ];
 };
 
-export const getPassportTypes = () => {
+export const getPassportTypes = (s: typeof strings) => {
   return [
     {
-      name: "Phone",
+      name: s.typePhone,
       uniqueId: "phonenumber",
     },
-    { name: "Email", uniqueId: "email" },
+    { name: s.typeEmail, uniqueId: "email" },
   ];
 };

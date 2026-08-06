@@ -1,9 +1,13 @@
 import { type DatatableColumn } from "@/modules/fireback/definitions/definitions";
 import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
 import { enTranslations } from "../../../translations/en";
+import { strings } from "./strings/translations";
 import { GenderView } from "./GenderView";
 
-export const columns = (t: typeof enTranslations): DatatableColumn[] => [
+export const columns = (
+  t: typeof enTranslations,
+  s: typeof strings,
+): DatatableColumn[] => [
   {
     name: UserEntity.Fields.uniqueId,
     title: t.table.uniqueId,
@@ -29,7 +33,7 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
 
   {
     name: "birthDate",
-    title: "birthdate",
+    title: s.birthDate,
     width: 140,
     getCellValue: (e: UserEntity) => <>{e?.birthDate}</>,
     filterType: "date",
@@ -38,7 +42,7 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
   },
   {
     name: "gender",
-    title: "gender",
+    title: s.gender,
     width: 50,
     getCellValue: (e: UserEntity) => (
       <>
@@ -49,7 +53,7 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
 
   {
     name: "Image",
-    title: "Image",
+    title: s.image,
     width: 40,
     getCellValue: (e: UserEntity) => (
       <>
@@ -61,34 +65,34 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
   },
   {
     name: UserEntity.Fields.primaryAddress.countryCode,
-    title: "Country code",
+    title: s.countryCode,
     width: 40,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.countryCode}</>,
   },
   {
     filterable: true,
     name: UserEntity.Fields.primaryAddress.addressLine1,
-    title: "Address Line 1",
+    title: s.addressLine1,
     width: 180,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine1}</>,
   },
   {
     filterable: true,
     name: UserEntity.Fields.primaryAddress.addressLine2,
-    title: "Address Line 2",
+    title: s.addressLine2,
     width: 180,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine2}</>,
   },
   {
     filterable: true,
     name: UserEntity.Fields.primaryAddress.city,
-    title: "City",
+    title: s.city,
     width: 180,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.city}</>,
   },
   {
     name: UserEntity.Fields.primaryAddress.postalCode,
-    title: "Postal Code",
+    title: s.postalCode,
     width: 80,
     getCellValue: (e: UserEntity) => <>{e.primaryAddress?.postalCode}</>,
   },

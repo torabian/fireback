@@ -1,12 +1,15 @@
 import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
 import { enTranslations } from "../../translations/en";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";
 import type { UseMutationResult, UseQueryResult } from "react-query";
 import { FormButton } from "../forms/form-button/FormButton";
+import { strings } from "../strings/translations";
 
 export function getQueryErrorString(
   t: typeof enTranslations,
+  s: typeof strings,
   query: UseQueryResult<any, any> | UseMutationResult<any, any>,
   params: any = {}
 ): string | null {
@@ -28,8 +31,7 @@ export function getQueryErrorString(
     let unknownStr = query.error?.toString();
 
     if ((unknownStr + "").includes("object Object")) {
-      unknownStr =
-        "There is an unknown error while getting information, please contact your software provider if issue persists.";
+      unknownStr = s.components.unknownError;
     }
 
     return unknownStr;
@@ -46,6 +48,7 @@ export function QueryErrorView({
   children?: React.ReactNode;
 }) {
   const t = useT();
+  const s = useS(strings);
   const { options, setOverrideRemoteUrl, overrideRemoteUrl } =
     useContext(RemoteQueryContext);
 
@@ -74,10 +77,10 @@ export function QueryErrorView({
     <>
       {query.isError && (
         <div className="basic-error-box fadein">
-          {getQueryErrorString(t, query, { remote: options.prefix }) || ""}
+          {getQueryErrorString(t, s, query, { remote: options.prefix }) || ""}
           {showAutoAdjustTheUrl && (
             <button className="btn btn-sm btn-secondary" onClick={autoAdjust}>
-              Auto-reroute
+              {s.components.autoReroute}
             </button>
           )}
           {overrideRemoteUrl && (
@@ -85,7 +88,7 @@ export function QueryErrorView({
               className="btn btn-sm btn-secondary"
               onClick={() => setOverrideRemoteUrl(undefined)}
             >
-              Reset
+              {s.components.reset}
             </button>
           )}
           <ul>
@@ -98,7 +101,7 @@ export function QueryErrorView({
             })}
           </ul>
           {query.refetch && (
-            <FormButton onClick={query.refetch}>Retry</FormButton>
+            <FormButton onClick={query.refetch}>{s.components.retry}</FormButton>
           )}
         </div>
       )}

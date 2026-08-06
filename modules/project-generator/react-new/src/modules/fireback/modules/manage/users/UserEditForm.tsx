@@ -2,8 +2,10 @@ import { useContext } from "react";
 import { FormText } from "../../../components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { strings } from "./strings/translations";
 
 export const UserEditForm = ({
   form,
@@ -12,6 +14,7 @@ export const UserEditForm = ({
   const { values, setFieldValue, errors, setValues } = form;
   const { options } = useContext(RemoteQueryContext);
   const t = useT();
+  const s = useS(strings);
 
   return (
     <>
@@ -46,8 +49,8 @@ export const UserEditForm = ({
               setFieldValue(UserEntity.Fields.primaryAddress.city, value, false)
             }
             errorMessage={errors?.primaryAddress?.city}
-            label={"City name"}
-            hint={"The city address associated with user."}
+            label={s.cityName}
+            hint={s.cityNameHint}
           />
         </div>
         <div className="col-md-12">
@@ -61,8 +64,8 @@ export const UserEditForm = ({
               )
             }
             errorMessage={errors?.primaryAddress?.addressLine1}
-            label={"Address Line 1"}
-            hint={"Address line 1 associated with user."}
+            label={s.addressLine1}
+            hint={s.addressLine1Hint}
           />
         </div>
         <div className="col-md-12">
@@ -76,8 +79,8 @@ export const UserEditForm = ({
               )
             }
             errorMessage={errors?.primaryAddress?.addressLine2}
-            label={"Address Line 2"}
-            hint={"Address line 2 associated with user."}
+            label={s.addressLine2}
+            hint={s.addressLine2Hint}
           />
         </div>
       </div>

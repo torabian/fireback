@@ -4,10 +4,12 @@
 // make sure database is keeping type text instead of string
 
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import {
   BaseFormElement,
   type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
+import { strings } from "../../strings/translations";
 
 interface FormInlineImageProps extends BaseFormElementProps {
   onChange?: (value: string) => void;
@@ -27,19 +29,20 @@ export const FormInlineImage = ({
 }: FormInlineImageProps) => {
   const readonly = !!onChange;
   const t = useT();
+  const s = useS(strings);
 
   const uploadFn = (file: File) => {
     if (!file) return;
 
     // Check file type
     if (file.type !== "image/png" && file.type !== "image/svg+xml") {
-      alert("Only PNG or SVG files are allowed.");
+      alert(s.components.onlyPngSvgAllowed);
       return;
     }
 
     // Check file size
     if (file.size > maxFileSizeBytes) {
-      alert("File size exceeds 5KB.");
+      alert(s.components.fileSizeExceeds5kb);
       return;
     }
 
@@ -73,7 +76,7 @@ export const FormInlineImage = ({
         <div>
           <img
             src={value}
-            alt="Selected"
+            alt={s.components.selected}
             style={{ maxWidth: "200px", maxHeight: "200px" }}
           />
         </div>

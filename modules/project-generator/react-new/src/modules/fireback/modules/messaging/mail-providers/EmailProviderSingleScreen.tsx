@@ -4,16 +4,19 @@ import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
+import { useS } from "@/modules/fireback/hooks/useS";
 import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
 import {
   SendEmailActionReq,
   useSendEmailAction,
 } from "@/modules/fireback/sdk/messaging/SendEmailAction";
 import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
+import { strings } from "./strings/translations";
 
 export const EmailProviderSingleScreen = () => {
   const router = useRouter();
   const t = useT();
+  const s = useS(strings);
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
 
@@ -38,7 +41,7 @@ export const EmailProviderSingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: "Title",
+              label: s.emailProviders.title,
               elem: d?.title,
             },
             {
@@ -60,14 +63,14 @@ export const EmailProviderSingleScreen = () => {
             )
               .then((res) => {
                 console.log(res);
-                alert("Mail has been sent");
+                alert(s.emailProviders.mailSent);
               })
               .catch((err) => {
                 alert(`${err}`);
               });
           }}
         >
-          Send a test email
+          {s.emailProviders.sendTestEmail}
         </button>
       </CommonSingleManager>
     </>

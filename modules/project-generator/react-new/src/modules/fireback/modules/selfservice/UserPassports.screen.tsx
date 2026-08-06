@@ -18,7 +18,7 @@ export const UserPassportsScreen = ({ }: {}) => {
       <PassportList passports={items} />
 
       <button className="btn btn-danger mt-3 w-100" onClick={signout}>
-        Signout
+        {s.signout}
       </button>
     </div>
   );
@@ -37,7 +37,7 @@ const PassportList = ({
           <h3 className="card-title">{passport.type.toUpperCase()}</h3>
           <p className="card-text">{passport.value}</p>
           <p className="text-muted">
-            TOTP: {passport.totpConfirmed ? "Yes" : "No"}
+            {s.totpLabel} {passport.totpConfirmed ? s.yes : s.no}
           </p>
           <ActiveLink href={`../change-password/${passport.uniqueId}`}>
             <button className="btn btn-primary">

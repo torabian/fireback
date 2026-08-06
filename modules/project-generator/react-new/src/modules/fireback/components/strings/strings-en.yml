@@ -1,0 +1,35 @@
+content:
+  components:
+    done: Done
+    submit: Submit
+    confirmLeaveApp: Are you sure to leave the app?
+    somethingWentWrong: 'Something went wrong:'
+    unknownError: There is an unknown error while getting information, please contact your software provider if issue persists.
+    autoReroute: Auto-reroute
+    reset: Reset
+    retry: Retry
+    findASetting: Find a setting
+    noAttachmentData: No attachment data
+    view: View
+    download: Download
+    attachDocumentsAboutThePayment: Attach documents about the payment
+    dropFileHere: Drop a file here
+    errorPrefix: 'Error:'
+    preview: Preview
+    pdfPreview: PDF Preview
+    fileTooLarge: File too large. Max allowed size is {size}MB.
+    fileTypeNotAllowed: File type not allowed.
+    onlyPngSvgAllowed: Only PNG or SVG files are allowed.
+    fileSizeExceeds5kb: File size exceeds 5KB.
+    selected: Selected
+    noQuerySourceToRender: No query source to render
+    defaultSelectExample: Default select example
+    toggleNavigation: Toggle navigation
+    close: Close
+    home: Home
+    profile: Profile
+    settings: Settings
+    demo: Demo
+    formSelect: Form select
+    formDateTime: Form Date/Time
+    overlaysAndModal: Overlays & Modal

@@ -1,7 +1,8 @@
 import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
 import { enTranslations } from "../../../translations/en";
+import { strings } from "./strings/translations";
 
-export const columns = (t: typeof enTranslations) => [
+export const columns = (t: typeof enTranslations, s: typeof strings) => [
   {
     name: EmailProviderEntity.Fields.uniqueId,
     title: t.table.uniqueId,
@@ -9,7 +10,7 @@ export const columns = (t: typeof enTranslations) => [
   },
   {
     name: "title",
-    title: "Title",
+    title: s.emailProviders.title,
     width: 200,
   },
   {

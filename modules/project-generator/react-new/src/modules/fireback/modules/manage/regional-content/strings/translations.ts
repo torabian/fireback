@@ -16,25 +16,7 @@ export const en = {
     regionHint: "Region",
     title: "Title",
     titleHint: "Title",
-  },
-};/**
-* Auto generated file by fireback language & translation manager.
-*/
-export const pl = {
-  regionalContents: {
-    archiveTitle: "Treści regionalne",
-    content: "Treść",
-    contentHint: "Treść",
-    editRegionalContent: "Edytuj treść regionalną",
-    keyGroup: "Grupa kluczy",
-    keyGroupHint: "Grupa kluczy",
-    languageId: "Identyfikator języka",
-    languageIdHint: "Identyfikator języka",
-    newRegionalContent: "Nowa treść regionalna",
-    region: "Region",
-    regionHint: "Region",
-    title: "Tytuł",
-    titleHint: "Tytuł",
+    uniqueId: "Id",
   },
 };/**
 * Auto generated file by fireback language & translation manager.
@@ -54,6 +36,27 @@ export const fa = {
     regionHint: "منطقه",
     title: "عنوان",
     titleHint: "عنوان",
+    uniqueId: "شناسه",
+  },
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  regionalContents: {
+    archiveTitle: "Treści regionalne",
+    content: "Treść",
+    contentHint: "Treść",
+    editRegionalContent: "Edytuj treść regionalną",
+    keyGroup: "Grupa kluczy",
+    keyGroupHint: "Grupa kluczy",
+    languageId: "Identyfikator języka",
+    languageIdHint: "Identyfikator języka",
+    newRegionalContent: "Nowa treść regionalna",
+    region: "Region",
+    regionHint: "Region",
+    title: "Tytuł",
+    titleHint: "Tytuł",
+    uniqueId: "Identyfikator",
   },
 };
- export const strings = {...en, $pl:pl,$fa:fa};
+ export const strings = {...en, $fa:fa,$pl:pl};

@@ -74,3 +74,14 @@ content:
 
   selectWorkspace: You have multiple workspaces associated with your account. Select one to continue.
   selectWorkspaceTitle: Select workspace
+  authenticationFailed: Authentication has failed.
+  select: Select
+  tryAnotherAccount: Try another account
+  signout: Signout
+  totpLabel: 'TOTP:'
+  yes: 'Yes'
+  no: 'No'
+  loginMethodAriaLabel: Login method
+  facebook: Facebook
+  facebookSdkNotLoaded: Facebook SDK not loaded
+  facebookLoginFailed: Facebook login failed

@@ -20,3 +20,25 @@ content:
   theme:
     description: "Change the interface theme color"
     title: "Theme"
+  debugger:
+    userRoleWorkspaces: "User Role Workspaces"
+    data: "Data:"
+    error: "Error:"
+    firebackContext: "Fireback context:"
+    goToLalaland: "Go to Lalaland"
+    view3d: "View 3D"
+  notifications:
+    title: "Notification settings"
+    description: "Here you can manage your notifications"
+    subscribe: "Subscribe"
+    unsubscribe: "Unsubscribe"
+    failedToSubscribe: "Failed to subscribe."
+    noSubscriptionFound: "No subscription found"
+    failedToUnsubscribe: "Failed to unsubscribe."
+  languages:
+    russian: "Russian (Русский)"
+    ukrainian: "Ukrainain (українська)"
+  richThemes:
+    macAutomatic: "MacOSX Automatic"
+    macLight: "MacOSX Light"
+    macDark: "MacOSX Dark"

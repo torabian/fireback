@@ -13,3 +13,5 @@ content:
     newGsmProvider: New gsm provider
     type: Type
     typeHint: Type
+    typeTerminal: Terminal
+    typeUrl: Url

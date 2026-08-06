@@ -1,2 +1,20 @@
 content:
+  addressLine1: Address Line 1
+  addressLine1Hint: Address line 1 associated with user.
+  addressLine2: Address Line 2
+  addressLine2Hint: Address line 2 associated with user.
   birthDate: Birth date
+  city: City
+  cityName: City name
+  cityNameHint: The city address associated with user.
+  confirmed: 'Confirmed:'
+  countryCode: Country code
+  gender: Gender
+  image: Image
+  na: n/a
+  no: 'No'
+  passports: Passports
+  postalCode: Postal Code
+  type: 'Type:'
+  value: 'Value:'
+  yes: 'Yes'

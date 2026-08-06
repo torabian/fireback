@@ -4,6 +4,8 @@ import {
   type OverlayInstanceComponentProps,
 } from "./OverlayDefinitions";
 import classNames from "classnames";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 export const OverlayBaseModal = ({
   children,
@@ -13,6 +15,7 @@ export const OverlayBaseModal = ({
 }: {
   children: ReactNode;
 } & OverlayInstanceComponentProps<unknown, BaseModalOpenParams>) => {
+  const s = useS(strings);
   return (
     <div
       className={classNames(
@@ -29,7 +32,7 @@ export const OverlayBaseModal = ({
               id="cls"
               className="btn-close"
               onClick={close}
-              aria-label="Close"
+              aria-label={s.components.close}
             ></button>
           </div>
           {children}

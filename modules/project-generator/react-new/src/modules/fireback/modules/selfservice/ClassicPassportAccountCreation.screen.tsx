@@ -63,7 +63,7 @@ export const ClassicPassportAccountCreation = ({}: {}) => {
                   setSelectedWorkspaceType(workspaceType.uniqueId);
                 }}
               >
-                Select
+                {s.select}
               </button>
             </div>
           ))}

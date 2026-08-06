@@ -127,7 +127,7 @@ const Form = ({
       <p>{s.welcomeBackDescription} </p>
       <div
         role="group"
-        aria-label="Login method"
+        aria-label={s.loginMethodAriaLabel}
         className="flex gap-2 login-option-buttons"
       >
         {availableOptions.email ? (

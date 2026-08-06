@@ -1,0 +1,37 @@
+content:
+  emailProviders:
+    title: Title
+    titleHint: Title of the email provider, to search and allocate easier.
+    typeSendgrid: SendGrid
+    typeMailgun: Mailgun
+    typePostmark: Postmark
+    typeResend: Resend
+    typeCurl: Curl
+    typeSmtp: SMTP
+    typeTerminal: Terminal (Debug)
+    fieldApiKey: API Key
+    fieldDomain: Domain
+    fieldServerToken: Server Token
+    fieldCurlScript: Curl script
+    fieldCurlScriptDescription: |-
+      Curl script, which would be called upon sending email.
+                Kindly beaware, this is semantic rather
+                than actual bash script, so use limited features and no extra bash calls.
+                <br />
+                Make sure, you put the secrets, templates, credentials, here, there will be no
+                other place to use. While sending an email, following variables will be
+                replaced in your curl message.
+                <br />
+
+                %FromName%  string <br />
+                %FromEmail% string <br />
+                %ToName%    string <br />
+                %ToEmail%   string <br />
+                %Subject%   string <br />
+                %Content%   string (It will be escaped with \", so use double qoutes) <br />
+    fieldHost: Host
+    fieldPort: Port
+    fieldUsername: Username
+    fieldPassword: Password
+    sendTestEmail: Send a test email
+    mailSent: Mail has been sent

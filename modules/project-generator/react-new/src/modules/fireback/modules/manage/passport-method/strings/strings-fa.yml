@@ -6,8 +6,13 @@ content:
     clientKeyHint: کلید کلاینت برای روش‌هایی مانند گوگل، جهت احراز هویت OAuth2 استفاده
       می‌شود
     editPassportMethod: ویرایش روش پاسپورت
+    methodEmail: ایمیل
+    methodFacebook: فیسبوک
+    methodGoogle: گوگل
+    methodPhone: تلفن
     newPassportMethod: روش پاسپورت جدید
     region: منطقه
     regionHint: منطقه
     type: نوع
     typeHint: نوع
+    uniqueId: شناسه

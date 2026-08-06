@@ -4,14 +4,17 @@ import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";
 import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
 import { osResources } from "../../resources/resources";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import Link from "../link/Link";
+import { strings } from "../strings/translations";
 
 export function CurrentUser({ onClick }: { onClick: () => void }) {
   const { isAuthenticated, signout } = useContext(RemoteQueryContext);
   const router = useRouter();
   const t = useT();
+  const s = useS(strings);
   const queryClient = useQueryClient();
   const signout$ = () => {
     onClick();
@@ -26,7 +29,7 @@ export function CurrentUser({ onClick }: { onClick: () => void }) {
   };
 
   const onSignoutClick = () => {
-    if (confirm("Are you sure to leave the app?")) {
+    if (confirm(s.components.confirmLeaveApp)) {
       signout$();
     }
   };

@@ -1,0 +1,37 @@
+extends: []
+content:
+  components:
+    attachDocumentsAboutThePayment: پیوست اسناد مربوط به پرداخت
+    autoReroute: تنظیم خودکار مسیر
+    close: بستن
+    confirmLeaveApp: آیا مطمئن هستید که می‌خواهید از برنامه خارج شوید؟
+    defaultSelectExample: مثال انتخاب پیش‌فرض
+    demo: نسخه نمایشی
+    done: انجام شد
+    download: دانلود
+    dropFileHere: فایل را اینجا رها کنید
+    errorPrefix: 'خطا:'
+    fileSizeExceeds5kb: حجم فایل از ۵ کیلوبایت بیشتر است.
+    fileTooLarge: حجم فایل بیش از حد مجاز است. حداکثر اندازه مجاز {size} مگابایت است.
+    fileTypeNotAllowed: نوع فایل مجاز نیست.
+    findASetting: جستجوی یک تنظیم
+    formDateTime: فرم تاریخ/زمان
+    formSelect: فرم انتخاب
+    home: خانه
+    noAttachmentData: داده‌ای برای پیوست وجود ندارد
+    noQuerySourceToRender: منبعی برای نمایش وجود ندارد
+    onlyPngSvgAllowed: فقط فایل‌های PNG یا SVG مجاز هستند.
+    overlaysAndModal: پنجره‌های شناور و مودال
+    pdfPreview: پیش‌نمایش PDF
+    preview: پیش‌نمایش
+    profile: پروفایل
+    reset: بازنشانی
+    retry: تلاش دوباره
+    selected: انتخاب شده
+    settings: تنظیمات
+    somethingWentWrong: 'مشکلی پیش آمد:'
+    submit: ثبت
+    toggleNavigation: تغییر وضعیت ناوبری
+    unknownError: خطای ناشناخته‌ای هنگام دریافت اطلاعات رخ داد، در صورت تداوم مشکل
+      با ارائه‌دهنده نرم‌افزار خود تماس بگیرید.
+    view: مشاهده

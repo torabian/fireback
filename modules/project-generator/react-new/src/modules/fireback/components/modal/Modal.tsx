@@ -1,7 +1,9 @@
 import { useKeyPress } from "../../hooks/useKeyPress";
 import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
 import classNames from "classnames";
 import React, { useContext, useEffect, useState } from "react";
+import { strings } from "../strings/translations";
 declare var bootstrap: any;
 
 export interface ModalProps {
@@ -44,6 +46,7 @@ export function ModalView({
   context: IModalContext;
 }) {
   const t = useT();
+  const s = useS(strings);
   const Component = mref.component;
   const onSubmit = async () => {
     if (mref.onSubmit) {
@@ -64,7 +67,7 @@ export function ModalView({
               id="cls"
               className="btn-close"
               onClick={() => context.closeModal(mref.id)}
-              aria-label="Close"
+              aria-label={s.components.close}
             ></button>
           </div>
           <div className="modal-body">

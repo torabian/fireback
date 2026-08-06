@@ -7,3 +7,4 @@ content:
     name: Name
     nameHint: Name
     newCapability: New capability
+    uniqueId: Id

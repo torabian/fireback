@@ -1,8 +1,12 @@
 import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
 import { type KeyValue } from "../../../definitions/definitions";
 import { enTranslations } from "../../../translations/en";
+import { strings } from "./strings/translations";
 
-export const interfaceLanguages = (t: typeof enTranslations): KeyValue[] => [
+export const interfaceLanguages = (
+  t: typeof enTranslations,
+  s: typeof strings,
+): KeyValue[] => [
   BUILD_VARIABLES.SUPPORTED_LANGUAGES.includes("en") ?
   {
     label: t.locale.englishWorldwide,
@@ -17,7 +21,7 @@ export const interfaceLanguages = (t: typeof enTranslations): KeyValue[] => [
   /// #endif
   BUILD_VARIABLES.SUPPORTED_LANGUAGES.includes("ru") ?
   {
-    label: "Russian (Русский)",
+    label: s.languages.russian,
     value: "ru",
   } : undefined,
   /// #endif
@@ -29,7 +33,7 @@ export const interfaceLanguages = (t: typeof enTranslations): KeyValue[] => [
   /// #endif
   BUILD_VARIABLES.SUPPORTED_LANGUAGES.includes("ua") ?
   {
-    label: "Ukrainain (українська)",
+    label: s.languages.ukrainian,
     value: "ua",
   } : undefined,
   /// #endif

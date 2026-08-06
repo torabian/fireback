@@ -1,6 +1,7 @@
 extends: []
 content:
   anotherAccount: حساب دیگری انتخاب کنید
+  authenticationFailed: احراز هویت با شکست مواجه شد.
   cancelStep: لغو و امتحان روش دیگر.
   changePassword:
     description: برای تغییر رمز عبور، رمز جدید را دو بار در فیلدهای زیر وارد کنید
@@ -24,6 +25,9 @@ content:
   enterPasswordDescription: برای ادامه احراز هویت حساب خود، رمز عبور را وارد کنید.
   enterTotp: کد TOTP را وارد کنید
   enterTotpDescription: اپلیکیشن احراز هویت خود را باز کرده و ۶ رقم را وارد کنید.
+  facebook: فیسبوک
+  facebookLoginFailed: ورود با فیسبوک ناموفق بود
+  facebookSdkNotLoaded: SDK فیسبوک بارگذاری نشده است
   firstName: نام
   google: گوگل
   home:
@@ -33,6 +37,8 @@ content:
     passportsTitle: پاسپورت‌ها
     title: حساب کاربری و پروفایل
   lastName: نام خانوادگی
+  loginMethodAriaLabel: روش ورود
+  "no": خیر
   noAuthenticationMethod: احراز هویت در حال حاضر در دسترس نیست
   noAuthenticationMethodDescription: در حال حاضر امکان ورود و ثبت‌نام در منطقه شما
     وجود ندارد. اگر فکر می‌کنید این یک خطاست یا نیاز به دسترسی دارید، لطفاً با مدیر
@@ -43,6 +49,7 @@ content:
   registerationNotPossibleLine1: در این پروژه هیچ نوع فضای کاری‌ای که به‌صورت عمومی
     برای ایجاد حساب قابل استفاده باشد وجود ندارد.
   registerationNotPossibleLine2: برای ایجاد حساب، با مدیر سرویس تماس بگیرید.
+  select: انتخاب
   selectWorkspace: شما چند فضای کاری مرتبط با حساب خود دارید. برای ادامه یکی را انتخاب
     کنید.
   selectWorkspaceTitle: انتخاب فضای کاری
@@ -51,8 +58,11 @@ content:
   setupTotpDescription: برای تکمیل ثبت‌نام حساب، باید کد زیر را با استفاده از «Microsoft
     Authenticator» یا «Google Authenticator» اسکن کنید. سپس باید کد ۶ رقمی را از برنامه
     در اینجا وارد کنید.
+  signout: خروج
   skipTotpButton: فعلاً رد شو
   skipTotpInfo: می‌توانید این کار را هر زمان دیگری از بخش امنیت حساب خود انجام دهید.
+  totpLabel: 'TOTP:'
+  tryAnotherAccount: امتحان حساب دیگر
   useOneTimePassword: به‌جای آن از رمز یکبار مصرف استفاده کنید
   userPassports:
     add: افزودن پاسپورت جدید
@@ -62,3 +72,4 @@ content:
     title: پاسپورت‌ها
   welcomeBack: خوش آمدید
   welcomeBackDescription: برای دسترسی به حساب خود، هر گزینه‌ای را انتخاب کنید.
+  "yes": بله

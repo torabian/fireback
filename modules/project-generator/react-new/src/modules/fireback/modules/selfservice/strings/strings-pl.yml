@@ -1,6 +1,7 @@
 extends: []
 content:
   anotherAccount: Wybierz inne konto
+  authenticationFailed: Uwierzytelnianie nie powiodło się.
   cancelStep: Anuluj i spróbuj innej metody.
   changePassword:
     description: Aby zmienić hasło, wprowadź nowe hasło dwukrotnie w polach poniżej
@@ -23,6 +24,9 @@ content:
   enterPasswordDescription: Wprowadź swoje hasło, aby kontynuować autoryzację konta.
   enterTotp: Wprowadź kod TOTP
   enterTotpDescription: Otwórz aplikację uwierzytelniającą i wprowadź 6-cyfrowy kod.
+  facebook: Facebook
+  facebookLoginFailed: Logowanie przez Facebook nie powiodło się
+  facebookSdkNotLoaded: SDK Facebooka nie zostało załadowane
   firstName: Imię
   google: Google
   home:
@@ -32,6 +36,8 @@ content:
     passportsTitle: Paszporty
     title: Konto i profil
   lastName: Nazwisko
+  loginMethodAriaLabel: Metoda logowania
+  "no": Nie
   noAuthenticationMethod: Uwierzytelnianie obecnie niedostępne
   noAuthenticationMethodDescription: Logowanie i rejestracja są obecnie niedostępne
     w Twoim regionie. Jeśli uważasz, że to błąd lub potrzebujesz dostępu, skontaktuj
@@ -43,6 +49,7 @@ content:
     roboczych do publicznego tworzenia konta.
   registerationNotPossibleLine2: Skontaktuj się z administratorem usługi, aby utworzył
     konto dla Ciebie.
+  select: Wybierz
   selectWorkspace: Masz wiele przestrzeni roboczych powiązanych z Twoim kontem. Wybierz
     jedną, aby kontynuować.
   selectWorkspaceTitle: Wybierz przestrzeń roboczą
@@ -51,9 +58,12 @@ content:
   setupTotpDescription: Aby zakończyć rejestrację konta, zeskanuj poniższy kod za
     pomocą aplikacji „Microsoft Authenticator” lub „Google Authenticator”. Następnie
     wprowadź tutaj 6-cyfrowy kod z aplikacji.
+  signout: Wyloguj
   skipTotpButton: Pomiń na razie
   skipTotpInfo: Możesz skonfigurować to później, odwiedzając sekcję bezpieczeństwa
     konta.
+  totpLabel: 'TOTP:'
+  tryAnotherAccount: Spróbuj innego konta
   useOneTimePassword: Użyj jednorazowego hasła zamiast tego
   userPassports:
     add: Dodaj nowy paszport
@@ -64,3 +74,4 @@ content:
   welcomeBack: Witamy ponownie
   welcomeBackDescription: Wybierz dowolną opcję, aby kontynuować dostęp do swojego
     konta.
+  "yes": Tak

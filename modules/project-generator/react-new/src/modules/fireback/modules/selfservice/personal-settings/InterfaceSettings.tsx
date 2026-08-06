@@ -8,10 +8,12 @@ import { type KeyValue } from "../../../definitions/definitions";
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import { enTranslations } from "../../../translations/en";
 import { FormSelect } from "../../../components/forms/form-select/FormSelect";
 import { createQuerySource } from "../../../hooks/useAsQuery";
 import { interfaceLanguages } from "./Langugages";
+import { strings } from "./strings/translations";
 
 interface InterfaceSettingsInformation {
   interfaceLanguage: string;
@@ -37,6 +39,7 @@ export function InterfaceSettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
   const t = useT();
+  const s = useS(strings);
   const { router, uniqueId, queryClient, isEditing, locale, formik } =
     useCommonEntityManager<Partial<InterfaceSettingsInformation>>({});
 
@@ -58,7 +61,7 @@ export function InterfaceSettings({}: {}) {
     formik.current?.setValues({ interfaceLanguage: config.interfaceLanguage });
   }, [config.remote]);
 
-  const languages = interfaceLanguages(t);
+  const languages = interfaceLanguages(t, s);
   const languagesQuerySource = createQuerySource(languages);
 
   return (

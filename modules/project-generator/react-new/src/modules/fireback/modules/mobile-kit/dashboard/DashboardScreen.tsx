@@ -1,8 +1,12 @@
+import { useS } from "@/modules/fireback/hooks/useS";
+import { strings } from "./strings/translations";
+
 export const DashboardScreen = () => {
+  const s = useS(strings);
   return (
     <div>
-      <h1 className="mt-4">Dashboard</h1>
-      <p>Welcome to the dashboard. You can see what's going on here.</p>
+      <h1 className="mt-4">{s.dashboard.title}</h1>
+      <p>{s.dashboard.description}</p>
     </div>
   );
 };

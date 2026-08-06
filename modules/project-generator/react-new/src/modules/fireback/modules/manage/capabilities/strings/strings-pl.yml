@@ -8,3 +8,4 @@ content:
     name: Name
     nameHint: Name
     newCapability: New capability
+    uniqueId: Identyfikator

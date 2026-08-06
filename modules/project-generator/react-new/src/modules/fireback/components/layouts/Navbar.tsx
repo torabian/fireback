@@ -14,6 +14,8 @@ import { ReactiveSearch } from "../reactive-search/ReactiveSearch";
 import { useOverlay } from "../overlay/OverlayProvider";
 import Sidebar from "./Sidebar";
 import { detectDeviceType } from "../../hooks/deviceInformation";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 function Navbar({
   menu,
@@ -26,6 +28,7 @@ function Navbar({
 }) {
   const { toggleSidebar, closeCurrentRouter } = useUiState();
   const { openDrawer } = useOverlay();
+  const s = useS(strings);
 
   useKeyCombination(KeyboardAction.SidebarToggle, () => {
     toggleSidebar();
@@ -92,7 +95,7 @@ function Navbar({
             data-bs-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent"
             aria-expanded="false"
-            aria-label="Toggle navigation"
+            aria-label={s.components.toggleNavigation}
           >
             <span className="navbar-toggler-icon"></span>
           </button>

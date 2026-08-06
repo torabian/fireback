@@ -14,3 +14,4 @@ content:
     regionHint: Region
     title: Tytuł
     titleHint: Tytuł
+    uniqueId: Identyfikator

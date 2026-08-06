@@ -2,5 +2,13 @@ extends: []
 content:
   editPassport: ویرایش پاسپورت
   newPassport: پاسپورت جدید
+  optionEmailPassword: ایمیل و رمز عبور
+  optionPhoneNumber: شماره تلفن
+  passwordByEmail: ارسال ایمیلی به کاربر، حاوی رمز عبور موقت آن‌ها
+  passwordShowPassword: نمایش رمز عبور موقت به من
+  type: نوع
+  typeEmail: ایمیل
+  typeHint: روش‌های پاسپورتی که در این برنامه در دسترس هستند
+  typePhone: تلفن
   value: شناسه (ایمیل، شماره تلفن)
   valueHint: شناسه واقعی پاسپورت؛ برای ایمیل، آدرس کامل ایمیل است

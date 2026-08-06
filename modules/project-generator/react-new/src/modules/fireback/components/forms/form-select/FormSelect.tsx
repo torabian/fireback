@@ -8,10 +8,12 @@ import { useState } from "react";
 import { useQueryClient, type UseQueryResult } from "react-query";
 import Select from "react-select/async";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import {
   BaseFormElement,
   type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
+import { strings } from "../../strings/translations";
 
 export interface FormSelectBase<
   T,
@@ -200,12 +202,13 @@ export function FormSelectMultiple<T, V>(props: FormSelectMultipleProps<T, V>) {
 }
 export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
   const t = useT();
+  const s = useS(strings);
 
   const queryClient = useQueryClient();
   let [keyword, setKeyword] = useState<string>("");
 
   if (!props.querySource) {
-    return <div>No query source to render</div>;
+    return <div>{s.components.noQuerySourceToRender}</div>;
   }
 
   const { query, keyExtractor: queryKeyExtractor } = props.querySource({
@@ -317,7 +320,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
             props.validMessage && "is-valid",
           )}
           disabled={props.disabled}
-          aria-label="Default select example"
+          aria-label={s.components.defaultSelectExample}
         >
           <option key={undefined} value={""}>
             {t.selectPlaceholder}

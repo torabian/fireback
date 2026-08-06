@@ -13,12 +13,11 @@ export const GsmProviderForm = ({
 }: EntityFormProps<GsmProviderEntity>) => {
   const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
-  const gsmTypes = createQuerySource([
-    { uniqueId: 'terminal', title: 'Terminal' },
-    { uniqueId: 'url' , title: 'Url'},
-  ]);
-
   const s = useS(strings);
+  const gsmTypes = createQuerySource([
+    { uniqueId: 'terminal', title: s.gsmProviders.typeTerminal },
+    { uniqueId: 'url' , title: s.gsmProviders.typeUrl},
+  ]);
   return (
     <>
       <FormText

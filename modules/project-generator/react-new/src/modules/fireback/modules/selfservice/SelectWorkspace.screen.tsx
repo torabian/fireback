@@ -38,7 +38,7 @@ export const SelectWorkspaceScreen = () => {
                   })
                 }
               >
-                Select ({role.name})
+                {s.select} ({role.name})
               </button>
             ))}
           </div>

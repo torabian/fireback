@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { QueryErrorView } from "../error-view/QueryError";
 import { Toast } from "../../hooks/toast";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 export interface HeadlessEntityManagerProps<T> {
   data?: T | null;
@@ -45,6 +47,7 @@ export const HeadlessEntityManager = ({
   >({
     data,
   });
+  const s = useS(strings);
 
   // const { query: getQuery } = getSingleHook;
 
@@ -79,7 +82,7 @@ export const HeadlessEntityManager = ({
         } else if (onFinishUriResolver) {
           router.goBackOrDefault(onFinishUriResolver(response, locale));
         } else {
-          Toast("Done", { type: "success" });
+          Toast(s.components.done, { type: "success" });
         }
       }
     });
@@ -122,7 +125,7 @@ export const HeadlessEntityManager = ({
           <Form isEditing={isEditing} form={form} />
           {/* <ProductPlanForm form={form} /> */}
           <button className="btn btn-primary" type="submit">
-            Submit
+            {s.components.submit}
           </button>
         </form>
       )}

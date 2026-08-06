@@ -14,6 +14,8 @@ import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext"
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 export function dataMenuToMenu(
   data: AppMenuOptionalDto,
@@ -71,6 +73,7 @@ function Sidebar({
     sidebarItemSelected,
   } = useUiState();
   const menu = useRemoteMenuResolver("sidebar");
+  const s = useS(strings);
 
   const { reset } = useContext(ReactiveSearchContext);
 
@@ -128,22 +131,22 @@ function Sidebar({
             sidebarItemSelectedExtra?.();
           }}
           menu={{
-            label: "Demo",
+            label: s.components.demo,
             children: [
               {
-                label: "Form select",
+                label: s.components.formSelect,
                 icon: "/ios-theme/icons/settings.svg",
                 children: [],
                 href: "/demo/form-select",
               },
               {
-                label: "Form Date/Time",
+                label: s.components.formDateTime,
                 icon: "/ios-theme/icons/settings.svg",
                 children: [],
                 href: "/demo/form-date",
               },
               {
-                label: "Overlays & Modal",
+                label: s.components.overlaysAndModal,
                 icon: "/ios-theme/icons/settings.svg",
                 children: [],
                 href: "/demo/modals",

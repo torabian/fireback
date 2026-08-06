@@ -1,6 +1,14 @@
 content:
   editPassport: Edit Passport
   newPassport: New Passport
+  optionEmailPassword: Email and Password
+  optionPhoneNumber: Phone number
+  passwordByEmail: Send an email to user, containing their temporary password
+  passwordShowPassword: Show me their temporary password
+  type: Type
+  typeEmail: Email
+  typeHint: Passport methods which are available in this app
+  typePhone: Phone
   value: Identifier (email, phonenumber)
   valueHint: The actual identifier for passport, for email is the complete address
     for example

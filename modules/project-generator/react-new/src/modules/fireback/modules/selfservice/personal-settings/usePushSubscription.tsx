@@ -1,8 +1,11 @@
 import { usePostWebPushConfig } from "@/modules/fireback/sdk/modules/fireback/usePostWebPushConfig";
 import { useEffect, useState } from "react";
+import { useS } from "../../../hooks/useS";
+import { strings } from "./strings/translations";
 
 export function usePushSubscription() {
   const { submit } = usePostWebPushConfig();
+  const s = useS(strings);
 
   useEffect(() => {
     if (navigator.serviceWorker) {
@@ -50,7 +53,7 @@ export function usePushSubscription() {
       console.log("Subscribed:", JSON.stringify(sub));
       setIsSubscribed(true);
     } catch (err) {
-      setError("Failed to subscribe.");
+      setError(s.notifications.failedToSubscribe);
       console.error("Subscription failed:", err);
     } finally {
       setIsSubscribing(false);
@@ -67,10 +70,10 @@ export function usePushSubscription() {
         await sub.unsubscribe();
         setIsSubscribed(false);
       } else {
-        setError("No subscription found");
+        setError(s.notifications.noSubscriptionFound);
       }
     } catch (err) {
-      setError("Failed to unsubscribe.");
+      setError(s.notifications.failedToUnsubscribe);
       console.error("Unsubscription failed:", err);
     } finally {
       setIsSubscribing(false);

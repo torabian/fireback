@@ -4,7 +4,7 @@ import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
   {
     name: "uniqueId",
-    title: "uniqueId",
+    title: t.regionalContents.uniqueId,
     width: 200,
   },
   {

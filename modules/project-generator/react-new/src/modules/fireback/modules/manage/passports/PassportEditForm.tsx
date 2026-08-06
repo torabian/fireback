@@ -13,7 +13,7 @@ export const PassportEditForm = ({
 }: EntityFormProps<Partial<PassportEntity>>) => {
   const { values, setFieldValue, errors, setValues } = form;
   const s = useS(strings);
-  const passportTypesQuery = createQuerySource(getPassportTypes());
+  const passportTypesQuery = createQuerySource(getPassportTypes(s));
 
   return (
     <>
@@ -28,8 +28,8 @@ export const PassportEditForm = ({
               },
             }}
             querySource={passportTypesQuery}
-            label="Type"
-            hint="Passport methods which are available in this app"
+            label={s.type}
+            hint={s.typeHint}
           />
         </div>
         <div className="col-md-12">

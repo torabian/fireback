@@ -1,8 +1,10 @@
 import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
 import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 import { useFileListener } from "../../window-drop/WindowDrop";
+import { strings } from "../../strings/translations";
 
 export type XFile =
   | {
@@ -29,21 +31,23 @@ function buildAcceptString(rules: FileValidationRule[]): string {
 
 function validateFileAgainstRules(
   file: File,
-  rules: FileValidationRule[]
+  rules: FileValidationRule[],
+  s: typeof strings
 ): string | null {
   for (const rule of rules) {
     const matchesType =
       !rule.mimeStartsWith || file.type.startsWith(rule.mimeStartsWith);
     if (matchesType) {
       if (file.size > rule.maxSize) {
-        return `File too large. Max allowed size is ${Math.round(
-          rule.maxSize / 1024 / 1024
-        )}MB.`;
+        return s.components.fileTooLarge.replace(
+          "{size}",
+          String(Math.round(rule.maxSize / 1024 / 1024))
+        );
       }
       return null; // valid
     }
   }
-  return "File type not allowed.";
+  return s.components.fileTypeNotAllowed;
 }
 
 interface FormXFileProps {
@@ -87,6 +91,7 @@ export const FormXFile = ({
   validateFile,
 }: FormXFileProps) => {
   const t = useT();
+  const s = useS(strings);
   const { uploadSingle } = useFileUploader(); // assumes a custom tus uploader
   const [uploadError, setUploadError] = useState();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -99,7 +104,7 @@ export const FormXFile = ({
     if (!file) return;
 
     if (validateFile?.length) {
-      const error = validateFileAgainstRules(file, validateFile);
+      const error = validateFileAgainstRules(file, validateFile, s);
       if (error) {
         alert(error);
         return;
@@ -162,7 +167,7 @@ export const FormXFile = ({
 
   useFileListener({
     enabled: !!onChange,
-    label: "Drop a file here",
+    label: s.components.dropFileHere,
     extentions: ["*"],
     onCaptureFile(files) {
       handleFiles(files);
@@ -190,7 +195,11 @@ export const FormXFile = ({
           {t.drive.attachFile}
         </button>
       )}
-      {uploadError ? <pre>Error: {(uploadError as any).toString()}</pre> : null}
+      {uploadError ? (
+        <pre>
+          {s.components.errorPrefix} {(uploadError as any).toString()}
+        </pre>
+      ) : null}
       <div className="space-y-2">
         {file && (
           <div className="mt-4">
@@ -201,7 +210,7 @@ export const FormXFile = ({
         {fileType.startsWith("image/") && previewUrl && (
           <img
             src={previewUrl}
-            alt="Preview"
+            alt={s.components.preview}
             className="max-w-full max-h-80"
             style={{ maxWidth: "50%" }}
           />
@@ -219,7 +228,7 @@ export const FormXFile = ({
           <iframe
             src={previewUrl}
             className="w-full h-96 border rounded"
-            title="PDF Preview"
+            title={s.components.pdfPreview}
           />
         )}
 

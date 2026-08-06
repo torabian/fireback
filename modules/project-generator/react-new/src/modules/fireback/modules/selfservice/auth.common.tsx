@@ -1,7 +1,9 @@
 import { useContext, useEffect } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
+import { useS } from "../../hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { strings } from "./strings/translations";
 import type { ClassicPassportOtpActionRes } from "../../sdk/abac/ClassicPassportOtpAction";
 import type { ClassicSigninActionRes } from "../../sdk/abac/ClassicSigninAction";
 import type { ClassicSignupActionRes } from "../../sdk/abac/ClassicSignupAction";
@@ -29,6 +31,7 @@ export const useCompleteAuth = () => {
   const { setSession, selectUrw, selectedUrw } = useContext(RemoteQueryContext);
   const { locale } = useLocale();
   const { replace } = useRouter();
+  const s = useS(strings);
 
   const onComplete = (
     res: GResponse<
@@ -55,7 +58,7 @@ export const useCompleteAuth = () => {
     const token = session.token;
 
     if (!token) {
-      alert("Authentication has failed.");
+      alert(s.authenticationFailed);
       return;
     }
 

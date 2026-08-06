@@ -11,3 +11,4 @@ content:
   confirmRejectTitle: Reject invite
   confirmRejectDescription: Are you sure to reject this invitation? You need to be reinvited by admins again.
   acceptBtn: "Yes"
+  successful: Successful.

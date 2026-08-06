@@ -1,6 +1,8 @@
 import { httpErrorHanlder } from "../../hooks/api";
 import { Toast } from "../../hooks/toast";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect, useRef, useState } from "react";
 import { KeyboardAction } from "../../definitions/definitions";
@@ -65,6 +67,7 @@ export const CommonEntityManager = ({
   >({
     data,
   });
+  const s = useS(strings);
 
   const touchedData = useRef({});
 
@@ -108,7 +111,7 @@ export const CommonEntityManager = ({
         } else if (onFinishUriResolver) {
           router.goBackOrDefault(onFinishUriResolver(response, locale));
         } else {
-          Toast("Done", { type: "success" });
+          Toast(s.components.done, { type: "success" });
         }
       }
     }).catch((err) => httpErrorHanlder(err, t));

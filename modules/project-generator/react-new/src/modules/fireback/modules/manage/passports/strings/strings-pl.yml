@@ -2,5 +2,13 @@ extends: []
 content:
   editPassport: Edytuj paszport
   newPassport: Nowy paszport
+  optionEmailPassword: E-mail i hasło
+  optionPhoneNumber: Numer telefonu
+  passwordByEmail: Wyślij e-mail do użytkownika z tymczasowym hasłem
+  passwordShowPassword: Pokaż mi tymczasowe hasło
+  type: Typ
+  typeEmail: E-mail
+  typeHint: Metody paszportowe dostępne w tej aplikacji
+  typePhone: Telefon
   value: Identyfikator (e-mail, numer telefonu)
   valueHint: Faktyczny identyfikator paszportu, np. pełny adres e-mail
