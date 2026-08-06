@@ -1,163 +1,576 @@
 package abac
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/pquerna/otp/totp"
+	"bytes"
+	"context"
+	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli/v3"
+	"io"
+	"net/http"
+	"net/url"
+	"reflect"
 )
 
+/**
+* Action to communicate with the action ClassicPassportRequestOtpAction
+ */
+/*
+Here is a quick function implementation to make your life easier:
+// Actual implementation of ClassicPassportRequestOtpAction
 func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err2 := classicPassportRequestOtpCore(c.Body, *query)
-	if err2 != nil {
-		return nil, err2
-	}
-
 	return &ClassicPassportRequestOtpActionResponse{
-		Payload: fireback.GResponseSingleItem(res),
+		// Payload is an interface. Use it at carefully.
 	}, nil
 }
+*/
+func ClassicPassportRequestOtpActionMeta() struct {
+	Name        string
+	CliName     string
+	URL         string
+	Method      string
+	Description string
+} {
+	return struct {
+		Name        string
+		CliName     string
+		URL         string
+		Method      string
+		Description string
+	}{
+		Name:        "ClassicPassportRequestOtpAction",
+		CliName:     "otp-request",
+		URL:         "/workspace/passport/request-otp",
+		Method:      "POST",
+		Description: `Triggers an otp request, and will send an sms or email to the passport. This endpoint is not used for login, but rather makes a request at initial step. Later you can call classicPassportOtp to get in.`,
+	}
+}
 
-// classicPassportRequestOtpCore holds the actual implementation, reusable by callers
-// which already have a resolved QueryDSL (such as checkClassicPassportCore, or the cli-only AuthFlow).
-func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionRes, *fireback.IError) {
+// The base class definition for classicPassportRequestOtpActionReq
+type ClassicPassportRequestOtpActionReq struct {
+	// Passport value (email, phone number) which would be receiving the otp code.
+	Value string `json:"value" validate:"required" yaml:"value"`
+}
 
-	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
+func (x *ClassicPassportRequestOtpActionReq) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
+func GetClassicPassportRequestOtpActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name:        prefix + "value",
+			Type:        "string",
+			Description: "Passport value (email, phone number) which would be receiving the otp code.",
+		},
+	}
+}
+func CastClassicPassportRequestOtpActionReqFromCli(c emigo.CliCastable) ClassicPassportRequestOtpActionReq {
+	data := ClassicPassportRequestOtpActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	return data
+}
+
+// The base class definition for classicPassportRequestOtpActionRes
+type ClassicPassportRequestOtpActionRes struct {
+	SuspendUntil int64 `json:"suspendUntil" yaml:"suspendUntil"`
+	ValidUntil   int64 `json:"validUntil" yaml:"validUntil"`
+	BlockedUntil int64 `json:"blockedUntil" yaml:"blockedUntil"`
+	// The amount of time left to unblock for next request
+	SecondsToUnblock int64 `json:"secondsToUnblock" yaml:"secondsToUnblock"`
+}
+
+func (x *ClassicPassportRequestOtpActionRes) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
+func GetClassicPassportRequestOtpActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "suspend-until",
+			Type: "int64",
+		},
+		{
+			Name: prefix + "valid-until",
+			Type: "int64",
+		},
+		{
+			Name: prefix + "blocked-until",
+			Type: "int64",
+		},
+		{
+			Name:        prefix + "seconds-to-unblock",
+			Type:        "int64",
+			Description: "The amount of time left to unblock for next request",
+		},
+	}
+}
+func CastClassicPassportRequestOtpActionResFromCli(c emigo.CliCastable) ClassicPassportRequestOtpActionRes {
+	data := ClassicPassportRequestOtpActionRes{}
+	if c.IsSet("suspend-until") {
+		data.SuspendUntil = int64(c.Int64("suspend-until"))
+	}
+	if c.IsSet("valid-until") {
+		data.ValidUntil = int64(c.Int64("valid-until"))
+	}
+	if c.IsSet("blocked-until") {
+		data.BlockedUntil = int64(c.Int64("blocked-until"))
+	}
+	if c.IsSet("seconds-to-unblock") {
+		data.SecondsToUnblock = int64(c.Int64("seconds-to-unblock"))
+	}
+	return data
+}
+
+type ClassicPassportRequestOtpActionResponse struct {
+	StatusCode int
+	Headers    map[string]string
+	Payload    interface{}
+	// Do not manually fill this in. It has no effect. This is only useful when you are using
+	// client code, and want to get access to the original response. When sending response from your
+	// application it will be ignored.
+	resp *http.Response
+}
+
+func (x *ClassicPassportRequestOtpActionResponse) SetContentType(contentType string) *ClassicPassportRequestOtpActionResponse {
+	if x.Headers == nil {
+		x.Headers = make(map[string]string)
+	}
+	x.Headers["Content-Type"] = contentType
+	return x
+}
+func (x *ClassicPassportRequestOtpActionResponse) AsStream(r io.Reader, contentType string) *ClassicPassportRequestOtpActionResponse {
+	x.Payload = r
+	x.SetContentType(contentType)
+	return x
+}
+func (x *ClassicPassportRequestOtpActionResponse) AsJSON(payload any) *ClassicPassportRequestOtpActionResponse {
+	x.Payload = payload
+	x.SetContentType("application/json")
+	return x
+}
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *ClassicPassportRequestOtpActionResponse) WithIdeal(payload ClassicPassportRequestOtpActionRes) *ClassicPassportRequestOtpActionResponse {
+	x.Payload = payload
+	return x
+}
+
+// Use this for client calls, so the payload is being casted
+func (x *ClassicPassportRequestOtpActionResponse) AsIdeal() (*ClassicPassportRequestOtpActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
 		return nil, err
 	}
-
-	var secondsToUnblock int64 = 120
-
-	var olderEntity *PublicAuthenticationEntity = nil
-	fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Find(&olderEntity)
-
-	if olderEntity != nil && time.Now().UnixNano() < olderEntity.BlockedUntil {
-		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
-		return &ClassicPassportRequestOtpActionRes{
-			BlockedUntil:     olderEntity.BlockedUntil,
-			SecondsToUnblock: remaining,
-		}, fireback.Create401Error(&AbacMessages.OtaRequestBlockedUntil, []string{})
-	} else {
-		// Let's delete the record, to start the process fresh
-		fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&PublicAuthenticationEntity{})
+	var res ClassicPassportRequestOtpActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
 	}
+	return &res, nil
+}
+func (x *ClassicPassportRequestOtpActionResponse) AsHTML(payload string) *ClassicPassportRequestOtpActionResponse {
+	x.Payload = payload
+	x.SetContentType("text/html; charset=utf-8")
+	return x
+}
+func (x *ClassicPassportRequestOtpActionResponse) AsBytes(payload []byte) *ClassicPassportRequestOtpActionResponse {
+	x.Payload = payload
+	x.SetContentType("application/octet-stream")
+	return x
+}
+func (x ClassicPassportRequestOtpActionResponse) GetStatusCode() int {
+	return x.StatusCode
+}
+func (x ClassicPassportRequestOtpActionResponse) GetRespHeaders() map[string]string {
+	return x.Headers
+}
+func (x ClassicPassportRequestOtpActionResponse) GetPayload() interface{} {
+	return x.Payload
+}
 
-	passport, user, err := UnsafeGetUserByPassportValue(req.Value, query)
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
+type ClassicPassportRequestOtpActionRequestSig = func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error)
 
-	// We only throw error if passport not available, other errors we need to throw
-	if err != nil {
-		if item := err.Message["$"]; item != "PassportNotAvailable" {
-			return nil, err
-		}
+/**
+ * Query parameters for ClassicPassportRequestOtpAction
+ */
+// Query wrapper with private fields
+type ClassicPassportRequestOtpActionQuery struct {
+	values url.Values
+	mapped map[string]interface{}
+	// Typesafe fields
+}
+
+func ClassicPassportRequestOtpActionQueryFromString(rawQuery string) ClassicPassportRequestOtpActionQuery {
+	v := ClassicPassportRequestOtpActionQuery{}
+	values, _ := url.ParseQuery(rawQuery)
+	mapped := map[string]interface{}{}
+	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
+		mapped = result
 	}
-
-	uid := fireback.UUID()
-	otp := fireback.GenerateRandomKey(6)
-	url := "http://localhost:8888/reset-password?session=" + uid
-	secret := fireback.UUID_Long() + "." + fireback.UUID_Long()
-
-	item := &PublicAuthenticationEntity{
-		UniqueId:            uid,
-		BlockedUntil:        time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
-		Otp:                 otp,
-		RecoveryAbsoluteUrl: url,
-		PassportValue:       req.Value,
-		WorkspaceId:         emigo.NullableOf(ROOT_VAR),
-		SessionSecret:       secret,
-		IsInCreationProcess: emigo.NullableOf(false),
-	}
-	if passport != nil {
-		item.PassportId = emigo.NullableOf(passport.UniqueId)
-	}
-	if user != nil {
-		item.UserId = emigo.NullableOf(user.UniqueId)
-	}
-
-	// add time based dual factor information
-	key, _ := totp.Generate(totp.GenerateOpts{
-		Issuer:      "Fireback",
-		AccountName: req.Value,
+	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
+		TagName:          "json", // reuse json tags
+		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
+		Result:           &v,
 	})
-
-	totpSecret := key.Secret()
-	totpLink := key.URL()
-
-	if totpSecret != "" {
-		item.TotpSecret = totpSecret
+	if err == nil {
+		_ = decoder.Decode(mapped)
 	}
-	if totpLink != "" {
-		item.TotpLink = totpLink
+	v.values = values
+	v.mapped = mapped
+	return v
+}
+func ClassicPassportRequestOtpActionQueryFromHttp(r *http.Request) ClassicPassportRequestOtpActionQuery {
+	return ClassicPassportRequestOtpActionQueryFromString(r.URL.RawQuery)
+}
+func (q ClassicPassportRequestOtpActionQuery) Values() url.Values {
+	return q.values
+}
+func (q ClassicPassportRequestOtpActionQuery) Mapped() map[string]interface{} {
+	return q.mapped
+}
+func (q *ClassicPassportRequestOtpActionQuery) SetValues(v url.Values) {
+	q.values = v
+}
+func (q *ClassicPassportRequestOtpActionQuery) SetMapped(m map[string]interface{}) {
+	q.mapped = m
+}
+
+type ClassicPassportRequestOtpActionRequest struct {
+	Body        ClassicPassportRequestOtpActionReq
+	QueryParams url.Values
+	// Automatically casted headers, for purpose of typesafe headers in later versions
+	Headers http.Header
+	// Gin context for each request in case of a direct access requirement
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
+	// Reference to the application instance, in such scenarios that entire
+	// application is wrapped into a single struct that holds database connection,
+	// routes, etc.
+	Application interface{}
+}
+
+// Returns the gin ctx. You need to manually cast this to .(*gin.Context)
+func (x ClassicPassportRequestOtpActionRequest) GetGinCtx() interface{} {
+	return x.GinCtx
+}
+
+// Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
+func (x ClassicPassportRequestOtpActionRequest) GetCliCtx() interface{} {
+	return x.CliCtx
+}
+func ClassicPassportRequestOtpActionClientCreateUrl(
+	req ClassicPassportRequestOtpActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*url.URL, error) {
+	meta := ClassicPassportRequestOtpActionMeta()
+	urlAddr := meta.URL
+	urlAddr = config.BaseURL + urlAddr
+	// Build final URL with query string
+	u, err := url.Parse(urlAddr)
+	if err != nil {
+		return nil, err
 	}
-
-	// If passport doesn't exists, we assume now user wants to create an account.
-	// we will store the entity with details, and after verifying, the account creation process starts
-	if passport == nil {
-
-		item.IsInCreationProcess = emigo.NullableOf(true)
+	// if UrlValues present, encode and append
+	if len(req.QueryParams) > 0 {
+		u.RawQuery = req.QueryParams.Encode()
 	}
-
-	if err := fireback.GetDbRef().Create(item).Error; err != nil {
-		return nil, fireback.GormErrorToIError(err)
+	return u, nil
+}
+func ClassicPassportRequestOtpActionClientExecuteTyped(httpReq *http.Request) (*ClassicPassportRequestOtpActionResponse, error) {
+	resp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		return nil, err
 	}
-
-	_, passportType := validatePassportType(req.Value)
-
-	if passportType == PASSPORT_METHOD_PHONE {
-
-		result := QuickGetOtpMessage(query, SMS_OTP)
-		body, err3 := result.CompileContent(map[string]string{"Otp": otp})
-		if err3 != nil {
-			return nil, fireback.CastToIError(err3)
+	// At this point, response is valid, and we need to return the results.
+	var result ClassicPassportRequestOtpActionResponse
+	result.resp = resp
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return &result, err
+	}
+	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
+		return &result, err
+	}
+	return &result, nil
+}
+func ClassicPassportRequestOtpActionClientBuildRequest(req ClassicPassportRequestOtpActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := ClassicPassportRequestOtpActionMeta()
+	bodyBytes, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header = make(http.Header)
+	// copy defaults
+	for k, v := range config.Headers {
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
 		}
-
-		if _, err2 := GsmSendSMSUsingNotificationConfig(body, []string{req.Value}); err2 != nil {
-			return nil, fireback.GormErrorToIError(err2)
+	}
+	// override with request-specific headers
+	for k, v := range req.Headers {
+		httpReq.Header.Del(k) // ensure override, not duplicate
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
 		}
+	}
+	return httpReq, nil
+}
+func ClassicPassportRequestOtpActionCall(
+	req ClassicPassportRequestOtpActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*ClassicPassportRequestOtpActionResponse, error) {
+	// This function intentionally is split into 3 different sections, so in case
+	// of some modifications that we did not anticipate, at least a part would become quite useful.
+	// first we create url, apply all path parameters, query params, etc
+	u, err := ClassicPassportRequestOtpActionClientCreateUrl(req, config)
+	if err != nil {
+		return nil, err
+	}
+	// We create the request from the body in second stage
+	r, err := ClassicPassportRequestOtpActionClientBuildRequest(req, u, config)
+	if err != nil {
+		return nil, err
+	}
+	// This one would execute the request and cast the result.
+	return ClassicPassportRequestOtpActionClientExecuteTyped(r)
+}
 
-	} else if passportType == PASSPORT_METHOD_EMAIL {
-		result := QuickGetOtpMessage(query, EMAIL_OTP)
-		var body = ""
-		var title = ""
-		if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
-			return nil, fireback.CastToIError(err3)
+// ClassicPassportRequestOtpActionRaw registers a raw Gin route for the ClassicPassportRequestOtpAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func ClassicPassportRequestOtpActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := ClassicPassportRequestOtpActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
+}
+
+// ClassicPassportRequestOtpActionHandler returns the HTTP method, route URL, and a typed Gin handler for the ClassicPassportRequestOtpAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func ClassicPassportRequestOtpActionHandler(
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := ClassicPassportRequestOtpActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body ClassicPassportRequestOtpActionReq
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+		// Build typed request wrapper
+		req := ClassicPassportRequestOtpActionRequest{
+			Body:        body,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
 		} else {
-			body = body0
+			m.Status(status)
 		}
-
-		if title0, err3 := result.CompileTitle(map[string]string{"Otp": otp}); err3 != nil {
-			return nil, fireback.CastToIError(err3)
-		} else {
-			title = title0
-		}
-
-		msg := EmailMessageContent{
-			Subject:   title,
-			Content:   body,
-			ToEmail:   req.Value,
-			FromName:  "Account Center",
-			FromEmail: "accountcenter@gmail.com",
-			ToName:    req.Value,
-		}
-
-		if _, err2 := SendEmailUsingNotificationConfig(&msg, GENERAL_SENDER); err2 != nil {
-			return nil, fireback.GormErrorToIError(err2)
-		}
-
-	} else if passportType == ANONYMOUS_AUTHENTICATION && query.C != nil && query.G == nil {
-		// If only, in cli mode, we print the otp information on the cli screen
-		fmt.Println("Your otp code for anonymous login on cli only: ", otp)
-	} else {
-		return nil, &fireback.IError{Message: AbacMessages.OtpNotAvailableForThisType}
 	}
+}
 
-	return &ClassicPassportRequestOtpActionRes{
-		SecondsToUnblock: secondsToUnblock,
-	}, nil
+// ClassicPassportRequestOtpActionGin is a high-level convenience wrapper around ClassicPassportRequestOtpActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func ClassicPassportRequestOtpActionGin(r gin.IRoutes, handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error)) {
+	method, url, h := ClassicPassportRequestOtpActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x ClassicPassportRequestOtpActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func ClassicPassportRequestOtpActionQueryFromGin(c *gin.Context) ClassicPassportRequestOtpActionQuery {
+	return ClassicPassportRequestOtpActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x ClassicPassportRequestOtpActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// ClassicPassportRequestOtpActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the ClassicPassportRequestOtpAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func ClassicPassportRequestOtpActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetClassicPassportRequestOtpActionReqCliFlags(""))...)
+	return flags
+}
+
+// ClassicPassportRequestOtpActionCliHandler builds a full *cli.Command for the
+// ClassicPassportRequestOtpAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a ClassicPassportRequestOtpActionRequest the same way
+// ClassicPassportRequestOtpActionHandler (Gin) and ClassicPassportRequestOtpActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func ClassicPassportRequestOtpActionCliHandler(
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) *cli.Command {
+	meta := ClassicPassportRequestOtpActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: ClassicPassportRequestOtpActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := ClassicPassportRequestOtpActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastClassicPassportRequestOtpActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// ClassicPassportRequestOtpActionCli is a high-level convenience wrapper around
+// ClassicPassportRequestOtpActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way ClassicPassportRequestOtpActionGin
+// registers a route on a Gin engine.
+func ClassicPassportRequestOtpActionCli(
+	app *cli.Command,
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) {
+	app.Commands = append(app.Commands, ClassicPassportRequestOtpActionCliHandler(handler))
+}
+
+// ClassicPassportRequestOtpActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the ClassicPassportRequestOtpAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *ClassicPassportRequestOtpActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func ClassicPassportRequestOtpActionHttpHandler(
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := ClassicPassportRequestOtpActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body ClassicPassportRequestOtpActionReq
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := ClassicPassportRequestOtpActionRequest{
+			Body:        body,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// ClassicPassportRequestOtpActionHttp is a high-level convenience wrapper around
+// ClassicPassportRequestOtpActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func ClassicPassportRequestOtpActionHttp(
+	mux *http.ServeMux,
+	handler func(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error),
+) {
+	method, pattern, h := ClassicPassportRequestOtpActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

@@ -1,0 +1,244 @@
+package abac
+
+import (
+	"strings"
+
+	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/security"
+)
+
+func ClassicSigninAction(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := classicSigninCore(c.Body, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &ClassicSigninActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
+}
+
+// classicSigninCore holds the actual implementation, reusable by callers which
+// already have a resolved QueryDSL (such as the cli-only AuthFlow).
+func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
+	req := dto
+	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
+		return nil, err
+	}
+
+	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: query.Tx})
+	if err2 != nil {
+		if err2.HttpCode != 404 {
+			return nil, err2
+		}
+	}
+
+	requiresSessionSecret := false
+	if config != nil {
+
+		if config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
+			requiresSessionSecret = true
+		}
+		if config.RequireOtpOnSignin.OrDefault(false) {
+			requiresSessionSecret = true
+		}
+	}
+
+	if requiresSessionSecret {
+		if strings.TrimSpace(req.SessionSecret) == "" {
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
+		}
+
+		// Here we need to do some comparison to make sure this is the correct session secret
+		var publicSession *PublicAuthenticationEntity = nil
+		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
+
+		if strings.TrimSpace(req.SessionSecret) == "" {
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
+		}
+	}
+
+	session := &UserSessionDto{}
+
+	if err := fetchPureUserAndPassToSession(req.Value, req.Password, session, query); err != nil {
+		return nil, err
+	}
+
+	passport, _ := session.Passport.Get()
+	if passport == nil {
+		return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
+	}
+
+	// if user doesn't have totp setup, then move him
+	if config != nil && config.ForceTotp.OrDefault(false) {
+		if passport.Item.TotpSecret == "" ||
+			!passport.Item.TotpConfirmed.OrDefault(false) {
+
+			// Let's create and assign to passport
+			key, _ := totp.Generate(totp.GenerateOpts{
+				Issuer:      "Fireback",
+				AccountName: req.Value,
+			})
+
+			totpSecret := key.Secret()
+			totpLink := key.URL()
+
+			if _, err := PassportActions.Update(query, &PassportEntity{
+				UniqueId:   passport.Item.UniqueId,
+				TotpSecret: totpSecret,
+			}); err != nil {
+				return nil, err
+			}
+
+			return &ClassicSigninActionRes{
+				TotpUrl: totpLink,
+				Next:    []string{"setup-totp"},
+			}, nil
+		}
+	}
+
+	if passport.Item.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
+		// Assume this is first time, so do not fail the response and allow user to go there.
+		if req.TotpCode == "" {
+			return &ClassicSigninActionRes{
+				Next: []string{"enter-totp"},
+			}, nil
+		}
+
+		if !totp.Validate(req.TotpCode, passport.Item.TotpSecret) {
+			return nil, fireback.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
+		}
+	}
+
+	if err := applyUserTokenAndWorkspacesToToken(session, query); err != nil {
+		return nil, err
+	}
+
+	return &ClassicSigninActionRes{
+		Session: emigo.NewOne(*session),
+	}, nil
+}
+
+func convertPointersToValuesUserWorkspaceEntity(pointers []*UserWorkspaceEntity) []UserWorkspaceEntity {
+	values := make([]UserWorkspaceEntity, 0, len(pointers)) // preallocate
+	for _, ptr := range pointers {
+		if ptr != nil {
+			values = append(values, *ptr) // dereference pointer and append
+		}
+	}
+	return values
+}
+
+// Can be used to authenticate only using value and passport.
+// Do not expose this publicly, by passes recaptcha and all other securities.
+func classicSinginInternalUnsafe(req *ClassicSigninActionReq, q fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
+
+	session := &UserSessionDto{}
+
+	fetchPureUserAndPassToSession(req.Value, req.Password, session, q)
+	applyUserTokenAndWorkspacesToToken(session, q)
+
+	return &ClassicSigninActionRes{
+		Session: emigo.NewOne(*session),
+	}, nil
+}
+
+func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
+	user, _ := session.User.Get()
+	// Get the user workspaces as well
+	q.UserId = user.Item.UniqueId
+	q.ResolveStrategy = "user"
+	workspacesItems, _, err := UserWorkspaceActions.Query(q)
+	if err != nil {
+		return fireback.GormErrorToIError(err)
+	}
+
+	session.UserWorkspaces = emigo.CollectionReplace(
+		convertPointersToValuesUserWorkspaceEntity(workspacesItems),
+	)
+
+	// Authorize the session, put the token
+	if token, err := user.Item.AuthorizeWithToken(q); err != nil {
+		return fireback.CastToIError(err)
+	} else {
+		session.Token = token
+	}
+
+	// Secure cookie, only if gin is present
+	if q.G != nil {
+		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
+	}
+
+	return nil
+}
+
+// Gets the user via the passport value.
+// This is an unsafe function and should not be exposed to outside.
+// If the password is nil, it means it would work without a password.
+// So make sure you have
+func fetchPureUserAndPassToSession(value string, password string, session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
+
+	passportPassword, err := fetchUserAndPassToSession(value, session, q)
+
+	if err != nil {
+		return err
+	}
+
+	if !security.CheckPasswordHash(password, *passportPassword) {
+		return fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	}
+
+	return nil
+}
+
+// Unsafe function, which reads a user passport and finds him and assigns to the
+// session. Just use in password less scenarios, such as oauth.
+func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback.QueryDSL) (*string, *fireback.IError) {
+	ClearPassportValue(&value)
+
+	var passportPassword = ""
+	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
+		return nil, err
+	} else {
+		session.User.Set(*user)
+		session.Passport.Set(*passport)
+		passportPassword = passport.Password
+	}
+
+	if user, _ := session.User.Get(); user == nil {
+		return nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	}
+
+	return &passportPassword, nil
+}
+
+func UnsafeGetUserByPassportValue(value string, q fireback.QueryDSL) (*PassportEntity, *UserEntity, *fireback.IError) {
+
+	// Check the passport if exists
+	var item PassportEntity
+	if err := fireback.GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
+
+		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	}
+
+	var user UserEntity
+	if err := fireback.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.OrDefault("")}).First(&user).Error; err != nil {
+		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	}
+
+	return &item, &user, nil
+}
+
+// Delete the spaces in the email and make it lower case
+// before any operation
+func ClearPassportValue(str *string) {
+	v := strings.ToLower(strings.TrimSpace(*str))
+	*str = v
+}
