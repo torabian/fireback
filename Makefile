@@ -1,9 +1,6 @@
 default:
 	rm -rf app && cd cmd/fireback && make dev
 
-mock:
-	cd modules/fireback/codegen/react-new && npm run start:mock
-
 wasm:
 	cd cmd/fireback-wasm && make
 
@@ -13,27 +10,8 @@ mac-pkg:
 server:
 	cd cmd/fireback && make everything
 
-desktop:
-	cd cmd/fireback-desktop && make
-
-npm:
-	cd cmd/fireback && make npm
-
-npmp:
-	cd cmd/fireback && make npmp
-
 test:
 	FIREBACK_SDK_LOCATION=$(PWD) ./artifacts/fireback/f tests run
-
-bed:
-	rm -rf ../fbtest && cd .. && ./fireback/artifacts/fireback/f new --name fbtest --ui --mobile --replace-fb ../fireback --module github.com/torabian/fireback/testbed
-
-test_rebuild:
-	node e2e/scripts/rebuild.js $(PWD)
-
-bundle:
-	cd cmd/fireback && make ui2 && cd ../.. && make
-
 
 # Fireback has some sdks on some projects which are commited due to fact I want it
 # be ready to use without any builds tools right away. They often get old over changes we make
@@ -61,7 +39,6 @@ dockerbuild:
 
 dockerpublish:
 	make dockerbuild && docker tag fireback fireback/fireback:latest && docker push fireback/fireback:latest
-
 
 defs:
 	./app emi compile --path modules/fireback/Fireback.emi.yml && \
