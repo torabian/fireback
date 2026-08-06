@@ -52,7 +52,7 @@ type ModuleProvider struct {
 	SeederHandler       func()
 	Namespace           string
 	MigrationFunction   func(x *FirebackApp, db *gorm.DB)
-	AppendCli           func(x *FirebackApp, db *gorm.DB) []*cli.Command
+	AppendCli           func(x *FirebackApp) []*cli.Command
 	ActionsBundle       *ModuleActionsBundle
 	MockWriterHandler   func(languages []string)
 	PermissionsProvider []PermissionInfo

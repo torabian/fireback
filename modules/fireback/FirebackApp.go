@@ -82,6 +82,10 @@ func GetCliCommands(x *FirebackApp) []*cli.Command {
 			// Add CLI handlers from the module
 			collected = append(collected, module.CliHandlers...)
 
+			if module.AppendCli != nil {
+				collected = append(collected, module.AppendCli(x)...)
+			}
+
 			// Add commands from entity bundles
 			for _, bundle := range module.EntityBundles {
 				collected = append(collected, bundle.CliCommands...)

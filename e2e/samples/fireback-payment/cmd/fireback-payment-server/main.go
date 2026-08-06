@@ -38,12 +38,6 @@ var xapp = &fireback.FirebackApp{
 
 	Modules: append([]*fireback.ModuleProvider{
 		fireback.FirebackModuleSetup(nil),
-		// payment.PaymentModuleSetup(nil),
-		// {
-		// 	CliHandlers: []cli.Command{
-		// 		fireback.NewProjectCli(),
-		// 	},
-		// },
 	}, abac.AbacCompleteModules()...),
 }
 

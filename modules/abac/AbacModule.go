@@ -292,7 +292,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		SyncPermissionsInDatabase(x, db)
 	}
 
-	module.AppendCli = func(x *fireback.FirebackApp, db *gorm.DB) []*cli.Command {
+	module.AppendCli = func(x *fireback.FirebackApp) []*cli.Command {
 		return []*cli.Command{
 			GetMigrationCommand(x),
 		}
