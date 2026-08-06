@@ -187,16 +187,6 @@ dtos:
     fields:
       - name: status
         type: int
-  - name: capabilityInfo
-    description: Capability and permission level which is suitable for front-end application to interact...
-    fields:
-      - name: uniqueId
-        type: string
-      - name: name
-        type: string
-      - name: children
-        type: collection
-        target: self@
   - name: reactiveSearchResult
     fields:
       - type: string
@@ -215,21 +205,6 @@ dtos:
         name: actionFn
 
 actions:
-  - name: CapabilitiesTree
-    cliName: treex
-    url: /capabilitiesTree
-    method: get
-    description: dLists all of the capabilities in database as a array of string as root access
-    out:
-      envelope: GResponse
-      fields:
-        - name: capabilities
-          type: collection
-          target: CapabilityInfoDto
-        - name: nested
-          type: collection
-          target: CapabilityInfoDto
-      
   - name: ReactiveSearch
     description:
       Reactive search is a general purpose search mechanism for different modules,
@@ -243,16 +218,6 @@ actions:
     url: /ws
 
 entities:
-  - name: capability
-    cliShort: cap
-    description: >-
-      Manage the capabilities inside the application, both builtin to core and
-      custom defined ones
-    fields:
-      - name: name
-        type: string
-      - name: description
-        type: string
   - name: webPushConfig
     features:
       actions: false

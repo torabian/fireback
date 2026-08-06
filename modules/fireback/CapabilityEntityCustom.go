@@ -114,36 +114,3 @@ func PermissionInfoToString(items []PermissionInfo) []string {
 
 	return res
 }
-
-var PERM_ROOT_CAPABILITY = PermissionInfo{
-	CompleteKey: "root.manage.fireback.capability.*",
-	Name:        "Entire capability actions (*)",
-	Description: "",
-}
-var PERM_ROOT_CAPABILITY_DELETE = PermissionInfo{
-	CompleteKey: "root.manage.fireback.capability.delete",
-	Name:        "Delete capability",
-	Description: "",
-}
-var PERM_ROOT_CAPABILITY_CREATE = PermissionInfo{
-	CompleteKey: "root.manage.fireback.capability.create",
-	Name:        "Create capability",
-	Description: "",
-}
-var PERM_ROOT_CAPABILITY_UPDATE = PermissionInfo{
-	CompleteKey: "root.manage.fireback.capability.update",
-	Name:        "Update capability",
-	Description: "",
-}
-var PERM_ROOT_CAPABILITY_QUERY = PermissionInfo{
-	CompleteKey: "root.manage.fireback.capability.query",
-	Name:        "Query capability",
-	Description: "",
-}
-var ALL_CAPABILITY_PERMISSIONS = []PermissionInfo{
-	PERM_ROOT_CAPABILITY_DELETE,
-	PERM_ROOT_CAPABILITY_CREATE,
-	PERM_ROOT_CAPABILITY_UPDATE,
-	PERM_ROOT_CAPABILITY_QUERY,
-	PERM_ROOT_CAPABILITY,
-}

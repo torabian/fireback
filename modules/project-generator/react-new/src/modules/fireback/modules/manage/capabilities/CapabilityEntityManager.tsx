@@ -1,18 +1,15 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { CapabilityForm } from "./CapabilityEditForm";
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
-import { useGetCapabilityByUniqueId } from "@/modules/fireback/sdk/modules/fireback/useGetCapabilityByUniqueId";
-import { usePostCapability } from "@/modules/fireback/sdk/modules/fireback/usePostCapability";
-import { usePatchCapability } from "@/modules/fireback/sdk/modules/fireback/usePatchCapability";
+import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
+import { useCapabilityCreateAction } from "@/modules/fireback/sdk/abac/CapabilityCreateAction";
+import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/abac/CapabilityGetAction";
+import { useCapabilityUpdateAction } from "@/modules/fireback/sdk/abac/CapabilityUpdateAction";
+import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
+import { CapabilityForm } from "./CapabilityEditForm";
 import { strings } from "./strings/translations";
-import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/fireback/CapabilityGetAction";
-import { useCapabilityCreateAction } from "@/modules/fireback/sdk/fireback/CapabilityCreateAction";
-import { useCapabilityUpdateAction } from "@/modules/fireback/sdk/fireback/CapabilityUpdateAction";
 export const CapabilityEntityManager = ({
   data,
 }: DtoEntity<CapabilityEntity>) => {

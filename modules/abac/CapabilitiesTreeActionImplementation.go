@@ -1,4 +1,4 @@
-package fireback
+package abac
 
 import (
 	"fmt"
@@ -6,14 +6,15 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/terminal"
 )
 
 func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error) {
 
-	query, err := ResolveActionContext(c, &SecurityModel{
-		ResolveStrategy: ResolveStrategyUser,
-		ActionRequires: []PermissionInfo{
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyUser,
+		ActionRequires: []fireback.PermissionInfo{
 			PERM_ROOT_CAPABILITY_QUERY,
 		},
 	})
@@ -27,14 +28,14 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 	var items []*CapabilityEntity
 
-	err2 := GetDbRef().Debug().Model(&CapabilityEntity{}).Limit(1000).Find(&items).Error
+	err2 := fireback.GetDbRef().Debug().Model(&CapabilityEntity{}).Limit(1000).Find(&items).Error
 	if err2 != nil {
-		return nil, GormErrorToIError(err2)
+		return nil, fireback.GormErrorToIError(err2)
 	}
 
 	itemsFiltered := []CapabilityInfoDto{}
 
-	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(*query)
+	workspaceAccesses, rolesPermission := fireback.GetWorkspaceAndUserAccesses(*query)
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})
@@ -49,8 +50,8 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 		}
 
 		// Filter based on the workspace and role and not allow to create more access than the user has.
-		meetsUser := MeetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
-		meetsWorkspace := MeetsCheck([]PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
+		meetsUser := fireback.MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
+		meetsWorkspace := fireback.MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
 
 		fmt.Println("1", meetsUser, meetsWorkspace, item.UniqueId, rolesPermission, workspaceAccesses)
 		if !meetsUser || !meetsWorkspace {
@@ -72,7 +73,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 	itemsa := tree.ToObject(true)
 
 	return &CapabilitiesTreeActionResponse{
-		Payload: GResponseSingleItem(CapabilitiesTreeActionRes{
+		Payload: fireback.GResponseSingleItem(CapabilitiesTreeActionRes{
 			Capabilities: emigo.CollectionReplace(itemsFiltered),
 			Nested:       emigo.CollectionReplace(treeToCapabilityChild(itemsa)),
 		}),

@@ -242,8 +242,33 @@ dtos:
         description: The role which invitee get if they accept the request.
         tags:
           validate: required
+  - name: capabilityInfo
+    description: Capability and permission level which is suitable for front-end application to interact...
+    fields:
+      - name: uniqueId
+        type: string
+      - name: name
+        type: string
+      - name: children
+        type: collection
+        target: self@
 
 actions:
+  - name: CapabilitiesTree
+    cliName: treex
+    url: /capabilitiesTree
+    method: get
+    description: dLists all of the capabilities in database as a array of string as root access
+    out:
+      envelope: GResponse
+      fields:
+        - name: capabilities
+          type: collection
+          target: CapabilityInfoDto
+        - name: nested
+          type: collection
+          target: CapabilityInfoDto
+
   - name: QueryUserRoleWorkspaces
     method: get
     url: /urw/query
@@ -864,6 +889,16 @@ actions:
       dto: AppMenuOptionalDto
       envelope: GResponse
 entities:
+  - name: capability
+    cliShort: cap
+    description: >-
+      Manage the capabilities inside the application, both builtin to core and
+      custom defined ones
+    fields:
+      - name: name
+        type: string
+      - name: description
+        type: string
   - name: tableViewSizing
     cliShort: tvs
     description: >-

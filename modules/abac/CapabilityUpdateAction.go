@@ -1,8 +1,10 @@
-package fireback
+package abac
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
@@ -10,22 +12,22 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strconv"
+	"strings"
 )
 
 /**
-* Action to communicate with the action CapabilityBrowseAction
+* Action to communicate with the action CapabilityUpdateAction
  */
 /*
 Here is a quick function implementation to make your life easier:
-// Actual implementation of CapabilityBrowseAction
-func CapabilityBrowseAction(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error) {
-	return &CapabilityBrowseActionResponse{
+// Actual implementation of CapabilityUpdateAction
+func CapabilityUpdateAction(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error) {
+	return &CapabilityUpdateActionResponse{
 		// Payload is an interface. Use it at carefully.
 	}, nil
 }
 */
-func CapabilityBrowseActionMeta() struct {
+func CapabilityUpdateActionMeta() struct {
 	Name        string
 	CliName     string
 	CliShort    string
@@ -41,16 +43,16 @@ func CapabilityBrowseActionMeta() struct {
 		Method      string
 		Description string
 	}{
-		Name:        "CapabilityBrowseAction",
-		CliName:     "capability-browse-action",
-		CliShort:    "capability-b",
-		URL:         "/capability/browse",
-		Method:      "GET",
-		Description: `Returns "capability" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,
+		Name:        "CapabilityUpdateAction",
+		CliName:     "capability-update-action",
+		CliShort:    "capability-u",
+		URL:         "/capability/:uniqueId",
+		Method:      "PATCH",
+		Description: `Applies a partial update to a "capability" row by uniqueId.`,
 	}
 }
 
-type CapabilityBrowseActionResponse struct {
+type CapabilityUpdateActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
@@ -60,19 +62,19 @@ type CapabilityBrowseActionResponse struct {
 	resp *http.Response
 }
 
-func (x *CapabilityBrowseActionResponse) SetContentType(contentType string) *CapabilityBrowseActionResponse {
+func (x *CapabilityUpdateActionResponse) SetContentType(contentType string) *CapabilityUpdateActionResponse {
 	if x.Headers == nil {
 		x.Headers = make(map[string]string)
 	}
 	x.Headers["Content-Type"] = contentType
 	return x
 }
-func (x *CapabilityBrowseActionResponse) AsStream(r io.Reader, contentType string) *CapabilityBrowseActionResponse {
+func (x *CapabilityUpdateActionResponse) AsStream(r io.Reader, contentType string) *CapabilityUpdateActionResponse {
 	x.Payload = r
 	x.SetContentType(contentType)
 	return x
 }
-func (x *CapabilityBrowseActionResponse) AsJSON(payload any) *CapabilityBrowseActionResponse {
+func (x *CapabilityUpdateActionResponse) AsJSON(payload any) *CapabilityUpdateActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
@@ -80,63 +82,78 @@ func (x *CapabilityBrowseActionResponse) AsJSON(payload any) *CapabilityBrowseAc
 
 // When the response is expected as documentation, you call this to get some type
 // safety for the action which is happening.
-func (x *CapabilityBrowseActionResponse) WithIdeal(payload CapabilityOptionalDto) *CapabilityBrowseActionResponse {
+func (x *CapabilityUpdateActionResponse) WithIdeal(payload CapabilityDto) *CapabilityUpdateActionResponse {
 	x.Payload = payload
 	return x
 }
 
 // Use this for client calls, so the payload is being casted
-func (x *CapabilityBrowseActionResponse) AsIdeal() (*CapabilityOptionalDto, error) {
+func (x *CapabilityUpdateActionResponse) AsIdeal() (*CapabilityDto, error) {
 	b, err := json.Marshal(x.GetPayload())
 	if err != nil {
 		return nil, err
 	}
-	var res CapabilityOptionalDto
+	var res CapabilityDto
 	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
-func (x *CapabilityBrowseActionResponse) AsHTML(payload string) *CapabilityBrowseActionResponse {
+func (x *CapabilityUpdateActionResponse) AsHTML(payload string) *CapabilityUpdateActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
 	return x
 }
-func (x *CapabilityBrowseActionResponse) AsBytes(payload []byte) *CapabilityBrowseActionResponse {
+func (x *CapabilityUpdateActionResponse) AsBytes(payload []byte) *CapabilityUpdateActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/octet-stream")
 	return x
 }
-func (x CapabilityBrowseActionResponse) GetStatusCode() int {
+func (x CapabilityUpdateActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x CapabilityBrowseActionResponse) GetRespHeaders() map[string]string {
+func (x CapabilityUpdateActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x CapabilityBrowseActionResponse) GetPayload() interface{} {
+func (x CapabilityUpdateActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
 // Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
-type CapabilityBrowseActionRequestSig = func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error)
+type CapabilityUpdateActionRequestSig = func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error)
 
 /**
- * Query parameters for CapabilityBrowseAction
+ * Path parameters for CapabilityUpdateAction
+ */
+type CapabilityUpdateActionPathParameter struct {
+	UniqueId string
+}
+
+// Converts a placeholder url, and applies the parameters to it.
+func CapabilityUpdateActionPathParameterApply(params CapabilityUpdateActionPathParameter, templateUrl string) string {
+	templateUrl = strings.ReplaceAll(templateUrl, ":uniqueId", fmt.Sprintf("%v", params.UniqueId))
+	return templateUrl
+}
+
+// General purpose to extract the value and cast based on type.
+func CapabilityUpdateActionPathParameterFromFn(fn func(key string) string) CapabilityUpdateActionPathParameter {
+	res := CapabilityUpdateActionPathParameter{}
+	res.UniqueId = fn("uniqueId")
+	return res
+}
+
+/**
+ * Query parameters for CapabilityUpdateAction
  */
 // Query wrapper with private fields
-type CapabilityBrowseActionQuery struct {
+type CapabilityUpdateActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
-	Filter       string `json:"filter"`
-	Sort         string `json:"sort"`
-	StartIndex   int    `json:"startIndex"`
-	ItemsPerPage int    `json:"itemsPerPage"`
-	Cursor       string `json:"cursor"`
 }
 
-func CapabilityBrowseActionQueryFromString(rawQuery string) CapabilityBrowseActionQuery {
-	v := CapabilityBrowseActionQuery{}
+func CapabilityUpdateActionQueryFromString(rawQuery string) CapabilityUpdateActionQuery {
+	v := CapabilityUpdateActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -154,24 +171,25 @@ func CapabilityBrowseActionQueryFromString(rawQuery string) CapabilityBrowseActi
 	v.mapped = mapped
 	return v
 }
-func CapabilityBrowseActionQueryFromHttp(r *http.Request) CapabilityBrowseActionQuery {
-	return CapabilityBrowseActionQueryFromString(r.URL.RawQuery)
+func CapabilityUpdateActionQueryFromHttp(r *http.Request) CapabilityUpdateActionQuery {
+	return CapabilityUpdateActionQueryFromString(r.URL.RawQuery)
 }
-func (q CapabilityBrowseActionQuery) Values() url.Values {
+func (q CapabilityUpdateActionQuery) Values() url.Values {
 	return q.values
 }
-func (q CapabilityBrowseActionQuery) Mapped() map[string]interface{} {
+func (q CapabilityUpdateActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *CapabilityBrowseActionQuery) SetValues(v url.Values) {
+func (q *CapabilityUpdateActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *CapabilityBrowseActionQuery) SetMapped(m map[string]interface{}) {
+func (q *CapabilityUpdateActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type CapabilityBrowseActionRequest struct {
-	Body        interface{}
+type CapabilityUpdateActionRequest struct {
+	Body        CapabilityOptionalDto
+	Params      CapabilityUpdateActionPathParameter
 	QueryParams url.Values
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
@@ -195,21 +213,23 @@ type CapabilityBrowseActionRequest struct {
 }
 
 // Returns the gin ctx. You need to manually cast this to .(*gin.Context)
-func (x CapabilityBrowseActionRequest) GetGinCtx() interface{} {
+func (x CapabilityUpdateActionRequest) GetGinCtx() interface{} {
 	return x.GinCtx
 }
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
-func (x CapabilityBrowseActionRequest) GetCliCtx() interface{} {
+func (x CapabilityUpdateActionRequest) GetCliCtx() interface{} {
 	return x.CliCtx
 }
-func CapabilityBrowseActionClientCreateUrl(
-	req CapabilityBrowseActionRequest,
+func CapabilityUpdateActionClientCreateUrl(
+	req CapabilityUpdateActionRequest,
 	config *emigo.APIClient, // optional pre-built request
 ) (*url.URL, error) {
-	meta := CapabilityBrowseActionMeta()
+	meta := CapabilityUpdateActionMeta()
 	urlAddr := meta.URL
 	urlAddr = config.BaseURL + urlAddr
+	// In case there is a path parameter, we need to apply that.
+	urlAddr = CapabilityUpdateActionPathParameterApply(req.Params, urlAddr)
 	// Build final URL with query string
 	u, err := url.Parse(urlAddr)
 	if err != nil {
@@ -221,13 +241,13 @@ func CapabilityBrowseActionClientCreateUrl(
 	}
 	return u, nil
 }
-func CapabilityBrowseActionClientExecuteTyped(httpReq *http.Request) (*CapabilityBrowseActionResponse, error) {
+func CapabilityUpdateActionClientExecuteTyped(httpReq *http.Request) (*CapabilityUpdateActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	// At this point, response is valid, and we need to return the results.
-	var result CapabilityBrowseActionResponse
+	var result CapabilityUpdateActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
@@ -239,9 +259,13 @@ func CapabilityBrowseActionClientExecuteTyped(httpReq *http.Request) (*Capabilit
 	}
 	return &result, nil
 }
-func CapabilityBrowseActionClientBuildRequest(req CapabilityBrowseActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
-	meta := CapabilityBrowseActionMeta()
-	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), nil)
+func CapabilityUpdateActionClientBuildRequest(req CapabilityUpdateActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := CapabilityUpdateActionMeta()
+	bodyBytes, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -261,44 +285,55 @@ func CapabilityBrowseActionClientBuildRequest(req CapabilityBrowseActionRequest,
 	}
 	return httpReq, nil
 }
-func CapabilityBrowseActionCall(
-	req CapabilityBrowseActionRequest,
+func CapabilityUpdateActionCall(
+	req CapabilityUpdateActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*CapabilityBrowseActionResponse, error) {
+) (*CapabilityUpdateActionResponse, error) {
 	// This function intentionally is split into 3 different sections, so in case
 	// of some modifications that we did not anticipate, at least a part would become quite useful.
 	// first we create url, apply all path parameters, query params, etc
-	u, err := CapabilityBrowseActionClientCreateUrl(req, config)
+	u, err := CapabilityUpdateActionClientCreateUrl(req, config)
 	if err != nil {
 		return nil, err
 	}
 	// We create the request from the body in second stage
-	r, err := CapabilityBrowseActionClientBuildRequest(req, u, config)
+	r, err := CapabilityUpdateActionClientBuildRequest(req, u, config)
 	if err != nil {
 		return nil, err
 	}
 	// This one would execute the request and cast the result.
-	return CapabilityBrowseActionClientExecuteTyped(r)
+	return CapabilityUpdateActionClientExecuteTyped(r)
+}
+func CapabilityUpdateActionPathParameterFromGin(g *gin.Context) CapabilityUpdateActionPathParameter {
+	return CapabilityUpdateActionPathParameterFromFn(func(key string) string {
+		return g.Param(key)
+	})
 }
 
-// CapabilityBrowseActionRaw registers a raw Gin route for the CapabilityBrowseAction action.
+// CapabilityUpdateActionRaw registers a raw Gin route for the CapabilityUpdateAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func CapabilityBrowseActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := CapabilityBrowseActionMeta()
+func CapabilityUpdateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := CapabilityUpdateActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-// CapabilityBrowseActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CapabilityBrowseAction action.
+// CapabilityUpdateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CapabilityUpdateAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func CapabilityBrowseActionHandler(
-	handler func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error),
+func CapabilityUpdateActionHandler(
+	handler func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error),
 ) (method, url string, h gin.HandlerFunc) {
-	meta := CapabilityBrowseActionMeta()
+	meta := CapabilityUpdateActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body CapabilityOptionalDto
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
 		// Build typed request wrapper
-		req := CapabilityBrowseActionRequest{
-			Body:        nil,
+		req := CapabilityUpdateActionRequest{
+			Body:        body,
+			Params:      CapabilityUpdateActionPathParameterFromGin(m),
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -329,14 +364,14 @@ func CapabilityBrowseActionHandler(
 	}
 }
 
-// CapabilityBrowseActionGin is a high-level convenience wrapper around CapabilityBrowseActionHandler.
+// CapabilityUpdateActionGin is a high-level convenience wrapper around CapabilityUpdateActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func CapabilityBrowseActionGin(r gin.IRoutes, handler func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error)) {
-	method, url, h := CapabilityBrowseActionHandler(handler)
+func CapabilityUpdateActionGin(r gin.IRoutes, handler func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error)) {
+	method, url, h := CapabilityUpdateActionHandler(handler)
 	r.Handle(method, url, h)
 }
-func (x CapabilityBrowseActionRequest) IsGin() bool {
+func (x CapabilityUpdateActionRequest) IsGin() bool {
 	if x.GinCtx == nil {
 		return false
 	}
@@ -347,66 +382,28 @@ func (x CapabilityBrowseActionRequest) IsGin() bool {
 	}
 	return true
 }
-func CapabilityBrowseActionQueryFromGin(c *gin.Context) CapabilityBrowseActionQuery {
-	return CapabilityBrowseActionQueryFromString(c.Request.URL.RawQuery)
+func CapabilityUpdateActionQueryFromGin(c *gin.Context) CapabilityUpdateActionQuery {
+	return CapabilityUpdateActionQueryFromString(c.Request.URL.RawQuery)
 }
-func GetCapabilityBrowseActionQueryCliFlags(prefix string) []emigo.CliFlag {
+func GetCapabilityUpdateActionPathParameterCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
-			Name: prefix + "qs-filter",
-			Type: "string",
-		},
-		{
-			Name: prefix + "qs-sort",
-			Type: "string",
-		},
-		{
-			Name: prefix + "qs-start-index",
-			Type: "int",
-		},
-		{
-			Name: prefix + "qs-items-per-page",
-			Type: "int",
-		},
-		{
-			Name: prefix + "qs-cursor",
-			Type: "string",
+			Name:     prefix + "pp-uniqueId",
+			Type:     "string",
+			Required: true,
 		},
 	}
 }
 
-// CapabilityBrowseActionQueryFromCli extracts and casts query parameters the same way
-// CapabilityBrowseActionQueryFromString does, but reads them off urfave v3 CLI flags instead
-// of a raw query string. The underlying url.Values (as returned by .Values()) is filled
-// in using each field's real name, so code consuming req.QueryParams behaves the same
-// whether the request came from HTTP or from the CLI.
-func CapabilityBrowseActionQueryFromCli(c *cli.Command) CapabilityBrowseActionQuery {
-	data := CapabilityBrowseActionQuery{}
-	values := url.Values{}
-	if c.IsSet("qs-filter") {
-		data.Filter = c.String("qs-filter")
-		values.Set("filter", data.Filter)
-	}
-	if c.IsSet("qs-sort") {
-		data.Sort = c.String("qs-sort")
-		values.Set("sort", data.Sort)
-	}
-	if c.IsSet("qs-start-index") {
-		data.StartIndex = int(c.Int64("qs-start-index"))
-		values.Set("startIndex", strconv.FormatInt(int64(data.StartIndex), 10))
-	}
-	if c.IsSet("qs-items-per-page") {
-		data.ItemsPerPage = int(c.Int64("qs-items-per-page"))
-		values.Set("itemsPerPage", strconv.FormatInt(int64(data.ItemsPerPage), 10))
-	}
-	if c.IsSet("qs-cursor") {
-		data.Cursor = c.String("qs-cursor")
-		values.Set("cursor", data.Cursor)
-	}
-	data.SetValues(values)
-	return data
+// Extracts the path parameter from a urfave v3 cli.
+func CapabilityUpdateActionPathParameterFromCli(c *cli.Command) CapabilityUpdateActionPathParameter {
+	return CapabilityUpdateActionPathParameterFromFn(func(key string) string {
+		// In cli, they are prefixed with pp, to avoid conflict with other params coming from 'in'
+		// section of the definition.
+		return c.String("pp-" + key)
+	})
 }
-func (x CapabilityBrowseActionRequest) IsCli() bool {
+func (x CapabilityUpdateActionRequest) IsCli() bool {
 	if x.CliCtx == nil {
 		return false
 	}
@@ -418,11 +415,11 @@ func (x CapabilityBrowseActionRequest) IsCli() bool {
 	return true
 }
 
-// CapabilityBrowseActionCliFlags returns every flag (request body, path parameters,
-// query parameters and typed headers) the CapabilityBrowseAction action can bind from
+// CapabilityUpdateActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the CapabilityUpdateAction action can bind from
 // urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
 // typed header.
-func CapabilityBrowseActionCliFlags() []cli.Flag {
+func CapabilityUpdateActionCliFlags() []cli.Flag {
 	flags := []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    "header",
@@ -430,63 +427,78 @@ func CapabilityBrowseActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
-	flags = append(flags, emigo.CastEmiFlagToUrfave(GetCapabilityBrowseActionQueryCliFlags(""))...)
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetCapabilityUpdateActionPathParameterCliFlags(""))...)
 	return flags
 }
 
-// CapabilityBrowseActionCliHandler builds a full *cli.Command for the
-// CapabilityBrowseAction action: it wires body, path parameters, query parameters and
-// headers from urfave v3 CLI flags into a CapabilityBrowseActionRequest the same way
-// CapabilityBrowseActionHandler (Gin) and CapabilityBrowseActionHttpHandler (net/http)
+// CapabilityUpdateActionCliHandler builds a full *cli.Command for the
+// CapabilityUpdateAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a CapabilityUpdateActionRequest the same way
+// CapabilityUpdateActionHandler (Gin) and CapabilityUpdateActionHttpHandler (net/http)
 // do from their own transports, then prints the JSON response (or returns the error) so
 // urfave reports the right exit code.
-func CapabilityBrowseActionCliHandler(
-	handler func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error),
+func CapabilityUpdateActionCliHandler(
+	handler func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error),
 ) *cli.Command {
-	meta := CapabilityBrowseActionMeta()
+	meta := CapabilityUpdateActionMeta()
 	cmd := &cli.Command{
 		Name:  meta.CliName,
 		Usage: meta.Description,
-		Flags: CapabilityBrowseActionCliFlags(),
+		Flags: CapabilityUpdateActionCliFlags(),
 	}
 	cmd.Aliases = []string{meta.CliShort}
 	cmd.Action = func(ctx context.Context, c *cli.Command) error {
-		req := CapabilityBrowseActionRequest{
+		req := CapabilityUpdateActionRequest{
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Params:      CapabilityUpdateActionPathParameterFromCli(c),
 		}
-		req.QueryParams = CapabilityBrowseActionQueryFromCli(c).Values()
 		return emigo.HandleActionInCli(handler(req))
 	}
 	return cmd
 }
 
-// CapabilityBrowseActionCli is a high-level convenience wrapper around
-// CapabilityBrowseActionCliHandler. It registers the generated command as a subcommand
-// of an existing urfave v3 *cli.Command, the same way CapabilityBrowseActionGin
+// CapabilityUpdateActionCli is a high-level convenience wrapper around
+// CapabilityUpdateActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way CapabilityUpdateActionGin
 // registers a route on a Gin engine.
-func CapabilityBrowseActionCli(
+func CapabilityUpdateActionCli(
 	app *cli.Command,
-	handler func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error),
+	handler func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error),
 ) {
-	app.Commands = append(app.Commands, CapabilityBrowseActionCliHandler(handler))
+	app.Commands = append(app.Commands, CapabilityUpdateActionCliHandler(handler))
 }
 
-// CapabilityBrowseActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
-// typed net/http handler for the CapabilityBrowseAction action. Developers implement
+// CapabilityUpdateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the CapabilityUpdateAction action. Developers implement
 // their business logic as a function that receives a typed request object and
-// returns either an *CapabilityBrowseActionResponse or nil. JSON marshalling, headers,
+// returns either an *CapabilityUpdateActionResponse or nil. JSON marshalling, headers,
 // status codes, and errors are handled automatically.
-func CapabilityBrowseActionHttpHandler(
-	handler func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error),
+func CapabilityUpdateActionHttpHandler(
+	handler func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error),
 ) (method, pattern string, h http.HandlerFunc) {
-	meta := CapabilityBrowseActionMeta()
+	meta := CapabilityUpdateActionMeta()
 	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body CapabilityOptionalDto
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
 		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
 		// which is what the IsGin() helper keys off.
-		req := CapabilityBrowseActionRequest{
-			Body:        nil,
+		req := CapabilityUpdateActionRequest{
+			Body: body,
+			Params: CapabilityUpdateActionPathParameterFromFn(func(key string) string {
+				return r.PathValue(key)
+			}),
 			QueryParams: r.URL.Query(),
 			Headers:     r.Header,
 		}
@@ -523,14 +535,14 @@ func CapabilityBrowseActionHttpHandler(
 	}
 }
 
-// CapabilityBrowseActionHttp is a high-level convenience wrapper around
-// CapabilityBrowseActionHttpHandler. It registers the typed route on a standard
+// CapabilityUpdateActionHttp is a high-level convenience wrapper around
+// CapabilityUpdateActionHttpHandler. It registers the typed route on a standard
 // *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
 // Use this when you don't need custom middleware.
-func CapabilityBrowseActionHttp(
+func CapabilityUpdateActionHttp(
 	mux *http.ServeMux,
-	handler func(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error),
+	handler func(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error),
 ) {
-	method, pattern, h := CapabilityBrowseActionHttpHandler(handler)
+	method, pattern, h := CapabilityUpdateActionHttpHandler(handler)
 	mux.HandleFunc(method+" "+pattern, h)
 }

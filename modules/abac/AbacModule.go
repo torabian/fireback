@@ -48,6 +48,12 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	fireback.AuthorizeRequest = AuthorizeRequest
 	fireback.WithSocketAuthorization = WithSocketAuthorization
 
+	// CapabilityEntity (the capability catalog table) moved here from modules/fireback -
+	// fireback core no longer keeps a capability table of its own, so it needs this
+	// injection point (see CapabilityActions.go) to keep SyncPermissionsInDatabase
+	// working, same pattern as the With*/AuthorizeRequest overrides above.
+	fireback.UpsertPermission = CapabilityUpsertPermissionFn
+
 	module := &fireback.ModuleProvider{
 		Name:               "abac",
 		Definitions:        &Module3Definitions,
@@ -162,6 +168,13 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				AppMenuAwareDeleteActionGin(g, AppMenuAwareDeleteAction)
 				CteAppMenusActionGin(g, CteAppMenusAction)
 
+				// CapabilityEntity moved here from modules/fireback - see CapabilityActions.go.
+				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
+				CapabilityGetActionGin(g, CapabilityGetAction)
+				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
+				CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
+				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
+
 				WorkspaceConfigBrowseActionGin(g, WorkspaceConfigBrowseAction)
 				WorkspaceConfigGetActionGin(g, WorkspaceConfigGetAction)
 				WorkspaceConfigCreateActionGin(g, WorkspaceConfigCreateAction)
@@ -224,6 +237,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		ALL_USER_PROFILE_PERMISSIONS,
 		ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
 		ALL_TOKEN_PERMISSIONS,
+		ALL_CAPABILITY_PERMISSIONS,
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
@@ -245,6 +259,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 			&PendingWorkspaceInviteEntity{},
 			&AppMenuEntity{},
 			&TimezoneGroupEntity{},
+			&CapabilityEntity{},
 		}
 
 		items2 := []interface{}{}
@@ -345,6 +360,13 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		PendingWorkspaceInviteUpdateActionCliHandler(PendingWorkspaceInviteUpdateAction),
 		PendingWorkspaceInviteAwareDeletePreviewActionCliHandler(PendingWorkspaceInviteAwareDeletePreviewAction),
 		PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
+
+		// CapabilityEntity moved here from modules/fireback - see CapabilityActions.go.
+		CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
+		CapabilityGetActionCliHandler(CapabilityGetAction),
+		CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
+		CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
+		CapabilitiesTreeActionCliHandler(CapabilitiesTreeAction),
 	})
 
 	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})

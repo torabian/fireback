@@ -1,7 +1,6 @@
-package fireback
+package abac
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
@@ -14,21 +13,20 @@ import (
 )
 
 /**
-* Action to communicate with the action CapabilityCreateAction
+* Action to communicate with the action CapabilitiesTreeAction
  */
 /*
 Here is a quick function implementation to make your life easier:
-// Actual implementation of CapabilityCreateAction
-func CapabilityCreateAction(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error) {
-	return &CapabilityCreateActionResponse{
+// Actual implementation of CapabilitiesTreeAction
+func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error) {
+	return &CapabilitiesTreeActionResponse{
 		// Payload is an interface. Use it at carefully.
 	}, nil
 }
 */
-func CapabilityCreateActionMeta() struct {
+func CapabilitiesTreeActionMeta() struct {
 	Name        string
 	CliName     string
-	CliShort    string
 	URL         string
 	Method      string
 	Description string
@@ -36,21 +34,55 @@ func CapabilityCreateActionMeta() struct {
 	return struct {
 		Name        string
 		CliName     string
-		CliShort    string
 		URL         string
 		Method      string
 		Description string
 	}{
-		Name:        "CapabilityCreateAction",
-		CliName:     "capability-create-action",
-		CliShort:    "capability-c",
-		URL:         "/capability",
-		Method:      "POST",
-		Description: `Creates a new "capability" row.`,
+		Name:        "CapabilitiesTreeAction",
+		CliName:     "treex",
+		URL:         "/capabilitiesTree",
+		Method:      "GET",
+		Description: `dLists all of the capabilities in database as a array of string as root access`,
 	}
 }
 
-type CapabilityCreateActionResponse struct {
+// The base class definition for capabilitiesTreeActionRes
+type CapabilitiesTreeActionRes struct {
+	Capabilities emigo.Collection[CapabilityInfoDto] `json:"capabilities" yaml:"capabilities"`
+	Nested       emigo.Collection[CapabilityInfoDto] `json:"nested" yaml:"nested"`
+}
+
+func (x *CapabilitiesTreeActionRes) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
+func GetCapabilitiesTreeActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "capabilities",
+			Type: "collection",
+		},
+		{
+			Name: prefix + "nested",
+			Type: "collection",
+		},
+	}
+}
+func CastCapabilitiesTreeActionResFromCli(c emigo.CliCastable) CapabilitiesTreeActionRes {
+	data := CapabilitiesTreeActionRes{}
+	if c.IsSet("capabilities") {
+		data.Capabilities = emigo.CapturePossibleCollection(CastCapabilityInfoDtoFromCli, "capabilities", c)
+	}
+	if c.IsSet("nested") {
+		data.Nested = emigo.CapturePossibleCollection(CastCapabilityInfoDtoFromCli, "nested", c)
+	}
+	return data
+}
+
+type CapabilitiesTreeActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
@@ -60,19 +92,19 @@ type CapabilityCreateActionResponse struct {
 	resp *http.Response
 }
 
-func (x *CapabilityCreateActionResponse) SetContentType(contentType string) *CapabilityCreateActionResponse {
+func (x *CapabilitiesTreeActionResponse) SetContentType(contentType string) *CapabilitiesTreeActionResponse {
 	if x.Headers == nil {
 		x.Headers = make(map[string]string)
 	}
 	x.Headers["Content-Type"] = contentType
 	return x
 }
-func (x *CapabilityCreateActionResponse) AsStream(r io.Reader, contentType string) *CapabilityCreateActionResponse {
+func (x *CapabilitiesTreeActionResponse) AsStream(r io.Reader, contentType string) *CapabilitiesTreeActionResponse {
 	x.Payload = r
 	x.SetContentType(contentType)
 	return x
 }
-func (x *CapabilityCreateActionResponse) AsJSON(payload any) *CapabilityCreateActionResponse {
+func (x *CapabilitiesTreeActionResponse) AsJSON(payload any) *CapabilitiesTreeActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
@@ -80,58 +112,58 @@ func (x *CapabilityCreateActionResponse) AsJSON(payload any) *CapabilityCreateAc
 
 // When the response is expected as documentation, you call this to get some type
 // safety for the action which is happening.
-func (x *CapabilityCreateActionResponse) WithIdeal(payload CapabilityDto) *CapabilityCreateActionResponse {
+func (x *CapabilitiesTreeActionResponse) WithIdeal(payload CapabilitiesTreeActionRes) *CapabilitiesTreeActionResponse {
 	x.Payload = payload
 	return x
 }
 
 // Use this for client calls, so the payload is being casted
-func (x *CapabilityCreateActionResponse) AsIdeal() (*CapabilityDto, error) {
+func (x *CapabilitiesTreeActionResponse) AsIdeal() (*CapabilitiesTreeActionRes, error) {
 	b, err := json.Marshal(x.GetPayload())
 	if err != nil {
 		return nil, err
 	}
-	var res CapabilityDto
+	var res CapabilitiesTreeActionRes
 	if err := json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
-func (x *CapabilityCreateActionResponse) AsHTML(payload string) *CapabilityCreateActionResponse {
+func (x *CapabilitiesTreeActionResponse) AsHTML(payload string) *CapabilitiesTreeActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
 	return x
 }
-func (x *CapabilityCreateActionResponse) AsBytes(payload []byte) *CapabilityCreateActionResponse {
+func (x *CapabilitiesTreeActionResponse) AsBytes(payload []byte) *CapabilitiesTreeActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/octet-stream")
 	return x
 }
-func (x CapabilityCreateActionResponse) GetStatusCode() int {
+func (x CapabilitiesTreeActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x CapabilityCreateActionResponse) GetRespHeaders() map[string]string {
+func (x CapabilitiesTreeActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x CapabilityCreateActionResponse) GetPayload() interface{} {
+func (x CapabilitiesTreeActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
 // Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
-type CapabilityCreateActionRequestSig = func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error)
+type CapabilitiesTreeActionRequestSig = func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error)
 
 /**
- * Query parameters for CapabilityCreateAction
+ * Query parameters for CapabilitiesTreeAction
  */
 // Query wrapper with private fields
-type CapabilityCreateActionQuery struct {
+type CapabilitiesTreeActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
 }
 
-func CapabilityCreateActionQueryFromString(rawQuery string) CapabilityCreateActionQuery {
-	v := CapabilityCreateActionQuery{}
+func CapabilitiesTreeActionQueryFromString(rawQuery string) CapabilitiesTreeActionQuery {
+	v := CapabilitiesTreeActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -149,24 +181,24 @@ func CapabilityCreateActionQueryFromString(rawQuery string) CapabilityCreateActi
 	v.mapped = mapped
 	return v
 }
-func CapabilityCreateActionQueryFromHttp(r *http.Request) CapabilityCreateActionQuery {
-	return CapabilityCreateActionQueryFromString(r.URL.RawQuery)
+func CapabilitiesTreeActionQueryFromHttp(r *http.Request) CapabilitiesTreeActionQuery {
+	return CapabilitiesTreeActionQueryFromString(r.URL.RawQuery)
 }
-func (q CapabilityCreateActionQuery) Values() url.Values {
+func (q CapabilitiesTreeActionQuery) Values() url.Values {
 	return q.values
 }
-func (q CapabilityCreateActionQuery) Mapped() map[string]interface{} {
+func (q CapabilitiesTreeActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *CapabilityCreateActionQuery) SetValues(v url.Values) {
+func (q *CapabilitiesTreeActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *CapabilityCreateActionQuery) SetMapped(m map[string]interface{}) {
+func (q *CapabilitiesTreeActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type CapabilityCreateActionRequest struct {
-	Body        CapabilityDto
+type CapabilitiesTreeActionRequest struct {
+	Body        interface{}
 	QueryParams url.Values
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
@@ -190,19 +222,19 @@ type CapabilityCreateActionRequest struct {
 }
 
 // Returns the gin ctx. You need to manually cast this to .(*gin.Context)
-func (x CapabilityCreateActionRequest) GetGinCtx() interface{} {
+func (x CapabilitiesTreeActionRequest) GetGinCtx() interface{} {
 	return x.GinCtx
 }
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
-func (x CapabilityCreateActionRequest) GetCliCtx() interface{} {
+func (x CapabilitiesTreeActionRequest) GetCliCtx() interface{} {
 	return x.CliCtx
 }
-func CapabilityCreateActionClientCreateUrl(
-	req CapabilityCreateActionRequest,
+func CapabilitiesTreeActionClientCreateUrl(
+	req CapabilitiesTreeActionRequest,
 	config *emigo.APIClient, // optional pre-built request
 ) (*url.URL, error) {
-	meta := CapabilityCreateActionMeta()
+	meta := CapabilitiesTreeActionMeta()
 	urlAddr := meta.URL
 	urlAddr = config.BaseURL + urlAddr
 	// Build final URL with query string
@@ -216,13 +248,13 @@ func CapabilityCreateActionClientCreateUrl(
 	}
 	return u, nil
 }
-func CapabilityCreateActionClientExecuteTyped(httpReq *http.Request) (*CapabilityCreateActionResponse, error) {
+func CapabilitiesTreeActionClientExecuteTyped(httpReq *http.Request) (*CapabilitiesTreeActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	// At this point, response is valid, and we need to return the results.
-	var result CapabilityCreateActionResponse
+	var result CapabilitiesTreeActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
@@ -234,13 +266,9 @@ func CapabilityCreateActionClientExecuteTyped(httpReq *http.Request) (*Capabilit
 	}
 	return &result, nil
 }
-func CapabilityCreateActionClientBuildRequest(req CapabilityCreateActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
-	meta := CapabilityCreateActionMeta()
-	bodyBytes, err := json.Marshal(req.Body)
-	if err != nil {
-		return nil, err
-	}
-	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+func CapabilitiesTreeActionClientBuildRequest(req CapabilitiesTreeActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := CapabilitiesTreeActionMeta()
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -260,49 +288,44 @@ func CapabilityCreateActionClientBuildRequest(req CapabilityCreateActionRequest,
 	}
 	return httpReq, nil
 }
-func CapabilityCreateActionCall(
-	req CapabilityCreateActionRequest,
+func CapabilitiesTreeActionCall(
+	req CapabilitiesTreeActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*CapabilityCreateActionResponse, error) {
+) (*CapabilitiesTreeActionResponse, error) {
 	// This function intentionally is split into 3 different sections, so in case
 	// of some modifications that we did not anticipate, at least a part would become quite useful.
 	// first we create url, apply all path parameters, query params, etc
-	u, err := CapabilityCreateActionClientCreateUrl(req, config)
+	u, err := CapabilitiesTreeActionClientCreateUrl(req, config)
 	if err != nil {
 		return nil, err
 	}
 	// We create the request from the body in second stage
-	r, err := CapabilityCreateActionClientBuildRequest(req, u, config)
+	r, err := CapabilitiesTreeActionClientBuildRequest(req, u, config)
 	if err != nil {
 		return nil, err
 	}
 	// This one would execute the request and cast the result.
-	return CapabilityCreateActionClientExecuteTyped(r)
+	return CapabilitiesTreeActionClientExecuteTyped(r)
 }
 
-// CapabilityCreateActionRaw registers a raw Gin route for the CapabilityCreateAction action.
+// CapabilitiesTreeActionRaw registers a raw Gin route for the CapabilitiesTreeAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func CapabilityCreateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := CapabilityCreateActionMeta()
+func CapabilitiesTreeActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := CapabilitiesTreeActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-// CapabilityCreateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CapabilityCreateAction action.
+// CapabilitiesTreeActionHandler returns the HTTP method, route URL, and a typed Gin handler for the CapabilitiesTreeAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func CapabilityCreateActionHandler(
-	handler func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error),
+func CapabilitiesTreeActionHandler(
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
 ) (method, url string, h gin.HandlerFunc) {
-	meta := CapabilityCreateActionMeta()
+	meta := CapabilitiesTreeActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body CapabilityDto
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
 		// Build typed request wrapper
-		req := CapabilityCreateActionRequest{
-			Body:        body,
+		req := CapabilitiesTreeActionRequest{
+			Body:        nil,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -333,14 +356,14 @@ func CapabilityCreateActionHandler(
 	}
 }
 
-// CapabilityCreateActionGin is a high-level convenience wrapper around CapabilityCreateActionHandler.
+// CapabilitiesTreeActionGin is a high-level convenience wrapper around CapabilitiesTreeActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func CapabilityCreateActionGin(r gin.IRoutes, handler func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error)) {
-	method, url, h := CapabilityCreateActionHandler(handler)
+func CapabilitiesTreeActionGin(r gin.IRoutes, handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error)) {
+	method, url, h := CapabilitiesTreeActionHandler(handler)
 	r.Handle(method, url, h)
 }
-func (x CapabilityCreateActionRequest) IsGin() bool {
+func (x CapabilitiesTreeActionRequest) IsGin() bool {
 	if x.GinCtx == nil {
 		return false
 	}
@@ -351,10 +374,10 @@ func (x CapabilityCreateActionRequest) IsGin() bool {
 	}
 	return true
 }
-func CapabilityCreateActionQueryFromGin(c *gin.Context) CapabilityCreateActionQuery {
-	return CapabilityCreateActionQueryFromString(c.Request.URL.RawQuery)
+func CapabilitiesTreeActionQueryFromGin(c *gin.Context) CapabilitiesTreeActionQuery {
+	return CapabilitiesTreeActionQueryFromString(c.Request.URL.RawQuery)
 }
-func (x CapabilityCreateActionRequest) IsCli() bool {
+func (x CapabilitiesTreeActionRequest) IsCli() bool {
 	if x.CliCtx == nil {
 		return false
 	}
@@ -366,11 +389,11 @@ func (x CapabilityCreateActionRequest) IsCli() bool {
 	return true
 }
 
-// CapabilityCreateActionCliFlags returns every flag (request body, path parameters,
-// query parameters and typed headers) the CapabilityCreateAction action can bind from
+// CapabilitiesTreeActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the CapabilitiesTreeAction action can bind from
 // urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
 // typed header.
-func CapabilityCreateActionCliFlags() []cli.Flag {
+func CapabilitiesTreeActionCliFlags() []cli.Flag {
 	flags := []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    "header",
@@ -381,24 +404,23 @@ func CapabilityCreateActionCliFlags() []cli.Flag {
 	return flags
 }
 
-// CapabilityCreateActionCliHandler builds a full *cli.Command for the
-// CapabilityCreateAction action: it wires body, path parameters, query parameters and
-// headers from urfave v3 CLI flags into a CapabilityCreateActionRequest the same way
-// CapabilityCreateActionHandler (Gin) and CapabilityCreateActionHttpHandler (net/http)
+// CapabilitiesTreeActionCliHandler builds a full *cli.Command for the
+// CapabilitiesTreeAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a CapabilitiesTreeActionRequest the same way
+// CapabilitiesTreeActionHandler (Gin) and CapabilitiesTreeActionHttpHandler (net/http)
 // do from their own transports, then prints the JSON response (or returns the error) so
 // urfave reports the right exit code.
-func CapabilityCreateActionCliHandler(
-	handler func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error),
+func CapabilitiesTreeActionCliHandler(
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
 ) *cli.Command {
-	meta := CapabilityCreateActionMeta()
+	meta := CapabilitiesTreeActionMeta()
 	cmd := &cli.Command{
 		Name:  meta.CliName,
 		Usage: meta.Description,
-		Flags: CapabilityCreateActionCliFlags(),
+		Flags: CapabilitiesTreeActionCliFlags(),
 	}
-	cmd.Aliases = []string{meta.CliShort}
 	cmd.Action = func(ctx context.Context, c *cli.Command) error {
-		req := CapabilityCreateActionRequest{
+		req := CapabilitiesTreeActionRequest{
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
@@ -408,43 +430,31 @@ func CapabilityCreateActionCliHandler(
 	return cmd
 }
 
-// CapabilityCreateActionCli is a high-level convenience wrapper around
-// CapabilityCreateActionCliHandler. It registers the generated command as a subcommand
-// of an existing urfave v3 *cli.Command, the same way CapabilityCreateActionGin
+// CapabilitiesTreeActionCli is a high-level convenience wrapper around
+// CapabilitiesTreeActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way CapabilitiesTreeActionGin
 // registers a route on a Gin engine.
-func CapabilityCreateActionCli(
+func CapabilitiesTreeActionCli(
 	app *cli.Command,
-	handler func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error),
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
 ) {
-	app.Commands = append(app.Commands, CapabilityCreateActionCliHandler(handler))
+	app.Commands = append(app.Commands, CapabilitiesTreeActionCliHandler(handler))
 }
 
-// CapabilityCreateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
-// typed net/http handler for the CapabilityCreateAction action. Developers implement
+// CapabilitiesTreeActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the CapabilitiesTreeAction action. Developers implement
 // their business logic as a function that receives a typed request object and
-// returns either an *CapabilityCreateActionResponse or nil. JSON marshalling, headers,
+// returns either an *CapabilitiesTreeActionResponse or nil. JSON marshalling, headers,
 // status codes, and errors are handled automatically.
-func CapabilityCreateActionHttpHandler(
-	handler func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error),
+func CapabilitiesTreeActionHttpHandler(
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
 ) (method, pattern string, h http.HandlerFunc) {
-	meta := CapabilityCreateActionMeta()
+	meta := CapabilitiesTreeActionMeta()
 	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
-		var body CapabilityDto
-		if r.Body != nil {
-			defer r.Body.Close()
-			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
-				if err := json.Unmarshal(data, &body); err != nil {
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusBadRequest)
-					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
-					return
-				}
-			}
-		}
 		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
 		// which is what the IsGin() helper keys off.
-		req := CapabilityCreateActionRequest{
-			Body:        body,
+		req := CapabilitiesTreeActionRequest{
+			Body:        nil,
 			QueryParams: r.URL.Query(),
 			Headers:     r.Header,
 		}
@@ -481,14 +491,14 @@ func CapabilityCreateActionHttpHandler(
 	}
 }
 
-// CapabilityCreateActionHttp is a high-level convenience wrapper around
-// CapabilityCreateActionHttpHandler. It registers the typed route on a standard
+// CapabilitiesTreeActionHttp is a high-level convenience wrapper around
+// CapabilitiesTreeActionHttpHandler. It registers the typed route on a standard
 // *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
 // Use this when you don't need custom middleware.
-func CapabilityCreateActionHttp(
+func CapabilitiesTreeActionHttp(
 	mux *http.ServeMux,
-	handler func(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error),
+	handler func(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error),
 ) {
-	method, pattern, h := CapabilityCreateActionHttpHandler(handler)
+	method, pattern, h := CapabilitiesTreeActionHttpHandler(handler)
 	mux.HandleFunc(method+" "+pattern, h)
 }

@@ -2,7 +2,7 @@ import { CommonSingleManager } from "@/modules/fireback/components/entity-manage
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/fireback/CapabilityGetAction";
+import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/abac/CapabilityGetAction";
 import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
 import { strings } from "./strings/translations";
 import { usePageTitle } from "@/modules/fireback/hooks/authContext";

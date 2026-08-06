@@ -69,26 +69,14 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
-func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
-	var entity *CapabilityEntity = nil
-	perm := permInfo.CompleteKey
-
-	if hasChildren {
-		perm = perm + ".*"
-	}
-
-	if (db.Where(CapabilityEntity{UniqueId: perm}).First(&entity).Error != nil) {
-		err := db.Create(&CapabilityEntity{
-			UniqueId:    perm,
-			Description: permInfo.Description,
-			Name:        permInfo.Name,
-		}).Error
-
-		if err != nil {
-			log.Fatalln("Cannot start the app because a permission creation failed.", perm, err)
-		}
-	}
-}
+// UpsertPermission is a module-provided injection point, the same shape as
+// AuthorizeRequest/WithAuthorizationFn/WithAuthorizationPure/WithSocketAuthorization
+// below - fireback core doesn't keep a capability catalog table itself anymore (that
+// moved to abac's CapabilityEntity, see modules/abac/CapabilityActions.go), so this is
+// a no-op by default. SyncPermissionsInDatabase still calls it unconditionally for
+// every permission in every registered module, so a project without abac (or any
+// other module providing a catalog) simply gets no-op syncing instead of an error.
+var UpsertPermission = func(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {}
 
 var USER_SYSTEM = "system"
 

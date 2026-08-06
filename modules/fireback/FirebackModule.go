@@ -13,9 +13,7 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-var EverRunEntities []interface{} = []interface{}{
-	&CapabilityEntity{},
-}
+var EverRunEntities []interface{} = []interface{}{}
 
 type FirebackModuleConfig struct{}
 
@@ -34,11 +32,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
 			func(g *gin.RouterGroup, x *FirebackApp) error {
 
-				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
-				CapabilityGetActionGin(g, CapabilityGetAction)
-				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
-				CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
-
 				{
 					meta := EventBusSubscriptionActionMeta()
 					g.GET(meta.URL, EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
@@ -53,8 +46,6 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 					)
 				}
 
-				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
-
 				return nil
 			},
 		},
@@ -63,16 +54,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 	module.ProvideCliHandlers([]*cli.Command{
 		&PushNotificationCmd,
-		CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
-		CapabilityGetActionCliHandler(CapabilityGetAction),
-		CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
-		CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
 	})
-
-	module.ProvidePermissionHandler(
-
-		ALL_CAPABILITY_PERMISSIONS,
-	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 

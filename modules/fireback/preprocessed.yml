@@ -37,17 +37,6 @@ dtos:
   fields:
   - name: status
     type: int
-- description: Capability and permission level which is suitable for front-end application
-    to interact...
-  name: capabilityInfo
-  fields:
-  - name: uniqueId
-    type: string
-  - name: name
-    type: string
-  - name: children
-    type: collection
-    target: self@
 - name: reactiveSearchResult
   fields:
   - name: uniqueId
@@ -64,16 +53,6 @@ dtos:
     type: string
   - name: actionFn
     type: string
-- description: Every field of the "capability" entity, but optional - used both as
-    Update's partial input and as Browse's response item shape.
-  name: capabilityOptional
-  fields:
-  - name: uniqueId
-    type: string?
-  - name: name
-    type: string?
-  - name: description
-    type: string?
 - description: Every field of the "webPushConfig" entity, but optional - used both
     as Update's partial input and as Browse's response item shape.
   name: webPushConfigOptional
@@ -84,15 +63,6 @@ dtos:
     description: The json content of the web push after getting it from browser
     type: complex
     complex: JSON
-- description: Plain dto mirroring the "capability" entity's own fields.
-  name: capability
-  fields:
-  - name: uniqueId
-    type: string?
-  - name: name
-    type: string
-  - name: description
-    type: string
 - description: Plain dto mirroring the "webPushConfig" entity's own fields.
   name: webPushConfig
   fields:
@@ -103,15 +73,6 @@ dtos:
     type: complex
     complex: JSON
 entities:
-- name: capability
-  fields:
-  - name: name
-    type: string
-  - name: description
-    type: string
-  cliShort: cap
-  description: Manage the capabilities inside the application, both builtin to core
-    and custom defined ones
 - name: webPushConfig
   features:
     actions: false
@@ -129,21 +90,6 @@ complexes:
   location: github.com/torabian/fireback/modules/fireback/complexes
   compiler: go
 actions:
-- name: CapabilitiesTree
-  cliName: treex
-  url: /capabilitiesTree
-  method: get
-  description: dLists all of the capabilities in database as a array of string as
-    root access
-  out:
-    envelope: GResponse
-    fields:
-    - name: capabilities
-      type: collection
-      target: CapabilityInfoDto
-    - name: nested
-      type: collection
-      target: CapabilityInfoDto
 - name: ReactiveSearch
   url: /reactive-search
   method: reactive
@@ -155,86 +101,6 @@ actions:
   method: reactive
   description: Connects a client to all events related to their user profile, or workspace
     they are in
-- name: capabilityCreate
-  cliShort: capability-c
-  url: /capability
-  method: post
-  description: Creates a new "capability" row.
-  in:
-    dto: CapabilityDto
-  out:
-    envelope: GResponse
-    dto: CapabilityDto
-- name: capabilityUpdate
-  cliShort: capability-u
-  url: /capability/:uniqueId
-  method: patch
-  description: Applies a partial update to a "capability" row by uniqueId.
-  in:
-    dto: CapabilityOptionalDto
-  out:
-    envelope: GResponse
-    dto: CapabilityDto
-- name: capabilityGet
-  cliShort: capability-g
-  url: /capability/:uniqueId
-  method: get
-  description: Looks up a single "capability" row by uniqueId.
-  out:
-    envelope: GResponse
-    dto: CapabilityDto
-- name: capabilityBrowse
-  cliShort: capability-b
-  url: /capability/browse
-  method: get
-  qs:
-  - name: filter
-    type: string
-  - name: sort
-    type: string
-  - name: startIndex
-    type: int
-  - name: itemsPerPage
-    type: int
-  - name: cursor
-    type: string
-  description: Returns "capability" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
-  out:
-    envelope: GResponse
-    dto: CapabilityOptionalDto
-- name: capabilityAwareDeletePreview
-  cliShort: capability-dp
-  url: /capability/delete-preview
-  method: get
-  qs:
-  - name: uniqueIds
-    type: slice
-    primitive: string
-  description: Reports what deleting the given "capability" uniqueIds would affect,
-    without deleting anything.
-  out:
-    envelope: GResponse
-    fields:
-    - name: message
-      type: string
-    - name: affected
-      type: array
-      fields:
-      - name: relation
-        type: string
-      - name: count
-        type: int64
-- name: capabilityAwareDelete
-  cliShort: capability-d
-  url: /capability/delete
-  method: post
-  description: Deletes the given "capability" uniqueIds, along with everything capabilityAwareDeletePreview
-    reports.
-  in:
-    fields:
-    - name: uniqueIds
-      type: slice
-      primitive: string
 config:
 - name: cookieAuthOnly
   type: bool
