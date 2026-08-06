@@ -4,10 +4,10 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useT } from "@/modules/fireback/hooks/useT";
+import { useRoleCreateAction } from "@/modules/fireback/sdk/abac/RoleCreateAction";
+import { useRoleGetActionQuery } from "@/modules/fireback/sdk/abac/RoleGetAction";
+import { useRoleUpdateAction } from "@/modules/fireback/sdk/abac/RoleUpdateAction";
 import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
-import { useGetRoleByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetRoleByUniqueId";
-import { usePatchRole } from "@/modules/fireback/sdk/modules/abac/usePatchRole";
-import { usePostRole } from "@/modules/fireback/sdk/modules/abac/usePostRole";
 import { RoleEditForm } from "./RoleEditForm";
 
 export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
@@ -18,20 +18,13 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
   });
   const t = useT();
 
-  const getSingleHook = useGetRoleByUniqueId({
-    query: { uniqueId },
-    queryOptions: {
-      enabled: !!uniqueId,
-    },
+  const getSingleHook = useRoleGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = usePostRole({
-    queryClient,
-  });
+  const postHook = useRoleCreateAction({});
 
-  const patchHook = usePatchRole({
-    queryClient,
-  });
+  const patchHook = useRoleUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager

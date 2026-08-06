@@ -146,6 +146,7 @@ func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, err
 	entity := &RoleEntity{
 		Name:               c.Body.Name,
 		CapabilitiesListId: c.Body.CapabilitiesListId,
+		WorkspaceId:        emigo.NullableOf(query.WorkspaceId),
 	}
 	filterRolePermissions(entity, *query)
 	if len(RoleCapabilitiesListIdGet(entity)) == 0 {

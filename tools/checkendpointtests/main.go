@@ -1,6 +1,5 @@
 // Command checkendpointtests makes sure every Emi action - hand-declared or
-// entity-synthesized alike - has a dedicated Go test file sitting next to its
-// generated wiring file.
+// entity-synthesized alike - has a dedicated Go test covering it.
 //
 // Source of truth: each module's own preprocessed.yml (the "preprocessor" compiler
 // target's output, produced by `emi compile --path <module>.emi.yml`). Since
@@ -10,6 +9,14 @@
 // alongside hand-declared actions: entries - exactly what actually gets compiled into
 // <Name>Action.go files, without needing to reimplement any of Emi's own entity
 // expansion logic here.
+//
+// A module is considered to cover an action if either:
+//   - <ModuleDir>/<Name>Action_test.go exists with a func Test in it (the plain,
+//     in-process convention), or
+//   - <ModuleDir>/*_test.go or <ModuleDir>/tests/*_test.go (this repo's established
+//     black-box HTTP/CLI test package, see modules/abac/tests/testconfig.go) contains a
+//     func Test whose name has the action's bare name as a substring, e.g.
+//     TestCapabilitiesTree_HTTP covers the "CapabilitiesTree" action.
 //
 // Usage:
 //
@@ -51,13 +58,47 @@ func goActionName(name string) string {
 	return strings.ToUpper(name[:1]) + name[1:] + "Action"
 }
 
-var testFuncRe = regexp.MustCompile(`(?m)^func\s+Test`)
+var testFuncNameRe = regexp.MustCompile(`(?m)^func\s+(Test\w+)\s*\(`)
 
 type moduleReport struct {
 	emiPath string
 	dir     string
 	missing []string
 	total   int
+}
+
+// collectTestFuncNames gathers every top-level `func TestXxx(` name declared in *_test.go
+// files directly inside dir, plus (if present) dir/tests/*_test.go - this repo's
+// established location for black-box tests (see modules/abac/tests). It deliberately
+// doesn't recurse further than that one "tests" subdir, so an unrelated test package
+// elsewhere in the tree can't accidentally satisfy coverage for a module it has nothing
+// to do with.
+func collectTestFuncNames(dir string) ([]string, error) {
+	var files []string
+	for _, d := range []string{dir, filepath.Join(dir, "tests")} {
+		entries, err := os.ReadDir(d)
+		if err != nil {
+			continue // fine if dir (or its tests/ subdir) doesn't exist or has none
+		}
+		for _, e := range entries {
+			if e.IsDir() || !strings.HasSuffix(e.Name(), "_test.go") {
+				continue
+			}
+			files = append(files, filepath.Join(d, e.Name()))
+		}
+	}
+
+	var names []string
+	for _, f := range files {
+		content, err := os.ReadFile(f)
+		if err != nil {
+			return nil, err
+		}
+		for _, m := range testFuncNameRe.FindAllStringSubmatch(string(content), -1) {
+			names = append(names, m[1])
+		}
+	}
+	return names, nil
 }
 
 func findEmiFiles(roots []string) ([]string, error) {
@@ -110,16 +151,27 @@ func checkModule(emiPath string) (*moduleReport, error) {
 		return nil, fmt.Errorf("%s: %w", preprocessedPath, err)
 	}
 
+	testFuncNames, err := collectTestFuncNames(dir)
+	if err != nil {
+		return nil, fmt.Errorf("%s: reading test files: %w", dir, err)
+	}
+
 	report := &moduleReport{emiPath: emiPath, dir: dir, total: len(pf.Actions)}
 	for _, a := range pf.Actions {
 		if a.Name == "" {
 			continue
 		}
 		goName := goActionName(a.Name)
-		testPath := filepath.Join(dir, goName+"_test.go")
+		bareName := strings.TrimSuffix(goName, "Action")
 
-		content, err := os.ReadFile(testPath)
-		if err != nil || !testFuncRe.Match(content) {
+		covered := false
+		for _, fn := range testFuncNames {
+			if strings.Contains(fn, bareName) {
+				covered = true
+				break
+			}
+		}
+		if !covered {
 			report.missing = append(report.missing, goName)
 		}
 	}
@@ -171,7 +223,9 @@ func main() {
 		covered := report.total - len(report.missing)
 		fmt.Printf("\n%s (%d/%d actions have a test file)\n", report.emiPath, covered, report.total)
 		for _, name := range report.missing {
-			fmt.Printf("  MISSING  %s\n", filepath.Join(report.dir, name+"_test.go"))
+			bareName := strings.TrimSuffix(name, "Action")
+			fmt.Printf("  MISSING  no func Test*%s* in %s or %s\n",
+				bareName, report.dir, filepath.Join(report.dir, "tests"))
 		}
 	}
 

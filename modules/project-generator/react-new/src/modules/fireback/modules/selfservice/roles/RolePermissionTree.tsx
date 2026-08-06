@@ -18,10 +18,7 @@ export function RolePermissionTree({
 }) {
   const { data, error } = useCapabilitiesTreeActionQuery({});
 
-  let items = data?.data?.item?.nested || [];
-  if (items instanceof MCollection) {
-    items = items.get();
-  }
+  let items = data?.data?.item?.nested;
 
   const onNodeChange: NodeChangeFn = (node, checkValue) => {
     let newValue: string[] = [...(value || [])];
@@ -38,12 +35,14 @@ export function RolePermissionTree({
     <nav className="tree-nav">
       <ErrorsView error={error} />
       <ul className="list">
-        <PermissionTree
-          items={items}
-          onNodeChange={onNodeChange}
-          value={value}
-          prefix={prefix}
-        />
+        {items instanceof MCollection ? (
+          <PermissionTree
+            items={items}
+            onNodeChange={onNodeChange}
+            value={value}
+            prefix={prefix}
+          />
+        ) : null}
       </ul>
     </nav>
   );
@@ -56,7 +55,7 @@ export function PermissionTree({
   prefix,
   autoChecked,
 }: {
-  items: CapabilityChild[];
+  items: MCollection<CapabilityChild>;
   value: string[];
   autoChecked?: boolean;
   onNodeChange: NodeChangeFn;
@@ -65,7 +64,7 @@ export function PermissionTree({
   const pref = prefix ? prefix + "." : "";
   return (
     <>
-      {(items || []).map((item) => {
+      {(items.get() || []).map((item) => {
         const completeKey = `${pref}${item.uniqueId}${
           item.children?.length ? ".*" : ""
         }`;
@@ -98,7 +97,7 @@ export function PermissionTree({
                   autoChecked={autoChecked || checkValue === "checked"}
                   onNodeChange={onNodeChange}
                   value={value}
-                  items={item.children}
+                  items={item.children as any}
                   prefix={pref + item.uniqueId}
                 />
               </ul>

@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -17,13 +18,12 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 			PERM_ROOT_CAPABILITY_QUERY,
 		},
 	})
+
 	if err != nil {
 		return nil, err
 	}
 
 	query.ItemsPerPage = 9999
-	query.WorkspaceId = "system"
-	query.UserId = "system"
 
 	var items []*CapabilityEntity
 
@@ -35,6 +35,8 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 	itemsFiltered := []CapabilityInfoDto{}
 
 	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(*query)
+
+	fmt.Println(workspaceAccesses, rolesPermission, query.WorkspaceId)
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})

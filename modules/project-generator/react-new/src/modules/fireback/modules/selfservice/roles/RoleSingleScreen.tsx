@@ -1,33 +1,32 @@
-import { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
-import { RolePermissionTree } from "./RolePermissionTree";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useGetRoleByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetRoleByUniqueId";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
-import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
+import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { useT } from "@/modules/fireback/hooks/useT";
+import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { useEffect, useState } from "react";
+import { RolePermissionTree } from "./RolePermissionTree";
+import { useRoleGetActionQuery } from "@/modules/fireback/sdk/abac/RoleGetAction";
 
 export const RoleSingleScreen = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const uniqueId = router.query.uniqueId as string;
   const t = useT();
-  const { locale } = useLocale();
   const [value, setValue] = useState<string[]>([]);
 
-  const getSingleHook = useGetRoleByUniqueId({
-    query: { uniqueId, deep: true },
+  const getSingleHook = useRoleGetActionQuery({
+    params: { uniqueId },
   });
-  var d: RoleEntity | undefined = getSingleHook.query.data?.data;
+
+  var d = getSingleHook.data?.data.item;
   usePageTitle(d?.name || "");
 
   useEffect(() => {
-    setValue(d?.capabilities?.map((t) => t.uniqueId || "") as any);
-  }, [d?.capabilities]);
+    if (Array.isArray(d?.capabilitiesListId)) {
+      setValue(d?.capabilitiesListId);
+    }
+  }, [d?.capabilitiesListId]);
 
   return (
     <>
