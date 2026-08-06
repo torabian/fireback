@@ -38,15 +38,11 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,
-		// GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),
-		// Report tools is not really ever used.
-		// GetReportsTool(xapp),
-		// GetCapabilityRefreshCommand(xapp),
 
 		// Keep these in the last
 		&CLIAboutCommand,
@@ -60,7 +56,6 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,
-		// GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
