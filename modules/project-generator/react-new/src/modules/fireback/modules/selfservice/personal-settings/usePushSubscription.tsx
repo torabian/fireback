@@ -1,4 +1,4 @@
-import { usePostWebPushConfig } from "@/modules/fireback/sdk/modules/fireback/usePostWebPushConfig";
+import { usePostWebPushConfig } from "@/modules/fireback/sdk/modules/abac/usePostWebPushConfig";
 import { useEffect, useState } from "react";
 import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";

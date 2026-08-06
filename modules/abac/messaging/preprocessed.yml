@@ -120,6 +120,28 @@ dtos:
   - name: updatedAt
     type: complex
     complex: PlainTime
+- description: Every field of the "webPushConfig" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: webPushConfigOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: subscription
+    description: The json content of the web push after getting it from browser
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
 - description: Plain dto mirroring the "gsmProvider" entity's own fields.
   name: gsmProvider
   fields:
@@ -202,6 +224,27 @@ dtos:
     type: string
   - name: nickName
     type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "webPushConfig" entity's own fields.
+  name: webPushConfig
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: subscription
+    description: The json content of the web push after getting it from browser
+    type: complex
+    complex: JSON
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -321,6 +364,28 @@ entities:
     complex: PlainTime
   description: All emails going from the system need to have a virtual sender (nick
     name, email address, etc)
+- name: webPushConfig
+  fields:
+  - name: subscription
+    description: The json content of the web push after getting it from browser
+    type: complex
+    complex: JSON
+    tags:
+      validate: required
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Keeps a browser's web-push subscription for the user who registered
+    it.
 complexes:
 - name: JSON
   namespace: complexes
@@ -632,6 +697,86 @@ actions:
   method: post
   description: Deletes the given "emailSender" uniqueIds, along with everything emailSenderAwareDeletePreview
     reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: webPushConfigCreate
+  cliShort: webPushConfig-c
+  url: /webPushConfig
+  method: post
+  description: Creates a new "webPushConfig" row.
+  in:
+    dto: WebPushConfigDto
+  out:
+    envelope: GResponse
+    dto: WebPushConfigDto
+- name: webPushConfigUpdate
+  cliShort: webPushConfig-u
+  url: /webPushConfig/:uniqueId
+  method: patch
+  description: Applies a partial update to a "webPushConfig" row by uniqueId.
+  in:
+    dto: WebPushConfigOptionalDto
+  out:
+    envelope: GResponse
+    dto: WebPushConfigDto
+- name: webPushConfigGet
+  cliShort: webPushConfig-g
+  url: /webPushConfig/:uniqueId
+  method: get
+  description: Looks up a single "webPushConfig" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WebPushConfigDto
+- name: webPushConfigBrowse
+  cliShort: webPushConfig-b
+  url: /webPushConfig/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "webPushConfig" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WebPushConfigOptionalDto
+- name: webPushConfigAwareDeletePreview
+  cliShort: webPushConfig-dp
+  url: /webPushConfig/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "webPushConfig" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: webPushConfigAwareDelete
+  cliShort: webPushConfig-d
+  url: /webPushConfig/delete
+  method: post
+  description: Deletes the given "webPushConfig" uniqueIds, along with everything
+    webPushConfigAwareDeletePreview reports.
   in:
     fields:
     - name: uniqueIds

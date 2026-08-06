@@ -25,9 +25,7 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 		Name:        "fireback",
 		Definitions: &Module3Definitions,
 
-		EntityBundles: []EntityBundle{
-			// WebPushConfigEntityBundle,
-		},
+		EntityBundles: []EntityBundle{},
 
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
 			func(g *gin.RouterGroup, x *FirebackApp) error {

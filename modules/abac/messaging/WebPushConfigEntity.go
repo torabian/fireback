@@ -1,4 +1,4 @@
-package fireback
+package messaging
 
 import (
 	"encoding"
@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/emi/emigorm"
+	"github.com/torabian/fireback/modules/abac/abaccomplexes"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 	"gorm.io/gorm"
-	"net/http"
-	"net/url"
 )
 
 // The base class definition for webPushConfigEntity
@@ -18,6 +17,12 @@ type WebPushConfigEntity struct {
 	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The json content of the web push after getting it from browser
 	Subscription complexes.JSON `json:"subscription" validate:"required" yaml:"subscription"`
+	// The unique-id of the workspace which content belongs to.
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
+	// The unique-id of the user which created/owns the record.
+	UserId    emigo.Nullable[string]  `json:"userId" yaml:"userId"`
+	CreatedAt abaccomplexes.PlainTime `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt abaccomplexes.PlainTime `json:"updatedAt" yaml:"updatedAt"`
 }
 
 func (x *WebPushConfigEntity) Json() string {
@@ -42,6 +47,24 @@ func GetWebPushConfigEntityCliFlags(prefix string) []emigo.CliFlag {
 			Type:        "complex",
 			Description: "The json content of the web push after getting it from browser",
 		},
+		{
+			Name:        prefix + "workspace-id",
+			Type:        "string?",
+			Description: "The unique-id of the workspace which content belongs to.",
+		},
+		{
+			Name:        prefix + "user-id",
+			Type:        "string?",
+			Description: "The unique-id of the user which created/owns the record.",
+		},
+		{
+			Name: prefix + "created-at",
+			Type: "complex",
+		},
+		{
+			Name: prefix + "updated-at",
+			Type: "complex",
+		},
 	}
 }
 func CastWebPushConfigEntityFromCli(c emigo.CliCastable) WebPushConfigEntity {
@@ -55,6 +78,22 @@ func CastWebPushConfigEntityFromCli(c emigo.CliCastable) WebPushConfigEntity {
 	if c.IsSet("subscription") {
 		if u, ok := any(&data.Subscription).(encoding.TextUnmarshaler); ok {
 			u.UnmarshalText([]byte(c.String("subscription")))
+		}
+	}
+	if c.IsSet("workspace-id") {
+		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
+	}
+	if c.IsSet("user-id") {
+		emigo.ParseNullable(c.String("user-id"), &data.UserId)
+	}
+	if c.IsSet("created-at") {
+		if u, ok := any(&data.CreatedAt).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("created-at")))
+		}
+	}
+	if c.IsSet("updated-at") {
+		if u, ok := any(&data.UpdatedAt).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("updated-at")))
 		}
 	}
 	return data
@@ -99,6 +138,14 @@ func WebPushConfigEntityUpdateFn(tx *gorm.DB, uniqueId string, input WebPushConf
 		}
 		changes := map[string]interface{}{}
 		changes["Subscription"] = input.Subscription
+		if input.WorkspaceId.IsSet() {
+			changes["WorkspaceId"] = input.WorkspaceId
+		}
+		if input.UserId.IsSet() {
+			changes["UserId"] = input.UserId
+		}
+		changes["CreatedAt"] = input.CreatedAt
+		changes["UpdatedAt"] = input.UpdatedAt
 		if len(changes) > 0 {
 			if err := tx.Model(&entity).Updates(changes).Error; err != nil {
 				return err
@@ -151,56 +198,6 @@ func WebPushConfigEntityBrowseFn(tx *gorm.DB, qs WebPushConfigBrowseActionQuery,
 		Cursor:     emigorm.BuildQueryCursor(items),
 	}
 	return items, meta, nil
-}
-
-/**
- * Query parameters for WebPushConfigBrowseAction
- */
-// Query wrapper with private fields
-type WebPushConfigBrowseActionQuery struct {
-	values url.Values
-	mapped map[string]interface{}
-	// Typesafe fields
-	Filter       string `json:"filter"`
-	Sort         string `json:"sort"`
-	StartIndex   int    `json:"startIndex"`
-	ItemsPerPage int    `json:"itemsPerPage"`
-	Cursor       string `json:"cursor"`
-}
-
-func WebPushConfigBrowseActionQueryFromString(rawQuery string) WebPushConfigBrowseActionQuery {
-	v := WebPushConfigBrowseActionQuery{}
-	values, _ := url.ParseQuery(rawQuery)
-	mapped := map[string]interface{}{}
-	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
-		mapped = result
-	}
-	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
-		TagName:          "json", // reuse json tags
-		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
-		Result:           &v,
-	})
-	if err == nil {
-		_ = decoder.Decode(mapped)
-	}
-	v.values = values
-	v.mapped = mapped
-	return v
-}
-func WebPushConfigBrowseActionQueryFromHttp(r *http.Request) WebPushConfigBrowseActionQuery {
-	return WebPushConfigBrowseActionQueryFromString(r.URL.RawQuery)
-}
-func (q WebPushConfigBrowseActionQuery) Values() url.Values {
-	return q.values
-}
-func (q WebPushConfigBrowseActionQuery) Mapped() map[string]interface{} {
-	return q.mapped
-}
-func (q *WebPushConfigBrowseActionQuery) SetValues(v url.Values) {
-	q.values = v
-}
-func (q *WebPushConfigBrowseActionQuery) SetMapped(m map[string]interface{}) {
-	q.mapped = m
 }
 
 // WebPushConfigEntityAwareDeleteAffected reports one relation of WebPushConfigEntity that would be affected by

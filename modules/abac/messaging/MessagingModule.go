@@ -7,12 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// ModuleSetup registers messaging (email/gsm providers, email senders, and the
-// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider actions) as its own
-// fireback.ModuleProvider - split out of abac's NotificationModuleSetup, which now only
-// wires notificationConfig itself. GsmSendSms (the "use the workspace's default
-// provider" variant) stays wired in abac's WorkspaceModuleSetup, since it depends on
-// NotificationConfigEntity, which lives in abac.
+// ModuleSetup registers messaging (email/gsm providers, email senders, the
+// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider actions, and webPushConfig -
+// moved here from modules/fireback, where its CRUD had never actually been implemented
+// or wired) as its own fireback.ModuleProvider - split out of abac's
+// NotificationModuleSetup, which now only wires notificationConfig itself. GsmSendSms
+// (the "use the workspace's default provider" variant) stays wired in abac's
+// WorkspaceModuleSetup, since it depends on NotificationConfigEntity, which lives in
+// abac.
 func ModuleSetup() *fireback.ModuleProvider {
 	module := &fireback.ModuleProvider{
 		Name: "abac",
@@ -40,6 +42,13 @@ func ModuleSetup() *fireback.ModuleProvider {
 				EmailSenderAwareDeletePreviewActionGin(g, EmailSenderAwareDeletePreviewAction)
 				EmailSenderAwareDeleteActionGin(g, EmailSenderAwareDeleteAction)
 
+				WebPushConfigBrowseActionGin(g, WebPushConfigBrowseAction)
+				WebPushConfigGetActionGin(g, WebPushConfigGetAction)
+				WebPushConfigCreateActionGin(g, WebPushConfigCreateAction)
+				WebPushConfigUpdateActionGin(g, WebPushConfigUpdateAction)
+				WebPushConfigAwareDeletePreviewActionGin(g, WebPushConfigAwareDeletePreviewAction)
+				WebPushConfigAwareDeleteActionGin(g, WebPushConfigAwareDeleteAction)
+
 				SendEmailActionGin(g, SendEmailAction)
 				SendEmailWithProviderActionGin(g, SendEmailWithProviderAction)
 				GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
@@ -60,6 +69,7 @@ func ModuleSetup() *fireback.ModuleProvider {
 			&EmailProviderEntity{},
 			&EmailSenderEntity{},
 			&GsmProviderEntity{},
+			&WebPushConfigEntity{},
 		)
 	})
 
@@ -98,6 +108,12 @@ func ModuleSetup() *fireback.ModuleProvider {
 				SendEmailActionCliHandler(SendEmailAction),
 				SendEmailWithProviderActionCliHandler(SendEmailWithProviderAction),
 				GsmSendSmsWithProviderActionCliHandler(GsmSendSmsWithProviderAction),
+				WebPushConfigBrowseActionCliHandler(WebPushConfigBrowseAction),
+				WebPushConfigGetActionCliHandler(WebPushConfigGetAction),
+				WebPushConfigCreateActionCliHandler(WebPushConfigCreateAction),
+				WebPushConfigUpdateActionCliHandler(WebPushConfigUpdateAction),
+				WebPushConfigAwareDeletePreviewActionCliHandler(WebPushConfigAwareDeletePreviewAction),
+				WebPushConfigAwareDeleteActionCliHandler(WebPushConfigAwareDeleteAction),
 			},
 		},
 	})

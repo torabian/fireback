@@ -1,9 +1,9 @@
-package fireback
+package messaging
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
@@ -11,22 +11,21 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 )
 
 /**
-* Action to communicate with the action WebPushConfigGetAction
+* Action to communicate with the action WebPushConfigCreateAction
  */
 /*
 Here is a quick function implementation to make your life easier:
-// Actual implementation of WebPushConfigGetAction
-func WebPushConfigGetAction(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error) {
-	return &WebPushConfigGetActionResponse{
+// Actual implementation of WebPushConfigCreateAction
+func WebPushConfigCreateAction(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error) {
+	return &WebPushConfigCreateActionResponse{
 		// Payload is an interface. Use it at carefully.
 	}, nil
 }
 */
-func WebPushConfigGetActionMeta() struct {
+func WebPushConfigCreateActionMeta() struct {
 	Name        string
 	CliName     string
 	CliShort    string
@@ -42,16 +41,16 @@ func WebPushConfigGetActionMeta() struct {
 		Method      string
 		Description string
 	}{
-		Name:        "WebPushConfigGetAction",
-		CliName:     "web-push-config-get-action",
-		CliShort:    "webPushConfig-g",
-		URL:         "/webPushConfig/:uniqueId",
-		Method:      "GET",
-		Description: `Looks up a single "webPushConfig" row by uniqueId.`,
+		Name:        "WebPushConfigCreateAction",
+		CliName:     "web-push-config-create-action",
+		CliShort:    "webPushConfig-c",
+		URL:         "/webPushConfig",
+		Method:      "POST",
+		Description: `Creates a new "webPushConfig" row.`,
 	}
 }
 
-type WebPushConfigGetActionResponse struct {
+type WebPushConfigCreateActionResponse struct {
 	StatusCode int
 	Headers    map[string]string
 	Payload    interface{}
@@ -61,19 +60,19 @@ type WebPushConfigGetActionResponse struct {
 	resp *http.Response
 }
 
-func (x *WebPushConfigGetActionResponse) SetContentType(contentType string) *WebPushConfigGetActionResponse {
+func (x *WebPushConfigCreateActionResponse) SetContentType(contentType string) *WebPushConfigCreateActionResponse {
 	if x.Headers == nil {
 		x.Headers = make(map[string]string)
 	}
 	x.Headers["Content-Type"] = contentType
 	return x
 }
-func (x *WebPushConfigGetActionResponse) AsStream(r io.Reader, contentType string) *WebPushConfigGetActionResponse {
+func (x *WebPushConfigCreateActionResponse) AsStream(r io.Reader, contentType string) *WebPushConfigCreateActionResponse {
 	x.Payload = r
 	x.SetContentType(contentType)
 	return x
 }
-func (x *WebPushConfigGetActionResponse) AsJSON(payload any) *WebPushConfigGetActionResponse {
+func (x *WebPushConfigCreateActionResponse) AsJSON(payload any) *WebPushConfigCreateActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/json")
 	return x
@@ -81,13 +80,13 @@ func (x *WebPushConfigGetActionResponse) AsJSON(payload any) *WebPushConfigGetAc
 
 // When the response is expected as documentation, you call this to get some type
 // safety for the action which is happening.
-func (x *WebPushConfigGetActionResponse) WithIdeal(payload WebPushConfigDto) *WebPushConfigGetActionResponse {
+func (x *WebPushConfigCreateActionResponse) WithIdeal(payload WebPushConfigDto) *WebPushConfigCreateActionResponse {
 	x.Payload = payload
 	return x
 }
 
 // Use this for client calls, so the payload is being casted
-func (x *WebPushConfigGetActionResponse) AsIdeal() (*WebPushConfigDto, error) {
+func (x *WebPushConfigCreateActionResponse) AsIdeal() (*WebPushConfigDto, error) {
 	b, err := json.Marshal(x.GetPayload())
 	if err != nil {
 		return nil, err
@@ -98,61 +97,41 @@ func (x *WebPushConfigGetActionResponse) AsIdeal() (*WebPushConfigDto, error) {
 	}
 	return &res, nil
 }
-func (x *WebPushConfigGetActionResponse) AsHTML(payload string) *WebPushConfigGetActionResponse {
+func (x *WebPushConfigCreateActionResponse) AsHTML(payload string) *WebPushConfigCreateActionResponse {
 	x.Payload = payload
 	x.SetContentType("text/html; charset=utf-8")
 	return x
 }
-func (x *WebPushConfigGetActionResponse) AsBytes(payload []byte) *WebPushConfigGetActionResponse {
+func (x *WebPushConfigCreateActionResponse) AsBytes(payload []byte) *WebPushConfigCreateActionResponse {
 	x.Payload = payload
 	x.SetContentType("application/octet-stream")
 	return x
 }
-func (x WebPushConfigGetActionResponse) GetStatusCode() int {
+func (x WebPushConfigCreateActionResponse) GetStatusCode() int {
 	return x.StatusCode
 }
-func (x WebPushConfigGetActionResponse) GetRespHeaders() map[string]string {
+func (x WebPushConfigCreateActionResponse) GetRespHeaders() map[string]string {
 	return x.Headers
 }
-func (x WebPushConfigGetActionResponse) GetPayload() interface{} {
+func (x WebPushConfigCreateActionResponse) GetPayload() interface{} {
 	return x.Payload
 }
 
 // Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
-type WebPushConfigGetActionRequestSig = func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error)
+type WebPushConfigCreateActionRequestSig = func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error)
 
 /**
- * Path parameters for WebPushConfigGetAction
- */
-type WebPushConfigGetActionPathParameter struct {
-	UniqueId string
-}
-
-// Converts a placeholder url, and applies the parameters to it.
-func WebPushConfigGetActionPathParameterApply(params WebPushConfigGetActionPathParameter, templateUrl string) string {
-	templateUrl = strings.ReplaceAll(templateUrl, ":uniqueId", fmt.Sprintf("%v", params.UniqueId))
-	return templateUrl
-}
-
-// General purpose to extract the value and cast based on type.
-func WebPushConfigGetActionPathParameterFromFn(fn func(key string) string) WebPushConfigGetActionPathParameter {
-	res := WebPushConfigGetActionPathParameter{}
-	res.UniqueId = fn("uniqueId")
-	return res
-}
-
-/**
- * Query parameters for WebPushConfigGetAction
+ * Query parameters for WebPushConfigCreateAction
  */
 // Query wrapper with private fields
-type WebPushConfigGetActionQuery struct {
+type WebPushConfigCreateActionQuery struct {
 	values url.Values
 	mapped map[string]interface{}
 	// Typesafe fields
 }
 
-func WebPushConfigGetActionQueryFromString(rawQuery string) WebPushConfigGetActionQuery {
-	v := WebPushConfigGetActionQuery{}
+func WebPushConfigCreateActionQueryFromString(rawQuery string) WebPushConfigCreateActionQuery {
+	v := WebPushConfigCreateActionQuery{}
 	values, _ := url.ParseQuery(rawQuery)
 	mapped := map[string]interface{}{}
 	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
@@ -170,25 +149,24 @@ func WebPushConfigGetActionQueryFromString(rawQuery string) WebPushConfigGetActi
 	v.mapped = mapped
 	return v
 }
-func WebPushConfigGetActionQueryFromHttp(r *http.Request) WebPushConfigGetActionQuery {
-	return WebPushConfigGetActionQueryFromString(r.URL.RawQuery)
+func WebPushConfigCreateActionQueryFromHttp(r *http.Request) WebPushConfigCreateActionQuery {
+	return WebPushConfigCreateActionQueryFromString(r.URL.RawQuery)
 }
-func (q WebPushConfigGetActionQuery) Values() url.Values {
+func (q WebPushConfigCreateActionQuery) Values() url.Values {
 	return q.values
 }
-func (q WebPushConfigGetActionQuery) Mapped() map[string]interface{} {
+func (q WebPushConfigCreateActionQuery) Mapped() map[string]interface{} {
 	return q.mapped
 }
-func (q *WebPushConfigGetActionQuery) SetValues(v url.Values) {
+func (q *WebPushConfigCreateActionQuery) SetValues(v url.Values) {
 	q.values = v
 }
-func (q *WebPushConfigGetActionQuery) SetMapped(m map[string]interface{}) {
+func (q *WebPushConfigCreateActionQuery) SetMapped(m map[string]interface{}) {
 	q.mapped = m
 }
 
-type WebPushConfigGetActionRequest struct {
-	Body        interface{}
-	Params      WebPushConfigGetActionPathParameter
+type WebPushConfigCreateActionRequest struct {
+	Body        WebPushConfigDto
 	QueryParams url.Values
 	// Automatically casted headers, for purpose of typesafe headers in later versions
 	Headers http.Header
@@ -212,23 +190,21 @@ type WebPushConfigGetActionRequest struct {
 }
 
 // Returns the gin ctx. You need to manually cast this to .(*gin.Context)
-func (x WebPushConfigGetActionRequest) GetGinCtx() interface{} {
+func (x WebPushConfigCreateActionRequest) GetGinCtx() interface{} {
 	return x.GinCtx
 }
 
 // Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
-func (x WebPushConfigGetActionRequest) GetCliCtx() interface{} {
+func (x WebPushConfigCreateActionRequest) GetCliCtx() interface{} {
 	return x.CliCtx
 }
-func WebPushConfigGetActionClientCreateUrl(
-	req WebPushConfigGetActionRequest,
+func WebPushConfigCreateActionClientCreateUrl(
+	req WebPushConfigCreateActionRequest,
 	config *emigo.APIClient, // optional pre-built request
 ) (*url.URL, error) {
-	meta := WebPushConfigGetActionMeta()
+	meta := WebPushConfigCreateActionMeta()
 	urlAddr := meta.URL
 	urlAddr = config.BaseURL + urlAddr
-	// In case there is a path parameter, we need to apply that.
-	urlAddr = WebPushConfigGetActionPathParameterApply(req.Params, urlAddr)
 	// Build final URL with query string
 	u, err := url.Parse(urlAddr)
 	if err != nil {
@@ -240,13 +216,13 @@ func WebPushConfigGetActionClientCreateUrl(
 	}
 	return u, nil
 }
-func WebPushConfigGetActionClientExecuteTyped(httpReq *http.Request) (*WebPushConfigGetActionResponse, error) {
+func WebPushConfigCreateActionClientExecuteTyped(httpReq *http.Request) (*WebPushConfigCreateActionResponse, error) {
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		return nil, err
 	}
 	// At this point, response is valid, and we need to return the results.
-	var result WebPushConfigGetActionResponse
+	var result WebPushConfigCreateActionResponse
 	result.resp = resp
 	defer resp.Body.Close()
 	respBody, err := io.ReadAll(resp.Body)
@@ -258,9 +234,13 @@ func WebPushConfigGetActionClientExecuteTyped(httpReq *http.Request) (*WebPushCo
 	}
 	return &result, nil
 }
-func WebPushConfigGetActionClientBuildRequest(req WebPushConfigGetActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
-	meta := WebPushConfigGetActionMeta()
-	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), nil)
+func WebPushConfigCreateActionClientBuildRequest(req WebPushConfigCreateActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := WebPushConfigCreateActionMeta()
+	bodyBytes, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -280,50 +260,49 @@ func WebPushConfigGetActionClientBuildRequest(req WebPushConfigGetActionRequest,
 	}
 	return httpReq, nil
 }
-func WebPushConfigGetActionCall(
-	req WebPushConfigGetActionRequest,
+func WebPushConfigCreateActionCall(
+	req WebPushConfigCreateActionRequest,
 	config *emigo.APIClient, // optional pre-built request
-) (*WebPushConfigGetActionResponse, error) {
+) (*WebPushConfigCreateActionResponse, error) {
 	// This function intentionally is split into 3 different sections, so in case
 	// of some modifications that we did not anticipate, at least a part would become quite useful.
 	// first we create url, apply all path parameters, query params, etc
-	u, err := WebPushConfigGetActionClientCreateUrl(req, config)
+	u, err := WebPushConfigCreateActionClientCreateUrl(req, config)
 	if err != nil {
 		return nil, err
 	}
 	// We create the request from the body in second stage
-	r, err := WebPushConfigGetActionClientBuildRequest(req, u, config)
+	r, err := WebPushConfigCreateActionClientBuildRequest(req, u, config)
 	if err != nil {
 		return nil, err
 	}
 	// This one would execute the request and cast the result.
-	return WebPushConfigGetActionClientExecuteTyped(r)
-}
-func WebPushConfigGetActionPathParameterFromGin(g *gin.Context) WebPushConfigGetActionPathParameter {
-	return WebPushConfigGetActionPathParameterFromFn(func(key string) string {
-		return g.Param(key)
-	})
+	return WebPushConfigCreateActionClientExecuteTyped(r)
 }
 
-// WebPushConfigGetActionRaw registers a raw Gin route for the WebPushConfigGetAction action.
+// WebPushConfigCreateActionRaw registers a raw Gin route for the WebPushConfigCreateAction action.
 // This gives the developer full control over middleware, handlers, and response handling.
-func WebPushConfigGetActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := WebPushConfigGetActionMeta()
+func WebPushConfigCreateActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := WebPushConfigCreateActionMeta()
 	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-// WebPushConfigGetActionHandler returns the HTTP method, route URL, and a typed Gin handler for the WebPushConfigGetAction action.
+// WebPushConfigCreateActionHandler returns the HTTP method, route URL, and a typed Gin handler for the WebPushConfigCreateAction action.
 // Developers implement their business logic as a function that receives a typed request object
 // and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func WebPushConfigGetActionHandler(
-	handler func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error),
+func WebPushConfigCreateActionHandler(
+	handler func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error),
 ) (method, url string, h gin.HandlerFunc) {
-	meta := WebPushConfigGetActionMeta()
+	meta := WebPushConfigCreateActionMeta()
 	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body WebPushConfigDto
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
 		// Build typed request wrapper
-		req := WebPushConfigGetActionRequest{
-			Body:        nil,
-			Params:      WebPushConfigGetActionPathParameterFromGin(m),
+		req := WebPushConfigCreateActionRequest{
+			Body:        body,
 			QueryParams: m.Request.URL.Query(),
 			Headers:     m.Request.Header,
 			GinCtx:      m,
@@ -354,14 +333,14 @@ func WebPushConfigGetActionHandler(
 	}
 }
 
-// WebPushConfigGetActionGin is a high-level convenience wrapper around WebPushConfigGetActionHandler.
+// WebPushConfigCreateActionGin is a high-level convenience wrapper around WebPushConfigCreateActionHandler.
 // It automatically constructs and registers the typed route on the Gin engine.
 // Use this when you don't need custom middleware or route grouping.
-func WebPushConfigGetActionGin(r gin.IRoutes, handler func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error)) {
-	method, url, h := WebPushConfigGetActionHandler(handler)
+func WebPushConfigCreateActionGin(r gin.IRoutes, handler func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error)) {
+	method, url, h := WebPushConfigCreateActionHandler(handler)
 	r.Handle(method, url, h)
 }
-func (x WebPushConfigGetActionRequest) IsGin() bool {
+func (x WebPushConfigCreateActionRequest) IsGin() bool {
 	if x.GinCtx == nil {
 		return false
 	}
@@ -372,28 +351,10 @@ func (x WebPushConfigGetActionRequest) IsGin() bool {
 	}
 	return true
 }
-func WebPushConfigGetActionQueryFromGin(c *gin.Context) WebPushConfigGetActionQuery {
-	return WebPushConfigGetActionQueryFromString(c.Request.URL.RawQuery)
+func WebPushConfigCreateActionQueryFromGin(c *gin.Context) WebPushConfigCreateActionQuery {
+	return WebPushConfigCreateActionQueryFromString(c.Request.URL.RawQuery)
 }
-func GetWebPushConfigGetActionPathParameterCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name:     prefix + "pp-uniqueId",
-			Type:     "string",
-			Required: true,
-		},
-	}
-}
-
-// Extracts the path parameter from a urfave v3 cli.
-func WebPushConfigGetActionPathParameterFromCli(c *cli.Command) WebPushConfigGetActionPathParameter {
-	return WebPushConfigGetActionPathParameterFromFn(func(key string) string {
-		// In cli, they are prefixed with pp, to avoid conflict with other params coming from 'in'
-		// section of the definition.
-		return c.String("pp-" + key)
-	})
-}
-func (x WebPushConfigGetActionRequest) IsCli() bool {
+func (x WebPushConfigCreateActionRequest) IsCli() bool {
 	if x.CliCtx == nil {
 		return false
 	}
@@ -405,11 +366,11 @@ func (x WebPushConfigGetActionRequest) IsCli() bool {
 	return true
 }
 
-// WebPushConfigGetActionCliFlags returns every flag (request body, path parameters,
-// query parameters and typed headers) the WebPushConfigGetAction action can bind from
+// WebPushConfigCreateActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the WebPushConfigCreateAction action can bind from
 // urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
 // typed header.
-func WebPushConfigGetActionCliFlags() []cli.Flag {
+func WebPushConfigCreateActionCliFlags() []cli.Flag {
 	flags := []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    "header",
@@ -417,66 +378,73 @@ func WebPushConfigGetActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
-	flags = append(flags, emigo.CastEmiFlagToUrfave(GetWebPushConfigGetActionPathParameterCliFlags(""))...)
 	return flags
 }
 
-// WebPushConfigGetActionCliHandler builds a full *cli.Command for the
-// WebPushConfigGetAction action: it wires body, path parameters, query parameters and
-// headers from urfave v3 CLI flags into a WebPushConfigGetActionRequest the same way
-// WebPushConfigGetActionHandler (Gin) and WebPushConfigGetActionHttpHandler (net/http)
+// WebPushConfigCreateActionCliHandler builds a full *cli.Command for the
+// WebPushConfigCreateAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a WebPushConfigCreateActionRequest the same way
+// WebPushConfigCreateActionHandler (Gin) and WebPushConfigCreateActionHttpHandler (net/http)
 // do from their own transports, then prints the JSON response (or returns the error) so
 // urfave reports the right exit code.
-func WebPushConfigGetActionCliHandler(
-	handler func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error),
+func WebPushConfigCreateActionCliHandler(
+	handler func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error),
 ) *cli.Command {
-	meta := WebPushConfigGetActionMeta()
+	meta := WebPushConfigCreateActionMeta()
 	cmd := &cli.Command{
 		Name:  meta.CliName,
 		Usage: meta.Description,
-		Flags: WebPushConfigGetActionCliFlags(),
+		Flags: WebPushConfigCreateActionCliFlags(),
 	}
 	cmd.Aliases = []string{meta.CliShort}
 	cmd.Action = func(ctx context.Context, c *cli.Command) error {
-		req := WebPushConfigGetActionRequest{
+		req := WebPushConfigCreateActionRequest{
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
-			Params:      WebPushConfigGetActionPathParameterFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}
 	return cmd
 }
 
-// WebPushConfigGetActionCli is a high-level convenience wrapper around
-// WebPushConfigGetActionCliHandler. It registers the generated command as a subcommand
-// of an existing urfave v3 *cli.Command, the same way WebPushConfigGetActionGin
+// WebPushConfigCreateActionCli is a high-level convenience wrapper around
+// WebPushConfigCreateActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way WebPushConfigCreateActionGin
 // registers a route on a Gin engine.
-func WebPushConfigGetActionCli(
+func WebPushConfigCreateActionCli(
 	app *cli.Command,
-	handler func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error),
+	handler func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error),
 ) {
-	app.Commands = append(app.Commands, WebPushConfigGetActionCliHandler(handler))
+	app.Commands = append(app.Commands, WebPushConfigCreateActionCliHandler(handler))
 }
 
-// WebPushConfigGetActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
-// typed net/http handler for the WebPushConfigGetAction action. Developers implement
+// WebPushConfigCreateActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the WebPushConfigCreateAction action. Developers implement
 // their business logic as a function that receives a typed request object and
-// returns either an *WebPushConfigGetActionResponse or nil. JSON marshalling, headers,
+// returns either an *WebPushConfigCreateActionResponse or nil. JSON marshalling, headers,
 // status codes, and errors are handled automatically.
-func WebPushConfigGetActionHttpHandler(
-	handler func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error),
+func WebPushConfigCreateActionHttpHandler(
+	handler func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error),
 ) (method, pattern string, h http.HandlerFunc) {
-	meta := WebPushConfigGetActionMeta()
+	meta := WebPushConfigCreateActionMeta()
 	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body WebPushConfigDto
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
 		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
 		// which is what the IsGin() helper keys off.
-		req := WebPushConfigGetActionRequest{
-			Body: nil,
-			Params: WebPushConfigGetActionPathParameterFromFn(func(key string) string {
-				return r.PathValue(key)
-			}),
+		req := WebPushConfigCreateActionRequest{
+			Body:        body,
 			QueryParams: r.URL.Query(),
 			Headers:     r.Header,
 		}
@@ -513,14 +481,14 @@ func WebPushConfigGetActionHttpHandler(
 	}
 }
 
-// WebPushConfigGetActionHttp is a high-level convenience wrapper around
-// WebPushConfigGetActionHttpHandler. It registers the typed route on a standard
+// WebPushConfigCreateActionHttp is a high-level convenience wrapper around
+// WebPushConfigCreateActionHttpHandler. It registers the typed route on a standard
 // *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
 // Use this when you don't need custom middleware.
-func WebPushConfigGetActionHttp(
+func WebPushConfigCreateActionHttp(
 	mux *http.ServeMux,
-	handler func(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error),
+	handler func(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error),
 ) {
-	method, pattern, h := WebPushConfigGetActionHttpHandler(handler)
+	method, pattern, h := WebPushConfigCreateActionHttpHandler(handler)
 	mux.HandleFunc(method+" "+pattern, h)
 }

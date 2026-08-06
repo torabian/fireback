@@ -51,6 +51,102 @@ export class WebPushConfigDto {
     this.subscription = value;
     return this;
   }
+  /**
+   * The unique-id of the workspace which content belongs to.
+   * @type {string}
+   **/
+  #workspaceId?: string | null = undefined;
+  /**
+   * The unique-id of the workspace which content belongs to.
+   * @returns {string}
+   **/
+  get workspaceId() {
+    return this.#workspaceId;
+  }
+  /**
+   * The unique-id of the workspace which content belongs to.
+   * @type {string}
+   **/
+  set workspaceId(value: string | null | undefined) {
+    const correctType =
+      typeof value === "string" || value === undefined || value === null;
+    this.#workspaceId = correctType ? value : String(value);
+  }
+  setWorkspaceId(value: string | null | undefined) {
+    this.workspaceId = value;
+    return this;
+  }
+  /**
+   * The unique-id of the user which created/owns the record.
+   * @type {string}
+   **/
+  #userId?: string | null = undefined;
+  /**
+   * The unique-id of the user which created/owns the record.
+   * @returns {string}
+   **/
+  get userId() {
+    return this.#userId;
+  }
+  /**
+   * The unique-id of the user which created/owns the record.
+   * @type {string}
+   **/
+  set userId(value: string | null | undefined) {
+    const correctType =
+      typeof value === "string" || value === undefined || value === null;
+    this.#userId = correctType ? value : String(value);
+  }
+  setUserId(value: string | null | undefined) {
+    this.userId = value;
+    return this;
+  }
+  /**
+   *
+   * @type {PlainTime}
+   **/
+  #createdAt!: PlainTime;
+  /**
+   *
+   * @returns {PlainTime}
+   **/
+  get createdAt() {
+    return this.#createdAt;
+  }
+  /**
+   *
+   * @type {PlainTime}
+   **/
+  set createdAt(value: PlainTime) {
+    this.#createdAt = value;
+  }
+  setCreatedAt(value: PlainTime) {
+    this.createdAt = value;
+    return this;
+  }
+  /**
+   *
+   * @type {PlainTime}
+   **/
+  #updatedAt!: PlainTime;
+  /**
+   *
+   * @returns {PlainTime}
+   **/
+  get updatedAt() {
+    return this.#updatedAt;
+  }
+  /**
+   *
+   * @type {PlainTime}
+   **/
+  set updatedAt(value: PlainTime) {
+    this.#updatedAt = value;
+  }
+  setUpdatedAt(value: PlainTime) {
+    this.updatedAt = value;
+    return this;
+  }
   constructor(data: unknown = undefined) {
     if (data === null || data === undefined) {
       return;
@@ -93,6 +189,18 @@ export class WebPushConfigDto {
     if (d.subscription !== undefined) {
       this.subscription = d.subscription;
     }
+    if (d.workspaceId !== undefined) {
+      this.workspaceId = d.workspaceId;
+    }
+    if (d.userId !== undefined) {
+      this.userId = d.userId;
+    }
+    if (d.createdAt !== undefined) {
+      this.createdAt = d.createdAt;
+    }
+    if (d.updatedAt !== undefined) {
+      this.updatedAt = d.updatedAt;
+    }
   }
   /**
    *	Special toJSON override, since the field are private,
@@ -102,6 +210,10 @@ export class WebPushConfigDto {
     return {
       uniqueId: this.#uniqueId,
       subscription: this.#subscription,
+      workspaceId: this.#workspaceId,
+      userId: this.#userId,
+      createdAt: this.#createdAt,
+      updatedAt: this.#updatedAt,
     };
   }
   toString() {
@@ -111,6 +223,10 @@ export class WebPushConfigDto {
     return {
       uniqueId: "uniqueId",
       subscription: "subscription",
+      workspaceId: "workspaceId",
+      userId: "userId",
+      createdAt: "createdAt",
+      updatedAt: "updatedAt",
     };
   }
   /**
@@ -155,6 +271,26 @@ export type WebPushConfigDtoType = {
    * @type {JSON}
    **/
   subscription: JSON;
+  /**
+   * The unique-id of the workspace which content belongs to.
+   * @type {string}
+   **/
+  workspaceId?: string;
+  /**
+   * The unique-id of the user which created/owns the record.
+   * @type {string}
+   **/
+  userId?: string;
+  /**
+   *
+   * @type {PlainTime}
+   **/
+  createdAt: PlainTime;
+  /**
+   *
+   * @type {PlainTime}
+   **/
+  updatedAt: PlainTime;
 };
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace WebPushConfigDtoType {}

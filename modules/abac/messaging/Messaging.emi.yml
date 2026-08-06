@@ -29,11 +29,12 @@ name: messaging
 description:
   Email and SMS/GSM provider configuration and sending mechanics, split out of abac's
   notification module - email providers (sendgrid/mailgun/postmark/resend/smtp/terminal),
-  sms gateways (url/terminal/mediana), and named "from" email senders. Depends on abac
-  for auth (ResolveActionContext/SecurityModel), but nothing in abac's other entities
-  depends back on this module - see modules/abac/NotificationConfigActions.go for the
-  one place abac calls into this package (looking up which provider is "the general
-  one" for a workspace).
+  sms gateways (url/terminal/mediana), named "from" email senders, and per-user browser
+  web-push subscriptions (webPushConfig, moved here from modules/fireback). Depends on
+  abac for auth (ResolveActionContext/SecurityModel), but nothing in abac's other
+  entities depends back on this module - see modules/abac/NotificationConfigActions.go
+  for the one place abac calls into this package (looking up which provider is "the
+  general one" for a workspace).
 
 actions:
   - name: SendEmail
@@ -204,6 +205,28 @@ entities:
         tags:
           validate: required
         type: string
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
+      - name: userId
+        type: string?
+        description: The unique-id of the user which created/owns the record.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+
+  - name: webPushConfig
+    description: Keeps a browser's web-push subscription for the user who registered it.
+    fields:
+      - name: subscription
+        type: complex
+        complex: JSON
+        tags:
+          validate: required
+        description: The json content of the web push after getting it from browser
       - name: workspaceId
         type: string?
         description: The unique-id of the workspace which content belongs to.

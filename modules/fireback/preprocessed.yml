@@ -30,37 +30,6 @@ dtos:
     type: string
   - name: actionFn
     type: string
-- description: Every field of the "webPushConfig" entity, but optional - used both
-    as Update's partial input and as Browse's response item shape.
-  name: webPushConfigOptional
-  fields:
-  - name: uniqueId
-    type: string?
-  - name: subscription
-    description: The json content of the web push after getting it from browser
-    type: complex
-    complex: JSON
-- description: Plain dto mirroring the "webPushConfig" entity's own fields.
-  name: webPushConfig
-  fields:
-  - name: uniqueId
-    type: string?
-  - name: subscription
-    description: The json content of the web push after getting it from browser
-    type: complex
-    complex: JSON
-entities:
-- name: webPushConfig
-  features:
-    actions: false
-  fields:
-  - name: subscription
-    description: The json content of the web push after getting it from browser
-    type: complex
-    complex: JSON
-    tags:
-      validate: required
-  description: Keep the web push notification configuration for each user
 complexes:
 - name: JSON
   namespace: complexes

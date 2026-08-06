@@ -192,16 +192,3 @@ actions:
     description: Connects a client to all events related to their user profile, or workspace they are in
     method: reactive
     url: /ws
-
-entities:
-  - name: webPushConfig
-    features:
-      actions: false
-    description: Keep the web push notification configuration for each user
-    fields:
-      - name: subscription
-        type: complex
-        complex: JSON
-        tags:
-          validate: required
-        description: The json content of the web push after getting it from browser
