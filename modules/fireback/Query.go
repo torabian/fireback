@@ -339,7 +339,6 @@ var FIREBACK_DEFAULT_DB_COLUMNS []string = []string{
 	"Translations",
 	"Updated",
 	"Created",
-	"Visibility",
 	"ParentId",
 }
 

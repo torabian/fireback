@@ -229,12 +229,7 @@ func WithAuthorizationFn(securityModel *fireback.SecurityModel) gin.HandlerFunc 
 // It would convert the current selected role_id and workspace_id into a sql
 // with given permissions to make the queries do not need check that again
 func GetSqlContext(x *fireback.UserAccessPerWorkspaceDto, activeWorkspaceId string, allowCascade bool) string {
-	conditions := []string{
-
-		// Visibility A means that the content is accessible across the entire project.
-		// It's a public content.
-		`visibility = 'A'`,
-	}
+	conditions := []string{}
 
 	// Let's allow the user to see everything which they belong to
 	// but usually it's not necessary, because they are focused on one workspace at the moment
