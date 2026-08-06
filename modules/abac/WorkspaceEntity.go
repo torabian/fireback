@@ -13,7 +13,7 @@ import (
 // The base class definition for workspaceEntity
 type WorkspaceEntity struct {
 	Id          int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId    string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId    string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Description string `json:"description" yaml:"description"`
 	Name        string `json:"name" validate:"required" yaml:"name"`
 	// The unique-id of the workspace type which defines this workspace's role.

@@ -13,7 +13,7 @@ import (
 // The base class definition for publicJoinKeyEntity
 type PublicJoinKeyEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The unique-id of the role which is granted to anyone joining via this key.
 	RoleId emigo.Nullable[string] `json:"roleId" yaml:"roleId"`
 	// The unique-id of the workspace which content belongs to.

@@ -13,7 +13,7 @@ import (
 // The base class definition for workspaceConfigEntity
 type WorkspaceConfigEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// Enables the recaptcha2 for authentication flow.
 	EnableRecaptcha2 emigo.Nullable[bool] `json:"enableRecaptcha2" yaml:"enableRecaptcha2"`
 	// Enables the otp option. It's not forcing it, so user can choose if they want otp or password.

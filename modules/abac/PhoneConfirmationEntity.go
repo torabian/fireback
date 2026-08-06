@@ -13,7 +13,7 @@ import (
 // The base class definition for phoneConfirmationEntity
 type PhoneConfirmationEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The unique-id of the user this confirmation belongs to.
 	UserId      emigo.Nullable[string] `json:"userId" yaml:"userId"`
 	Status      string                 `json:"status" yaml:"status"`

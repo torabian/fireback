@@ -15,7 +15,7 @@ import (
 // The base class definition for webPushConfigEntity
 type WebPushConfigEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The json content of the web push after getting it from browser
 	Subscription complexes.JSON `json:"subscription" validate:"required" yaml:"subscription"`
 }

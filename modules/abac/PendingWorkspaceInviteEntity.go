@@ -13,7 +13,7 @@ import (
 // The base class definition for pendingWorkspaceInviteEntity
 type PendingWorkspaceInviteEntity struct {
 	Id            int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId      string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId      string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Value         string `json:"value" yaml:"value"`
 	Type          string `json:"type" yaml:"type"`
 	CoverLetter   string `json:"coverLetter" yaml:"coverLetter"`

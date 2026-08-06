@@ -14,7 +14,7 @@ import (
 // The base class definition for emailProviderEntity
 type EmailProviderEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
 	Type string `json:"type" validate:"required" yaml:"type"`
 	// Give the email provider configuration a name, which makes it easier later to query.

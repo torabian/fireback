@@ -13,7 +13,7 @@ import (
 // The base class definition for regionalContentEntity
 type RegionalContentEntity struct {
 	Id         int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId   string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId   string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Content    string `json:"content" validate:"required" yaml:"content"`
 	Region     string `json:"region" validate:"required" yaml:"region"`
 	Title      string `json:"title" yaml:"title"`

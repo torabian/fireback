@@ -11,7 +11,7 @@ import (
 // The base class definition for capabilityEntity
 type CapabilityEntity struct {
 	Id          int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId    string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId    string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description" yaml:"description"`
 }

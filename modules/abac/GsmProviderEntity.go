@@ -13,7 +13,7 @@ import (
 // The base class definition for gsmProviderEntity
 type GsmProviderEntity struct {
 	Id               int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId         string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId         string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	ApiKey           string `json:"apiKey" yaml:"apiKey"`
 	MainSenderNumber string `json:"mainSenderNumber" validate:"required" yaml:"mainSenderNumber"`
 	Type             string `json:"type" validate:"required" yaml:"type"`

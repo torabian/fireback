@@ -13,7 +13,7 @@ import (
 // The base class definition for userProfileEntity
 type UserProfileEntity struct {
 	Id        int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId  string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId  string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	FirstName string `json:"firstName" yaml:"firstName"`
 	LastName  string `json:"lastName" yaml:"lastName"`
 	// The unique-id of the workspace which content belongs to.

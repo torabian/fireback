@@ -13,7 +13,7 @@ import (
 // The base class definition for passportMethodEntity
 type PassportMethodEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Type     string `json:"type" validate:"oneof=email phone google facebook,required" yaml:"type"`
 	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
 	Region string `json:"region" validate:"required,oneof=global" yaml:"region"`

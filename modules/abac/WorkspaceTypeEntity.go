@@ -13,7 +13,7 @@ import (
 // The base class definition for workspaceTypeEntity
 type WorkspaceTypeEntity struct {
 	Id          int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId    string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId    string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Title       string `json:"title" validate:"required,omitempty,min=1,max=250" yaml:"title"`
 	Description string `json:"description" yaml:"description"`
 	Slug        string `json:"slug" validate:"required,omitempty,min=2,max=50" yaml:"slug"`

@@ -13,7 +13,7 @@ import (
 // The base class definition for workspaceInviteEntity
 type WorkspaceInviteEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// A long hash to get the user into the confirm or signup page without sending the email or phone number, for example if an administrator wants to copy the link.
 	PublicKey string `json:"publicKey" yaml:"publicKey"`
 	// The content that user will receive to understand the reason of the letter.

@@ -14,7 +14,7 @@ import (
 // The base class definition for roleEntity
 type RoleEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Name     string `json:"name" validate:"required,omitempty,min=1,max=200" yaml:"name"`
 	// The list of capability completeKeys granted to this role, stored directly as JSON (replaces the old many-to-many role_capabilities join table - Emi has no relation mechanism compatible with fireback's string-uniqueId FK convention, see other entities' xId fields).
 	CapabilitiesListId complexes.JSON          `json:"capabilitiesListId" yaml:"capabilitiesListId"`

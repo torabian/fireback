@@ -13,7 +13,7 @@ import (
 // The base class definition for publicAuthenticationEntity
 type PublicAuthenticationEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The unique-id of the user which this record belongs to.
 	UserId emigo.Nullable[string] `json:"userId" yaml:"userId"`
 	// If the application requires totp dual factor upon account creation, we create a secret here and pass the link

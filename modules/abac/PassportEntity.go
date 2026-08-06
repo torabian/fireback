@@ -13,7 +13,7 @@ import (
 // The base class definition for passportEntity
 type PassportEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// When user creates account via oauth services such as google, it's essential to set the provider and do not allow passwordless logins if it's not via that specific provider.
 	ThirdPartyVerifier string                 `json:"thirdPartyVerifier" yaml:"thirdPartyVerifier"`
 	Type               string                 `json:"type" validate:"required" yaml:"type"`

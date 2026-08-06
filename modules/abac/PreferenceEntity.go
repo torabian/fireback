@@ -13,7 +13,7 @@ import (
 // The base class definition for preferenceEntity
 type PreferenceEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	Timezone string `json:"timezone" yaml:"timezone"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`

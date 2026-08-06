@@ -13,7 +13,7 @@ import (
 // The base class definition for workspaceRoleEntity
 type WorkspaceRoleEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// The unique-id of the userWorkspace this role assignment belongs to.
 	UserWorkspaceId emigo.Nullable[string] `gorm:"index:workspacerole_idx,unique" json:"userWorkspaceId" yaml:"userWorkspaceId"`
 	// The unique-id of the assigned role.

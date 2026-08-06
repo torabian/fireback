@@ -13,7 +13,7 @@ import (
 // The base class definition for timezoneGroupEntity
 type TimezoneGroupEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
-	UniqueId string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
 	// Title which is shown to the user and allows them to select.
 	Title string `json:"title" yaml:"title"`
 	// The unique-id of the workspace which content belongs to.
