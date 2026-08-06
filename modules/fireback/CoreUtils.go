@@ -72,8 +72,6 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 	}
 }
 
-var ROOT_ALL_ACCESS = "root.*"
-
 var USER_SYSTEM = "system"
 
 func FormatYamlKeys(yamlStr string) string {
