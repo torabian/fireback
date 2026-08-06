@@ -1,7 +1,6 @@
 package abac
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -39,8 +38,6 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})
-
-	fmt.Println(4, workspaceAccesses, rolesPermission)
 
 	tree := terminal.Tree{}
 

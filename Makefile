@@ -36,13 +36,26 @@ bundle:
 
 
 # Fireback has some sdks on some projects which are commited due to fact I want it
-# be ready to use without any builds tools right away. They often get old over changes we make 
+# be ready to use without any builds tools right away. They often get old over changes we make
 # to typescript builder for example, and forget to update the codegen projects.
 # this function need to do that, and before making any release we need to make
 # sure, that running this command on main (or release tag) make any code diff.
 
 prepare:
 	make refresh && make rebuild-sdks && make bundle
+
+# Every Emi action - hand-declared or entity-synthesized alike - is meant to have a
+# (see tools/checkendpointtests) reads each module's own preprocessed.yml (the
+# "preprocessor" emi target's output - already includes entity CRUD actions, since
+# core.ReadEmiFromString runs Preprocess() before writing it) to get the real, complete
+# list of actions, and reports which ones have no test file yet.
+#
+# This is report-only for now (exit 0 regardless of gaps) since there is real, sizable
+# test debt today - see the printed count. Once coverage has caught up, switch this to
+# `go run ./tools/checkendpointtests --strict` (exits 1 on any gap) and wire it into
+# `prepare`/CI so new endpoints can't ship without a test.
+checkendpointtests:
+	go run ./tools/checkendpointtests
 
 dockerbuild:
 	docker build -t fireback . 
