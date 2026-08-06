@@ -20,7 +20,6 @@ export function dataMenuToMenu(
   permissionCheck: (permissionKey?: string | null) => boolean = () => true,
   locale: string,
 ): MenuItem | null {
-  console.log(17, data.capabilityId);
   if (!permissionCheck(data.capabilityId)) {
     return null;
   }
@@ -93,8 +92,6 @@ function Sidebar({
 
   const { menus: workspaceMenus } = useWorkspacesMenuPresenter();
   menus.push(workspaceMenus[0]);
-
-  console.log(5, menus);
 
   return (
     <div

@@ -4,9 +4,9 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
+import { useWorkspaceConfigDistinctGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctGetAction";
+import { useWorkspaceConfigDistinctUpdateAction } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctUpdateAction";
 import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
-import { useGetWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceConfigDistinct";
-import { usePatchWorkspaceConfigDistinct } from "@/modules/fireback/sdk/modules/abac/usePatchWorkspaceConfigDistinct";
 import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
 import { strings } from "./strings/translations";
 export const WorkspaceConfigEntityManager = ({
@@ -18,13 +18,9 @@ export const WorkspaceConfigEntityManager = ({
   >({
     data,
   });
-  const getSingleHook = useGetWorkspaceConfigDistinct({
-    query: { uniqueId },
-  });
+  const getSingleHook = useWorkspaceConfigDistinctGetActionQuery({});
+  const patchHook = useWorkspaceConfigDistinctUpdateAction({});
 
-  const patchHook = usePatchWorkspaceConfigDistinct({
-    queryClient,
-  });
   return (
     <CommonEntityManager
       patchHook={patchHook}
@@ -33,7 +29,7 @@ export const WorkspaceConfigEntityManager = ({
       forceEdit
       onCancel={() => {
         router.goBackOrDefault(
-          WorkspaceConfigEntity.Navigation.single(undefined, locale)
+          WorkspaceConfigEntity.Navigation.single(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>

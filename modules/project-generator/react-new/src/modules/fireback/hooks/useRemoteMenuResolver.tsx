@@ -63,7 +63,6 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   if (data instanceof GResponse) {
     result = data?.data?.items
       .map((item) => {
-        console.log(102, item);
         return dataMenuToMenu(item, visibilityCheck, locale);
       })
       .filter(Boolean) as MenuItem[];

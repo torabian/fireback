@@ -888,6 +888,33 @@ actions:
     out:
       dto: AppMenuOptionalDto
       envelope: GResponse
+
+  - name: WorkspaceConfigDistinctGet
+    url: /workspace-config/distinct
+    cliName: workspace-config-distinct-get
+    method: get
+    description: >-
+      Returns the single WorkspaceConfig row for the caller's current workspace,
+      looked up by workspace instead of uniqueId - if none exists yet, returns an
+      empty WorkspaceConfig instead of a 404. Restores the old Module3-generated
+      GET /workspace-config/distinct route.
+    out:
+      dto: WorkspaceConfigDto
+      envelope: GResponse
+
+  - name: WorkspaceConfigDistinctUpdate
+    url: /workspace-config/distinct
+    cliName: workspace-config-distinct-update
+    method: patch
+    description: >-
+      Creates or updates the single WorkspaceConfig row for the caller's current
+      workspace, resolved/written by workspace instead of a uniqueId path param.
+      Restores the old Module3-generated PATCH /workspace-config/distinct route.
+    in:
+      dto: WorkspaceConfigOptionalDto
+    out:
+      dto: WorkspaceConfigDto
+      envelope: GResponse
 entities:
   - name: capability
     cliShort: cap

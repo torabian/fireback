@@ -47,6 +47,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	fireback.WithAuthorizationFn = WithAuthorizationFn
 	fireback.AuthorizeRequest = AuthorizeRequest
 	fireback.WithSocketAuthorization = WithSocketAuthorization
+	fireback.MeetsAccessLevel = MeetsAccessLevel
 
 	module := &fireback.ModuleProvider{
 		Name:               "abac",
@@ -175,6 +176,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				WorkspaceConfigUpdateActionGin(g, WorkspaceConfigUpdateAction)
 				WorkspaceConfigAwareDeletePreviewActionGin(g, WorkspaceConfigAwareDeletePreviewAction)
 				WorkspaceConfigAwareDeleteActionGin(g, WorkspaceConfigAwareDeleteAction)
+				WorkspaceConfigDistinctGetActionGin(g, WorkspaceConfigDistinctGetAction)
+				WorkspaceConfigDistinctUpdateActionGin(g, WorkspaceConfigDistinctUpdateAction)
 
 				RoleBrowseActionGin(g, RoleBrowseAction)
 				RoleGetActionGin(g, RoleGetAction)

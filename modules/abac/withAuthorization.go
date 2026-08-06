@@ -59,7 +59,7 @@ func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.A
 		ActionRequires:         context.Capabilities,
 	}
 
-	meets, missing := fireback.MeetsAccessLevel(query, false)
+	meets, missing := MeetsAccessLevel(query, false)
 
 	if !meets {
 		return nil, fireback.Create401Error(&AbacMessages.NotEnoughPermission, missing)
