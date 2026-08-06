@@ -64,8 +64,8 @@ dockerpublish:
 
 
 defs:
-	emi compile --path modules/fireback/Fireback.emi.yml && \
-	emi compile --path modules/abac/Abac.emi.yml
+	./app emi compile --path modules/fireback/Fireback.emi.yml && \
+	./app emi compile --path modules/abac/Abac.emi.yml
 
 interface: interface-manage interface-ss
 
