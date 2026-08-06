@@ -43,6 +43,2915 @@ dtos:
       type: string
     - name: country
       type: string
+- name: okayResponse
+- name: resetEmail
+  fields:
+  - name: password
+    type: string
+- name: phoneNumberAccountCreation
+  fields:
+  - name: phoneNumber
+    type: string
+- name: emailAccountSignin
+  fields:
+  - name: email
+    type: string
+    tags:
+      validate: required
+  - name: password
+    type: string
+    tags:
+      validate: required
+- name: classicAuth
+  fields:
+  - name: value
+    type: string
+    tags:
+      validate: required
+  - name: password
+    type: string
+    tags:
+      validate: required
+  - name: firstName
+    type: string
+    tags:
+      validate: required
+  - name: lastName
+    type: string
+    tags:
+      validate: required
+  - name: inviteId
+    type: string
+  - name: publicJoinKeyId
+    type: string
+  - name: workspaceTypeId
+    type: string
+- name: assignRole
+  fields:
+  - name: roleId
+    type: string
+  - name: userId
+    type: string
+  - name: visibility
+    type: string
+  - name: updated
+    type: int64
+  - name: created
+    type: int64
+- name: exchangeKeyInformation
+  fields:
+  - name: key
+    type: string
+  - name: visibility
+    type: string
+- name: testMail
+  fields:
+  - name: senderId
+    type: string
+  - name: toName
+    type: string
+  - name: toEmail
+    type: string
+  - name: subject
+    type: string
+  - name: content
+    type: string
+- name: importRequest
+  fields:
+  - name: file
+    type: string
+- name: permissionInfo
+  fields:
+  - name: name
+    type: string
+  - name: description
+    type: string
+  - name: completeKey
+    type: string
+- name: userRoleWorkspace
+  fields:
+  - name: roleId
+    type: string
+  - name: capabilities
+    type: slice
+    primitive: string
+- name: otpAuthenticate
+  fields:
+  - name: value
+    type: string
+    tags:
+      validate: required
+  - name: otp
+    type: string
+  - name: type
+    type: string
+    tags:
+      validate: required
+  - name: password
+    type: string
+    tags:
+      validate: required
+- name: userSession
+  fields:
+  - name: passport
+    type: one?
+    target: PassportEntity
+  - name: token
+    type: string
+  - name: exchangeKey
+    type: string
+  - name: userWorkspaces
+    type: collection
+    target: UserWorkspaceEntity
+  - name: user
+    type: one?
+    target: UserEntity
+  - name: userId
+    type: string?
+- description: Workspace invitation has some common usage, so it's put here.
+  name: workspaceInvitation
+  fields:
+  - name: publicKey
+    description: A long hash to get the user into the confirm or signup page without
+      sending the email or phone number, for example if an administrator wants to
+      copy the link.
+    type: string
+  - name: coverLetter
+    description: The content that user will receive to understand the reason of the
+      letter.
+    type: string
+  - name: targetUserLocale
+    description: If the invited person has a different language, then you can define
+      that so the interface for him will be automatically translated.
+    type: string
+  - name: email
+    description: The email address of the person which is invited.
+    type: string
+  - name: phonenumber
+    description: The phone number of the person which is invited.
+    type: string
+  - name: workspace
+    description: Workspace which user is being invite to.
+    type: one
+    target: WorkspaceEntity
+  - name: firstName
+    description: First name of the person which is invited
+    type: string
+    tags:
+      validate: required
+  - name: lastName
+    description: Last name of the person which is invited.
+    type: string
+    tags:
+      validate: required
+  - name: forceEmailAddress
+    description: If forced, the email address cannot be changed by the user which
+      has been invited.
+    type: bool?
+  - name: forcePhoneNumber
+    description: If forced, user cannot change the phone number and needs to complete
+      signup.
+    type: bool?
+  - name: roleId
+    description: The role which invitee get if they accept the request.
+    type: string
+    tags:
+      validate: required
+- description: Every field of the "tableViewSizing" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: tableViewSizingOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: tableName
+    type: string?
+  - name: sizes
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    description: The time the record was created. Populated automatically by gorm.
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    description: The time the record was last updated. Populated automatically by
+      gorm.
+    type: complex
+    complex: PlainTime
+- description: Every field of the "timezoneGroup" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: timezoneGroupOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: title
+    description: Title which is shown to the user and allows them to select.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "passportMethod" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: passportMethodOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: type
+    type: enum?
+    of:
+    - k: email
+      description: Authenticate users using email
+    - k: phone
+      description: Authenticat users using phone number, can be sms, calls, or whatsapp.
+    - k: google
+      description: Users can be authenticated using their google account
+    - k: facebook
+      description: Users can be authenticated using their facebook account
+  - name: region
+    description: The region which would be using this method of passports for authentication.
+      In Fireback open-source, only 'global' is available.
+    type: enum?
+    default: global
+    of:
+    - k: global
+  - name: clientKey
+    description: Client key for those methods such as 'google' which require oauth
+      client key
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "pendingWorkspaceInvite" entity, but optional -
+    used both as Update's partial input and as Browse's response item shape.
+  name: pendingWorkspaceInviteOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: value
+    type: string?
+  - name: type
+    type: string?
+  - name: coverLetter
+    type: string?
+  - name: workspaceName
+    type: string?
+  - name: roleId
+    description: The unique-id of the role which invitee will get if they accept the
+      request.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "preference" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: preferenceOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: timezone
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "userProfile" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: userProfileOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: firstName
+    type: string?
+  - name: lastName
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "publicJoinKey" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: publicJoinKeyOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: roleId
+    description: The unique-id of the role which is granted to anyone joining via
+      this key.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "emailConfirmation" entity, but optional - used
+    both as Update's partial input and as Browse's response item shape.
+  name: emailConfirmationOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this confirmation belongs to.
+    type: string?
+  - name: status
+    type: string?
+  - name: email
+    type: string?
+  - name: key
+    type: string?
+  - name: expiresAt
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "gsmProvider" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: gsmProviderOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: apiKey
+    type: string?
+  - name: mainSenderNumber
+    type: string?
+  - name: type
+    type: enum?
+    of:
+    - k: url
+    - k: terminal
+    - k: mediana
+  - name: invokeUrl
+    type: string?
+  - name: invokeBody
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "phoneConfirmation" entity, but optional - used
+    both as Update's partial input and as Browse's response item shape.
+  name: phoneConfirmationOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this confirmation belongs to.
+    type: string?
+  - name: status
+    type: string?
+  - name: phoneNumber
+    type: string?
+  - name: key
+    type: string?
+  - name: expiresAt
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "token" entity, but optional - used both as Update's
+    partial input and as Browse's response item shape.
+  name: tokenOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this token belongs to.
+    type: string?
+  - name: token
+    type: string?
+  - name: validUntil
+    type: complex
+    complex: XDateTime
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "workspaceInvite" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: workspaceInviteOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: publicKey
+    description: A long hash to get the user into the confirm or signup page without
+      sending the email or phone number, for example if an administrator wants to
+      copy the link.
+    type: string?
+  - name: coverLetter
+    description: The content that user will receive to understand the reason of the
+      letter.
+    type: string?
+  - name: targetUserLocale
+    description: If the invited person has a different language, then you can define
+      that so the interface for him will be automatically translated.
+    type: string?
+  - name: email
+    description: The email address of the person which is invited.
+    type: string?
+  - name: phonenumber
+    description: The phone number of the person which is invited.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which user is being invited to.
+    type: string?
+  - name: firstName
+    description: First name of the person which is invited
+    type: string?
+  - name: lastName
+    description: Last name of the person which is invited.
+    type: string?
+  - name: forceEmailAddress
+    description: If forced, the email address cannot be changed by the user which
+      has been invited.
+    type: bool?
+  - name: forcePhoneNumber
+    description: If forced, user cannot change the phone number and needs to complete
+      signup.
+    type: bool?
+  - name: roleId
+    description: The role which invitee get if they accept the request.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "userWorkspace" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: userWorkspaceOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this record belongs to.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userPermissions
+    type: slice?
+    primitive: string
+  - name: rolePermission
+    type: slice?
+    primitive: UserRoleWorkspaceDto
+  - name: workspacePermissions
+    type: slice?
+    primitive: string
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "workspaceRole" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: workspaceRoleOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userWorkspaceId
+    description: The unique-id of the userWorkspace this role assignment belongs to.
+    type: string?
+  - name: roleId
+    description: The unique-id of the assigned role.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "emailProvider" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: emailProviderOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: type
+    description: Type of the service, or communication which actually is being used
+      under the hood for providing the service, such as third party or printing right
+      away for terminal or logs.
+    type: enum?
+    of:
+    - k: sendgrid
+    - k: mailgun
+    - k: postmark
+    - k: resend
+    - k: smtp
+    - k: terminal
+  - name: title
+    description: Give the email provider configuration a name, which makes it easier
+      later to query.
+    type: string?
+  - name: config
+    description: JSON field which contains api keys, or other kind of configuration
+      based on the type of the email provider.
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "emailSender" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: emailSenderOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: fromName
+    type: string?
+  - name: fromEmailAddress
+    type: string?
+  - name: replyTo
+    type: string?
+  - name: nickName
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "regionalContent" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: regionalContentOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: content
+    type: string?
+  - name: region
+    type: string?
+  - name: title
+    type: string?
+  - name: languageId
+    type: string?
+  - name: keyGroup
+    type: enum?
+    of:
+    - k: SMS_OTP
+      description: Used when an email would be sent with one time password
+    - k: EMAIL_OTP
+      description: Used when an sms would be sent with one time password
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "appMenu" entity, but optional - used both as Update's
+    partial input and as Browse's response item shape.
+  name: appMenuOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: label
+    description: Label that will be visible to user
+    type: string?
+  - name: href
+    description: Location that will be navigated in case of click or selection on
+      ui
+    type: string?
+  - name: icon
+    description: Icon string address which matches the resources on the front-end
+      apps.
+    type: string?
+  - name: activeMatcher
+    description: Custom window location url matchers, for inner screens.
+    type: string?
+  - name: capabilityId
+    description: The unique-id of the capability which is required for the menu to
+      be visible.
+    type: string?
+  - name: parentId
+    description: The unique-id of the parent menu item, for nested/tree menus.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "publicAuthentication" entity, but optional - used
+    both as Update's partial input and as Browse's response item shape.
+  name: publicAuthenticationOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user which this record belongs to.
+    type: string?
+  - name: totpSecret
+    description: If the application requires totp dual factor upon account creation,
+      we create a secret here and pass the link
+    type: string?
+  - name: totpLink
+    description: The url which will be converted into QR code on client side to scan
+    type: string?
+  - name: passportId
+    description: The unique-id of the passport this record belongs to.
+    type: string?
+  - name: sessionSecret
+    description: This is a long hash generated and will be used to authenticate user
+      after he confirmed the otp to finish the signup process and add more information
+      before creating an account
+    type: string?
+  - name: passportValue
+    type: string?
+  - name: isInCreationProcess
+    type: bool?
+  - name: status
+    type: string?
+  - name: blockedUntil
+    type: int64?
+  - name: otp
+    type: string?
+  - name: recoveryAbsoluteUrl
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "notificationConfig" entity, but optional - used
+    both as Update's partial input and as Browse's response item shape.
+  name: notificationConfigOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: cascadeToSubWorkspaces
+    type: bool?
+  - name: forcedCascadeEmailProvider
+    type: bool?
+  - name: generalEmailProviderId
+    type: string?
+  - name: generalGsmProviderId
+    type: string?
+  - name: inviteToWorkspaceContent
+    type: string?
+  - name: inviteToWorkspaceContentExcerpt
+    type: string?
+  - name: inviteToWorkspaceContentDefault
+    type: string?
+  - name: inviteToWorkspaceContentDefaultExcerpt
+    type: string?
+  - name: inviteToWorkspaceTitle
+    type: string?
+  - name: inviteToWorkspaceTitleDefault
+    type: string?
+  - name: inviteToWorkspaceSenderId
+    type: string?
+  - name: accountCenterEmailSenderId
+    type: string?
+  - name: forgetPasswordContent
+    type: string?
+  - name: forgetPasswordContentExcerpt
+    type: string?
+  - name: forgetPasswordContentDefault
+    type: string?
+  - name: forgetPasswordContentDefaultExcerpt
+    type: string?
+  - name: forgetPasswordTitle
+    type: string?
+  - name: forgetPasswordTitleDefault
+    type: string?
+  - name: forgetPasswordSenderId
+    type: string?
+  - name: acceptLanguage
+    type: string?
+  - name: confirmEmailSenderId
+    type: string?
+  - name: confirmEmailContent
+    type: string?
+  - name: confirmEmailContentExcerpt
+    type: string?
+  - name: confirmEmailContentDefault
+    type: string?
+  - name: confirmEmailContentDefaultExcerpt
+    type: string?
+  - name: confirmEmailTitle
+    type: string?
+  - name: confirmEmailTitleDefault
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "workspaceConfig" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: workspaceConfigOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: enableRecaptcha2
+    description: Enables the recaptcha2 for authentication flow.
+    type: bool?
+  - name: enableOtp
+    description: Enables the otp option. It's not forcing it, so user can choose if
+      they want otp or password.
+    type: bool?
+  - name: requireOtpOnSignup
+    description: Forces the user to have otp verification before can create an account.
+      They can define their password still.
+    type: bool?
+  - name: requireOtpOnSignin
+    description: Forces the user to use otp when signing in. Even if they have password
+      set, they won't use it and only will be able to signin using that otp.
+    type: bool?
+  - name: recaptcha2ServerKey
+    description: Secret which would be used to decrypt if the recaptcha is correct.
+      Should not be available publicly.
+    type: string?
+  - name: recaptcha2ClientKey
+    description: Secret which would be used for recaptcha2 on the client side. Can
+      be publicly visible, and upon authenticating users it would be sent to front-end.
+    type: string?
+  - name: enableTotp
+    description: Enables user to make 2FA using apps such as google authenticator
+      or microsoft authenticator.
+    type: bool?
+  - name: forceTotp
+    description: Forces the user to setup a 2FA in order to access their account.
+      Users which did not setup this won't be affected.
+    type: bool?
+  - name: forcePasswordOnPhone
+    description: Forces users who want to create account using phone number to also
+      set a password on their account
+    type: bool?
+  - name: forcePersonNameOnPhone
+    description: Forces the creation of account using phone number to ask for user
+      first name and last name
+    type: bool?
+  - name: generalEmailProviderId
+    description: The unique-id of the email provider service, which will be used to
+      send the messages using it's service.
+    type: string?
+  - name: generalGsmProviderId
+    description: The unique-id of the general service which would be used to send
+      text messages (sms).
+    type: string?
+  - name: inviteToWorkspaceContentId
+    description: The unique-id of the template used as default when a user is inviting
+      a third-party into their own workspace.
+    type: string?
+  - name: emailOtpContentId
+    description: The unique-id of the template used to fill the message for email
+      one-time-password requests.
+    type: string?
+  - name: smsOtpContentId
+    description: The unique-id of the template used for OTP text messages, including
+      the one time password code.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "role" entity, but optional - used both as Update's
+    partial input and as Browse's response item shape.
+  name: roleOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: name
+    type: string?
+  - name: capabilitiesListId
+    description: The list of capability completeKeys granted to this role, stored
+      directly as JSON (replaces the old many-to-many role_capabilities join table
+      - Emi has no relation mechanism compatible with fireback's string-uniqueId FK
+      convention, see other entities' xId fields).
+    type: complex
+    complex: JSON
+  - name: isDeletable
+    type: bool?
+  - name: isUpdatable
+    type: bool?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "workspaceType" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: workspaceTypeOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: title
+    type: string?
+  - name: description
+    type: string?
+  - name: slug
+    type: string?
+  - name: roleId
+    description: The role which will be used to define the functionality of this workspace.
+      Role needs to be created before hand, and only roles which belong to root workspace
+      are possible to be selected.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "user" entity, but optional - used both as Update's
+    partial input and as Browse's response item shape.
+  name: userOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: firstName
+    type: string?
+  - name: lastName
+    type: string?
+  - name: photo
+    type: string?
+  - name: gender
+    type: int?
+  - name: title
+    type: string?
+  - name: birthDate
+    type: complex
+    complex: XDate
+  - name: avatar
+    type: string?
+  - name: lastIpAddress
+    description: User last connecting ip address
+    type: string?
+  - name: primaryAddress
+    description: User primary address location. Can be useful for simple projects
+      that a user is associated with a single address.
+    type: object?
+    fields:
+    - name: addressLine1
+      description: Street address, building number
+      type: string?
+    - name: addressLine2
+      description: Apartment, suite, floor (optional)
+      type: string?
+    - name: city
+      description: City or locality
+      type: string?
+    - name: stateOrProvince
+      description: State, region, or province
+      type: string?
+    - name: postalCode
+      description: ZIP or postal code
+      type: string?
+    - name: countryCode
+      description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
+      type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "workspace" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: workspaceOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: description
+    type: string?
+  - name: name
+    type: string?
+  - name: typeId
+    description: The unique-id of the workspace type which defines this workspace's
+      role.
+    type: string?
+  - name: parentId
+    description: The unique-id of the parent workspace, for nested/tree workspaces.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "passport" entity, but optional - used both as Update's
+    partial input and as Browse's response item shape.
+  name: passportOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: thirdPartyVerifier
+    description: When user creates account via oauth services such as google, it's
+      essential to set the provider and do not allow passwordless logins if it's not
+      via that specific provider.
+    type: string?
+  - name: type
+    type: string?
+  - name: userId
+    type: string?
+  - name: value
+    type: string?
+  - name: totpSecret
+    description: Store the secret of 2FA using time based dual factor authentication
+      here for this specific passport. If set, during authorization will be asked.
+    type: string?
+  - name: totpConfirmed
+    description: Regardless of the secret, user needs to confirm his secret. There
+      is an extra action to confirm user totp, could be used after signup or prior
+      to login.
+    type: bool?
+  - name: password
+    type: string?
+  - name: confirmed
+    type: bool?
+  - name: accessToken
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "tableViewSizing" entity's own fields.
+  name: tableViewSizing
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: tableName
+    type: string
+  - name: sizes
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    description: The time the record was created. Populated automatically by gorm.
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    description: The time the record was last updated. Populated automatically by
+      gorm.
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "timezoneGroup" entity's own fields.
+  name: timezoneGroup
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: title
+    description: Title which is shown to the user and allows them to select.
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "passportMethod" entity's own fields.
+  name: passportMethod
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: type
+    type: enum
+    of:
+    - k: email
+      description: Authenticate users using email
+    - k: phone
+      description: Authenticat users using phone number, can be sms, calls, or whatsapp.
+    - k: google
+      description: Users can be authenticated using their google account
+    - k: facebook
+      description: Users can be authenticated using their facebook account
+  - name: region
+    description: The region which would be using this method of passports for authentication.
+      In Fireback open-source, only 'global' is available.
+    type: enum
+    default: global
+    of:
+    - k: global
+  - name: clientKey
+    description: Client key for those methods such as 'google' which require oauth
+      client key
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "pendingWorkspaceInvite" entity's own fields.
+  name: pendingWorkspaceInvite
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: value
+    type: string
+  - name: type
+    type: string
+  - name: coverLetter
+    type: string
+  - name: workspaceName
+    type: string
+  - name: roleId
+    description: The unique-id of the role which invitee will get if they accept the
+      request.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "preference" entity's own fields.
+  name: preference
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: timezone
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "userProfile" entity's own fields.
+  name: userProfile
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: firstName
+    type: string
+  - name: lastName
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "publicJoinKey" entity's own fields.
+  name: publicJoinKey
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: roleId
+    description: The unique-id of the role which is granted to anyone joining via
+      this key.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "emailConfirmation" entity's own fields.
+  name: emailConfirmation
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this confirmation belongs to.
+    type: string?
+  - name: status
+    type: string
+  - name: email
+    type: string
+  - name: key
+    type: string
+  - name: expiresAt
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "gsmProvider" entity's own fields.
+  name: gsmProvider
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: apiKey
+    type: string
+  - name: mainSenderNumber
+    type: string
+  - name: type
+    type: enum
+    of:
+    - k: url
+    - k: terminal
+    - k: mediana
+  - name: invokeUrl
+    type: string
+  - name: invokeBody
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "phoneConfirmation" entity's own fields.
+  name: phoneConfirmation
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this confirmation belongs to.
+    type: string?
+  - name: status
+    type: string
+  - name: phoneNumber
+    type: string
+  - name: key
+    type: string
+  - name: expiresAt
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "token" entity's own fields.
+  name: token
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this token belongs to.
+    type: string?
+  - name: token
+    type: string
+  - name: validUntil
+    type: complex
+    complex: XDateTime
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "workspaceInvite" entity's own fields.
+  name: workspaceInvite
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: publicKey
+    description: A long hash to get the user into the confirm or signup page without
+      sending the email or phone number, for example if an administrator wants to
+      copy the link.
+    type: string
+  - name: coverLetter
+    description: The content that user will receive to understand the reason of the
+      letter.
+    type: string
+  - name: targetUserLocale
+    description: If the invited person has a different language, then you can define
+      that so the interface for him will be automatically translated.
+    type: string
+  - name: email
+    description: The email address of the person which is invited.
+    type: string
+  - name: phonenumber
+    description: The phone number of the person which is invited.
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which user is being invited to.
+    type: string?
+  - name: firstName
+    description: First name of the person which is invited
+    type: string
+  - name: lastName
+    description: Last name of the person which is invited.
+    type: string
+  - name: forceEmailAddress
+    description: If forced, the email address cannot be changed by the user which
+      has been invited.
+    type: bool?
+  - name: forcePhoneNumber
+    description: If forced, user cannot change the phone number and needs to complete
+      signup.
+    type: bool?
+  - name: roleId
+    description: The role which invitee get if they accept the request.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "userWorkspace" entity's own fields.
+  name: userWorkspace
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user this record belongs to.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userPermissions
+    type: slice
+    primitive: string
+  - name: rolePermission
+    type: slice
+    primitive: UserRoleWorkspaceDto
+  - name: workspacePermissions
+    type: slice
+    primitive: string
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "workspaceRole" entity's own fields.
+  name: workspaceRole
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userWorkspaceId
+    description: The unique-id of the userWorkspace this role assignment belongs to.
+    type: string?
+  - name: roleId
+    description: The unique-id of the assigned role.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "emailProvider" entity's own fields.
+  name: emailProvider
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: type
+    description: Type of the service, or communication which actually is being used
+      under the hood for providing the service, such as third party or printing right
+      away for terminal or logs.
+    type: enum
+    of:
+    - k: sendgrid
+    - k: mailgun
+    - k: postmark
+    - k: resend
+    - k: smtp
+    - k: terminal
+  - name: title
+    description: Give the email provider configuration a name, which makes it easier
+      later to query.
+    type: string
+  - name: config
+    description: JSON field which contains api keys, or other kind of configuration
+      based on the type of the email provider.
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "emailSender" entity's own fields.
+  name: emailSender
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: fromName
+    type: string
+  - name: fromEmailAddress
+    type: string
+  - name: replyTo
+    type: string
+  - name: nickName
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "regionalContent" entity's own fields.
+  name: regionalContent
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: content
+    type: string
+  - name: region
+    type: string
+  - name: title
+    type: string
+  - name: languageId
+    type: string
+  - name: keyGroup
+    type: enum
+    of:
+    - k: SMS_OTP
+      description: Used when an email would be sent with one time password
+    - k: EMAIL_OTP
+      description: Used when an sms would be sent with one time password
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "appMenu" entity's own fields.
+  name: appMenu
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: label
+    description: Label that will be visible to user
+    type: string
+  - name: href
+    description: Location that will be navigated in case of click or selection on
+      ui
+    type: string
+  - name: icon
+    description: Icon string address which matches the resources on the front-end
+      apps.
+    type: string
+  - name: activeMatcher
+    description: Custom window location url matchers, for inner screens.
+    type: string
+  - name: capabilityId
+    description: The unique-id of the capability which is required for the menu to
+      be visible.
+    type: string?
+  - name: parentId
+    description: The unique-id of the parent menu item, for nested/tree menus.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "publicAuthentication" entity's own fields.
+  name: publicAuthentication
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: The unique-id of the user which this record belongs to.
+    type: string?
+  - name: totpSecret
+    description: If the application requires totp dual factor upon account creation,
+      we create a secret here and pass the link
+    type: string
+  - name: totpLink
+    description: The url which will be converted into QR code on client side to scan
+    type: string
+  - name: passportId
+    description: The unique-id of the passport this record belongs to.
+    type: string?
+  - name: sessionSecret
+    description: This is a long hash generated and will be used to authenticate user
+      after he confirmed the otp to finish the signup process and add more information
+      before creating an account
+    type: string
+  - name: passportValue
+    type: string
+  - name: isInCreationProcess
+    type: bool?
+  - name: status
+    type: string
+  - name: blockedUntil
+    type: int64
+  - name: otp
+    type: string
+  - name: recoveryAbsoluteUrl
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "notificationConfig" entity's own fields.
+  name: notificationConfig
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: cascadeToSubWorkspaces
+    type: bool
+  - name: forcedCascadeEmailProvider
+    type: bool
+  - name: generalEmailProviderId
+    type: string?
+  - name: generalGsmProviderId
+    type: string?
+  - name: inviteToWorkspaceContent
+    type: string
+  - name: inviteToWorkspaceContentExcerpt
+    type: string
+  - name: inviteToWorkspaceContentDefault
+    type: string
+  - name: inviteToWorkspaceContentDefaultExcerpt
+    type: string
+  - name: inviteToWorkspaceTitle
+    type: string
+  - name: inviteToWorkspaceTitleDefault
+    type: string
+  - name: inviteToWorkspaceSenderId
+    type: string?
+  - name: accountCenterEmailSenderId
+    type: string?
+  - name: forgetPasswordContent
+    type: string
+  - name: forgetPasswordContentExcerpt
+    type: string
+  - name: forgetPasswordContentDefault
+    type: string
+  - name: forgetPasswordContentDefaultExcerpt
+    type: string
+  - name: forgetPasswordTitle
+    type: string
+  - name: forgetPasswordTitleDefault
+    type: string
+  - name: forgetPasswordSenderId
+    type: string?
+  - name: acceptLanguage
+    type: string
+  - name: confirmEmailSenderId
+    type: string?
+  - name: confirmEmailContent
+    type: string
+  - name: confirmEmailContentExcerpt
+    type: string
+  - name: confirmEmailContentDefault
+    type: string
+  - name: confirmEmailContentDefaultExcerpt
+    type: string
+  - name: confirmEmailTitle
+    type: string
+  - name: confirmEmailTitleDefault
+    type: string
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "workspaceConfig" entity's own fields.
+  name: workspaceConfig
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: enableRecaptcha2
+    description: Enables the recaptcha2 for authentication flow.
+    type: bool?
+  - name: enableOtp
+    description: Enables the otp option. It's not forcing it, so user can choose if
+      they want otp or password.
+    type: bool?
+  - name: requireOtpOnSignup
+    description: Forces the user to have otp verification before can create an account.
+      They can define their password still.
+    type: bool?
+  - name: requireOtpOnSignin
+    description: Forces the user to use otp when signing in. Even if they have password
+      set, they won't use it and only will be able to signin using that otp.
+    type: bool?
+  - name: recaptcha2ServerKey
+    description: Secret which would be used to decrypt if the recaptcha is correct.
+      Should not be available publicly.
+    type: string
+  - name: recaptcha2ClientKey
+    description: Secret which would be used for recaptcha2 on the client side. Can
+      be publicly visible, and upon authenticating users it would be sent to front-end.
+    type: string
+  - name: enableTotp
+    description: Enables user to make 2FA using apps such as google authenticator
+      or microsoft authenticator.
+    type: bool?
+  - name: forceTotp
+    description: Forces the user to setup a 2FA in order to access their account.
+      Users which did not setup this won't be affected.
+    type: bool?
+  - name: forcePasswordOnPhone
+    description: Forces users who want to create account using phone number to also
+      set a password on their account
+    type: bool?
+  - name: forcePersonNameOnPhone
+    description: Forces the creation of account using phone number to ask for user
+      first name and last name
+    type: bool?
+  - name: generalEmailProviderId
+    description: The unique-id of the email provider service, which will be used to
+      send the messages using it's service.
+    type: string?
+  - name: generalGsmProviderId
+    description: The unique-id of the general service which would be used to send
+      text messages (sms).
+    type: string?
+  - name: inviteToWorkspaceContentId
+    description: The unique-id of the template used as default when a user is inviting
+      a third-party into their own workspace.
+    type: string?
+  - name: emailOtpContentId
+    description: The unique-id of the template used to fill the message for email
+      one-time-password requests.
+    type: string?
+  - name: smsOtpContentId
+    description: The unique-id of the template used for OTP text messages, including
+      the one time password code.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "role" entity's own fields.
+  name: role
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: name
+    type: string
+  - name: capabilitiesListId
+    description: The list of capability completeKeys granted to this role, stored
+      directly as JSON (replaces the old many-to-many role_capabilities join table
+      - Emi has no relation mechanism compatible with fireback's string-uniqueId FK
+      convention, see other entities' xId fields).
+    type: complex
+    complex: JSON
+  - name: isDeletable
+    type: bool?
+  - name: isUpdatable
+    type: bool?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "workspaceType" entity's own fields.
+  name: workspaceType
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: title
+    type: string
+  - name: description
+    type: string
+  - name: slug
+    type: string
+  - name: roleId
+    description: The role which will be used to define the functionality of this workspace.
+      Role needs to be created before hand, and only roles which belong to root workspace
+      are possible to be selected.
+    type: string
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "user" entity's own fields.
+  name: user
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: firstName
+    type: string
+  - name: lastName
+    type: string
+  - name: photo
+    type: string
+  - name: gender
+    type: int?
+  - name: title
+    type: string
+  - name: birthDate
+    type: complex
+    complex: XDate
+  - name: avatar
+    type: string
+  - name: lastIpAddress
+    description: User last connecting ip address
+    type: string
+  - name: primaryAddress
+    description: User primary address location. Can be useful for simple projects
+      that a user is associated with a single address.
+    type: object?
+    fields:
+    - name: addressLine1
+      description: Street address, building number
+      type: string
+    - name: addressLine2
+      description: Apartment, suite, floor (optional)
+      type: string?
+    - name: city
+      description: City or locality
+      type: string?
+    - name: stateOrProvince
+      description: State, region, or province
+      type: string?
+    - name: postalCode
+      description: ZIP or postal code
+      type: string?
+    - name: countryCode
+      description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
+      type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "workspace" entity's own fields.
+  name: workspace
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: description
+    type: string
+  - name: name
+    type: string
+  - name: typeId
+    description: The unique-id of the workspace type which defines this workspace's
+      role.
+    type: string
+  - name: parentId
+    description: The unique-id of the parent workspace, for nested/tree workspaces.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "passport" entity's own fields.
+  name: passport
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: thirdPartyVerifier
+    description: When user creates account via oauth services such as google, it's
+      essential to set the provider and do not allow passwordless logins if it's not
+      via that specific provider.
+    type: string
+  - name: type
+    type: string
+  - name: userId
+    type: string?
+  - name: value
+    type: string
+  - name: totpSecret
+    description: Store the secret of 2FA using time based dual factor authentication
+      here for this specific passport. If set, during authorization will be asked.
+    type: string
+  - name: totpConfirmed
+    description: Regardless of the secret, user needs to confirm his secret. There
+      is an extra action to confirm user totp, could be used after signup or prior
+      to login.
+    type: bool?
+  - name: password
+    type: string
+  - name: confirmed
+    type: bool?
+  - name: accessToken
+    type: string
+  - name: workspaceId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+entities:
+- name: tableViewSizing
+  fields:
+  - name: tableName
+    type: string
+    tags:
+      validate: required
+  - name: sizes
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    description: The time the record was created. Populated automatically by gorm.
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    description: The time the record was last updated. Populated automatically by
+      gorm.
+    type: complex
+    complex: PlainTime
+  cliShort: tvs
+  description: Used to store meta data about user tables (in front-end, or apps for
+    example) about the size of the columns
+- name: timezoneGroup
+  fields:
+  - name: title
+    description: Title which is shown to the user and allows them to select.
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliName: tz
+  description: World timezone information
+- name: passportMethod
+  fields:
+  - name: type
+    type: enum
+    of:
+    - k: email
+      description: Authenticate users using email
+    - k: phone
+      description: Authenticat users using phone number, can be sms, calls, or whatsapp.
+    - k: google
+      description: Users can be authenticated using their google account
+    - k: facebook
+      description: Users can be authenticated using their facebook account
+    tags:
+      validate: oneof=email phone google facebook,required
+  - name: region
+    description: The region which would be using this method of passports for authentication.
+      In Fireback open-source, only 'global' is available.
+    type: enum
+    default: global
+    of:
+    - k: global
+    tags:
+      validate: required,oneof=global
+  - name: clientKey
+    description: Client key for those methods such as 'google' which require oauth
+      client key
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: method
+  description: Login/Signup methods which are available in the app for different regions
+    (Email, Phone Number, Google, etc)
+- name: pendingWorkspaceInvite
+  fields:
+  - name: value
+    type: string
+  - name: type
+    type: string
+  - name: coverLetter
+    type: string
+  - name: workspaceName
+    type: string
+  - name: roleId
+    description: The unique-id of the role which invitee will get if they accept the
+      request.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: preference
+  fields:
+  - name: timezone
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: userProfile
+  fields:
+  - name: firstName
+    type: string
+  - name: lastName
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: publicJoinKey
+  fields:
+  - name: roleId
+    description: The unique-id of the role which is granted to anyone joining via
+      this key.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Joining to different workspaces using a public link directly
+- name: emailConfirmation
+  fields:
+  - name: userId
+    description: The unique-id of the user this confirmation belongs to.
+    type: string?
+  - name: status
+    type: string
+  - name: email
+    type: string
+  - name: key
+    type: string
+  - name: expiresAt
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: gsmProvider
+  fields:
+  - name: apiKey
+    type: string
+  - name: mainSenderNumber
+    type: string
+    tags:
+      validate: required
+  - name: type
+    type: enum
+    of:
+    - k: url
+    - k: terminal
+    - k: mediana
+    tags:
+      validate: required
+  - name: invokeUrl
+    type: string
+  - name: invokeBody
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: phoneConfirmation
+  fields:
+  - name: userId
+    description: The unique-id of the user this confirmation belongs to.
+    type: string?
+  - name: status
+    type: string
+  - name: phoneNumber
+    type: string
+  - name: key
+    type: string
+  - name: expiresAt
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: token
+  fields:
+  - name: userId
+    description: The unique-id of the user this token belongs to.
+    type: string?
+  - name: token
+    type: string
+  - name: validUntil
+    type: complex
+    complex: XDateTime
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: workspaceInvite
+  fields:
+  - name: publicKey
+    description: A long hash to get the user into the confirm or signup page without
+      sending the email or phone number, for example if an administrator wants to
+      copy the link.
+    type: string
+  - name: coverLetter
+    description: The content that user will receive to understand the reason of the
+      letter.
+    type: string
+  - name: targetUserLocale
+    description: If the invited person has a different language, then you can define
+      that so the interface for him will be automatically translated.
+    type: string
+  - name: email
+    description: The email address of the person which is invited.
+    type: string
+  - name: phonenumber
+    description: The phone number of the person which is invited.
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which user is being invited to.
+    type: string?
+  - name: firstName
+    description: First name of the person which is invited
+    type: string
+    tags:
+      validate: required
+  - name: lastName
+    description: Last name of the person which is invited.
+    type: string
+    tags:
+      validate: required
+  - name: forceEmailAddress
+    description: If forced, the email address cannot be changed by the user which
+      has been invited.
+    type: bool?
+  - name: forcePhoneNumber
+    description: If forced, user cannot change the phone number and needs to complete
+      signup.
+    type: bool?
+  - name: roleId
+    description: The role which invitee get if they accept the request.
+    type: string?
+    tags:
+      validate: required
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: invite
+  description: Active invitations for non-users or already users to join an specific
+    workspace, created by administration of the workspace
+- name: userWorkspace
+  gormMap:
+    workspaceId: index:userworkspace_idx,unique
+    userId: index:userworkspace_idx,unique
+  fields:
+  - name: userId
+    description: The unique-id of the user this record belongs to.
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userPermissions
+    type: slice
+    primitive: string
+    tags:
+      gorm: '-'
+      sql: '-'
+  - name: rolePermission
+    type: slice
+    primitive: UserRoleWorkspaceDto
+    tags:
+      gorm: '-'
+      sql: '-'
+  - name: workspacePermissions
+    type: slice
+    primitive: string
+    tags:
+      gorm: '-'
+      sql: '-'
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: user
+  description: Manage the workspaces that user belongs to (either its himselves or
+    adding by invitation)
+- name: workspaceRole
+  fields:
+  - name: userWorkspaceId
+    description: The unique-id of the userWorkspace this role assignment belongs to.
+    type: string?
+    tags:
+      gorm: index:workspacerole_idx,unique
+  - name: roleId
+    description: The unique-id of the assigned role.
+    type: string?
+    tags:
+      gorm: index:workspacerole_idx,unique
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: role
+  description: Manage roles assigned to an specific workspace or created by the workspace
+    itself
+- name: emailProvider
+  fields:
+  - name: type
+    description: Type of the service, or communication which actually is being used
+      under the hood for providing the service, such as third party or printing right
+      away for terminal or logs.
+    type: enum
+    of:
+    - k: sendgrid
+    - k: mailgun
+    - k: postmark
+    - k: resend
+    - k: smtp
+    - k: terminal
+    tags:
+      validate: required
+  - name: title
+    description: Give the email provider configuration a name, which makes it easier
+      later to query.
+    type: string
+  - name: config
+    description: JSON field which contains api keys, or other kind of configuration
+      based on the type of the email provider.
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Email servers and thirdparty services configuration to send emails
+    across the app. Each configuration can be used for a different purpose, hence
+    information is stored in database to give operation chance change the mail services
+    without taking the server down.
+- name: emailSender
+  fields:
+  - name: fromName
+    type: string
+    tags:
+      validate: required
+  - name: fromEmailAddress
+    type: string
+    tags:
+      gorm: unique
+      validate: required
+  - name: replyTo
+    type: string
+    tags:
+      validate: required
+  - name: nickName
+    type: string
+    tags:
+      validate: required
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: All emails going from the system need to have a virtual sender (nick
+    name, email address, etc)
+- name: regionalContent
+  fields:
+  - name: content
+    type: string
+    tags:
+      validate: required
+  - name: region
+    type: string
+    tags:
+      validate: required
+  - name: title
+    type: string
+  - name: languageId
+    type: string
+    tags:
+      gorm: index:regional_content_index,unique
+      validate: required
+  - name: keyGroup
+    type: enum
+    of:
+    - k: SMS_OTP
+      description: Used when an email would be sent with one time password
+    - k: EMAIL_OTP
+      description: Used when an sms would be sent with one time password
+    tags:
+      gorm: index:regional_content_index,unique
+      validate: required
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: rc
+  description: Email templates, sms templates or other textual content which can be
+    accessed.
+- name: appMenu
+  fields:
+  - name: label
+    description: Label that will be visible to user
+    type: string
+  - name: href
+    description: Location that will be navigated in case of click or selection on
+      ui
+    type: string
+  - name: icon
+    description: Icon string address which matches the resources on the front-end
+      apps.
+    type: string
+  - name: activeMatcher
+    description: Custom window location url matchers, for inner screens.
+    type: string
+  - name: capabilityId
+    description: The unique-id of the capability which is required for the menu to
+      be visible.
+    type: string?
+  - name: parentId
+    description: The unique-id of the parent menu item, for nested/tree menus.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Manages the menus in the app, (for example tab views, sidebar items,
+    etc.)
+- name: publicAuthentication
+  fields:
+  - name: userId
+    description: The unique-id of the user which this record belongs to.
+    type: string?
+  - name: totpSecret
+    description: If the application requires totp dual factor upon account creation,
+      we create a secret here and pass the link
+    type: string
+  - name: totpLink
+    description: The url which will be converted into QR code on client side to scan
+    type: string
+  - name: passportId
+    description: The unique-id of the passport this record belongs to.
+    type: string?
+  - name: sessionSecret
+    description: This is a long hash generated and will be used to authenticate user
+      after he confirmed the otp to finish the signup process and add more information
+      before creating an account
+    type: string
+  - name: passportValue
+    type: string
+  - name: isInCreationProcess
+    type: bool?
+  - name: status
+    type: string
+  - name: blockedUntil
+    type: int64
+  - name: otp
+    type: string
+  - name: recoveryAbsoluteUrl
+    type: string
+    tags:
+      sql: '-'
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: pa
+  description: Keeps information about user onboarding, otp state, and other things
+    which are necessary for onboarding new users in multiple endpoints
+- name: notificationConfig
+  fields:
+  - name: cascadeToSubWorkspaces
+    type: bool
+  - name: forcedCascadeEmailProvider
+    type: bool
+  - name: generalEmailProviderId
+    type: string?
+  - name: generalGsmProviderId
+    type: string?
+  - name: inviteToWorkspaceContent
+    type: string
+    tags:
+      gorm: text
+  - name: inviteToWorkspaceContentExcerpt
+    type: string
+    tags:
+      gorm: text
+  - name: inviteToWorkspaceContentDefault
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: inviteToWorkspaceContentDefaultExcerpt
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: inviteToWorkspaceTitle
+    type: string
+  - name: inviteToWorkspaceTitleDefault
+    type: string
+    tags:
+      sql: '-'
+  - name: inviteToWorkspaceSenderId
+    type: string?
+  - name: accountCenterEmailSenderId
+    type: string?
+  - name: forgetPasswordContent
+    type: string
+    tags:
+      gorm: text
+  - name: forgetPasswordContentExcerpt
+    type: string
+    tags:
+      gorm: text
+  - name: forgetPasswordContentDefault
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: forgetPasswordContentDefaultExcerpt
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: forgetPasswordTitle
+    type: string
+    tags:
+      gorm: text
+  - name: forgetPasswordTitleDefault
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: forgetPasswordSenderId
+    type: string?
+  - name: acceptLanguage
+    type: string
+  - name: confirmEmailSenderId
+    type: string?
+  - name: confirmEmailContent
+    type: string
+    tags:
+      gorm: text
+  - name: confirmEmailContentExcerpt
+    type: string
+    tags:
+      gorm: text
+  - name: confirmEmailContentDefault
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: confirmEmailContentDefaultExcerpt
+    type: string
+    tags:
+      gorm: text
+      sql: '-'
+  - name: confirmEmailTitle
+    type: string
+  - name: confirmEmailTitleDefault
+    type: string
+    tags:
+      sql: '-'
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: config
+  description: Configuration for the notifications used in the app, such as default
+    gsm number, email senders, and many more
+- name: workspaceConfig
+  fields:
+  - name: enableRecaptcha2
+    description: Enables the recaptcha2 for authentication flow.
+    type: bool?
+  - name: enableOtp
+    description: Enables the otp option. It's not forcing it, so user can choose if
+      they want otp or password.
+    type: bool?
+  - name: requireOtpOnSignup
+    description: Forces the user to have otp verification before can create an account.
+      They can define their password still.
+    type: bool?
+  - name: requireOtpOnSignin
+    description: Forces the user to use otp when signing in. Even if they have password
+      set, they won't use it and only will be able to signin using that otp.
+    type: bool?
+  - name: recaptcha2ServerKey
+    description: Secret which would be used to decrypt if the recaptcha is correct.
+      Should not be available publicly.
+    type: string
+  - name: recaptcha2ClientKey
+    description: Secret which would be used for recaptcha2 on the client side. Can
+      be publicly visible, and upon authenticating users it would be sent to front-end.
+    type: string
+  - name: enableTotp
+    description: Enables user to make 2FA using apps such as google authenticator
+      or microsoft authenticator.
+    type: bool?
+  - name: forceTotp
+    description: Forces the user to setup a 2FA in order to access their account.
+      Users which did not setup this won't be affected.
+    type: bool?
+  - name: forcePasswordOnPhone
+    description: Forces users who want to create account using phone number to also
+      set a password on their account
+    type: bool?
+  - name: forcePersonNameOnPhone
+    description: Forces the creation of account using phone number to ask for user
+      first name and last name
+    type: bool?
+  - name: generalEmailProviderId
+    description: The unique-id of the email provider service, which will be used to
+      send the messages using it's service.
+    type: string?
+  - name: generalGsmProviderId
+    description: The unique-id of the general service which would be used to send
+      text messages (sms).
+    type: string?
+  - name: inviteToWorkspaceContentId
+    description: The unique-id of the template used as default when a user is inviting
+      a third-party into their own workspace.
+    type: string?
+  - name: emailOtpContentId
+    description: The unique-id of the template used to fill the message for email
+      one-time-password requests.
+    type: string?
+  - name: smsOtpContentId
+    description: The unique-id of the template used for OTP text messages, including
+      the one time password code.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: config
+  description: Contains configuration which would be necessary for application environment
+    to be running. At the moment, a single record is allowed, and only for root workspace.
+    But in theory it could be configured per each workspace independently. For sub
+    projects do not touch this, rather create a custom config entity if workspaces
+    in the product need extra config.
+- name: role
+  fields:
+  - name: name
+    type: string
+    tags:
+      validate: required,omitempty,min=1,max=200
+  - name: capabilitiesListId
+    description: The list of capability completeKeys granted to this role, stored
+      directly as JSON (replaces the old many-to-many role_capabilities join table
+      - Emi has no relation mechanism compatible with fireback's string-uniqueId FK
+      convention, see other entities' xId fields).
+    type: complex
+    complex: JSON
+  - name: isDeletable
+    type: bool?
+    tags:
+      gorm: default:true
+  - name: isUpdatable
+    type: bool?
+    tags:
+      gorm: default:true
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Manage roles within the workspaces, or root configuration
+- name: workspaceType
+  fields:
+  - name: title
+    type: string
+    tags:
+      validate: required,omitempty,min=1,max=250
+  - name: description
+    type: string
+  - name: slug
+    type: string
+    tags:
+      validate: required,omitempty,min=2,max=50
+  - name: roleId
+    description: The role which will be used to define the functionality of this workspace.
+      Role needs to be created before hand, and only roles which belong to root workspace
+      are possible to be selected.
+    type: string
+    tags:
+      validate: required
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: type
+  description: Defines a type for workspace, and the role which it can have as a whole.
+    In systems with multiple types of services, e.g. student, teachers, schools this
+    is useful to set those default types and limit the access of the users.
+- name: user
+  fields:
+  - name: firstName
+    type: string
+    tags:
+      validate: required
+  - name: lastName
+    type: string
+    tags:
+      validate: required
+  - name: photo
+    type: string
+  - name: gender
+    type: int?
+  - name: title
+    type: string
+  - name: birthDate
+    type: complex
+    complex: XDate
+  - name: avatar
+    type: string
+  - name: lastIpAddress
+    description: User last connecting ip address
+    type: string
+  - name: primaryAddress
+    description: User primary address location. Can be useful for simple projects
+      that a user is associated with a single address.
+    type: object?
+    fields:
+    - name: addressLine1
+      description: Street address, building number
+      type: string
+    - name: addressLine2
+      description: Apartment, suite, floor (optional)
+      type: string?
+    - name: city
+      description: City or locality
+      type: string?
+    - name: stateOrProvince
+      description: State, region, or province
+      type: string?
+    - name: postalCode
+      description: ZIP or postal code
+      type: string?
+    - name: countryCode
+      description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
+      type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Manage the users who are in the current app (root only)
+- name: workspace
+  fields:
+  - name: description
+    type: string
+  - name: name
+    type: string
+    tags:
+      validate: required
+  - name: typeId
+    description: The unique-id of the workspace type which defines this workspace's
+      role.
+    type: string
+    tags:
+      validate: required
+  - name: parentId
+    description: The unique-id of the parent workspace, for nested/tree workspaces.
+    type: string?
+  - name: workspaceId
+    type: string?
+  - name: userId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  cliShort: ws
+  description: Fireback general user role, workspaces services.
+- name: passport
+  fields:
+  - name: thirdPartyVerifier
+    description: When user creates account via oauth services such as google, it's
+      essential to set the provider and do not allow passwordless logins if it's not
+      via that specific provider.
+    type: string
+  - name: type
+    type: string
+    tags:
+      validate: required
+  - name: userId
+    type: string?
+  - name: value
+    type: string
+    tags:
+      gorm: unique
+      validate: required
+  - name: totpSecret
+    description: Store the secret of 2FA using time based dual factor authentication
+      here for this specific passport. If set, during authorization will be asked.
+    type: string
+  - name: totpConfirmed
+    description: Regardless of the secret, user needs to confirm his secret. There
+      is an extra action to confirm user totp, could be used after signup or prior
+      to login.
+    type: bool?
+  - name: password
+    type: string
+    tags:
+      json: '-'
+      yaml: '-'
+  - name: confirmed
+    type: bool?
+  - name: accessToken
+    type: string
+  - name: workspaceId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Represent a mean to login in into the system, each user could have
+    multiple passport (email, phone) and authenticate into the system.
 complexes:
 - name: JSON
   namespace: complexes
@@ -52,3 +2961,2671 @@ complexes:
   namespace: complexes
   location: github.com/torabian/fireback/modules/fireback/complexes
   compiler: go
+- name: PlainTime
+  namespace: abaccomplexes
+  location: github.com/torabian/fireback/modules/abac/abaccomplexes
+  compiler: go
+- name: XDateTime
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go
+actions:
+- name: QueryUserRoleWorkspaces
+  cliName: urw
+  url: /urw/query
+  method: get
+  description: Returns the workspaces that user belongs to, as well as his role in
+    there, and the permissions for each role
+  out:
+    envelope: GResponse
+    fields:
+    - name: name
+      type: string
+    - name: capabilities
+      description: Workspace level capabilities which are available
+      type: slice
+      primitive: string
+    - name: uniqueId
+      type: string
+    - name: roles
+      type: array
+      fields:
+      - name: name
+        type: string
+      - name: uniqueId
+        type: string
+      - name: capabilities
+        description: Capabilities related to this role which are available
+        type: slice
+        primitive: string
+- name: InviteToWorkspace
+  cliName: invite
+  url: /workspace/invite
+  method: post
+  description: Invite a new person (either a user, with passport or without passport)
+  in:
+    dto: WorkspaceInvitationDto
+  out:
+    dto: WorkspaceInvitationDto
+- name: UserInvitations
+  url: /users/invitations
+  method: get
+  description: Shows the invitations for an specific user, if the invited member already
+    has a account. It's based on the passports, so if the passport is authenticated
+    we will show them.
+  out:
+    envelope: GResponse
+    fields:
+    - name: userId
+      description: UserUniqueId
+      type: string
+    - name: uniqueId
+      description: Invitation unique id
+      type: string
+    - name: value
+      description: The value of the passport (email/phone)
+      type: string
+    - name: roleName
+      description: Name of the role that user will get
+      type: string
+    - name: workspaceName
+      description: Name of the workspace which user is invited to.
+      type: string
+    - name: type
+      description: The method of the invitation, such as email.
+      type: string
+    - name: coverLetter
+      description: The content that user will receive to understand the reason of
+        the letter.
+      type: string
+- name: Signout
+  url: /passport/signout
+  method: post
+  description: Signout the user, clears cookies or does anything else if needed.
+  in:
+    fields:
+    - name: clear
+      type: bool?
+  out:
+    envelope: GResponse
+    fields:
+    - name: okay
+      type: bool
+- name: OauthAuthenticate
+  url: /passport/via-oauth
+  method: post
+  description: When a token is got from a oauth service such as google, we send the
+    token here to authenticate the user. To me seems this doesn't need to have 2FA
+    or anything, so we return the session directly, or maybe there needs to be next
+    step.
+  in:
+    fields:
+    - name: token
+      description: The token that Auth2 provider returned to the front-end, which
+        will be used to validate the backend
+      type: string
+    - name: service
+      description: The service name, such as 'google' which later backend will use
+        to authorize the token and create the user.
+      type: string
+  out:
+    envelope: GResponse
+    fields:
+    - name: session
+      type: one
+      target: UserSessionDto
+    - name: next
+      description: The next possible action which is suggested.
+      type: slice
+      primitive: string
+- name: AcceptInvite
+  url: /user/invitation/accept
+  method: post
+  description: Use it when user accepts an invitation, and it will complete the joining
+    process
+  in:
+    fields:
+    - name: invitationUniqueId
+      description: The invitation id which will be used to process
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: accepted
+      type: bool
+- name: ConfirmClassicPassportTotp
+  url: /passport/totp/confirm
+  method: post
+  description: When user requires to setup the totp for an specifc passport, they
+    can use this endpoint to confirm it.
+  in:
+    fields:
+    - name: value
+      description: Passport value, email or phone number which is already successfully
+        registered.
+      type: string
+      tags:
+        validate: required
+    - name: password
+      description: Password related to the passport. Totp is only available for passports
+        with a password. Basically totp is protecting passport, not otp over email
+        or sms.
+      type: string
+      tags:
+        validate: required
+    - name: totpCode
+      description: The totp code generated by authenticator such as google or microsft
+        apps.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: session
+      type: one
+      target: UserSessionDto
+- name: ChangePassword
+  cliName: cp
+  url: /passport/change-password
+  method: post
+  description: Change the password for a given passport of the user. User needs to
+    be authenticated in order to be able to change the password for a given account.
+  in:
+    fields:
+    - name: password
+      description: New password meeting the security requirements.
+      type: string
+      tags:
+        validate: required
+    - name: uniqueId
+      description: The passport uniqueId (not the email or phone number) which password
+        would be applied to. Don't confuse with value.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: changed
+      type: bool
+- name: UserPassports
+  url: /user/passports
+  method: get
+  description: Returns list of passports belongs to an specific user.
+  out:
+    envelope: GResponse
+    fields:
+    - name: value
+      description: The passport value, such as email address or phone number
+      type: string
+    - name: uniqueId
+      description: Unique identifier of the passport to operate some action on top
+        of it
+      type: string
+    - name: type
+      description: The type of the passport, such as email, phone number
+      type: string
+    - name: totpConfirmed
+      description: Regardless of the secret, user needs to confirm his secret. There
+        is an extra action to confirm user totp, could be used after signup or prior
+        to login.
+      type: bool
+- name: CreateWorkspace
+  url: /workspaces/create
+  method: post
+  in:
+    fields:
+    - name: name
+      type: string
+  out:
+    envelope: GResponse
+    fields:
+    - name: workspaceId
+      type: string
+- name: ClassicPassportRequestOtp
+  cliName: otp-request
+  url: /workspace/passport/request-otp
+  method: post
+  description: Triggers an otp request, and will send an sms or email to the passport.
+    This endpoint is not used for login, but rather makes a request at initial step.
+    Later you can call classicPassportOtp to get in.
+  in:
+    fields:
+    - name: value
+      description: Passport value (email, phone number) which would be receiving the
+        otp code.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: suspendUntil
+      type: int64
+    - name: validUntil
+      type: int64
+    - name: blockedUntil
+      type: int64
+    - name: secondsToUnblock
+      description: The amount of time left to unblock for next request
+      type: int64
+- name: ClassicPassportOtp
+  cliName: otp
+  url: /workspace/passport/otp
+  method: post
+  description: Authenticate the user publicly for classic methods using communication
+    service, such as sms, call, or email. You need to call classicPassportRequestOtp
+    beforehand to send a otp code, and then validate it with this API. Also checkClassicPassport
+    action might already sent the otp, so make sure you don't send it twice.
+  in:
+    fields:
+    - name: value
+      type: string
+      tags:
+        validate: required
+    - name: otp
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: session
+      description: Upon successful authentication, there will be a session dto generated,
+        which is a ground information of authorized user and can be stored in front-end.
+      type: one?
+      target: UserSessionDto
+    - name: totpUrl
+      description: If time based otp is available, we add it response to make it easier
+        for ui.
+      type: string
+    - name: sessionSecret
+      description: The session secret will be used to call complete user registration
+        api.
+      type: string
+    - name: continueWithCreation
+      description: If return true, means the OTP is correct and user needs to be created
+        before continue the authentication process.
+      type: bool
+- name: CheckClassicPassport
+  cliName: ccp
+  url: /workspace/passport/check
+  method: post
+  description: Checks if a classic passport (email, phone) exists or not, used in
+    multi step authentication
+  in:
+    fields:
+    - name: value
+      type: string
+      tags:
+        validate: required
+    - name: securityToken
+      description: This can be the value of ReCaptcha2, ReCaptcha3, or generate security
+        image or voice for verification. Will be used based on the configuration.
+      type: string
+  out:
+    envelope: GResponse
+    fields:
+    - name: next
+      description: The next possible action which is suggested.
+      type: slice
+      primitive: string
+    - name: flags
+      description: Extra information that can be useful actually when doing onboarding.
+        Make sure sensitive information doesn't go out.
+      type: slice
+      primitive: string
+    - name: otpInfo
+      description: If the endpoint automatically triggers a send otp, then it would
+        be holding that information, Also the otp information can become available.
+      type: object?
+      fields:
+      - name: suspendUntil
+        type: int64
+      - name: validUntil
+        type: int64
+      - name: blockedUntil
+        type: int64
+      - name: secondsToUnblock
+        description: The amount of time left to unblock for next request
+        type: int64
+- name: ClassicSignup
+  cliName: up
+  url: /passports/signup/classic
+  method: post
+  description: Signup a user into system via public access (aka website visitors)
+    using either email or phone number.
+  in:
+    fields:
+    - name: value
+      type: string
+      tags:
+        validate: required
+    - name: sessionSecret
+      description: Required when the account creation requires recaptcha, or otp approval
+        first. If such requirements are there, you first need to follow the otp apis,
+        get the session secret and pass it here to complete the setup.
+      type: string
+    - name: type
+      type: enum
+      of:
+      - k: phonenumber
+      - k: email
+      tags:
+        validate: required
+    - name: password
+      type: string
+      tags:
+        validate: required
+    - name: firstName
+      type: string
+      tags:
+        validate: required
+    - name: lastName
+      type: string
+      tags:
+        validate: required
+    - name: inviteId
+      type: string?
+    - name: publicJoinKeyId
+      type: string?
+    - name: workspaceTypeId
+      type: string?
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: session
+      description: Returns the user session in case that signup is completely successful.
+      type: one
+      target: UserSessionDto
+    - name: totpUrl
+      description: If time based otp is available, we add it response to make it easier
+        for ui.
+      type: string
+    - name: continueToTotp
+      description: Returns true and session will be empty if, the totp is required
+        by the installation. In such scenario, you need to forward user to setup totp
+        screen.
+      type: bool
+    - name: forcedTotp
+      description: Determines if user must complete totp in order to continue based
+        on workspace or installation
+      type: bool
+- name: ClassicSignin
+  cliName: in
+  url: /passports/signin/classic
+  method: post
+  description: Signin publicly to and account using class passports (email, password)
+  in:
+    fields:
+    - name: value
+      type: string
+      tags:
+        validate: required
+    - name: password
+      type: string
+      tags:
+        validate: required
+    - name: totpCode
+      description: Accepts login with totp code. If enabled, first login would return
+        a success response with next[enter-totp] value and ui can understand that
+        user needs to be navigated into the screen other screen.
+      type: string
+    - name: sessionSecret
+      description: Session secret when logging in to the application requires more
+        steps to complete.
+      type: string
+  out:
+    envelope: GResponse
+    fields:
+    - name: session
+      type: one
+      target: UserSessionDto
+    - name: next
+      description: The next possible action which is suggested.
+      type: slice
+      primitive: string
+    - name: totpUrl
+      description: In case the account doesn't have totp, but enforced by installation,
+        this value will contain the link
+      type: string
+    - name: sessionSecret
+      description: Returns a secret session if the authentication requires more steps.
+      type: string
+- name: QueryWorkspaceTypesPublicly
+  cliName: public-types
+  url: /workspace/public/types
+  method: get
+  description: Returns the workspaces types available in the project publicly without
+    authentication, and the value could be used upon signup to go different route.
+  out:
+    envelope: GResponse
+    fields:
+    - name: title
+      type: string
+    - name: description
+      type: string
+    - name: uniqueId
+      type: string
+    - name: slug
+      type: string
+- name: CheckPassportMethods
+  cliName: check-passport-methods
+  url: /passports/available-methods
+  method: get
+  description: Publicly available information to create the authentication form, and
+    show users how they can signin or signup to the system. Based on the PassportMethod
+    entities, it will compute the available methods for the user, considering their
+    region (IP for example)
+  out:
+    envelope: GResponse
+    fields:
+    - name: email
+      type: bool
+      default: false
+    - name: phone
+      type: bool
+      default: false
+    - name: google
+      type: bool
+      default: false
+    - name: facebook
+      type: bool
+      default: false
+    - name: googleOAuthClientKey
+      type: string
+    - name: facebookAppId
+      type: string
+    - name: enabledRecaptcha2
+      type: bool
+      default: false
+    - name: recaptcha2ClientKey
+      type: string
+- name: OsLoginAuthenticate
+  cliName: oslogin
+  url: /passports/os/login
+  method: get
+  description: Logins into the system using operating system (current) user, and store
+    the information for them. Useful for desktop applications.
+  out:
+    dto: UserSessionDto
+- name: SendEmail
+  cliName: email
+  url: /email/send
+  method: post
+  description: Send a email using default root notification configuration
+  in:
+    fields:
+    - name: providerId
+      description: Sending a test email requires to be sent through an specific email
+        provider.
+      type: string
+    - name: toAddress
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: SendEmailWithProvider
+  cliName: emailp
+  url: /emailProvider/send
+  method: post
+  description: Send a text message using an specific gsm provider
+  in:
+    fields:
+    - name: emailProvider
+      type: one
+      target: EmailProviderEntity
+    - name: toAddress
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: GsmSendSms
+  cliName: sms
+  url: /gsm/send/sms
+  method: post
+  description: Send a text message using default root notification configuration
+  in:
+    fields:
+    - name: toNumber
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: GsmSendSmsWithProvider
+  cliName: smsp
+  url: /gsmProvider/send/sms
+  method: post
+  description: Send a text message using an specific gsm provider
+  in:
+    fields:
+    - name: gsmProviderId
+      type: string
+    - name: toNumber
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: tableViewSizingCreate
+  cliShort: tableViewSizing-c
+  url: /tableViewSizing
+  method: post
+  description: Creates a new "tableViewSizing" row.
+  in:
+    dto: TableViewSizingDto
+  out:
+    envelope: GResponse
+    dto: TableViewSizingDto
+- name: tableViewSizingUpdate
+  cliShort: tableViewSizing-u
+  url: /tableViewSizing/:uniqueId
+  method: patch
+  description: Applies a partial update to a "tableViewSizing" row by uniqueId.
+  in:
+    dto: TableViewSizingOptionalDto
+  out:
+    envelope: GResponse
+    dto: TableViewSizingDto
+- name: tableViewSizingGet
+  cliShort: tableViewSizing-g
+  url: /tableViewSizing/:uniqueId
+  method: get
+  description: Looks up a single "tableViewSizing" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: TableViewSizingDto
+- name: tableViewSizingBrowse
+  cliShort: tableViewSizing-b
+  url: /tableViewSizing/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "tableViewSizing" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: TableViewSizingOptionalDto
+- name: tableViewSizingAwareDeletePreview
+  cliShort: tableViewSizing-dp
+  url: /tableViewSizing/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "tableViewSizing" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: tableViewSizingAwareDelete
+  cliShort: tableViewSizing-d
+  url: /tableViewSizing/delete
+  method: post
+  description: Deletes the given "tableViewSizing" uniqueIds, along with everything
+    tableViewSizingAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: timezoneGroupCreate
+  cliShort: timezoneGroup-c
+  url: /timezoneGroup
+  method: post
+  description: Creates a new "timezoneGroup" row.
+  in:
+    dto: TimezoneGroupDto
+  out:
+    envelope: GResponse
+    dto: TimezoneGroupDto
+- name: timezoneGroupUpdate
+  cliShort: timezoneGroup-u
+  url: /timezoneGroup/:uniqueId
+  method: patch
+  description: Applies a partial update to a "timezoneGroup" row by uniqueId.
+  in:
+    dto: TimezoneGroupOptionalDto
+  out:
+    envelope: GResponse
+    dto: TimezoneGroupDto
+- name: timezoneGroupGet
+  cliShort: timezoneGroup-g
+  url: /timezoneGroup/:uniqueId
+  method: get
+  description: Looks up a single "timezoneGroup" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: TimezoneGroupDto
+- name: timezoneGroupBrowse
+  cliShort: timezoneGroup-b
+  url: /timezoneGroup/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "timezoneGroup" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: TimezoneGroupOptionalDto
+- name: timezoneGroupAwareDeletePreview
+  cliShort: timezoneGroup-dp
+  url: /timezoneGroup/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "timezoneGroup" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: timezoneGroupAwareDelete
+  cliShort: timezoneGroup-d
+  url: /timezoneGroup/delete
+  method: post
+  description: Deletes the given "timezoneGroup" uniqueIds, along with everything
+    timezoneGroupAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: passportMethodCreate
+  cliShort: passportMethod-c
+  url: /passportMethod
+  method: post
+  description: Creates a new "passportMethod" row.
+  in:
+    dto: PassportMethodDto
+  out:
+    envelope: GResponse
+    dto: PassportMethodDto
+- name: passportMethodUpdate
+  cliShort: passportMethod-u
+  url: /passportMethod/:uniqueId
+  method: patch
+  description: Applies a partial update to a "passportMethod" row by uniqueId.
+  in:
+    dto: PassportMethodOptionalDto
+  out:
+    envelope: GResponse
+    dto: PassportMethodDto
+- name: passportMethodGet
+  cliShort: passportMethod-g
+  url: /passportMethod/:uniqueId
+  method: get
+  description: Looks up a single "passportMethod" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PassportMethodDto
+- name: passportMethodBrowse
+  cliShort: passportMethod-b
+  url: /passportMethod/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "passportMethod" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PassportMethodOptionalDto
+- name: passportMethodAwareDeletePreview
+  cliShort: passportMethod-dp
+  url: /passportMethod/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "passportMethod" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: passportMethodAwareDelete
+  cliShort: passportMethod-d
+  url: /passportMethod/delete
+  method: post
+  description: Deletes the given "passportMethod" uniqueIds, along with everything
+    passportMethodAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: pendingWorkspaceInviteCreate
+  cliShort: pendingWorkspaceInvite-c
+  url: /pendingWorkspaceInvite
+  method: post
+  description: Creates a new "pendingWorkspaceInvite" row.
+  in:
+    dto: PendingWorkspaceInviteDto
+  out:
+    envelope: GResponse
+    dto: PendingWorkspaceInviteDto
+- name: pendingWorkspaceInviteUpdate
+  cliShort: pendingWorkspaceInvite-u
+  url: /pendingWorkspaceInvite/:uniqueId
+  method: patch
+  description: Applies a partial update to a "pendingWorkspaceInvite" row by uniqueId.
+  in:
+    dto: PendingWorkspaceInviteOptionalDto
+  out:
+    envelope: GResponse
+    dto: PendingWorkspaceInviteDto
+- name: pendingWorkspaceInviteGet
+  cliShort: pendingWorkspaceInvite-g
+  url: /pendingWorkspaceInvite/:uniqueId
+  method: get
+  description: Looks up a single "pendingWorkspaceInvite" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PendingWorkspaceInviteDto
+- name: pendingWorkspaceInviteBrowse
+  cliShort: pendingWorkspaceInvite-b
+  url: /pendingWorkspaceInvite/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "pendingWorkspaceInvite" rows matching a filter, sorted/paged
+    (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PendingWorkspaceInviteOptionalDto
+- name: pendingWorkspaceInviteAwareDeletePreview
+  cliShort: pendingWorkspaceInvite-dp
+  url: /pendingWorkspaceInvite/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "pendingWorkspaceInvite" uniqueIds
+    would affect, without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: pendingWorkspaceInviteAwareDelete
+  cliShort: pendingWorkspaceInvite-d
+  url: /pendingWorkspaceInvite/delete
+  method: post
+  description: Deletes the given "pendingWorkspaceInvite" uniqueIds, along with everything
+    pendingWorkspaceInviteAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: preferenceCreate
+  cliShort: preference-c
+  url: /preference
+  method: post
+  description: Creates a new "preference" row.
+  in:
+    dto: PreferenceDto
+  out:
+    envelope: GResponse
+    dto: PreferenceDto
+- name: preferenceUpdate
+  cliShort: preference-u
+  url: /preference/:uniqueId
+  method: patch
+  description: Applies a partial update to a "preference" row by uniqueId.
+  in:
+    dto: PreferenceOptionalDto
+  out:
+    envelope: GResponse
+    dto: PreferenceDto
+- name: preferenceGet
+  cliShort: preference-g
+  url: /preference/:uniqueId
+  method: get
+  description: Looks up a single "preference" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PreferenceDto
+- name: preferenceBrowse
+  cliShort: preference-b
+  url: /preference/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "preference" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PreferenceOptionalDto
+- name: preferenceAwareDeletePreview
+  cliShort: preference-dp
+  url: /preference/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "preference" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: preferenceAwareDelete
+  cliShort: preference-d
+  url: /preference/delete
+  method: post
+  description: Deletes the given "preference" uniqueIds, along with everything preferenceAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: userProfileCreate
+  cliShort: userProfile-c
+  url: /userProfile
+  method: post
+  description: Creates a new "userProfile" row.
+  in:
+    dto: UserProfileDto
+  out:
+    envelope: GResponse
+    dto: UserProfileDto
+- name: userProfileUpdate
+  cliShort: userProfile-u
+  url: /userProfile/:uniqueId
+  method: patch
+  description: Applies a partial update to a "userProfile" row by uniqueId.
+  in:
+    dto: UserProfileOptionalDto
+  out:
+    envelope: GResponse
+    dto: UserProfileDto
+- name: userProfileGet
+  cliShort: userProfile-g
+  url: /userProfile/:uniqueId
+  method: get
+  description: Looks up a single "userProfile" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: UserProfileDto
+- name: userProfileBrowse
+  cliShort: userProfile-b
+  url: /userProfile/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "userProfile" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: UserProfileOptionalDto
+- name: userProfileAwareDeletePreview
+  cliShort: userProfile-dp
+  url: /userProfile/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "userProfile" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: userProfileAwareDelete
+  cliShort: userProfile-d
+  url: /userProfile/delete
+  method: post
+  description: Deletes the given "userProfile" uniqueIds, along with everything userProfileAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: publicJoinKeyCreate
+  cliShort: publicJoinKey-c
+  url: /publicJoinKey
+  method: post
+  description: Creates a new "publicJoinKey" row.
+  in:
+    dto: PublicJoinKeyDto
+  out:
+    envelope: GResponse
+    dto: PublicJoinKeyDto
+- name: publicJoinKeyUpdate
+  cliShort: publicJoinKey-u
+  url: /publicJoinKey/:uniqueId
+  method: patch
+  description: Applies a partial update to a "publicJoinKey" row by uniqueId.
+  in:
+    dto: PublicJoinKeyOptionalDto
+  out:
+    envelope: GResponse
+    dto: PublicJoinKeyDto
+- name: publicJoinKeyGet
+  cliShort: publicJoinKey-g
+  url: /publicJoinKey/:uniqueId
+  method: get
+  description: Looks up a single "publicJoinKey" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PublicJoinKeyDto
+- name: publicJoinKeyBrowse
+  cliShort: publicJoinKey-b
+  url: /publicJoinKey/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "publicJoinKey" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PublicJoinKeyOptionalDto
+- name: publicJoinKeyAwareDeletePreview
+  cliShort: publicJoinKey-dp
+  url: /publicJoinKey/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "publicJoinKey" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: publicJoinKeyAwareDelete
+  cliShort: publicJoinKey-d
+  url: /publicJoinKey/delete
+  method: post
+  description: Deletes the given "publicJoinKey" uniqueIds, along with everything
+    publicJoinKeyAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: emailConfirmationCreate
+  cliShort: emailConfirmation-c
+  url: /emailConfirmation
+  method: post
+  description: Creates a new "emailConfirmation" row.
+  in:
+    dto: EmailConfirmationDto
+  out:
+    envelope: GResponse
+    dto: EmailConfirmationDto
+- name: emailConfirmationUpdate
+  cliShort: emailConfirmation-u
+  url: /emailConfirmation/:uniqueId
+  method: patch
+  description: Applies a partial update to a "emailConfirmation" row by uniqueId.
+  in:
+    dto: EmailConfirmationOptionalDto
+  out:
+    envelope: GResponse
+    dto: EmailConfirmationDto
+- name: emailConfirmationGet
+  cliShort: emailConfirmation-g
+  url: /emailConfirmation/:uniqueId
+  method: get
+  description: Looks up a single "emailConfirmation" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: EmailConfirmationDto
+- name: emailConfirmationBrowse
+  cliShort: emailConfirmation-b
+  url: /emailConfirmation/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "emailConfirmation" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: EmailConfirmationOptionalDto
+- name: emailConfirmationAwareDeletePreview
+  cliShort: emailConfirmation-dp
+  url: /emailConfirmation/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "emailConfirmation" uniqueIds would
+    affect, without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: emailConfirmationAwareDelete
+  cliShort: emailConfirmation-d
+  url: /emailConfirmation/delete
+  method: post
+  description: Deletes the given "emailConfirmation" uniqueIds, along with everything
+    emailConfirmationAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: gsmProviderCreate
+  cliShort: gsmProvider-c
+  url: /gsmProvider
+  method: post
+  description: Creates a new "gsmProvider" row.
+  in:
+    dto: GsmProviderDto
+  out:
+    envelope: GResponse
+    dto: GsmProviderDto
+- name: gsmProviderUpdate
+  cliShort: gsmProvider-u
+  url: /gsmProvider/:uniqueId
+  method: patch
+  description: Applies a partial update to a "gsmProvider" row by uniqueId.
+  in:
+    dto: GsmProviderOptionalDto
+  out:
+    envelope: GResponse
+    dto: GsmProviderDto
+- name: gsmProviderGet
+  cliShort: gsmProvider-g
+  url: /gsmProvider/:uniqueId
+  method: get
+  description: Looks up a single "gsmProvider" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: GsmProviderDto
+- name: gsmProviderBrowse
+  cliShort: gsmProvider-b
+  url: /gsmProvider/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "gsmProvider" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: GsmProviderOptionalDto
+- name: gsmProviderAwareDeletePreview
+  cliShort: gsmProvider-dp
+  url: /gsmProvider/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "gsmProvider" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: gsmProviderAwareDelete
+  cliShort: gsmProvider-d
+  url: /gsmProvider/delete
+  method: post
+  description: Deletes the given "gsmProvider" uniqueIds, along with everything gsmProviderAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: phoneConfirmationCreate
+  cliShort: phoneConfirmation-c
+  url: /phoneConfirmation
+  method: post
+  description: Creates a new "phoneConfirmation" row.
+  in:
+    dto: PhoneConfirmationDto
+  out:
+    envelope: GResponse
+    dto: PhoneConfirmationDto
+- name: phoneConfirmationUpdate
+  cliShort: phoneConfirmation-u
+  url: /phoneConfirmation/:uniqueId
+  method: patch
+  description: Applies a partial update to a "phoneConfirmation" row by uniqueId.
+  in:
+    dto: PhoneConfirmationOptionalDto
+  out:
+    envelope: GResponse
+    dto: PhoneConfirmationDto
+- name: phoneConfirmationGet
+  cliShort: phoneConfirmation-g
+  url: /phoneConfirmation/:uniqueId
+  method: get
+  description: Looks up a single "phoneConfirmation" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PhoneConfirmationDto
+- name: phoneConfirmationBrowse
+  cliShort: phoneConfirmation-b
+  url: /phoneConfirmation/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "phoneConfirmation" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PhoneConfirmationOptionalDto
+- name: phoneConfirmationAwareDeletePreview
+  cliShort: phoneConfirmation-dp
+  url: /phoneConfirmation/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "phoneConfirmation" uniqueIds would
+    affect, without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: phoneConfirmationAwareDelete
+  cliShort: phoneConfirmation-d
+  url: /phoneConfirmation/delete
+  method: post
+  description: Deletes the given "phoneConfirmation" uniqueIds, along with everything
+    phoneConfirmationAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: tokenCreate
+  cliShort: token-c
+  url: /token
+  method: post
+  description: Creates a new "token" row.
+  in:
+    dto: TokenDto
+  out:
+    envelope: GResponse
+    dto: TokenDto
+- name: tokenUpdate
+  cliShort: token-u
+  url: /token/:uniqueId
+  method: patch
+  description: Applies a partial update to a "token" row by uniqueId.
+  in:
+    dto: TokenOptionalDto
+  out:
+    envelope: GResponse
+    dto: TokenDto
+- name: tokenGet
+  cliShort: token-g
+  url: /token/:uniqueId
+  method: get
+  description: Looks up a single "token" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: TokenDto
+- name: tokenBrowse
+  cliShort: token-b
+  url: /token/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "token" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: TokenOptionalDto
+- name: tokenAwareDeletePreview
+  cliShort: token-dp
+  url: /token/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "token" uniqueIds would affect, without
+    deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: tokenAwareDelete
+  cliShort: token-d
+  url: /token/delete
+  method: post
+  description: Deletes the given "token" uniqueIds, along with everything tokenAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: workspaceInviteCreate
+  cliShort: workspaceInvite-c
+  url: /workspaceInvite
+  method: post
+  description: Creates a new "workspaceInvite" row.
+  in:
+    dto: WorkspaceInviteDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceInviteDto
+- name: workspaceInviteUpdate
+  cliShort: workspaceInvite-u
+  url: /workspaceInvite/:uniqueId
+  method: patch
+  description: Applies a partial update to a "workspaceInvite" row by uniqueId.
+  in:
+    dto: WorkspaceInviteOptionalDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceInviteDto
+- name: workspaceInviteGet
+  cliShort: workspaceInvite-g
+  url: /workspaceInvite/:uniqueId
+  method: get
+  description: Looks up a single "workspaceInvite" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WorkspaceInviteDto
+- name: workspaceInviteBrowse
+  cliShort: workspaceInvite-b
+  url: /workspaceInvite/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "workspaceInvite" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WorkspaceInviteOptionalDto
+- name: workspaceInviteAwareDeletePreview
+  cliShort: workspaceInvite-dp
+  url: /workspaceInvite/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "workspaceInvite" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: workspaceInviteAwareDelete
+  cliShort: workspaceInvite-d
+  url: /workspaceInvite/delete
+  method: post
+  description: Deletes the given "workspaceInvite" uniqueIds, along with everything
+    workspaceInviteAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: userWorkspaceCreate
+  cliShort: userWorkspace-c
+  url: /userWorkspace
+  method: post
+  description: Creates a new "userWorkspace" row.
+  in:
+    dto: UserWorkspaceDto
+  out:
+    envelope: GResponse
+    dto: UserWorkspaceDto
+- name: userWorkspaceUpdate
+  cliShort: userWorkspace-u
+  url: /userWorkspace/:uniqueId
+  method: patch
+  description: Applies a partial update to a "userWorkspace" row by uniqueId.
+  in:
+    dto: UserWorkspaceOptionalDto
+  out:
+    envelope: GResponse
+    dto: UserWorkspaceDto
+- name: userWorkspaceGet
+  cliShort: userWorkspace-g
+  url: /userWorkspace/:uniqueId
+  method: get
+  description: Looks up a single "userWorkspace" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: UserWorkspaceDto
+- name: userWorkspaceBrowse
+  cliShort: userWorkspace-b
+  url: /userWorkspace/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "userWorkspace" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: UserWorkspaceOptionalDto
+- name: userWorkspaceAwareDeletePreview
+  cliShort: userWorkspace-dp
+  url: /userWorkspace/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "userWorkspace" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: userWorkspaceAwareDelete
+  cliShort: userWorkspace-d
+  url: /userWorkspace/delete
+  method: post
+  description: Deletes the given "userWorkspace" uniqueIds, along with everything
+    userWorkspaceAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: workspaceRoleCreate
+  cliShort: workspaceRole-c
+  url: /workspaceRole
+  method: post
+  description: Creates a new "workspaceRole" row.
+  in:
+    dto: WorkspaceRoleDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceRoleDto
+- name: workspaceRoleUpdate
+  cliShort: workspaceRole-u
+  url: /workspaceRole/:uniqueId
+  method: patch
+  description: Applies a partial update to a "workspaceRole" row by uniqueId.
+  in:
+    dto: WorkspaceRoleOptionalDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceRoleDto
+- name: workspaceRoleGet
+  cliShort: workspaceRole-g
+  url: /workspaceRole/:uniqueId
+  method: get
+  description: Looks up a single "workspaceRole" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WorkspaceRoleDto
+- name: workspaceRoleBrowse
+  cliShort: workspaceRole-b
+  url: /workspaceRole/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "workspaceRole" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WorkspaceRoleOptionalDto
+- name: workspaceRoleAwareDeletePreview
+  cliShort: workspaceRole-dp
+  url: /workspaceRole/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "workspaceRole" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: workspaceRoleAwareDelete
+  cliShort: workspaceRole-d
+  url: /workspaceRole/delete
+  method: post
+  description: Deletes the given "workspaceRole" uniqueIds, along with everything
+    workspaceRoleAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: emailProviderCreate
+  cliShort: emailProvider-c
+  url: /emailProvider
+  method: post
+  description: Creates a new "emailProvider" row.
+  in:
+    dto: EmailProviderDto
+  out:
+    envelope: GResponse
+    dto: EmailProviderDto
+- name: emailProviderUpdate
+  cliShort: emailProvider-u
+  url: /emailProvider/:uniqueId
+  method: patch
+  description: Applies a partial update to a "emailProvider" row by uniqueId.
+  in:
+    dto: EmailProviderOptionalDto
+  out:
+    envelope: GResponse
+    dto: EmailProviderDto
+- name: emailProviderGet
+  cliShort: emailProvider-g
+  url: /emailProvider/:uniqueId
+  method: get
+  description: Looks up a single "emailProvider" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: EmailProviderDto
+- name: emailProviderBrowse
+  cliShort: emailProvider-b
+  url: /emailProvider/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "emailProvider" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: EmailProviderOptionalDto
+- name: emailProviderAwareDeletePreview
+  cliShort: emailProvider-dp
+  url: /emailProvider/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "emailProvider" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: emailProviderAwareDelete
+  cliShort: emailProvider-d
+  url: /emailProvider/delete
+  method: post
+  description: Deletes the given "emailProvider" uniqueIds, along with everything
+    emailProviderAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: emailSenderCreate
+  cliShort: emailSender-c
+  url: /emailSender
+  method: post
+  description: Creates a new "emailSender" row.
+  in:
+    dto: EmailSenderDto
+  out:
+    envelope: GResponse
+    dto: EmailSenderDto
+- name: emailSenderUpdate
+  cliShort: emailSender-u
+  url: /emailSender/:uniqueId
+  method: patch
+  description: Applies a partial update to a "emailSender" row by uniqueId.
+  in:
+    dto: EmailSenderOptionalDto
+  out:
+    envelope: GResponse
+    dto: EmailSenderDto
+- name: emailSenderGet
+  cliShort: emailSender-g
+  url: /emailSender/:uniqueId
+  method: get
+  description: Looks up a single "emailSender" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: EmailSenderDto
+- name: emailSenderBrowse
+  cliShort: emailSender-b
+  url: /emailSender/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "emailSender" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: EmailSenderOptionalDto
+- name: emailSenderAwareDeletePreview
+  cliShort: emailSender-dp
+  url: /emailSender/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "emailSender" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: emailSenderAwareDelete
+  cliShort: emailSender-d
+  url: /emailSender/delete
+  method: post
+  description: Deletes the given "emailSender" uniqueIds, along with everything emailSenderAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: regionalContentCreate
+  cliShort: regionalContent-c
+  url: /regionalContent
+  method: post
+  description: Creates a new "regionalContent" row.
+  in:
+    dto: RegionalContentDto
+  out:
+    envelope: GResponse
+    dto: RegionalContentDto
+- name: regionalContentUpdate
+  cliShort: regionalContent-u
+  url: /regionalContent/:uniqueId
+  method: patch
+  description: Applies a partial update to a "regionalContent" row by uniqueId.
+  in:
+    dto: RegionalContentOptionalDto
+  out:
+    envelope: GResponse
+    dto: RegionalContentDto
+- name: regionalContentGet
+  cliShort: regionalContent-g
+  url: /regionalContent/:uniqueId
+  method: get
+  description: Looks up a single "regionalContent" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: RegionalContentDto
+- name: regionalContentBrowse
+  cliShort: regionalContent-b
+  url: /regionalContent/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "regionalContent" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: RegionalContentOptionalDto
+- name: regionalContentAwareDeletePreview
+  cliShort: regionalContent-dp
+  url: /regionalContent/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "regionalContent" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: regionalContentAwareDelete
+  cliShort: regionalContent-d
+  url: /regionalContent/delete
+  method: post
+  description: Deletes the given "regionalContent" uniqueIds, along with everything
+    regionalContentAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: appMenuCreate
+  cliShort: appMenu-c
+  url: /appMenu
+  method: post
+  description: Creates a new "appMenu" row.
+  in:
+    dto: AppMenuDto
+  out:
+    envelope: GResponse
+    dto: AppMenuDto
+- name: appMenuUpdate
+  cliShort: appMenu-u
+  url: /appMenu/:uniqueId
+  method: patch
+  description: Applies a partial update to a "appMenu" row by uniqueId.
+  in:
+    dto: AppMenuOptionalDto
+  out:
+    envelope: GResponse
+    dto: AppMenuDto
+- name: appMenuGet
+  cliShort: appMenu-g
+  url: /appMenu/:uniqueId
+  method: get
+  description: Looks up a single "appMenu" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: AppMenuDto
+- name: appMenuBrowse
+  cliShort: appMenu-b
+  url: /appMenu/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "appMenu" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: AppMenuOptionalDto
+- name: appMenuAwareDeletePreview
+  cliShort: appMenu-dp
+  url: /appMenu/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "appMenu" uniqueIds would affect, without
+    deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: appMenuAwareDelete
+  cliShort: appMenu-d
+  url: /appMenu/delete
+  method: post
+  description: Deletes the given "appMenu" uniqueIds, along with everything appMenuAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: publicAuthenticationCreate
+  cliShort: publicAuthentication-c
+  url: /publicAuthentication
+  method: post
+  description: Creates a new "publicAuthentication" row.
+  in:
+    dto: PublicAuthenticationDto
+  out:
+    envelope: GResponse
+    dto: PublicAuthenticationDto
+- name: publicAuthenticationUpdate
+  cliShort: publicAuthentication-u
+  url: /publicAuthentication/:uniqueId
+  method: patch
+  description: Applies a partial update to a "publicAuthentication" row by uniqueId.
+  in:
+    dto: PublicAuthenticationOptionalDto
+  out:
+    envelope: GResponse
+    dto: PublicAuthenticationDto
+- name: publicAuthenticationGet
+  cliShort: publicAuthentication-g
+  url: /publicAuthentication/:uniqueId
+  method: get
+  description: Looks up a single "publicAuthentication" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PublicAuthenticationDto
+- name: publicAuthenticationBrowse
+  cliShort: publicAuthentication-b
+  url: /publicAuthentication/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "publicAuthentication" rows matching a filter, sorted/paged
+    (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PublicAuthenticationOptionalDto
+- name: publicAuthenticationAwareDeletePreview
+  cliShort: publicAuthentication-dp
+  url: /publicAuthentication/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "publicAuthentication" uniqueIds would
+    affect, without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: publicAuthenticationAwareDelete
+  cliShort: publicAuthentication-d
+  url: /publicAuthentication/delete
+  method: post
+  description: Deletes the given "publicAuthentication" uniqueIds, along with everything
+    publicAuthenticationAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: notificationConfigCreate
+  cliShort: notificationConfig-c
+  url: /notificationConfig
+  method: post
+  description: Creates a new "notificationConfig" row.
+  in:
+    dto: NotificationConfigDto
+  out:
+    envelope: GResponse
+    dto: NotificationConfigDto
+- name: notificationConfigUpdate
+  cliShort: notificationConfig-u
+  url: /notificationConfig/:uniqueId
+  method: patch
+  description: Applies a partial update to a "notificationConfig" row by uniqueId.
+  in:
+    dto: NotificationConfigOptionalDto
+  out:
+    envelope: GResponse
+    dto: NotificationConfigDto
+- name: notificationConfigGet
+  cliShort: notificationConfig-g
+  url: /notificationConfig/:uniqueId
+  method: get
+  description: Looks up a single "notificationConfig" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: NotificationConfigDto
+- name: notificationConfigBrowse
+  cliShort: notificationConfig-b
+  url: /notificationConfig/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "notificationConfig" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: NotificationConfigOptionalDto
+- name: notificationConfigAwareDeletePreview
+  cliShort: notificationConfig-dp
+  url: /notificationConfig/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "notificationConfig" uniqueIds would
+    affect, without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: notificationConfigAwareDelete
+  cliShort: notificationConfig-d
+  url: /notificationConfig/delete
+  method: post
+  description: Deletes the given "notificationConfig" uniqueIds, along with everything
+    notificationConfigAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: workspaceConfigCreate
+  cliShort: workspaceConfig-c
+  url: /workspaceConfig
+  method: post
+  description: Creates a new "workspaceConfig" row.
+  in:
+    dto: WorkspaceConfigDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceConfigDto
+- name: workspaceConfigUpdate
+  cliShort: workspaceConfig-u
+  url: /workspaceConfig/:uniqueId
+  method: patch
+  description: Applies a partial update to a "workspaceConfig" row by uniqueId.
+  in:
+    dto: WorkspaceConfigOptionalDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceConfigDto
+- name: workspaceConfigGet
+  cliShort: workspaceConfig-g
+  url: /workspaceConfig/:uniqueId
+  method: get
+  description: Looks up a single "workspaceConfig" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WorkspaceConfigDto
+- name: workspaceConfigBrowse
+  cliShort: workspaceConfig-b
+  url: /workspaceConfig/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "workspaceConfig" rows matching a filter, sorted/paged (see
+    emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WorkspaceConfigOptionalDto
+- name: workspaceConfigAwareDeletePreview
+  cliShort: workspaceConfig-dp
+  url: /workspaceConfig/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "workspaceConfig" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: workspaceConfigAwareDelete
+  cliShort: workspaceConfig-d
+  url: /workspaceConfig/delete
+  method: post
+  description: Deletes the given "workspaceConfig" uniqueIds, along with everything
+    workspaceConfigAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: roleCreate
+  cliShort: role-c
+  url: /role
+  method: post
+  description: Creates a new "role" row.
+  in:
+    dto: RoleDto
+  out:
+    envelope: GResponse
+    dto: RoleDto
+- name: roleUpdate
+  cliShort: role-u
+  url: /role/:uniqueId
+  method: patch
+  description: Applies a partial update to a "role" row by uniqueId.
+  in:
+    dto: RoleOptionalDto
+  out:
+    envelope: GResponse
+    dto: RoleDto
+- name: roleGet
+  cliShort: role-g
+  url: /role/:uniqueId
+  method: get
+  description: Looks up a single "role" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: RoleDto
+- name: roleBrowse
+  cliShort: role-b
+  url: /role/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "role" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: RoleOptionalDto
+- name: roleAwareDeletePreview
+  cliShort: role-dp
+  url: /role/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "role" uniqueIds would affect, without
+    deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: roleAwareDelete
+  cliShort: role-d
+  url: /role/delete
+  method: post
+  description: Deletes the given "role" uniqueIds, along with everything roleAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: workspaceTypeCreate
+  cliShort: workspaceType-c
+  url: /workspaceType
+  method: post
+  description: Creates a new "workspaceType" row.
+  in:
+    dto: WorkspaceTypeDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceTypeDto
+- name: workspaceTypeUpdate
+  cliShort: workspaceType-u
+  url: /workspaceType/:uniqueId
+  method: patch
+  description: Applies a partial update to a "workspaceType" row by uniqueId.
+  in:
+    dto: WorkspaceTypeOptionalDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceTypeDto
+- name: workspaceTypeGet
+  cliShort: workspaceType-g
+  url: /workspaceType/:uniqueId
+  method: get
+  description: Looks up a single "workspaceType" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WorkspaceTypeDto
+- name: workspaceTypeBrowse
+  cliShort: workspaceType-b
+  url: /workspaceType/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "workspaceType" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WorkspaceTypeOptionalDto
+- name: workspaceTypeAwareDeletePreview
+  cliShort: workspaceType-dp
+  url: /workspaceType/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "workspaceType" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: workspaceTypeAwareDelete
+  cliShort: workspaceType-d
+  url: /workspaceType/delete
+  method: post
+  description: Deletes the given "workspaceType" uniqueIds, along with everything
+    workspaceTypeAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: userCreate
+  cliShort: user-c
+  url: /user
+  method: post
+  description: Creates a new "user" row.
+  in:
+    dto: UserDto
+  out:
+    envelope: GResponse
+    dto: UserDto
+- name: userUpdate
+  cliShort: user-u
+  url: /user/:uniqueId
+  method: patch
+  description: Applies a partial update to a "user" row by uniqueId.
+  in:
+    dto: UserOptionalDto
+  out:
+    envelope: GResponse
+    dto: UserDto
+- name: userGet
+  cliShort: user-g
+  url: /user/:uniqueId
+  method: get
+  description: Looks up a single "user" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: UserDto
+- name: userBrowse
+  cliShort: user-b
+  url: /user/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "user" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: UserOptionalDto
+- name: userAwareDeletePreview
+  cliShort: user-dp
+  url: /user/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "user" uniqueIds would affect, without
+    deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: userAwareDelete
+  cliShort: user-d
+  url: /user/delete
+  method: post
+  description: Deletes the given "user" uniqueIds, along with everything userAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: workspaceCreate
+  cliShort: workspace-c
+  url: /workspace
+  method: post
+  description: Creates a new "workspace" row.
+  in:
+    dto: WorkspaceDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceDto
+- name: workspaceUpdate
+  cliShort: workspace-u
+  url: /workspace/:uniqueId
+  method: patch
+  description: Applies a partial update to a "workspace" row by uniqueId.
+  in:
+    dto: WorkspaceOptionalDto
+  out:
+    envelope: GResponse
+    dto: WorkspaceDto
+- name: workspaceGet
+  cliShort: workspace-g
+  url: /workspace/:uniqueId
+  method: get
+  description: Looks up a single "workspace" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WorkspaceDto
+- name: workspaceBrowse
+  cliShort: workspace-b
+  url: /workspace/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "workspace" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WorkspaceOptionalDto
+- name: workspaceAwareDeletePreview
+  cliShort: workspace-dp
+  url: /workspace/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "workspace" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: workspaceAwareDelete
+  cliShort: workspace-d
+  url: /workspace/delete
+  method: post
+  description: Deletes the given "workspace" uniqueIds, along with everything workspaceAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: passportCreate
+  cliShort: passport-c
+  url: /passport
+  method: post
+  description: Creates a new "passport" row.
+  in:
+    dto: PassportDto
+  out:
+    envelope: GResponse
+    dto: PassportDto
+- name: passportUpdate
+  cliShort: passport-u
+  url: /passport/:uniqueId
+  method: patch
+  description: Applies a partial update to a "passport" row by uniqueId.
+  in:
+    dto: PassportOptionalDto
+  out:
+    envelope: GResponse
+    dto: PassportDto
+- name: passportGet
+  cliShort: passport-g
+  url: /passport/:uniqueId
+  method: get
+  description: Looks up a single "passport" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: PassportDto
+- name: passportBrowse
+  cliShort: passport-b
+  url: /passport/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "passport" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: PassportOptionalDto
+- name: passportAwareDeletePreview
+  cliShort: passport-dp
+  url: /passport/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "passport" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: passportAwareDelete
+  cliShort: passport-d
+  url: /passport/delete
+  method: post
+  description: Deletes the given "passport" uniqueIds, along with everything passportAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
