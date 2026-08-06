@@ -8,15 +8,15 @@
 
 import { Route } from "react-router-dom";
 import { useCapabilityRoutes } from "./capabilities/CapabilityRoutes";
-import { useEmailProviderRoutes } from "./mail-providers/EmailProviderRoutes";
-import { useEmailSenderRoutes } from "./mail-senders/EmailSenderRoutes";
+import { useEmailProviderRoutes } from "../messaging/mail-providers/EmailProviderRoutes";
+import { useEmailSenderRoutes } from "../messaging/mail-senders/EmailSenderRoutes";
 import { usePassportMethodRoutes } from "./passport-method/PassportMethodRoutes";
 import { useRegionalContentRoutes } from "./regional-content/RegionalContentRoutes";
 import { useUserRoutes } from "./users/UserRoutes";
 import { useWorkspaceConfigRoutes } from "./workspace-config/WorkspaceConfigRoutes";
 import { useWorkspaceTypeRoutes } from "./workspace-types/WorkspaceTypeRoutes";
 import { useWorkspaceRoutes } from "./workspaces/WorkspaceRoutes";
-import { useGsmProviderRoutes } from "./gsm-provider/GsmProviderRoutes";
+import { useGsmProviderRoutes } from "../messaging/gsm-provider/GsmProviderRoutes";
 
 export function useManageRoutes() {
   const capabilityRoutes = useCapabilityRoutes();

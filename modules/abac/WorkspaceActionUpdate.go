@@ -3,6 +3,7 @@ package abac
 import (
 	"strings"
 
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -36,7 +37,7 @@ func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fi
 	if !hasSender || *inviteToWorkspaceSenderId == "" {
 		return fireback.Create401Error(&AbacMessages.UserWhichHasThisTokenDoesNotExist, []string{})
 	}
-	sender, senderErr := EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *inviteToWorkspaceSenderId})
+	sender, senderErr := messaging.EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *inviteToWorkspaceSenderId})
 	if senderErr != nil {
 		return senderErr
 	}
@@ -53,12 +54,12 @@ func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fi
 	}
 	content = strings.ReplaceAll(content, "ROLE_NAME", roleName)
 
-	var provider *EmailProviderEntity
+	var provider *messaging.EmailProviderEntity
 	if generalEmailProviderId, ok := config.GeneralEmailProviderId.Get(); ok && *generalEmailProviderId != "" {
-		provider, _ = EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
+		provider, _ = messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
 	}
 
-	err3 := SendMail(EmailMessageContent{
+	err3 := messaging.SendMail(messaging.EmailMessageContent{
 		FromName:  sender.FromName,
 		FromEmail: sender.FromEmailAddress,
 		ToName:    invite.FirstName,

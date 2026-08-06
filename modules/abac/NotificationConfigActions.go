@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 )
@@ -206,7 +207,7 @@ func NotificationTestMailAction(
 
 	q := query
 	q.UniqueId = dto.SenderId
-	item, err := EmailSenderActions.GetOne(q)
+	item, err := messaging.EmailSenderActions.GetOne(q)
 
 	if err != nil {
 		return nil, err
@@ -218,15 +219,15 @@ func NotificationTestMailAction(
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	var provider *EmailProviderEntity
+	var provider *messaging.EmailProviderEntity
 	if v, ok := conf.GeneralEmailProviderId.Get(); ok {
-		provider, err2 = EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *v})
+		provider, err2 = messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *v})
 		if err2 != nil {
 			return nil, err2
 		}
 	}
 
-	err3 := SendMail(EmailMessageContent{
+	err3 := messaging.SendMail(messaging.EmailMessageContent{
 		FromEmail: item.FromEmailAddress,
 		FromName:  item.FromName,
 		ToName:    dto.ToName,

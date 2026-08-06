@@ -4,111 +4,15 @@ import (
 	"errors"
 	"log"
 
-	"github.com/sendgrid/rest"
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-// emailProvider's old security block was { writeOnRoot: true, readOnRoot: true }: the old
-// generated code set AllowOnRoot: true on every action (Query/Get/Create/Update/Delete) -
-// preserved here exactly.
-var emailProviderPerms = NewCrudPermissionSet("root.manage", "email-provider", "email provider")
-var PERM_ROOT_EMAIL_PROVIDER = emailProviderPerms.Wildcard
-var PERM_ROOT_EMAIL_PROVIDER_QUERY = emailProviderPerms.Query
-var PERM_ROOT_EMAIL_PROVIDER_CREATE = emailProviderPerms.Create
-var PERM_ROOT_EMAIL_PROVIDER_UPDATE = emailProviderPerms.Update
-var PERM_ROOT_EMAIL_PROVIDER_DELETE = emailProviderPerms.Delete
-var ALL_EMAIL_PROVIDER_PERMISSIONS = emailProviderPerms.All
-
-var EmailProviderActions = NewEntityActionsBundle[EmailProviderEntity]()
-
-func emailProviderSecurity(perm fireback.PermissionInfo) *fireback.SecurityModel {
-	return &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{perm}, AllowOnRoot: true}
-}
-
-func EmailProviderBrowseAction(c EmailProviderBrowseActionRequest) (*EmailProviderBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_QUERY))
-	if err != nil {
-		return nil, err
-	}
-	items, qrm, err2 := EmailProviderActions.Query(*query)
-	if err2 != nil {
-		return nil, err2
-	}
-	return &EmailProviderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
-}
-
-func EmailProviderGetAction(c EmailProviderGetActionRequest) (*EmailProviderGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_QUERY))
-	if err != nil {
-		return nil, err
-	}
-	query.UniqueId = c.Params.UniqueId
-	item, err2 := EmailProviderActions.GetOne(*query)
-	if err2 != nil {
-		return nil, err2
-	}
-	return &EmailProviderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
-}
-
-func EmailProviderCreateAction(c EmailProviderCreateActionRequest) (*EmailProviderCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_CREATE))
-	if err != nil {
-		return nil, err
-	}
-	entity := &EmailProviderEntity{Type: c.Body.Type, Title: c.Body.Title, Config: c.Body.Config}
-	created, err2 := EmailProviderActions.Create(entity, *query)
-	if err2 != nil {
-		return nil, err2
-	}
-	return &EmailProviderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
-}
-
-func EmailProviderUpdateAction(c EmailProviderUpdateActionRequest) (*EmailProviderUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_UPDATE))
-	if err != nil {
-		return nil, err
-	}
-	query.UniqueId = c.Params.UniqueId
-	fields := &EmailProviderEntity{UniqueId: c.Params.UniqueId}
-	if v, ok := c.Body.Type.Get(); ok {
-		fields.Type = *v
-	}
-	if v, ok := c.Body.Title.Get(); ok {
-		fields.Title = *v
-	}
-	fields.Config = c.Body.Config
-	updated, err2 := EmailProviderActions.Update(*query, fields)
-	if err2 != nil {
-		return nil, err2
-	}
-	return &EmailProviderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
-}
-
-func EmailProviderAwareDeletePreviewAction(c EmailProviderAwareDeletePreviewActionRequest) (*EmailProviderAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_DELETE)); err != nil {
-		return nil, err
-	}
-	uniqueIds := EmailProviderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := EmailProviderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
-	if err2 != nil {
-		return nil, fireback.GormErrorToIError(err2)
-	}
-	return &EmailProviderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
-}
-
-func EmailProviderAwareDeleteAction(c EmailProviderAwareDeleteActionRequest) (*EmailProviderAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_DELETE)); err != nil {
-		return nil, err
-	}
-	if err2 := EmailProviderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
-		return nil, fireback.GormErrorToIError(err2)
-	}
-	return &EmailProviderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
-}
-
-// --- Hand business logic recovered from the pre-migration EmailProviderEntity.go ---
+// EmailProvider/EmailSender CRUD, and the raw email-sending mechanics (SendMail et al.),
+// moved to modules/abac/messaging - see messaging.EmailProviderActions/EmailSenderActions
+// and messaging.SendMail. What's left here is the one orchestration function that ties
+// NotificationConfigEntity (which stays here, in abac) to a specific provider from
+// messaging.
 
 type EmailSenderCategory string
 
@@ -116,7 +20,7 @@ const (
 	GENERAL_SENDER EmailSenderCategory = "GENERAL_SENDER"
 )
 
-func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender EmailSenderCategory) (*SendEmailWithProviderActionRes, *fireback.IError) {
+func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, sender EmailSenderCategory) (*messaging.SendEmailWithProviderActionRes, *fireback.IError) {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 
@@ -133,27 +37,27 @@ func SendEmailUsingNotificationConfig(content *EmailMessageContent, sender Email
 		log.Default().Println(content.Json())
 
 		QueueId := "printed-to-terminal"
-		return &SendEmailWithProviderActionRes{QueueId: QueueId}, nil
+		return &messaging.SendEmailWithProviderActionRes{QueueId: QueueId}, nil
 	} else {
 
-		provider, providerErr := EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
+		provider, providerErr := messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
 		if providerErr != nil {
 			return nil, providerErr
 		}
 
 		// @todo: Give the option to set custom senders everywhere
 		if senderId, ok := config.AccountCenterEmailSenderId.Get(); ok && *senderId != "" {
-			sender, senderErr := EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *senderId})
+			sender, senderErr := messaging.EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *senderId})
 			if senderErr == nil && sender != nil {
 				content.FromEmail = sender.FromEmailAddress
 				content.FromName = sender.FromName
 			}
 		}
 
-		if err := SendMail(*content, provider); err != nil {
+		if err := messaging.SendMail(*content, provider); err != nil {
 			return nil, fireback.CastToIError(err)
 		} else {
-			return &SendEmailWithProviderActionRes{}, nil
+			return &messaging.SendEmailWithProviderActionRes{}, nil
 		}
 	}
 }
@@ -173,25 +77,4 @@ func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*Notification
 	// @todo handle the region information based on the query
 
 	return items[0], nil
-}
-
-type IEmailSender interface {
-	Send(message EmailMessageContent) error
-}
-
-func SendMailViaSendGrid(message EmailMessageContent, apiKey string) (*rest.Response, error) {
-
-	from := mail.NewEmail(message.FromName, message.FromEmail)
-	to := mail.NewEmail(message.ToName, message.ToEmail)
-
-	message2 := mail.NewSingleEmail(from, message.Subject, to, message.Content, message.Content)
-
-	client := sendgrid.NewSendClient(apiKey)
-	res, err := client.Send(message2)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
 }

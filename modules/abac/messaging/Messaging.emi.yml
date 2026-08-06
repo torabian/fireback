@@ -1,0 +1,218 @@
+complexes:
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: JSON
+    namespace: complexes
+  - compiler: go
+    location: github.com/torabian/fireback/modules/abac/abaccomplexes
+    name: PlainTime
+    namespace: abaccomplexes
+
+targets:
+  - compiler: go
+    output: ./
+    flags:
+      pkg: messaging
+  - compiler: js
+    output: ../../project-generator/react-new/src/modules/fireback/sdk/messaging
+    flags:
+      js-sdk-location: ../sdk
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: preprocessor
+    output: ./
+
+name: messaging
+description:
+  Email and SMS/GSM provider configuration and sending mechanics, split out of abac's
+  notification module - email providers (sendgrid/mailgun/postmark/resend/smtp/terminal),
+  sms gateways (url/terminal/mediana), and named "from" email senders. Depends on abac
+  for auth (ResolveActionContext/SecurityModel), but nothing in abac's other entities
+  depends back on this module - see modules/abac/NotificationConfigActions.go for the
+  one place abac calls into this package (looking up which provider is "the general
+  one" for a workspace).
+
+actions:
+  - name: SendEmail
+    url: /email/send
+    cliName: email
+    method: post
+    description: Send a email using default root notification configuration
+    in:
+      fields:
+        - name: providerId
+          type: string
+          description:
+            Sending a test email requires to be sent through an specific email provider.
+        - name: toAddress
+          tags:
+            validate: required
+          type: string
+        - name: body
+          tags:
+            validate: required
+          type: string
+    out:
+      fields:
+        - name: queueId
+          type: string
+  - name: SendEmailWithProvider
+    url: /emailProvider/send
+    cliName: emailp
+    method: post
+    description: Send a text message using an specific gsm provider
+    in:
+      fields:
+        - name: emailProvider
+          type: one
+          target: EmailProviderEntity
+        - name: toAddress
+          tags:
+            validate: required
+          type: string
+        - name: body
+          tags:
+            validate: required
+          type: string
+    out:
+      fields:
+        - name: queueId
+          type: string
+  - name: GsmSendSmsWithProvider
+    url: /gsmProvider/send/sms
+    cliName: smsp
+    method: post
+    description: Send a text message using an specific gsm provider
+    in:
+      fields:
+        - name: gsmProviderId
+          type: string
+        - name: toNumber
+          tags:
+            validate: required
+          type: string
+        - name: body
+          tags:
+            validate: required
+          type: string
+    out:
+      fields:
+        - name: queueId
+          type: string
+
+entities:
+  - name: gsmProvider
+    fields:
+      - name: apiKey
+        type: string
+      - name: mainSenderNumber
+        type: string
+        tags:
+          validate: required
+      - name: type
+        type: enum
+        tags:
+          validate: required
+        of:
+          - k: url
+          - k: terminal
+          - k: mediana
+      - name: invokeUrl
+        type: string
+      - name: invokeBody
+        type: string
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
+      - name: userId
+        type: string?
+        description: The unique-id of the user which created/owns the record.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+
+  - name: emailProvider
+    description:
+      Email servers and thirdparty services configuration to send emails across the app.
+      Each configuration can be used for a different purpose, hence information is stored
+      in database to give operation chance change the mail services without taking the
+      server down.
+    fields:
+      - name: type
+        description:
+          Type of the service, or communication which actually is being used
+          under the hood for providing the service, such as third party or printing
+          right away for terminal or logs.
+        tags:
+          validate: required
+        type: enum
+        of:
+          - k: sendgrid
+          - k: mailgun
+          - k: postmark
+          - k: resend
+          - k: smtp
+          - k: terminal
+      - name: title
+        type: string
+        description:
+          Give the email provider configuration a name, which makes it easier later to query.
+      - name: config
+        type: complex
+        description:
+          JSON field which contains api keys, or other kind of configuration based
+          on the type of the email provider.
+        complex: JSON
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
+      - name: userId
+        type: string?
+        description: The unique-id of the user which created/owns the record.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+
+  - name: emailSender
+    description: >-
+      All emails going from the system need to have a virtual sender (nick name,
+      email address, etc)
+    fields:
+      - name: fromName
+        type: string
+        tags:
+          validate: required
+      - name: fromEmailAddress
+        type: string
+        tags:
+          gorm: unique
+          validate: required
+      - name: replyTo
+        type: string
+        tags:
+          validate: required
+      - name: nickName
+        tags:
+          validate: required
+        type: string
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
+      - name: userId
+        type: string?
+        description: The unique-id of the user which created/owns the record.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime

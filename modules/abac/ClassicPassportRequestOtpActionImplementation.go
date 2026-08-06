@@ -6,6 +6,7 @@ import (
 
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -137,7 +138,7 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 			title = title0
 		}
 
-		msg := EmailMessageContent{
+		msg := messaging.EmailMessageContent{
 			Subject:   title,
 			Content:   body,
 			ToEmail:   req.Value,

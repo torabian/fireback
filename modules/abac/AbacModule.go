@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -36,6 +37,7 @@ func AbacCompleteModules() []*fireback.ModuleProvider {
 	return []*fireback.ModuleProvider{
 		WorkspaceModuleSetup(),
 		NotificationModuleSetup(),
+		messaging.ModuleSetup(),
 		PassportsModuleSetup(),
 	}
 }
@@ -78,10 +80,10 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				QueryWorkspaceTypesPubliclyActionGin(g, QueryWorkspaceTypesPubliclyAction)
 				CheckPassportMethodsActionGin(g, CheckPassportMethodsAction)
 				OsLoginAuthenticateActionGin(g, OsLoginAuthenticateAction)
-				SendEmailActionGin(g, SendEmailAction)
-				SendEmailWithProviderActionGin(g, SendEmailWithProviderAction)
+				// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider moved to
+				// modules/abac/messaging - see messaging.ModuleSetup. GsmSendSms stays
+				// here since it depends on NotificationConfigEntity, which stays in abac.
 				GsmSendSmsActionGin(g, GsmSendSmsAction)
-				GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
 
 				// Entities migrated from AbacModule3.yml's old entities: section to
 				// Abac.emi.yml get their CRUD actions wired the same way.
@@ -215,10 +217,10 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	module.ProvidePermissionHandler(
 		ALL_WORKSPACE_CONFIG_PERMISSIONS,
 		ALL_WORKSPACE_TYPE_PERMISSIONS,
-		ALL_EMAIL_SENDER_PERMISSIONS,
-		ALL_EMAIL_PROVIDER_PERMISSIONS,
+		// ALL_EMAIL_SENDER_PERMISSIONS/ALL_EMAIL_PROVIDER_PERMISSIONS/ALL_GSM_PROVIDER_PERMISSIONS
+		// moved to modules/abac/messaging - already registered via messaging.ModuleSetup's
+		// own ProvidePermissionHandler call (see AbacCompleteModules), no need to repeat here.
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
-		ALL_GSM_PROVIDER_PERMISSIONS,
 		ALL_WORKSPACE_INVITE_PERMISSIONS,
 		ALL_TABLE_VIEW_SIZING_PERMISSIONS,
 		ALL_APP_MENU_PERMISSIONS,
@@ -248,7 +250,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 			&WorkspaceInviteEntity{},
 			&WorkspaceConfigEntity{},
 			&WorkspaceTypeEntity{},
-			&GsmProviderEntity{},
 			&WorkspaceRoleEntity{},
 			&UserWorkspaceEntity{},
 			&RegionalContentEntity{},
@@ -336,10 +337,9 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		CheckClassicPassportActionCliHandler(CheckClassicPassportAction),
 		ClassicSignupActionCliHandler(ClassicSignupAction),
 		ClassicSigninActionCliHandler(ClassicSigninAction),
-		SendEmailActionCliHandler(SendEmailAction),
-		SendEmailWithProviderActionCliHandler(SendEmailWithProviderAction),
+		// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider moved to
+		// modules/abac/messaging - see messaging.ModuleSetup.
 		GsmSendSmsActionCliHandler(GsmSendSmsAction),
-		GsmSendSmsWithProviderActionCliHandler(GsmSendSmsWithProviderAction),
 
 		TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
 		TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),

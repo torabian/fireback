@@ -7,36 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// NotificationModuleSetup wires notificationConfig only now - GsmProvider, EmailProvider
+// and EmailSender (CRUD + the SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider
+// actions) moved to their own module, see modules/abac/messaging.ModuleSetup, registered
+// alongside this one in AbacCompleteModules().
 func NotificationModuleSetup() *fireback.ModuleProvider {
 	module := &fireback.ModuleProvider{
 		Name: "abac",
 
-		// gsmProvider moved from AbacModule3.yml's old entities: section to
-		// Abac.emi.yml, so it's wired directly here now, the same way
-		// FirebackModuleSetup wires Capability* actions.
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
 			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
-				GsmProviderBrowseActionGin(g, GsmProviderBrowseAction)
-				GsmProviderGetActionGin(g, GsmProviderGetAction)
-				GsmProviderCreateActionGin(g, GsmProviderCreateAction)
-				GsmProviderUpdateActionGin(g, GsmProviderUpdateAction)
-				GsmProviderAwareDeletePreviewActionGin(g, GsmProviderAwareDeletePreviewAction)
-				GsmProviderAwareDeleteActionGin(g, GsmProviderAwareDeleteAction)
-
-				EmailProviderBrowseActionGin(g, EmailProviderBrowseAction)
-				EmailProviderGetActionGin(g, EmailProviderGetAction)
-				EmailProviderCreateActionGin(g, EmailProviderCreateAction)
-				EmailProviderUpdateActionGin(g, EmailProviderUpdateAction)
-				EmailProviderAwareDeletePreviewActionGin(g, EmailProviderAwareDeletePreviewAction)
-				EmailProviderAwareDeleteActionGin(g, EmailProviderAwareDeleteAction)
-
-				EmailSenderBrowseActionGin(g, EmailSenderBrowseAction)
-				EmailSenderGetActionGin(g, EmailSenderGetAction)
-				EmailSenderCreateActionGin(g, EmailSenderCreateAction)
-				EmailSenderUpdateActionGin(g, EmailSenderUpdateAction)
-				EmailSenderAwareDeletePreviewActionGin(g, EmailSenderAwareDeletePreviewAction)
-				EmailSenderAwareDeleteActionGin(g, EmailSenderAwareDeleteAction)
-
 				NotificationConfigBrowseActionGin(g, NotificationConfigBrowseAction)
 				NotificationConfigGetActionGin(g, NotificationConfigGetAction)
 				NotificationConfigCreateActionGin(g, NotificationConfigCreateAction)
@@ -52,15 +32,11 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 	}
 
 	module.ProvidePermissionHandler(
-		ALL_EMAIL_PROVIDER_PERMISSIONS,
-		ALL_EMAIL_SENDER_PERMISSIONS,
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		return dbref.AutoMigrate(
-			&EmailProviderEntity{},
-			&EmailSenderEntity{},
 			&NotificationConfigEntity{},
 		)
 	})
@@ -69,7 +45,7 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 		{
 			Name:        "notification",
 			Description: "Manage the notification system, emails, text messages, templates and so on",
-			Usage:       "Manage email accounts, templates, email providers and so on",
+			Usage:       "Manage the workspace-level notification config (invite emails, general senders, and so on)",
 			Aliases:     []string{"nt"},
 			Flags: []cli.Flag{
 				&cli.StringFlag{
@@ -80,25 +56,6 @@ func NotificationModuleSetup() *fireback.ModuleProvider {
 			Commands: []*cli.Command{
 				&NotificationModuleAuditCmd,
 				&EmailProviderTestCmd,
-				EmailProviderBrowseActionCliHandler(EmailProviderBrowseAction),
-				EmailProviderGetActionCliHandler(EmailProviderGetAction),
-				EmailProviderCreateActionCliHandler(EmailProviderCreateAction),
-				EmailProviderUpdateActionCliHandler(EmailProviderUpdateAction),
-				EmailProviderAwareDeletePreviewActionCliHandler(EmailProviderAwareDeletePreviewAction),
-				EmailProviderAwareDeleteActionCliHandler(EmailProviderAwareDeleteAction),
-				EmailSenderBrowseActionCliHandler(EmailSenderBrowseAction),
-				EmailSenderGetActionCliHandler(EmailSenderGetAction),
-				EmailSenderCreateActionCliHandler(EmailSenderCreateAction),
-				EmailSenderUpdateActionCliHandler(EmailSenderUpdateAction),
-				EmailSenderAwareDeletePreviewActionCliHandler(EmailSenderAwareDeletePreviewAction),
-				EmailSenderAwareDeleteActionCliHandler(EmailSenderAwareDeleteAction),
-				&GsmProviderTestCmd,
-				GsmProviderBrowseActionCliHandler(GsmProviderBrowseAction),
-				GsmProviderGetActionCliHandler(GsmProviderGetAction),
-				GsmProviderCreateActionCliHandler(GsmProviderCreateAction),
-				GsmProviderUpdateActionCliHandler(GsmProviderUpdateAction),
-				GsmProviderAwareDeletePreviewActionCliHandler(GsmProviderAwareDeletePreviewAction),
-				GsmProviderAwareDeleteActionCliHandler(GsmProviderAwareDeleteAction),
 				&NotificationConfigTestCmd,
 				NotificationConfigBrowseActionCliHandler(NotificationConfigBrowseAction),
 				NotificationConfigGetActionCliHandler(NotificationConfigGetAction),
