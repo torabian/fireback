@@ -1,6 +1,8 @@
 package abac
 
 import (
+	"strings"
+
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/complexes"
@@ -20,10 +22,15 @@ var ALL_ROLE_PERMISSIONS = rolePerms.All
 // there's no Emi equivalent for entity-scoped messages, so it's hand-declared here.
 var RoleMessages = struct {
 	RoleNeedsOneCapability fireback.ErrorItem
+	RoleNameReserved       fireback.ErrorItem
 }{
 	RoleNeedsOneCapability: fireback.ErrorItem{
 		"$":  "RoleNeedsOneCapability",
 		"en": "Role atleast needs one capability to be selected.",
+	},
+	RoleNameReserved: fireback.ErrorItem{
+		"$":  "RoleNameReserved",
+		"en": "\"root\" is a reserved role name and uniqueId - it cannot be used for a new role.",
 	},
 }
 
@@ -75,20 +82,55 @@ func init() {
 		return baseRemoveEnqueue(request, query)
 	}
 
-	// The root role is reported as non-deletable/non-updatable in every query response.
+	// The root role is only ever visible when querying from the root workspace itself -
+	// hidden entirely from every other workspace's role list/lookup, not merely marked
+	// read-only, since it's the super-admin role and has no business appearing in a
+	// non-root workspace's UI at all. When it IS visible (root workspace), it's reported
+	// as non-deletable/non-updatable in the response.
 	baseQuery := RoleActions.Query
 	RoleActions.Query = func(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
 		roles, qrm, err := baseQuery(query)
 		if len(roles) > 0 {
+			filtered := roles[:0]
 			for _, role := range roles {
 				if role.UniqueId == ROOT_VAR {
+					if query.WorkspaceId != ROOT_VAR {
+						if qrm != nil {
+							qrm.TotalItems--
+							qrm.TotalAvailableItems--
+						}
+						continue
+					}
 					f := false
 					role.IsDeletable = emigo.NullableOf(f)
 					role.IsUpdatable = emigo.NullableOf(f)
 				}
+				filtered = append(filtered, role)
 			}
+			roles = filtered
 		}
 		return roles, qrm, err
+	}
+
+	// Same visibility rule as RoleActions.Query above, for the single-item lookup path
+	// (RoleGetAction) - without this, the root role would still be directly fetchable by
+	// uniqueId from a non-root workspace even though it never shows up in that
+	// workspace's role list. Reported as a plain 404 (not a permission error), since the
+	// point is that it's not visible at all from here, not that it exists but is
+	// forbidden.
+	baseGetOne := RoleActions.GetOne
+	RoleActions.GetOne = func(query fireback.QueryDSL) (*RoleEntity, *fireback.IError) {
+		role, err := baseGetOne(query)
+		if err != nil {
+			return nil, err
+		}
+		if role != nil && role.UniqueId == ROOT_VAR && query.WorkspaceId != ROOT_VAR {
+			return nil, &fireback.IError{
+				Message:  fireback.FirebackMessages.ResourceNotFound,
+				HttpCode: 404,
+			}
+		}
+		return role, nil
 	}
 }
 
@@ -143,6 +185,18 @@ func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, err
 	if err != nil {
 		return nil, err
 	}
+
+	// "root" is the one seeded, protected super-admin role (see RoleActions.Query's
+	// visibility filter and RemoveEnqueue's delete guard below) - a caller can never
+	// create another role that claims that name or uniqueId, regardless of workspace,
+	// case-insensitively on the name (an "Root"/"ROOT" role would be just as confusing).
+	if strings.EqualFold(c.Body.Name, ROOT_VAR) {
+		return nil, fireback.Create401Error(&RoleMessages.RoleNameReserved, []string{})
+	}
+	if v, ok := c.Body.UniqueId.Get(); ok && strings.EqualFold(*v, ROOT_VAR) {
+		return nil, fireback.Create401Error(&RoleMessages.RoleNameReserved, []string{})
+	}
+
 	entity := &RoleEntity{
 		Name:               c.Body.Name,
 		CapabilitiesListId: c.Body.CapabilitiesListId,

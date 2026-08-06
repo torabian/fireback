@@ -45,6 +45,7 @@ prepare:
 	make refresh && make rebuild-sdks && make bundle
 
 # Every Emi action - hand-declared or entity-synthesized alike - is meant to have a
+# dedicated <Name>Action_test.go next to its generated wiring file. checkendpointtests
 # (see tools/checkendpointtests) reads each module's own preprocessed.yml (the
 # "preprocessor" emi target's output - already includes entity CRUD actions, since
 # core.ReadEmiFromString runs Preprocess() before writing it) to get the real, complete
