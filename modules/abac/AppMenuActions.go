@@ -221,6 +221,7 @@ func AppMenuCliFn() *cli.Command {
 			AppMenuUpdateActionCliHandler(AppMenuUpdateAction),
 			AppMenuAwareDeletePreviewActionCliHandler(AppMenuAwareDeletePreviewAction),
 			AppMenuAwareDeleteActionCliHandler(AppMenuAwareDeleteAction),
+			CteAppMenusActionCliHandler(CteAppMenusAction),
 		},
 	}
 }

@@ -160,6 +160,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				AppMenuUpdateActionGin(g, AppMenuUpdateAction)
 				AppMenuAwareDeletePreviewActionGin(g, AppMenuAwareDeletePreviewAction)
 				AppMenuAwareDeleteActionGin(g, AppMenuAwareDeleteAction)
+				CteAppMenusActionGin(g, CteAppMenusAction)
 
 				WorkspaceConfigBrowseActionGin(g, WorkspaceConfigBrowseAction)
 				WorkspaceConfigGetActionGin(g, WorkspaceConfigGetAction)

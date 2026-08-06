@@ -1,6 +1,5 @@
 import { type MenuItem } from "../../definitions/common";
 import { source } from "../../hooks/source";
-import { osResources } from "../../resources/resources";
 
 export function MenuItemContent({ item }: { item: MenuItem }) {
   return (

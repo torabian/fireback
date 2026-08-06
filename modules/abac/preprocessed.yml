@@ -714,8 +714,10 @@ dtos:
   - name: uniqueId
     type: string?
   - name: label
-    description: Label that will be visible to user
-    type: string?
+    description: 'Label that will be visible to user, as a locale -> text map (e.g.
+      {"en": "Home", "fa": "خانه"}) - see complexes.TString.'
+    type: complex
+    complex: TString
   - name: href
     description: Location that will be navigated in case of click or selection on
       ui
@@ -1593,8 +1595,10 @@ dtos:
   - name: uniqueId
     type: string?
   - name: label
-    description: Label that will be visible to user
-    type: string
+    description: 'Label that will be visible to user, as a locale -> text map (e.g.
+      {"en": "Home", "fa": "خانه"}) - see complexes.TString.'
+    type: complex
+    complex: TString
   - name: href
     description: Location that will be navigated in case of click or selection on
       ui
@@ -2491,8 +2495,10 @@ entities:
 - name: appMenu
   fields:
   - name: label
-    description: Label that will be visible to user
-    type: string
+    description: 'Label that will be visible to user, as a locale -> text map (e.g.
+      {"en": "Home", "fa": "خانه"}) - see complexes.TString.'
+    type: complex
+    complex: TString
   - name: href
     description: Location that will be navigated in case of click or selection on
       ui
@@ -2966,6 +2972,10 @@ complexes:
   location: github.com/torabian/fireback/modules/abac/abaccomplexes
   compiler: go
 - name: XDateTime
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go
+- name: TString
   namespace: complexes
   location: github.com/torabian/fireback/modules/fireback/complexes
   compiler: go
@@ -3539,6 +3549,30 @@ actions:
     fields:
     - name: queueId
       type: string
+- name: CteAppMenus
+  cliName: cte-app-menus
+  url: /cte-app-menus
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: 'Returns "appMenu" rows assembled into a tree (each item''s children
+    nested under it via a recursive query) instead of Browse''s flat list - restores
+    the old Module3-generated /cte-app-menus route. See AppMenuActions.CteQuery /
+    AppMenuTreeNode. Note: Emi has no self-referencing dto, so the declared response
+    type here is the flat AppMenuOptionalDto - the actual JSON payload additionally
+    nests a "children" array of the same shape under each item.'
+  out:
+    envelope: GResponse
+    dto: AppMenuOptionalDto
 - name: tableViewSizingCreate
   cliShort: tableViewSizing-c
   url: /tableViewSizing

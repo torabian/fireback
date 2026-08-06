@@ -837,6 +837,32 @@ actions:
       fields:
         - name: queueId
           type: string
+
+  - name: CteAppMenus
+    url: /cte-app-menus
+    cliName: cte-app-menus
+    method: get
+    description: >-
+      Returns "appMenu" rows assembled into a tree (each item's children nested
+      under it via a recursive query) instead of Browse's flat list - restores the
+      old Module3-generated /cte-app-menus route. See AppMenuActions.CteQuery /
+      AppMenuTreeNode. Note: Emi has no self-referencing dto, so the declared
+      response type here is the flat AppMenuOptionalDto - the actual JSON payload
+      additionally nests a "children" array of the same shape under each item.
+    qs:
+      - name: filter
+        type: string
+      - name: sort
+        type: string
+      - name: startIndex
+        type: int
+      - name: itemsPerPage
+        type: int
+      - name: cursor
+        type: string
+    out:
+      dto: AppMenuOptionalDto
+      envelope: GResponse
 entities:
   - name: tableViewSizing
     cliShort: tvs

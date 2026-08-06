@@ -4,6 +4,8 @@ import { useUiState } from "../../hooks/uiStateContext";
 
 import classNames from "classnames";
 import React, { useContext } from "react";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { osResources } from "../../resources/resources";
 import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
@@ -11,23 +13,30 @@ import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext"
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
 import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
-import { detectDeviceType } from "../../hooks/deviceInformation";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 export function dataMenuToMenu(
   data: AppMenuEntity,
-  permissionCheck: (permissionKey?: string | null) => boolean = () => true
+  permissionCheck: (permissionKey?: string | null) => boolean = () => true,
+  locale: string,
 ): MenuItem | null {
+  // const { locale } = usePureLocale();
+
   if (!permissionCheck(data.capabilityId)) {
     return null;
   }
 
   const children = (data.children || [])
-    .map((v: AppMenuEntity) => dataMenuToMenu(v, permissionCheck))
+    .map((v: AppMenuEntity) => dataMenuToMenu(v, permissionCheck, locale))
     .filter(Boolean) as MenuItem[];
 
+  let label = data.label || "";
+
+  if (typeof label !== "string") {
+    label = label[locale];
+  }
+
   return {
-    label: data.label || "",
+    label,
 
     children,
     displayFn: castMenuDefinitionToDisplayFn(data),
@@ -85,6 +94,8 @@ function Sidebar({
   const { menus: workspaceMenus } = useWorkspacesMenuPresenter();
   menus.push(workspaceMenus[0]);
 
+  console.log(5, menus);
+
   return (
     <div
       data-wails-drag
@@ -93,7 +104,7 @@ function Sidebar({
         "sidebar",
         sidebarVisible ? "open" : "",
         "scrollable-element",
-        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined
+        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined,
       )}
     >
       <button
@@ -109,7 +120,7 @@ function Sidebar({
             sidebarItemSelected();
             sidebarItemSelectedExtra?.();
           }}
-          key={menu.label}
+          key={JSON.stringify(menu)}
           menu={menu}
         />
       ))}

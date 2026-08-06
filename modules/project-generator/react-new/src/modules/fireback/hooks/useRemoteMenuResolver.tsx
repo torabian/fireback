@@ -14,6 +14,7 @@ import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/abac/QueryUserRole
  */
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const queryClient = useQueryClient();
+  const { locale } = useLocale();
   const { selectedUrw, session } = useContext(RemoteQueryContext);
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
     enabled: !!session?.token,
@@ -31,8 +32,6 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
       itemsPerPage: 9999,
     },
   });
-
-  const { locale } = useLocale();
 
   useEffect(() => {
     query.refetch();
@@ -54,7 +53,7 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
 
   if (query.data?.data?.items && query.data?.data?.items.length) {
     result = query.data?.data?.items
-      .map((item) => dataMenuToMenu(item, visibilityCheck))
+      .map((item) => dataMenuToMenu(item, visibilityCheck, locale))
       .filter(Boolean) as MenuItem[];
   }
 
