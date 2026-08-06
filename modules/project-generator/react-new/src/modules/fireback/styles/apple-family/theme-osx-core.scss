@@ -49,10 +49,9 @@
 .ios-theme {
   background-color: rgba(255, 255, 255, 0.7);
 
-  // think about this not make it global 
+  // think about this not make it global
   // height: 100vh;
   // overflow: hidden;
-
 
   .panel-resize-handle {
     width: 8px;
@@ -82,16 +81,12 @@
         width: 100%;
       }
     }
-
   }
-
-
 
   .reactive-search-result {
     ul {
       list-style: none;
       padding: 30px 0;
-
     }
 
     a {
@@ -113,7 +108,6 @@
 
   .data-node-values-list {
     .table-responsive {
-
       height: 800px;
     }
   }
@@ -280,7 +274,6 @@
   }
 
   .content-container {
-
     background-color: transparent;
     box-shadow: none;
     $navHeight: 55px;
@@ -307,7 +300,8 @@
     overflow-x: hidden !important;
   }
 
-  .sidebar-overlay {}
+  .sidebar-overlay {
+  }
 
   @import "./sidebar.scss";
 
@@ -394,13 +388,15 @@
 }
 
 html[dir="rtl"] {
-
   .mac-theme,
   .ios-theme {
     // * {
     //   font-family: iransans;
     // }
-
+    .panel-resize-handle {
+      left: 0;
+      right: initial;
+    }
     .content-section {
       margin-left: 0;
       // margin-right: $sidebarExpandedSize;
@@ -417,7 +413,8 @@ html[dir="rtl"] {
       }
     }
 
-    @media only screen and (max-width: 500px) {}
+    @media only screen and (max-width: 500px) {
+    }
 
     nav.navbar {
       right: $sidebarExpandedSize;

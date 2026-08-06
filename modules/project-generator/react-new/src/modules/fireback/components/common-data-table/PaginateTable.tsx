@@ -15,6 +15,7 @@ import { type Udf } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
 import { castColumns, type TableColumnWidthInfo } from "./PaginateUtils";
 import { useReindexedContent } from "./useReindex";
+import { useLocale } from "../../hooks/useLocale";
 
 export function PaginateTable({
   columns,
@@ -57,6 +58,7 @@ export function PaginateTable({
 }) {
   const t = useT();
   const { pathname } = useLocation();
+  const { dir } = useLocale();
 
   const {
     filters,
@@ -120,6 +122,7 @@ export function PaginateTable({
         columns={cols}
         onScroll={handleScroll}
         onColumnResize={onColumnResize}
+        direction={dir as any}
         onSelectedRowsChange={(value) => {
           setSelection(Array.from(value));
         }}
