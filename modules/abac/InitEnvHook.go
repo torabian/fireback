@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -13,14 +12,6 @@ import (
 func OnInitEnvHook(c *cli.Command) error {
 
 	appConfig := fireback.GetConfig()
-	workingDirectory, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-
-	// Remember to use always absolute path for database, and storage.
-	appConfig.Storage = fireback.AskFolderName("Storage folder (all upload files from users will go here)", filepath.Join(workingDirectory, "storage"))
-	appConfig.TusPort = fireback.AskPortName("TUS File upload port", "4506")
 
 	// 5. Ask for the storage folder as well
 
@@ -56,19 +47,6 @@ func OnInitEnvHook(c *cli.Command) error {
 
 		IntegrateAuthFlow(c)
 
-		// if result, err := InteractiveUserAdmin(fireback.QueryDSL{
-		// 	WorkspaceHas: []string{ROOT_ALL_ACCESS},
-		// 	WorkspaceId:  "system",
-		// 	ItemsPerPage: 10,
-		// }); err != nil {
-		// 	fmt.Println(err)
-		// 	return err
-		// } else {
-
-		// 	appConfig.CliWorkspace = result.WorkspaceAs
-		// 	appConfig.CliToken = result.Token
-		// 	appConfig.Save(".env")
-		// }
 	}
 
 	return nil

@@ -44,8 +44,6 @@ type Config struct {
 	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
 	// Database port for those which are having a port, 3306 on mysql for example
 	DbPort int64 `envconfig:"DB_PORT" description:"Database port for those which are having a port, 3306 on mysql for example"`
-	// Drive is a mechanism to have file upload and download, inlining integrated into the fireback
-	DriveEnabled bool `envconfig:"DRIVE_ENABLED" description:"Drive is a mechanism to have file upload and download, inlining integrated into the fireback"`
 	// Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.
 	DbDsn string `envconfig:"DB_DSN" description:"Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored."`
 	// Database host, such as localhost, or 127.0.0.1
@@ -68,8 +66,6 @@ type Config struct {
 	WorkerConcurrency int `envconfig:"WORKER_CONCURRENCY" description:"How many tasks worker can take concurrently"`
 	// Writes the errors instead of std err into these log files.
 	StdErr string `envconfig:"STD_ERR" description:"Writes the errors instead of std err into these log files."`
-	// Resumable file upload server port.
-	TusPort string `envconfig:"TUS_PORT" description:"Resumable file upload server port."`
 	// Authorization token for cli apps, to access resoruces similar on http api
 	CliToken string `envconfig:"CLI_TOKEN" description:"Authorization token for cli apps, to access resoruces similar on http api"`
 	// Region, for example us or pl
@@ -156,10 +152,6 @@ func GetConfigCliFlags() []cli.Flag {
 			Name:  "db-port",
 			Usage: "Database port for those which are having a port, 3306 on mysql for example",
 		},
-		&cli.BoolFlag{
-			Name:  "drive-enabled",
-			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback",
-		},
 		&cli.StringFlag{
 			Name:  "db-dsn",
 			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
@@ -203,10 +195,6 @@ func GetConfigCliFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "std-err",
 			Usage: "Writes the errors instead of std err into these log files.",
-		},
-		&cli.StringFlag{
-			Name:  "tus-port",
-			Usage: "Resumable file upload server port.",
 		},
 		&cli.StringFlag{
 			Name:  "cli-token",
@@ -295,9 +283,6 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	if c.IsSet("db-port") {
 		config.DbPort = c.Int64("db-port")
 	}
-	if c.IsSet("drive-enabled") {
-		config.DriveEnabled = c.Bool("drive-enabled")
-	}
 	if c.IsSet("db-dsn") {
 		config.DbDsn = c.String("db-dsn")
 	}
@@ -330,9 +315,6 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	}
 	if c.IsSet("std-err") {
 		config.StdErr = c.String("std-err")
-	}
-	if c.IsSet("tus-port") {
-		config.TusPort = c.String("tus-port")
 	}
 	if c.IsSet("cli-token") {
 		config.CliToken = c.String("cli-token")
@@ -733,29 +715,6 @@ func GetConfigCli() []*cli.Command {
 			},
 		},
 		{
-			Name:  "drive-enabled",
-			Usage: "Drive is a mechanism to have file upload and download, inlining integrated into the fireback (bool)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.DriveEnabled)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetBoolean(c, config.DriveEnabled, func(value bool) {
-							config.DriveEnabled = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
 			Name:  "db-dsn",
 			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. (string)",
 			Commands: []*cli.Command{
@@ -1009,29 +968,6 @@ func GetConfigCli() []*cli.Command {
 			},
 		},
 		{
-			Name:  "tus-port",
-			Usage: "Resumable file upload server port. (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.TusPort)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.TusPort, func(value string) {
-							config.TusPort = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
 			Name:  "cli-token",
 			Usage: "Authorization token for cli apps, to access resoruces similar on http api (string)",
 			Commands: []*cli.Command{
@@ -1248,7 +1184,6 @@ var config Config = Config{
 	WithTaskServer:          false,
 	DbName:                  ":memory:",
 	DbLogLevel:              "silent",
-	DriveEnabled:            true,
 	DbVendor:                "sqlite",
 	WorkerAddress:           "127.0.0.1:6379",
 	WorkerConcurrency:       10,

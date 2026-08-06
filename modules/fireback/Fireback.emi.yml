@@ -80,12 +80,6 @@ config:
   - name: dbPort
     description: "Database port for those which are having a port, 3306 on mysql for example"
     type: int64
-  - name: driveEnabled
-    type: bool
-    description: >-
-      Drive is a mechanism to have file upload and download, inlining integrated
-      into the fireback
-    default: true
   - name: dbDsn
     description: >-
       Connection dsn to database. Some databases allow connection using a string
@@ -119,8 +113,6 @@ config:
     type: int
   - name: stdErr
     description: Writes the errors instead of std err into these log files.
-  - name: tusPort
-    description: Resumable file upload server port.
   - name: cliToken
     description: "Authorization token for cli apps, to access resoruces similar on http api"
   - name: cliRegion

@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -286,78 +285,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 			return
 		}
 		c.Data(http.StatusOK, "text/css", file)
-	})
-
-	{
-
-		if config.DriveEnabled {
-			prefix := "/xattach/"
-			fileServer := http.StripPrefix(prefix, http.FileServer(http.Dir(config.Storage)))
-
-			r.GET(prefix+"/*filepath", func(c *gin.Context) {
-				if cfg.Slow {
-					time.Sleep(5 * time.Second)
-				}
-				c.Header("Cache-Control", "public, max-age=31536000") // 1 year
-				fileServer.ServeHTTP(c.Writer, c.Request)
-			})
-		}
-	}
-
-	r.GET("/docs", func(c *gin.Context) {
-
-		c.Header("content-type", "text/html")
-		c.String(200, `<!doctype html>
-		<html lang="en">
-		  <head>
-			<meta charset="utf-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-			<title>Fireback OpenAPI3 Docs</title>
-			<script src="stoplight.js"></script>
-			<link rel="stylesheet" href="stoplight.css">
-		  </head>
-		  <style>
-			#mosaic-provider-react-aria-0-1 > div > div > div > div.sl-flex > div.sl-flex.sl-overflow-y-auto.sl-flex-col.sl-sticky.sl-inset-y-0.sl-pt-8.sl-bg-canvas-100.sl-border-r {
-				height: 100vh;
-				overflow-y: scroll;	
-			}
-		  </style>
-		  <body>
-		
-			<elements-api
-			  apiDescriptionUrl="/openapi.yml"
-			  router="hash"
-			  layout="sidebar"
-			/>
-		
-		  </body>
-		</html>
-		`)
-	})
-
-	r.GET("/swagger", func(c *gin.Context) {
-
-		c.Header("content-type", "text/html")
-		c.String(200, `<!DOCTYPE html>
-<html>
-  <head>
-    <title>Swagger UI</title>
-    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
-  </head>
-  <body>
-    <div id="swagger-ui"></div>
-
-    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
-    <script>
-      SwaggerUIBundle({
-        url: "/openapi.yml",
-        dom_id: '#swagger-ui'
-      });
-    </script>
-  </body>
-</html>
-
-		`)
 	})
 
 	// r.Use(GinPostTranslateErrorMessages(translations))
