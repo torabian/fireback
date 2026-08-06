@@ -7,8 +7,6 @@ Fireback with ABAC module, can handle large scale issues for Indie developers.
 
 <img src=".github/logo.svg" alt="Fireback logo" width="200"/>
 
-
-
 ## Getting started
 
 If you want to build a new go project using fireback, easiest is to download the [https://github.com/torabian/fireback/releases/latest/download/fireback-microservice-boilerplate.zip](https://github.com/torabian/fireback/releases/latest/download/fireback-microservice-boilerplate.zip)
@@ -20,24 +18,20 @@ Or you can go deeper, and install CLI:
 - [Download and install fireback](https://torabian.github.io/fireback/docs/intro/)
 - [Your first fireback project](https://torabian.github.io/fireback/docs/first-fireback-project)
 
-
 ### Microservices Made Easy
 
 At its core, Fireback is built around **definition files** that let you describe your services, entities, and APIs in a structured way. From those definitions, Fireback generates:
 
-- Go microservices with REST endpoints  
-- React SDKs  
-- Android/iOS SDKs (via Swift/Kotlin)  
+- Go microservices with REST endpoints
+- React SDKs
+- Android/iOS SDKs (via Swift/Kotlin)
 - DTOs and boilerplate handlers
 
 Your backend becomes a network of services, each independently deployable and easy to integrate across clients.
 
-
-
 ### Fullstack Codegen for Microservices
 
 Once your microservices are defined, Fireback’s CLI tools generate frontends and SDKs for various platforms—React, Android, iOS—making it dead-simple for apps to consume your services. Backend and client are always in sync.
-
 
 ### Modular by Design
 
@@ -45,13 +39,12 @@ Fireback services are cleanly separated and **decoupled**, built on top of **Gin
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License (AGPL)](LICENSE.md). Contributions and modifications must be shared under the same terms. 
+This project is licensed under the [GNU Affero General Public License (AGPL)](LICENSE.md). Contributions and modifications must be shared under the same terms.
 
 ## Documents
 
 The original documents are provided in https://torabian.github.io/fireback but for quick understanding you
 can continue reading this document.
-
 
 ## Watch on youtube (How to build a backend in 15 minutes)
 
@@ -114,7 +107,7 @@ The reason I have started this project was to change the course of action for en
 - JsonDSL (for complex conditions on a query) and QueryDSL (textual query)
 - Predefined queries on SQL (Pivot and Recursive CTE operation for all entities)
 - Event system for changes on the entity, and broadcasting to rooms using WebSocket
-- Wipe entities on CLI (development) and multi row delete 
+- Wipe entities on CLI (development) and multi row delete
 - Automatic forcing the user privilegs on the content they can create or modify
 - Multiple workspaces, and multiple roles inside each workspace
 - Multiple workspace type (such as School, Student, etc)
@@ -139,19 +132,18 @@ The reason I have started this project was to change the course of action for en
 - Full ABAC screens and functionality using native elements
 - Entire dto, actions, entities on Java and Swift.
 - Form generation helpers
- 
 
 ## Sample client key OAuth google
 
 1040931581120-prdfdml80dl7uaq3999jkge72dph280l.apps.googleusercontent.com
 fb: 1242737803616678
-Stripe sample: sk_ test _51Rgi39Q mgiVL99NYaGNt4onAjBbSraf4Lo10siAoaZ5MhsdRQ i749V6dxRWAFqt0jL1epuYYPtee8iL8shHSjfxX002eyc6eWo
+Stripe sample: sk\_ test \_51Rgi39Q mgiVL99NYaGNt4onAjBbSraf4Lo10siAoaZ5MhsdRQ i749V6dxRWAFqt0jL1epuYYPtee8iL8shHSjfxX002eyc6eWo
+
 ## Change the fireback version
 
 In order to release a new fireback, follow these steps:
 
 - cmd/fireback/fireback-deb.sh
-- OVERVIEW.md
 - cmd/fireback/msi/Product.wxs
 - .github/workflows/fireback-build.yml
 - modules/fireback/version.go
@@ -162,5 +154,3 @@ In order to release a new fireback, follow these steps:
 
 The archive folder which had old codes for different purposes is removed in 7fe548ebbbbeaa3291b53e8cb5b21f2bc34d895b commit. Checkout that
 if you needed.
-
-
