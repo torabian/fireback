@@ -29,27 +29,25 @@ export class AppMenuOptionalDto {
     return this;
   }
   /**
-   * Label that will be visible to user
-   * @type {string}
+   * Label that will be visible to user, as a locale -> text map (e.g. {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+   * @type {TString}
    **/
-  #label?: string | null = undefined;
+  #label!: TString;
   /**
-   * Label that will be visible to user
-   * @returns {string}
+   * Label that will be visible to user, as a locale -> text map (e.g. {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+   * @returns {TString}
    **/
   get label() {
     return this.#label;
   }
   /**
-   * Label that will be visible to user
-   * @type {string}
+   * Label that will be visible to user, as a locale -> text map (e.g. {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+   * @type {TString}
    **/
-  set label(value: string | null | undefined) {
-    const correctType =
-      typeof value === "string" || value === undefined || value === null;
-    this.#label = correctType ? value : String(value);
+  set label(value: TString) {
+    this.#label = value;
   }
-  setLabel(value: string | null | undefined) {
+  setLabel(value: TString) {
     this.label = value;
     return this;
   }
@@ -419,10 +417,10 @@ export type AppMenuOptionalDtoType = {
    **/
   uniqueId?: string;
   /**
-   * Label that will be visible to user
-   * @type {string}
+   * Label that will be visible to user, as a locale -> text map (e.g. {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+   * @type {TString}
    **/
-  label?: string;
+  label: TString;
   /**
    * Location that will be navigated in case of click or selection on ui
    * @type {string}

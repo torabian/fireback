@@ -1,51 +1,35 @@
 items:
-- label: Personal
+- label:
+    en: Personal
+    fa: شخصی سازی
   uniqueId: personal
-  visibility: A
   workspaceId: system
-  translations:
-    - languageId: fa
-      label: شخصی سازی
-    - languageId: en
-      label: Personal
 
 - href: "/settings"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
-  label: Settings
+  label:
+    en: Settings
+    fa: تنظیمات
   activeMatcher: "/settings"
   uniqueId: settings
-  visibility: A
-  translations:
-    - languageId: fa
-      label: تنظیمات
-    - languageId: en
-      label: Settings
   parentId: personal
 - href: "/selfservice"
   workspaceId: system
   icon: ios-theme/icons/settings.svg
-  label: Account & Profile
+  label:
+    en: Account & Profile
+    fa: حساب و پروفایل
   activeMatcher: "/selfservice$"
   uniqueId: selfservice
-  visibility: A
-  translations:
-    - languageId: fa
-      label: حساب و پروفایل
-    - languageId: en
-      label: Account & Profile
   parentId: personal
 
 - href: "/selfservice/user-invitations"
   workspaceId: system
   icon: common/workspaceinvite.svg
-  label: My Invitations
+  label:
+    en: My Invitations
+    fa: دعوت نامه های من
   uniqueId: my_invitation
-  visibility: A
   activeMatcher: "/invites/"
-  translations:
-    - languageId: fa
-      label: دعوت نامه های من
-    - languageId: en
-      label: My Invitations
   parentId: personal

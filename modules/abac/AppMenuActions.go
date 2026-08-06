@@ -159,9 +159,10 @@ func AppMenuUpdateAction(c AppMenuUpdateActionRequest) (*AppMenuUpdateActionResp
 	}
 	query.UniqueId = c.Params.UniqueId
 	fields := &AppMenuEntity{UniqueId: c.Params.UniqueId}
-	if v, ok := c.Body.Label.Get(); ok {
-		fields.Label = *v
-	}
+	// complex fields (TString included) have no Nullable/partial-update variant, so
+	// unlike the plain-string fields below, this is always assigned wholesale - see
+	// the same pattern for BirthDate/CreatedAt/UpdatedAt elsewhere in this migration.
+	fields.Label = c.Body.Label
 	if v, ok := c.Body.Href.Get(); ok {
 		fields.Href = *v
 	}

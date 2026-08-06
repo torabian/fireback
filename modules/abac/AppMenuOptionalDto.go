@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/abac/abaccomplexes"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
 // The base class definition for appMenuOptionalDto
 type AppMenuOptionalDto struct {
 	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	// Label that will be visible to user
-	Label emigo.Nullable[string] `json:"label" yaml:"label"`
+	// Label that will be visible to user, as a locale -> text map (e.g. {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+	Label complexes.TString `json:"label" yaml:"label"`
 	// Location that will be navigated in case of click or selection on ui
 	Href emigo.Nullable[string] `json:"href" yaml:"href"`
 	// Icon string address which matches the resources on the front-end apps.
@@ -43,8 +44,8 @@ func GetAppMenuOptionalDtoCliFlags(prefix string) []emigo.CliFlag {
 		},
 		{
 			Name:        prefix + "label",
-			Type:        "string?",
-			Description: "Label that will be visible to user",
+			Type:        "complex",
+			Description: "Label that will be visible to user, as a locale -> text map (e.g. {\"en\": \"Home\", \"fa\": \"خانه\"}) - see complexes.TString.",
 		},
 		{
 			Name:        prefix + "href",
@@ -95,7 +96,9 @@ func CastAppMenuOptionalDtoFromCli(c emigo.CliCastable) AppMenuOptionalDto {
 		emigo.ParseNullable(c.String("unique-id"), &data.UniqueId)
 	}
 	if c.IsSet("label") {
-		emigo.ParseNullable(c.String("label"), &data.Label)
+		if u, ok := any(&data.Label).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("label")))
+		}
 	}
 	if c.IsSet("href") {
 		emigo.ParseNullable(c.String("href"), &data.Href)

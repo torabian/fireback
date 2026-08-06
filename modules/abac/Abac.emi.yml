@@ -15,6 +15,10 @@ complexes:
     location: github.com/torabian/fireback/modules/fireback/complexes
     name: XDateTime
     namespace: complexes
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: TString
+    namespace: complexes
 
 targets:
   - compiler: go
@@ -1364,8 +1368,11 @@ entities:
       etc.)
     fields:
       - name: label
-        type: string
-        description: Label that will be visible to user
+        type: complex
+        complex: TString
+        description: >-
+          Label that will be visible to user, as a locale -> text map (e.g.
+          {"en": "Home", "fa": "خانه"}) - see complexes.TString.
       - name: href
         type: string
         description: Location that will be navigated in case of click or selection on ui

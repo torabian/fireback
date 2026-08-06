@@ -14,9 +14,13 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 		}
 
 		uid := fireback.UUID()
+		// item.Label is a complexes.TString (locale -> text map) now; ReactiveSearchResultDto
+		// needs a single display string, so resolve it the same way TString.String() always
+		// has (DefaultLocale, falling back to whatever locale is present).
+		label := item.Label.String()
 		chanStream <- &fireback.ReactiveSearchResultDto{
-			Phrase:      item.Label,
-			Description: item.Label,
+			Phrase:      label,
+			Description: label,
 			Icon:        item.Icon,
 			Group:       item.ParentId.OrDefault(""),
 			ActionFn:    actionFnNavigate,

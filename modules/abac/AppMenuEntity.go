@@ -7,6 +7,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/emi/emigorm"
 	"github.com/torabian/fireback/modules/abac/abaccomplexes"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 	"gorm.io/gorm"
 )
 
@@ -14,8 +15,8 @@ import (
 type AppMenuEntity struct {
 	Id       int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
 	UniqueId string `gorm:"type:varchar(100);default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
-	// Label that will be visible to user
-	Label string `json:"label" yaml:"label"`
+	// Label that will be visible to user, as a locale -> text map (e.g. {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+	Label complexes.TString `json:"label" yaml:"label"`
 	// Location that will be navigated in case of click or selection on ui
 	Href string `json:"href" yaml:"href"`
 	// Icon string address which matches the resources on the front-end apps.
@@ -51,8 +52,8 @@ func GetAppMenuEntityCliFlags(prefix string) []emigo.CliFlag {
 		},
 		{
 			Name:        prefix + "label",
-			Type:        "string",
-			Description: "Label that will be visible to user",
+			Type:        "complex",
+			Description: "Label that will be visible to user, as a locale -> text map (e.g. {\"en\": \"Home\", \"fa\": \"خانه\"}) - see complexes.TString.",
 		},
 		{
 			Name:        prefix + "href",
@@ -106,7 +107,9 @@ func CastAppMenuEntityFromCli(c emigo.CliCastable) AppMenuEntity {
 		data.UniqueId = c.String("unique-id")
 	}
 	if c.IsSet("label") {
-		data.Label = c.String("label")
+		if u, ok := any(&data.Label).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("label")))
+		}
 	}
 	if c.IsSet("href") {
 		data.Href = c.String("href")
@@ -180,9 +183,7 @@ func AppMenuEntityUpdateFn(tx *gorm.DB, uniqueId string, input AppMenuOptionalDt
 			return err
 		}
 		changes := map[string]interface{}{}
-		if input.Label.IsSet() {
-			changes["Label"] = input.Label
-		}
+		changes["Label"] = input.Label
 		if input.Href.IsSet() {
 			changes["Href"] = input.Href
 		}
