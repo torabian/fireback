@@ -1,14 +1,15 @@
-package fireback
+package abac
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
-func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
+func GetWorkspaceAndUserAccesses(query fireback.QueryDSL) ([]string, []string) {
 
 	if query.UserAccessPerWorkspace == nil {
 		return []string{}, []string{}
@@ -31,33 +32,26 @@ func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
 	return workspaceAccesses, rolesPermission
 }
 
-type PermissionInfo struct {
-	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
-	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
-	GoVariable  string `yaml:"-" json:"-"`
-}
-
-func GetCapabilityRefreshCommand(xapp *FirebackApp) *cli.Command {
+func GetCapabilityRefreshCommand(xapp *fireback.FirebackApp) *cli.Command {
 	return &cli.Command{
 
 		Name:        "capsync",
-		Flags:       CommonQueryFlags,
+		Flags:       fireback.CommonQueryFlags,
 		Usage:       "Idemponent sync the modules capabilities into the database again.",
 		Description: "Fireback and sub projects need to have permissions as capability strings into database to create role or check. This is happening on env startup, but after project updates needs to be refreshed, or if you have deleted them from database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
 
-			SyncPermissionsInDatabase(xapp, GetDbRef())
+			SyncPermissionsInDatabase(xapp, fireback.GetDbRef())
 			return nil
 		},
 	}
 
 }
 
-func GetStats(xapp *FirebackApp) cli.Command {
+func GetStats(xapp *fireback.FirebackApp) cli.Command {
 	return cli.Command{
 		Name:        "stats",
-		Flags:       CommonQueryFlags,
+		Flags:       fireback.CommonQueryFlags,
 		Usage:       "Some stats regarding the application will go here",
 		Description: "Some stats regarding the application will go here",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -68,7 +62,7 @@ func GetStats(xapp *FirebackApp) cli.Command {
 
 }
 
-func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
+func SyncPermissionsInDatabase(x *fireback.FirebackApp, db *gorm.DB) {
 
 	for _, item := range x.Modules {
 
@@ -83,21 +77,21 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 		// }
 
 		// Insert the permissions into the database
-		item.PermissionsProvider = append(item.PermissionsProvider, PermissionInfo{
+		item.PermissionsProvider = append(item.PermissionsProvider, fireback.PermissionInfo{
 			CompleteKey: ROOT_ALL_ACCESS,
-		}, PermissionInfo{
+		}, fireback.PermissionInfo{
 			CompleteKey: ROOT_ALL_MODULES,
 		})
 
 		for _, perm := range item.PermissionsProvider {
-			hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(item.PermissionsProvider))
-			UpsertPermission(&perm, hasChildren, db)
+			hasChildren := fireback.HasChildren(perm.CompleteKey, PermissionInfoToString(item.PermissionsProvider))
+			CapabilityUpsertPermissionFn(&perm, hasChildren, db)
 		}
 
 		for _, bundle := range item.EntityBundles {
 			for _, perm := range bundle.Permissions {
-				hasChildren := HasChildren(perm.CompleteKey, PermissionInfoToString(bundle.Permissions))
-				UpsertPermission(&perm, hasChildren, db)
+				hasChildren := fireback.HasChildren(perm.CompleteKey, PermissionInfoToString(bundle.Permissions))
+				CapabilityUpsertPermissionFn(&perm, hasChildren, db)
 			}
 		}
 
@@ -105,7 +99,7 @@ func SyncPermissionsInDatabase(x *FirebackApp, db *gorm.DB) {
 
 }
 
-func PermissionInfoToString(items []PermissionInfo) []string {
+func PermissionInfoToString(items []fireback.PermissionInfo) []string {
 	res := []string{}
 
 	for _, j := range items {

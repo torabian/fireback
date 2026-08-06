@@ -51,6 +51,7 @@ type ModuleProvider struct {
 	Reports             []Report
 	SeederHandler       func()
 	Namespace           string
+	MigrationFunction   func(x *FirebackApp, db *gorm.DB)
 	ActionsBundle       *ModuleActionsBundle
 	MockWriterHandler   func(languages []string)
 	PermissionsProvider []PermissionInfo

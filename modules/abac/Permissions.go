@@ -1,17 +1,20 @@
-package fireback
+package abac
 
 import (
+	"slices"
 	"strings"
+
+	"github.com/torabian/fireback/modules/fireback"
 )
 
-func MeetsCheck(actionRequires []PermissionInfo, perms []string) bool {
+func MeetsCheck(actionRequires []fireback.PermissionInfo, perms []string) bool {
 	meets := true
 	for _, requiredPermission := range actionRequires {
 
 		// Two things needs to be checked, first if it does contain exact capability
-		hasExactKey := Contains(perms, requiredPermission.CompleteKey)
-
+		hasExactKey := slices.Contains(perms, requiredPermission.CompleteKey)
 		hasParentalKey := false
+
 		for _, a := range perms {
 			if strings.Contains(requiredPermission.CompleteKey, strings.ReplaceAll(a, "*", "")) {
 				hasParentalKey = true
@@ -26,14 +29,14 @@ func MeetsCheck(actionRequires []PermissionInfo, perms []string) bool {
 	return meets
 }
 
-func MeetsAccessLevel(query QueryDSL, onlyRoot bool) (bool, []string) {
+func MeetsAccessLevel(query fireback.QueryDSL, onlyRoot bool) (bool, []string) {
 	if onlyRoot && (query.WorkspaceId != ROOT_VAR && query.WorkspaceId != "system") {
 		return false, []string{"SYSTEM_OR_ROOT_ALLOWED"}
 	}
 
 	missingPerms := []string{}
 
-	if Contains(query.UserHas, ROOT_ALL_ACCESS) && Contains(query.WorkspaceHas, ROOT_ALL_ACCESS) {
+	if slices.Contains(query.UserHas, ROOT_ALL_ACCESS) && slices.Contains(query.WorkspaceHas, ROOT_ALL_ACCESS) {
 		return false, missingPerms
 	}
 
@@ -42,7 +45,7 @@ func MeetsAccessLevel(query QueryDSL, onlyRoot bool) (bool, []string) {
 
 	if !meetsUser || !meetsWorkspace {
 		for _, perm := range query.ActionRequires {
-			if Contains(query.UserHas, perm.CompleteKey) {
+			if slices.Contains(query.UserHas, perm.CompleteKey) {
 				continue
 			}
 

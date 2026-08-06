@@ -20,8 +20,14 @@ import (
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
-	"gorm.io/gorm"
 )
+
+type PermissionInfo struct {
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
+	GoVariable  string `yaml:"-" json:"-"`
+}
 
 func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 
@@ -32,7 +38,7 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,
-		GetMigrationCommand(xapp),
+		// GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
@@ -40,7 +46,7 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 		GetSeeder(xapp),
 		// Report tools is not really ever used.
 		// GetReportsTool(xapp),
-		GetCapabilityRefreshCommand(xapp),
+		// GetCapabilityRefreshCommand(xapp),
 
 		// Keep these in the last
 		&CLIAboutCommand,
@@ -54,7 +60,7 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,
-		GetMigrationCommand(xapp),
+		// GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
@@ -67,16 +73,6 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 }
 
 var ROOT_ALL_ACCESS = "root.*"
-var ROOT_ALL_MODULES = "root.modules.*"
-
-// UpsertPermission is a module-provided injection point, the same shape as
-// AuthorizeRequest/WithAuthorizationFn/WithAuthorizationPure/WithSocketAuthorization
-// below - fireback core doesn't keep a capability catalog table itself anymore (that
-// moved to abac's CapabilityEntity, see modules/abac/CapabilityActions.go), so this is
-// a no-op by default. SyncPermissionsInDatabase still calls it unconditionally for
-// every permission in every registered module, so a project without abac (or any
-// other module providing a catalog) simply gets no-op syncing instead of an error.
-var UpsertPermission = func(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {}
 
 var USER_SYSTEM = "system"
 
@@ -89,12 +85,6 @@ func FormatYamlKeys(yamlStr string) string {
 
 	return formattedYaml
 }
-
-var DATABASE_TYPE_MYSQL string = "mysql"
-var DATABASE_TYPE_SQLITE string = "sqlite"
-var DATABASE_TYPE_SQLITE_MEMORY string = "sqlite (:memory:)"
-var DATABASE_TYPE_POSTGRES string = "postgres"
-var DATABASE_TYPE_MARIADB string = "mariadb"
 
 var ROOT_VAR = "root"
 
@@ -157,16 +147,6 @@ func (x *GeneralDoctorData) Yaml() string {
 		return (string(str))
 	}
 	return ""
-}
-
-type Database struct {
-	Username string `yaml:"username,omitempty"`
-	Port     string `yaml:"port,omitempty"`
-	Host     string `yaml:"host,omitempty"`
-	Password string `yaml:"password,omitempty"`
-	Database string `yaml:"database,omitempty"`
-	Vendor   string `yaml:"vendor,omitempty"`
-	Dsn      string `yaml:"dsn,omitempty"`
 }
 
 func Doctor() {

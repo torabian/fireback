@@ -35,7 +35,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 	itemsFiltered := []CapabilityInfoDto{}
 
-	workspaceAccesses, rolesPermission := fireback.GetWorkspaceAndUserAccesses(*query)
+	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(*query)
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})
@@ -50,10 +50,9 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 		}
 
 		// Filter based on the workspace and role and not allow to create more access than the user has.
-		meetsUser := fireback.MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
-		meetsWorkspace := fireback.MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
+		meetsUser := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
+		meetsWorkspace := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
 
-		fmt.Println("1", meetsUser, meetsWorkspace, item.UniqueId, rolesPermission, workspaceAccesses)
 		if !meetsUser || !meetsWorkspace {
 			continue
 		}

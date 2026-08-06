@@ -93,15 +93,15 @@ func init() {
 }
 
 func filterRolePermissions(dto *RoleEntity, query fireback.QueryDSL) {
-	workspaceAccesses, rolesPermission := fireback.GetWorkspaceAndUserAccesses(query)
+	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(query)
 
 	ids := RoleCapabilitiesListIdGet(dto)
 
 	// Let's filter out the permissions that user actually doesn't have
 	itemsFiltered := []string{}
 	for _, capability := range ids {
-		meetsUser := fireback.MeetsCheck([]fireback.PermissionInfo{{CompleteKey: capability}}, rolesPermission)
-		meetsWorkspace := fireback.MeetsCheck([]fireback.PermissionInfo{{CompleteKey: capability}}, workspaceAccesses)
+		meetsUser := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: capability}}, rolesPermission)
+		meetsWorkspace := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: capability}}, workspaceAccesses)
 
 		if !meetsUser || !meetsWorkspace {
 			continue

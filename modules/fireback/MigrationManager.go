@@ -63,11 +63,10 @@ func ApplyMigration(xapp *FirebackApp, level int64) {
 				}
 			}
 		}
+
+		if item.MigrationFunction != nil {
+			item.MigrationFunction(xapp, db)
+		}
 	}
 
-	// This is a fireback data managemnt issue - we do not want it
-	// on projects which are not using fireback permission system
-	if os.Getenv("DISABLE_FIREBACK_DATA_MANAGEMENT") != "true" {
-		SyncPermissionsInDatabase(xapp, db)
-	}
 }

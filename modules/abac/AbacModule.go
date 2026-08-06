@@ -48,12 +48,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	fireback.AuthorizeRequest = AuthorizeRequest
 	fireback.WithSocketAuthorization = WithSocketAuthorization
 
-	// CapabilityEntity (the capability catalog table) moved here from modules/fireback -
-	// fireback core no longer keeps a capability table of its own, so it needs this
-	// injection point (see CapabilityActions.go) to keep SyncPermissionsInDatabase
-	// working, same pattern as the With*/AuthorizeRequest overrides above.
-	fireback.UpsertPermission = CapabilityUpsertPermissionFn
-
 	module := &fireback.ModuleProvider{
 		Name:               "abac",
 		Definitions:        &Module3Definitions,
@@ -241,6 +235,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
+
 		items := []interface{}{
 			&UserEntity{},
 			&TokenEntity{},
@@ -292,6 +287,10 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// for other projects extending fireback you can use here.
 		TimezoneGroupSyncSeeders()
 	})
+
+	module.MigrationFunction = func(x *fireback.FirebackApp, db *gorm.DB) {
+		SyncPermissionsInDatabase(x, db)
+	}
 
 	module.ProvideMockImportHandler(func() {
 		// GsmProviderImportMocks()

@@ -9,6 +9,8 @@ var ctx = context.Background()
 var instance InstanceUserSocketManager
 var EVENT_BUS_TOPIC string = "workspace.notifications"
 
+var MeetsAccessLevel func(query QueryDSL, onlyRoot bool) (bool, []string)
+
 type InstanceUserSocketManager interface {
 	AddUser(instanceId, userId string) error
 	RemoveUser(instanceId, userId string) error
