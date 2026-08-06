@@ -70,7 +70,17 @@ client:
 interface: interface-manage interface-ss
 
 interface-manage:
-	cd modules/project-generator/react-new && npm run manage:build && cd - && rm -rf modules/interfaces/fireback-manage && cp -rf modules/project-generator/react-new/dist modules/interfaces/fireback-manage && git checkout modules/interfaces/fireback-manage/index.go
+	cd modules/project-generator/react-new && \
+	npm run manage:build && \
+	cd - && \
+	rm -rf modules/interfaces/fireback-manage && \
+	cp -rf modules/project-generator/react-new/dist modules/interfaces/fireback-manage && \
+	git checkout modules/interfaces/fireback-manage/index.go
 
 interface-ss:
-	cd modules/project-generator/react-new && npm run self-service:build && cd - && rm -rf modules/interfaces/selfservice && cp -rf modules/project-generator/react-new/dist modules/interfaces/selfservice && git checkout modules/interfaces/selfservice/index.go
+	cd modules/project-generator/react-new && \
+	npm run self-service:build && \
+	cd - && \
+	rm -rf modules/interfaces/selfservice && \
+	cp -rf modules/project-generator/react-new/dist modules/interfaces/selfservice && \
+	git checkout modules/interfaces/selfservice/index.go
