@@ -14,12 +14,6 @@ import (
 type Config struct {
 	// When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie.
 	CookieAuthOnly bool `envconfig:"COOKIE_AUTH_ONLY" description:"When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie."`
-	// In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn
-	ClickhouseDsn string `envconfig:"CLICKHOUSE_DSN" description:"In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn"`
-	// In case of mongodb replica option, you need to provide the installation url and all necessary config
-	MongodbDsn string `envconfig:"MONGODB_DSN" description:"In case of mongodb replica option, you need to provide the installation url and all necessary config"`
-	// Elastic search installation url in case some entities require to write into the elastic search.
-	ElasticsearchDsn string `envconfig:"ELASTICSEARCH_DSN" description:"Elastic search installation url in case some entities require to write into the elastic search."`
 	// If true, set's the environment behavior to production, and some functionality will be limited
 	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
 	// The address of the redis, which will be used to distribute the events. If provided empty, internal golang event library will be used, and events won't be distributed across different instances
@@ -101,18 +95,6 @@ func GetConfigCliFlags() []cli.Flag {
 		&cli.BoolFlag{
 			Name:  "cookie-auth-only",
 			Usage: "When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie.",
-		},
-		&cli.StringFlag{
-			Name:  "clickhouse-dsn",
-			Usage: "In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn",
-		},
-		&cli.StringFlag{
-			Name:  "mongodb-dsn",
-			Usage: "In case of mongodb replica option, you need to provide the installation url and all necessary config",
-		},
-		&cli.StringFlag{
-			Name:  "elasticsearch-dsn",
-			Usage: "Elastic search installation url in case some entities require to write into the elastic search.",
 		},
 		&cli.BoolFlag{
 			Name:  "production",
@@ -268,15 +250,6 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	if c.IsSet("cookie-auth-only") {
 		config.CookieAuthOnly = c.Bool("cookie-auth-only")
 	}
-	if c.IsSet("clickhouse-dsn") {
-		config.ClickhouseDsn = c.String("clickhouse-dsn")
-	}
-	if c.IsSet("mongodb-dsn") {
-		config.MongodbDsn = c.String("mongodb-dsn")
-	}
-	if c.IsSet("elasticsearch-dsn") {
-		config.ElasticsearchDsn = c.String("elasticsearch-dsn")
-	}
 	if c.IsSet("production") {
 		config.Production = c.Bool("production")
 	}
@@ -407,75 +380,6 @@ func GetConfigCli() []*cli.Command {
 					Action: func(ctx context.Context, c *cli.Command) error {
 						return emigo.ConfigSetBoolean(c, config.CookieAuthOnly, func(value bool) {
 							config.CookieAuthOnly = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:  "clickhouse-dsn",
-			Usage: "In case of using clickhouse replica option, then you need to provide this configuration for connection, make sure you add the username, password also in the same dsn (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.ClickhouseDsn)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.ClickhouseDsn, func(value string) {
-							config.ClickhouseDsn = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:  "mongodb-dsn",
-			Usage: "In case of mongodb replica option, you need to provide the installation url and all necessary config (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.MongodbDsn)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.MongodbDsn, func(value string) {
-							config.MongodbDsn = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:  "elasticsearch-dsn",
-			Usage: "Elastic search installation url in case some entities require to write into the elastic search. (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.ElasticsearchDsn)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.ElasticsearchDsn, func(value string) {
-							config.ElasticsearchDsn = value
 							config.Save(".env")
 						})
 						return nil

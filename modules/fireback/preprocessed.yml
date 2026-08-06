@@ -52,22 +52,6 @@ config:
   type: bool
   description: When true, the sessions (after authentication) would not return the
     token back in the response, and token will be only accessible via secure cookie.
-- name: clickhouseDsn
-  type: string
-  description: In case of using clickhouse replica option, then you need to provide
-    this configuration for connection, make sure you add the username, password also
-    in the same dsn
-  hint: 127.0.0.1:9000
-- name: mongodbDsn
-  type: string
-  description: In case of mongodb replica option, you need to provide the installation
-    url and all necessary config
-  hint: defaultmongodb instalaltion
-- name: elasticsearchDsn
-  type: string
-  description: Elastic search installation url in case some entities require to write
-    into the elastic search.
-  hint: default elastic search installation
 - name: production
   type: bool
   description: If true, set's the environment behavior to production, and some functionality
