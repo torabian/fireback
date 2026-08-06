@@ -14,29 +14,6 @@ targets:
 - compiler: preprocessor
   output: ./
 dtos:
-- name: deleteRequest
-  fields:
-  - name: query
-    description: The query selector which would be used to delete the content.
-    type: string
-- name: deleteResponse
-  fields:
-  - name: data
-    type: object
-    fields:
-    - name: item
-      type: object
-      fields:
-      - name: executed
-        description: If the deletion executed immediately.
-        type: bool
-      - name: rowsAffected
-        description: The query selector which would be used to delete the content.
-        type: int64
-- name: okayResponse
-  fields:
-  - name: status
-    type: int
 - name: reactiveSearchResult
   fields:
   - name: uniqueId

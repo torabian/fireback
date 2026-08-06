@@ -1,7 +1,6 @@
 package abac
 
 import (
-	"embed"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -12,9 +11,6 @@ import (
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
-
-//go:embed *Module3.yml
-var Module3Definitions embed.FS
 
 func AppMenuWriteQueryCteMock(ctx fireback.MockQueryContext) {
 	for _, lang := range ctx.Languages {
@@ -55,7 +51,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 
 	module := &fireback.ModuleProvider{
 		Name:               "abac",
-		Definitions:        &Module3Definitions,
 		OnEnvInit:          OnInitEnvHook,
 		GoMigrateDirectory: &migrations.MigrationsFs,
 
