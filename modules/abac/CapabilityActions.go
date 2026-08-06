@@ -40,8 +40,6 @@ var ALL_CAPABILITY_PERMISSIONS = []fireback.PermissionInfo{
 	PERM_ROOT_CAPABILITY,
 }
 
-var CapabilityActions = NewEntityActionsBundle[CapabilityEntity]()
-
 // CapabilityUpsertPermissionFn is fireback.UpsertPermission's real, CapabilityEntity-backed
 // body (moved verbatim from the old modules/fireback/CoreUtils.go's UpsertPermission) -
 // wired into fireback.UpsertPermission from WorkspaceModuleSetup below, the same
@@ -70,6 +68,13 @@ func CapabilityUpsertPermissionFn(permInfo *fireback.PermissionInfo, hasChildren
 
 // GetCapabilitiesAction keeps its original name (not CapabilityBrowseAction) since that's
 // what FirebackModule.go used to wire it under, and other code may already reference it.
+//
+// Unlike every other entity in this package, CapabilityEntity is NOT workspace-scoped (it's
+// a single global catalog, no workspace_id/user_id column at all) - so, same as the original
+// implementation, this calls CapabilityEntityActions.Browse (the entity's own generated,
+// unscoped query) directly instead of going through EntityActionsBundle/QueryEntitiesPointer,
+// which unconditionally filters by workspace_id and would fail with "column workspace_id does
+// not exist" on this table.
 func GetCapabilitiesAction(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
@@ -79,61 +84,56 @@ func GetCapabilitiesAction(c CapabilityBrowseActionRequest) (*CapabilityBrowseAc
 		return nil, err
 	}
 
-	items, qrm, err2 := CapabilityActions.Query(*query)
+	res, qrm, err2 := CapabilityEntityActions.Browse(fireback.GetDbRef(), CapabilityBrowseActionQuery{}, "")
 	if err2 != nil {
-		return nil, err2
+		return nil, fireback.GormErrorToIError(err2)
 	}
 
 	return &CapabilityBrowseActionResponse{
-		Payload: fireback.GResponseQuery(items, qrm, query),
+		Payload: fireback.GResponseQuery(res, &fireback.QueryResultMeta{
+			TotalItems: qrm.TotalItems,
+			Cursor:     qrm.Cursor,
+		}, query),
 	}, nil
 }
 
+// See GetCapabilitiesAction - not workspace-scoped, so this calls the entity's own
+// generated, unscoped CapabilityEntityActions.Get directly.
 func CapabilityGetAction(c CapabilityGetActionRequest) (*CapabilityGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
-	query.UniqueId = c.Params.UniqueId
 
-	item, err2 := CapabilityActions.GetOne(*query)
+	res, err2 := CapabilityEntityActions.Get(fireback.GetDbRef(), c.Params.UniqueId)
 	if err2 != nil {
-		return nil, err2
+		return nil, fireback.GormErrorToIError(err2)
 	}
 
 	return &CapabilityGetActionResponse{
-		Payload: fireback.GResponseSingleItem(item),
+		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 
+// See GetCapabilitiesAction - not workspace-scoped, so this calls the entity's own
+// generated, unscoped CapabilityEntityActions.Update directly.
 func CapabilityUpdateAction(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
-	query.UniqueId = c.Params.UniqueId
 
-	fields := &CapabilityEntity{UniqueId: c.Params.UniqueId}
-	if v, ok := c.Body.Name.Get(); ok {
-		fields.Name = *v
-	}
-	if v, ok := c.Body.Description.Get(); ok {
-		fields.Description = *v
-	}
-
-	updated, err2 := CapabilityActions.Update(*query, fields)
+	res, err2 := CapabilityEntityActions.Update(fireback.GetDbRef(), c.Params.UniqueId, c.Body)
 	if err2 != nil {
-		return nil, err2
+		return nil, fireback.GormErrorToIError(err2)
 	}
 
 	return &CapabilityUpdateActionResponse{
-		Payload: fireback.GResponseSingleItem(updated),
+		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 

@@ -1,4 +1,3 @@
-import { TString } from "../core/complexes/TString";
 import { type PartialDeep } from "../sdk/common/fetchx";
 /**
  * The base class definition for appMenuOptionalDto
