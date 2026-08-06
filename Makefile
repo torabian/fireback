@@ -41,8 +41,6 @@ bundle:
 # this function need to do that, and before making any release we need to make
 # sure, that running this command on main (or release tag) make any code diff.
 
-prepare:
-	make refresh && make rebuild-sdks && make bundle
 
 # Every Emi action - hand-declared or entity-synthesized alike - is meant to have a
 # dedicated <Name>Action_test.go next to its generated wiring file. checkendpointtests
@@ -68,3 +66,11 @@ dockerpublish:
 client:
 	emi js --path modules/fireback/FirebackModule3.yml --output modules/fireback/codegen/react-new/src/modules/fireback/sdk/modules/fireback --tags react,typescript,no-package,no-sdk --react-query="react-query@^3.39.3" --js-sdk-location="../../sdk" && \
 	emi js --path modules/abac/AbacModule3.yml --output modules/fireback/codegen/react-new/src/modules/fireback/sdk/modules/abac --tags react,typescript,no-package,no-sdk --react-query="react-query@^3.39.3" --js-sdk-location="../../sdk"
+
+interface: interface-manage interface-ss
+
+interface-manage:
+	cd modules/project-generator/react-new && npm run manage:build && cd - && rm -rf modules/interfaces/fireback-manage && cp -rf modules/project-generator/react-new/dist modules/interfaces/fireback-manage && git checkout modules/interfaces/fireback-manage/index.go
+
+interface-ss:
+	cd modules/project-generator/react-new && npm run self-service:build && cd - && rm -rf modules/interfaces/selfservice && cp -rf modules/project-generator/react-new/dist modules/interfaces/selfservice && git checkout modules/interfaces/selfservice/index.go
