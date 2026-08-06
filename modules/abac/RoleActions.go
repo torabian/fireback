@@ -46,26 +46,23 @@ func RoleCapabilitiesListIdGet(role *RoleEntity) []string {
 var RoleActions = NewEntityActionsBundle[RoleEntity]()
 
 func init() {
-	// RoleActions.Create/.Update: filter out capabilities the acting user/workspace
-	// doesn't itself have, and require at least one capability - preserved from the
-	// pre-migration RoleEntity.go hand file.
-	baseCreate := RoleActions.Create
-	RoleActions.Create = func(dto *RoleEntity, query fireback.QueryDSL) (*RoleEntity, *fireback.IError) {
-		filterRolePermissions(dto, query)
-		if len(RoleCapabilitiesListIdGet(dto)) == 0 {
-			return nil, fireback.Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
-		}
-		return baseCreate(dto, query)
-	}
-
-	baseUpdate := RoleActions.Update
-	RoleActions.Update = func(query fireback.QueryDSL, dto *RoleEntity) (*RoleEntity, *fireback.IError) {
-		filterRolePermissions(dto, query)
-		if len(RoleCapabilitiesListIdGet(dto)) == 0 {
-			return nil, fireback.Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
-		}
-		return baseUpdate(query, dto)
-	}
+	// filterRolePermissions/the RoleNeedsOneCapability guard deliberately do NOT wrap
+	// RoleActions.Create/.Update here (unlike most other entities' overrides) - they're
+	// applied only inside RoleCreateAction/RoleUpdateAction below, the actual API/CLI
+	// entry points. That matches the pre-migration behavior exactly: the old
+	// filterPermissions only ever mutated the transient, non-persisted
+	// CapabilitiesListId convenience field (gorm:"-" sql:"-" in the old schema) used by
+	// user-facing role create/update requests - it never touched the real persisted
+	// grant, the Capabilities many-to-many relation, which internal/bootstrap callers
+	// (WorkspaceCoreFeatures.go's signup flow, UserCli.go's SyncWorkspaceDefaultRoles,
+	// CreateRootRoleInWorkspace) set directly and were therefore never filtered.
+	// CapabilitiesListId is now the one and only, actually-persisted field, so wrapping
+	// RoleActions.Create/.Update directly (as originally done here) would apply the
+	// filter to those internal/bootstrap callers too - which have no acting-user
+	// permission context to filter against, so every capability gets stripped and
+	// RoleNeedsOneCapability fires on every signup. Filtering only at the action layer,
+	// where ResolveActionContext has actually populated the caller's real permissions,
+	// restores the old exemption for internal callers.
 
 	// The root role (uniqueId "root") is excluded from removal whenever InternalQuery is
 	// already set - preserved verbatim from the pre-migration RoleEntity.go hand file
@@ -150,6 +147,10 @@ func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, err
 		Name:               c.Body.Name,
 		CapabilitiesListId: c.Body.CapabilitiesListId,
 	}
+	filterRolePermissions(entity, *query)
+	if len(RoleCapabilitiesListIdGet(entity)) == 0 {
+		return nil, fireback.Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
+	}
 	created, err2 := RoleActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
@@ -166,6 +167,10 @@ func RoleUpdateAction(c RoleUpdateActionRequest) (*RoleUpdateActionResponse, err
 	fields := &RoleEntity{UniqueId: c.Params.UniqueId, CapabilitiesListId: c.Body.CapabilitiesListId}
 	if v, ok := c.Body.Name.Get(); ok {
 		fields.Name = *v
+	}
+	filterRolePermissions(fields, *query)
+	if len(RoleCapabilitiesListIdGet(fields)) == 0 {
+		return nil, fireback.Create401Error(&RoleMessages.RoleNeedsOneCapability, []string{})
 	}
 	updated, err2 := RoleActions.Update(*query, fields)
 	if err2 != nil {

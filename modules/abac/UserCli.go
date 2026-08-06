@@ -373,10 +373,14 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = user.Item.UserId.OrDefault("")
-			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+			// user.Item.UserId is the "created/owned by" metadata field (blank for a
+			// fresh signup, since nobody else created this user) - the user's actual
+			// identity is UniqueId. Using UserId here left every root UserWorkspace/
+			// WorkspaceRole row created below with an empty user reference.
+			query.UserId = user.Item.UniqueId
+			createdUserWorkspace, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
-				UserId:      user.Item.UserId,
+				UserId:      emigo.NullableOf(user.Item.UniqueId),
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
 			}, query)
 
@@ -385,8 +389,9 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 			}
 
 			_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
-				RoleId:      emigo.NullableOf(ROOT_VAR),
-				WorkspaceId: emigo.NullableOf(ROOT_VAR),
+				UserWorkspaceId: emigo.NullableOf(createdUserWorkspace.UniqueId),
+				RoleId:          emigo.NullableOf(ROOT_VAR),
+				WorkspaceId:     emigo.NullableOf(ROOT_VAR),
 			}, query)
 
 			if err3 != nil {
