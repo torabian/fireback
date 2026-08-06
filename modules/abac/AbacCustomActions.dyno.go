@@ -8,6 +8,7 @@ package abac
 import (
 	"reflect"
 
+	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
@@ -31,13 +32,13 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	// in WorkspaceModuleSetup's GinWebServerInitHooks (see AbacModule.go) - they moved out of
 	// here once they moved to Abac.emi.yml.
 	Commands: []*cli.Command{
-		TableViewSizingBrowseActionCliHandler(TableViewSizingBrowseAction),
-		TableViewSizingGetActionCliHandler(TableViewSizingGetAction),
-		TableViewSizingCreateActionCliHandler(TableViewSizingCreateAction),
-		TableViewSizingUpdateActionCliHandler(TableViewSizingUpdateAction),
-		TableViewSizingAwareDeletePreviewActionCliHandler(TableViewSizingAwareDeletePreviewAction),
-		TableViewSizingAwareDeleteActionCliHandler(TableViewSizingAwareDeleteAction),
-		AppMenuCliFn(),
+		interfacetools.TableViewSizingBrowseActionCliHandler(interfacetools.TableViewSizingBrowseAction),
+		interfacetools.TableViewSizingGetActionCliHandler(interfacetools.TableViewSizingGetAction),
+		interfacetools.TableViewSizingCreateActionCliHandler(interfacetools.TableViewSizingCreateAction),
+		interfacetools.TableViewSizingUpdateActionCliHandler(interfacetools.TableViewSizingUpdateAction),
+		interfacetools.TableViewSizingAwareDeletePreviewActionCliHandler(interfacetools.TableViewSizingAwareDeletePreviewAction),
+		interfacetools.TableViewSizingAwareDeleteActionCliHandler(interfacetools.TableViewSizingAwareDeleteAction),
+		interfacetools.AppMenuCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),
 		RoleBrowseActionCliHandler(RoleBrowseAction),

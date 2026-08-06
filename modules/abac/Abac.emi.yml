@@ -796,32 +796,6 @@ actions:
       fields:
         - name: queueId
           type: string
-  - name: CteAppMenus
-    url: /cte-app-menus
-    cliName: cte-app-menus
-    method: get
-    description: >-
-      Returns "appMenu" rows assembled into a tree (each item's children nested
-      under it via a recursive query) instead of Browse's flat list - restores the
-      old Module3-generated /cte-app-menus route. See AppMenuActions.CteQuery /
-      AppMenuTreeNode. Note: Emi has no self-referencing dto, so the declared
-      response type here is the flat AppMenuOptionalDto - the actual JSON payload
-      additionally nests a "children" array of the same shape under each item.
-    qs:
-      - name: filter
-        type: string
-      - name: sort
-        type: string
-      - name: startIndex
-        type: int
-      - name: itemsPerPage
-        type: int
-      - name: cursor
-        type: string
-    out:
-      dto: AppMenuOptionalDto
-      envelope: GResponse
-
   - name: WorkspaceConfigDistinctGet
     url: /workspace-config/distinct
     cliName: workspace-config-distinct-get
@@ -859,52 +833,6 @@ entities:
         type: string
       - name: description
         type: string
-  - name: tableViewSizing
-    cliShort: tvs
-    description: >-
-      Used to store meta data about user tables (in front-end, or apps for
-      example) about the size of the columns
-    fields:
-      - name: tableName
-        type: string
-        tags:
-          validate: required
-      - name: sizes
-        type: string
-      - name: workspaceId
-        type: string?
-        description: The unique-id of the workspace which content belongs to.
-      - name: userId
-        type: string?
-        description: The unique-id of the user which created/owns the record.
-      - name: createdAt
-        type: complex
-        complex: PlainTime
-        description: The time the record was created. Populated automatically by gorm.
-      - name: updatedAt
-        type: complex
-        complex: PlainTime
-        description: The time the record was last updated. Populated automatically by gorm.
-
-  - name: timezoneGroup
-    description: World timezone information
-    cliName: tz
-    fields:
-      - name: title
-        type: string
-        description: Title which is shown to the user and allows them to select.
-      - name: workspaceId
-        type: string?
-        description: The unique-id of the workspace which content belongs to.
-      - name: userId
-        type: string?
-        description: The unique-id of the user which created/owns the record.
-      - name: createdAt
-        type: complex
-        complex: PlainTime
-      - name: updatedAt
-        type: complex
-        complex: PlainTime
 
   - name: passportMethod
     cliShort: method
@@ -1264,43 +1192,6 @@ entities:
       - name: userId
         type: string?
         description: The unique-id of the user which created/owns the record.
-      - name: createdAt
-        type: complex
-        complex: PlainTime
-      - name: updatedAt
-        type: complex
-        complex: PlainTime
-
-  - name: appMenu
-    description: >-
-      Manages the menus in the app, (for example tab views, sidebar items,
-      etc.)
-    fields:
-      - name: label
-        type: complex
-        complex: TString
-        description: >-
-          Label that will be visible to user, as a locale -> text map (e.g.
-          {"en": "Home", "fa": "خانه"}) - see complexes.TString.
-      - name: href
-        type: string
-        description: Location that will be navigated in case of click or selection on ui
-      - name: icon
-        type: string
-        description: Icon string address which matches the resources on the front-end apps.
-      - name: activeMatcher
-        type: string
-        description: Custom window location url matchers, for inner screens.
-      - name: capabilityId
-        type: string?
-        description: The unique-id of the capability which is required for the menu to be visible.
-      - name: parentId
-        type: string?
-        description: The unique-id of the parent menu item, for nested/tree menus.
-      - name: workspaceId
-        type: string?
-      - name: userId
-        type: string?
       - name: createdAt
         type: complex
         complex: PlainTime

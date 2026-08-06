@@ -8,7 +8,7 @@ import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { osResources } from "../../resources/resources";
-import type { AppMenuOptionalDto } from "../../sdk/abac/AppMenuOptionalDto";
+import type { AppMenuOptionalDto } from "../../sdk/interfacetools/AppMenuOptionalDto";
 import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";

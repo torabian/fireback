@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
@@ -22,7 +23,7 @@ func AppMenuWriteQueryCteMock(ctx fireback.MockQueryContext) {
 			itemsPerPage = ctx.ItemsPerPage
 		}
 		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := AppMenuActions.CteQuery(f)
+		items, count, _ := interfacetools.AppMenuActions.CteQuery(f)
 		result := fireback.QueryEntitySuccessResult(f, items, count)
 		fireback.WriteMockDataToFile(lang, "", "AppMenu", result)
 	}
@@ -38,6 +39,7 @@ func AbacCompleteModules() []*fireback.ModuleProvider {
 		WorkspaceModuleSetup(),
 		NotificationModuleSetup(),
 		messaging.ModuleSetup(),
+		interfacetools.ModuleSetup(),
 		PassportsModuleSetup(),
 	}
 }
@@ -85,21 +87,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				// here since it depends on NotificationConfigEntity, which stays in abac.
 				GsmSendSmsActionGin(g, GsmSendSmsAction)
 
-				// Entities migrated from AbacModule3.yml's old entities: section to
-				// Abac.emi.yml get their CRUD actions wired the same way.
-				TableViewSizingBrowseActionGin(g, TableViewSizingBrowseAction)
-				TableViewSizingGetActionGin(g, TableViewSizingGetAction)
-				TableViewSizingCreateActionGin(g, TableViewSizingCreateAction)
-				TableViewSizingUpdateActionGin(g, TableViewSizingUpdateAction)
-				TableViewSizingAwareDeletePreviewActionGin(g, TableViewSizingAwareDeletePreviewAction)
-				TableViewSizingAwareDeleteActionGin(g, TableViewSizingAwareDeleteAction)
-
-				TimezoneGroupBrowseActionGin(g, TimezoneGroupBrowseAction)
-				TimezoneGroupGetActionGin(g, TimezoneGroupGetAction)
-				TimezoneGroupCreateActionGin(g, TimezoneGroupCreateAction)
-				TimezoneGroupUpdateActionGin(g, TimezoneGroupUpdateAction)
-				TimezoneGroupAwareDeletePreviewActionGin(g, TimezoneGroupAwareDeletePreviewAction)
-				TimezoneGroupAwareDeleteActionGin(g, TimezoneGroupAwareDeleteAction)
+				// TableViewSizing, TimezoneGroup, AppMenu (and /cte-app-menus) moved to
+				// modules/abac/interfacetools - see interfacetools.ModuleSetup.
 
 				PreferenceBrowseActionGin(g, PreferenceBrowseAction)
 				PreferenceGetActionGin(g, PreferenceGetAction)
@@ -157,13 +146,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				RegionalContentAwareDeletePreviewActionGin(g, RegionalContentAwareDeletePreviewAction)
 				RegionalContentAwareDeleteActionGin(g, RegionalContentAwareDeleteAction)
 
-				AppMenuBrowseActionGin(g, AppMenuBrowseAction)
-				AppMenuGetActionGin(g, AppMenuGetAction)
-				AppMenuCreateActionGin(g, AppMenuCreateAction)
-				AppMenuUpdateActionGin(g, AppMenuUpdateAction)
-				AppMenuAwareDeletePreviewActionGin(g, AppMenuAwareDeletePreviewAction)
-				AppMenuAwareDeleteActionGin(g, AppMenuAwareDeleteAction)
-				CteAppMenusActionGin(g, CteAppMenusAction)
+				// AppMenu (and /cte-app-menus) moved to modules/abac/interfacetools - see
+				// interfacetools.ModuleSetup.
 
 				// CapabilityEntity moved here from modules/fireback - see CapabilityActions.go.
 				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
@@ -222,8 +206,10 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// own ProvidePermissionHandler call (see AbacCompleteModules), no need to repeat here.
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
 		ALL_WORKSPACE_INVITE_PERMISSIONS,
-		ALL_TABLE_VIEW_SIZING_PERMISSIONS,
-		ALL_APP_MENU_PERMISSIONS,
+		// ALL_TABLE_VIEW_SIZING_PERMISSIONS/ALL_APP_MENU_PERMISSIONS/ALL_TIMEZONE_GROUP_PERMISSIONS
+		// moved to modules/abac/interfacetools - already registered via
+		// interfacetools.ModuleSetup's own ProvidePermissionHandler call (see
+		// AbacCompleteModules), no need to repeat here.
 		ALL_REGIONAL_CONTENT_PERMISSIONS,
 		ALL_USER_WORKSPACE_PERMISSIONS,
 		ALL_USER_PERMISSIONS,
@@ -231,7 +217,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		ALL_WORKSPACE_ROLE_PERMISSIONS,
 		ALL_WORKSPACE_PERMISSIONS,
 		ALL_PERM_ABAC_MODULE,
-		ALL_TIMEZONE_GROUP_PERMISSIONS,
 		ALL_PREFERENCE_PERMISSIONS,
 		ALL_USER_PROFILE_PERMISSIONS,
 		ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
@@ -253,11 +238,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 			&WorkspaceRoleEntity{},
 			&UserWorkspaceEntity{},
 			&RegionalContentEntity{},
-			&TableViewSizingEntity{},
 			&UserProfileEntity{},
 			&PendingWorkspaceInviteEntity{},
-			&AppMenuEntity{},
-			&TimezoneGroupEntity{},
 			&CapabilityEntity{},
 		}
 
@@ -283,14 +265,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
 	})
 
-	module.ProvideSeederImportHandler(func() {
-		// We do not use syncing here.
-		// Because fireback is being imported by other modules,
-		// they might want their own unique menu items
-		// sync items in the fireback/main or desktop one manually for this project.
-		// for other projects extending fireback you can use here.
-		TimezoneGroupSyncSeeders()
-	})
+	// TimezoneGroupSyncSeeders moved to modules/abac/interfacetools - see
+	// interfacetools.ModuleSetup's own ProvideSeederImportHandler call.
 
 	module.MigrationFunction = func(x *fireback.FirebackApp, db *gorm.DB) {
 		SyncPermissionsInDatabase(x, db)
@@ -341,12 +317,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// modules/abac/messaging - see messaging.ModuleSetup.
 		GsmSendSmsActionCliHandler(GsmSendSmsAction),
 
-		TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
-		TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
-		TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
-		TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
-		TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
-		TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
+		// TimezoneGroup CLI moved to modules/abac/interfacetools - see
+		// interfacetools.ModuleSetup.
 
 		PreferenceBrowseActionCliHandler(PreferenceBrowseAction),
 		PreferenceGetActionCliHandler(PreferenceGetAction),

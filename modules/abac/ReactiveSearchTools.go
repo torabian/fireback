@@ -1,12 +1,15 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/torabian/fireback/modules/abac/interfacetools"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
 func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "label %" + query.SearchPhrase + "%"
-	items, _, _ := AppMenuActions.Query(query)
+	items, _, _ := interfacetools.AppMenuActions.Query(query)
 
 	for _, item := range items {
 		if !item.ParentId.IsSet() {

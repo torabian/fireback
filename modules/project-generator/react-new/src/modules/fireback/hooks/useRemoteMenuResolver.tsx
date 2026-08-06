@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { dataMenuToMenu } from "../components/layouts/Sidebar";
 import { type MenuItem } from "../definitions/common";
-import { useCteAppMenusActionQuery } from "../sdk/abac/CteAppMenusAction";
-import { AppMenuOptionalDto } from "../sdk/abac/AppMenuOptionalDto";
+import { useCteAppMenusActionQuery } from "../sdk/interfacetools/CteAppMenusAction";
+import { AppMenuOptionalDto } from "../sdk/interfacetools/AppMenuOptionalDto";
 import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/abac/QueryUserRoleWorkspacesAction";
 import { RemoteQueryContext } from "../sdk/core/react-tools";
 import { GResponse } from "../sdk/sdk/envelopes";

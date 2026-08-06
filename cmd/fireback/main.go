@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/backup"
 	"github.com/torabian/fireback/modules/fireback"
 	// clitools registers every terminal/CLI-interactive fireback feature
@@ -81,7 +82,7 @@ func main() {
 		},
 		SeedersSync: func() {
 			abac.PassportMethodSyncSeeders()
-			abac.AppMenuSyncSeeders()
+			interfacetools.AppMenuSyncSeeders()
 		},
 
 		PublicFolders: []gintools.PublicFolderInfo{

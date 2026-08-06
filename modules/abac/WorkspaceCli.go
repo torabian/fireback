@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
@@ -189,12 +190,12 @@ var MiscCli cli.Command = cli.Command{
 	Name:  "misc",
 	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
 	Commands: []*cli.Command{
-		TableViewSizingBrowseActionCliHandler(TableViewSizingBrowseAction),
-		TableViewSizingGetActionCliHandler(TableViewSizingGetAction),
-		TableViewSizingCreateActionCliHandler(TableViewSizingCreateAction),
-		TableViewSizingUpdateActionCliHandler(TableViewSizingUpdateAction),
-		TableViewSizingAwareDeletePreviewActionCliHandler(TableViewSizingAwareDeletePreviewAction),
-		TableViewSizingAwareDeleteActionCliHandler(TableViewSizingAwareDeleteAction),
+		interfacetools.TableViewSizingBrowseActionCliHandler(interfacetools.TableViewSizingBrowseAction),
+		interfacetools.TableViewSizingGetActionCliHandler(interfacetools.TableViewSizingGetAction),
+		interfacetools.TableViewSizingCreateActionCliHandler(interfacetools.TableViewSizingCreateAction),
+		interfacetools.TableViewSizingUpdateActionCliHandler(interfacetools.TableViewSizingUpdateAction),
+		interfacetools.TableViewSizingAwareDeletePreviewActionCliHandler(interfacetools.TableViewSizingAwareDeletePreviewAction),
+		interfacetools.TableViewSizingAwareDeleteActionCliHandler(interfacetools.TableViewSizingAwareDeleteAction),
 		&cli.Command{
 			Name:        "regionalcontent",
 			Aliases:     []string{"rc"},
@@ -210,7 +211,7 @@ var MiscCli cli.Command = cli.Command{
 				&RegionalContentGetCmd,
 			},
 		},
-		AppMenuCliFn(),
+		interfacetools.AppMenuCliFn(),
 		getCssMinCombineCli(),
 		&cli.Command{
 			Name:        "totp",
@@ -268,12 +269,12 @@ var WorkspaceCliCommands = []*cli.Command{
 				PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
 			},
 		},
-		TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
-		TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
-		TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
-		TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
-		TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
-		TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
+		interfacetools.TimezoneGroupBrowseActionCliHandler(interfacetools.TimezoneGroupBrowseAction),
+		interfacetools.TimezoneGroupGetActionCliHandler(interfacetools.TimezoneGroupGetAction),
+		interfacetools.TimezoneGroupCreateActionCliHandler(interfacetools.TimezoneGroupCreateAction),
+		interfacetools.TimezoneGroupUpdateActionCliHandler(interfacetools.TimezoneGroupUpdateAction),
+		interfacetools.TimezoneGroupAwareDeletePreviewActionCliHandler(interfacetools.TimezoneGroupAwareDeletePreviewAction),
+		interfacetools.TimezoneGroupAwareDeleteActionCliHandler(interfacetools.TimezoneGroupAwareDeleteAction),
 		WorkspaceTypeBrowseActionCliHandler(WorkspaceTypeBrowseAction),
 		WorkspaceTypeGetActionCliHandler(WorkspaceTypeGetAction),
 		WorkspaceTypeCreateActionCliHandler(WorkspaceTypeCreateAction),
