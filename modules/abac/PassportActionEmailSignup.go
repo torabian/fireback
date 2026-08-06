@@ -19,6 +19,6 @@ func PassportAppendEmailToUser(dto *ClassicAuthDto, query fireback.QueryDSL) (*P
 		Type:     PassportTypes.EmailPassword,
 	}
 
-	return PassportActionCreateFn(entity, query)
+	return PassportActions.Create(entity, query)
 
 }

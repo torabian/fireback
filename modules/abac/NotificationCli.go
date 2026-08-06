@@ -41,7 +41,7 @@ var NotificationModuleAuditCmd cli.Command = cli.Command{
 			log.Fatalln(err)
 		}
 
-		if config.GeneralEmailProvider == nil {
+		if !config.GeneralEmailProviderId.IsSet() || config.GeneralEmailProviderId.IsNull() {
 			log.Fatalln("You need to specify a general email provider. Email provider, is a service, such as sendgrid, smtp, which lets you send emails. Software depends on sending emails for user interactions, its important to configurate it and make sure the emails arrive.")
 		}
 

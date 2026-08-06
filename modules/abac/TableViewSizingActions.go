@@ -1,0 +1,185 @@
+package abac
+
+import (
+	"reflect"
+
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+)
+
+// Permission keys are preserved verbatim from the old Module3-generated
+// TableViewSizingEntity.dyno.go (this entity had no permRewrite override), so existing
+// role/capability records in any live database keep matching these completeKeys.
+var PERM_ROOT_TABLE_VIEW_SIZING = fireback.PermissionInfo{
+	CompleteKey: "root.modules.abac.table-view-sizing.*",
+	Name:        "Entire table view sizing actions (*)",
+}
+var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = fireback.PermissionInfo{
+	CompleteKey: "root.modules.abac.table-view-sizing.delete",
+	Name:        "Delete table view sizing",
+}
+var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = fireback.PermissionInfo{
+	CompleteKey: "root.modules.abac.table-view-sizing.create",
+	Name:        "Create table view sizing",
+}
+var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = fireback.PermissionInfo{
+	CompleteKey: "root.modules.abac.table-view-sizing.update",
+	Name:        "Update table view sizing",
+}
+var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = fireback.PermissionInfo{
+	CompleteKey: "root.modules.abac.table-view-sizing.query",
+	Name:        "Query table view sizing",
+}
+var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []fireback.PermissionInfo{
+	PERM_ROOT_TABLE_VIEW_SIZING_DELETE,
+	PERM_ROOT_TABLE_VIEW_SIZING_CREATE,
+	PERM_ROOT_TABLE_VIEW_SIZING_UPDATE,
+	PERM_ROOT_TABLE_VIEW_SIZING_QUERY,
+	PERM_ROOT_TABLE_VIEW_SIZING,
+}
+
+func TableViewSizingBrowseAction(c TableViewSizingBrowseActionRequest) (*TableViewSizingBrowseActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
+
+	refl := reflect.ValueOf(&TableViewSizingEntity{})
+	items, qrm, err2 := fireback.QueryEntitiesPointer[TableViewSizingEntity](q, refl)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &TableViewSizingBrowseActionResponse{
+		Payload: fireback.GResponseQuery(items, qrm, &q),
+	}, nil
+}
+
+func TableViewSizingGetAction(c TableViewSizingGetActionRequest) (*TableViewSizingGetActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
+	q.UniqueId = c.Params.UniqueId
+
+	refl := reflect.ValueOf(&TableViewSizingEntity{})
+	item, err2 := fireback.GetOneEntity[TableViewSizingEntity](q, refl)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &TableViewSizingGetActionResponse{
+		Payload: fireback.GResponseSingleItem(item),
+	}, nil
+}
+
+func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableViewSizingCreateActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
+
+	entity := TableViewSizingEntity{
+		TableName:   c.Body.TableName,
+		Sizes:       c.Body.Sizes,
+		WorkspaceId: emigo.NullableOf(q.WorkspaceId),
+		UserId:      emigo.NullableOf(q.UserId),
+	}
+
+	created, err2 := fireback.CreateEntity(entity)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &TableViewSizingCreateActionResponse{
+		Payload: fireback.GResponseSingleItem(created),
+	}, nil
+}
+
+func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableViewSizingUpdateActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+	})
+	if err != nil {
+		return nil, err
+	}
+	q := *query
+	q.UniqueId = c.Params.UniqueId
+
+	fields := &TableViewSizingEntity{UniqueId: c.Params.UniqueId}
+	if v, ok := c.Body.TableName.Get(); ok {
+		fields.TableName = *v
+	}
+	if v, ok := c.Body.Sizes.Get(); ok {
+		fields.Sizes = *v
+	}
+
+	updated, err2 := fireback.UpdateEntity(q, fields)
+	if err2 != nil && err2.HttpCode == 404 {
+		// The front-end (see CommonListManager.tsx's table-column-width persistence)
+		// addresses this entity by a caller-chosen uniqueId (a per-table, per-user key),
+		// not a server-generated one - so the first "update" for a given key is actually
+		// a create. Preserved from the old distinctBy-less upsert-by-uniqueId behavior.
+		fields.WorkspaceId = emigo.NullableOf(q.WorkspaceId)
+		fields.UserId = emigo.NullableOf(q.UserId)
+		created, err3 := fireback.CreateEntity(*fields)
+		if err3 != nil {
+			return nil, err3
+		}
+		return &TableViewSizingUpdateActionResponse{
+			Payload: fireback.GResponseSingleItem(created),
+		}, nil
+	}
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &TableViewSizingUpdateActionResponse{
+		Payload: fireback.GResponseSingleItem(updated),
+	}, nil
+}
+
+func TableViewSizingAwareDeletePreviewAction(c TableViewSizingAwareDeletePreviewActionRequest) (*TableViewSizingAwareDeletePreviewActionResponse, error) {
+	_, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	uniqueIds := TableViewSizingAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := TableViewSizingEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	if err2 != nil {
+		return nil, fireback.GormErrorToIError(err2)
+	}
+
+	return &TableViewSizingAwareDeletePreviewActionResponse{
+		Payload: fireback.GResponseSingleItem(preview),
+	}, nil
+}
+
+func TableViewSizingAwareDeleteAction(c TableViewSizingAwareDeleteActionRequest) (*TableViewSizingAwareDeleteActionResponse, error) {
+	_, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if err2 := TableViewSizingEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+		return nil, fireback.GormErrorToIError(err2)
+	}
+
+	return &TableViewSizingAwareDeleteActionResponse{
+		Payload: fireback.GResponseSingleItem(struct{}{}),
+	}, nil
+}

@@ -92,7 +92,7 @@ func RepairTheWorkspaces() error {
 		err := fireback.GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
-			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: emigo.NullableOf(ROOT_VAR)}).Error
+			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: ROOT_VAR}).Error
 			if err != nil {
 				return err
 			}
@@ -109,7 +109,7 @@ func RepairTheWorkspaces() error {
 			err = fireback.GetDbRef().Create(&WorkspaceEntity{
 				UniqueId: "root", Name: ROOT_VAR, Description: description,
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
-				TypeId:      emigo.NullableOf(ROOT_VAR),
+				TypeId:      ROOT_VAR,
 			}).Error
 
 			if err != nil {
@@ -155,14 +155,10 @@ func RepairTheWorkspaces() error {
 func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 	sampleName := "Root Access"
 	entity := &RoleEntity{
-		UniqueId:    "root",
-		WorkspaceId: emigo.NullableOf(ROOT_VAR),
-		Name:        sampleName,
-		Capabilities: []*fireback.CapabilityEntity{
-			{
-				UniqueId: ROOT_ALL_ACCESS,
-			},
-		},
+		UniqueId:           "root",
+		WorkspaceId:        emigo.NullableOf(ROOT_VAR),
+		Name:               sampleName,
+		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_ACCESS}),
 	}
 
 	err := fireback.GetDbRef().

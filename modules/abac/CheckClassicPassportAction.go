@@ -47,9 +47,18 @@ func checkClassicPassportCore(req CheckClassicPassportActionReq, query fireback.
 }
 
 func wrapCheckPassportResult(res *CheckClassicPassportActionRes, err *fireback.IError) (*CheckClassicPassportActionResponse, error) {
+	// err is a concrete *fireback.IError; returning it directly as the built-in error
+	// interface would wrap a nil pointer in a non-nil interface value on success (the
+	// classic Go typed-nil-in-interface gotcha), making every successful call still
+	// look like an error to callers (Gin's handler calls err.Error(), which
+	// json-marshals a nil receiver into the literal string "null"). Must check
+	// explicitly instead of returning err straight through.
+	if err != nil {
+		return nil, err
+	}
 	return &CheckClassicPassportActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
-	}, err
+	}, nil
 }
 
 // in some operations, the only option is otp either on signin or signup.

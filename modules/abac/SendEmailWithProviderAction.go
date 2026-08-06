@@ -1,9 +1,6 @@
 package abac
 
 import (
-	"encoding/json"
-
-	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -14,11 +11,4 @@ func SendEmailWithProviderAction(c SendEmailWithProviderActionRequest) (*SendEma
 	}
 
 	return nil, nil
-}
-
-func CastEmailProviderEntityFromCli(c emigo.CliCastable) EmailProviderEntity {
-	var result EmailProviderEntity
-	json.Unmarshal([]byte(c.String("email-provider")), &result)
-
-	return result
 }

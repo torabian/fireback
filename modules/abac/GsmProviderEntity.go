@@ -1,196 +1,322 @@
 package abac
 
 import (
-	"bytes"
-	"context"
+	"encoding"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
-
-	"github.com/torabian/fireback/modules/fireback"
-	"github.com/urfave/cli/v3"
-
-	medianasms "github.com/medianasms/go-rest-sdk"
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/emi/emigorm"
+	"github.com/torabian/fireback/modules/abac/abaccomplexes"
+	"gorm.io/gorm"
 )
 
-var GsmProviderTestCmd cli.Command = cli.Command{
+// The base class definition for gsmProviderEntity
+type GsmProviderEntity struct {
+	Id               int64  `gorm:"primaryKey;autoIncrement" json:"-" yaml:"-"`
+	UniqueId         string `gorm:"type:uuid;default:gen_random_uuid();unique" json:"uniqueId" yaml:"uniqueId"`
+	ApiKey           string `json:"apiKey" yaml:"apiKey"`
+	MainSenderNumber string `json:"mainSenderNumber" validate:"required" yaml:"mainSenderNumber"`
+	Type             string `json:"type" validate:"required" yaml:"type"`
+	InvokeUrl        string `json:"invokeUrl" yaml:"invokeUrl"`
+	InvokeBody       string `json:"invokeBody" yaml:"invokeBody"`
+	// The unique-id of the workspace which content belongs to.
+	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
+	// The unique-id of the user which created/owns the record.
+	UserId    emigo.Nullable[string]  `json:"userId" yaml:"userId"`
+	CreatedAt abaccomplexes.PlainTime `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt abaccomplexes.PlainTime `json:"updatedAt" yaml:"updatedAt"`
+}
 
-	Name:  "sms",
-	Usage: "Sends the text message via gsm provider id",
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:     "id",
-			Value:    "",
-			Usage:    "Provider which you want to use for the message",
-			Required: true,
+func (x *GsmProviderEntity) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
+func GetGsmProviderEntityCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "id",
+			Type: "int64",
 		},
-		&cli.StringFlag{
-			Name:     "message",
-			Value:    "",
-			Usage:    "Message content",
-			Required: true,
+		{
+			Name: prefix + "unique-id",
+			Type: "string",
 		},
-		&cli.StringFlag{
-			Name:     "to",
-			Value:    "",
-			Usage:    "Message recipient",
-			Required: true,
+		{
+			Name: prefix + "api-key",
+			Type: "string",
 		},
-	},
-	Action: func(ctx context.Context, c *cli.Command) error {
-		message := c.String("message")
-		result, err := GsmSendSMS(c.String("id"), message, []string{c.String("to")})
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		{
+			Name: prefix + "main-sender-number",
+			Type: "string",
+		},
+		{
+			Name: prefix + "type",
+			Type: "enum",
+		},
+		{
+			Name: prefix + "invoke-url",
+			Type: "string",
+		},
+		{
+			Name: prefix + "invoke-body",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "workspace-id",
+			Type:        "string?",
+			Description: "The unique-id of the workspace which content belongs to.",
+		},
+		{
+			Name:        prefix + "user-id",
+			Type:        "string?",
+			Description: "The unique-id of the user which created/owns the record.",
+		},
+		{
+			Name: prefix + "created-at",
+			Type: "complex",
+		},
+		{
+			Name: prefix + "updated-at",
+			Type: "complex",
+		},
+	}
+}
+func CastGsmProviderEntityFromCli(c emigo.CliCastable) GsmProviderEntity {
+	data := GsmProviderEntity{}
+	if c.IsSet("id") {
+		data.Id = int64(c.Int64("id"))
+	}
+	if c.IsSet("unique-id") {
+		data.UniqueId = c.String("unique-id")
+	}
+	if c.IsSet("api-key") {
+		data.ApiKey = c.String("api-key")
+	}
+	if c.IsSet("main-sender-number") {
+		data.MainSenderNumber = c.String("main-sender-number")
+	}
+	if c.IsSet("invoke-url") {
+		data.InvokeUrl = c.String("invoke-url")
+	}
+	if c.IsSet("invoke-body") {
+		data.InvokeBody = c.String("invoke-body")
+	}
+	if c.IsSet("workspace-id") {
+		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
+	}
+	if c.IsSet("user-id") {
+		emigo.ParseNullable(c.String("user-id"), &data.UserId)
+	}
+	if c.IsSet("created-at") {
+		if u, ok := any(&data.CreatedAt).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("created-at")))
+		}
+	}
+	if c.IsSet("updated-at") {
+		if u, ok := any(&data.UpdatedAt).(encoding.TextUnmarshaler); ok {
+			u.UnmarshalText([]byte(c.String("updated-at")))
+		}
+	}
+	return data
+}
 
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+// GsmProviderEntityCreateFn creates a new GsmProviderEntity row (and its array/collection/one relations,
+// including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
+// assigned by the database (see AutoMigrate's column defaults) and populated back onto
+// dto once created. Relations are applied in a single transaction: one/one? are
+// resolved before the row itself is created (a belongs-to FK doesn't need the parent's
+// own id); array/array? and collection/collection? are reconciled afterwards, once
+// dto.Id is known.
+func GsmProviderEntityCreateFn(tx *gorm.DB, dto *GsmProviderEntity) (*GsmProviderEntity, error) {
+	err := tx.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(dto).Error; err != nil {
+			return err
+		}
 		return nil
-	},
-}
-
-func init() {
-	GsmProviderCliCommands = append(GsmProviderCliCommands, &GsmProviderTestCmd)
-}
-
-func GsmProviderActionCreate(
-	dto *GsmProviderEntity, query fireback.QueryDSL,
-) (*GsmProviderEntity, *fireback.IError) {
-	return GsmProviderActionCreateFn(dto, query)
-}
-
-func GsmProviderActionUpdate(
-	query fireback.QueryDSL,
-	fields *GsmProviderEntity,
-) (*GsmProviderEntity, *fireback.IError) {
-	return GsmProviderActionUpdateFn(query, fields)
-}
-
-/**
-*	Returns an specific template for an occiasion
-*   for example, getting sms template for otp in europe area
-**/
-
-func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
-
-	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
+	})
 	if err != nil {
-		// If there are no configuration, skip returning error, we use some terminal stuff for development.
-		if err.HttpCode != 404 {
-			return nil, err
-		}
-	}
-
-	if config == nil || config.GeneralGsmProvider == nil {
-		log.Default().Println("There is no gsm configuration unfortunately. We are printing the sms to the terminal for the sake of development.")
-		log.Default().Println(message, recp)
-
-		terminalQueue := "print-to-terminal"
-		return &GsmSendSmsWithProviderActionRes{QueueId: terminalQueue}, nil
-	}
-
-	return config.GeneralGsmProvider.SendSms(message, recp)
-}
-
-func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
-
-	if provider, err := GsmProviderActions.GetOne(fireback.QueryDSL{UniqueId: providerId}); err != nil {
 		return nil, err
-	} else {
-		return provider.SendSms(message, recp)
 	}
+	return dto, nil
 }
 
-func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
-
-	if x.Type == GsmProviderType.Url {
-		if j, err := GsmSendSMSByHttpCall(x, message, recp); err != nil {
-			return nil, err
-		} else {
-			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
+// GsmProviderEntityUpdateFn applies a partial update to the GsmProviderEntity row identified by uniqueId (its
+// public identity, e.g. from an API path parameter - never the internal auto-increment
+// id). Only fields the caller actually set on input (input.{Field}.IsSet()) are touched -
+// anything else is left exactly as it was. one/one? are resolved into their {field}Id
+// FK column alongside the rest of the scalar changes; array/array? and
+// collection/collection? are reconciled afterwards via the same emigorm helpers
+// GsmProviderEntityCreateFn uses, against entity.Id (the row's real primary key, resolved from
+// uniqueId up front - gorm's Association API and the has-many reconcile both join on
+// it, not on uniqueId).
+func GsmProviderEntityUpdateFn(tx *gorm.DB, uniqueId string, input GsmProviderOptionalDto) (*GsmProviderEntity, error) {
+	var entity GsmProviderEntity
+	err := tx.Transaction(func(tx *gorm.DB) error {
+		if err := tx.First(&entity, "unique_id = ?", uniqueId).Error; err != nil {
+			return err
 		}
-	} else if x.Type == GsmProviderType.Terminal {
-		if j, err := GsmSendSMSByTerminal(x, message, recp); err != nil {
-			return nil, err
-		} else {
-			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
+		changes := map[string]interface{}{}
+		if input.ApiKey.IsSet() {
+			changes["ApiKey"] = input.ApiKey
 		}
-	} else if x.Type == GsmProviderType.Mediana {
-		if j, err := GsmSendSMSByMediana(x, message, recp); err != nil {
-			return nil, err
-		} else {
-			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
+		if input.MainSenderNumber.IsSet() {
+			changes["MainSenderNumber"] = input.MainSenderNumber
 		}
+		if input.Type.IsSet() {
+			changes["Type"] = input.Type
+		}
+		if input.InvokeUrl.IsSet() {
+			changes["InvokeUrl"] = input.InvokeUrl
+		}
+		if input.InvokeBody.IsSet() {
+			changes["InvokeBody"] = input.InvokeBody
+		}
+		if input.WorkspaceId.IsSet() {
+			changes["WorkspaceId"] = input.WorkspaceId
+		}
+		if input.UserId.IsSet() {
+			changes["UserId"] = input.UserId
+		}
+		changes["CreatedAt"] = input.CreatedAt
+		changes["UpdatedAt"] = input.UpdatedAt
+		if len(changes) > 0 {
+			if err := tx.Model(&entity).Updates(changes).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
-
-	fmt.Println(x.Json())
-	return nil, fireback.Create401Error(&AbacMessages.SmsNotSent, []string{})
+	var updated GsmProviderEntity
+	if err := tx.First(&updated, "unique_id = ?", uniqueId).Error; err != nil {
+		return nil, err
+	}
+	return &updated, nil
 }
 
-func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
-	fmt.Println("Sending sms using http call", provider.UniqueId)
-
-	if provider.InvokeUrl == "" {
-		return "", fireback.Create401Error(&AbacMessages.InvokeUrlMissing, []string{})
+// GsmProviderEntityGetFn looks up a single GsmProviderEntity row by its public uniqueId (e.g. from an API path
+// parameter - never the internal auto-increment id).
+func GsmProviderEntityGetFn(tx *gorm.DB, uniqueId string) (*GsmProviderEntity, error) {
+	var entity GsmProviderEntity
+	if err := tx.First(&entity, "unique_id = ?", uniqueId).Error; err != nil {
+		return nil, err
 	}
-
-	m, _ := json.MarshalIndent(recp, "", "  ")
-
-	body := `{"apiKey":"{apiKey}","recipients":{recipients},"sender":"{sender}"}`
-
-	if provider.InvokeBody != "" {
-		body = provider.InvokeBody
-	}
-
-	if provider.ApiKey != "" {
-		body = strings.ReplaceAll(body, "{apiKey}", provider.ApiKey)
-	}
-	body = strings.ReplaceAll(body, "{recipients}", string(m))
-	if provider.MainSenderNumber != "" {
-		body = strings.ReplaceAll(body, "{sender}", provider.MainSenderNumber)
-	}
-	fmt.Println("SMS Body:", body)
-
-	req, err := http.NewRequest(http.MethodPost, provider.InvokeUrl, bytes.NewBuffer([]byte(body)))
-	if err != nil {
-		return "", fireback.GormErrorToIError(err)
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", fireback.GormErrorToIError(err)
-	}
-
-	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", fireback.GormErrorToIError(err)
-	}
-
-	return string(resBody), nil
+	return &entity, nil
 }
 
-func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
-
-	fmt.Println("Sending sms using terminal by", provider.UniqueId)
-
-	fmt.Println("Sms Message:", message)
-	fmt.Println("Sms Recepients:", recp)
-
-	return "", nil
-
+// GsmProviderEntityBrowseFn returns GsmProviderEntity rows matching qs.Filter (a JSON-logic expression) and
+// scope/scopeArgs (a second, handler-enforced condition - e.g. workspace isolation),
+// sorted/paged per qs.Sort/StartIndex/ItemsPerPage/Cursor, alongside a
+// emigo.QueryResultMeta reporting the total row count matching both filters (ignoring
+// paging) and a cursor for fetching the next page.
+func GsmProviderEntityBrowseFn(tx *gorm.DB, qs GsmProviderBrowseActionQuery, scope string, scopeArgs ...interface{}) ([]*GsmProviderEntity, *emigo.QueryResultMeta, error) {
+	filtered, err := emigorm.ApplyQueryFilter(tx.Model(&GsmProviderEntity{}), qs.Filter)
+	if err != nil {
+		return nil, nil, err
+	}
+	filtered = emigorm.ApplyQueryScope(filtered, scope, scopeArgs...)
+	var total int64
+	if err := filtered.Count(&total).Error; err != nil {
+		return nil, nil, err
+	}
+	var items []*GsmProviderEntity
+	paged := emigorm.ApplyQueryPage(emigorm.ApplyQueryCursor(emigorm.ApplyQuerySort(filtered, qs.Sort), qs.Cursor), qs.StartIndex, qs.ItemsPerPage)
+	if err := paged.Find(&items).Error; err != nil {
+		return nil, nil, err
+	}
+	meta := &emigo.QueryResultMeta{
+		TotalItems: total,
+		Cursor:     emigorm.BuildQueryCursor(items),
+	}
+	return items, meta, nil
 }
 
-func GsmSendSMSByMediana(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
+// GsmProviderEntityAwareDeleteAffected reports one relation of GsmProviderEntity that would be affected by
+// deleting the matching row(s) - either its has-many child rows are hard-deleted
+// (array/array?) or its many-to-many join rows are cleared, leaving the target rows
+// themselves untouched (collection/collection?). one/one? relations are never listed:
+// they're a plain FK column on GsmProviderEntity itself, so deleting GsmProviderEntity doesn't cascade into them.
+type GsmProviderEntityAwareDeleteAffected struct {
+	Relation string `json:"relation"`
+	Count    int64  `json:"count"`
+}
 
-	fmt.Println("Using mediana")
-	sms := medianasms.New(provider.ApiKey)
+// GsmProviderEntityAwareDeletePreview is the result of GsmProviderEntityAwareDeletePreviewFn: a human-readable
+// summary plus the exact per-relation counts GsmProviderEntityAwareDeleteFn would delete/clear
+// alongside the GsmProviderEntity row(s) themselves.
+type GsmProviderEntityAwareDeletePreview struct {
+	Message  string                                 `json:"message"`
+	Affected []GsmProviderEntityAwareDeleteAffected `json:"affected"`
+}
 
-	bulkID, err := sms.Send(provider.MainSenderNumber,
-		recp, message)
-	if err != nil {
-		return "", fireback.GormErrorToIError(err)
+// GsmProviderEntityAwareDeletePreviewFn looks up the GsmProviderEntity rows matching uniqueIds and reports what
+// deleting them would affect - every array/array?/collection/collection? relation (at
+// any nesting depth inside object/object? containers), matching exactly what
+// GsmProviderEntityAwareDeleteFn deletes/clears. Intended as a confirmation step before actually
+// calling GsmProviderEntityAwareDeleteFn.
+func GsmProviderEntityAwareDeletePreviewFn(tx *gorm.DB, uniqueIds []string) (*GsmProviderEntityAwareDeletePreview, error) {
+	var rows []*GsmProviderEntity
+	if err := tx.Where("unique_id IN ?", uniqueIds).Find(&rows).Error; err != nil {
+		return nil, err
 	}
+	if len(rows) == 0 {
+		return &GsmProviderEntityAwareDeletePreview{Message: "No matching GsmProviderEntity row was found for the given uniqueIds."}, nil
+	}
+	ids := make([]int64, len(rows))
+	for i := range rows {
+		ids[i] = rows[i].Id
+	}
+	affected := []GsmProviderEntityAwareDeleteAffected{}
+	var total int64
+	message := fmt.Sprintf("Deleting %d GsmProviderEntity row(s) will affect %d related record(s) across %d relation(s).", len(rows), total, len(affected))
+	return &GsmProviderEntityAwareDeletePreview{Message: message, Affected: affected}, nil
+}
 
-	return fmt.Sprintf("%v", bulkID), nil
+// GsmProviderEntityAwareDeleteFn deletes the GsmProviderEntity rows matching uniqueIds, along with every
+// array/array?/collection/collection? relation GsmProviderEntityAwareDeletePreviewFn reports (see
+// its own doc comment for exactly what that means per relation kind).
+func GsmProviderEntityAwareDeleteFn(tx *gorm.DB, uniqueIds []string) error {
+	return tx.Transaction(func(tx *gorm.DB) error {
+		var rows []*GsmProviderEntity
+		if err := tx.Where("unique_id IN ?", uniqueIds).Find(&rows).Error; err != nil {
+			return err
+		}
+		if len(rows) == 0 {
+			return nil
+		}
+		ids := make([]int64, len(rows))
+		for i := range rows {
+			ids[i] = rows[i].Id
+		}
+		return tx.Where("id IN ?", ids).Delete(&GsmProviderEntity{}).Error
+	})
+}
 
+// GsmProviderEntityActionsSig bundles the actions available for GsmProviderEntity. Extend this (and
+// GsmProviderEntityActions below) with more fields as more actions are generated. Which fields are
+// present here depends on entity.Features (see Module3EntityFeatures) - a disabled
+// feature is omitted entirely rather than left as a nil func.
+type GsmProviderEntityActionsSig struct {
+	Create             func(tx *gorm.DB, dto *GsmProviderEntity) (*GsmProviderEntity, error)
+	Update             func(tx *gorm.DB, uniqueId string, input GsmProviderOptionalDto) (*GsmProviderEntity, error)
+	Get                func(tx *gorm.DB, uniqueId string) (*GsmProviderEntity, error)
+	Browse             func(tx *gorm.DB, qs GsmProviderBrowseActionQuery, scope string, scopeArgs ...interface{}) ([]*GsmProviderEntity, *emigo.QueryResultMeta, error)
+	AwareDeletePreview func(tx *gorm.DB, uniqueIds []string) (*GsmProviderEntityAwareDeletePreview, error)
+	AwareDelete        func(tx *gorm.DB, uniqueIds []string) error
+}
+
+var GsmProviderEntityActions GsmProviderEntityActionsSig = GsmProviderEntityActionsSig{
+	Create:             GsmProviderEntityCreateFn,
+	Update:             GsmProviderEntityUpdateFn,
+	Get:                GsmProviderEntityGetFn,
+	Browse:             GsmProviderEntityBrowseFn,
+	AwareDeletePreview: GsmProviderEntityAwareDeletePreviewFn,
+	AwareDelete:        GsmProviderEntityAwareDeleteFn,
 }

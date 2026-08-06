@@ -1,6 +1,202 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
+	"github.com/urfave/cli/v3"
+)
+
+// UserCliFn mirrors the old Module3-generated grouped "user" cli command (minus the
+// import/export/dev commands, which had no hand-written equivalent to recover) - tokens,
+// accept-invite and user-invitations are nested here too, since they're user-scoped
+// actions without their own cli home (preserved from the pre-migration UserEntity.go
+// hand file's "Tokens are related to users, so let's move them there." comment).
+func UserCliFn() *cli.Command {
+	return &cli.Command{
+		Name:        "user",
+		Description: `Manage the users who are in the current app (root only)`,
+		Usage:       `Manage the users who are in the current app (root only)`,
+		Commands: []*cli.Command{
+			UserBrowseActionCliHandler(UserBrowseAction),
+			UserGetActionCliHandler(UserGetAction),
+			UserCreateActionCliHandler(UserCreateAction),
+			UserUpdateActionCliHandler(UserUpdateAction),
+			UserAwareDeletePreviewActionCliHandler(UserAwareDeletePreviewAction),
+			UserAwareDeleteActionCliHandler(UserAwareDeleteAction),
+			TokenBrowseActionCliHandler(TokenBrowseAction),
+			TokenGetActionCliHandler(TokenGetAction),
+			TokenCreateActionCliHandler(TokenCreateAction),
+			TokenUpdateActionCliHandler(TokenUpdateAction),
+			TokenAwareDeletePreviewActionCliHandler(TokenAwareDeletePreviewAction),
+			TokenAwareDeleteActionCliHandler(TokenAwareDeleteAction),
+			AcceptInviteActionCliHandler(AcceptInviteAction),
+			UserInvitationsActionCliHandler(UserInvitationsAction),
+		},
+	}
+}
+
+// user had permRewrite root.modules -> root.manage, and security: { writeOnRoot: true }
+// in the old yaml: the old generated code set AllowOnRoot: true on Create/Update/Delete
+// only, leaving Query/Get plain - preserved here exactly. The old yaml's rpc.query.qs
+// (withImages) and events (Googoli2) blocks had zero real readers anywhere in the
+// codebase, so neither needed an extension-file implementation.
+var userPerms = NewCrudPermissionSet("root.manage", "user", "user")
+var PERM_ROOT_USER = userPerms.Wildcard
+var PERM_ROOT_USER_QUERY = userPerms.Query
+var PERM_ROOT_USER_CREATE = userPerms.Create
+var PERM_ROOT_USER_UPDATE = userPerms.Update
+var PERM_ROOT_USER_DELETE = userPerms.Delete
+var ALL_USER_PERMISSIONS = userPerms.All
+
+var UserActions = NewEntityActionsBundle[UserEntity]()
+
+func (x *UserEntity) FullName() string {
+
+	full := ""
+
+	if x.FirstName != "" {
+		full += x.FirstName
+	}
+
+	if x.LastName != "" {
+		full += " " + x.LastName
+	}
+
+	return full
+
+}
+
+func UserBrowseAction(c UserBrowseActionRequest) (*UserBrowseActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY}})
+	if err != nil {
+		return nil, err
+	}
+	items, qrm, err2 := UserActions.Query(*query)
+	if err2 != nil {
+		return nil, err2
+	}
+	return &UserBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+}
+
+func UserGetAction(c UserGetActionRequest) (*UserGetActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY}})
+	if err != nil {
+		return nil, err
+	}
+	query.UniqueId = c.Params.UniqueId
+	item, err2 := UserActions.GetOne(*query)
+	if err2 != nil {
+		return nil, err2
+	}
+	return &UserGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+}
+
+func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_CREATE}, AllowOnRoot: true})
+	if err != nil {
+		return nil, err
+	}
+	entity := &UserEntity{
+		FirstName:     c.Body.FirstName,
+		LastName:      c.Body.LastName,
+		Photo:         c.Body.Photo,
+		Gender:        c.Body.Gender,
+		Title:         c.Body.Title,
+		BirthDate:     c.Body.BirthDate,
+		Avatar:        c.Body.Avatar,
+		LastIpAddress: c.Body.LastIpAddress,
+	}
+	if v, ok := c.Body.PrimaryAddress.Get(); ok && v != nil {
+		entity.PrimaryAddress = emigo.NullableOf(UserEntityPrimaryAddress{
+			AddressLine1:    v.AddressLine1,
+			AddressLine2:    v.AddressLine2,
+			City:            v.City,
+			StateOrProvince: v.StateOrProvince,
+			PostalCode:      v.PostalCode,
+			CountryCode:     v.CountryCode,
+		})
+	}
+	created, err2 := UserActionCreate(entity, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+	return &UserCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+}
+
+func UserUpdateAction(c UserUpdateActionRequest) (*UserUpdateActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_UPDATE}, AllowOnRoot: true})
+	if err != nil {
+		return nil, err
+	}
+	query.UniqueId = c.Params.UniqueId
+	fields := &UserEntity{UniqueId: c.Params.UniqueId}
+	if v, ok := c.Body.FirstName.Get(); ok {
+		fields.FirstName = *v
+	}
+	if v, ok := c.Body.LastName.Get(); ok {
+		fields.LastName = *v
+	}
+	if v, ok := c.Body.Photo.Get(); ok {
+		fields.Photo = *v
+	}
+	if v, ok := c.Body.Gender.Get(); ok {
+		fields.Gender = emigo.NullableOf(*v)
+	}
+	if v, ok := c.Body.Title.Get(); ok {
+		fields.Title = *v
+	}
+	fields.BirthDate = c.Body.BirthDate
+	if v, ok := c.Body.Avatar.Get(); ok {
+		fields.Avatar = *v
+	}
+	if v, ok := c.Body.LastIpAddress.Get(); ok {
+		fields.LastIpAddress = *v
+	}
+	if v, ok := c.Body.PrimaryAddress.Get(); ok && v != nil {
+		fields.PrimaryAddress = emigo.NullableOf(UserEntityPrimaryAddress{
+			AddressLine1:    v.AddressLine1.OrDefault(""),
+			AddressLine2:    v.AddressLine2,
+			City:            v.City,
+			StateOrProvince: v.StateOrProvince,
+			PostalCode:      v.PostalCode,
+			CountryCode:     v.CountryCode,
+		})
+	}
+	updated, err2 := UserActionUpdate(*query, fields)
+	if err2 != nil {
+		return nil, err2
+	}
+	return &UserUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+}
+
+func UserAwareDeletePreviewAction(c UserAwareDeletePreviewActionRequest) (*UserAwareDeletePreviewActionResponse, error) {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
+		return nil, err
+	}
+	uniqueIds := UserAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := UserEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	if err2 != nil {
+		return nil, fireback.GormErrorToIError(err2)
+	}
+	return &UserAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+}
+
+func UserAwareDeleteAction(c UserAwareDeleteActionRequest) (*UserAwareDeleteActionResponse, error) {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
+		return nil, err
+	}
+	if err2 := UserEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+		return nil, fireback.GormErrorToIError(err2)
+	}
+	return &UserAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+}
+
+// --- Hand business logic recovered from the pre-migration UserActions.go/UserEntity.go ---
 
 /*
 This file holds in memory some temporary solution to tokens that need to be used upon redirection
@@ -35,139 +231,11 @@ func GetTokenFromExchangePoolAction(query fireback.QueryDSL) (*ExchangeKeyInform
 	return &ExchangeKeyInformationDto{Key: token}, nil
 }
 
-/*
-1- Maybe user does not exists in the system, so we create a new user, and give him a google passport
-2- Maybe user has an account, and has linked google account, so we just act as signin
-3- Maybe user email is registered, but it's not linked with the account. Now we give error,
-4- To first login and then come back.
-
-type GoogleAuthClaim struct {
-	Aud           string `json:"aud"`
-	Azp           string `json:"azp"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	Exp           uint   `json:"exp"`
-	FamilyName    string `json:"family_name"`
-	GivenName     string `json:"given_name"`
-	Iat           uint   `json:"iat"`
-	Iss           string `json:"iss"`
-	Jti           string `json:"jti"`
-	Locale        string `json:"locale"`
-	Name          string `json:"name"`
-	Picture       string `json:"picture"`
-	Sub           string `json:"sub"`
-}
-BROKEN!!
-*/
-// func SigninUserWithGoogle(claim GoogleAuthClaim, accessToken string) (UserEntity, string, error) {
-
-// 	u := UUID()
-
-// 	var p2 models.Passport
-
-// 	dbref.Preload("User").Where("type = ? and email = ?", models.PassportTypes.Google, claim.Email).First(&p2)
-
-// 	var user UserEntity
-
-// 	if p2.UniqueId == "" {
-// 		uid := u.String()
-// 		user = UserEntity{
-// 			UniqueId:  uid,
-// 			FirstName: claim.GivenName,
-// 			Lastname:  claim.FamilyName,
-// 			Photo:     "googleoauth2://" + claim.Picture,
-// 			// Passports: []models.Passport{
-// 			// 	{Email: claim.Email, Password: "", Type: models.PassportTypes.Google, AccessToken: accessToken, UserID: uid},
-// 			// },
-// 		}
-
-// 		err := dbref.Create(&user).Error
-
-// 		if err != nil {
-// 			return UserEntity{}, "", err
-// 		}
-
-// 		// 3. Create the workspace for him
-// 		// 4. Assign his owner role
-// 		CreateWorkspace(user.UniqueId, claim.Email+" workspace")
-
-// 	} else {
-
-// 		fmt.Println("++++++")
-
-// 		dbref.Model(&models.Passport{}).Where(models.Passport{Type: "Google", UserID: p2.UserID}).Updates(models.Passport{AccessToken: accessToken})
-// 	}
-
-// 	// 5. Log him in
-// 	token, _ := SigninUserWithGoogleClaim(user, claim)
-
-// 	return user, token, nil
-// }
-
-// func GetUserPreferences(user *UserEntity) map[string]interface{} {
-// 	body := map[string]interface{}{}
-
-// 	var items []*Preference
-// 	GetDbRef().Where("user_id = ?", user.UniqueId).Find(&items)
-
-// 	for _, item := range items {
-// 		if item.ValueType == "float" {
-// 			body[item.ItemKey], _ = strconv.Atoi(item.Value)
-// 		} else if item.ValueType == "boolean" && item.Value == "true" {
-// 			body[item.ItemKey] = true
-// 		} else if item.ValueType == "boolean" && item.Value == "false" {
-// 			body[item.ItemKey] = false
-// 		} else {
-// 			body[item.ItemKey] = item.Value
-// 		}
-
-// 	}
-
-// 	return body
-// }
-
-// func PatchUserPreferences(user *UserEntity, data map[string]interface{}) {
-
-// 	for k, v := range data {
-
-// 		valueType := "string"
-
-// 		switch v.(type) {
-
-// 		case int:
-// 			valueType = "number"
-// 		case float64:
-// 			valueType = "float"
-// 		case bool:
-// 			valueType = "boolean"
-// 		}
-
-// 		if v == "true" {
-// 			valueType = "boolean"
-// 		}
-
-// 		if v == "false" {
-// 			valueType = "boolean"
-// 		}
-
-// 		if GetDbRef().Model(&Preference{}).Where(&Preference{UserID: &user.UniqueId, ItemKey: k}).Update("value", v).RowsAffected == 0 {
-// 			GetDbRef().Create(&Preference{
-// 				User:      user,
-// 				ItemKey:   k,
-// 				ValueType: valueType,
-// 				Value:     fmt.Sprint(v),
-// 			})
-// 		}
-
-// 	}
-
-// }
-
 func GetUserFromToken(tokenString string) (*UserEntity, error) {
 
 	var item TokenEntity
 
-	if err := fireback.GetDbRef().Preload("User").Where(fireback.RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
+	if err := fireback.GetDbRef().Where(fireback.RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
 		return &UserEntity{}, err
 	}
 
@@ -179,12 +247,177 @@ func UserActionCreate(
 	dto *UserEntity, query fireback.QueryDSL,
 ) (*UserEntity, *fireback.IError) {
 	query.WorkspaceId = "root"
-	return UserActionCreateFn(dto, query)
+	return UserActions.Create(dto, query)
 }
 
 func UserActionUpdate(
 	query fireback.QueryDSL,
 	fields *UserEntity,
 ) (*UserEntity, *fireback.IError) {
-	return UserActionUpdateFn(query, fields)
+	return UserActions.Update(query, fields)
+}
+
+func getRandomAvatarURL() string {
+	rand.Seed(time.Now().UnixNano()) // Seed to ensure randomness
+	randomNum := rand.Intn(20) + 1   // Generate number between 1 and 20
+	return fmt.Sprintf("https://cdn.jsdelivr.net/gh/alohe/avatars/png/vibrent_%d.png", randomNum)
+}
+
+func randomZeroOrOne() int {
+	rand.Seed(time.Now().UnixNano()) // Ensure randomness
+	return rand.Intn(2)              // Generates 0 or 1
+}
+
+var firstNames = []string{
+	"Ali", "Mohammad", "John", "David", "Maria", "Sarah", "Hassan", "Omar", "James", "Robert",
+	"Emily", "Sophia", "Daniel", "Michael", "Jessica", "Olivia", "Amir", "Reza", "Alex", "Emma",
+	"Chris", "Elena", "Noah", "Liam", "Ethan", "Mason", "Lucas", "Henry", "Nathan", "Jack",
+	"Isabella", "Charlotte", "Mia", "Layla", "Ava", "Ella", "Benjamin", "Jacob", "Matthew", "Sofia",
+	"Zahra", "Fatima", "Amin", "Mehdi", "Tomas", "Victor", "Leon", "Julian", "Max", "Leo",
+	"Arthur", "Elias", "Hugo", "Theo", "Oscar", "Gabriel", "William", "Daniela", "Samuel", "Adam",
+	"Alexander", "Freddie", "Edward", "Joseph", "Harry", "Charlie", "Sebastian", "Ryan", "Evelyn", "Anna",
+	"Adrian", "Diego", "Mateo", "Dylan", "Jason", "Carter", "Ezra", "Milo", "Jasper", "Axel",
+	"Leonardo", "Caleb", "Hunter", "Isaiah", "Andrew", "Cooper", "Nathaniel", "Elliot", "Brody", "Parker",
+	"Sadie", "Ruby", "Violet", "Luna", "Clara", "Madeline", "Stella", "Nora", "Lily", "Hazel",
+}
+
+var lastNames = []string{
+	"Torabi", "Johnson", "Smith", "Williams", "Brown", "Taylor", "Anderson", "Thomas", "Jackson", "White",
+	"Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson", "Clark", "Rodriguez", "Lewis", "Lee",
+	"Walker", "Hall", "Allen", "Young", "King", "Wright", "Lopez", "Hill", "Scott", "Green",
+	"Adams", "Baker", "Gonzalez", "Nelson", "Carter", "Mitchell", "Perez", "Roberts", "Turner", "Phillips",
+	"Campbell", "Parker", "Evans", "Edwards", "Collins", "Stewart", "Sanchez", "Morris", "Rogers", "Reed",
+	"Cook", "Morgan", "Bell", "Murphy", "Bailey", "Rivera", "Cooper", "Richardson", "Cox", "Howard",
+	"Ward", "Torres", "Peterson", "Gray", "Ramirez", "James", "Watson", "Brooks", "Kelly", "Sanders",
+	"Price", "Bennett", "Wood", "Barnes", "Ross", "Henderson", "Coleman", "Jenkins", "Perry", "Powell",
+	"Long", "Patterson", "Hughes", "Flores", "Washington", "Butler", "Simmons", "Foster", "Gonzales", "Bryant",
+	"Alexander", "Russell", "Griffin", "Diaz", "Hayes", "Myers", "Ford", "Hamilton", "Graham", "Sullivan",
+}
+
+func getRandomName(names []string) string {
+	return names[rand.Intn(len(names))]
+}
+
+func getRandomBirthDate() string {
+	// Get the current year
+	currentYear := time.Now().Year()
+
+	// Generate a random number of years between 10 and 20
+	yearsAgo := rand.Intn(11) + 10 // Random number between 10 and 20
+
+	// Calculate the year for the birthdate
+	birthYear := currentYear - yearsAgo
+
+	// Randomly select a month (1 to 12)
+	birthMonth := rand.Intn(12) + 1
+
+	// Randomly select a day (1 to 28, for simplicity)
+	birthDay := rand.Intn(28) + 1
+
+	// Format the birthdate as YYYY-MM-DD
+	return time.Date(birthYear, time.Month(birthMonth), birthDay, 0, 0, 0, 0, time.UTC).Format("2006-01-02")
+}
+
+func randomPublicIP() string {
+	rand.Seed(time.Now().UnixNano())
+
+	for {
+		a := rand.Intn(256)
+		b := rand.Intn(256)
+		c := rand.Intn(256)
+		d := rand.Intn(256)
+
+		// Skip reserved/private ranges
+		if a == 10 || // 10.0.0.0/8
+			(a == 172 && b >= 16 && b <= 31) || // 172.16.0.0 – 172.31.255.255
+			(a == 192 && b == 168) || // 192.168.0.0/16
+			a == 127 || // loopback
+			a >= 224 { // multicast/reserved
+			continue
+		}
+		return fmt.Sprintf("%d.%d.%d.%d", a, b, c, d)
+	}
+}
+
+type sampleAddress struct {
+	CountryCode, City, State, Address1, Address2, Postcode string
+}
+
+var addresses = []sampleAddress{
+	{"US", "Springfield", "IL", "742 Evergreen Terrace", "Apt 4B", "62704"},
+	{"DE", "Berlin", "Berlin", "Musterstraße 12", "EG", "10115"},
+	{"IR", "تهران", "تهران", "خیابان ولیعصر، پلاک ۲۳", "طبقه سوم", "1599616313"},
+	{"PL", "Warszawa", "Mazowieckie", "ul. Długa 45", "mieszkanie 12", "00-238"},
+	{"FR", "Paris", "Île-de-France", "10 Rue de Rivoli", "5ème étage", "75001"},
+	{"UK", "London", "Greater London", "221B Baker Street", "Flat 2", "NW1 6XE"},
+	{"IT", "Rome", "Lazio", "Via Nazionale 75", "Scala B", "00184"},
+	{"ES", "Madrid", "Community of Madrid", "Calle Mayor 3", "Piso 1", "28013"},
+	{"CA", "Toronto", "Ontario", "123 Queen St W", "Unit 1502", "M5H 2M9"},
+	{"AU", "Sydney", "NSW", "88 George Street", "Suite 7", "2000"},
+	{"IN", "Mumbai", "Maharashtra", "12 Linking Road", "Flat 501", "400050"},
+	{"RU", "Moscow", "Moscow", "ул. Тверская, д. 7", "кв. 23", "125009"},
+	{"CN", "Beijing", "Beijing", "东直门南大街 5号", "三层", "100007"},
+	{"JP", "Tokyo", "Tokyo", "1-2-3 Shibuya", "Apt 301", "150-0002"},
+	{"BR", "São Paulo", "SP", "Av. Paulista, 1000", "Ap 102", "01310-100"},
+	{"MX", "Mexico City", "CDMX", "Av. Reforma 222", "Depto 33", "06600"},
+	{"AR", "Buenos Aires", "CABA", "Calle Florida 100", "Piso 2", "1005"},
+	{"TR", "Istanbul", "Istanbul", "İstiklal Caddesi 56", "Kat 4", "34433"},
+	{"NL", "Amsterdam", "North Holland", "Damrak 89", "2nd Floor", "1012 LP"},
+	{"SE", "Stockholm", "Stockholm", "Drottninggatan 50", "Lgh 1101", "11121"},
+	{"NO", "Oslo", "Oslo", "Karl Johans gate 15", "Etasje 3", "0159"},
+	{"FI", "Helsinki", "Uusimaa", "Mannerheimintie 10", "Asunto 2A", "00100"},
+	{"DK", "Copenhagen", "Capital Region", "Strøget 20", "2. sal", "1154"},
+	{"CH", "Zurich", "Zurich", "Bahnhofstrasse 10", "Stock 3", "8001"},
+	{"BE", "Brussels", "Brussels-Capital", "Rue Neuve 15", "Etage 2", "1000"},
+	{"AT", "Vienna", "Vienna", "Mariahilfer Str. 99", "Top 6", "1060"},
+	{"GR", "Athens", "Attica", "Ermou 20", "2ος Όροφος", "10563"},
+	{"PT", "Lisbon", "Lisbon", "Avenida da Liberdade 144", "Apartamento 5D", "1250-146"},
+	{"RO", "Bucharest", "Bucharest", "Strada Lipscani 35", "Etaj 1", "030036"},
+	{"BG", "Sofia", "Sofia", "Vitosha Blvd 18", "Ap. 12", "1000"},
+	{"HU", "Budapest", "Budapest", "Andrássy út 45", "2nd floor", "1061"},
+	{"CZ", "Prague", "Prague", "Wenceslas Square 1", "Suite 4", "110 00"},
+	{"SK", "Bratislava", "Bratislava", "Obchodná 12", "Byt 6", "811 06"},
+	{"HR", "Zagreb", "Zagreb", "Ilica 50", "Kat 1", "10000"},
+	{"SI", "Ljubljana", "Ljubljana", "Slovenska cesta 25", "Nadstropje 3", "1000"},
+	{"EE", "Tallinn", "Harju", "Pikk 23", "Korter 5", "10133"},
+	{"LV", "Riga", "Riga", "Brīvības iela 100", "Dzīvoklis 8", "LV-1011"},
+	{"LT", "Vilnius", "Vilnius", "Gedimino pr. 9", "Butas 2", "01103"},
+	{"UA", "Kyiv", "Kyiv", "Khreshchatyk St, 22", "kv 10", "01001"},
+	{"RS", "Belgrade", "Belgrade", "Knez Mihailova 14", "Sprat 3", "11000"},
+	{"BA", "Sarajevo", "Sarajevo", "Ferhadija 12", "Stan 7", "71000"},
+	{"MK", "Skopje", "Skopje", "Makedonija Str. 5", "Apartment 11", "1000"},
+	{"AL", "Tirana", "Tirana", "Rruga Myslym Shyri 77", "Kati 2", "1001"},
+	{"GE", "Tbilisi", "Tbilisi", "Rustaveli Ave 40", "Apt 9", "0108"},
+	{"AM", "Yerevan", "Yerevan", "Abovyan St 22", "Flat 4", "0001"},
+	{"KZ", "Almaty", "Almaty", "Dostyk Ave 34", "Kv 16", "050010"},
+	{"AZ", "Baku", "Baku", "Nizami St 78", "Mənzil 5", "AZ1000"},
+	{"SA", "Riyadh", "Riyadh", "Olaya St 234", "Floor 6", "12211"},
+}
+
+func RandomUserPrimaryAddress() *UserEntityPrimaryAddress {
+	rand.Seed(time.Now().UnixNano())
+	s := addresses[rand.Intn(len(addresses))]
+	return &UserEntityPrimaryAddress{
+		AddressLine1:    (s.Address1),
+		AddressLine2:    emigo.NullableOf(s.Address2),
+		City:            emigo.NullableOf(s.City),
+		StateOrProvince: emigo.NullableOf(s.State),
+		PostalCode:      emigo.NullableOf(s.Postcode),
+		CountryCode:     emigo.NullableOf(s.CountryCode),
+	}
+}
+
+func init() {
+
+	UserActions.SeederInit = func() *UserEntity {
+		return &UserEntity{
+			FirstName:      getRandomName(firstNames),
+			LastName:       getRandomName(lastNames),
+			BirthDate:      complexes.XDate((getRandomBirthDate())),
+			Photo:          getRandomAvatarURL(),
+			Gender:         emigo.NullableOf(randomZeroOrOne()),
+			LastIpAddress:  randomPublicIP(),
+			PrimaryAddress: emigo.NullableOf(*RandomUserPrimaryAddress()),
+		}
+	}
 }

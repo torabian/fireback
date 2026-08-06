@@ -82,6 +82,120 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 				GsmSendSmsActionGin(g, GsmSendSmsAction)
 				GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
 
+				// Entities migrated from AbacModule3.yml's old entities: section to
+				// Abac.emi.yml get their CRUD actions wired the same way.
+				TableViewSizingBrowseActionGin(g, TableViewSizingBrowseAction)
+				TableViewSizingGetActionGin(g, TableViewSizingGetAction)
+				TableViewSizingCreateActionGin(g, TableViewSizingCreateAction)
+				TableViewSizingUpdateActionGin(g, TableViewSizingUpdateAction)
+				TableViewSizingAwareDeletePreviewActionGin(g, TableViewSizingAwareDeletePreviewAction)
+				TableViewSizingAwareDeleteActionGin(g, TableViewSizingAwareDeleteAction)
+
+				TimezoneGroupBrowseActionGin(g, TimezoneGroupBrowseAction)
+				TimezoneGroupGetActionGin(g, TimezoneGroupGetAction)
+				TimezoneGroupCreateActionGin(g, TimezoneGroupCreateAction)
+				TimezoneGroupUpdateActionGin(g, TimezoneGroupUpdateAction)
+				TimezoneGroupAwareDeletePreviewActionGin(g, TimezoneGroupAwareDeletePreviewAction)
+				TimezoneGroupAwareDeleteActionGin(g, TimezoneGroupAwareDeleteAction)
+
+				PreferenceBrowseActionGin(g, PreferenceBrowseAction)
+				PreferenceGetActionGin(g, PreferenceGetAction)
+				PreferenceCreateActionGin(g, PreferenceCreateAction)
+				PreferenceUpdateActionGin(g, PreferenceUpdateAction)
+				PreferenceAwareDeletePreviewActionGin(g, PreferenceAwareDeletePreviewAction)
+				PreferenceAwareDeleteActionGin(g, PreferenceAwareDeleteAction)
+
+				UserProfileBrowseActionGin(g, UserProfileBrowseAction)
+				UserProfileGetActionGin(g, UserProfileGetAction)
+				UserProfileCreateActionGin(g, UserProfileCreateAction)
+				UserProfileUpdateActionGin(g, UserProfileUpdateAction)
+				UserProfileAwareDeletePreviewActionGin(g, UserProfileAwareDeletePreviewAction)
+				UserProfileAwareDeleteActionGin(g, UserProfileAwareDeleteAction)
+
+				PendingWorkspaceInviteBrowseActionGin(g, PendingWorkspaceInviteBrowseAction)
+				PendingWorkspaceInviteGetActionGin(g, PendingWorkspaceInviteGetAction)
+				PendingWorkspaceInviteCreateActionGin(g, PendingWorkspaceInviteCreateAction)
+				PendingWorkspaceInviteUpdateActionGin(g, PendingWorkspaceInviteUpdateAction)
+				PendingWorkspaceInviteAwareDeletePreviewActionGin(g, PendingWorkspaceInviteAwareDeletePreviewAction)
+				PendingWorkspaceInviteAwareDeleteActionGin(g, PendingWorkspaceInviteAwareDeleteAction)
+
+				TokenBrowseActionGin(g, TokenBrowseAction)
+				TokenGetActionGin(g, TokenGetAction)
+				TokenCreateActionGin(g, TokenCreateAction)
+				TokenUpdateActionGin(g, TokenUpdateAction)
+				TokenAwareDeletePreviewActionGin(g, TokenAwareDeletePreviewAction)
+				TokenAwareDeleteActionGin(g, TokenAwareDeleteAction)
+
+				WorkspaceInviteBrowseActionGin(g, WorkspaceInviteBrowseAction)
+				WorkspaceInviteGetActionGin(g, WorkspaceInviteGetAction)
+				WorkspaceInviteCreateActionGin(g, WorkspaceInviteCreateAction)
+				WorkspaceInviteUpdateActionGin(g, WorkspaceInviteUpdateAction)
+				WorkspaceInviteAwareDeletePreviewActionGin(g, WorkspaceInviteAwareDeletePreviewAction)
+				WorkspaceInviteAwareDeleteActionGin(g, WorkspaceInviteAwareDeleteAction)
+
+				UserWorkspaceBrowseActionGin(g, UserWorkspaceBrowseAction)
+				UserWorkspaceGetActionGin(g, UserWorkspaceGetAction)
+				UserWorkspaceCreateActionGin(g, UserWorkspaceCreateAction)
+				UserWorkspaceUpdateActionGin(g, UserWorkspaceUpdateAction)
+				UserWorkspaceAwareDeletePreviewActionGin(g, UserWorkspaceAwareDeletePreviewAction)
+				UserWorkspaceAwareDeleteActionGin(g, UserWorkspaceAwareDeleteAction)
+
+				WorkspaceRoleBrowseActionGin(g, WorkspaceRoleBrowseAction)
+				WorkspaceRoleGetActionGin(g, WorkspaceRoleGetAction)
+				WorkspaceRoleCreateActionGin(g, WorkspaceRoleCreateAction)
+				WorkspaceRoleUpdateActionGin(g, WorkspaceRoleUpdateAction)
+				WorkspaceRoleAwareDeletePreviewActionGin(g, WorkspaceRoleAwareDeletePreviewAction)
+				WorkspaceRoleAwareDeleteActionGin(g, WorkspaceRoleAwareDeleteAction)
+
+				RegionalContentBrowseActionGin(g, RegionalContentBrowseAction)
+				RegionalContentGetActionGin(g, RegionalContentGetAction)
+				RegionalContentCreateActionGin(g, RegionalContentCreateAction)
+				RegionalContentUpdateActionGin(g, RegionalContentUpdateAction)
+				RegionalContentAwareDeletePreviewActionGin(g, RegionalContentAwareDeletePreviewAction)
+				RegionalContentAwareDeleteActionGin(g, RegionalContentAwareDeleteAction)
+
+				AppMenuBrowseActionGin(g, AppMenuBrowseAction)
+				AppMenuGetActionGin(g, AppMenuGetAction)
+				AppMenuCreateActionGin(g, AppMenuCreateAction)
+				AppMenuUpdateActionGin(g, AppMenuUpdateAction)
+				AppMenuAwareDeletePreviewActionGin(g, AppMenuAwareDeletePreviewAction)
+				AppMenuAwareDeleteActionGin(g, AppMenuAwareDeleteAction)
+
+				WorkspaceConfigBrowseActionGin(g, WorkspaceConfigBrowseAction)
+				WorkspaceConfigGetActionGin(g, WorkspaceConfigGetAction)
+				WorkspaceConfigCreateActionGin(g, WorkspaceConfigCreateAction)
+				WorkspaceConfigUpdateActionGin(g, WorkspaceConfigUpdateAction)
+				WorkspaceConfigAwareDeletePreviewActionGin(g, WorkspaceConfigAwareDeletePreviewAction)
+				WorkspaceConfigAwareDeleteActionGin(g, WorkspaceConfigAwareDeleteAction)
+
+				RoleBrowseActionGin(g, RoleBrowseAction)
+				RoleGetActionGin(g, RoleGetAction)
+				RoleCreateActionGin(g, RoleCreateAction)
+				RoleUpdateActionGin(g, RoleUpdateAction)
+				RoleAwareDeletePreviewActionGin(g, RoleAwareDeletePreviewAction)
+				RoleAwareDeleteActionGin(g, RoleAwareDeleteAction)
+
+				WorkspaceTypeBrowseActionGin(g, WorkspaceTypeBrowseAction)
+				WorkspaceTypeGetActionGin(g, WorkspaceTypeGetAction)
+				WorkspaceTypeCreateActionGin(g, WorkspaceTypeCreateAction)
+				WorkspaceTypeUpdateActionGin(g, WorkspaceTypeUpdateAction)
+				WorkspaceTypeAwareDeletePreviewActionGin(g, WorkspaceTypeAwareDeletePreviewAction)
+				WorkspaceTypeAwareDeleteActionGin(g, WorkspaceTypeAwareDeleteAction)
+
+				UserBrowseActionGin(g, UserBrowseAction)
+				UserGetActionGin(g, UserGetAction)
+				UserCreateActionGin(g, UserCreateAction)
+				UserUpdateActionGin(g, UserUpdateAction)
+				UserAwareDeletePreviewActionGin(g, UserAwareDeletePreviewAction)
+				UserAwareDeleteActionGin(g, UserAwareDeleteAction)
+
+				WorkspaceBrowseActionGin(g, WorkspaceBrowseAction)
+				WorkspaceGetActionGin(g, WorkspaceGetAction)
+				WorkspaceCreateActionGin(g, WorkspaceCreateAction)
+				WorkspaceUpdateActionGin(g, WorkspaceUpdateAction)
+				WorkspaceAwareDeletePreviewActionGin(g, WorkspaceAwareDeletePreviewAction)
+				WorkspaceAwareDeleteActionGin(g, WorkspaceAwareDeleteAction)
+
 				return nil
 			},
 		},
@@ -105,6 +219,10 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		ALL_WORKSPACE_PERMISSIONS,
 		ALL_PERM_ABAC_MODULE,
 		ALL_TIMEZONE_GROUP_PERMISSIONS,
+		ALL_PREFERENCE_PERMISSIONS,
+		ALL_USER_PROFILE_PERMISSIONS,
+		ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
+		ALL_TOKEN_PERMISSIONS,
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
@@ -117,16 +235,15 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 			&WorkspaceInviteEntity{},
 			&WorkspaceConfigEntity{},
 			&WorkspaceTypeEntity{},
-			&WorkspaceTypeEntityPolyglot{},
 			&GsmProviderEntity{},
 			&WorkspaceRoleEntity{},
 			&UserWorkspaceEntity{},
 			&RegionalContentEntity{},
 			&TableViewSizingEntity{},
+			&UserProfileEntity{},
+			&PendingWorkspaceInviteEntity{},
 			&AppMenuEntity{},
-			&AppMenuEntityPolyglot{},
 			&TimezoneGroupEntity{},
-			&TimezoneGroupEntityPolyglot{},
 		}
 
 		items2 := []interface{}{}
@@ -165,31 +282,21 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	})
 
 	module.Actions = [][]fireback.Module3Action{
-		GetUserModule3Actions(),
-		GetWorkspaceModule3Actions(),
-		GetRoleModule3Actions(),
-		GetWorkspaceTypeModule3Actions(),
-		GetGsmProviderModule3Actions(),
-		GetWorkspaceInviteModule3Actions(),
-		GetTableViewSizingModule3Actions(),
-		GetAppMenuModule3Actions(),
-		GetEmailConfirmationModule3Actions(),
-		GetUserWorkspaceModule3Actions(),
-		GetWorkspaceRoleModule3Actions(),
-		GetTimezoneGroupModule3Actions(),
-		GetWorkspaceConfigModule3Actions(),
-		GetRegionalContentModule3Actions(),
 		// {
 		// 	AS_FIREBACK_ACTION,
 		// },
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		RoleCliFn(),
+		RoleBrowseActionCliHandler(RoleBrowseAction),
+		RoleGetActionCliHandler(RoleGetAction),
+		RoleCreateActionCliHandler(RoleCreateAction),
+		RoleUpdateActionCliHandler(RoleUpdateAction),
+		RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
+		RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
 		UserCliFn(),
 		WorkspaceCliFn(),
 		&MiscCli,
-		TimezoneGroupCliFn(),
 		// The actions below moved to Abac.emi.yml and don't have a home yet among the
 		// entity-scoped cli groups above (AcceptInvite/UserInvitations live under UserCliFn,
 		// QueryUserRoleWorkspaces/QueryWorkspaceTypesPublicly under WorkspaceCliFn,
@@ -209,6 +316,34 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		SendEmailWithProviderActionCliHandler(SendEmailWithProviderAction),
 		GsmSendSmsActionCliHandler(GsmSendSmsAction),
 		GsmSendSmsWithProviderActionCliHandler(GsmSendSmsWithProviderAction),
+
+		TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
+		TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
+		TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
+		TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
+		TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
+		TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
+
+		PreferenceBrowseActionCliHandler(PreferenceBrowseAction),
+		PreferenceGetActionCliHandler(PreferenceGetAction),
+		PreferenceCreateActionCliHandler(PreferenceCreateAction),
+		PreferenceUpdateActionCliHandler(PreferenceUpdateAction),
+		PreferenceAwareDeletePreviewActionCliHandler(PreferenceAwareDeletePreviewAction),
+		PreferenceAwareDeleteActionCliHandler(PreferenceAwareDeleteAction),
+
+		UserProfileBrowseActionCliHandler(UserProfileBrowseAction),
+		UserProfileGetActionCliHandler(UserProfileGetAction),
+		UserProfileCreateActionCliHandler(UserProfileCreateAction),
+		UserProfileUpdateActionCliHandler(UserProfileUpdateAction),
+		UserProfileAwareDeletePreviewActionCliHandler(UserProfileAwareDeletePreviewAction),
+		UserProfileAwareDeleteActionCliHandler(UserProfileAwareDeleteAction),
+
+		PendingWorkspaceInviteBrowseActionCliHandler(PendingWorkspaceInviteBrowseAction),
+		PendingWorkspaceInviteGetActionCliHandler(PendingWorkspaceInviteGetAction),
+		PendingWorkspaceInviteCreateActionCliHandler(PendingWorkspaceInviteCreateAction),
+		PendingWorkspaceInviteUpdateActionCliHandler(PendingWorkspaceInviteUpdateAction),
+		PendingWorkspaceInviteAwareDeletePreviewActionCliHandler(PendingWorkspaceInviteAwareDeletePreviewAction),
+		PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
 	})
 
 	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})
@@ -225,8 +360,18 @@ var AbacActions cli.Command = cli.Command{
 				Name:  "internal",
 				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",
 				Commands: []*cli.Command{
-					PublicJoinKeyCliFn(),
-					PublicAuthenticationCliFn(),
+					PublicJoinKeyBrowseActionCliHandler(PublicJoinKeyBrowseAction),
+					PublicJoinKeyGetActionCliHandler(PublicJoinKeyGetAction),
+					PublicJoinKeyCreateActionCliHandler(PublicJoinKeyCreateAction),
+					PublicJoinKeyUpdateActionCliHandler(PublicJoinKeyUpdateAction),
+					PublicJoinKeyAwareDeletePreviewActionCliHandler(PublicJoinKeyAwareDeletePreviewAction),
+					PublicJoinKeyAwareDeleteActionCliHandler(PublicJoinKeyAwareDeleteAction),
+					PublicAuthenticationBrowseActionCliHandler(PublicAuthenticationBrowseAction),
+					PublicAuthenticationGetActionCliHandler(PublicAuthenticationGetAction),
+					PublicAuthenticationCreateActionCliHandler(PublicAuthenticationCreateAction),
+					PublicAuthenticationUpdateActionCliHandler(PublicAuthenticationUpdateAction),
+					PublicAuthenticationAwareDeletePreviewActionCliHandler(PublicAuthenticationAwareDeletePreviewAction),
+					PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
 				},
 			},
 		},

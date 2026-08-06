@@ -10,8 +10,6 @@ import (
 
 func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
 
-	fmt.Println(4, query.UserAccessPerWorkspace.Json(), query.WorkspaceId)
-
 	if query.UserAccessPerWorkspace == nil {
 		return []string{}, []string{}
 	}

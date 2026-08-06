@@ -72,8 +72,12 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 		WorkspaceId:         emigo.NullableOf(ROOT_VAR),
 		SessionSecret:       secret,
 		IsInCreationProcess: emigo.NullableOf(false),
-		Passport:            passport,
-		User:                user,
+	}
+	if passport != nil {
+		item.PassportId = emigo.NullableOf(passport.UniqueId)
+	}
+	if user != nil {
+		item.UserId = emigo.NullableOf(user.UniqueId)
 	}
 
 	// add time based dual factor information

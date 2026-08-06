@@ -9,8 +9,8 @@ import { type QueryArchiveColumn } from "../../definitions/common";
 import { type Filter } from "../../definitions/definitions";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
 import { useT } from "../../hooks/useT";
-import { useGetTableViewSizingByUniqueId } from "../../sdk/modules/abac/useGetTableViewSizingByUniqueId";
-import { usePatchTableViewSizing } from "../../sdk/modules/abac/usePatchTableViewSizing";
+import { useTableViewSizingGetActionQuery } from "../../sdk/abac/TableViewSizingGetAction";
+import { useTableViewSizingUpdateAction } from "../../sdk/abac/TableViewSizingUpdateAction";
 import { PaginateTable } from "../common-data-table/PaginateTable";
 import Link from "../link/Link";
 import { filtersToJsonQuery } from "./EnttityManagerHelper";
@@ -113,27 +113,32 @@ export const CommonListManager = ({
   const { view } = useViewMode();
   const queryClient = useQueryClient();
 
-  const { query } = useGetTableViewSizingByUniqueId({
-    query: { uniqueId: queryHook.UKEY },
+  const query = useTableViewSizingGetActionQuery({
+    params: { uniqueId: queryHook.UKEY },
   });
 
   const [columnSizes, setColumnSizes] = useState<any>(
     columns.map((t) => ({ columnName: t.name, width: t.width })),
   );
 
+  const tableSizingSizes = (query.data as any)?.data?.item?.sizes;
+
   useEffect(() => {
-    if ((query as any).data?.data?.sizes) {
-      setColumnSizes(JSON.parse((query as any).data?.data?.sizes));
+    if (tableSizingSizes) {
+      setColumnSizes(JSON.parse(tableSizingSizes));
     } else {
       const table = localStorage.getItem(`table_${queryHook.UKEY}`);
       if (table) {
         setColumnSizes(JSON.parse(table));
       }
     }
-  }, [(query as any).data?.data?.sizes]);
+  }, [tableSizingSizes]);
 
-  const { submit: submitTableSizing } = usePatchTableViewSizing({
-    queryClient,
+  // tableViewSizing is addressed by a caller-chosen uniqueId (queryHook.UKEY, a
+  // per-table, per-user key) - the update action upserts (creates on first save)
+  // for that same uniqueId server-side.
+  const { mutate: submitTableSizing } = useTableViewSizingUpdateAction({
+    params: { uniqueId: queryHook.UKEY },
   });
 
   const delHook =
@@ -173,10 +178,7 @@ export const CommonListManager = ({
   const onColumnWidthsChange = (nextColumnWidths: TableColumnWidthInfo[]) => {
     setColumnSizes(nextColumnWidths);
     const sizes = JSON.stringify(nextColumnWidths);
-    submitTableSizing({
-      uniqueId: queryHook.UKEY,
-      sizes,
-    });
+    submitTableSizing({ sizes });
     localStorage.setItem(`table_${queryHook.UKEY}`, sizes);
   };
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -68,18 +67,21 @@ var PassportCli cli.Command = cli.Command{
 	Usage: "Manage the methods of authentication in the app, as well as users passports (root only)",
 	Commands: []*cli.Command{
 		&AppendEmailPassportToUser,
-		&PassportUpdateCmd,
 		OsLoginAuthenticateActionCliHandler(OsLoginAuthenticateAction),
-		PassportMethodCliFn(),
+		PassportMethodBrowseActionCliHandler(PassportMethodBrowseAction),
+		PassportMethodGetActionCliHandler(PassportMethodGetAction),
+		PassportMethodCreateActionCliHandler(PassportMethodCreateAction),
+		PassportMethodUpdateActionCliHandler(PassportMethodUpdateAction),
+		PassportMethodAwareDeletePreviewActionCliHandler(PassportMethodAwareDeletePreviewAction),
+		PassportMethodAwareDeleteActionCliHandler(PassportMethodAwareDeleteAction),
 		CheckPassportMethodsActionCliHandler(CheckPassportMethodsAction),
 		UserPassportsActionCliHandler(UserPassportsAction),
 		OauthAuthenticateActionCliHandler(OauthAuthenticateAction),
-		&PassportWipeCmd,
-		&PassportUpdateCmd,
-		fireback.GetCommonRemoveQuery(
-			reflect.ValueOf(&PassportEntity{}).Elem(),
-			PassportActions.RemoveEnqueue,
-		),
-		PASSPORT_ACTION_QUERY.ToCli(),
+		PassportBrowseActionCliHandler(PassportBrowseAction),
+		PassportGetActionCliHandler(PassportGetAction),
+		PassportCreateActionCliHandler(PassportCreateAction),
+		PassportUpdateActionCliHandler(PassportUpdateAction),
+		PassportAwareDeletePreviewActionCliHandler(PassportAwareDeletePreviewAction),
+		PassportAwareDeleteActionCliHandler(PassportAwareDeleteAction),
 	},
 }
