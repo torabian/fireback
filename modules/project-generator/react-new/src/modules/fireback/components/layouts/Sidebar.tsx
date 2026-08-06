@@ -8,6 +8,7 @@ import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { osResources } from "../../resources/resources";
+import type { AppMenuOptionalDto } from "../../sdk/abac/AppMenuOptionalDto";
 import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
@@ -15,18 +16,17 @@ import { MenuParticle } from "./MenuParticle";
 import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
 
 export function dataMenuToMenu(
-  data: AppMenuEntity,
+  data: AppMenuOptionalDto,
   permissionCheck: (permissionKey?: string | null) => boolean = () => true,
   locale: string,
 ): MenuItem | null {
-  // const { locale } = usePureLocale();
-
+  console.log(17, data.capabilityId);
   if (!permissionCheck(data.capabilityId)) {
     return null;
   }
 
   const children = (data.children || [])
-    .map((v: AppMenuEntity) => dataMenuToMenu(v, permissionCheck, locale))
+    .map((v: AppMenuOptionalDto) => dataMenuToMenu(v, permissionCheck, locale))
     .filter(Boolean) as MenuItem[];
 
   let label = data.label || "";

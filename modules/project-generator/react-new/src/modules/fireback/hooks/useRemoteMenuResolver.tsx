@@ -1,19 +1,38 @@
+import { useContext } from "react";
 import { dataMenuToMenu } from "../components/layouts/Sidebar";
 import { type MenuItem } from "../definitions/common";
-import { useGetCteAppMenus } from "../sdk/modules/abac/useGetCteAppMenus";
-import { useContext, useEffect } from "react";
-import { useQueryClient } from "react-query";
-import { useLocale } from "./useLocale";
-import { RemoteQueryContext } from "../sdk/core/react-tools";
-import { userMeetsAccess2 } from "./accessLevels";
+import { useCteAppMenusActionQuery } from "../sdk/abac/CteAppMenusAction";
+import { AppMenuOptionalDto } from "../sdk/abac/AppMenuOptionalDto";
 import { useQueryUserRoleWorkspacesActionQuery } from "../sdk/abac/QueryUserRoleWorkspacesAction";
+import { RemoteQueryContext } from "../sdk/core/react-tools";
+import { GResponse } from "../sdk/sdk/envelopes";
+import { userMeetsAccess2 } from "./accessLevels";
+import { useLocale } from "./useLocale";
+
+// AppMenuOptionalDto is Emi-generated from the "appMenu" entity - Emi has no
+// self-referencing dto, so it has no "children" field at all, and its constructor
+// only copies its own known fields. /cte-app-menus's response nests real children
+// (with their own capabilityId, etc.) under each item though - see
+// AppMenuActions.CteQuery / AppMenuTreeNode on the backend. AppMenuTreeItem +
+// toAppMenuTree below are the client-side mirror of that hand-written backend type,
+// recursively preserving "children" instead of losing it to the plain
+// AppMenuOptionalDto cast (which is CteAppMenusAction's default creatorFn).
+class AppMenuTreeItem extends AppMenuOptionalDto {
+  children: AppMenuTreeItem[] = [];
+}
+
+function toAppMenuTree(item: unknown): AppMenuTreeItem {
+  const dto = new AppMenuTreeItem(item);
+  const rawChildren = (item as { children?: unknown[] })?.children ?? [];
+  dto.children = rawChildren.map(toAppMenuTree);
+  return dto;
+}
 
 /**
  *
  * @param menuGroup Use it later for getting different menu items for navbar, other places, etc
  */
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
-  const queryClient = useQueryClient();
   const { locale } = useLocale();
   const { selectedUrw, session } = useContext(RemoteQueryContext);
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
@@ -22,20 +41,10 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
 
   const enabled = !queryUrw.isError && queryUrw.isSuccess && !!session?.token;
 
-  const { query } = useGetCteAppMenus({
-    queryClient,
-    queryOptions: {
-      refetchOnWindowFocus: false,
-      enabled,
-    },
-    query: {
-      itemsPerPage: 9999,
-    },
+  const { data } = useCteAppMenusActionQuery({
+    enabled,
+    creatorFn: toAppMenuTree,
   });
-
-  useEffect(() => {
-    query.refetch();
-  }, [locale]);
 
   let result: MenuItem[] = [];
 
@@ -51,9 +60,12 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
     );
   };
 
-  if (query.data?.data?.items && query.data?.data?.items.length) {
-    result = query.data?.data?.items
-      .map((item) => dataMenuToMenu(item, visibilityCheck, locale))
+  if (data instanceof GResponse) {
+    result = data?.data?.items
+      .map((item) => {
+        console.log(102, item);
+        return dataMenuToMenu(item, visibilityCheck, locale);
+      })
       .filter(Boolean) as MenuItem[];
   }
 
