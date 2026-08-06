@@ -9,6 +9,7 @@ import { useWorkspaceConfigDistinctUpdateAction } from "@/modules/fireback/sdk/a
 import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
 import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
 import { strings } from "./strings/translations";
+
 export const WorkspaceConfigEntityManager = ({
   data,
 }: DtoEntity<WorkspaceConfigEntity>) => {

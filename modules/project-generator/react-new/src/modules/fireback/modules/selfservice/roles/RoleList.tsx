@@ -1,8 +1,8 @@
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
 import { useT } from "@/modules/fireback/hooks/useT";
+import { useRoleAwareDeleteAction } from "@/modules/fireback/sdk/abac/RoleAwareDeleteAction";
+import { useRoleBrowseActionQuery } from "@/modules/fireback/sdk/abac/RoleBrowseAction";
 import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
-import { usePostRoleRemove } from "@/modules/fireback/sdk/modules/abac/usePostRoleRemove";
 import { columns } from "./RoleColumns";
 
 export const RoleList = () => {
@@ -12,11 +12,11 @@ export const RoleList = () => {
     <>
       <CommonListManager
         columns={columns(t)}
-        queryHook={useGetRoles}
+        queryHook={useRoleBrowseActionQuery}
         uniqueIdHrefHandler={(uniqueId: string) =>
           RoleEntity.Navigation.single(uniqueId)
         }
-        deleteHook={usePostRoleRemove}
+        deleteHook={useRoleAwareDeleteAction}
       ></CommonListManager>
     </>
   );

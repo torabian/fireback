@@ -1,15 +1,16 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { PassportMethodForm } from "./PassportMethodEditForm";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
-import { useGetPassportMethodByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetPassportMethodByUniqueId";
-import { usePostPassportMethod } from "@/modules/fireback/sdk/modules/abac/usePostPassportMethod";
-import { usePatchPassportMethod } from "@/modules/fireback/sdk/modules/abac/usePatchPassportMethod";
+import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
+import { usePassportMethodCreateAction } from "@/modules/fireback/sdk/abac/PassportMethodCreateAction";
+import { usePassportMethodGetActionQuery } from "@/modules/fireback/sdk/abac/PassportMethodGetAction";
+import { usePassportMethodUpdateAction } from "@/modules/fireback/sdk/abac/PassportMethodUpdateAction";
+import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
+import { PassportMethodForm } from "./PassportMethodEditForm";
 import { strings } from "./strings/translations";
+
 export const PassportMethodEntityManager = ({
   data,
 }: DtoEntity<PassportMethodEntity>) => {
@@ -19,15 +20,13 @@ export const PassportMethodEntityManager = ({
   >({
     data,
   });
-  const getSingleHook = useGetPassportMethodByUniqueId({
-    query: { uniqueId },
+
+  const getSingleHook = usePassportMethodGetActionQuery({
+    params: { uniqueId },
   });
-  const postHook = usePostPassportMethod({
-    queryClient,
-  });
-  const patchHook = usePatchPassportMethod({
-    queryClient,
-  });
+  const postHook = usePassportMethodCreateAction();
+  const patchHook = usePassportMethodUpdateAction({ params: { uniqueId } });
+
   return (
     <CommonEntityManager
       postHook={postHook}
@@ -35,7 +34,7 @@ export const PassportMethodEntityManager = ({
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          PassportMethodEntity.Navigation.query(undefined, locale)
+          PassportMethodEntity.Navigation.query(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>

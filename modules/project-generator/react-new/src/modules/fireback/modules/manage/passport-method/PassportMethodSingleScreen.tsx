@@ -1,16 +1,19 @@
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useGetPassportMethodByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetPassportMethodByUniqueId";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
 import { useS } from "@/modules/fireback/hooks/useS";
+import { usePassportMethodGetActionQuery } from "@/modules/fireback/sdk/abac/PassportMethodGetAction";
+import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
 import { strings } from "./strings/translations";
+
 export const PassportMethodSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
-  const getSingleHook = useGetPassportMethodByUniqueId({ query: { uniqueId } });
-  var d: PassportMethodEntity | undefined = getSingleHook.query.data?.data;
+  const getSingleHook = usePassportMethodGetActionQuery({
+    params: { uniqueId },
+  });
+  var d = getSingleHook.data?.data?.item;
   const t = useS(strings);
-  // usePageTitle(`${d?.name}`);
+
   return (
     <>
       <CommonSingleManager
