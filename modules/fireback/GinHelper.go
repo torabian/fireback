@@ -175,40 +175,6 @@ func CastRoutes(routes []Module3Action, r *gin.Engine) {
 	}
 }
 
-func CastRoutes2(routes []Module3Action, r *gin.RouterGroup) {
-	for _, route := range routes {
-
-		if route.Url == "" {
-			continue
-		}
-		if route.Method == "GET" {
-			r.GET(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "REACTIVE" {
-			r.GET(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "DELETE" {
-			r.DELETE(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "POST" {
-			r.POST(route.Url, CastRouteToHandler(route)...)
-		}
-		// WebRtc is also a post request in it's nature
-		if route.Method == "WEBRTC" {
-			r.POST(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "PATCH" {
-			r.PATCH(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "OPTIONS" {
-			r.OPTIONS(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "HEAD" {
-			r.HEAD(route.Url, CastRouteToHandler(route)...)
-		}
-	}
-}
-
 type HttpRouteInformation struct {
 	Method         string
 	Url            string

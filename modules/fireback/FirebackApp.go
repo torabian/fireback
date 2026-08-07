@@ -327,9 +327,7 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 
 	for _, item := range x.Modules {
-		moduleNamespace := g.Group(item.Namespace)
 
-		// Sometimes we need to add custom things to gin.
 		for _, hook := range item.GinWebServerInitHooks {
 			if err := hook(g, x); err != nil {
 				LOG.Error("Error %w", zap.Error(err))
@@ -337,17 +335,6 @@ func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 			}
 		}
 
-		if item.ActionsBundle != nil {
-			CastRoutes2(item.ActionsBundle.Actions, moduleNamespace)
-		}
-
-		for _, bundle := range item.EntityBundles {
-			CastRoutes2(bundle.Actions, moduleNamespace)
-		}
-
-		if len(item.Children) > 0 {
-			// FirebackAppToGin(x, g, prefix+"/"+item.Name)
-		}
 	}
 }
 
