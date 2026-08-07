@@ -277,12 +277,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// GsmProviderImportMocks()
 	})
 
-	module.Actions = [][]fireback.Module3Action{
-		// {
-		// 	AS_FIREBACK_ACTION,
-		// },
-	}
-
 	module.ProvideCliHandlers([]*cli.Command{
 		RoleBrowseActionCliHandler(RoleBrowseAction),
 		RoleGetActionCliHandler(RoleGetAction),

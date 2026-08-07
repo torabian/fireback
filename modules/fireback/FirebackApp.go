@@ -337,10 +337,6 @@ func FirebackAppToGin(x *FirebackApp, g *gin.RouterGroup, prefix string) {
 			}
 		}
 
-		for _, actions := range item.Actions {
-			CastRoutes2(actions, moduleNamespace)
-		}
-
 		if item.ActionsBundle != nil {
 			CastRoutes2(item.ActionsBundle.Actions, moduleNamespace)
 		}

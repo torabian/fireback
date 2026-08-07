@@ -61,7 +61,6 @@ type ModuleProvider struct {
 	BackupTables        []TableMetaData
 	Tasks               []*TaskAction
 	Definitions         *embed.FS
-	Actions             [][]Module3Action
 	Translations        map[string]map[string]string
 
 	GoMigrateDirectory *embed.FS
