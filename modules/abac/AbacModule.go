@@ -12,19 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-func AppMenuWriteQueryCteMock(ctx fireback.MockQueryContext) {
-	for _, lang := range ctx.Languages {
-		itemsPerPage := 9999
-		if ctx.ItemsPerPage > 0 {
-			itemsPerPage = ctx.ItemsPerPage
-		}
-		f := fireback.QueryDSL{ItemsPerPage: itemsPerPage, Language: lang, WithPreloads: ctx.WithPreloads, Deep: true}
-		items, count, _ := interfacetools.AppMenuActions.CteQuery(f)
-		result := fireback.QueryEntitySuccessResult(f, items, count)
-		fireback.WriteMockDataToFile(lang, "", "AppMenu", result)
-	}
-}
-
 type MicroserviceSetupConfig struct {
 	AuthorizationResolver WithAuthorizationPureImpl
 }

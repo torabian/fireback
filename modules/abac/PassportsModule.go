@@ -65,23 +65,6 @@ func PassportsModuleSetup() *fireback.ModuleProvider {
 		},
 	}
 
-	module.ProvideMockWriterHandler(func(languages []string) {
-		for _, lang := range languages {
-			var result *UserSessionDto
-			if result != nil {
-
-				fireback.WriteMockDataToFile(lang, "", "UserSessionDto", gin.H{
-					"data": gin.H{
-						"user":     result.User,
-						"passport": result.Passport,
-						"token":    result.Token,
-						// "userRoleWorkspaces": result.UserRoleWorkspaces,
-					},
-				})
-			}
-		}
-	})
-
 	module.ProvidePermissionHandler(
 		ALL_PASSPORT_PERMISSIONS,
 		ALL_PASSPORT_METHOD_PERMISSIONS,

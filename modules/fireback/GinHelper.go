@@ -145,36 +145,6 @@ func CastRouteToHandler(r Module3Action) []gin.HandlerFunc {
 	return items
 }
 
-func CastRoutes(routes []Module3Action, r *gin.Engine) {
-	for _, route := range routes {
-
-		if route.Url == "" {
-			continue
-		}
-		if route.Method == "GET" {
-			r.GET(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "REACTIVE" {
-			r.GET(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "DELETE" {
-			r.DELETE(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "POST" {
-			r.POST(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "PATCH" {
-			r.PATCH(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "OPTIONS" {
-			r.OPTIONS(route.Url, CastRouteToHandler(route)...)
-		}
-		if route.Method == "HEAD" {
-			r.HEAD(route.Url, CastRouteToHandler(route)...)
-		}
-	}
-}
-
 type HttpRouteInformation struct {
 	Method         string
 	Url            string
@@ -238,18 +208,6 @@ func GetInterfaceName(temp interface{}) string {
 
 func GetFunctionNameFull(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
-}
-
-func WriteMockDataToFile(lang string, region string, entityName string, data2 any) {
-
-	fmt.Println("Writing:", lang, region, entityName, data2)
-	body, err := json.MarshalIndent(data2, "", "  ")
-	if err != nil {
-		// log.Fatal(err)
-	}
-
-	os.Mkdir("./artifacts/md/"+lang, 0777)
-	os.WriteFile("./artifacts/md/"+lang+"/"+entityName+".json", body, 0644)
 }
 
 func WriteEntitySchema(name string, data interface{}, mod string) {
