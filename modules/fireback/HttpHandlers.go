@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback/jsonbinding"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -17,7 +18,7 @@ func HttpUpdateEntity[T any, V any](c *gin.Context, fn func(QueryDSL, T) (V, *IE
 
 	var body T
 
-	if ReadGinRequestBodyAndCastToGoStruct(c, &body, f) {
+	if jsonbinding.ReadGinRequestBodyAndCastToGoStruct(c, &body) {
 		return
 	}
 

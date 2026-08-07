@@ -76,7 +76,7 @@ type appMenuActionsBundle struct {
 
 var AppMenuActions = appMenuActionsBundle{
 	EntityActionsBundle: NewEntityActionsBundle[AppMenuEntity](),
-	CteQuery:             AppMenuActionCteQueryFn,
+	CteQuery:            AppMenuActionCteQueryFn,
 }
 
 // AppMenuActionCteQueryFn fetches every AppMenuEntity row matching query (via the

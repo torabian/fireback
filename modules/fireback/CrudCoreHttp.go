@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/torabian/fireback/modules/fireback/gintools"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -270,48 +269,6 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 	return gin.H{
 		"data": data,
 	}
-}
-
-// Use it for requests which are kinda having body, such as post, put, patch, etc.
-// It would read the body (either if it's json, form-data, yaml, etc, based on headers)
-// and cast it to the 'body'. Make sure calling this with &body, not body
-// Extend this function if you want to support different formats.
-func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any, f QueryDSL) (aborted bool) {
-
-	// Only following request methods do have a body
-	if c.Request.Method != "POST" && c.Request.Method != "PATCH" && c.Request.Method != "PUT" {
-		return false
-	}
-
-	bodyBytes, err := ginBodyToBytes(c)
-	if err != nil {
-		return abortWithError(c, err, f)
-	}
-
-	switch gintools.DetectGinContentType(c) {
-	case gintools.ContentTypeYAML:
-		if err := BindYamlStringWithDetails(bodyBytes, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	case gintools.ContentTypeFormData:
-		if err := BindMultiPartFormDataWithDetails(c, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	case gintools.ContentTypeURLEncoded:
-		if err := BindFormUrlEncodedWithDetails(c, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	case gintools.ContentTypeXML:
-		if err := BindXmlStringWithDetails(bodyBytes, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	default:
-		if err := BindJsonStringWithDetails(bodyBytes, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	}
-
-	return false
 }
 
 func abortWithError(c *gin.Context, err error, f QueryDSL) bool {
