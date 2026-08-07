@@ -1,4 +1,4 @@
-package jsonbinding
+package gintools
 
 import (
 	"encoding/xml"

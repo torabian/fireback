@@ -1,4 +1,4 @@
-package jsonbinding
+package gintools
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 	"github.com/torabian/fireback/modules/fireback/ferror"
-	"github.com/torabian/fireback/modules/fireback/gintools"
 	"gopkg.in/yaml.v3"
 )
 
@@ -245,20 +244,20 @@ func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any) (aborted bool
 		return abortWithError(c, err)
 	}
 
-	switch gintools.DetectGinContentType(c) {
-	case gintools.ContentTypeYAML:
+	switch DetectGinContentType(c) {
+	case ContentTypeYAML:
 		if err := BindYamlStringWithDetails(bodyBytes, body); err != nil {
 			return abortWithError(c, err)
 		}
-	case gintools.ContentTypeFormData:
+	case ContentTypeFormData:
 		if err := BindMultiPartFormDataWithDetails(c, body); err != nil {
 			return abortWithError(c, err)
 		}
-	case gintools.ContentTypeURLEncoded:
+	case ContentTypeURLEncoded:
 		if err := BindFormUrlEncodedWithDetails(c, body); err != nil {
 			return abortWithError(c, err)
 		}
-	case gintools.ContentTypeXML:
+	case ContentTypeXML:
 		if err := BindXmlStringWithDetails(bodyBytes, body); err != nil {
 			return abortWithError(c, err)
 		}
