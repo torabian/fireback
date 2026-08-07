@@ -1,0 +1,30 @@
+name: eventbus
+
+targets:
+  - compiler: go
+    output: ./
+    flags:
+      pkg: eventbus
+  - compiler: js
+    output: ../project-generator/react-new/src/modules/fireback/sdk/eventbus
+    flags:
+      js-sdk-location: ../sdk
+    tags:
+      - typescript
+      - react
+      - no-sdk
+  - compiler: preprocessor
+    output: ./
+
+description:
+  Connects users to a socket, and conveys messages/notifications to them, with
+  optional Redis-backed distribution across instances. Split out of modules/fireback
+  (which used to start this unconditionally for every project and hardcode its route)
+  so a project only pays for it - the background goroutine and the /ws route - if its
+  main.go actually calls eventbus.ModuleSetup(...).
+
+actions:
+  - name: EventBusSubscription
+    description: Connects a client to all events related to their user profile, or workspace they are in
+    method: reactive
+    url: /ws

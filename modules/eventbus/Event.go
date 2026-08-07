@@ -1,7 +1,9 @@
-package fireback
+package eventbus
 
 import (
 	"encoding/json"
+
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 // General definition of the notification, which could be sent over web, push notification, socket
@@ -32,7 +34,7 @@ type Event struct {
 	InstanceSourceId string `json:"instanceSourceId"`
 
 	// Security model of the event
-	Security *SecurityModel `json:"security"`
+	Security *fireback.SecurityModel `json:"security"`
 
 	// Indicates if the event has occured in the internal project.
 	// Because your project might be listening to other environments or events as well

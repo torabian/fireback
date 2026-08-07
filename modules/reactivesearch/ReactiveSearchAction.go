@@ -1,4 +1,4 @@
-package fireback
+package reactivesearch
 
 import (
 	"github.com/torabian/emi/emigo"

@@ -5,9 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/torabian/fireback/modules/owner"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
+
+// QueryDSL satisfies owner.Owner - anything that only needs to know which
+// workspace/user a request belongs to can depend on owner.Owner instead of the
+// concrete QueryDSL type (see modules/eventbus for an example).
+var _ owner.Owner = QueryDSL{}
 
 // Field selector for the databases
 type SelectableColumn []string
@@ -121,4 +127,14 @@ func (x QueryDSL) Json() string {
 
 func (x QueryDSL) GetLanguage() string {
 	return x.Language
+}
+
+// GetWorkspaceId implements owner.Owner.
+func (x QueryDSL) GetWorkspaceId() string {
+	return x.WorkspaceId
+}
+
+// GetUserId implements owner.Owner.
+func (x QueryDSL) GetUserId() string {
+	return x.UserId
 }

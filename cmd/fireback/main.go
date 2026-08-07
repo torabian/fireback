@@ -9,7 +9,9 @@ import (
 	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/backup"
+	"github.com/torabian/fireback/modules/eventbus"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/reactivesearch"
 
 	// clitools registers every terminal/CLI-interactive fireback feature
 	// (promptui/bubbletea prompts, os/exec service management, asynq
@@ -62,6 +64,13 @@ func main() {
 			},
 		},
 		storage.StorageModuleSetup(nil),
+		eventbus.ModuleSetup(nil),
+		reactivesearch.ModuleSetup(&reactivesearch.ReactiveSearchModuleConfig{
+			SearchProviders: []reactivesearch.SearchProviderFn{
+				abac.QueryMenusReact,
+				abac.QueryRolesReact,
+			},
+		}),
 	}
 
 	// For fireback we have abac module added.
@@ -70,10 +79,6 @@ func main() {
 	var xapp = &fireback.FirebackApp{
 		Title:              PRODUCT_DESCRIPTION,
 		SupportedLanguages: PRODUCT_LANGUAGES,
-		SearchProviders: []fireback.SearchProviderFn{
-			abac.QueryMenusReact,
-			abac.QueryRolesReact,
-		},
 		SeedersSync: func() {
 			abac.PassportMethodSyncSeeders()
 			interfacetools.AppMenuSyncSeeders()

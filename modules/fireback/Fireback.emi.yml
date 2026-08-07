@@ -29,13 +29,6 @@ config:
   - name: production
     type: bool
     description: If true, set's the environment behavior to production, and some functionality will be limited
-  - name: redisEventsUrl
-    type: string
-    description:
-      The address of the redis, which will be used to distribute the events. If provided empty,
-      internal golang event library will be used, and events won't be distributed across different instances
-    default: "127.0.0.1:6379"
-
   - name: tablePrefix
     type: string
     description: Prefix all gorm tables with some string
@@ -140,33 +133,9 @@ config:
     description: Used name for installing app as system service on windows installers
     default: fireback
 
-dtos:
-  - name: reactiveSearchResult
-    fields:
-      - type: string
-        name: uniqueId
-      - type: string
-        name: phrase
-      - type: string
-        name: icon
-      - type: string
-        name: description
-      - type: string
-        name: group
-      - type: string
-        name: uiLocation
-      - type: string
-        name: actionFn
-
-actions:
-  - name: ReactiveSearch
-    description:
-      Reactive search is a general purpose search mechanism for different modules,
-      and could be used in mobile apps or front-end to quickly search for a entity.
-    url: /reactive-search
-    method: reactive
-    
-  - name: EventBusSubscription
-    description: Connects a client to all events related to their user profile, or workspace they are in
-    method: reactive
-    url: /ws
+description:
+  Fireback core module. ReactiveSearch and EventBusSubscription have moved to their
+  own opt-in modules (see modules/reactivesearch/ReactiveSearch.emi.yml and
+  modules/eventbus/EventBus.emi.yml) - a project only gets them by explicitly calling
+  reactivesearch.ModuleSetup(...)/eventbus.ModuleSetup(...) from its own main.go,
+  instead of Fireback module always wiring them in.

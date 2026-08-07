@@ -1,4 +1,4 @@
-package fireback
+package eventbus
 
 // Redis implementation of the Socket Instance Manager
 
@@ -8,6 +8,7 @@ import (
 	"log"
 
 	redis "github.com/redis/go-redis/v9"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 type RedisManager struct {
@@ -22,7 +23,6 @@ func NewRedisManager(redisURL string) (*RedisManager, error) {
 
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		// log.Println("❌ Failed to connect to Redis at %s: %v - fallback to internal event system", config.RedisEventsUrl, err)
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func (r *RedisManager) IsUserIn(instanceId, userID string) (bool, error) {
 	return r.client.SIsMember(r.ctx, r.key(instanceId), userID).Result()
 }
 
-func (r *RedisManager) FireEvent(q QueryDSL, event Event) {
+func (r *RedisManager) FireEvent(q fireback.QueryDSL, event Event) {
 	content := event.Json()
 
 	if err := r.client.Publish(ctx, EVENT_BUS_TOPIC, content).Err(); err != nil {

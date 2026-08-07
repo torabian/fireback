@@ -1,10 +1,11 @@
-package fireback
+package eventbus
 
 import (
 	"context"
 	"encoding/json"
 
 	"github.com/gookit/event"
+	"github.com/torabian/fireback/modules/fireback"
 )
 
 type LocalEventManager struct{}
@@ -51,7 +52,7 @@ func (l *LocalEventManager) IsUserIn(instanceId, userID string) (bool, error) {
 	return ok, nil
 }
 
-func (l *LocalEventManager) FireEvent(q QueryDSL, e Event) {
+func (l *LocalEventManager) FireEvent(q fireback.QueryDSL, e Event) {
 
 	event.MustFire("locale_events", map[string]any{
 		"content": e.Json(),
@@ -61,10 +62,10 @@ func (l *LocalEventManager) FireEvent(q QueryDSL, e Event) {
 func (l *LocalEventManager) Subscribe(ctx context.Context, channel string) {
 	event.On("locale_events", event.ListenerFunc(func(e event.Event) error {
 		payload := e.Data()["content"]
-		var event *Event
-		json.Unmarshal([]byte(payload.(string)), &event)
+		var evt *Event
+		json.Unmarshal([]byte(payload.(string)), &evt)
 
-		RouteEvent(*event)
+		RouteEvent(*evt)
 		return nil
 	}))
 }

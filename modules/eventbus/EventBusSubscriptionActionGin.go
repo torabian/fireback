@@ -1,4 +1,4 @@
-package fireback
+package eventbus
 
 import (
 	"crypto/tls"

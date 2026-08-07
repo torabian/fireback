@@ -486,6 +486,14 @@ var CliInteractiveSearchAndSelect func(title string, fn func(keyword string, pag
 var SystemServiceHandler func(action string, c *cli.Command)
 var GetMacDaemon func() string
 
+// MeetsAccessLevel checks whether a QueryDSL's granted access (query.UserAccessPerWorkspace)
+// satisfies query.ActionRequires - abac wires its own implementation here (see
+// AbacModule.go's setup), since the actual access model lives there, not in fireback
+// itself. Used both directly (e.g. WorkspaceCli.go's own permission checks) and by
+// modules/eventbus, which defaults to this if a project doesn't override
+// EventBusModuleConfig.MeetsAccessLevel.
+var MeetsAccessLevel func(query QueryDSL, onlyRoot bool) (bool, []string)
+
 func GetCliMockTools(xapp *FirebackApp) *cli.Command {
 	return &cli.Command{
 		Name:  "mock",

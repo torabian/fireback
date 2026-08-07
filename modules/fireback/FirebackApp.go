@@ -45,13 +45,10 @@ type FirebackApp struct {
 	CliActions func() []*cli.Command
 
 	SetupWebServerHook func(*gin.Engine, *FirebackApp)
-	SearchProviders    []SearchProviderFn
 	SeedersSync        func()
 	MockSync           func()
 	PublicFolders      []gintools.PublicFolderInfo
 }
-
-type SearchProviderFn = func(query QueryDSL, chanStream chan *ReactiveSearchResultDto)
 
 /*
 
@@ -286,14 +283,15 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 				},
 			})
 		} else {
-			socketUsers, socketUserErr := GetEventBusInstance().ListUsers(SERVER_INSTANCE)
+			// Used to also report eventbus.GetEventBusInstance()'s connected socket
+			// users/snapshot here directly - eventbus is now an opt-in module (see
+			// modules/eventbus), so this core diagnostic endpoint no longer assumes
+			// it's registered. A project that registers eventbus can extend its own
+			// /ping (or add another route) if it wants that detail back.
 			c.JSON(200, gin.H{
 				"data": gin.H{
-					"pong":           "yes",
-					"instanceId":     SERVER_INSTANCE,
-					"socketUsers":    socketUsers,
-					"socketUserErr":  socketUserErr,
-					"socketSnapshot": SocketSessionPool,
+					"pong":       "yes",
+					"instanceId": SERVER_INSTANCE,
 				},
 			})
 		}

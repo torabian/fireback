@@ -1,26 +1,26 @@
 //go:build wasm
 
-package fireback
+package reactivesearch
 
 import "github.com/torabian/emi/emigo"
 
-// EventBusSubscriptionActionReactiveHandlerWasm is the in-browser counterpart of
-// EventBusSubscriptionActionReactiveHandler. It registers the same developer factory against an
+// ReactiveSearchActionReactiveHandlerWasm is the in-browser counterpart of
+// ReactiveSearchActionReactiveHandler. It registers the same developer factory against an
 // emigo.WasmReactor instead of a gin engine, so the business logic is shared
 // verbatim across the real server and the wasm build.
 //
 // There is no gorilla, no gin, and no socket here: the reactor bridges the
 // session's channels straight to the WebSocketWasm JS class.
 //
-func EventBusSubscriptionActionReactiveHandlerWasm(
+func ReactiveSearchActionReactiveHandlerWasm(
 	reactor *emigo.WasmReactor,
-	factory func(session EventBusSubscriptionActionSession) (chan []byte, error),
+	factory func(session ReactiveSearchActionSession) (chan []byte, error),
 ) {
-	reactor.Handle(EventBusSubscriptionActionMeta().URL, func(conn *emigo.WasmReactiveConn) error {
-		session := EventBusSubscriptionActionSession{
+	reactor.Handle(ReactiveSearchActionMeta().URL, func(conn *emigo.WasmReactiveConn) error {
+		session := ReactiveSearchActionSession{
 			Done:        conn.Done,
-			Read:        make(chan EventBusSubscriptionActionReadChan),
-			QueryParams: EventBusSubscriptionActionQueryFromString(conn.Query.Encode()),
+			Read:        make(chan ReactiveSearchActionReadChan),
+			QueryParams: ReactiveSearchActionQueryFromString(conn.Query.Encode()),
 			// Socket and Ctx stay nil — meaningless in the browser.
 		}
 		// client -> server: adapt raw []byte frames into the typed read channel.
@@ -31,7 +31,7 @@ func EventBusSubscriptionActionReactiveHandlerWasm(
 					if !ok {
 						return
 					}
-					session.Read <- EventBusSubscriptionActionReadChan{Data: data}
+					session.Read <- ReactiveSearchActionReadChan{Data: data}
 				case <-conn.Done:
 					return
 				}

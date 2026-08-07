@@ -1,16 +1,12 @@
-package fireback
+package eventbus
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/torabian/fireback/modules/fireback"
 	"go.uber.org/zap"
 )
 
-func init() {
-	// Override the implementation with our actual code.
-	// EventBusSubscriptionActionImp = EventBusSubscriptionAction
-}
-
-func cleanUserFromSocketPool(query QueryDSL) {
+func cleanUserFromSocketPool(query fireback.QueryDSL) {
 	workspaceId := query.WorkspaceId
 	userId := query.UserId
 
@@ -35,20 +31,20 @@ func cleanUserFromSocketPool(query QueryDSL) {
 	}
 	socketMutex.Unlock()
 
-	GetEventBusInstance().RemoveUser(SERVER_INSTANCE, userId)
+	GetEventBusInstance().RemoveUser(fireback.SERVER_INSTANCE, userId)
 }
 
-func addUserToEventBus(query QueryDSL) {
+func addUserToEventBus(query fireback.QueryDSL) {
 
 	workspaceId := query.WorkspaceId
 	userId := query.UserId
 
-	GetEventBusInstance().AddUser(SERVER_INSTANCE, userId)
+	GetEventBusInstance().AddUser(fireback.SERVER_INSTANCE, userId)
 
 	socket := &SocketConnection{
 		UserId:     userId,
 		Connection: query.RawSocketConnection,
-		UniqueId:   UUID_SHORT(),
+		UniqueId:   fireback.UUID_SHORT(),
 	}
 
 	if query.UserAccessPerWorkspace != nil {
@@ -65,8 +61,8 @@ func addUserToEventBus(query QueryDSL) {
 }
 
 func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (chan []byte, error) {
-	query, err := ResolveActionContextFromGinContext(session.GinCtx(), &SecurityModel{
-		ResolveStrategy: ResolveStrategyWorkspace,
+	query, err := fireback.ResolveActionContextFromGinContext(session.GinCtx(), &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyWorkspace,
 	})
 	if err != nil {
 		return nil, err
@@ -74,7 +70,7 @@ func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (c
 
 	query.RawSocketConnection = session.GetSocket()
 
-	LOG.Debug(
+	fireback.LOG.Debug(
 		"Event bus subscription has been started",
 		zap.String("workspace-id", query.WorkspaceId),
 		zap.String("user", query.UserId),
@@ -104,12 +100,12 @@ func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (c
 					websocket.CloseInvalidFramePayloadData,
 					websocket.CloseTLSHandshake,
 				) {
-					LOG.Debug("WebSocket closed", zap.String("user", query.UserId), zap.String("ws", query.WorkspaceId))
+					fireback.LOG.Debug("WebSocket closed", zap.String("user", query.UserId), zap.String("ws", query.WorkspaceId))
 					cleanUserFromSocketPool(*query)
 					break
 				} else {
 					// We need to handle this kinda.
-					LOG.Debug("WebSocket read error", zap.Error(msg.Error))
+					fireback.LOG.Debug("WebSocket read error", zap.Error(msg.Error))
 					out <- []byte("Socket interaction with webserver only supports json at this moment.")
 				}
 

@@ -1,4 +1,4 @@
-package fireback
+package reactivesearch
 
 import (
 	"encoding/json"

@@ -76,6 +76,14 @@ type ModuleProvider struct {
 	// each module can have those hook inits, for example abac adds some other questions.
 	OnEnvInit func(c *cli.Command) error
 
+	// Called once during app startup (see commonHeadlessStarter), after the database
+	// connection is available but before the CLI/web server actually run - the
+	// equivalent of GinWebServerInitHooks for anything a module needs to kick off
+	// itself rather than wire onto a router (e.g. eventbus.ModuleSetup uses this to
+	// start its background goroutine only when a project actually registers the
+	// eventbus module, instead of every project paying for it unconditionally).
+	OnAppStart func(x *FirebackApp) error
+
 	// When a gin web server is being created, the group for this module
 	// will be looking for this function. Could be used to manually add routes or other configuration
 	GinWebServerInitHooks []func(g *gin.RouterGroup, x *FirebackApp) error

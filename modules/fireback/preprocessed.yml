@@ -13,40 +13,16 @@ targets:
   - no-sdk
 - compiler: preprocessor
   output: ./
-dtos:
-- name: reactiveSearchResult
-  fields:
-  - name: uniqueId
-    type: string
-  - name: phrase
-    type: string
-  - name: icon
-    type: string
-  - name: description
-    type: string
-  - name: group
-    type: string
-  - name: uiLocation
-    type: string
-  - name: actionFn
-    type: string
+description: Fireback core module. ReactiveSearch and EventBusSubscription have moved
+  to their own opt-in modules (see modules/reactivesearch/ReactiveSearch.emi.yml and
+  modules/eventbus/EventBus.emi.yml) - a project only gets them by explicitly calling
+  reactivesearch.ModuleSetup(...)/eventbus.ModuleSetup(...) from its own main.go,
+  instead of Fireback module always wiring them in.
 complexes:
 - name: JSON
   namespace: complexes
   location: github.com/torabian/fireback/modules/fireback/complexes
   compiler: go
-actions:
-- name: ReactiveSearch
-  url: /reactive-search
-  method: reactive
-  description: Reactive search is a general purpose search mechanism for different
-    modules, and could be used in mobile apps or front-end to quickly search for a
-    entity.
-- name: EventBusSubscription
-  url: /ws
-  method: reactive
-  description: Connects a client to all events related to their user profile, or workspace
-    they are in
 config:
 - name: cookieAuthOnly
   type: bool
@@ -56,12 +32,6 @@ config:
   type: bool
   description: If true, set's the environment behavior to production, and some functionality
     will be limited
-- name: redisEventsUrl
-  type: string
-  description: The address of the redis, which will be used to distribute the events.
-    If provided empty, internal golang event library will be used, and events won't
-    be distributed across different instances
-  default: 127.0.0.1:6379
 - name: tablePrefix
   type: string
   description: Prefix all gorm tables with some string

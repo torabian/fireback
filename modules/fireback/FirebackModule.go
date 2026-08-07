@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/migrations"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -27,26 +26,11 @@ func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 		EntityBundles: []EntityBundle{},
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
-			func(g *gin.RouterGroup, x *FirebackApp) error {
-
-				{
-					meta := EventBusSubscriptionActionMeta()
-					g.GET(meta.URL, EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
-
-				}
-
-				{
-					meta := ReactiveSearchActionMeta()
-					g.GET(
-						meta.URL,
-						ReactiveSearchActionReactiveHandler(CreateReactiveSearchHanlder(x)),
-					)
-				}
-
-				return nil
-			},
-		},
+		// EventBusSubscription (/ws) and ReactiveSearch (/reactive-search) used to be
+		// wired here unconditionally for every project. They've moved to their own
+		// opt-in modules - see eventbus.ModuleSetup and reactivesearch.ModuleSetup -
+		// so a project only gets the background goroutine/route/config surface it
+		// actually asked for from its own main.go.
 		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
