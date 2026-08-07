@@ -21,9 +21,9 @@ import (
 
 	"github.com/torabian/fireback/modules/fireback"
 
-	{{ if .ctx.IsMonolith }}
+ 
 	"github.com/torabian/fireback/modules/abac"
-	{{ end }}
+ 
 
 )
 
@@ -182,16 +182,10 @@ var PRODUCT_LANGUAGES = []string{"en"}
 
 var xapp = &fireback.FirebackApp{
 	Title: PRODUCT_DESCRIPTION,
-	{{ if ne .ctx.IsMonolith true }}
-	MicroService:       true,
-	{{ end }}
-
+ 
 	SupportedLanguages: PRODUCT_LANGUAGES,
 	SearchProviders: []fireback.SearchProviderFn{
-		{{ if .ctx.IsMonolith }}
-		abac.QueryMenusReact,
-		abac.QueryRolesReact,
-		{{ end }}
+ 
 	},
 	SeedersSync: func() {
 		 

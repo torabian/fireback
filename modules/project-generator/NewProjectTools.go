@@ -128,7 +128,6 @@ func loadLastPath() (string, error) {
 type NewProjectContext struct {
 	Name                   string
 	Path                   string
-	IsMonolith             bool
 	IncludeWailsDesktop    bool
 	FirebackManage         bool
 	ModuleName             string
@@ -216,16 +215,12 @@ func NewProjectCli() *cli.Command {
 		Action: func(ctx0 context.Context, c *cli.Command) error {
 			ctx := &NewProjectContext{
 				FirebackVersion: fireback.FIREBACK_VERSION,
-				IsMonolith:      false,
 			}
 
 			if c.NumFlags() == 0 {
 				ctx.Name = fireback.AskForInput("Give the project a name", "new-app")
 				githubAccount := fireback.AskForInput("Your github account (for prefixing the module location)", "torabian")
 				ctx.ModuleName = fireback.AskForInput("What is the golang module name?", fmt.Sprintf("github.com/%v/%v", githubAccount, ctx.Name))
-				if r := fireback.AskForSelect("Architecture type of the project?", []string{"monolith", "microservice"}); r == "monolith" {
-					ctx.IsMonolith = true
-				}
 
 				if r := fireback.AskForSelect("Do you want to use a local copy of fireback instead of mod?", []string{"yes", "no"}); r == "yes" {
 					for {
@@ -265,10 +260,8 @@ func NewProjectCli() *cli.Command {
 					ctx.FirebackManage = true
 				}
 
-				if ctx.IsMonolith {
-					if r := fireback.AskForSelect("Do you want Go wails desktop toolkit added?", []string{"no", "yes"}); r == "yes" {
-						ctx.IncludeWailsDesktop = true
-					}
+				if r := fireback.AskForSelect("Do you want Go wails desktop toolkit added?", []string{"no", "yes"}); r == "yes" {
+					ctx.IncludeWailsDesktop = true
 				}
 
 				if r := fireback.AskForSelect("Do you want to add fireback self-service ui as well into your project?", []string{"yes", "no"}); r == "yes" {
@@ -295,7 +288,6 @@ func NewProjectCli() *cli.Command {
 				}
 				ctx = &NewProjectContext{
 					FirebackVersion:        fireback.FIREBACK_VERSION,
-					IsMonolith:             true,
 					Name:                   c.String("name"),
 					Description:            c.String("description"),
 					ReplaceFireback:        c.String("replace-fb"),
@@ -309,9 +301,6 @@ func NewProjectCli() *cli.Command {
 					CreateAndroidProject:   c.Bool("android"),
 				}
 
-				if c.IsSet("micro") {
-					ctx.IsMonolith = !c.Bool("micro")
-				}
 			}
 
 			newProjectContentWriter(tmpl.FbGoNewTemplate, ctx, "")
