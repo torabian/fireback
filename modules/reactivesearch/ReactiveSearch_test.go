@@ -2,10 +2,13 @@ package reactivesearch
 
 import (
 	"encoding/json"
+	"errors"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/gorilla/websocket"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -125,5 +128,104 @@ func TestAdaptResultsToBytes_EncodesEachResult(t *testing.T) {
 
 	if _, ok := <-out; ok {
 		t.Fatal("expected the output channel to be closed once the input was drained")
+	}
+}
+
+// TestCreateReactiveSearchHandler_UsesProvidedAuthorize verifies a custom Authorize
+// callback is what actually resolves the query providers get called with - proving
+// createReactiveSearchHandler doesn't need fireback.ResolveActionContext (and
+// therefore abac) at all once Authorize is supplied.
+func TestCreateReactiveSearchHandler_UsesProvidedAuthorize(t *testing.T) {
+	var gotReq emigo.EmiRequestContexts
+	authorize := func(req emigo.EmiRequestContexts) (fireback.QueryDSL, error) {
+		gotReq = req
+		return fireback.QueryDSL{SearchPhrase: "hello"}, nil
+	}
+
+	seenPhrase := make(chan string, 1)
+	provider := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+		seenPhrase <- query.SearchPhrase
+	}
+
+	handler := createReactiveSearchHandler([]SearchProviderFn{provider}, authorize)
+
+	// A pure-function Authorize like this one never needs to touch the socket - only
+	// the underlying Socket type has to satisfy GetSocket's assertion for the
+	// success path to reach runSearchProviders.
+	out, err := handler(ReactiveSearchActionSession{Socket: (*websocket.Conn)(nil)})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for range out {
+		// Drain so runSearchProviders' goroutine finishes and the deferred close
+		// on the byte channel runs.
+	}
+
+	select {
+	case phrase := <-seenPhrase:
+		if phrase != "hello" {
+			t.Fatalf("expected the provider to see the query Authorize returned, got %q", phrase)
+		}
+	default:
+		t.Fatal("provider was never called")
+	}
+
+	if gotReq == nil {
+		t.Fatal("expected Authorize to be called with a request context")
+	}
+}
+
+// TestCreateReactiveSearchHandler_PropagatesAuthorizeError verifies a rejected/failed
+// Authorize call short-circuits before ever touching the socket or providers.
+func TestCreateReactiveSearchHandler_PropagatesAuthorizeError(t *testing.T) {
+	wantErr := errors.New("nope")
+	called := false
+	provider := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+		called = true
+	}
+
+	handler := createReactiveSearchHandler([]SearchProviderFn{provider}, func(req emigo.EmiRequestContexts) (fireback.QueryDSL, error) {
+		return fireback.QueryDSL{}, wantErr
+	})
+
+	// Socket/Ctx are deliberately left unset (nil interfaces) - if the handler
+	// tried to use them before returning the error, this would panic.
+	_, err := handler(ReactiveSearchActionSession{})
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("expected Authorize's error to propagate, got %v", err)
+	}
+	if called {
+		t.Fatal("expected providers to never run once Authorize failed")
+	}
+}
+
+// TestReactiveSearchRequestContext_AdaptsSession verifies the emigo.EmiRequestContexts
+// adapter exposes the session's gin context and always reports no CLI context (reactive
+// search never runs over CLI).
+func TestReactiveSearchRequestContext_AdaptsSession(t *testing.T) {
+	fakeCtx := "stand-in for a *gin.Context"
+	session := &ReactiveSearchActionSession{Ctx: fakeCtx}
+	adapter := reactiveSearchRequestContext{session: session}
+
+	if adapter.GetGinCtx() != interface{}(fakeCtx) {
+		t.Fatalf("expected GetGinCtx to return the session's Ctx, got %v", adapter.GetGinCtx())
+	}
+	if adapter.GetCliCtx() != nil {
+		t.Fatalf("expected GetCliCtx to always be nil, got %v", adapter.GetCliCtx())
+	}
+}
+
+// TestDefaultAuthorize_NoGinContext verifies the fireback.ResolveActionContext-based
+// fallback used when ReactiveSearchModuleConfig.Authorize is left nil degrades to a
+// zero QueryDSL (no panic, no error) when there's no real gin context to resolve -
+// matching fireback.ResolveActionContext's own documented behavior for a nilish
+// context.
+func TestDefaultAuthorize_NoGinContext(t *testing.T) {
+	query, err := defaultAuthorize(reactiveSearchRequestContext{session: &ReactiveSearchActionSession{}})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if query.WorkspaceId != "" || query.UserId != "" {
+		t.Fatalf("expected a zero-value QueryDSL with no gin context, got %+v", query)
 	}
 }

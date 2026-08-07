@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -12,30 +13,69 @@ import (
 // chanStream, and returns once it's done searching.
 type SearchProviderFn = func(query fireback.QueryDSL, chanStream chan *ReactiveSearchResultDto)
 
+// AuthorizeReactiveSearchFn resolves/authorizes an incoming reactive search request,
+// returning the QueryDSL SearchProviderFn handlers get called with. It's handed
+// anything satisfying emigo.EmiRequestContexts (GetGinCtx/GetCliCtx) - the exact
+// contract every other emi-generated request type already implements - so it plugs
+// straight into fireback.ResolveActionContext the same way a normal action would, or
+// into a project's own auth logic instead: reactivesearch itself never has to know
+// which. See ReactiveSearchModuleConfig.Authorize and defaultAuthorize (the fallback
+// used when it's left nil).
+type AuthorizeReactiveSearchFn func(req emigo.EmiRequestContexts) (fireback.QueryDSL, error)
+
+// reactiveSearchRequestContext adapts a ReactiveSearchActionSession into
+// emigo.EmiRequestContexts, so AuthorizeReactiveSearchFn implementations can reuse
+// fireback.ResolveActionContext (or anything else already written against that
+// interface) without reactivesearch needing its own gin-specific plumbing. Reactive
+// search only ever runs over a live gin websocket connection, never CLI, so
+// GetCliCtx is always nil.
+type reactiveSearchRequestContext struct {
+	session *ReactiveSearchActionSession
+}
+
+func (r reactiveSearchRequestContext) GetGinCtx() interface{} { return r.session.Ctx }
+func (r reactiveSearchRequestContext) GetCliCtx() interface{} { return nil }
+
+// defaultAuthorize is used when ReactiveSearchModuleConfig.Authorize is left nil -
+// matches reactivesearch's original, pre-callback behavior: resolve via
+// fireback.ResolveActionContext with SecurityModel{ResolveStrategy: ResolveStrategyWorkspace},
+// which requires a valid token and depends on abac (or whatever else wires up
+// fireback.AuthorizeRequest/fireback.MeetsAccessLevel) having already run its own
+// module setup. Pass your own AuthorizeReactiveSearchFn instead if you want
+// reactivesearch to not depend on any of that.
+func defaultAuthorize(req emigo.EmiRequestContexts) (fireback.QueryDSL, error) {
+	query, err := fireback.ResolveActionContext(req, &fireback.SecurityModel{
+		ResolveStrategy: fireback.ResolveStrategyWorkspace,
+	})
+	if err != nil {
+		return fireback.QueryDSL{}, err
+	}
+	return *query, nil
+}
+
 // createReactiveSearchHandler builds the reactive handler ModuleSetup wires to the
-// ReactiveSearch action - providers is exactly (and only) what the project passed to
-// ModuleSetup's config, instead of being read off a FirebackApp field every project
-// carried whether or not it used reactive search. Auth resolution (needs a live gin
-// context/token) is kept separate from the actual fan-out (runSearchProviders) so the
-// fan-out - the part with real logic worth testing - can be tested without a live
-// server; see ReactiveSearch_test.go.
-func createReactiveSearchHandler(providers []SearchProviderFn) func(
+// ReactiveSearch action. Authorization (needs a live gin context/token, or whatever
+// authorize itself needs) is kept separate from the actual fan-out
+// (runSearchProviders) so the fan-out - the part with real logic worth testing - can
+// be tested without a live server; see ReactiveSearch_test.go.
+func createReactiveSearchHandler(providers []SearchProviderFn, authorize AuthorizeReactiveSearchFn) func(
 	session ReactiveSearchActionSession,
 ) (chan []byte, error) {
+	if authorize == nil {
+		authorize = defaultAuthorize
+	}
 
 	return func(
 		session ReactiveSearchActionSession,
 	) (chan []byte, error) {
-		query, err := fireback.ResolveActionContextFromGinContext(session.GinCtx(), &fireback.SecurityModel{
-			ResolveStrategy: fireback.ResolveStrategyWorkspace,
-		})
+		query, err := authorize(reactiveSearchRequestContext{session: &session})
 		if err != nil {
 			return nil, err
 		}
 
 		query.RawSocketConnection = session.GetSocket()
 
-		return AdaptResultsToBytes(runSearchProviders(*query, providers)), nil
+		return AdaptResultsToBytes(runSearchProviders(query, providers)), nil
 	}
 
 }
