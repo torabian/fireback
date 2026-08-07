@@ -1,13 +1,43 @@
 package fireback
 
 import (
+	"database/sql"
+	"embed"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/pressly/goose/v3"
 	"gorm.io/gorm/logger"
 )
+
+func RunMigrationBasedOnGoose(db *sql.DB, moduleName string, dialect string, mdir *embed.FS) error {
+
+	goose.SetTableName("goose_db_module_" + moduleName)
+	goose.SetBaseFS(mdir)
+	goose.SetDialect(dialect)
+
+	// Set a logger to capture all output
+	// Use our custom logger
+	goose.SetLogger(GooseZapLogger{Logger: LOG})
+
+	// Optionally, enable verbose mode
+	goose.SetVerbose(true)
+
+	// Run all migrations
+	err := goose.Up(db, ".")
+	if err != nil {
+		if strings.Contains(err.Error(), "no migration files found") {
+			// handle empty migration directory gracefully
+			return nil
+		}
+		return err
+	}
+
+	return nil
+}
 
 func ApplyMigration(xapp *FirebackApp, level int64) {
 	db := GetDbRef()

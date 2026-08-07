@@ -2,7 +2,6 @@ package fireback
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"fmt"
 	"io/fs"
@@ -13,7 +12,6 @@ import (
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
-	"github.com/pressly/goose/v3"
 	"github.com/torabian/fireback/modules/fireback/connmonitor"
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	statics "github.com/torabian/fireback/modules/fireback/static"
@@ -357,32 +355,6 @@ func LogAllFiles(fsys embed.FS, dir string) error {
 		}
 		return nil
 	})
-}
-
-func RunMigrationBasedOnGoose(db *sql.DB, moduleName string, dialect string, mdir *embed.FS) error {
-
-	goose.SetTableName("goose_db_module_" + moduleName)
-	goose.SetBaseFS(mdir)
-	goose.SetDialect(dialect)
-
-	// Set a logger to capture all output
-	// Use our custom logger
-	goose.SetLogger(GooseZapLogger{Logger: LOG})
-
-	// Optionally, enable verbose mode
-	goose.SetVerbose(true)
-
-	// Run all migrations
-	err := goose.Up(db, ".")
-	if err != nil {
-		if strings.Contains(err.Error(), "no migration files found") {
-			// handle empty migration directory gracefully
-			return nil
-		}
-		return err
-	}
-
-	return nil
 }
 
 func RunApp(xapp *FirebackApp) {
