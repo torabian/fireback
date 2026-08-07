@@ -5,10 +5,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func HttpSendTestMail(c *gin.Context) {
-	fireback.HttpPostEntity(c, NotificationTestMailAction)
-}
-
 func HttpGetNotificationWorkspaceConfig(c *gin.Context) {
 	fireback.HttpGetEntity(c, NotificationWorkspaecConfigActionGet)
 }
@@ -23,7 +19,7 @@ func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
 // exists now that notificationConfig moved to Abac.emi.yml), called directly from
 // NotificationModule.go's GinWebServerInitHooks instead.
 func AppendNotificationConfigRouter(g *gin.RouterGroup) {
-	g.POST("/notification/testmail", HttpSendTestMail)
+
 	g.GET("/notification/workspace/config",
 		WithAuthorization(&fireback.SecurityModel{
 			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
