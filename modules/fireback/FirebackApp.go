@@ -19,7 +19,6 @@ import (
 	statics "github.com/torabian/fireback/modules/fireback/static"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
-	"golang.org/x/exp/maps"
 )
 
 var SERVER_INSTANCE string = UUID_Long()
@@ -259,12 +258,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		go taskServerLifter(x)
 	}
 
-	translations := map[string]map[string]string{}
-	for _, item := range x.Modules {
-		maps.Copy(translations, item.Translations)
-	}
-	maps.Copy(translations, BasicTranslations)
-
 	if x.SetupWebServerHook != nil {
 		x.SetupWebServerHook(r, x)
 	}
@@ -286,8 +279,6 @@ func SetupHttpServer(x *FirebackApp, cfg HttpServerInstanceConfig) *gin.Engine {
 		}
 		c.Data(http.StatusOK, "text/css", file)
 	})
-
-	// r.Use(GinPostTranslateErrorMessages(translations))
 
 	r.GET("/ping", func(c *gin.Context) {
 		if config.Production {

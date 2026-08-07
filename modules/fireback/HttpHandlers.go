@@ -161,11 +161,3 @@ func WriteResponse(c *gin.Context, status int, resp emigo.EmiActionResult) {
 
 	}
 }
-
-type GinLanguageTmp struct {
-	g *gin.Context
-}
-
-func (x *GinLanguageTmp) GetLanguage() string {
-	return GetAcceptFromGinHeaders(x.g)
-}

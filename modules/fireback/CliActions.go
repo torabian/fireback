@@ -3,16 +3,10 @@ package fireback
 import (
 	"context"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"reflect"
-	"strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -165,111 +159,6 @@ var AskForInputOptional func(label string, defaultV string) (string, bool, error
 var AskForInput func(label string, defaultV string) string
 var AskForPassword func(label string, defaultV string) string
 
-func WriteResponseCLI(w io.Writer, status int, resp emigo.EmiActionResult) error {
-	payload := resp.GetPayload()
-
-	if payload == nil {
-		return nil
-	}
-
-	headers := resp.GetRespHeaders()
-	ct := ""
-	if headers != nil {
-		ct = headers["Content-Type"]
-	}
-
-	switch p := payload.(type) {
-
-	case func(io.Writer) error:
-		// streaming template
-		return p(w)
-
-	case io.Reader:
-		// streaming file
-		_, err := io.Copy(w, p)
-		return err
-
-	default:
-		switch {
-		case strings.Contains(ct, "application/json"):
-			enc := json.NewEncoder(w)
-			enc.SetIndent("", "  ") // CLI-friendly
-			return enc.Encode(payload)
-
-		case strings.Contains(ct, "application/xml"):
-			out, err := xml.MarshalIndent(payload, "", "  ")
-			if err != nil {
-				return err
-			}
-			_, err = w.Write(out)
-			return err
-
-		case strings.Contains(ct, "text/plain"):
-			_, err := fmt.Fprintf(w, "%v\n", payload)
-			return err
-
-		case strings.Contains(ct, "text/html"):
-			_, err := w.Write(toBytes(payload))
-			return err
-
-		default:
-			// sane default for CLI → JSON
-			enc := json.NewEncoder(w)
-			enc.SetIndent("", "  ")
-			return enc.Encode(payload)
-		}
-	}
-}
-
-func HandleActionInCli2(c *cli.Command, result emigo.EmiActionResult, err error, t map[string]map[string]string) {
-
-	f := CommonCliQueryDSLBuilder(c)
-
-	if !IsNilish(err) {
-
-		err := CastToIError(err)
-		err2 := err.ToPublicEndUser(&f)
-
-		if err2 == nil {
-			log.Panicln("Panic on handle action, without public error: %w", err)
-			return
-		}
-
-		body, _ := json.MarshalIndent(err2, "", "  ")
-		fmt.Println(string(body))
-
-		os.Exit(int(err2.HttpCode))
-	}
-
-	WriteResponseCLI(os.Stdout, result.GetStatusCode(), result)
-
-}
-
-func HandleActionInCli(c *cli.Command, result any, err *IError, t map[string]map[string]string) {
-	f := CommonCliQueryDSLBuilder(c)
-
-	resultIsNil := result == nil || (reflect.ValueOf(result).Kind() == reflect.Ptr && reflect.ValueOf(result).IsNil())
-
-	if !resultIsNil {
-		cliSuccessPrinter(c, result)
-	}
-
-	if err != nil {
-
-		err2 := err.ToPublicEndUser(&f)
-
-		if err2 == nil {
-			log.Panicln("Panic on handle action, without public error: %w", err)
-			return
-		}
-
-		body, _ := json.MarshalIndent(err2, "", "  ")
-		fmt.Println(string(body))
-
-		os.Exit(int(err2.HttpCode))
-	}
-}
-
 func CommonInitSeeder[T any](format string, entity *T) {
 	body := []byte{}
 	var err error
@@ -310,47 +199,6 @@ type ModuleActionsBundle struct {
 	CliAction *cli.Command
 }
 
-func populateQueriableFields(v reflect.Value, parent string, getValue func(field reflect.StructField) string) {
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return
-	}
-
-	t := v.Type()
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		name := parent + field.Name
-		fieldValue := v.Field(i)
-
-		// Recursively handle embedded/nested structs
-		if field.Type.Kind() == reflect.Struct {
-			populateQueriableFields(fieldValue, name+".", getValue)
-		}
-
-		if fieldValue.CanSet() && fieldValue.Type() == reflect.TypeOf(QueriableField{}) {
-			current := fieldValue.Interface().(QueriableField)
-			current.UserInput = getValue(field)
-			fieldValue.Set(reflect.ValueOf(current))
-		}
-	}
-}
-
-func QueriableFieldFromCliContext(v reflect.Value, parent string, c *cli.Command) {
-	populateQueriableFields(v, parent, func(field reflect.StructField) string {
-		return c.String(field.Tag.Get("cli"))
-	})
-}
-
-func QueriableFieldFromGinContext(v reflect.Value, parent string, c *gin.Context) {
-	populateQueriableFields(v, parent, func(field reflect.StructField) string {
-		val, _ := c.GetQuery(field.Tag.Get("qs"))
-		return val
-	})
-}
-
 type QuerySelectionInfo struct {
 	Columns  []string
 	Preloads []string
@@ -361,73 +209,4 @@ func (x QuerySelectionInfo) Json() string {
 	str, _ := json.MarshalIndent(x, "", "  ")
 	return (string(str))
 
-}
-
-func GenerateQueryStringStyle(v reflect.Value, parent string) string {
-	data := GenerateQuery(v, parent, "AsSql")
-
-	query := strings.Join(data, " and ")
-	return query
-}
-
-func GenerateQueryJqStyle(v reflect.Value, parent string) string {
-	data := GenerateQuery(v, parent, "AsJq")
-	if len(data) == 0 {
-		return ""
-	}
-
-	query := strings.Join(data, " and ")
-
-	return fmt.Sprintf("map(select(%s))", query)
-}
-
-func GenerateQuery(v reflect.Value, parent string, funcName string) []string {
-	var values []string
-
-	// Dereference pointer if it's a pointer
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	// Only proceed if it's a struct
-	if v.Kind() != reflect.Struct {
-		return values
-	}
-
-	t := v.Type() // Get the struct type
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		name := parent + field.Name
-
-		// Handle embedded/nested structs
-		if field.Type.Kind() == reflect.Struct {
-			values = append(values, GenerateQuery(v.Field(i), name+".", funcName)...)
-		}
-
-		// Skip non-QueriableField fields
-		if !strings.Contains(field.Type.String(), "QueriableField") {
-			continue
-		}
-
-		// Call the String method for QueriableField
-		fieldValue := v.Field(i)
-		if fieldValue.CanAddr() {
-			method := fieldValue.Addr().MethodByName(funcName)
-			if method.IsValid() {
-				result := method.Call(nil) // Call String() with no arguments
-				if len(result) > 0 {
-					// Append the result to the values slice
-					res := result[0].Interface().(string)
-
-					if strings.TrimSpace(res) != "" {
-						val := field.Tag.Get("column")
-						values = append(values, strings.ReplaceAll(res, "$col", val))
-					}
-				}
-			}
-		}
-	}
-
-	return values
 }

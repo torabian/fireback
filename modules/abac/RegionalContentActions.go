@@ -275,14 +275,14 @@ var RegionalContentGetCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
-		f := fireback.CommonCliQueryDSLBuilder(c)
+		// f := fireback.CommonCliQueryDSLBuilder(c)
 
-		result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
-			LanguageId:       c.String("lang"),
-			Region:           c.String("region"),
-			RegionContentKey: RegionContentKey(c.String(("key"))),
-		}, f)
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		// result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
+		// 	LanguageId:       c.String("lang"),
+		// 	Region:           c.String("region"),
+		// 	RegionContentKey: RegionContentKey(c.String(("key"))),
+		// }, f)
+		// fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 
 		return nil
 	},

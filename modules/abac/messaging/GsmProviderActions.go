@@ -155,9 +155,9 @@ var GsmProviderTestCmd cli.Command = cli.Command{
 		},
 	},
 	Action: func(ctx context.Context, c *cli.Command) error {
-		message := c.String("message")
-		result, err := GsmSendSMS(c.String("id"), message, []string{c.String("to")})
-		fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
+		// message := c.String("message")
+		// result, err := GsmSendSMS(c.String("id"), message, []string{c.String("to")})
+		// fireback.HandleActionInCli(c, result, err, map[string]map[string]string{})
 
 		return nil
 	},
