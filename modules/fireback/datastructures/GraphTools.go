@@ -1,4 +1,4 @@
-package fireback
+package datastructures
 
 import (
 	"encoding/json"
