@@ -308,10 +308,6 @@ type ModuleActionsBundle struct {
 
 	// cli.Command which has Subcommands of all actions
 	CliAction *cli.Command
-
-	// these are actions used for web generally, more general. In ideal world these
-	// could be used to create cli actions
-	Actions []Module3Action
 }
 
 func populateQueriableFields(v reflect.Value, parent string, getValue func(field reflect.StructField) string) {

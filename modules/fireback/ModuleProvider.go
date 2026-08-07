@@ -38,7 +38,6 @@ type MigrationScript struct {
 // Entities also can be bundled into one
 type EntityBundle struct {
 	Permissions           []PermissionInfo
-	Actions               []Module3Action
 	AutoMigrationEntities []interface{}
 	CliCommands           []*cli.Command
 	MockProvider          func()
@@ -80,13 +79,6 @@ type ModuleProvider struct {
 	// When a gin web server is being created, the group for this module
 	// will be looking for this function. Could be used to manually add routes or other configuration
 	GinWebServerInitHooks []func(g *gin.RouterGroup, x *FirebackApp) error
-}
-
-func (x *ModuleProvider) ToModule3() Module3 {
-	return Module3{
-		Name:      x.Name,
-		Namespace: x.Namespace,
-	}
 }
 
 func (x *ModuleProvider) ProvideMockImportHandler(t func()) {

@@ -59,7 +59,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 
 func GetAbacActionsBundle() *fireback.ModuleActionsBundle {
 	return &fireback.ModuleActionsBundle{
-		Actions:   []fireback.Module3Action{},
 		CliAction: AbacCliActionsBundle,
 	}
 }

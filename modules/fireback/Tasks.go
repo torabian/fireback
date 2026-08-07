@@ -23,7 +23,6 @@ type TaskAction struct {
 	Name        string
 	Cli         func(context.Context, *cli.Command) error
 	Flags       []cli.Flag
-	Triggers    []*Module3Trigger
 }
 
 type TaskMessage struct {

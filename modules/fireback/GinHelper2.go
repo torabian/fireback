@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stoewer/go-strcase"
 )
 
 type LangQ struct {
@@ -121,28 +120,6 @@ type EntitySecurityModel struct {
 
 func WithAuthorization(securityModel *SecurityModel) gin.HandlerFunc {
 	return WithAuthorizationFn(securityModel)
-}
-
-// Converts the security policy and action into the gin
-func CastRouteToHandler(r Module3Action) []gin.HandlerFunc {
-
-	items := []gin.HandlerFunc{}
-
-	// Handle security model - to this moment only WithAuth... is used,
-	// Seems other models are not required
-	if r.SecurityModel != nil && r.SecurityModel.ResolveStrategy != ResolveStrategyPublic {
-		if r.Method == "REACTIVE" {
-			items = append([]gin.HandlerFunc{WithSocketAuthorization(r.SecurityModel)}, items...)
-
-		} else {
-
-			items = append([]gin.HandlerFunc{WithAuthorization(r.SecurityModel)}, items...)
-		}
-	}
-
-	items = append(items, r.Handlers...)
-
-	return items
 }
 
 type HttpRouteInformation struct {
@@ -272,106 +249,6 @@ func EntityFromString(str string) EntityResolvedInformation {
 	}
 }
 
-func (route Module3Action) ResponseEntityMeta() EntityResolvedInformation {
-
-	return EntityFromString(GetTypeString(route.ResponseEntity))
-}
-
-func (x Module3Action) ResponseEntityComputed() string {
-	if x.Out == nil {
-		return "any"
-	}
-
-	if x.Out.Entity != "" {
-		return x.Out.Entity
-	}
-	if x.Out.Dto != "" {
-		return x.Out.Dto
-	}
-
-	return "any"
-
-}
-
-func (route Module3Action) ResponseEntityComputedSplit() string {
-	return strings.ReplaceAll(route.ResponseEntityComputed(), "ResDto", ".Res")
-}
-
-func (route Module3Action) RequestEntityComputedSplit() string {
-	return strings.ReplaceAll(route.RequestEntityComputed(), "ReqDto", ".Req")
-}
-
-func (route Module3Action) RequestEntityMeta() EntityResolvedInformation {
-	return EntityFromString(GetTypeString(route.RequestEntity))
-}
-
-func (x Module3Action) RequestEntityComputed() string {
-	if x.In == nil {
-		return ""
-	}
-
-	if x.In.Entity != "" {
-		return x.In.Entity
-	}
-	if x.In.Dto != "" {
-		return x.In.Dto
-	}
-
-	return ""
-
-	// j := EntityFromString(GetTypeString(route.RequestEntity))
-	// return j.ClassName
-}
-
-func (route Module3Action) EntityKey() string {
-	t := ""
-	if route.Method == "DELETE" {
-		if route.TargetEntity != nil {
-			t = GetTypeString(route.TargetEntity)
-		}
-	} else {
-		if route.ResponseEntity != nil {
-			t = GetTypeString(route.ResponseEntity)
-		} else if route.ResponseEntityComputed() != "" {
-			t = route.ResponseEntityComputed()
-		}
-	}
-
-	t = strings.ReplaceAll(t, "[]", "")
-
-	return t
-}
-
-func (route Module3Action) UrlParams() []string {
-	params := []string{}
-	parts := strings.Split(route.Url, "/")
-
-	for _, part := range parts {
-		if part != "" && part[0:1] == ":" {
-			params = append(params, part)
-		}
-	}
-
-	return params
-}
-
-func (route Module3Action) GetFuncName() string {
-	fnName := route.ExternFuncName
-
-	if fnName == "" {
-		fnName = route.Method + strings.ReplaceAll(route.Url, "/", "_")
-		fnName = strings.Replace(fnName, ":", "_by_", 1)
-		fnName = strings.ReplaceAll(fnName, ":", "_and_")
-		fnName = strcase.LowerCamelCase(fnName)
-	}
-
-	return fnName
-}
-
-func (route Module3Action) GetFuncNameUpper() string {
-	return ToUpper(route.GetFuncName())
-}
-
 type IResponseDelete struct {
 	Data *struct {
 		RowsAffected int64 `json:"rowsAffected"`
@@ -411,18 +288,4 @@ type IResponseList[T any] struct {
 			Message  string `json:"message"`
 		} `json:"errors"`
 	} `json:"error"`
-}
-
-type TestResult struct {
-	Service      string `json:"service"`
-	RequestBody  any    `json:"requestBody"`
-	ResponseBody any    `json:"responseBody"`
-	Name         string `json:"name"`
-	Method       string `json:"method"`
-}
-
-func DocumentTestResult(testResult TestResult) {
-	str, _ := json.MarshalIndent(testResult, "", "  ")
-	os.Mkdir("TestResults", 0777)
-	os.WriteFile("TestResults/"+testResult.Name+".json", str, 0777)
 }

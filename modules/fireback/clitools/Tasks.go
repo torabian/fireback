@@ -4,7 +4,6 @@ package clitools
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/hibiken/asynq"
@@ -88,15 +87,15 @@ func liftAsyncqWorkerServer(tasks []*fireback.TaskAction) {
 			)
 		})
 
-		if len(task.Triggers) > 0 {
-			for _, trigger := range task.Triggers {
-				if trigger.Cron != "" {
+		// if len(task.Triggers) > 0 {
+		// 	for _, trigger := range task.Triggers {
+		// 		if trigger.Cron != "" {
 
-					c.AddFunc(trigger.Cron, func() { fmt.Println("Trigger: %s", trigger.Cron) })
-				}
+		// 			c.AddFunc(trigger.Cron, func() { fmt.Println("Trigger: %s", trigger.Cron) })
+		// 		}
 
-			}
-		}
+		// 	}
+		// }
 	}
 
 	c.Start()
