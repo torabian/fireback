@@ -62,15 +62,30 @@ export function useUiState() {
 export function UIStateProvider({ children }: { children: React.ReactNode }) {
   const panelRef = useRef(null); // This is the panel on the sidebar
   const userPreferedWidth = useRef(null); // This is the panel on the sidebar
+  // react-resizable-panels only knows percentages of the group, so on its
+  // own it keeps the sidebar's *share* constant as the window resizes —
+  // which means its actual pixel width grows/shrinks with the window.
+  // We want the opposite: the sidebar should hold a fixed pixel width and
+  // let the router panel(s) absorb the change, same as a manual drag
+  // would. This tracks that fixed target in pixels.
+  const sidebarWidthPx = useRef<number | null>(null);
   const [sidebarVisible, setSidebarVisibility] = useState(false);
 
   const [routers, setRouters] = useState<Array<ActiveRoute>>([
     { id: "url-router" },
   ]);
 
+  const syncSidebarWidthPx = () => {
+    const size = panelRef.current?.getSize();
+    if (size && size > 0) {
+      sidebarWidthPx.current = (size / 100) * window.innerWidth;
+    }
+  };
+
   const persistSidebarSize = (newValue: number) => {
     userPreferedWidth.current = newValue;
     localStorage.setItem("sidebarState", newValue.toString());
+    syncSidebarWidthPx();
   };
 
   useEffect(() => {
@@ -90,6 +105,61 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
   useResizeThreshold(768, (exceeded) => {
     resize(exceeded ? 0 : 20);
   });
+
+  // Re-apply the sidebar's fixed pixel width whenever the window resizes,
+  // so it holds its size while the router panel(s) grow/shrink instead of
+  // everything scaling together. Runs after useResizeThreshold above (both
+  // listen for "resize"), and re-reads the panel's live size each time
+  // rather than trusting React state, so it never fights that hook's
+  // collapse/expand at the 768px breakpoint.
+  //
+  // Throttled with rAF rather than debounced: a debounce only fires once
+  // events stop, so the sidebar would sit at the wrong (scaled) width for
+  // the whole drag and only snap into place on release. rAF instead
+  // applies it on every frame the browser gives us during the drag, so it
+  // tracks live.
+  useEffect(() => {
+    let rafId: number | null = null;
+
+    const applyLockedWidth = () => {
+      rafId = null;
+
+      if (detectDeviceType().isMobileView) {
+        return;
+      }
+
+      const currentSize = panelRef.current?.getSize();
+      if (!currentSize || currentSize <= 0) {
+        // Collapsed/hidden — leave it alone rather than forcing it open.
+        return;
+      }
+
+      if (sidebarWidthPx.current == null) {
+        // No fixed target established yet — this resize just sets the
+        // baseline; it takes effect from the next one onward.
+        syncSidebarWidthPx();
+        return;
+      }
+
+      const newPercentage = (sidebarWidthPx.current / window.innerWidth) * 100;
+      resize(newPercentage);
+    };
+
+    const onWindowResize = () => {
+      if (rafId == null) {
+        rafId = requestAnimationFrame(applyLockedWidth);
+      }
+    };
+
+    window.addEventListener("resize", onWindowResize);
+
+    return () => {
+      window.removeEventListener("resize", onWindowResize);
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
 
   const addRouter = (initialRoute?: string) => {
     setRouters((routers) => [...routers, { id: uuidv4(), href: initialRoute }]);
@@ -147,6 +217,7 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("sidebarState", goodSize.toString());
       resize(goodSize);
       setSidebarVisibility(true);
+      syncSidebarWidthPx();
     }
   };
 
@@ -173,6 +244,7 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     if (panelRef.current) {
       resize(20);
       setSidebarVisibility(true);
+      syncSidebarWidthPx();
     }
   };
 
