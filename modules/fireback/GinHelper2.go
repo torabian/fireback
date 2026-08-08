@@ -9,7 +9,6 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,51 +20,6 @@ type LangQ struct {
 	Q      float64
 }
 
-func ParseAcceptLanguage(acptLang string) []LangQ {
-
-	var lqs []LangQ
-
-	if acptLang == "" {
-		return lqs
-	}
-
-	langQStrs := strings.Split(acptLang, ",")
-	if len(langQStrs) == 0 {
-		return lqs
-	}
-
-	for _, langQStr := range langQStrs {
-		trimedLangQStr := strings.Trim(langQStr, " ")
-
-		langQ := strings.Split(trimedLangQStr, ";")
-		if len(langQ) == 1 {
-			langRegion := strings.Split(langQ[0], "-")
-			lq := LangQ{langRegion[0], langRegion[1], 1}
-			lqs = append(lqs, lq)
-		} else {
-			qp := strings.Split(langQ[1], "=")
-			q, err := strconv.ParseFloat(qp[1], 64)
-			if err != nil {
-				panic(err)
-			}
-			langRegion := strings.Split(langQ[0], "-")
-			lq := LangQ{langRegion[0], langRegion[1], q}
-			lqs = append(lqs, lq)
-		}
-	}
-	return lqs
-}
-
-func GetMainLanguageFromAcceptLanguage(acceptLanguage string) string {
-	query := ParseAcceptLanguage(acceptLanguage)
-
-	if len(query) > 0 {
-		return query[0].Lang
-	}
-
-	// default language
-	return "en"
-}
 func GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h := c.Writer.Header()
