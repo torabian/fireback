@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/torabian/emi/lib/gorunner"
@@ -34,8 +33,6 @@ func main() {
 
 	// Load the application configuration
 	envm.LoadFirebackAppConfiguration(fireback.GetConfigRef())
-
-	fmt.Println(fireback.GetConfig().DbDsn)
 
 	// wal-g is embedded directly in this binary (see modules/backup/Exec.go)
 	// rather than shelling out to a separate installed executable. This
