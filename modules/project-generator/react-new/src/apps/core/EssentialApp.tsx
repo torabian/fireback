@@ -6,12 +6,7 @@ import "../../modules/styles/styles.scss";
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 import "../../modules/styles/apple-family/styles.scss";
 
-import {
-  QueryClient,
-  QueryClient as QueryClient2,
-  QueryClientProvider,
-  QueryClientProvider as QueryClientProvider2,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useContext, useEffect } from "react";
 
 import { ErrorBoundary } from "react-error-boundary";
@@ -34,7 +29,6 @@ export function EssentialApp({
   apiPrefix?: string;
 }) {
   const [queryClient] = React.useState(() => new QueryClient());
-  const [queryClient2] = React.useState(() => new QueryClient2());
   const { config } = useContext(AppConfigContext);
 
   useEffect(() => {
@@ -47,38 +41,36 @@ export function EssentialApp({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <QueryClientProvider2 client={queryClient2}>
-        <UIStateProvider>
-          <AuthProvider>
-            <ErrorBoundary
-              FallbackComponent={Fallback}
-              onReset={(details) => {
-                // Reset the state of your app so the error doesn't happen again
-              }}
+      <UIStateProvider>
+        <AuthProvider>
+          <ErrorBoundary
+            FallbackComponent={Fallback}
+            onReset={(details) => {
+              // Reset the state of your app so the error doesn't happen again
+            }}
+          >
+            <WithFireback
+              config={config}
+              prefix={apiPrefix}
+              queryClient={queryClient}
+              locale={locale}
             >
-              <WithFireback
-                config={config}
+              <WithSdk
                 prefix={apiPrefix}
+                config={config}
                 queryClient={queryClient}
-                locale={locale}
               >
-                <WithSdk
-                  prefix={apiPrefix}
-                  config={config}
-                  queryClient={queryClient}
-                >
-                  <WithSelfServiceRoutes>
-                    <SidebarMultiRouterSetup
-                      queryClient={queryClient}
-                      ApplicationRoutes={ApplicationRoutes}
-                    />
-                  </WithSelfServiceRoutes>
-                </WithSdk>
-              </WithFireback>
-            </ErrorBoundary>
-          </AuthProvider>
-        </UIStateProvider>
-      </QueryClientProvider2>
+                <WithSelfServiceRoutes>
+                  <SidebarMultiRouterSetup
+                    queryClient={queryClient}
+                    ApplicationRoutes={ApplicationRoutes}
+                  />
+                </WithSelfServiceRoutes>
+              </WithSdk>
+            </WithFireback>
+          </ErrorBoundary>
+        </AuthProvider>
+      </UIStateProvider>
     </QueryClientProvider>
   );
 }
