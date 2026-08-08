@@ -2,6 +2,7 @@ package abac
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/abac/interfacetools"
@@ -231,7 +232,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		for _, item := range items2 {
 
 			if err := dbref.AutoMigrate(item); err != nil {
-				fmt.Println("Migrating entity issue:", fireback.GetInterfaceName(item))
+				fmt.Println("Migrating entity issue:", reflect.ValueOf(item).Elem().String())
 				return err
 			}
 		}

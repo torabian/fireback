@@ -1,24 +1,13 @@
 package fireback
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"reflect"
 	"regexp"
-	"runtime"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
-
-type LangQ struct {
-	Lang   string
-	Region string
-	Q      float64
-}
 
 func GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -76,22 +65,6 @@ func WithAuthorization(securityModel *SecurityModel) gin.HandlerFunc {
 	return WithAuthorizationFn(securityModel)
 }
 
-type HttpRouteInformation struct {
-	Method         string
-	Url            string
-	RequestEntity  string
-	TargetEntity   string
-	ResponseEntity string
-	Action         string
-	Params         []string
-}
-type HttpRouteInformationFile struct {
-	ModuleName    string
-	SubModuleName string
-	Schema        []EntityJsonField
-	Routes        []*HttpRouteInformation
-}
-
 func GetTypeString(myvar interface{}) string {
 	pathRemover := regexp.MustCompile("(\\[).*/")
 	t := reflect.TypeOf(myvar)
@@ -103,118 +76,6 @@ func GetTypeString(myvar interface{}) string {
 	}
 
 	return ""
-}
-
-func SplitFnToModuleAndFunc(input string) (string, string, string) {
-
-	items := strings.Split(input, "/")
-
-	fullName := items[len(items)-1]
-	moduleName := strings.Split(fullName, ".")[0]
-	modulePath := strings.Join(items[0:len(items)-1], "/")
-
-	return fullName, modulePath + "/" + moduleName, moduleName
-}
-
-func UniqueString(intSlice []string) []string {
-	keys := make(map[string]bool)
-	list := []string{}
-	for _, entry := range intSlice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
-}
-
-func GetFunctionName(temp interface{}) string {
-	strs := strings.Split((runtime.FuncForPC(reflect.ValueOf(temp).Pointer()).Name()), ".")
-	return strs[len(strs)-1]
-}
-
-func GetInterfaceName(temp interface{}) string {
-	return reflect.ValueOf(temp).Elem().String()
-}
-
-func GetFunctionNameFull(i interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
-}
-
-func WriteEntitySchema(name string, data interface{}, mod string) {
-
-	body, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	os.Mkdir("./artifacts/entity-schema", 0777)
-	os.WriteFile("./artifacts/entity-schema/"+name+".json", body, 0644)
-}
-
-type EntityResolvedInformation struct {
-	Module        string
-	ClassName     string
-	GenericGroups []string
-}
-
-func EntityFromString(str string) EntityResolvedInformation {
-	dot := strings.Index(str, ".")
-
-	vModule := ""
-	vClassName := ""
-	genericGroups := []string{}
-
-	if dot == -1 {
-		return EntityResolvedInformation{
-			Module:        vModule,
-			ClassName:     vClassName,
-			GenericGroups: genericGroups,
-		}
-	}
-
-	// Match this pattern *[]module.entity
-
-	if strings.Contains(str, "*[]") {
-		str = strings.ReplaceAll(str, "*[]", "")
-		dot = strings.Index(str, ".")
-		vModule = strings.ReplaceAll(str[0:dot], "*", "")
-		vClassName = str[dot+1:]
-	} else if strings.Contains(str, "[") && strings.Contains(str, "]") {
-		// Match the generic patten
-		startBracket := strings.Index(str, "[")
-		endBracket := strings.Index(str, "]")
-
-		between := str[startBracket+1 : endBracket]
-		dot = strings.Index(between, ".")
-		vModule = strings.ReplaceAll(between[0:dot], "*", "")
-		vClassName = between[dot+1:]
-	} else {
-		// Simple workspace.entity type
-
-		vModule = strings.ReplaceAll(str[0:dot], "*", "")
-		vClassName = str[dot+1:]
-	}
-
-	return EntityResolvedInformation{
-		Module:        vModule,
-		ClassName:     vClassName,
-		GenericGroups: genericGroups,
-	}
-}
-
-type IResponseDelete struct {
-	Data *struct {
-		RowsAffected int64 `json:"rowsAffected"`
-	} `json:"data"`
-	Error *struct {
-		Message string `json:"message"`
-		Code    string `json:"code"`
-		Errors  []struct {
-			Location string `json:"location"`
-			Message  string `json:"message"`
-		} `json:"errors"`
-	} `json:"error"`
 }
 
 type IResponse[T any] struct {

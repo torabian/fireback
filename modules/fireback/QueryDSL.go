@@ -79,9 +79,6 @@ type QueryDSL struct {
 	// in every request
 	Authorization string `json:"authorization"`
 
-	// Parsed languages
-	AcceptLanguage []LangQ `json:"-"`
-
 	// Automatically assigned UserId to the request after analising the token
 	// This will be used to save each entity and determine the owner of the record
 	UserId string `json:"-"`
