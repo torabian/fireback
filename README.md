@@ -1,15 +1,16 @@
-# Fireback – Go, React commercial boilerplate
+# Fireback – Authentication server
 
-Fireback is a boilerplate for creating commerical web projects, specially those require multi-tenancy, database
-connection, file upload, and a front-end interface.
+Fireback is an authentication server, which can be used to build commercial products in general category,
+or be used as a tool to create authentication server for projects within seconds.
 
 It includes a set of features, which most apps need, and uses famous libraries for that:
 
 - Gin
 - Urfave Cli v3
 - Tus resumable file upload.
+- User role workspace
 
-And also comes with a react project, to handle all those things.
+And also comes with a react project, to handle all those things, in UI.
 
 You can clone fireback, or create a new project using it, or add it's libraries as a dependency
 to your project, or install it only for a user authentication solution. Totally up to you.
