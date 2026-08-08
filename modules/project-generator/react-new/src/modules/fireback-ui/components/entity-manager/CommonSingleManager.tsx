@@ -1,5 +1,5 @@
-import { KeyboardAction } from "../../../fireback/definitions/definitions";
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
+import { KeyboardAction } from "../../hooks/useExportTools";
 import { useBackButton, useEditAction } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 
@@ -20,12 +20,12 @@ export const CommonSingleManager = ({
 
   useEditAction(
     editEntityHandler ? () => editEntityHandler({ locale, router }) : undefined,
-    KeyboardAction.EditEntity
+    KeyboardAction.EditEntity,
   );
 
   useBackButton(
     noBack !== true ? () => router.goBack() : null,
-    KeyboardAction.CommonBack
+    KeyboardAction.CommonBack,
   );
 
   return (

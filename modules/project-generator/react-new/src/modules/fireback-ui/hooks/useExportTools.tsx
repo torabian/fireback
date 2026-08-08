@@ -1,7 +1,41 @@
 import { useT } from "./useT";
 
 import { useExportActions } from "../components/action-menu/ActionMenu";
-import { KeyboardAction } from "../../fireback/definitions/definitions";
+
+export enum KeyboardAction {
+  NewEntity = "new_entity",
+  SidebarToggle = "sidebarToggle",
+  NewChildEntity = "new_child_entity",
+  EditEntity = "edit_entity",
+  ViewQuestions = "view_questions",
+  ExportTable = "export_table",
+  CommonBack = "common_back",
+  StopStart = "StopStart",
+  Delete = "delete",
+  Select1Index = "select1_index",
+  Select2Index = "select2_index",
+  Select3Index = "select3_index",
+  Select4Index = "select4_index",
+  Select5Index = "select5_index",
+  Select6Index = "select6_index",
+  Select7Index = "select7_index",
+  Select8Index = "select8_index",
+  Select9Index = "select9_index",
+  ToggleLock = "l",
+}
+
+export const NumericKeys = [
+  KeyboardAction.Select1Index,
+  KeyboardAction.Select2Index,
+  KeyboardAction.Select3Index,
+  KeyboardAction.Select4Index,
+  KeyboardAction.Select5Index,
+  KeyboardAction.Select6Index,
+  KeyboardAction.Select7Index,
+  KeyboardAction.Select8Index,
+  KeyboardAction.Select9Index,
+];
+
 import { RemoteQueryContext } from "../../fireback/sdk/core/react-tools";
 import { useContext } from "react";
 
@@ -22,7 +56,7 @@ export function xhrStreamFile(
   method: string,
   token: string,
   workspaceId: string,
-  roleId: string
+  roleId: string,
 ) {
   var xhr = new XMLHttpRequest();
 
@@ -35,7 +69,7 @@ export function xhrStreamFile(
       data = "data:application/text;base64," + btoa(data);
       document.location = data;
     },
-    false
+    false,
   );
 
   xhr.setRequestHeader("Authorization", token);
@@ -55,7 +89,7 @@ export function useOctetDownload({ path }: { path: string }) {
       "POST",
       h.authorization || "",
       h["workspace-id"] || "",
-      h["role-id"] || ""
+      h["role-id"] || "",
     );
 
   return { execute };
@@ -75,10 +109,10 @@ export const useExportTools = ({ path }: { path?: string }) => {
             "GET",
             h.authorization || "",
             h["workspace-id"] || "",
-            h["role-id"] || ""
+            h["role-id"] || "",
           );
         }
       : undefined,
-    KeyboardAction.ExportTable
+    KeyboardAction.ExportTable,
   );
 };

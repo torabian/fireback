@@ -1,6 +1,5 @@
 import { usePageTitle } from "../page-title/PageTitle";
-import { KeyboardAction } from "../../../fireback/definitions/definitions";
-import { useExportTools } from "../../hooks/useExportTools";
+import { KeyboardAction, useExportTools } from "../../hooks/useExportTools";
 import { useLocale } from "../../hooks/useLocale";
 import { useRouter } from "../../hooks/useRouter";
 import { useNewAction } from "../action-menu/ActionMenu";
@@ -25,7 +24,7 @@ export const CommonArchiveManager = ({
 
   useNewAction(
     newEntityHandler ? () => newEntityHandler({ locale, router }) : undefined,
-    KeyboardAction.NewEntity
+    KeyboardAction.NewEntity,
   );
 
   return <>{children}</>;

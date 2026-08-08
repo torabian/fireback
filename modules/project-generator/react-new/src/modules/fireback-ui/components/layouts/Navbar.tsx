@@ -5,7 +5,6 @@ import { getOS } from "../../hooks/useHtmlClass";
 import { osResources } from "../../../fireback/resources/resources";
 import classNames from "classnames";
 import React from "react";
-import { KeyboardAction } from "../../../fireback/definitions/definitions";
 import { useKeyCombination } from "../../hooks/useKeyPress";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
 import ActiveLink from "../link/ActiveLink";
@@ -16,6 +15,7 @@ import Sidebar from "./Sidebar";
 import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
+import { KeyboardAction } from "../../hooks/useExportTools";
 
 function Navbar({
   menu,
@@ -57,7 +57,7 @@ function Navbar({
                       {
                         speed: 180,
                         direction: "left",
-                      }
+                      },
                     )
                   : toggleSidebar()
               }
@@ -109,7 +109,7 @@ function Navbar({
               <li
                 className={classNames(
                   "nav-item",
-                  item.children?.length && "dropdown"
+                  item.children?.length && "dropdown",
                 )}
                 key={`${item.label}_${item.href}`}
               >
@@ -136,7 +136,7 @@ function Navbar({
                             <li
                               className={classNames(
                                 "nav-item",
-                                item.children?.length && "dropdown"
+                                item.children?.length && "dropdown",
                               )}
                               key={`${item.label}_${item.href}`}
                             >

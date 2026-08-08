@@ -5,7 +5,7 @@ import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect, useRef, useState } from "react";
-import { KeyboardAction } from "../../../fireback/definitions/definitions";
+
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
@@ -15,6 +15,7 @@ import { get, set } from "lodash";
 import type { GResponse } from "../../../fireback/sdk/sdk/envelopes";
 import { mutationErrorsToFormik } from "../../../fireback/sdk/core/http-tools";
 import { ErrorsView } from "../error-view/ErrorView";
+import { KeyboardAction } from "../../hooks/useExportTools";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;

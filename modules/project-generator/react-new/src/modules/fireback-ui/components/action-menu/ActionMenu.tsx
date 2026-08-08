@@ -5,12 +5,12 @@
 import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { KeyboardAction } from "../../../fireback/definitions/definitions";
+
 import { osResources } from "../../../fireback/resources/resources";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
-import { toBinaryString } from "../../hooks/useExportTools";
+import { KeyboardAction, toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
 import { useT } from "../../hooks/useT";
 

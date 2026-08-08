@@ -8,7 +8,6 @@ import {
 } from "../components/action-menu/ActionMenu";
 import { ModalContext } from "../components/modal/Modal";
 import { commonDialogs } from "../components/overlay/CommonOverlays";
-import { KeyboardAction } from "../../fireback/definitions/definitions";
 import { type Filters } from "./datatabletools";
 import { useRouter } from "./useRouter";
 import { osResources } from "../../fireback/resources/resources";
@@ -16,6 +15,7 @@ import { type DeleteRequest } from "../../fireback/sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";
 import { useT } from "./useT";
+import { KeyboardAction } from "./useExportTools";
 
 export function useDatatableFiltering({
   urlMask,

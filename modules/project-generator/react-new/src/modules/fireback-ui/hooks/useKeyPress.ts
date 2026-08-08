@@ -1,10 +1,10 @@
-import { KeyboardAction } from "../../fireback/definitions/definitions";
 import { useEffect } from "react";
+import { KeyboardAction } from "./useExportTools";
 
 // App predefined combination that user can change
 export function useKeyCombination(
   action?: KeyboardAction | KeyboardAction[],
-  handler?: (key: string) => void
+  handler?: (key: string) => void,
 ) {
   // Later use the backend information for this, this is where you need to manage also CTRL+x
   const mapper = {
@@ -40,7 +40,7 @@ export function useKeyCombination(
 
 export function useKeyPress(
   key?: string | string[],
-  handler?: (key: any) => void
+  handler?: (key: any) => void,
 ) {
   useEffect(() => {
     if (!key || key.length === 0 || !handler) {
