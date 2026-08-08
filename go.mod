@@ -9,7 +9,6 @@ require (
 	github.com/alexeyco/simpletable v1.0.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/charmbracelet/bubbletea v1.2.4
-	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/expr-lang/expr v1.17.5
 	github.com/fatih/color v1.16.0
 	github.com/gin-contrib/cors v1.7.7
@@ -28,7 +27,6 @@ require (
 	github.com/hibiken/asynq v0.24.1
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/json-iterator/go v1.1.12
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/matoous/go-nanoid/v2 v2.1.0
@@ -45,7 +43,6 @@ require (
 	github.com/sendgrid/rest v2.6.9+incompatible
 	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	github.com/signintech/gopdf v0.19.0
-	github.com/stoewer/go-strcase v1.2.1
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
@@ -161,6 +158,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
