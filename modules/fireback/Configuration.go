@@ -1,0 +1,1188 @@
+package fireback
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
+)
+
+/**
+* Configuration generator
+ */
+type Config struct {
+	// When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie.
+	CookieAuthOnly bool `envconfig:"COOKIE_AUTH_ONLY" description:"When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie."`
+	// If true, set's the environment behavior to production, and some functionality will be limited
+	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
+	// Prefix all gorm tables with some string
+	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
+	// VAPID Web push notification public key
+	VapidPublicKey string `envconfig:"VAPID_PUBLIC_KEY" description:"VAPID Web push notification public key"`
+	// VAPID Web push notification private key
+	VapidPrivateKey string `envconfig:"VAPID_PRIVATE_KEY" description:"VAPID Web push notification private key"`
+	// Fireback supports generating tokens based on random short string, or jwt.
+	TokenGenerationStrategy string `envconfig:"TOKEN_GENERATION_STRATEGY" description:"Fireback supports generating tokens based on random short string, or jwt."`
+	// If tokenGenerationStrategy is set to jwt, then these secret will be used.
+	JwtSecretKey string `envconfig:"JWT_SECRET_KEY" description:"If tokenGenerationStrategy is set to jwt, then these secret will be used."`
+	// Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance
+	WithTaskServer bool `envconfig:"WITH_TASK_SERVER" description:"Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance"`
+	// Environment name, such as dev, prod, test, test-eu, etc...
+	Name string `envconfig:"NAME" description:"Environment name, such as dev, prod, test, test-eu, etc..."`
+	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
+	DbName string `envconfig:"DB_NAME" description:"Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite."`
+	// SSL Certification location to server on http listener
+	CertFile string `envconfig:"CERT_FILE" description:"SSL Certification location to server on http listener"`
+	// SSL Certification key file
+	KeyFile string `envconfig:"KEY_FILE" description:"SSL Certification key file"`
+	// Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.
+	DbLogLevel string `envconfig:"DB_LOG_LEVEL" description:"Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options."`
+	// If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
+	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
+	// Database port for those which are having a port, 3306 on mysql for example
+	DbPort int64 `envconfig:"DB_PORT" description:"Database port for those which are having a port, 3306 on mysql for example"`
+	// Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.
+	DbDsn string `envconfig:"DB_DSN" description:"Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored."`
+	// Database host, such as localhost, or 127.0.0.1
+	DbHost string `envconfig:"DB_HOST" description:"Database host, such as localhost, or 127.0.0.1"`
+	// Database username for connection, such as root.
+	DbUsername string `envconfig:"DB_USERNAME" description:"Database username for connection, such as root."`
+	// Database password for connection. Can be empty if there is no password
+	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. Can be empty if there is no password"`
+	// Gin framework mode, which could be 'test', 'debug', 'release'
+	GinMode string `envconfig:"GIN_MODE" description:"Gin framework mode, which could be 'test', 'debug', 'release'"`
+	// This is the storage url which files will be uploaded to
+	Storage string `envconfig:"STORAGE" description:"This is the storage url which files will be uploaded to"`
+	// Database vendor name, such as sqlite, mysql, or any other supported database.
+	DbVendor string `envconfig:"DB_VENDOR" description:"Database vendor name, such as sqlite, mysql, or any other supported database."`
+	// Writes the logs instead of std out into these log files.
+	StdOut string `envconfig:"STD_OUT" description:"Writes the logs instead of std out into these log files."`
+	// This is the url (host and port) of a queue service. If not set, we use the internal queue system
+	WorkerAddress string `envconfig:"WORKER_ADDRESS" description:"This is the url (host and port) of a queue service. If not set, we use the internal queue system"`
+	// How many tasks worker can take concurrently
+	WorkerConcurrency int `envconfig:"WORKER_CONCURRENCY" description:"How many tasks worker can take concurrently"`
+	// Writes the errors instead of std err into these log files.
+	StdErr string `envconfig:"STD_ERR" description:"Writes the errors instead of std err into these log files."`
+	// Authorization token for cli apps, to access resoruces similar on http api
+	CliToken string `envconfig:"CLI_TOKEN" description:"Authorization token for cli apps, to access resoruces similar on http api"`
+	// Region, for example us or pl
+	CliRegion string `envconfig:"CLI_REGION" description:"Region, for example us or pl"`
+	// Language of the cli operations, for example en or pl
+	CliLanguage string `envconfig:"CLI_LANGUAGE" description:"Language of the cli operations, for example en or pl"`
+	// Selected workspace in the cli context.
+	CliWorkspace string `envconfig:"CLI_WORKSPACE" description:"Selected workspace in the cli context."`
+	// The port which application would be lifted
+	Port int64 `envconfig:"PORT" description:"The port which application would be lifted"`
+	// Application host which http server will be lifted
+	Host string `envconfig:"HOST" description:"Application host which http server will be lifted"`
+	// Used name for installing app as system service on macos installers
+	MacIdentifier string `envconfig:"MAC_IDENTIFIER" description:"Used name for installing app as system service on macos installers"`
+	// Used name for installing app as system service on ubuntu installers
+	DebianIdentifier string `envconfig:"DEBIAN_IDENTIFIER" description:"Used name for installing app as system service on ubuntu installers"`
+	// Used name for installing app as system service on windows installers
+	WindowsIdentifier string `envconfig:"WINDOWS_IDENTIFIER" description:"Used name for installing app as system service on windows installers"`
+}
+
+func GetConfigCliFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "cookie-auth-only",
+			Usage: "When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie.",
+		},
+		&cli.BoolFlag{
+			Name:  "production",
+			Usage: "If true, set's the environment behavior to production, and some functionality will be limited",
+		},
+		&cli.StringFlag{
+			Name:  "table-prefix",
+			Usage: "Prefix all gorm tables with some string",
+		},
+		&cli.StringFlag{
+			Name:  "vapid-public-key",
+			Usage: "VAPID Web push notification public key",
+		},
+		&cli.StringFlag{
+			Name:  "vapid-private-key",
+			Usage: "VAPID Web push notification private key",
+		},
+		&cli.StringFlag{
+			Name:  "token-generation-strategy",
+			Usage: "Fireback supports generating tokens based on random short string, or jwt.",
+		},
+		&cli.StringFlag{
+			Name:  "jwt-secret-key",
+			Usage: "If tokenGenerationStrategy is set to jwt, then these secret will be used.",
+		},
+		&cli.BoolFlag{
+			Name:  "with-task-server",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance",
+		},
+		&cli.StringFlag{
+			Name:  "name",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc...",
+		},
+		&cli.StringFlag{
+			Name:  "db-name",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.",
+		},
+		&cli.StringFlag{
+			Name:  "cert-file",
+			Usage: "SSL Certification location to server on http listener",
+		},
+		&cli.StringFlag{
+			Name:  "key-file",
+			Usage: "SSL Certification key file",
+		},
+		&cli.StringFlag{
+			Name:  "db-log-level",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options.",
+		},
+		&cli.BoolFlag{
+			Name:  "use-ssl",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
+		},
+		&cli.Int64Flag{
+			Name:  "db-port",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example",
+		},
+		&cli.StringFlag{
+			Name:  "db-dsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
+		},
+		&cli.StringFlag{
+			Name:  "db-host",
+			Usage: "Database host, such as localhost, or 127.0.0.1",
+		},
+		&cli.StringFlag{
+			Name:  "db-username",
+			Usage: "Database username for connection, such as root.",
+		},
+		&cli.StringFlag{
+			Name:  "db-password",
+			Usage: "Database password for connection. Can be empty if there is no password",
+		},
+		&cli.StringFlag{
+			Name:  "gin-mode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release'",
+		},
+		&cli.StringFlag{
+			Name:  "storage",
+			Usage: "This is the storage url which files will be uploaded to",
+		},
+		&cli.StringFlag{
+			Name:  "db-vendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database.",
+		},
+		&cli.StringFlag{
+			Name:  "std-out",
+			Usage: "Writes the logs instead of std out into these log files.",
+		},
+		&cli.StringFlag{
+			Name:  "worker-address",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system",
+		},
+		&cli.IntFlag{
+			Name:  "worker-concurrency",
+			Usage: "How many tasks worker can take concurrently",
+		},
+		&cli.StringFlag{
+			Name:  "std-err",
+			Usage: "Writes the errors instead of std err into these log files.",
+		},
+		&cli.StringFlag{
+			Name:  "cli-token",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api",
+		},
+		&cli.StringFlag{
+			Name:  "cli-region",
+			Usage: "Region, for example us or pl",
+		},
+		&cli.StringFlag{
+			Name:  "cli-language",
+			Usage: "Language of the cli operations, for example en or pl",
+		},
+		&cli.StringFlag{
+			Name:  "cli-workspace",
+			Usage: "Selected workspace in the cli context.",
+		},
+		&cli.Int64Flag{
+			Name:  "port",
+			Usage: "The port which application would be lifted",
+		},
+		&cli.StringFlag{
+			Name:  "host",
+			Usage: "Application host which http server will be lifted",
+		},
+		&cli.StringFlag{
+			Name:  "mac-identifier",
+			Usage: "Used name for installing app as system service on macos installers",
+		},
+		&cli.StringFlag{
+			Name:  "debian-identifier",
+			Usage: "Used name for installing app as system service on ubuntu installers",
+		},
+		&cli.StringFlag{
+			Name:  "windows-identifier",
+			Usage: "Used name for installing app as system service on windows installers",
+		},
+	}
+}
+func CastConfigFromCli(config *Config, c emigo.CliCastable) {
+	if c.IsSet("cookie-auth-only") {
+		config.CookieAuthOnly = c.Bool("cookie-auth-only")
+	}
+	if c.IsSet("production") {
+		config.Production = c.Bool("production")
+	}
+	if c.IsSet("table-prefix") {
+		config.TablePrefix = c.String("table-prefix")
+	}
+	if c.IsSet("vapid-public-key") {
+		config.VapidPublicKey = c.String("vapid-public-key")
+	}
+	if c.IsSet("vapid-private-key") {
+		config.VapidPrivateKey = c.String("vapid-private-key")
+	}
+	if c.IsSet("token-generation-strategy") {
+		config.TokenGenerationStrategy = c.String("token-generation-strategy")
+	}
+	if c.IsSet("jwt-secret-key") {
+		config.JwtSecretKey = c.String("jwt-secret-key")
+	}
+	if c.IsSet("with-task-server") {
+		config.WithTaskServer = c.Bool("with-task-server")
+	}
+	if c.IsSet("name") {
+		config.Name = c.String("name")
+	}
+	if c.IsSet("db-name") {
+		config.DbName = c.String("db-name")
+	}
+	if c.IsSet("cert-file") {
+		config.CertFile = c.String("cert-file")
+	}
+	if c.IsSet("key-file") {
+		config.KeyFile = c.String("key-file")
+	}
+	if c.IsSet("db-log-level") {
+		config.DbLogLevel = c.String("db-log-level")
+	}
+	if c.IsSet("use-ssl") {
+		config.UseSSL = c.Bool("use-ssl")
+	}
+	if c.IsSet("db-port") {
+		config.DbPort = c.Int64("db-port")
+	}
+	if c.IsSet("db-dsn") {
+		config.DbDsn = c.String("db-dsn")
+	}
+	if c.IsSet("db-host") {
+		config.DbHost = c.String("db-host")
+	}
+	if c.IsSet("db-username") {
+		config.DbUsername = c.String("db-username")
+	}
+	if c.IsSet("db-password") {
+		config.DbPassword = c.String("db-password")
+	}
+	if c.IsSet("gin-mode") {
+		config.GinMode = c.String("gin-mode")
+	}
+	if c.IsSet("storage") {
+		config.Storage = c.String("storage")
+	}
+	if c.IsSet("db-vendor") {
+		config.DbVendor = c.String("db-vendor")
+	}
+	if c.IsSet("std-out") {
+		config.StdOut = c.String("std-out")
+	}
+	if c.IsSet("worker-address") {
+		config.WorkerAddress = c.String("worker-address")
+	}
+	if c.IsSet("worker-concurrency") {
+		config.WorkerConcurrency = c.Int("worker-concurrency")
+	}
+	if c.IsSet("std-err") {
+		config.StdErr = c.String("std-err")
+	}
+	if c.IsSet("cli-token") {
+		config.CliToken = c.String("cli-token")
+	}
+	if c.IsSet("cli-region") {
+		config.CliRegion = c.String("cli-region")
+	}
+	if c.IsSet("cli-language") {
+		config.CliLanguage = c.String("cli-language")
+	}
+	if c.IsSet("cli-workspace") {
+		config.CliWorkspace = c.String("cli-workspace")
+	}
+	if c.IsSet("port") {
+		config.Port = c.Int64("port")
+	}
+	if c.IsSet("host") {
+		config.Host = c.String("host")
+	}
+	if c.IsSet("mac-identifier") {
+		config.MacIdentifier = c.String("mac-identifier")
+	}
+	if c.IsSet("debian-identifier") {
+		config.DebianIdentifier = c.String("debian-identifier")
+	}
+	if c.IsSet("windows-identifier") {
+		config.WindowsIdentifier = c.String("windows-identifier")
+	}
+}
+func GetConfigCli() []*cli.Command {
+	return []*cli.Command{
+		{
+			Name:  "cookie-auth-only",
+			Usage: "When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie. (bool)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.CookieAuthOnly)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetBoolean(c, config.CookieAuthOnly, func(value bool) {
+							config.CookieAuthOnly = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "production",
+			Usage: "If true, set's the environment behavior to production, and some functionality will be limited (bool)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.Production)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetBoolean(c, config.Production, func(value bool) {
+							config.Production = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "table-prefix",
+			Usage: "Prefix all gorm tables with some string (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.TablePrefix)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.TablePrefix, func(value string) {
+							config.TablePrefix = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "vapid-public-key",
+			Usage: "VAPID Web push notification public key (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.VapidPublicKey)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.VapidPublicKey, func(value string) {
+							config.VapidPublicKey = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "vapid-private-key",
+			Usage: "VAPID Web push notification private key (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.VapidPrivateKey)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.VapidPrivateKey, func(value string) {
+							config.VapidPrivateKey = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "token-generation-strategy",
+			Usage: "Fireback supports generating tokens based on random short string, or jwt. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.TokenGenerationStrategy)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.TokenGenerationStrategy, func(value string) {
+							config.TokenGenerationStrategy = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "jwt-secret-key",
+			Usage: "If tokenGenerationStrategy is set to jwt, then these secret will be used. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.JwtSecretKey)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.JwtSecretKey, func(value string) {
+							config.JwtSecretKey = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "with-task-server",
+			Usage: "Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance (bool)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.WithTaskServer)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetBoolean(c, config.WithTaskServer, func(value bool) {
+							config.WithTaskServer = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "name",
+			Usage: "Environment name, such as dev, prod, test, test-eu, etc... (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.Name)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.Name, func(value string) {
+							config.Name = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-name",
+			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbName)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbName, func(value string) {
+							config.DbName = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cert-file",
+			Usage: "SSL Certification location to server on http listener (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.CertFile)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.CertFile, func(value string) {
+							config.CertFile = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "key-file",
+			Usage: "SSL Certification key file (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.KeyFile)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.KeyFile, func(value string) {
+							config.KeyFile = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-log-level",
+			Usage: "Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbLogLevel)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbLogLevel, func(value string) {
+							config.DbLogLevel = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "use-ssl",
+			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect (bool)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.UseSSL)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetBoolean(c, config.UseSSL, func(value bool) {
+							config.UseSSL = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-port",
+			Usage: "Database port for those which are having a port, 3306 on mysql for example (int64)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbPort)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetInt64(c, config.DbPort, func(value int64) {
+							config.DbPort = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-dsn",
+			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbDsn)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbDsn, func(value string) {
+							config.DbDsn = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-host",
+			Usage: "Database host, such as localhost, or 127.0.0.1 (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbHost)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbHost, func(value string) {
+							config.DbHost = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-username",
+			Usage: "Database username for connection, such as root. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbUsername)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbUsername, func(value string) {
+							config.DbUsername = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-password",
+			Usage: "Database password for connection. Can be empty if there is no password (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbPassword)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbPassword, func(value string) {
+							config.DbPassword = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "gin-mode",
+			Usage: "Gin framework mode, which could be 'test', 'debug', 'release' (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.GinMode)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.GinMode, func(value string) {
+							config.GinMode = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "storage",
+			Usage: "This is the storage url which files will be uploaded to (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.Storage)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.Storage, func(value string) {
+							config.Storage = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "db-vendor",
+			Usage: "Database vendor name, such as sqlite, mysql, or any other supported database. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DbVendor)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DbVendor, func(value string) {
+							config.DbVendor = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "std-out",
+			Usage: "Writes the logs instead of std out into these log files. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.StdOut)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.StdOut, func(value string) {
+							config.StdOut = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "worker-address",
+			Usage: "This is the url (host and port) of a queue service. If not set, we use the internal queue system (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.WorkerAddress)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.WorkerAddress, func(value string) {
+							config.WorkerAddress = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "worker-concurrency",
+			Usage: "How many tasks worker can take concurrently (int)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.WorkerConcurrency)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetInt(c, config.WorkerConcurrency, func(value int) {
+							config.WorkerConcurrency = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "std-err",
+			Usage: "Writes the errors instead of std err into these log files. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.StdErr)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.StdErr, func(value string) {
+							config.StdErr = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-token",
+			Usage: "Authorization token for cli apps, to access resoruces similar on http api (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.CliToken)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.CliToken, func(value string) {
+							config.CliToken = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-region",
+			Usage: "Region, for example us or pl (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.CliRegion)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.CliRegion, func(value string) {
+							config.CliRegion = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-language",
+			Usage: "Language of the cli operations, for example en or pl (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.CliLanguage)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.CliLanguage, func(value string) {
+							config.CliLanguage = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "cli-workspace",
+			Usage: "Selected workspace in the cli context. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.CliWorkspace)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.CliWorkspace, func(value string) {
+							config.CliWorkspace = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "port",
+			Usage: "The port which application would be lifted (int64)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.Port)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetInt64(c, config.Port, func(value int64) {
+							config.Port = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "host",
+			Usage: "Application host which http server will be lifted (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.Host)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.Host, func(value string) {
+							config.Host = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "mac-identifier",
+			Usage: "Used name for installing app as system service on macos installers (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.MacIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.MacIdentifier, func(value string) {
+							config.MacIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "debian-identifier",
+			Usage: "Used name for installing app as system service on ubuntu installers (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.DebianIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.DebianIdentifier, func(value string) {
+							config.DebianIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "windows-identifier",
+			Usage: "Used name for installing app as system service on windows installers (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.WindowsIdentifier)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.WindowsIdentifier, func(value string) {
+							config.WindowsIdentifier = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+	}
+}
+
+// The config is usually populated by env vars on LoadConfiguration
+var config Config = Config{
+	TokenGenerationStrategy: "random",
+	WithTaskServer:          false,
+	DbName:                  ":memory:",
+	DbLogLevel:              "silent",
+	DbVendor:                "sqlite",
+	WorkerAddress:           "127.0.0.1:6379",
+	WorkerConcurrency:       10,
+	CliRegion:               "us",
+	CliLanguage:             "en",
+	Port:                    4500,
+	Host:                    "localhost",
+	MacIdentifier:           "fireback",
+	DebianIdentifier:        "fireback",
+	WindowsIdentifier:       "fireback",
+}
+
+/*
+*
+You can call this function on first line of your main function.
+This is different from fireback configuration (for now), you can
+define config: in module3 file, similar to fields in entities,
+and we generate the config struct and this function would read .env.local,
+.env.prod, etc - depending on the ENV=xxx env variable.
+*
+*/
+func LoadConfiguration() Config {
+	emigo.HandleEnvVars(&config)
+	return config
+}
+func (x *Config) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+func (x *Config) Save(filepath string) error {
+	return emigo.SaveEnvFile(x, filepath)
+}

@@ -1,0 +1,17 @@
+extends: []
+content:
+  regionalContents:
+    archiveTitle: محتوای منطقه‌ای
+    content: محتوا
+    contentHint: محتوا
+    editRegionalContent: ویرایش محتوای منطقه‌ای
+    keyGroup: گروه کلید
+    keyGroupHint: گروه کلید
+    languageId: شناسه زبان
+    languageIdHint: شناسه زبان
+    newRegionalContent: محتوای منطقه‌ای جدید
+    region: منطقه
+    regionHint: منطقه
+    title: عنوان
+    titleHint: عنوان
+    uniqueId: شناسه

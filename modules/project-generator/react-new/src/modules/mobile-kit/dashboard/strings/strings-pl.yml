@@ -1,0 +1,5 @@
+extends: []
+content:
+  dashboard:
+    description: Witamy na pulpicie. Możesz tu zobaczyć, co się dzieje.
+    title: Pulpit

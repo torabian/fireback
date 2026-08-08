@@ -1,0 +1,51 @@
+@import "bootstrap/dist/css/bootstrap.css";
+/* if you want you can modify which parts of bootstrap you want.
+ * this will slow the build process, since everytime will be reloaded
+ * perhaps better is to have a bootstrap script in npm and build the version needed
+ * and include that instead. */
+
+/* @import "bootstrap.modified.css"; */
+
+@import "./authentication.css";
+@import "./pull-to-refresh.css";
+@import "./window-drop.css";
+@import "./role-permission-tree.css";
+@import "react-phone-input-2/lib/style.css";
+@import "./line-loader.css";
+@import "./theme-basic.css";
+@import "./not-found.css";
+
+.data-table-filter-input {
+  position: absolute;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 0;
+  padding-right: 35px;
+  padding-left: 8px;
+}
+
+.data-table-sort-actions {
+  position: absolute;
+  top: 0;
+  z-index: 9;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 5px;
+
+  button {
+    border: 0;
+    background-color: transparent;
+  }
+
+  .sort-icon {
+    width: 20px;
+  }
+}

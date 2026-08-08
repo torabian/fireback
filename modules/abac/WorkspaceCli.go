@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
@@ -27,8 +28,8 @@ var GetUserAccessScope cli.Command = cli.Command{
 	Action: func(ctx context.Context, c *cli.Command) error {
 		query := fireback.CommonCliQueryDSLBuilder(c)
 		query.UserId = c.String("id")
-		access, err := GetUserAccessLevels(query)
-		fireback.HandleActionInCli(c, access, err, map[string]map[string]string{})
+		fmt.Println(GetUserAccessLevels(query))
+		// fireback.HandleActionInCli(c, access, err, map[string]map[string]string{})
 
 		return nil
 	},
@@ -189,9 +190,28 @@ var MiscCli cli.Command = cli.Command{
 	Name:  "misc",
 	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
 	Commands: []*cli.Command{
-		TableViewSizingCliFn(),
-		RegionalContentCliFn(),
-		AppMenuCliFn(),
+		interfacetools.TableViewSizingBrowseActionCliHandler(interfacetools.TableViewSizingBrowseAction),
+		interfacetools.TableViewSizingGetActionCliHandler(interfacetools.TableViewSizingGetAction),
+		interfacetools.TableViewSizingCreateActionCliHandler(interfacetools.TableViewSizingCreateAction),
+		interfacetools.TableViewSizingUpdateActionCliHandler(interfacetools.TableViewSizingUpdateAction),
+		interfacetools.TableViewSizingAwareDeletePreviewActionCliHandler(interfacetools.TableViewSizingAwareDeletePreviewAction),
+		interfacetools.TableViewSizingAwareDeleteActionCliHandler(interfacetools.TableViewSizingAwareDeleteAction),
+		&cli.Command{
+			Name:        "regionalcontent",
+			Aliases:     []string{"rc"},
+			Description: `Email templates, sms templates or other textual content which can be accessed.`,
+			Usage:       `Email templates, sms templates or other textual content which can be accessed.`,
+			Commands: []*cli.Command{
+				RegionalContentBrowseActionCliHandler(RegionalContentBrowseAction),
+				RegionalContentGetActionCliHandler(RegionalContentGetAction),
+				RegionalContentCreateActionCliHandler(RegionalContentCreateAction),
+				RegionalContentUpdateActionCliHandler(RegionalContentUpdateAction),
+				RegionalContentAwareDeletePreviewActionCliHandler(RegionalContentAwareDeletePreviewAction),
+				RegionalContentAwareDeleteActionCliHandler(RegionalContentAwareDeleteAction),
+				&RegionalContentGetCmd,
+			},
+		},
+		interfacetools.AppMenuCliFn(),
 		getCssMinCombineCli(),
 		&cli.Command{
 			Name:        "totp",
@@ -227,25 +247,68 @@ var MiscCli cli.Command = cli.Command{
 	},
 }
 
-func init() {
-	WorkspaceCliCommands = append(
-		WorkspaceCliCommands,
-		&GetUserAccessScope,
-		&CliConfigCmd,
-		&ViewAuthorize,
-		QueryWorkspaceTypesPubliclyActionDef.ToCli(),
-		QueryUserRoleWorkspacesActionDef.ToCli(),
-		&CheckUserMeetsAPermissionCmd,
-		&WorkspaceAsCmd,
-		PublicAuthenticationCliFn(),
-		TimezoneGroupCliFn(),
-		WorkspaceTypeCliFn(),
-		WorkspaceConfigCliFn(),
-		WorkspaceInviteCliFn(),
-		WorkspaceRoleCliFn(),
-		UserWorkspaceCliFn(),
-		WorkspaceInviteCliFn(),
-		PublicJoinKeyCliFn(),
-	)
-
+var WorkspaceCliCommands = []*cli.Command{
+	&GetUserAccessScope,
+	&CliConfigCmd,
+	&ViewAuthorize,
+	QueryWorkspaceTypesPubliclyActionCliHandler(QueryWorkspaceTypesPubliclyAction),
+	QueryUserRoleWorkspacesActionCliHandler(QueryUserRoleWorkspacesAction),
+	&CheckUserMeetsAPermissionCmd,
+	&WorkspaceAsCmd,
+	&cli.Command{
+		Name:        "publicauthentication",
+		Aliases:     []string{"pa"},
+		Description: `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
+		Usage:       `Keeps information about user onboarding, otp state, and other things which are necessary for onboarding new users in multiple endpoints`,
+		Commands: []*cli.Command{
+			PublicAuthenticationBrowseActionCliHandler(PublicAuthenticationBrowseAction),
+			PublicAuthenticationGetActionCliHandler(PublicAuthenticationGetAction),
+			PublicAuthenticationCreateActionCliHandler(PublicAuthenticationCreateAction),
+			PublicAuthenticationUpdateActionCliHandler(PublicAuthenticationUpdateAction),
+			PublicAuthenticationAwareDeletePreviewActionCliHandler(PublicAuthenticationAwareDeletePreviewAction),
+			PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
+		},
+	},
+	interfacetools.TimezoneGroupBrowseActionCliHandler(interfacetools.TimezoneGroupBrowseAction),
+	interfacetools.TimezoneGroupGetActionCliHandler(interfacetools.TimezoneGroupGetAction),
+	interfacetools.TimezoneGroupCreateActionCliHandler(interfacetools.TimezoneGroupCreateAction),
+	interfacetools.TimezoneGroupUpdateActionCliHandler(interfacetools.TimezoneGroupUpdateAction),
+	interfacetools.TimezoneGroupAwareDeletePreviewActionCliHandler(interfacetools.TimezoneGroupAwareDeletePreviewAction),
+	interfacetools.TimezoneGroupAwareDeleteActionCliHandler(interfacetools.TimezoneGroupAwareDeleteAction),
+	WorkspaceTypeBrowseActionCliHandler(WorkspaceTypeBrowseAction),
+	WorkspaceTypeGetActionCliHandler(WorkspaceTypeGetAction),
+	WorkspaceTypeCreateActionCliHandler(WorkspaceTypeCreateAction),
+	WorkspaceTypeUpdateActionCliHandler(WorkspaceTypeUpdateAction),
+	WorkspaceTypeAwareDeletePreviewActionCliHandler(WorkspaceTypeAwareDeletePreviewAction),
+	WorkspaceTypeAwareDeleteActionCliHandler(WorkspaceTypeAwareDeleteAction),
+	WorkspaceConfigBrowseActionCliHandler(WorkspaceConfigBrowseAction),
+	WorkspaceConfigGetActionCliHandler(WorkspaceConfigGetAction),
+	WorkspaceConfigCreateActionCliHandler(WorkspaceConfigCreateAction),
+	WorkspaceConfigUpdateActionCliHandler(WorkspaceConfigUpdateAction),
+	WorkspaceConfigAwareDeletePreviewActionCliHandler(WorkspaceConfigAwareDeletePreviewAction),
+	WorkspaceConfigAwareDeleteActionCliHandler(WorkspaceConfigAwareDeleteAction),
+	WorkspaceInviteBrowseActionCliHandler(WorkspaceInviteBrowseAction),
+	WorkspaceInviteGetActionCliHandler(WorkspaceInviteGetAction),
+	WorkspaceInviteCreateActionCliHandler(WorkspaceInviteCreateAction),
+	WorkspaceInviteUpdateActionCliHandler(WorkspaceInviteUpdateAction),
+	WorkspaceInviteAwareDeletePreviewActionCliHandler(WorkspaceInviteAwareDeletePreviewAction),
+	WorkspaceInviteAwareDeleteActionCliHandler(WorkspaceInviteAwareDeleteAction),
+	WorkspaceRoleBrowseActionCliHandler(WorkspaceRoleBrowseAction),
+	WorkspaceRoleGetActionCliHandler(WorkspaceRoleGetAction),
+	WorkspaceRoleCreateActionCliHandler(WorkspaceRoleCreateAction),
+	WorkspaceRoleUpdateActionCliHandler(WorkspaceRoleUpdateAction),
+	WorkspaceRoleAwareDeletePreviewActionCliHandler(WorkspaceRoleAwareDeletePreviewAction),
+	WorkspaceRoleAwareDeleteActionCliHandler(WorkspaceRoleAwareDeleteAction),
+	UserWorkspaceBrowseActionCliHandler(UserWorkspaceBrowseAction),
+	UserWorkspaceGetActionCliHandler(UserWorkspaceGetAction),
+	UserWorkspaceCreateActionCliHandler(UserWorkspaceCreateAction),
+	UserWorkspaceUpdateActionCliHandler(UserWorkspaceUpdateAction),
+	UserWorkspaceAwareDeletePreviewActionCliHandler(UserWorkspaceAwareDeletePreviewAction),
+	UserWorkspaceAwareDeleteActionCliHandler(UserWorkspaceAwareDeleteAction),
+	PublicJoinKeyBrowseActionCliHandler(PublicJoinKeyBrowseAction),
+	PublicJoinKeyGetActionCliHandler(PublicJoinKeyGetAction),
+	PublicJoinKeyCreateActionCliHandler(PublicJoinKeyCreateAction),
+	PublicJoinKeyUpdateActionCliHandler(PublicJoinKeyUpdateAction),
+	PublicJoinKeyAwareDeletePreviewActionCliHandler(PublicJoinKeyAwareDeletePreviewAction),
+	PublicJoinKeyAwareDeleteActionCliHandler(PublicJoinKeyAwareDeleteAction),
 }

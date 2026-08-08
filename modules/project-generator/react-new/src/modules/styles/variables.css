@@ -1,0 +1,7 @@
+:root {
+  --sidebar-expanded-size: 185px;
+  --sidebar-grey: rgb(230, 223, 230);
+  --tuya-keys-inactive: rgb(71, 152, 210);
+  --tuya-keys-active: rgb(255, 229, 248);
+  --navbar-height: 55px;
+}

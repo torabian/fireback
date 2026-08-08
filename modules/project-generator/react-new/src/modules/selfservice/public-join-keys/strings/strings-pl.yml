@@ -1,0 +1,9 @@
+content:
+  editPublicJoinKey: Edytuj klucz publicznego dołączania
+  menuTitle: Klucze publicznego dołączania
+  newPublicJoinKey: Nowy klucz publicznego dołączania
+  roleFieldHint: Wybierz rolę(e), które chcesz nadać użytkownikowi po dołączeniu do
+    przestrzeni roboczej. Można to zmienić później.
+  roleFieldLabel: Rola
+  roleName: Nazwa
+  uniqueId: Unikalny identyfikator

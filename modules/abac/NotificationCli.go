@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
@@ -41,21 +42,12 @@ var NotificationModuleAuditCmd cli.Command = cli.Command{
 			log.Fatalln(err)
 		}
 
-		if config.GeneralEmailProvider == nil {
+		if !config.GeneralEmailProviderId.IsSet() || config.GeneralEmailProviderId.IsNull() {
 			log.Fatalln("You need to specify a general email provider. Email provider, is a service, such as sendgrid, smtp, which lets you send emails. Software depends on sending emails for user interactions, its important to configurate it and make sure the emails arrive.")
 		}
 
 		return nil
 	},
-}
-
-func GetEmailSenderAsStringList(items []*EmailSenderEntity) ([]string, error) {
-
-	result := []string{}
-	for _, entity := range items {
-		result = append(result, entity.UniqueId+" >>> "+entity.FromEmailAddress+" - "+entity.FromName)
-	}
-	return result, nil
 }
 
 var EmailProviderTestCmd cli.Command = cli.Command{
@@ -66,13 +58,13 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 	Action: func(ctx context.Context, c *cli.Command) error {
 
 		query := fireback.CommonCliQueryDSLBuilder(c)
-		items, count, err := EmailSenderActions.Query(fireback.QueryDSL{ItemsPerPage: 20})
+		items, count, err := messaging.EmailSenderActions.Query(fireback.QueryDSL{ItemsPerPage: 20})
 
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
 
-		senders, err2 := GetEmailSenderAsStringList(items)
+		senders, err2 := messaging.GetEmailSenderAsStringList(items)
 		if err2 != nil {
 			log.Fatalln(err.Error())
 		}

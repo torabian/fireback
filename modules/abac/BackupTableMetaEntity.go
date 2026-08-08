@@ -1,3 +1,0 @@
-package abac
-
-func init() {}

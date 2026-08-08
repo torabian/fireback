@@ -1,0 +1,9 @@
+content:
+  editPublicJoinKey: Edit Public Join Key
+  menuTitle: Public join keys
+  newPublicJoinKey: New Public Join Key
+  roleFieldHint: Select the role(s) you want to give the user when they join the workspace.
+    This can be changed later as well.
+  roleFieldLabel: Role
+  roleName: Name
+  uniqueId: Unique Id

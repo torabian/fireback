@@ -1,0 +1,16 @@
+name: storage
+description: >-
+  Minimal tus-protocol file upload module. Stores uploaded bytes as PostgreSQL
+  large objects (lo_*) and keeps upload bookkeeping (offset, metadata,
+  completion state) in the tus_uploads table.
+
+# This module intentionally does NOT use Fireback/Emi entities, actions, or
+# code generation - it is not a *Module3.yml and nothing will compile it.
+# Everything here (store.go, handler.go, queries.go, migrations/,
+# ../../cmd/tusupload) is hand-written plain Go. This file only documents the
+# module and its default configuration.
+
+# config:
+#   basePath: /files
+#   table: tus_uploads
+#   chunkSizeBytes: 4194304 # 4 MiB, used as the default by the CLI uploader

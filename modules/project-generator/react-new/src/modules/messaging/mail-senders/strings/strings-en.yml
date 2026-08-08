@@ -1,0 +1,14 @@
+content:
+  editMailSender: Edit Email sender
+  fromEmailAddress: From email address
+  fromEmailAddressHint: The address you are sending from, generally it needs to be
+    registered in mail service
+  fromName: From name
+  fromNameHint: Sender name
+  menuTitle: Email Senders
+  newMailSender: New Email sender
+  nickName: Nick name
+  nickNameHint: Email sender nick name, usually the sales person or customer support
+  replyTo: Reply to
+  replyToHint: The address which receipent is gonna reply to. (noreply@domain) for
+    example

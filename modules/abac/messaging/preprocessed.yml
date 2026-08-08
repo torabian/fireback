@@ -1,0 +1,785 @@
+targets:
+- compiler: go
+  flags:
+    pkg: messaging
+  output: ./
+- compiler: js
+  flags:
+    js-sdk-location: ../sdk
+  output: ../../project-generator/react-new/src/modules/fireback/sdk/messaging
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+- compiler: preprocessor
+  output: ./
+description: Email and SMS/GSM provider configuration and sending mechanics, split
+  out of abac's notification module - email providers (sendgrid/mailgun/postmark/resend/smtp/terminal),
+  sms gateways (url/terminal/mediana), named "from" email senders, and per-user browser
+  web-push subscriptions (webPushConfig, moved here from modules/fireback). Depends
+  on abac for auth (ResolveActionContext/SecurityModel), but nothing in abac's other
+  entities depends back on this module - see modules/abac/NotificationConfigActions.go
+  for the one place abac calls into this package (looking up which provider is "the
+  general one" for a workspace).
+name: messaging
+dtos:
+- description: Every field of the "gsmProvider" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: gsmProviderOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: apiKey
+    type: string?
+  - name: mainSenderNumber
+    type: string?
+  - name: type
+    type: enum?
+    of:
+    - k: url
+    - k: terminal
+    - k: mediana
+  - name: invokeUrl
+    type: string?
+  - name: invokeBody
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "emailProvider" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: emailProviderOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: type
+    description: Type of the service, or communication which actually is being used
+      under the hood for providing the service, such as third party or printing right
+      away for terminal or logs.
+    type: enum?
+    of:
+    - k: sendgrid
+    - k: mailgun
+    - k: postmark
+    - k: resend
+    - k: smtp
+    - k: terminal
+  - name: title
+    description: Give the email provider configuration a name, which makes it easier
+      later to query.
+    type: string?
+  - name: config
+    description: JSON field which contains api keys, or other kind of configuration
+      based on the type of the email provider.
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "emailSender" entity, but optional - used both as
+    Update's partial input and as Browse's response item shape.
+  name: emailSenderOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: fromName
+    type: string?
+  - name: fromEmailAddress
+    type: string?
+  - name: replyTo
+    type: string?
+  - name: nickName
+    type: string?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Every field of the "webPushConfig" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: webPushConfigOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: subscription
+    description: The json content of the web push after getting it from browser
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "gsmProvider" entity's own fields.
+  name: gsmProvider
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: apiKey
+    type: string
+  - name: mainSenderNumber
+    type: string
+  - name: type
+    type: enum
+    of:
+    - k: url
+    - k: terminal
+    - k: mediana
+  - name: invokeUrl
+    type: string
+  - name: invokeBody
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "emailProvider" entity's own fields.
+  name: emailProvider
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: type
+    description: Type of the service, or communication which actually is being used
+      under the hood for providing the service, such as third party or printing right
+      away for terminal or logs.
+    type: enum
+    of:
+    - k: sendgrid
+    - k: mailgun
+    - k: postmark
+    - k: resend
+    - k: smtp
+    - k: terminal
+  - name: title
+    description: Give the email provider configuration a name, which makes it easier
+      later to query.
+    type: string
+  - name: config
+    description: JSON field which contains api keys, or other kind of configuration
+      based on the type of the email provider.
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "emailSender" entity's own fields.
+  name: emailSender
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: fromName
+    type: string
+  - name: fromEmailAddress
+    type: string
+  - name: replyTo
+    type: string
+  - name: nickName
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "webPushConfig" entity's own fields.
+  name: webPushConfig
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: subscription
+    description: The json content of the web push after getting it from browser
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+entities:
+- name: gsmProvider
+  fields:
+  - name: apiKey
+    type: string
+  - name: mainSenderNumber
+    type: string
+    tags:
+      validate: required
+  - name: type
+    type: enum
+    of:
+    - k: url
+    - k: terminal
+    - k: mediana
+    tags:
+      validate: required
+  - name: invokeUrl
+    type: string
+  - name: invokeBody
+    type: string
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- name: emailProvider
+  fields:
+  - name: type
+    description: Type of the service, or communication which actually is being used
+      under the hood for providing the service, such as third party or printing right
+      away for terminal or logs.
+    type: enum
+    of:
+    - k: sendgrid
+    - k: mailgun
+    - k: postmark
+    - k: resend
+    - k: smtp
+    - k: terminal
+    tags:
+      validate: required
+  - name: title
+    description: Give the email provider configuration a name, which makes it easier
+      later to query.
+    type: string
+  - name: config
+    description: JSON field which contains api keys, or other kind of configuration
+      based on the type of the email provider.
+    type: complex
+    complex: JSON
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Email servers and thirdparty services configuration to send emails
+    across the app. Each configuration can be used for a different purpose, hence
+    information is stored in database to give operation chance change the mail services
+    without taking the server down.
+- name: emailSender
+  fields:
+  - name: fromName
+    type: string
+    tags:
+      validate: required
+  - name: fromEmailAddress
+    type: string
+    tags:
+      gorm: unique
+      validate: required
+  - name: replyTo
+    type: string
+    tags:
+      validate: required
+  - name: nickName
+    type: string
+    tags:
+      validate: required
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: All emails going from the system need to have a virtual sender (nick
+    name, email address, etc)
+- name: webPushConfig
+  fields:
+  - name: subscription
+    description: The json content of the web push after getting it from browser
+    type: complex
+    complex: JSON
+    tags:
+      validate: required
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: userId
+    description: The unique-id of the user which created/owns the record.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: Keeps a browser's web-push subscription for the user who registered
+    it.
+complexes:
+- name: JSON
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go
+- name: PlainTime
+  namespace: abaccomplexes
+  location: github.com/torabian/fireback/modules/abac/abaccomplexes
+  compiler: go
+actions:
+- name: SendEmail
+  cliName: email
+  url: /email/send
+  method: post
+  description: Send a email using default root notification configuration
+  in:
+    fields:
+    - name: providerId
+      description: Sending a test email requires to be sent through an specific email
+        provider.
+      type: string
+    - name: toAddress
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: SendEmailWithProvider
+  cliName: emailp
+  url: /emailProvider/send
+  method: post
+  description: Send a text message using an specific gsm provider
+  in:
+    fields:
+    - name: emailProvider
+      type: one
+      target: EmailProviderEntity
+    - name: toAddress
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: GsmSendSmsWithProvider
+  cliName: smsp
+  url: /gsmProvider/send/sms
+  method: post
+  description: Send a text message using an specific gsm provider
+  in:
+    fields:
+    - name: gsmProviderId
+      type: string
+    - name: toNumber
+      type: string
+      tags:
+        validate: required
+    - name: body
+      type: string
+      tags:
+        validate: required
+  out:
+    fields:
+    - name: queueId
+      type: string
+- name: gsmProviderCreate
+  cliShort: gsmProvider-c
+  url: /gsmProvider
+  method: post
+  description: Creates a new "gsmProvider" row.
+  in:
+    dto: GsmProviderDto
+  out:
+    envelope: GResponse
+    dto: GsmProviderDto
+- name: gsmProviderUpdate
+  cliShort: gsmProvider-u
+  url: /gsmProvider/:uniqueId
+  method: patch
+  description: Applies a partial update to a "gsmProvider" row by uniqueId.
+  in:
+    dto: GsmProviderOptionalDto
+  out:
+    envelope: GResponse
+    dto: GsmProviderDto
+- name: gsmProviderGet
+  cliShort: gsmProvider-g
+  url: /gsmProvider/:uniqueId
+  method: get
+  description: Looks up a single "gsmProvider" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: GsmProviderDto
+- name: gsmProviderBrowse
+  cliShort: gsmProvider-b
+  url: /gsmProvider/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "gsmProvider" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: GsmProviderOptionalDto
+- name: gsmProviderAwareDeletePreview
+  cliShort: gsmProvider-dp
+  url: /gsmProvider/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "gsmProvider" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: gsmProviderAwareDelete
+  cliShort: gsmProvider-d
+  url: /gsmProvider/delete
+  method: post
+  description: Deletes the given "gsmProvider" uniqueIds, along with everything gsmProviderAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: emailProviderCreate
+  cliShort: emailProvider-c
+  url: /emailProvider
+  method: post
+  description: Creates a new "emailProvider" row.
+  in:
+    dto: EmailProviderDto
+  out:
+    envelope: GResponse
+    dto: EmailProviderDto
+- name: emailProviderUpdate
+  cliShort: emailProvider-u
+  url: /emailProvider/:uniqueId
+  method: patch
+  description: Applies a partial update to a "emailProvider" row by uniqueId.
+  in:
+    dto: EmailProviderOptionalDto
+  out:
+    envelope: GResponse
+    dto: EmailProviderDto
+- name: emailProviderGet
+  cliShort: emailProvider-g
+  url: /emailProvider/:uniqueId
+  method: get
+  description: Looks up a single "emailProvider" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: EmailProviderDto
+- name: emailProviderBrowse
+  cliShort: emailProvider-b
+  url: /emailProvider/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "emailProvider" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: EmailProviderOptionalDto
+- name: emailProviderAwareDeletePreview
+  cliShort: emailProvider-dp
+  url: /emailProvider/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "emailProvider" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: emailProviderAwareDelete
+  cliShort: emailProvider-d
+  url: /emailProvider/delete
+  method: post
+  description: Deletes the given "emailProvider" uniqueIds, along with everything
+    emailProviderAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: emailSenderCreate
+  cliShort: emailSender-c
+  url: /emailSender
+  method: post
+  description: Creates a new "emailSender" row.
+  in:
+    dto: EmailSenderDto
+  out:
+    envelope: GResponse
+    dto: EmailSenderDto
+- name: emailSenderUpdate
+  cliShort: emailSender-u
+  url: /emailSender/:uniqueId
+  method: patch
+  description: Applies a partial update to a "emailSender" row by uniqueId.
+  in:
+    dto: EmailSenderOptionalDto
+  out:
+    envelope: GResponse
+    dto: EmailSenderDto
+- name: emailSenderGet
+  cliShort: emailSender-g
+  url: /emailSender/:uniqueId
+  method: get
+  description: Looks up a single "emailSender" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: EmailSenderDto
+- name: emailSenderBrowse
+  cliShort: emailSender-b
+  url: /emailSender/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "emailSender" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: EmailSenderOptionalDto
+- name: emailSenderAwareDeletePreview
+  cliShort: emailSender-dp
+  url: /emailSender/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "emailSender" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: emailSenderAwareDelete
+  cliShort: emailSender-d
+  url: /emailSender/delete
+  method: post
+  description: Deletes the given "emailSender" uniqueIds, along with everything emailSenderAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: webPushConfigCreate
+  cliShort: webPushConfig-c
+  url: /webPushConfig
+  method: post
+  description: Creates a new "webPushConfig" row.
+  in:
+    dto: WebPushConfigDto
+  out:
+    envelope: GResponse
+    dto: WebPushConfigDto
+- name: webPushConfigUpdate
+  cliShort: webPushConfig-u
+  url: /webPushConfig/:uniqueId
+  method: patch
+  description: Applies a partial update to a "webPushConfig" row by uniqueId.
+  in:
+    dto: WebPushConfigOptionalDto
+  out:
+    envelope: GResponse
+    dto: WebPushConfigDto
+- name: webPushConfigGet
+  cliShort: webPushConfig-g
+  url: /webPushConfig/:uniqueId
+  method: get
+  description: Looks up a single "webPushConfig" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: WebPushConfigDto
+- name: webPushConfigBrowse
+  cliShort: webPushConfig-b
+  url: /webPushConfig/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "webPushConfig" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: WebPushConfigOptionalDto
+- name: webPushConfigAwareDeletePreview
+  cliShort: webPushConfig-dp
+  url: /webPushConfig/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "webPushConfig" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: webPushConfigAwareDelete
+  cliShort: webPushConfig-d
+  url: /webPushConfig/delete
+  method: post
+  description: Deletes the given "webPushConfig" uniqueIds, along with everything
+    webPushConfigAwareDeletePreview reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string

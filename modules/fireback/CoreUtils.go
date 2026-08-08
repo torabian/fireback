@@ -7,42 +7,42 @@ package fireback
  */
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/manifoldco/promptui"
-	"github.com/torabian/emi/emigo"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
-	"gorm.io/gorm"
 )
+
+type PermissionInfo struct {
+	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
+	Description string `yaml:"description,omitempty" json:"description,omitempty"`
+	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
+	GoVariable  string `yaml:"-" json:"-"`
+}
 
 func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 
 	return []*cli.Command{
 		CLIInit(xapp),
 		EnvManagement(xapp),
-		CodeGenTools(xapp),
 		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,
-		GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
 		GetCliMockTools(xapp),
 		GetSeeder(xapp),
-		// Report tools is not really ever used.
-		// GetReportsTool(xapp),
-		GetCapabilityRefreshCommand(xapp),
-		ClickHouseTestConnectionCli,
 
 		// Keep these in the last
 		&CLIAboutCommand,
@@ -53,11 +53,9 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 
 	return []*cli.Command{
 		CLIInit(xapp),
-		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
 		&ConfigCommand,
-		GetMigrationCommand(xapp),
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
@@ -66,34 +64,6 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 
 		// Report tools is not really ever used.
 		// GetReportsTool(xapp),
-	}
-}
-
-var ROOT_ALL_ACCESS = "root.*"
-var ROOT_ALL_MODULES = "root.modules.*"
-
-func UpsertPermission(permInfo *PermissionInfo, hasChildren bool, db *gorm.DB) {
-	var entity *CapabilityEntity = nil
-	perm := permInfo.CompleteKey
-
-	if hasChildren {
-		perm = perm + ".*"
-	}
-
-	system := "system"
-
-	if (db.Where(CapabilityEntity{UniqueId: perm}).First(&entity).Error != nil) {
-		err := db.Create(&CapabilityEntity{
-			UniqueId:    perm,
-			WorkspaceId: emigo.NullableOf(system),
-			Visibility:  emigo.NullableOf("A"),
-			Description: permInfo.Description,
-			Name:        permInfo.Name,
-		}).Error
-
-		if err != nil {
-			log.Fatalln("Cannot start the app because a permission creation failed.", perm, err)
-		}
 	}
 }
 
@@ -109,18 +79,17 @@ func FormatYamlKeys(yamlStr string) string {
 	return formattedYaml
 }
 
-var DATABASE_TYPE_MYSQL string = "mysql"
-var DATABASE_TYPE_SQLITE string = "sqlite"
-var DATABASE_TYPE_SQLITE_MEMORY string = "sqlite (:memory:)"
-var DATABASE_TYPE_POSTGRES string = "postgres"
-var DATABASE_TYPE_MARIADB string = "mariadb"
-
 var ROOT_VAR = "root"
 
 var WithSocketAuthorization = func(securityModel *SecurityModel) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 	}
+}
+
+// By default everything is authorized
+var AuthorizeRequest = func(securityModel *SecurityModel, c *gin.Context) bool {
+	return true
 }
 
 var WithAuthorizationFn = func(securityModel *SecurityModel) gin.HandlerFunc {
@@ -141,6 +110,12 @@ type UserAccessPerWorkspaceDto map[string]*struct {
 		Name     string
 		Accesses []string
 	}
+}
+
+func (x UserAccessPerWorkspaceDto) Json() string {
+	str, _ := json.MarshalIndent(x, "", "  ")
+	return (string(str))
+
 }
 
 var WithAuthorizationPure = func(context *AuthContextDto) (*AuthResultDto, *IError) {
@@ -421,7 +396,7 @@ var ConfigCommand cli.Command = cli.Command{
 			Usage: "Configurates the database of the project",
 			Action: func(ctx context.Context, c *cli.Command) error {
 
-				databaseData, err := askProjectDatabase(config.Name)
+				databaseData, err := AskProjectDatabase(config.Name)
 				if err != nil {
 					log.Fatalln("Database could not be determined after all", err)
 					return nil
@@ -477,7 +452,7 @@ var ConfigCommand cli.Command = cli.Command{
 			Usage: "Change the sql log level",
 			Action: func(ctx context.Context, c *cli.Command) error {
 
-				askSqlLogLevel(&config)
+				AskSqlLogLevel(&config)
 
 				config.Save(".env")
 
@@ -487,331 +462,37 @@ var ConfigCommand cli.Command = cli.Command{
 	}, GetConfigCli()...),
 }
 
-func askProjectDatabase(projectName string) (Database, error) {
-	db := Database{}
-
-	promptVariable := promptui.Select{
-		Label: "Database type",
-		Items: []string{
-			DATABASE_TYPE_SQLITE,
-			DATABASE_TYPE_SQLITE_MEMORY,
-			DATABASE_TYPE_MYSQL,
-			DATABASE_TYPE_MARIADB,
-			DATABASE_TYPE_POSTGRES,
-		},
-	}
-
-	_, databaseType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return db, err
-	}
-
-	db.Vendor = databaseType
-
-	if db.Vendor == "sqlite" {
-		path, err := askSQLiteDatabaseLocation(projectName)
-		if err != nil {
-			fmt.Printf("cannot access the sqlite database, or cannot create it %v\n", err)
-			return db, err
-		}
-		db.Database = path
-	} else if db.Vendor == DATABASE_TYPE_SQLITE_MEMORY {
-		db.Database = ":memory:"
-		db.Vendor = "sqlite"
-	} else if db.Vendor == DATABASE_TYPE_MYSQL || db.Vendor == DATABASE_TYPE_MARIADB {
-		askMysqlDetails(&db)
-	} else if db.Vendor == DATABASE_TYPE_POSTGRES {
-		askPostgresDetails(&db)
-	}
-
-	return db, nil
-}
-
-func askMysqlDetails(db *Database) (*Database, error) {
-
-	promptVariable := promptui.Select{
-		Label: "Do you have dsn string or port, host , username?",
-		Items: []string{USE_DSN_OPTION, USE_MANUAL_OPTION},
-	}
-
-	_, actionType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return db, err
-	}
-
-	if actionType == USE_DSN_OPTION {
-		value, err := askMysqlDsn()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return db, err
-		}
-
-		db.Dsn = value
-
-		return db, nil
-	}
-
-	if actionType == USE_MANUAL_OPTION {
-
-		db.Host = askHostName()
-		db.Port = askHostPort("3306")
-		db.Database = askDatabaseName()
-		db.Username = askHostUsername("root")
-		db.Password = askHostPassword()
-	}
-
-	return db, nil
-}
-
-func askHostUsername(defaultUsername string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter database username")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "Database username",
-		Validate: validate,
-		Default:  defaultUsername,
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func promptInput(label, defaultValue string, validate func(string) error) string {
-	promptVariable := promptui.Prompt{
-		Label:    label,
-		Default:  defaultValue,
-		Validate: validate,
-	}
-
-	result, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed: %v\n", err)
-		return ""
-	}
-
-	return result
-}
-
-func askDatabaseName() string {
-	validateDatabaseName := func(input string) error {
-		if input == "" {
-			return errors.New("database name is required on this type of databse.")
-		}
-		return nil
-	}
-
-	return promptInput("Database name", "", validateDatabaseName)
-}
-
-func askHostName() string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter the mysql host, for example localhost")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "The host, ip which mysql is installed. (eg. 127.0.0.1 or localhost or 210.231.20.30",
-		Validate: validate,
-		Default:  "localhost",
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func AskPortName(label string, defaultPort string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("port should be between 0 to 65536")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    label,
-		Validate: validate,
-		Default:  defaultPort,
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func AskFolderName(label string, defaultFolder string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("this folder is necessary for file uploads")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    label,
-		Validate: validate,
-		Default:  defaultFolder,
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func askHostPassword() string {
-
-	promptVariable := promptui.Prompt{
-		Label:   "password",
-		Default: "",
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func askHostPort(defaultp string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter the database port")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "port",
-		Validate: validate,
-		Default:  defaultp,
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-var USE_DSN_OPTION = "I have dsn query string for connection"
-var USE_MANUAL_OPTION = "I enter port, host, username of database manually"
-
-var TRY_TO_SOLVE = "Let me retry to configurate the database parameters"
-var FORCE_CONTINUE = "Use the configuration without connection test"
-
-func askSqlLogLevel(cfg *Config) {
-
-	SILENT_PICK := "Silent - shows nothing, useful for production environment"
-	ERROR_PICK := "Error - Show sql errors"
-	WARNING_PICK := "Warning - show only warnings"
-	INFO_PICK := "Info - prints all queries to the database"
-
-	level := AskForSelect("Select the database log level for SQL queries", []string{
-		SILENT_PICK,
-		ERROR_PICK,
-		WARNING_PICK,
-		INFO_PICK,
-	})
-
-	if level == SILENT_PICK {
-		cfg.DbLogLevel = "silent"
-	}
-	if level == INFO_PICK {
-		cfg.DbLogLevel = "info"
-	}
-	if level == WARNING_PICK {
-		cfg.DbLogLevel = "warning"
-	}
-	if level == ERROR_PICK {
-		cfg.DbLogLevel = "error"
-	}
-
-	cfg.Save(".env")
-}
-
-func AskSSL(config *Config) {
-
-	if r := AskForSelect("Use SSL instead of Plain Http?", []string{"no", "yes"}); r == "yes" {
-		config.UseSSL = true
-
-		config.CertFile = AskFolderName("Certfile address", "/etc/letsencrypt/live/")
-		config.KeyFile = AskFolderName("Keyfile address", "/etc/letsencrypt/live/")
-
-	} else {
-		config.UseSSL = false
-	}
-
-	config.Save(".env")
-}
-
-func askPostgresDetails(db *Database) (*Database, error) {
-
-	promptVariable := promptui.Select{
-		Label: "Do you have dsn string or port, host , username?",
-		Items: []string{USE_DSN_OPTION, USE_MANUAL_OPTION},
-	}
-
-	_, actionType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return db, err
-	}
-
-	if actionType == USE_DSN_OPTION {
-		value, err := askPostgresDsn()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return db, err
-		}
-
-		db.Dsn = value
-
-		return db, nil
-	}
-
-	if actionType == USE_MANUAL_OPTION {
-
-		db.Host = askHostName()
-		db.Port = askHostPort("5432")
-		db.Database = askDatabaseName()
-		db.Username = askHostUsername("postgres")
-		db.Password = askHostPassword()
-	}
-
-	return db, nil
-}
+// AskProjectDatabase, AskSSL and AskSqlLogLevel are interactive terminal
+// wizards. Their real implementation lives in modules/fireback/clitools
+// (tagged !wasm) and registers itself here via init() - see CliActions.go
+// for the same pattern applied to the simpler Ask* prompt helpers.
+var AskProjectDatabase func(projectName string) (Database, error)
+var AskSSL func(config *Config)
+var AskSqlLogLevel func(cfg *Config)
+var AskPortName func(label string, defaultPort string) string
+var AskFolderName func(label string, defaultFolder string) string
+
+// QueryStringCastCli and CliInteractiveSearchAndSelect back the interactive
+// bubbletea-based CLI search/select UI. Real implementation lives in
+// modules/fireback/clitools (tagged !wasm) and registers itself here via
+// init().
+var QueryStringCastCli func(searchFields []string, keyword string, page int) QueryDSL
+var CliInteractiveSearchAndSelect func(title string, fn func(keyword string, page int) ([]string, *QueryResultMeta, *IError)) []string
+
+// SystemServiceHandler and GetMacDaemon manage the OS-level system service
+// (systemd/launchd) via os/exec, unavailable under wasm. Real implementation
+// lives in modules/fireback/clitools (tagged !wasm) and registers itself
+// here via init().
+var SystemServiceHandler func(action string, c *cli.Command)
+var GetMacDaemon func() string
+
+// MeetsAccessLevel checks whether a QueryDSL's granted access (query.UserAccessPerWorkspace)
+// satisfies query.ActionRequires - abac wires its own implementation here (see
+// AbacModule.go's setup), since the actual access model lives there, not in fireback
+// itself. Used both directly (e.g. WorkspaceCli.go's own permission checks) and by
+// modules/eventbus, which defaults to this if a project doesn't override
+// EventBusModuleConfig.MeetsAccessLevel.
+var MeetsAccessLevel func(query QueryDSL, onlyRoot bool) (bool, []string)
 
 func GetCliMockTools(xapp *FirebackApp) *cli.Command {
 	return &cli.Command{
@@ -905,174 +586,10 @@ var CLIServiceCommand cli.Command = cli.Command{
 	},
 }
 
-func CLIInit(xapp *FirebackApp) *cli.Command {
-
-	return &cli.Command{
-		Name:  "init",
-		Usage: "Creates a environment for project, by configurating database connection, http port, etc.",
-		Flags: GetConfigCliFlags(),
-		Action: func(ctx context.Context, c *cli.Command) error {
-			if c.NumFlags() > 0 {
-				CastConfigFromCli(&config, c)
-
-				if !c.IsSet("mac-identifier") {
-					config.MacIdentifier = config.Name
-				}
-
-				if !c.IsSet("debian-identifier") {
-					config.DebianIdentifier = config.Name
-				}
-
-				if !c.IsSet("windows-identifier") {
-					config.WindowsIdentifier = config.Name
-				}
-
-				config.Save(".env")
-			} else {
-				InitEnvironment(xapp, ".env", c)
-			}
-			return nil
-		},
-	}
-}
-
-func DataBaseConfigEnv(xapp *FirebackApp) error {
-
-	// 2. Determine the database type, test the connection, create tables
-	for {
-		databaseData, err := askProjectDatabase(config.Name)
-		if err != nil {
-			log.Fatalln("cannot determine the database config", err)
-			return nil
-		}
-
-		// 3. Check if the database could be connected, if not show error and move on
-		config.DbUsername = databaseData.Username
-		p, _ := strconv.Atoi(databaseData.Port)
-		config.DbPort = int64(p)
-		config.DbHost = databaseData.Host
-		config.DbPassword = databaseData.Password
-		config.DbName = databaseData.Database
-		config.DbVendor = databaseData.Vendor
-		config.DbDsn = databaseData.Dsn
-
-		db, err := DirectConnectToDb(config)
-		if err == nil && db.Exec("select 1").Error == nil {
-			config.Save(".env")
-			fmt.Println("✔ connection is successful")
-			break
-		}
-
-		fmt.Println(err)
-
-		if !askRetry() {
-			break
-		}
-	}
-
-	return nil
-}
-
-func ExecuteSeeders(xapp *FirebackApp) error {
-	if r := AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
-		}
-
-		ExecuteSeederImport(xapp)
-	}
-
-	return nil
-}
-
-func EnvRunMigration(xapp *FirebackApp) error {
-	if r := AskForSelect("Do you want to run migration, adding tables or columns to database (both automigrate, and manual)?", []string{"yes", "no"}); r == "yes" {
-		db, dbErr := CreateDatabasePool()
-		if db == nil && dbErr != nil {
-			log.Fatalln("Database error on initialize connection:", dbErr)
-		}
-
-		ApplyMigration(xapp, 0)
-	}
-
-	return nil
-}
-
-func InitEnvironment(xapp *FirebackApp, envFileName string, c *cli.Command) error {
-
-	if AskForSelect("This command is to generate a .env file, for existing project, or standalone fireback installation. You need to use `fireback new` to create new project. Agree?", []string{"yes", "no"}) == "no" {
-		return nil
-	}
-
-	datum := ""
-	var err error
-
-	// 1. Determine the project name
-	datum, err = askEnvironmentName(config.Name)
-	if err != nil {
-		log.Fatalln("cannot determine the project name", err)
-		return nil
-	}
-	config.Name = datum
-	config.DebianIdentifier = datum
-	config.MacIdentifier = datum
-	config.WindowsIdentifier = datum
-
-	if isProd := AskForSelect("Is this a production environment?", []string{"no", "yes"}); isProd == "yes" {
-		if isProd == "yes" {
-			config.Production = true
-		}
-	}
-
-	if err := DataBaseConfigEnv(xapp); err != nil {
-		return err
-	}
-
-	askSqlLogLevel(&config)
-
-	// 4. Ask for the ports, it's important.
-	po, _ := strconv.Atoi(AskPortName("Http port which fireback will be lifted:", fmt.Sprintf("%v", config.Port)))
-	config.Port = int64(po)
-
-	// microserivce has lighter migration
-
-	EnvRunMigration(xapp)
-
-	ExecuteSeeders(xapp)
-
-	AskSSL(&config)
-
-	config.Save(".env")
-
-	for _, module := range xapp.Modules {
-		if module.OnEnvInit != nil {
-			module.OnEnvInit(c)
-		}
-	}
-
-	return nil
-}
-
-func askRetry() bool {
-	promptVariable := promptui.Select{
-		Label: "Database connection failed, do you want retry again?",
-		Items: []string{TRY_TO_SOLVE,
-			FORCE_CONTINUE},
-	}
-
-	_, actionType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return false
-	}
-
-	if actionType == TRY_TO_SOLVE {
-		return true
-	}
-
-	return false
-}
+// CLIInit is the interactive `fireback init` wizard. Its real implementation
+// lives in modules/fireback/clitools (tagged !wasm) and registers itself
+// here via init().
+var CLIInit func(xapp *FirebackApp) *cli.Command
 
 var Cliversion cli.Command = cli.Command{
 
@@ -1129,4 +646,31 @@ var CLIAboutCommand cli.Command = cli.Command{
 		fmt.Println("&&&&&&&&&&&&#&&%%#((//****#@@@@@@@@@@@@@@&%&%&@&&&&@@@@@@@&@@@@@@&@@#(**,*****/*")
 		return nil
 	},
+}
+
+func HasChildren(key string, items []string) bool {
+
+	for _, perm := range items {
+		if strings.Contains(perm, key+"/") {
+			return true
+		}
+	}
+
+	return false
+}
+
+func IsNilish(val any) bool {
+	if val == nil {
+		return true
+	}
+
+	v := reflect.ValueOf(val)
+	k := v.Kind()
+	switch k {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Pointer,
+		reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+		return v.IsNil()
+	}
+
+	return false
 }

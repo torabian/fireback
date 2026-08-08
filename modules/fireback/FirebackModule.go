@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/migrations"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -13,64 +12,31 @@ import (
 //go:embed *Module3.yml
 var Module3Definitions embed.FS
 
-var EverRunEntities []interface{} = []interface{}{
-	&CapabilityEntity{},
-	&CapabilityEntityPolyglot{},
-}
+var EverRunEntities []interface{} = []interface{}{}
 
 type FirebackModuleConfig struct{}
 
-type X = func(query QueryDSL, done chan bool, read chan SocketReadChan) (chan []byte, error)
+// type X = func(query QueryDSL, done chan bool, read chan socket.SocketReadChan) (chan []byte, error)
 
 func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
 
 	module := &ModuleProvider{
 		Name:        "fireback",
 		Definitions: &Module3Definitions,
-		Actions: [][]Module3Action{
-			GetCapabilityModule3Actions(),
-			FirebackCustomActions(),
-		},
-		EntityBundles: []EntityBundle{
-			WebPushConfigEntityBundle,
-		},
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *FirebackApp) error{
-			func(g *gin.RouterGroup, x *FirebackApp) error {
+		EntityBundles: []EntityBundle{},
 
-				{
-					meta := EventBusSubscriptionActionMeta()
-					g.GET(
-						meta.URL,
-						WithSocketAuthorization(EventBusSubscriptionSecurityModel),
-						EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig),
-					)
-				}
-				{
-					meta := ReactiveSearchActionMeta()
-					g.GET(
-						meta.URL,
-						WithSocketAuthorization(ReactiveSearchSecurityModel),
-						ReactiveSearchActionReactiveHandler(CreateReactiveSearchHanlder(x)),
-					)
-				}
-
-				return nil
-			},
-		},
+		// EventBusSubscription (/ws) and ReactiveSearch (/reactive-search) used to be
+		// wired here unconditionally for every project. They've moved to their own
+		// opt-in modules - see eventbus.ModuleSetup and reactivesearch.ModuleSetup -
+		// so a project only gets the background goroutine/route/config surface it
+		// actually asked for from its own main.go.
 		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		CapabilityCliFn(),
 		&PushNotificationCmd,
-		CapabilitiesTreeActionDef.ToCli(),
 	})
-
-	module.ProvidePermissionHandler(
-
-		ALL_CAPABILITY_PERMISSIONS,
-	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 

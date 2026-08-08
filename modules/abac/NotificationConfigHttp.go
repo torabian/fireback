@@ -5,10 +5,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func HttpSendTestMail(c *gin.Context) {
-	fireback.HttpPostEntity(c, NotificationTestMailAction)
-}
-
 func HttpGetNotificationWorkspaceConfig(c *gin.Context) {
 	fireback.HttpGetEntity(c, NotificationWorkspaecConfigActionGet)
 }
@@ -17,58 +13,23 @@ func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
 	fireback.HttpUpdateEntity(c, NotificationWorkspaceConfigActionUpdate)
 }
 
-func init() {
+// AppendNotificationConfigRouter wires the custom /notification/testmail and
+// /notification/workspace/config routes directly into gin - moved out of the old
+// Module3Action + GetNotificationConfigModule3Actions() indirection (which no longer
+// exists now that notificationConfig moved to Abac.emi.yml), called directly from
+// NotificationModule.go's GinWebServerInitHooks instead.
+func AppendNotificationConfigRouter(g *gin.RouterGroup) {
 
-	AppendNotificationConfigRouter = func(r *[]fireback.Module3Action) {
-		*r = append(*r,
-			fireback.Module3Action{
-				Method: "POST",
-				Url:    "/notification/testmail",
-				Handlers: []gin.HandlerFunc{
-					HttpSendTestMail,
-				},
-				RequestEntity:  &TestMailDto{},
-				ResponseEntity: &OkayResponseDto{},
-				Out: &fireback.Module3ActionBody{
-					Dto: "OkayResponseDto",
-				},
-				In: &fireback.Module3ActionBody{
-					Dto: "TestMailDto",
-				},
-			},
-			fireback.Module3Action{
-				Method: "GET",
-				Url:    "/notification/workspace/config",
-				Handlers: []gin.HandlerFunc{
-					WithAuthorization(&fireback.SecurityModel{
-						ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-					}),
-					HttpGetNotificationWorkspaceConfig,
-				},
-				ResponseEntity: &NotificationConfigEntity{},
-				Out: &fireback.Module3ActionBody{
-					Entity: "NotificationConfigEntity",
-				},
-			},
-			fireback.Module3Action{
-				Method: "PATCH",
-				Url:    "/notification/workspace/config",
-				Handlers: []gin.HandlerFunc{
-					WithAuthorization(&fireback.SecurityModel{
-						ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-					}),
-					HttpUpdateNotificationWorkspaceConfig,
-				},
-				RequestEntity:  &NotificationConfigEntity{},
-				ResponseEntity: &NotificationConfigEntity{},
-				Out: &fireback.Module3ActionBody{
-					Entity: "NotificationConfigEntity",
-				},
-				In: &fireback.Module3ActionBody{
-					Entity: "NotificationConfigEntity",
-				},
-			},
-		)
-
-	}
+	g.GET("/notification/workspace/config",
+		WithAuthorization(&fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+		}),
+		HttpGetNotificationWorkspaceConfig,
+	)
+	g.PATCH("/notification/workspace/config",
+		WithAuthorization(&fireback.SecurityModel{
+			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+		}),
+		HttpUpdateNotificationWorkspaceConfig,
+	)
 }

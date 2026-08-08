@@ -1,0 +1,9 @@
+content:
+  editPublicJoinKey: کلید پیوستن عمومی را ویرایش کنید
+  menuTitle: کلیدهای پیوستن عمومی
+  newPublicJoinKey: کلید پیوستن عمومی جدید
+  roleFieldHint: نقش(هایی) را که می خواهید به کاربر هنگام پیوستن به فضای کاری بدهید،
+    انتخاب کنید. این را می توان بعدا نیز تغییر داد.
+  roleFieldLabel: نقش
+  roleName: نام
+  uniqueId: شناسه یکتا

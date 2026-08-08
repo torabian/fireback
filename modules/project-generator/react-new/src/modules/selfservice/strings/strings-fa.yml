@@ -1,0 +1,75 @@
+extends: []
+content:
+  anotherAccount: حساب دیگری انتخاب کنید
+  authenticationFailed: احراز هویت با شکست مواجه شد.
+  cancelStep: لغو و امتحان روش دیگر.
+  changePassword:
+    description: برای تغییر رمز عبور، رمز جدید را دو بار در فیلدهای زیر وارد کنید
+    pass1Label: رمز عبور
+    pass2Label: تکرار رمز عبور
+    submit: تغییر رمز عبور
+    title: تغییر رمز عبور
+  chooseAnotherMethod: روش دیگری انتخاب کنید
+  completeYourAccount: تکمیل حساب کاربری
+  completeYourAccountDescription: برای تکمیل ثبت‌نام، اطلاعات زیر را کامل کنید
+  continue: ادامه
+  continueWithEmail: ادامه با ایمیل
+  continueWithEmailDescription: برای ادامه، آدرس ایمیل خود را وارد کنید.
+  continueWithPhone: ادامه با تلفن
+  continueWithPhoneDescription: برای ادامه، شماره تلفن خود را وارد کنید.
+  emailMethod: ایمیل
+  enterOtp: رمز یکبار مصرف را وارد کنید
+  enterOtpDescription: یک رمز یکبار مصرف برای شما ارسال شد؛ لطفاً برای ادامه آن را
+    وارد کنید.
+  enterPassword: رمز عبور را وارد کنید
+  enterPasswordDescription: برای ادامه احراز هویت حساب خود، رمز عبور را وارد کنید.
+  enterTotp: کد TOTP را وارد کنید
+  enterTotpDescription: اپلیکیشن احراز هویت خود را باز کرده و ۶ رقم را وارد کنید.
+  facebook: فیسبوک
+  facebookLoginFailed: ورود با فیسبوک ناموفق بود
+  facebookSdkNotLoaded: SDK فیسبوک بارگذاری نشده است
+  firstName: نام
+  google: گوگل
+  home:
+    description: حساب کاربری، ایمیل‌ها، رمزهای عبور و موارد دیگر خود را مدیریت کنید
+    passports: پاسپورت‌ها
+    passportsDescription: ایمیل‌ها و شماره تلفن‌های مرتبط با حساب خود را مشاهده کنید.
+    passportsTitle: پاسپورت‌ها
+    title: حساب کاربری و پروفایل
+  lastName: نام خانوادگی
+  loginMethodAriaLabel: روش ورود
+  "no": خیر
+  noAuthenticationMethod: احراز هویت در حال حاضر در دسترس نیست
+  noAuthenticationMethodDescription: در حال حاضر امکان ورود و ثبت‌نام در منطقه شما
+    وجود ندارد. اگر فکر می‌کنید این یک خطاست یا نیاز به دسترسی دارید، لطفاً با مدیر
+    سیستم تماس بگیرید.
+  password: رمز عبور
+  phoneMethod: شماره تلفن
+  registerationNotPossible: امکان ثبت‌نام وجود ندارد.
+  registerationNotPossibleLine1: در این پروژه هیچ نوع فضای کاری‌ای که به‌صورت عمومی
+    برای ایجاد حساب قابل استفاده باشد وجود ندارد.
+  registerationNotPossibleLine2: برای ایجاد حساب، با مدیر سرویس تماس بگیرید.
+  select: انتخاب
+  selectWorkspace: شما چند فضای کاری مرتبط با حساب خود دارید. برای ادامه یکی را انتخاب
+    کنید.
+  selectWorkspaceTitle: انتخاب فضای کاری
+  setupDualFactor: راه‌اندازی تأیید دومرحله‌ای
+  setupTotp: راه‌اندازی تأیید دومرحله‌ای
+  setupTotpDescription: برای تکمیل ثبت‌نام حساب، باید کد زیر را با استفاده از «Microsoft
+    Authenticator» یا «Google Authenticator» اسکن کنید. سپس باید کد ۶ رقمی را از برنامه
+    در اینجا وارد کنید.
+  signout: خروج
+  skipTotpButton: فعلاً رد شو
+  skipTotpInfo: می‌توانید این کار را هر زمان دیگری از بخش امنیت حساب خود انجام دهید.
+  totpLabel: 'TOTP:'
+  tryAnotherAccount: امتحان حساب دیگر
+  useOneTimePassword: به‌جای آن از رمز یکبار مصرف استفاده کنید
+  userPassports:
+    add: افزودن پاسپورت جدید
+    description: می‌توانید فهرستی از پاسپورت‌هایی که برای احراز هویت در سیستم استفاده
+      می‌کنید را در اینجا مشاهده کنید.
+    remove: حذف پاسپورت
+    title: پاسپورت‌ها
+  welcomeBack: خوش آمدید
+  welcomeBackDescription: برای دسترسی به حساب خود، هر گزینه‌ای را انتخاب کنید.
+  "yes": بله

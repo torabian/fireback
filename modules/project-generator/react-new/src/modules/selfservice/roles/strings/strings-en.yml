@@ -1,0 +1,10 @@
+content:
+  editRole: Edit role
+  inviteRoleHint: Select the role(s) you want to give the user when they join the
+    workspace. This can be changed later as well.
+  inviteRoleLabel: Role
+  menuTitle: Roles
+  newRole: New role
+  role:
+    name: Name
+    permissions: Permissions

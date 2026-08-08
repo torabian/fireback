@@ -1,0 +1,16 @@
+content:
+  accept: Accept
+  acceptBtn: 'Yes'
+  actions: Actions
+  confirmAcceptDescription: Are you sure that you are confirming to join?
+  confirmAcceptTitle: Confirm invitation
+  confirmRejectDescription: Are you sure to reject this invitation? You need to be
+    reinvited by admins again.
+  confirmRejectTitle: Reject invite
+  menuTitle: My Invitations
+  method: Method
+  passport: Passport
+  reject: Reject
+  roleName: Role name
+  successful: Successful.
+  workspaceName: Workspace Name

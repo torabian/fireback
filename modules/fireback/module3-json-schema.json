@@ -198,7 +198,9 @@
           "enum": [
             "string",
             "int",
-            "any"
+            "any",
+            "object",
+            "slice"
           ],
           "description": "In case of type map this is the map key type"
         },
@@ -491,28 +493,14 @@
           "type": "array",
           "description": "Tasks are actions which are triggered by a queue message or a cron job."
         },
-        "dtos": {
-          "items": {
-            "$ref": "#/definitions/Module3Dto"
-          },
-          "type": "array",
-          "description": "Dtos are basically golang structs with some additional functionality which can be used for request/response actions"
-        },
         "actions": {
-          "items": {
-            "$ref": "#/definitions/Module3Action"
-          },
-          "type": "array",
-          "description": "Actions are similar to controllers in other frameworks. They are custom functionality available via CLI or Http requests and developer need to implement their logic"
-        },
-        "acts": {
           "items": {
             "$ref": "#/definitions/FirebackEmiAction"
           },
           "type": "array",
           "description": "Actions based on Emi compiler - aims to replace the actions from Fireback"
         },
-        "dtom": {
+        "dtos": {
           "items": {
             "$ref": "#/definitions/EmiDto"
           },
@@ -807,23 +795,6 @@
           "type": "boolean",
           "description": "adds created - updated - deleted fields as timestamps",
           "default": false
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "Module3Dto": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "Name of the dto in camel case the rest of the code related to this dto is being generated based on this"
-        },
-        "fields": {
-          "items": {
-            "$ref": "#/definitions/Module3Field"
-          },
-          "type": "array",
-          "description": "List of fields and body definitions of the dto"
         }
       },
       "additionalProperties": false,

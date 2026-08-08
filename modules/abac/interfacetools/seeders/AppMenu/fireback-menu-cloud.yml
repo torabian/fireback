@@ -1,0 +1,38 @@
+items:
+- label:
+    en: Workspace
+    fa: ورک اسپیس
+  uniqueId: fireback
+  workspaceId: system
+
+- href: "/selfservice/public-join-keys"
+  workspaceId: system
+  icon: common/joinkey.svg
+  label:
+    en: Public join keys
+    fa: کلید عضویت
+  activeMatcher: publicjoinkey
+  uniqueId: publicjoinkey
+  parentId: fireback
+  capabilityId: root.modules.abac.public-join-key.query
+- href: "/selfservice/roles"
+  workspaceId: system
+  icon: common/role.svg
+  label:
+    en: Roles
+    fa: نقش ها
+  uniqueId: roles
+  activeMatcher: "/role/"
+  parentId: fireback
+  capabilityId: root.modules.abac.role.query
+
+- href: "/selfservice/workspace-invites"
+  workspaceId: system
+  icon: common/workspaceinvite.svg
+  label:
+    en: Invites
+    fa: دعوت نامه ها
+  activeMatcher: "/workspace/invite(s)?"
+  uniqueId: invites
+  parentId: fireback
+  capabilityId: root.modules.abac.workspace-invite.query

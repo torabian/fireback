@@ -3,6 +3,7 @@ package abac
 import (
 	"strings"
 
+	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -32,8 +33,13 @@ func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fi
 		return fireback.Create401Error(&AbacMessages.EmailConfigurationIsNotAvailable, []string{})
 	}
 
-	if config.InviteToWorkspaceSender == nil {
+	inviteToWorkspaceSenderId, hasSender := config.InviteToWorkspaceSenderId.Get()
+	if !hasSender || *inviteToWorkspaceSenderId == "" {
 		return fireback.Create401Error(&AbacMessages.UserWhichHasThisTokenDoesNotExist, []string{})
+	}
+	sender, senderErr := messaging.EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *inviteToWorkspaceSenderId})
+	if senderErr != nil {
+		return senderErr
 	}
 
 	content := config.InviteToWorkspaceContent
@@ -42,16 +48,25 @@ func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fi
 	content = strings.ReplaceAll(content, "WORKSPACE_NAME", query.WorkspaceId)
 
 	// Dangerous next line
-	content = strings.ReplaceAll(content, "ROLE_NAME", invite.Role.Name)
+	roleName := ""
+	if role, roleErr := RoleActions.GetOne(fireback.QueryDSL{UniqueId: invite.RoleId.OrDefault("")}); roleErr == nil && role != nil {
+		roleName = role.Name
+	}
+	content = strings.ReplaceAll(content, "ROLE_NAME", roleName)
 
-	err3 := SendMail(EmailMessageContent{
-		FromName:  config.InviteToWorkspaceSender.FromName,
-		FromEmail: config.InviteToWorkspaceSender.FromEmailAddress,
+	var provider *messaging.EmailProviderEntity
+	if generalEmailProviderId, ok := config.GeneralEmailProviderId.Get(); ok && *generalEmailProviderId != "" {
+		provider, _ = messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
+	}
+
+	err3 := messaging.SendMail(messaging.EmailMessageContent{
+		FromName:  sender.FromName,
+		FromEmail: sender.FromEmailAddress,
 		ToName:    invite.FirstName,
 		ToEmail:   invite.Email,
 		Subject:   config.InviteToWorkspaceTitle,
 		Content:   content,
-	}, config.GeneralEmailProvider)
+	}, provider)
 
 	if err3 != nil {
 		return fireback.GormErrorToIError(err3)

@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
 // Implementation of generating token for specific user.
@@ -66,7 +67,7 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 	// 	tokenString = "[Already set on secure cookie]"
 	// }
 
-	until := fireback.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
+	until := complexes.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
 	token := &TokenEntity{
 		UniqueId:    fireback.UUID(),
 		UserId:      emigo.NullableOf(x.UniqueId),

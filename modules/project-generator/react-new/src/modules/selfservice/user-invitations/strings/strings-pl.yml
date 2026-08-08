@@ -1,0 +1,16 @@
+content:
+  accept: Akceptuj
+  acceptBtn: Tak
+  actions: Akcje
+  confirmAcceptDescription: Czy na pewno chcesz dołączyć?
+  confirmAcceptTitle: Potwierdź zaproszenie
+  confirmRejectDescription: Czy na pewno chcesz odrzucić to zaproszenie? Aby dołączyć
+    ponownie, musisz zostać ponownie zaproszony przez administratorów.
+  confirmRejectTitle: Odrzuć zaproszenie
+  menuTitle: Moje zaproszenia
+  method: Metoda
+  passport: Paszport
+  reject: Odrzuć
+  roleName: Nazwa roli
+  successful: Powodzenie.
+  workspaceName: Nazwa przestrzeni roboczej

@@ -17,8 +17,8 @@ import (
 var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
-var OS_SIGNIN_CAPABILITIES []*fireback.CapabilityEntity = []*fireback.CapabilityEntity{
-	{UniqueId: ROOT_ALL_ACCESS, Visibility: emigo.NullableOf("A"), Name: "Root"},
+var OS_SIGNIN_CAPABILITIES []*CapabilityEntity = []*CapabilityEntity{
+	{UniqueId: ROOT_ALL_ACCESS, Name: "Root"},
 }
 
 var TokenParseInformation cli.Command = cli.Command{
@@ -92,7 +92,7 @@ func RepairTheWorkspaces() error {
 		err := fireback.GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
-			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: emigo.NullableOf(ROOT_VAR)}).Error
+			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: ROOT_VAR}).Error
 			if err != nil {
 				return err
 			}
@@ -109,7 +109,7 @@ func RepairTheWorkspaces() error {
 			err = fireback.GetDbRef().Create(&WorkspaceEntity{
 				UniqueId: "root", Name: ROOT_VAR, Description: description,
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
-				TypeId:      emigo.NullableOf(ROOT_VAR),
+				TypeId:      ROOT_VAR,
 			}).Error
 
 			if err != nil {
@@ -155,16 +155,10 @@ func RepairTheWorkspaces() error {
 func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 	sampleName := "Root Access"
 	entity := &RoleEntity{
-		UniqueId:    "root",
-		WorkspaceId: emigo.NullableOf(ROOT_VAR),
-		Name:        sampleName,
-		Capabilities: []*fireback.CapabilityEntity{
-			{
-				WorkspaceId: emigo.NullableOf("system"),
-				Visibility:  emigo.NullableOf("A"),
-				UniqueId:    ROOT_ALL_ACCESS,
-			},
-		},
+		UniqueId:           "root",
+		WorkspaceId:        emigo.NullableOf(ROOT_VAR),
+		Name:               sampleName,
+		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_ACCESS}),
 	}
 
 	err := fireback.GetDbRef().
@@ -379,10 +373,14 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
-			query.UserId = user.Item.UserId.OrDefault("")
-			_, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+			// user.Item.UserId is the "created/owned by" metadata field (blank for a
+			// fresh signup, since nobody else created this user) - the user's actual
+			// identity is UniqueId. Using UserId here left every root UserWorkspace/
+			// WorkspaceRole row created below with an empty user reference.
+			query.UserId = user.Item.UniqueId
+			createdUserWorkspace, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
-				UserId:      user.Item.UserId,
+				UserId:      emigo.NullableOf(user.Item.UniqueId),
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
 			}, query)
 
@@ -391,8 +389,9 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 			}
 
 			_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
-				RoleId:      emigo.NullableOf(ROOT_VAR),
-				WorkspaceId: emigo.NullableOf(ROOT_VAR),
+				UserWorkspaceId: emigo.NullableOf(createdUserWorkspace.UniqueId),
+				RoleId:          emigo.NullableOf(ROOT_VAR),
+				WorkspaceId:     emigo.NullableOf(ROOT_VAR),
 			}, query)
 
 			if err3 != nil {

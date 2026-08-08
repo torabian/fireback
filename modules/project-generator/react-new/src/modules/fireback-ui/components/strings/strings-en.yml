@@ -1,0 +1,129 @@
+content:
+  actions:
+    addJob: + Add job
+    back: Back
+    edit: Edit
+    new: New
+  authenticatedOnly: This section requires you to login before viewing or editing
+    of any kind.
+  close: Close
+  common:
+    cancel: Cancel
+    isNUll: Not specified
+    'no': 'No'
+    noaccess: You do not have access to this part of the app. Contact your supervisor
+      for consultation
+    parent: Parent Record
+    parentHint: Select the parent entity which this belogns to
+    save: Save
+    'yes': 'Yes'
+  components:
+    attachDocumentsAboutThePayment: Attach documents about the payment
+    autoReroute: Auto-reroute
+    close: Close
+    confirmLeaveApp: Are you sure to leave the app?
+    defaultSelectExample: Default select example
+    demo: Demo
+    done: Done
+    download: Download
+    dropFileHere: Drop a file here
+    errorPrefix: 'Error:'
+    fileSizeExceeds5kb: File size exceeds 5KB.
+    fileTooLarge: File too large. Max allowed size is {size}MB.
+    fileTypeNotAllowed: File type not allowed.
+    findASetting: Find a setting
+    formDateTime: Form Date/Time
+    formSelect: Form select
+    home: Home
+    noAttachmentData: No attachment data
+    noQuerySourceToRender: No query source to render
+    onlyPngSvgAllowed: Only PNG or SVG files are allowed.
+    overlaysAndModal: Overlays & Modal
+    pdfPreview: PDF Preview
+    preview: Preview
+    profile: Profile
+    reset: Reset
+    retry: Retry
+    selected: Selected
+    settings: Settings
+    somethingWentWrong: 'Something went wrong:'
+    submit: Submit
+    toggleNavigation: Toggle navigation
+    unknownError: There is an unknown error while getting information, please contact
+      your software provider if issue persists.
+    view: View
+  confirm: Confirm
+  currentUser:
+    editProfile: Edit profile
+    profile: Profile
+    signin: Sign in
+    signout: Sign out
+  deleteAction: Delete
+  deleteConfirmMessage: Are you sure to delete the selected items?
+  drive:
+    attachFile: Attach file
+  dropNFiles: Drop {n} file(s) to begin the upload
+  errors:
+    UNKOWN_ERRROR: Unknown error occured
+  forcedLayout:
+    checkingSession: Checking tokens and authentication...
+    forcedLayoutGeneralMessage: You need to login before accessing this section
+  jalaliMonths:
+    '0': Farvardin
+    '1': Ordibehesht
+    '10': Bahman
+    '11': Isfand
+    '2': Khordad
+    '3': Tir
+    '4': Mordad
+    '5': Shahrivar
+    '6': Mehr
+    '7': Aban
+    '8': Azar
+    '9': Dey
+  lackOfPermission: You need more permissions, in order to access this part of the
+    software.
+  meta:
+    titleAffix: PixelPlux
+  networkError: You are not connected to the network, getting data failed. Check your
+    network connection. If you have connection, it's possible that our server is temporarily
+    offline or on maintenance
+  noOptions: No Options
+  not_found_404: The page you are looking for might have been removed, its URL changed
+    or is temporarily unavailable.
+  notfound: Resource you are looking for is not available on this version of the api.
+  onlyOnRoot: This feature is only available for root access, please ask your administrator
+    for more details
+  productName: Fireback
+  reactiveSearch:
+    noResults: There are no results :)
+    placeholder: Search (Press S)...
+  saveChanges: Apply
+  searchplaceholder: Search...
+  selectPlaceholder: '- Select an option -'
+  signinInstead: Sign in
+  table:
+    created: Created
+    filter:
+      contains: Contains
+      endsWith: Ends With
+      equal: Equal
+      filterPlaceholder: Filter...
+      greaterThan: Greater Than
+      greaterThanOrEqual: Greater or equal
+      lessThan: Less Than
+      lessThanOrEqual: Less or equal
+      notContains: Not Contains
+      notEqual: Not Equal
+      startsWith: Starts With
+    info: Info
+    next: Next
+    noRecords: There are no records available to show. To create one, press on Plus
+      button.
+    previous: Previous
+    uniqueId: id
+    updated: Updated
+    userId: User Id
+    value: Value
+    workspaceId: Workspace Id
+  workspacesSideTitle: Workspaces

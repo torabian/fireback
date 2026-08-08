@@ -1,0 +1,5 @@
+extends: []
+content:
+  dashboard:
+    description: به داشبورد خوش آمدید. می‌توانید ببینید اینجا چه خبر است.
+    title: داشبورد

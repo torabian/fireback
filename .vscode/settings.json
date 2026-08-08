@@ -2,42 +2,18 @@
   "emeraldwalk.runonsave": {
     "commands": [
       {
-        "cmd": "cd ${workspaceFolder} \u0026\u0026 make",
-        "match": "\\.tpl$"
-      },
-      {
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen gof --def ${relativeFile} --relative-to ${workspaceFolder} --gof-module github.com/torabian/fireback \u0026\u0026 ${workspaceFolder}/artifacts/fireback/f gen module3spec --out ${workspaceFolder}/.jsonschemas/${relativeFile}",
-        "match": "\\Module3.yml$"
-      },
-      {
-        "cmd": "${workspaceFolder}/artifacts/fireback/f gen strings --langs en,pl --path ${file}",
+        "cmd": "${workspaceFolder}/artifacts/fireback/f emi strings --langs en,pl --path ${file}",
         "match": "strings-([a-z][a-z]).yml$"
+      },
+      {
+        "cmd": "${workspaceFolder}/artifacts/fireback/f emi compile --path ${relativeFile}",
+        "match": "\\.emi.yml$"
       }
     ]
   },
-  "files.associations": {
-    "*.ejs": "html",
-    "__bit_reference": "cpp",
-    "__node_handle": "cpp",
-    "bitset": "cpp",
-    "chrono": "cpp",
-    "fireback.h": "c",
-    "gpiomodehttp.dyno.h": "c",
-    "locale": "cpp",
-    "map": "cpp",
-    "memorystatcjson.dyno.h": "c",
-    "memorystatdefinitions.dyno.h": "c",
-    "memorystathttp.dyno.h": "c",
-    "set": "cpp",
-    "unordered_map": "cpp",
-    "unordered_set": "cpp"
-  },
-  "fireback.serverPath": "/Users/ali/work/fireback/artifacts/fireback/f",
-  "go.useLanguageServer": true,
   "yaml.schemas": {
-    "./modules/fireback/module3-json-schema.json": [
-      "*Module3.yml"
-    ]
-  },
-  "java.compile.nullAnalysis.mode": "disabled"
+    ".jsonschemas/module3-json-schema.json": ["*Module3.yml"],
+    "./.vscode/emi-module-spec.json": ["*.emi.yml", "*.emi.yaml"],
+    "./modules/fireback/module3-json-schema.json": ["*Module3.yml"]
+  }
 }

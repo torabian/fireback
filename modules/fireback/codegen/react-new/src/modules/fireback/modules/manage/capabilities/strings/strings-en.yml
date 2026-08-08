@@ -1,9 +1,0 @@
-content:
-  capabilities:
-    archiveTitle: Capabilities
-    description: Description
-    descriptionHint: Description
-    editCapability: Edit capability
-    name: Name
-    nameHint: Name
-    newCapability: New capability

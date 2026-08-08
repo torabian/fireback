@@ -1,9 +1,12 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/security"
+)
 
 func PassportAppendEmailToUser(dto *ClassicAuthDto, query fireback.QueryDSL) (*PassportEntity, *fireback.IError) {
-	passwordHashed, _ := fireback.HashPassword(dto.Password)
+	passwordHashed, _ := security.HashPassword(dto.Password)
 
 	if iError := UserWithEmailAndPasswordValidator(dto, false); iError != nil {
 		return nil, iError
@@ -16,6 +19,6 @@ func PassportAppendEmailToUser(dto *ClassicAuthDto, query fireback.QueryDSL) (*P
 		Type:     PassportTypes.EmailPassword,
 	}
 
-	return PassportActionCreateFn(entity, query)
+	return PassportActions.Create(entity, query)
 
 }

@@ -2,16 +2,12 @@ package fireback
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"reflect"
-	"strings"
-	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -275,48 +271,6 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 	}
 }
 
-// Use it for requests which are kinda having body, such as post, put, patch, etc.
-// It would read the body (either if it's json, form-data, yaml, etc, based on headers)
-// and cast it to the 'body'. Make sure calling this with &body, not body
-// Extend this function if you want to support different formats.
-func ReadGinRequestBodyAndCastToGoStruct(c *gin.Context, body any, f QueryDSL) (aborted bool) {
-
-	// Only following request methods do have a body
-	if c.Request.Method != "POST" && c.Request.Method != "PATCH" && c.Request.Method != "PUT" {
-		return false
-	}
-
-	bodyBytes, err := ginBodyToBytes(c)
-	if err != nil {
-		return abortWithError(c, err, f)
-	}
-
-	switch DetectGinContentType(c) {
-	case ContentTypeYAML:
-		if err := BindYamlStringWithDetails(bodyBytes, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	case ContentTypeFormData:
-		if err := BindMultiPartFormDataWithDetails(c, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	case ContentTypeURLEncoded:
-		if err := BindFormUrlEncodedWithDetails(c, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	case ContentTypeXML:
-		if err := BindXmlStringWithDetails(bodyBytes, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	default:
-		if err := BindJsonStringWithDetails(bodyBytes, body); err != nil {
-			return abortWithError(c, err, f)
-		}
-	}
-
-	return false
-}
-
 func abortWithError(c *gin.Context, err error, f QueryDSL) bool {
 	accept := c.GetHeader("Accept")
 	isYAML := accept == "application/x-yaml" || accept == "application/yaml" || accept == "text/yaml"
@@ -384,147 +338,11 @@ func DtoFromString[T any](input string) T {
 	return body
 }
 
-type BindingActionItem struct {
-	FunctionName     string
-	FunctionFullName string
-	GenericName      string
-	Format           string
-	ModuleName       string
-	IPCSecurity      string
-	Url              string
-}
-
-type BindingTemplateData struct {
-	Imports []string
-	Items   []BindingActionItem
-}
-
 func GetType(myvar interface{}) string {
 	if t := reflect.TypeOf(myvar); t.Kind() == reflect.Ptr {
 		return "*" + t.Elem().Name()
 	} else {
 		return t.Name()
-	}
-}
-
-var IpcTemplate string = `
-package main
-
-import (
-	{{ with .Imports }}
-		{{ range . }}
-			"{{ .}}"
-		{{ end }}
-	{{ end }}
-)
-
-{{ with .Items }}
-	{{ range .}}
-		// URL: {{ .Url }}
-		{{ if eq .Format "QUERY" }}
-		// dto is not used, for compatibilty we have it
-		func (a *AppIPCBridge) {{ .FunctionName}}(dto string, query string) string {
-			return UniversalJsonStringFormatQuery(
-				{{ .FunctionFullName}}(
-					fireback.ActionArgumentFormatQuery(query, "{{ .Url }}", "{{ .IPCSecurity }}"),
-				),
-			)
-		}
-		{{ end }}
-		{{ if eq .Format "GET_ONE" }}
-		func (a *AppIPCBridge) {{ .FunctionName}}(dto string, query string) string {
-			return UniversalJsonString(
-				{{ .FunctionFullName}}(
-					fireback.ActionArgumentFormatQuery(query, "{{ .Url }}", "{{ .IPCSecurity }}"),
-				),
-			)
-		}
-		{{ end }}
-		{{ if eq .Format "POST_ONE" }}
-		func (a *AppIPCBridge) {{ .FunctionName}}(dto string, query string) string {
-			return UniversalJsonString(
-				{{ .FunctionFullName}}(
-					fireback.ActionArgumentsFormatPostOne[{{ .GenericName }}](dto, query, "{{ .Url }}", "{{ .IPCSecurity }}"),
-				),
-			)
-		}
-		{{ end }}
-		{{ if eq .Format "PATCH_ONE" }}
-		func (a *AppIPCBridge) {{ .FunctionName}}(dto string, query string) string {
-			return UniversalJsonString(
-				{{ .FunctionFullName}}(
-					fireback.ActionArgumentsFormatUpdateOne[{{ .GenericName }}](dto, query, "{{ .Url }}", "{{ .IPCSecurity }}"),
-				),
-			)
-		}
-		{{ end }}
-		{{ if eq .Format "DELETE_DSL" }}
-		func (a *AppIPCBridge) {{ .FunctionName}}(dto string, query string) string {
-			return UniversalJsonString(
-				{{ .FunctionFullName}}(
-					fireback.ActionArgumentsFormatDeleteDSL(query, "{{ .Url }}", "{{ .IPCSecurity }}"),
-				),
-			)
-		}
-		{{ end }}
-	{{ end }}
-{{ end }}
-
-`
-
-func GenerateBindings(items []Module3Action) cli.Command {
-	return cli.Command{
-
-		Name:    "bindings",
-		Aliases: []string{"bi"},
-		Usage:   "Generates the bindings",
-		Action: func(ctx context.Context, c *cli.Command) error {
-
-			data := BindingTemplateData{
-				Imports: []string{
-					"github.com/torabian/fireback/modules/fireback",
-				},
-			}
-			for _, item := range items {
-				if item.Action != nil {
-					fn := GetFunctionName(item.Action)
-					ffn := GetFunctionNameFull(item.Action)
-					imp, importPath, moduleName := SplitFnToModuleAndFunc(ffn)
-
-					genericName := ""
-					if item.Format == "POST_ONE" || item.Format == "PATCH_ONE" {
-						genericName = strings.Replace(moduleName+"."+GetType(item.RequestEntity), "*", "", 1)
-					}
-
-					data.Imports = UniqueString(append(data.Imports, importPath))
-					data.Items = append(data.Items, BindingActionItem{
-						FunctionName:     fn,
-						FunctionFullName: imp,
-						Format:           item.Format,
-						GenericName:      genericName,
-						ModuleName:       moduleName,
-						Url:              item.Url,
-					})
-
-				}
-			}
-			var tpl bytes.Buffer
-
-			t := template.Must(template.New("html-tmpl").Parse(IpcTemplate))
-			err := t.Execute(&tpl, data)
-			if err != nil {
-				panic(err)
-			}
-			result := tpl.String()
-
-			target := "./cmd/academy-desktop/ipc-binding.go"
-			err2 := os.WriteFile(target, []byte(result), 0644)
-			if err2 == nil {
-				fmt.Println("Bindings wrote to:", target)
-			}
-
-			return nil
-		},
 	}
 }
 

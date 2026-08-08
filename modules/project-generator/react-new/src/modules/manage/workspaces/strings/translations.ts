@@ -1,0 +1,74 @@
+/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const en = {
+  body: "Body",
+  confirmEmailSender: "User signup confirm account email",
+  createNewWorkspace: "New workspace",
+  customizedTemplate: "Customize template",
+  editWorkspae: "Edit workspace",
+  emailSendingConfiguration: "Email Sending Configuration",
+  emailSendingConfigurationHint: "Control how the system emails are being sent, customize the message, etc.",
+  forgetPasswordSender: "Forget password instructions",
+  inviteToWorkspace: "Invite to workspace",
+  mailServerConfiguration: "Mail server configuration",
+  menuTitle: "Workspaces",
+  name: "Name",
+  notificationDialogTitle: "Edit the mail template",
+  resetToDefault: "Reset to default",
+  sender: "Sender",
+  sidetitle: "Workspaces",
+  title: "Title",
+  type: "Type",
+  workspaceName: "Workspace name",
+  workspaceNameHint: "Enter the workspace name",
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const fa = {
+  body: "بدن",
+  confirmEmailSender: "ثبت نام کاربر ایمیل حساب را تایید کنید",
+  createNewWorkspace: "فضای کاری جدید",
+  customizedTemplate: "ویرایش قالب",
+  editWorkspae: "ویرایش فضای کاری",
+  emailSendingConfiguration: "پیکربندی ارسال ایمیل",
+  emailSendingConfigurationHint: "نحوه ارسال ایمیل های سیستمی را کنترل کنید، پیام را سفارشی کنید و غیره.",
+  forgetPasswordSender: "دستورالعمل های رمز عبور را فراموش کنید",
+  inviteToWorkspace: "دعوت به فضای کاری",
+  mailServerConfiguration: "پیکربندی سرور ایمیل",
+  menuTitle: "فضاهای کاری",
+  name: "نام",
+  notificationDialogTitle: "قالب نامه را ویرایش کنید",
+  resetToDefault: "تنظیم مجدد به حالت پیش فرض",
+  sender: "فرستنده",
+  sidetitle: "فضاهای کاری",
+  title: "عنوان",
+  type: "تایپ کنید",
+  workspaceName: "نام فضای کاری",
+  workspaceNameHint: "نام فضای کاری را وارد کنید",
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  body: "Treść",
+  confirmEmailSender: "E-mail potwierdzający rejestrację konta użytkownika",
+  createNewWorkspace: "Nowa przestrzeń robocza",
+  customizedTemplate: "Dostosuj szablon",
+  editWorkspae: "Edytuj przestrzeń roboczą",
+  emailSendingConfiguration: "Konfiguracja wysyłania e-maili",
+  emailSendingConfigurationHint: "Kontroluj sposób wysyłania e-maili systemowych, dostosuj wiadomość itp.",
+  forgetPasswordSender: "Instrukcje przypomnienia hasła",
+  inviteToWorkspace: "Zaproś do przestrzeni roboczej",
+  mailServerConfiguration: "Konfiguracja serwera pocztowego",
+  menuTitle: "Przestrzenie robocze",
+  name: "Nazwa",
+  notificationDialogTitle: "Edytuj szablon wiadomości",
+  resetToDefault: "Przywróć domyślne",
+  sender: "Nadawca",
+  sidetitle: "Przestrzenie robocze",
+  title: "Tytuł",
+  type: "Typ",
+  workspaceName: "Nazwa przestrzeni roboczej",
+  workspaceNameHint: "Wprowadź nazwę przestrzeni roboczej",
+};
+ export const strings = {...en, $fa:fa,$pl:pl};

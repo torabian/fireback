@@ -1,0 +1,10 @@
+content:
+  editRole: Edytuj rolę
+  inviteRoleHint: Wybierz rolę(e), które chcesz nadać użytkownikowi po dołączeniu
+    do przestrzeni roboczej. Można to zmienić później.
+  inviteRoleLabel: Rola
+  menuTitle: Role
+  newRole: Nowa rola
+  role:
+    name: Nazwa
+    permissions: Uprawnienia

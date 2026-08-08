@@ -31,10 +31,6 @@ func CreateEntity[T any](dto T) (T, *IError) {
 	return dto, nil
 }
 
-func GetTypeArray(arr interface{}) reflect.Type {
-	return reflect.TypeOf(arr).Elem()
-}
-
 // This function guesses the entities within a gorm model.
 // It's useful when querying to get all of the changes
 func ListGormSubEntities(entity reflect.Value) []string {
@@ -680,45 +676,20 @@ func RealEscape(portion string, values ...string) string {
 	return portion
 }
 
-func GetOneEntityByWorkspace[T any](query QueryDSL, reflectVal reflect.Value) (*T, *IError) {
-
-	var item T
-
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = GetDbRef()
-	} else {
-		dbref = query.Tx
-	}
-	preloads := ListGormSubEntities(reflectVal)
-
-	for _, f := range preloads {
-		if f != "" {
-			dbref = dbref.Preload(f)
-
-		}
-	}
-
-	if len(query.WithPreloads) > 0 {
-		for _, f := range query.WithPreloads {
-			dbref = dbref.Preload(f)
-		}
-	}
-
-	err := dbref.Where(RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
-
-	if err != nil {
-		return &item, GormErrorToIError(err)
-	}
-
-	return &item, nil
-}
-
 func UpdateEntity[T any](query QueryDSL, fields *T) (*T, *IError) {
 
 	var item T
-	err := GetDbRef().Where(RealEscape("unique_id = ?", GetFieldString(fields, "UniqueId"))).First(&item).UpdateColumns(fields).Error
-	if err != nil {
+	if err := GetDbRef().Where(RealEscape("unique_id = ?", GetFieldString(fields, "UniqueId"))).First(&item).Error; err != nil {
+		return &item, GormErrorToIError(err)
+	}
+
+	// Deliberately a fresh GetDbRef().Model(&item) chain rather than continuing to
+	// chain .UpdateColumns directly onto the .First() call above: reusing that same
+	// *gorm.DB session/Statement for the UPDATE (as this used to do) makes Postgres
+	// see the table referenced twice - `ERROR: table name "..." specified more than
+	// once (SQLSTATE 42712)` - on every single entity update, since this generic
+	// function backs every *_Update/PATCH action in the app.
+	if err := GetDbRef().Model(&item).UpdateColumns(fields).Error; err != nil {
 		return &item, GormErrorToIError(err)
 	}
 

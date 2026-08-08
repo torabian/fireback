@@ -3,75 +3,92 @@ package main
 import (
 	"os"
 
-	"github.com/gin-gonic/gin"
-	// "github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/emi/lib/gorunner"
 	"github.com/urfave/cli/v3"
 
 	"github.com/torabian/fireback/modules/abac"
+	"github.com/torabian/fireback/modules/abac/interfacetools"
+	"github.com/torabian/fireback/modules/backup"
+	"github.com/torabian/fireback/modules/eventbus"
 	"github.com/torabian/fireback/modules/fireback"
-	FBManage "github.com/torabian/fireback/modules/fireback/codegen/fireback-manage"
-	FbSelfService "github.com/torabian/fireback/modules/fireback/codegen/selfservice"
+	"github.com/torabian/fireback/modules/reactivesearch"
+
+	// clitools registers every terminal/CLI-interactive fireback feature
+	// (promptui/bubbletea prompts, os/exec service management, asynq
+	// workers, graceful HTTP shutdown) via init(). It's tagged !wasm and
+	// deliberately not imported by cmd/fireback-wasm.
+	_ "github.com/torabian/fireback/modules/fireback/clitools"
+	"github.com/torabian/fireback/modules/fireback/gintools"
+	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
+	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"
+	project_generator "github.com/torabian/fireback/modules/project-generator"
+	"github.com/torabian/fireback/modules/storage"
 )
 
 var PRODUCT_NAMESPACENAME = "fireback"
 var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + fireback.FIREBACK_VERSION
 var PRODUCT_LANGUAGES = []string{"fa", "en"}
 
-// Fireback doesn't come with default ui in the cmd anymore.
-// Fireback itself has 2 uis: Manage and SelfService.
-// Developer needs to build them if necessary and put the static files in workspaces
-// Folder. Fireback serves them on /manage and /selfservice, similarly child projects
-// Can serve those react projects if they wanted to.
 // //go:embed all:ui
 // var ui embed.FS
 
-var xapp = &fireback.FirebackApp{
-	Title:              PRODUCT_DESCRIPTION,
-	SupportedLanguages: PRODUCT_LANGUAGES,
-	SearchProviders: []fireback.SearchProviderFn{
-		abac.QueryMenusReact,
-		abac.QueryRolesReact,
-	},
-	SeedersSync: func() {
-		abac.PassportMethodSyncSeeders()
-		abac.AppMenuSyncSeeders()
-	},
+func main() {
 
-	PublicFolders: []fireback.PublicFolderInfo{
-		// You can set a series of static folders to be served along with fireback.
-		// This is only for static content. For advanced MVX render templates, you need to
-		// Bootstrap those themes
-		// Add these two lines on the top of the file
-		/////go:embed all:ui
-		// var ui embed.FS
-		// and then uncomment this, for example to serve static react or angular content
+	// wal-g is embedded directly in this binary (see modules/backup/Exec.go)
+	// rather than shelling out to a separate installed executable. This
+	// must run before any normal CLI parsing below, since it re-execs into
+	// wal-g's own command tree when invoked with its hidden marker arg.
+	backup.MaybeRunEmbeddedWalg()
 
-		// 		//go:embed all:selfservice
-		// var selfservice embed.FS
-		{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
-		{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
-	},
-	SetupWebServerHook: func(e *gin.Engine, xs *fireback.FirebackApp) {
+	emiCommand := &cli.Command{
+		Name:     "emi",
+		Usage:    "Emi compiler - Backend-for-Frontend with automatic SDK generation.",
+		Commands: gorunner.BuildCommands(),
+	}
 
-	},
-	Modules: append([]*fireback.ModuleProvider{
-		// Add the very core module, such as capabilities
+	modules := []*fireback.ModuleProvider{
 		fireback.FirebackModuleSetup(nil),
-
-		// // Add fireback payment module also
-		// payment.PaymentModuleSetup(nil),
-
-		// suggestion.SuggestionModuleSetup(nil),
 		{
 			CliHandlers: []*cli.Command{
-				fireback.NewProjectCli(),
+				project_generator.NewProjectCli(),
+				emiCommand,
 			},
 		},
-		// }),
-	}, abac.AbacCompleteModules()...),
-}
+		{
+			CliHandlers: []*cli.Command{
+				{
+					Name:     "backup",
+					Usage:    "Take and restore point-in-time Postgres backups via wal-g",
+					Commands: backup.Commands(),
+				},
+			},
+		},
+		storage.StorageModuleSetup(nil),
+		eventbus.ModuleSetup(nil),
+		reactivesearch.ModuleSetup(&reactivesearch.ReactiveSearchModuleConfig{
+			SearchProviders: []reactivesearch.SearchProviderFn{
+				abac.QueryMenusReact,
+				abac.QueryRolesReact,
+			},
+		}),
+	}
 
-func main() {
+	// For fireback we have abac module added.
+	modules = append(modules, abac.AbacCompleteModules()...)
+
+	var xapp = &fireback.FirebackApp{
+		Title:              PRODUCT_DESCRIPTION,
+		SupportedLanguages: PRODUCT_LANGUAGES,
+		SeedersSync: func() {
+			abac.PassportMethodSyncSeeders()
+			interfacetools.AppMenuSyncSeeders()
+		},
+		PublicFolders: []gintools.PublicFolderInfo{
+			{Fs: &FBManage.FirebackManageTmpl, Folder: ".", Prefix: "/manage"},
+			{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
+		},
+		Modules: modules,
+	}
 
 	// This is an important setting for some kind of app which will be installed
 	// it makes it easier for fireback to find the configuration.

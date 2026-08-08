@@ -1,237 +1,728 @@
 package abac
 
 import (
-	"strings"
-
-	"github.com/pquerna/otp/totp"
+	"bytes"
+	"context"
+	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/urfave/cli/v3"
+	"io"
+	"net/http"
+	"net/url"
+	"reflect"
+	"strings"
 )
 
-func init() {
-	// ClassicSigninActionImp = ClassicSigninAction
-	ClassicSigninImpl = ClassicSigninAction
-}
-
-func ClassicSigninAction(c ClassicSigninActionRequest, query fireback.QueryDSL) (*ClassicSigninActionResponse, error) {
-	dto := c.Body
-	req := dto
-	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
-		return nil, err
-	}
-
-	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: query.Tx})
-	if err2 != nil {
-		if err2.HttpCode != 404 {
-			return nil, err2
-		}
-	}
-
-	requiresSessionSecret := false
-	if config != nil {
-
-		if config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
-			requiresSessionSecret = true
-		}
-		if config.RequireOtpOnSignin.OrDefault(false) {
-			requiresSessionSecret = true
-		}
-	}
-
-	if requiresSessionSecret {
-		if strings.TrimSpace(req.SessionSecret) == "" {
-			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
-		}
-
-		// Here we need to do some comparison to make sure this is the correct session secret
-		var publicSession *PublicAuthenticationEntity = nil
-		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
-
-		if strings.TrimSpace(req.SessionSecret) == "" {
-			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
-		}
-	}
-
-	session := &UserSessionDto{}
-
-	if err := fetchPureUserAndPassToSession(req.Value, req.Password, session, query); err != nil {
-		return nil, err
-	}
-
-	passport, _ := session.Passport.Get()
-	if passport == nil {
-		return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
-	}
-
-	// if user doesn't have totp setup, then move him
-	if config != nil && config.ForceTotp.OrDefault(false) {
-		if passport.Item.TotpSecret == "" ||
-			!passport.Item.TotpConfirmed.OrDefault(false) {
-
-			// Let's create and assign to passport
-			key, _ := totp.Generate(totp.GenerateOpts{
-				Issuer:      "Fireback",
-				AccountName: req.Value,
-			})
-
-			totpSecret := key.Secret()
-			totpLink := key.URL()
-
-			if _, err := PassportActions.Update(query, &PassportEntity{
-				UniqueId:   passport.Item.UniqueId,
-				TotpSecret: totpSecret,
-			}); err != nil {
-				return nil, err
-			}
-
-			return &ClassicSigninActionResponse{
-				Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-					TotpUrl: totpLink,
-					Next:    []string{"setup-totp"},
-				}),
-			}, nil
-		}
-	}
-
-	if passport.Item.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
-		// Assume this is first time, so do not fail the response and allow user to go there.
-		if req.TotpCode == "" {
-			return &ClassicSigninActionResponse{
-				Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-					Next: []string{"enter-totp"},
-				}),
-			}, nil
-		}
-
-		if !totp.Validate(req.TotpCode, passport.Item.TotpSecret) {
-			return nil, fireback.Create401Error(&AbacMessages.TotpCodeIsNotValid, []string{})
-		}
-	}
-
-	if err := applyUserTokenAndWorkspacesToToken(session, query); err != nil {
-		return nil, err
-	}
-
+/**
+* Action to communicate with the action ClassicSigninAction
+ */
+/*
+Here is a quick function implementation to make your life easier:
+// Actual implementation of ClassicSigninAction
+func ClassicSigninAction(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error) {
 	return &ClassicSigninActionResponse{
-		Payload: fireback.GResponseSingleItem(ClassicSigninActionRes{
-			Session: emigo.NewOne(*session),
-		}),
+		// Payload is an interface. Use it at carefully.
 	}, nil
 }
+*/
+func ClassicSigninActionMeta() struct {
+	Name        string
+	CliName     string
+	URL         string
+	Method      string
+	Description string
+} {
+	return struct {
+		Name        string
+		CliName     string
+		URL         string
+		Method      string
+		Description string
+	}{
+		Name:        "ClassicSigninAction",
+		CliName:     "in",
+		URL:         "/passports/signin/classic",
+		Method:      "POST",
+		Description: `Signin publicly to and account using class passports (email, password)`,
+	}
+}
 
-func convertPointersToValuesUserWorkspaceEntity(pointers []*UserWorkspaceEntity) []UserWorkspaceEntity {
-	values := make([]UserWorkspaceEntity, 0, len(pointers)) // preallocate
-	for _, ptr := range pointers {
-		if ptr != nil {
-			values = append(values, *ptr) // dereference pointer and append
+// The base class definition for classicSigninActionReq
+type ClassicSigninActionReq struct {
+	Value    string `json:"value" validate:"required" yaml:"value"`
+	Password string `json:"password" validate:"required" yaml:"password"`
+	// Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.
+	TotpCode string `json:"totpCode" yaml:"totpCode"`
+	// Session secret when logging in to the application requires more steps to complete.
+	SessionSecret string `json:"sessionSecret" yaml:"sessionSecret"`
+}
+
+func (x *ClassicSigninActionReq) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
+func GetClassicSigninActionReqCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "value",
+			Type: "string",
+		},
+		{
+			Name: prefix + "password",
+			Type: "string",
+		},
+		{
+			Name:        prefix + "totp-code",
+			Type:        "string",
+			Description: "Accepts login with totp code. If enabled, first login would return a success response with next[enter-totp] value and ui can understand that user needs to be navigated into the screen other screen.",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "Session secret when logging in to the application requires more steps to complete.",
+		},
+	}
+}
+func CastClassicSigninActionReqFromCli(c emigo.CliCastable) ClassicSigninActionReq {
+	data := ClassicSigninActionReq{}
+	if c.IsSet("value") {
+		data.Value = c.String("value")
+	}
+	if c.IsSet("password") {
+		data.Password = c.String("password")
+	}
+	if c.IsSet("totp-code") {
+		data.TotpCode = c.String("totp-code")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	return data
+}
+
+// The base class definition for classicSigninActionRes
+type ClassicSigninActionRes struct {
+	Session emigo.One[UserSessionDto] `json:"session" yaml:"session"`
+	// The next possible action which is suggested.
+	Next []string `json:"next" yaml:"next"`
+	// In case the account doesn't have totp, but enforced by installation, this value will contain the link
+	TotpUrl string `json:"totpUrl" yaml:"totpUrl"`
+	// Returns a secret session if the authentication requires more steps.
+	SessionSecret string `json:"sessionSecret" yaml:"sessionSecret"`
+}
+
+func (x *ClassicSigninActionRes) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return string(str)
+	}
+	return ""
+}
+func GetClassicSigninActionResCliFlags(prefix string) []emigo.CliFlag {
+	return []emigo.CliFlag{
+		{
+			Name: prefix + "session",
+			Type: "one",
+		},
+		{
+			Name:        prefix + "next",
+			Type:        "slice",
+			Description: "The next possible action which is suggested.",
+		},
+		{
+			Name:        prefix + "totp-url",
+			Type:        "string",
+			Description: "In case the account doesn't have totp, but enforced by installation, this value will contain the link",
+		},
+		{
+			Name:        prefix + "session-secret",
+			Type:        "string",
+			Description: "Returns a secret session if the authentication requires more steps.",
+		},
+	}
+}
+func CastClassicSigninActionResFromCli(c emigo.CliCastable) ClassicSigninActionRes {
+	data := ClassicSigninActionRes{}
+	if c.IsSet("session") {
+		data.Session = emigo.CapturePossibleOne(CastUserSessionDtoFromCli, "session", c)
+	}
+	if c.IsSet("next") {
+		emigo.InflatePossibleSlice(c.String("next"), &data.Next)
+	}
+	if c.IsSet("totp-url") {
+		data.TotpUrl = c.String("totp-url")
+	}
+	if c.IsSet("session-secret") {
+		data.SessionSecret = c.String("session-secret")
+	}
+	return data
+}
+
+type ClassicSigninActionResponse struct {
+	StatusCode int
+	Headers    map[string]string
+	Payload    interface{}
+	// Do not manually fill this in. It has no effect. This is only useful when you are using
+	// client code, and want to get access to the original response. When sending response from your
+	// application it will be ignored.
+	resp *http.Response
+}
+
+func (x *ClassicSigninActionResponse) SetContentType(contentType string) *ClassicSigninActionResponse {
+	if x.Headers == nil {
+		x.Headers = make(map[string]string)
+	}
+	x.Headers["Content-Type"] = contentType
+	return x
+}
+func (x *ClassicSigninActionResponse) AsStream(r io.Reader, contentType string) *ClassicSigninActionResponse {
+	x.Payload = r
+	x.SetContentType(contentType)
+	return x
+}
+func (x *ClassicSigninActionResponse) AsJSON(payload any) *ClassicSigninActionResponse {
+	x.Payload = payload
+	x.SetContentType("application/json")
+	return x
+}
+
+// When the response is expected as documentation, you call this to get some type
+// safety for the action which is happening.
+func (x *ClassicSigninActionResponse) WithIdeal(payload ClassicSigninActionRes) *ClassicSigninActionResponse {
+	x.Payload = payload
+	return x
+}
+
+// Use this for client calls, so the payload is being casted
+func (x *ClassicSigninActionResponse) AsIdeal() (*ClassicSigninActionRes, error) {
+	b, err := json.Marshal(x.GetPayload())
+	if err != nil {
+		return nil, err
+	}
+	var res ClassicSigninActionRes
+	if err := json.Unmarshal(b, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+func (x *ClassicSigninActionResponse) AsHTML(payload string) *ClassicSigninActionResponse {
+	x.Payload = payload
+	x.SetContentType("text/html; charset=utf-8")
+	return x
+}
+func (x *ClassicSigninActionResponse) AsBytes(payload []byte) *ClassicSigninActionResponse {
+	x.Payload = payload
+	x.SetContentType("application/octet-stream")
+	return x
+}
+func (x ClassicSigninActionResponse) GetStatusCode() int {
+	return x.StatusCode
+}
+func (x ClassicSigninActionResponse) GetRespHeaders() map[string]string {
+	return x.Headers
+}
+func (x ClassicSigninActionResponse) GetPayload() interface{} {
+	return x.Payload
+}
+
+// Request signature, which is here for refernece. Now it's inlined, so auto completions suggest the function body.
+type ClassicSigninActionRequestSig = func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error)
+
+/**
+ * Query parameters for ClassicSigninAction
+ */
+// Query wrapper with private fields
+type ClassicSigninActionQuery struct {
+	values url.Values
+	mapped map[string]interface{}
+	// Typesafe fields
+}
+
+func ClassicSigninActionQueryFromString(rawQuery string) ClassicSigninActionQuery {
+	v := ClassicSigninActionQuery{}
+	values, _ := url.ParseQuery(rawQuery)
+	mapped := map[string]interface{}{}
+	if result, err := emigo.UnmarshalQs(rawQuery); err == nil {
+		mapped = result
+	}
+	decoder, err := emigo.NewDecoder(&emigo.DecoderConfig{
+		TagName:          "json", // reuse json tags
+		WeaklyTypedInput: true,   // "1" -> int, "true" -> bool
+		Result:           &v,
+	})
+	if err == nil {
+		_ = decoder.Decode(mapped)
+	}
+	v.values = values
+	v.mapped = mapped
+	return v
+}
+func ClassicSigninActionQueryFromHttp(r *http.Request) ClassicSigninActionQuery {
+	return ClassicSigninActionQueryFromString(r.URL.RawQuery)
+}
+func (q ClassicSigninActionQuery) Values() url.Values {
+	return q.values
+}
+func (q ClassicSigninActionQuery) Mapped() map[string]interface{} {
+	return q.mapped
+}
+func (q *ClassicSigninActionQuery) SetValues(v url.Values) {
+	q.values = v
+}
+func (q *ClassicSigninActionQuery) SetMapped(m map[string]interface{}) {
+	q.mapped = m
+}
+
+type ClassicSigninActionRequest struct {
+	Body        ClassicSigninActionReq
+	QueryParams url.Values
+	// Automatically casted headers, for purpose of typesafe headers in later versions
+	Headers http.Header
+	// Gin context for each request in case of a direct access requirement
+	// Now it's interface, so the code gen doesn't depend on the instance
+	// or gin package. Make sure you cast is later into *gin.Context, or whatever
+	// your framework is passing when creating a request.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	GinCtx interface{}
+	// Cli library helper (urfave) by default. The instance is interface{}, and you
+	// need to manually cast it to the *cli.Command, so gives you freedom and independence
+	// of external library.
+	// Ideally, you should not be needing this, and emi has to provide necessary helper
+	// functions to read and write a request.
+	CliCtx interface{}
+	// Reference to the application instance, in such scenarios that entire
+	// application is wrapped into a single struct that holds database connection,
+	// routes, etc.
+	Application interface{}
+}
+
+// Returns the gin ctx. You need to manually cast this to .(*gin.Context)
+func (x ClassicSigninActionRequest) GetGinCtx() interface{} {
+	return x.GinCtx
+}
+
+// Returns the urfave 3 cli context. You need to manullay cast to .(*cli.Command)
+func (x ClassicSigninActionRequest) GetCliCtx() interface{} {
+	return x.CliCtx
+}
+func ClassicSigninActionClientCreateUrl(
+	req ClassicSigninActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*url.URL, error) {
+	meta := ClassicSigninActionMeta()
+	urlAddr := meta.URL
+	urlAddr = config.BaseURL + urlAddr
+	// Build final URL with query string
+	u, err := url.Parse(urlAddr)
+	if err != nil {
+		return nil, err
+	}
+	// if UrlValues present, encode and append
+	if len(req.QueryParams) > 0 {
+		u.RawQuery = req.QueryParams.Encode()
+	}
+	return u, nil
+}
+func ClassicSigninActionClientExecuteTyped(httpReq *http.Request) (*ClassicSigninActionResponse, error) {
+	resp, err := http.DefaultClient.Do(httpReq)
+	if err != nil {
+		return nil, err
+	}
+	// At this point, response is valid, and we need to return the results.
+	var result ClassicSigninActionResponse
+	result.resp = resp
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return &result, err
+	}
+	if err := json.Unmarshal(respBody, &result.Payload); err != nil {
+		return &result, err
+	}
+	return &result, nil
+}
+func ClassicSigninActionClientBuildRequest(req ClassicSigninActionRequest, reqUrl *url.URL, config *emigo.APIClient) (*http.Request, error) {
+	meta := ClassicSigninActionMeta()
+	bodyBytes, err := json.Marshal(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	httpReq, err := http.NewRequest(meta.Method, reqUrl.String(), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+	httpReq.Header = make(http.Header)
+	// copy defaults
+	for k, v := range config.Headers {
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
 		}
 	}
-	return values
+	// override with request-specific headers
+	for k, v := range req.Headers {
+		httpReq.Header.Del(k) // ensure override, not duplicate
+		for _, vv := range v {
+			httpReq.Header.Add(k, vv)
+		}
+	}
+	return httpReq, nil
 }
-
-// Can be used to authenticate only using value and passport.
-// Do not expose this publicly, by passes recaptcha and all other securities.
-func classicSinginInternalUnsafe(req *ClassicSigninActionReq, q fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
-
-	session := &UserSessionDto{}
-
-	fetchPureUserAndPassToSession(req.Value, req.Password, session, q)
-	applyUserTokenAndWorkspacesToToken(session, q)
-
-	return &ClassicSigninActionRes{
-		Session: emigo.NewOne(*session),
-	}, nil
-}
-
-func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
-	user, _ := session.User.Get()
-	// Get the user workspaces as well
-	q.UserId = user.Item.UniqueId
-	q.ResolveStrategy = "user"
-	workspacesItems, _, err := UserWorkspaceActions.Query(q)
+func ClassicSigninActionCall(
+	req ClassicSigninActionRequest,
+	config *emigo.APIClient, // optional pre-built request
+) (*ClassicSigninActionResponse, error) {
+	// This function intentionally is split into 3 different sections, so in case
+	// of some modifications that we did not anticipate, at least a part would become quite useful.
+	// first we create url, apply all path parameters, query params, etc
+	u, err := ClassicSigninActionClientCreateUrl(req, config)
 	if err != nil {
-		return fireback.GormErrorToIError(err)
-	}
-
-	session.UserWorkspaces = emigo.CollectionReplace(
-		convertPointersToValuesUserWorkspaceEntity(workspacesItems),
-	)
-
-	// Authorize the session, put the token
-	if token, err := user.Item.AuthorizeWithToken(q); err != nil {
-		return fireback.CastToIError(err)
-	} else {
-		session.Token = token
-	}
-
-	// Secure cookie, only if gin is present
-	if q.G != nil {
-		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
-	}
-
-	return nil
-}
-
-// Gets the user via the passport value.
-// This is an unsafe function and should not be exposed to outside.
-// If the password is nil, it means it would work without a password.
-// So make sure you have
-func fetchPureUserAndPassToSession(value string, password string, session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
-
-	passportPassword, err := fetchUserAndPassToSession(value, session, q)
-
-	if err != nil {
-		return err
-	}
-
-	if !fireback.CheckPasswordHash(password, *passportPassword) {
-		return fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
-	}
-
-	return nil
-}
-
-// Unsafe function, which reads a user passport and finds him and assigns to the
-// session. Just use in password less scenarios, such as oauth.
-func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback.QueryDSL) (*string, *fireback.IError) {
-	ClearPassportValue(&value)
-
-	var passportPassword = ""
-	if passport, user, err := UnsafeGetUserByPassportValue(value, q); err != nil {
 		return nil, err
-	} else {
-		session.User.Set(*user)
-		session.Passport.Set(*passport)
-		passportPassword = passport.Password
 	}
-
-	if user, _ := session.User.Get(); user == nil {
-		return nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
+	// We create the request from the body in second stage
+	r, err := ClassicSigninActionClientBuildRequest(req, u, config)
+	if err != nil {
+		return nil, err
 	}
-
-	return &passportPassword, nil
+	// This one would execute the request and cast the result.
+	return ClassicSigninActionClientExecuteTyped(r)
 }
 
-func UnsafeGetUserByPassportValue(value string, q fireback.QueryDSL) (*PassportEntity, *UserEntity, *fireback.IError) {
-
-	// Check the passport if exists
-	var item PassportEntity
-	if err := fireback.GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
-
-		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
-	}
-
-	var user UserEntity
-	if err := fireback.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.OrDefault("")}).First(&user).Error; err != nil {
-		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
-	}
-
-	return &item, &user, nil
+// ClassicSigninActionRaw registers a raw Gin route for the ClassicSigninAction action.
+// This gives the developer full control over middleware, handlers, and response handling.
+func ClassicSigninActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
+	meta := ClassicSigninActionMeta()
+	r.Handle(meta.Method, meta.URL, handlers...)
 }
 
-// Delete the spaces in the email and make it lower case
-// before any operation
-func ClearPassportValue(str *string) {
-	v := strings.ToLower(strings.TrimSpace(*str))
-	*str = v
+// ClassicSigninActionHandler returns the HTTP method, route URL, and a typed Gin handler for the ClassicSigninAction action.
+// Developers implement their business logic as a function that receives a typed request object
+// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
+func ClassicSigninActionHandler(
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) (method, url string, h gin.HandlerFunc) {
+	meta := ClassicSigninActionMeta()
+	return meta.Method, meta.URL, func(m *gin.Context) {
+		var body ClassicSigninActionReq
+		if err := m.ShouldBindJSON(&body); err != nil {
+			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
+			return
+		}
+		// Build typed request wrapper
+		req := ClassicSigninActionRequest{
+			Body:        body,
+			QueryParams: m.Request.URL.Query(),
+			Headers:     m.Request.Header,
+			GinCtx:      m,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			// Some deeper call inside handler (e.g. a security/authorization check
+			// that rejects the request before the handler's own business logic ever
+			// runs) may have already written and aborted the response itself - gin
+			// tracks that on the ResponseWriter regardless of who did the writing.
+			// Rendering the bubbled-up error on top of that would append a second,
+			// invalid JSON body after the first.
+			if m.Writer.Written() {
+				return
+			}
+			status := http.StatusInternalServerError
+			// If the error knows how to render itself for a given language (e.g.
+			// fireback.IError, whose ferror.Error.ToPublicJSON resolves its
+			// {"$": ..., "en": ..., "fa": ...} message map down to one string), let it -
+			// picking the language the same way the rest of the app resolves it: the
+			// "acceptLanguage" query param first, else the Accept-Language header, else
+			// "en".
+			if converter, ok := err.(interface {
+				ToPublicJSON(lang string) ([]byte, int32)
+			}); ok {
+				lang := m.Query("acceptLanguage")
+				if lang == "" {
+					lang = m.GetHeader("Accept-Language")
+					if i := strings.IndexAny(lang, ",;-"); i >= 0 {
+						lang = lang[:i]
+					}
+					lang = strings.ToLower(strings.TrimSpace(lang))
+				}
+				if lang == "" {
+					lang = "en"
+				}
+				body, code := converter.ToPublicJSON(lang)
+				if code != 0 {
+					status = int(code)
+				}
+				// Nest the resolved object under "error" (rather than writing it as the
+				// bare response body) so every error shape - this one, the generic
+				// forwarded-JSON one below, and the plain-string one - answers with the
+				// same {"error": ...} envelope. json.RawMessage keeps body embedded as
+				// real JSON instead of being re-escaped into a string.
+				m.JSON(status, gin.H{"error": json.RawMessage(body)})
+				return
+			}
+			// Otherwise, other action errors may still stringify themselves as an
+			// indented JSON object via their Error() method. If that's what we got,
+			// forward it nested under "error" as real JSON (optionally honoring its own
+			// "httpCode" field for the response status) instead of re-escaping it into a
+			// string, which is what plain errors still get.
+			msg := err.Error()
+			trimmed := strings.TrimSpace(msg)
+			if strings.HasPrefix(trimmed, "{") && json.Valid([]byte(trimmed)) {
+				var probe struct {
+					HttpCode int32 `json:"httpCode"`
+				}
+				if uErr := json.Unmarshal([]byte(trimmed), &probe); uErr == nil && probe.HttpCode != 0 {
+					status = int(probe.HttpCode)
+				}
+				m.JSON(status, gin.H{"error": json.RawMessage(trimmed)})
+				return
+			}
+			m.JSON(status, gin.H{"error": msg})
+			return
+		}
+		// If the handler returned nil (and no error), it means the response was handled manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			m.Header(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			m.JSON(status, resp.Payload)
+		} else {
+			m.Status(status)
+		}
+	}
+}
+
+// ClassicSigninActionGin is a high-level convenience wrapper around ClassicSigninActionHandler.
+// It automatically constructs and registers the typed route on the Gin engine.
+// Use this when you don't need custom middleware or route grouping.
+func ClassicSigninActionGin(r gin.IRoutes, handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error)) {
+	method, url, h := ClassicSigninActionHandler(handler)
+	r.Handle(method, url, h)
+}
+func (x ClassicSigninActionRequest) IsGin() bool {
+	if x.GinCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.GinCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+func ClassicSigninActionQueryFromGin(c *gin.Context) ClassicSigninActionQuery {
+	return ClassicSigninActionQueryFromString(c.Request.URL.RawQuery)
+}
+func (x ClassicSigninActionRequest) IsCli() bool {
+	if x.CliCtx == nil {
+		return false
+	}
+	v := reflect.ValueOf(x.CliCtx)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
+		return !v.IsNil()
+	}
+	return true
+}
+
+// ClassicSigninActionCliFlags returns every flag (request body, path parameters,
+// query parameters and typed headers) the ClassicSigninAction action can bind from
+// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
+// typed header.
+func ClassicSigninActionCliFlags() []cli.Flag {
+	flags := []cli.Flag{
+		&cli.StringSliceFlag{
+			Name:    "header",
+			Aliases: []string{"H"},
+			Usage:   `Raw request header as "Key: Value", repeatable`,
+		},
+	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetClassicSigninActionReqCliFlags(""))...)
+	return flags
+}
+
+// ClassicSigninActionCliHandler builds a full *cli.Command for the
+// ClassicSigninAction action: it wires body, path parameters, query parameters and
+// headers from urfave v3 CLI flags into a ClassicSigninActionRequest the same way
+// ClassicSigninActionHandler (Gin) and ClassicSigninActionHttpHandler (net/http)
+// do from their own transports, then prints the JSON response (or returns the error) so
+// urfave reports the right exit code.
+func ClassicSigninActionCliHandler(
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) *cli.Command {
+	meta := ClassicSigninActionMeta()
+	cmd := &cli.Command{
+		Name:  meta.CliName,
+		Usage: meta.Description,
+		Flags: ClassicSigninActionCliFlags(),
+	}
+	cmd.Action = func(ctx context.Context, c *cli.Command) error {
+		req := ClassicSigninActionRequest{
+			CliCtx:      c,
+			QueryParams: url.Values{},
+			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastClassicSigninActionReqFromCli(c),
+		}
+		return emigo.HandleActionInCli(handler(req))
+	}
+	return cmd
+}
+
+// ClassicSigninActionCli is a high-level convenience wrapper around
+// ClassicSigninActionCliHandler. It registers the generated command as a subcommand
+// of an existing urfave v3 *cli.Command, the same way ClassicSigninActionGin
+// registers a route on a Gin engine.
+func ClassicSigninActionCli(
+	app *cli.Command,
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) {
+	app.Commands = append(app.Commands, ClassicSigninActionCliHandler(handler))
+}
+
+// ClassicSigninActionHttpHandler returns the HTTP method, the ServeMux pattern, and a
+// typed net/http handler for the ClassicSigninAction action. Developers implement
+// their business logic as a function that receives a typed request object and
+// returns either an *ClassicSigninActionResponse or nil. JSON marshalling, headers,
+// status codes, and errors are handled automatically.
+func ClassicSigninActionHttpHandler(
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) (method, pattern string, h http.HandlerFunc) {
+	meta := ClassicSigninActionMeta()
+	return meta.Method, meta.URL, func(w http.ResponseWriter, r *http.Request) {
+		var body ClassicSigninActionReq
+		if r.Body != nil {
+			defer r.Body.Close()
+			if data, _ := io.ReadAll(r.Body); len(data) > 0 {
+				if err := json.Unmarshal(data, &body); err != nil {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusBadRequest)
+					json.NewEncoder(w).Encode(map[string]string{"error": "invalid JSON: " + err.Error()})
+					return
+				}
+			}
+		}
+		// Build typed request wrapper. GinCtx stays nil here (this is not gin),
+		// which is what the IsGin() helper keys off.
+		req := ClassicSigninActionRequest{
+			Body:        body,
+			QueryParams: r.URL.Query(),
+			Headers:     r.Header,
+		}
+		resp, err := handler(req)
+		if err != nil {
+			status := http.StatusInternalServerError
+			w.Header().Set("Content-Type", "application/json")
+			// If the error knows how to render itself for a given language (e.g.
+			// fireback.IError, whose ferror.Error.ToPublicJSON resolves its
+			// {"$": ..., "en": ..., "fa": ...} message map down to one string), let it -
+			// picking the language the same way the rest of the app resolves it: the
+			// "acceptLanguage" query param first, else the Accept-Language header, else
+			// "en".
+			if converter, ok := err.(interface {
+				ToPublicJSON(lang string) ([]byte, int32)
+			}); ok {
+				lang := r.URL.Query().Get("acceptLanguage")
+				if lang == "" {
+					lang = r.Header.Get("Accept-Language")
+					if i := strings.IndexAny(lang, ",;-"); i >= 0 {
+						lang = lang[:i]
+					}
+					lang = strings.ToLower(strings.TrimSpace(lang))
+				}
+				if lang == "" {
+					lang = "en"
+				}
+				body, code := converter.ToPublicJSON(lang)
+				if code != 0 {
+					status = int(code)
+				}
+				// Nest the resolved object under "error" (rather than writing it as the
+				// bare response body) so every error shape - this one, the generic
+				// forwarded-JSON one below, and the plain-string one - answers with the
+				// same {"error": ...} envelope. json.RawMessage keeps body embedded as
+				// real JSON instead of being re-escaped into a string.
+				wrapped, wErr := json.Marshal(map[string]json.RawMessage{"error": json.RawMessage(body)})
+				w.WriteHeader(status)
+				if wErr == nil {
+					w.Write(wrapped)
+				} else {
+					w.Write(body)
+				}
+				return
+			}
+			// Otherwise, other action errors may still stringify themselves as an
+			// indented JSON object via their Error() method. If that's what we got,
+			// forward it nested under "error" as real JSON (optionally honoring its own
+			// "httpCode" field for the response status) instead of re-escaping it into a
+			// string, which is what plain errors still get.
+			msg := err.Error()
+			trimmed := strings.TrimSpace(msg)
+			if strings.HasPrefix(trimmed, "{") && json.Valid([]byte(trimmed)) {
+				var probe struct {
+					HttpCode int32 `json:"httpCode"`
+				}
+				if uErr := json.Unmarshal([]byte(trimmed), &probe); uErr == nil && probe.HttpCode != 0 {
+					status = int(probe.HttpCode)
+				}
+				wrapped, wErr := json.Marshal(map[string]json.RawMessage{"error": json.RawMessage(trimmed)})
+				w.WriteHeader(status)
+				if wErr == nil {
+					w.Write(wrapped)
+				} else {
+					w.Write([]byte(trimmed))
+				}
+				return
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(map[string]string{"error": msg})
+			return
+		}
+		// If the handler returned nil (and no error), the response was handled
+		// manually.
+		if resp == nil {
+			return
+		}
+		// Apply headers
+		for k, v := range resp.Headers {
+			w.Header().Set(k, v)
+		}
+		// Apply status and payload
+		status := resp.StatusCode
+		if status == 0 {
+			status = http.StatusOK
+		}
+		if resp.Payload != nil {
+			if w.Header().Get("Content-Type") == "" {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(resp.Payload)
+		} else {
+			w.WriteHeader(status)
+		}
+	}
+}
+
+// ClassicSigninActionHttp is a high-level convenience wrapper around
+// ClassicSigninActionHttpHandler. It registers the typed route on a standard
+// *http.ServeMux using Go 1.22+ method-aware pattern syntax (e.g. "POST /").
+// Use this when you don't need custom middleware.
+func ClassicSigninActionHttp(
+	mux *http.ServeMux,
+	handler func(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error),
+) {
+	method, pattern, h := ClassicSigninActionHttpHandler(handler)
+	mux.HandleFunc(method+" "+pattern, h)
 }

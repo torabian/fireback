@@ -1,0 +1,218 @@
+package abac
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/pquerna/otp/totp"
+	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback"
+)
+
+// Responsible for user creation from public flows in the application.
+func ClassicSignupAction(c ClassicSignupActionRequest) (*ClassicSignupActionResponse, error) {
+	query, err := fireback.ResolveActionContext(c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err2 := classicSignupCore(c.Body, *query)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &ClassicSignupActionResponse{
+		Payload: fireback.GResponseSingleItem(res),
+	}, nil
+}
+
+// classicSignupCore holds the actual implementation, reusable by callers which
+// already have a resolved QueryDSL (such as the cli-only AuthFlow).
+func classicSignupCore(dto ClassicSignupActionReq, query fireback.QueryDSL) (*ClassicSignupActionRes, *fireback.IError) {
+
+	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	workspaceTypeId := dto.WorkspaceTypeId.OrDefault("")
+
+	if workspaceTypeId == "" {
+		return nil, fireback.Create401Error(&AbacMessages.RootWorkspaceTypeIsNotAllowed, []string{})
+	}
+
+	// If the account creation is anonymous, the password, first name and name is not required.
+	if workspaceTypeId != ANONYMOUS_AUTHENTICATION {
+		errors := []*fireback.IErrorItem{}
+
+		if strings.TrimSpace(dto.FirstName) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "firstName",
+				ErrorParam: "firstName",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if strings.TrimSpace(dto.LastName) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "lastName",
+				ErrorParam: "lastName",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if strings.TrimSpace(dto.Password) == "" {
+			errors = append(errors, &fireback.IErrorItem{
+				Location:   "password",
+				ErrorParam: "password",
+				Message:    &fireback.FirebackMessages.FieldRequired,
+				Type:       "required",
+			})
+		}
+
+		if len(errors) > 0 {
+			return nil, &fireback.IError{
+				Message:  fireback.FirebackMessages.ValidationFailedOnSomeFields,
+				Errors:   errors,
+				HttpCode: 403,
+			}
+		}
+	}
+
+	if query.WorkspaceId != ROOT_VAR && workspaceTypeId == ROOT_VAR {
+		return nil, fireback.Create401Error(&AbacMessages.RootWorkspaceTypeIsNotAllowed, []string{})
+	}
+
+	ClearPassportValue(&dto.Value)
+
+	// Look for the configuration to check if the session secret is needed
+	config, err := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR, Tx: query.Tx})
+	if err != nil {
+		if err.HttpCode != 404 {
+			return nil, err
+		}
+	}
+
+	requiresSessionSecret := false
+	if config != nil {
+		if config.EnableRecaptcha2.OrDefault(false) && config.Recaptcha2ServerKey != "" && config.Recaptcha2ClientKey != "" {
+			requiresSessionSecret = true
+		}
+		if config.RequireOtpOnSignup.OrDefault(false) {
+			requiresSessionSecret = true
+		}
+	}
+
+	var publicSession *PublicAuthenticationEntity = nil
+	if requiresSessionSecret {
+		if strings.TrimSpace(dto.SessionSecret) == "" {
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
+		}
+
+		// Here we need to do some comparison to make sure this is the correct session secret
+		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: dto.SessionSecret}).Find(&publicSession)
+
+		if strings.TrimSpace(dto.SessionSecret) == "" {
+			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
+		}
+	}
+
+	res, err := completeClassicSignupProcess(dto, query, publicSession, config, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+// This function will complete the signup process.
+// the reason it's excluded from action body is, it can be reused for the account creation
+// via oauth. Just we pass nil for publicSession and config.
+// In case we neeed to change the config slightly, you can get the config
+// and change it for this specific function
+func completeClassicSignupProcess(
+	dto ClassicSignupActionReq,
+	q fireback.QueryDSL,
+	publicSession *PublicAuthenticationEntity,
+	config *WorkspaceConfigEntity,
+	beforeProcess func(*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity),
+) (ClassicSignupActionRes, *fireback.IError) {
+
+	user, role, workspace, passport := GetEmailPassportSignupMechanism(&dto)
+
+	// A callback to modify things.
+	if beforeProcess != nil {
+		beforeProcess(user, role, workspace, passport)
+	}
+
+	totpLink := ""
+	if publicSession != nil && publicSession.TotpLink != "" {
+		totpLink = publicSession.TotpLink
+	}
+
+	if config != nil {
+		if config.EnableTotp.OrDefault(false) || config.ForceTotp.OrDefault(false) {
+			// add time based dual factor information
+			key, _ := totp.Generate(totp.GenerateOpts{
+				Issuer:      "Fireback",
+				AccountName: passport.Value,
+			})
+			secret := key.Secret()
+			link := key.URL()
+			passport.TotpSecret = secret
+			totpLink = link
+		}
+	}
+
+	if passport.Type == ANONYMOUS_AUTHENTICATION {
+		user.FirstName = "Anonymous"
+		user.LastName = "Anonymous"
+	}
+
+	session, sessionError := UnsafeGenerateUser(&GenerateUserDto{
+
+		createUser:      true,
+		createWorkspace: true,
+		createRole:      true,
+		createPassport:  true,
+
+		user:      user,
+		role:      role,
+		workspace: workspace,
+		passport:  passport,
+
+		// We want always to be able to login regardless
+		restricted: true,
+	}, q)
+
+	if sessionError != nil {
+		return ClassicSignupActionRes{}, sessionError
+	}
+
+	forcedTotp := config != nil && config.ForceTotp.OrDefault(false)
+	// let's check for totp setup, if the session is successful.
+	if config != nil && config.ForceTotp.OrDefault(false) && session != nil {
+		return ClassicSignupActionRes{
+			ContinueToTotp: true,
+			TotpUrl:        totpLink,
+			ForcedTotp:     forcedTotp,
+		}, nil
+	}
+
+	// Clear the value so next time user can login directly
+	if sessionError == nil && session != nil && passport != nil && passport.Value != "" {
+		fireback.GetRef(q).Where(&PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&PublicAuthenticationEntity{})
+	}
+
+	// Let's also set the cookie.
+	if q.G != nil {
+		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
+	}
+
+	return ClassicSignupActionRes{
+		Session:        emigo.NewOne(*session),
+		ContinueToTotp: false,
+		ForcedTotp:     forcedTotp,
+	}, sessionError
+}

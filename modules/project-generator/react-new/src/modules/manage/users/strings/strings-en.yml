@@ -1,0 +1,27 @@
+content:
+  addressLine1: Address Line 1
+  addressLine1Hint: Address line 1 associated with user.
+  addressLine2: Address Line 2
+  addressLine2Hint: Address line 2 associated with user.
+  birthDate: Birth date
+  city: City
+  cityName: City name
+  cityNameHint: The city address associated with user.
+  confirmed: 'Confirmed:'
+  countryCode: Country code
+  editUser: Edit User
+  firstName: First name
+  gender: Gender
+  image: Image
+  inviteFirstNameHint: Write the first name of invitee
+  inviteLastNameHint: Write the last name of inviteee
+  lastName: Last name
+  menuTitle: Users
+  na: n/a
+  newUser: New User
+  'no': 'No'
+  passports: Passports
+  postalCode: Postal Code
+  type: 'Type:'
+  value: 'Value:'
+  'yes': 'Yes'

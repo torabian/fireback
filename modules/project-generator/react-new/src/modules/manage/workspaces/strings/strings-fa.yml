@@ -1,0 +1,22 @@
+content:
+  body: بدن
+  confirmEmailSender: ثبت نام کاربر ایمیل حساب را تایید کنید
+  createNewWorkspace: فضای کاری جدید
+  customizedTemplate: ویرایش قالب
+  editWorkspae: ویرایش فضای کاری
+  emailSendingConfiguration: پیکربندی ارسال ایمیل
+  emailSendingConfigurationHint: نحوه ارسال ایمیل های سیستمی را کنترل کنید، پیام را
+    سفارشی کنید و غیره.
+  forgetPasswordSender: دستورالعمل های رمز عبور را فراموش کنید
+  inviteToWorkspace: دعوت به فضای کاری
+  mailServerConfiguration: پیکربندی سرور ایمیل
+  menuTitle: فضاهای کاری
+  name: نام
+  notificationDialogTitle: قالب نامه را ویرایش کنید
+  resetToDefault: تنظیم مجدد به حالت پیش فرض
+  sender: فرستنده
+  sidetitle: فضاهای کاری
+  title: عنوان
+  type: تایپ کنید
+  workspaceName: نام فضای کاری
+  workspaceNameHint: نام فضای کاری را وارد کنید

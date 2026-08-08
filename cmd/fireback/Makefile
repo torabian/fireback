@@ -1,13 +1,17 @@
 project = fireback
 projectBinary = f
 
+# modules/backup embeds wal-g in-process (see modules/backup/Exec.go), which
+# depends on the experimental encoding/json/v2 stdlib package - every build
+# target needs this, same as cmd/nima-server/Makefile.
+export GOEXPERIMENT = jsonv2
+
 deb:
 	bash ./fireback-deb.sh
 dev:
 	go build --tags "fts5" -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
-	cp ../../artifacts/$(project)/$(projectBinary) ../../artifacts/$(project)/$(projectBinary).exe && \
-	../../app gen module3spec --out ../../modules/fireback/module3-json-schema.json
+	cp ../../artifacts/$(project)/$(projectBinary) ../../artifacts/$(project)/$(projectBinary).exe
 
 # Ui2 also copies the fireback-manage, in case it has a different built required
 # make sure you change it here too.

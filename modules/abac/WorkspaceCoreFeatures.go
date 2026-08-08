@@ -7,6 +7,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	queries "github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/security"
 	"gorm.io/gorm"
 )
 
@@ -215,23 +216,16 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 		Name:        name,
 		UniqueId:    wid,
 		WorkspaceId: emigo.NullableOf(wid),
-		LinkerId:    emigo.NullableOf(ROOT_VAR),
 		ParentId:    emigo.NullableOf(ROOT_VAR),
-		TypeId:      emigo.NullableOf(ROOT_VAR),
+		TypeId:      ROOT_VAR,
 	}
 
 	osRole := "OS User"
 	role := &RoleEntity{
-		UniqueId:    "ROLE_WORKSPACE_" + osUser.Uid,
-		Name:        osRole,
-		WorkspaceId: emigo.NullableOf(workspace.UniqueId),
-		Capabilities: []*fireback.CapabilityEntity{
-			{
-				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  emigo.NullableOf("A"),
-				WorkspaceId: emigo.NullableOf("system"),
-			},
-		},
+		UniqueId:           "ROLE_WORKSPACE_" + osUser.Uid,
+		Name:                osRole,
+		WorkspaceId:         emigo.NullableOf(workspace.UniqueId),
+		CapabilitiesListId:  RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
 	}
 
 	return user, role, workspace
@@ -269,29 +263,22 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 	workspace := &WorkspaceEntity{
 		UniqueId: workspaceId,
 		Name:     wname,
-		LinkerId: emigo.NullableOf(ROOT_VAR),
 		ParentId: emigo.NullableOf(ROOT_VAR),
-		TypeId:   emigo.NullableOf(dto.WorkspaceTypeId.OrDefault("")),
+		TypeId:   dto.WorkspaceTypeId.OrDefault(""),
 	}
 
 	osRole := "Admin"
 	role := &RoleEntity{
-		UniqueId:    roleId,
-		Name:        osRole,
-		WorkspaceId: emigo.NullableOf(workspace.UniqueId),
-		Capabilities: []*fireback.CapabilityEntity{
-			{
-				UniqueId:    ROOT_ALL_MODULES,
-				Visibility:  emigo.NullableOf("A"),
-				WorkspaceId: emigo.NullableOf("system"),
-			},
-		},
+		UniqueId:           roleId,
+		Name:               osRole,
+		WorkspaceId:        emigo.NullableOf(workspace.UniqueId),
+		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
 	}
 
 	method, _ := DetectSignupMechanismOverValue(dto.Value)
 	passwordHashed := ""
 	if strings.TrimSpace(dto.Password) != "" {
-		genPass, _ := fireback.HashPassword(dto.Password)
+		genPass, _ := security.HashPassword(dto.Password)
 		passwordHashed = genPass
 	}
 

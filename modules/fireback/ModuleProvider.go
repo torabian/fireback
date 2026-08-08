@@ -38,8 +38,6 @@ type MigrationScript struct {
 // Entities also can be bundled into one
 type EntityBundle struct {
 	Permissions           []PermissionInfo
-	Tests                 []Test
-	Actions               []Module3Action
 	AutoMigrationEntities []interface{}
 	CliCommands           []*cli.Command
 	MockProvider          func()
@@ -52,6 +50,8 @@ type ModuleProvider struct {
 	Reports             []Report
 	SeederHandler       func()
 	Namespace           string
+	MigrationFunction   func(x *FirebackApp, db *gorm.DB)
+	AppendCli           func(x *FirebackApp) []*cli.Command
 	ActionsBundle       *ModuleActionsBundle
 	MockWriterHandler   func(languages []string)
 	PermissionsProvider []PermissionInfo
@@ -60,9 +60,7 @@ type ModuleProvider struct {
 	BackupTables        []TableMetaData
 	Tasks               []*TaskAction
 	Definitions         *embed.FS
-	Actions             [][]Module3Action
 	Translations        map[string]map[string]string
-	Tests               []Test
 
 	GoMigrateDirectory *embed.FS
 
@@ -78,16 +76,17 @@ type ModuleProvider struct {
 	// each module can have those hook inits, for example abac adds some other questions.
 	OnEnvInit func(c *cli.Command) error
 
+	// Called once during app startup (see commonHeadlessStarter), after the database
+	// connection is available but before the CLI/web server actually run - the
+	// equivalent of GinWebServerInitHooks for anything a module needs to kick off
+	// itself rather than wire onto a router (e.g. eventbus.ModuleSetup uses this to
+	// start its background goroutine only when a project actually registers the
+	// eventbus module, instead of every project paying for it unconditionally).
+	OnAppStart func(x *FirebackApp) error
+
 	// When a gin web server is being created, the group for this module
 	// will be looking for this function. Could be used to manually add routes or other configuration
 	GinWebServerInitHooks []func(g *gin.RouterGroup, x *FirebackApp) error
-}
-
-func (x *ModuleProvider) ToModule3() Module3 {
-	return Module3{
-		Name:      x.Name,
-		Namespace: x.Namespace,
-	}
 }
 
 func (x *ModuleProvider) ProvideMockImportHandler(t func()) {
@@ -113,12 +112,6 @@ func (x *ModuleProvider) ProvideSeederImportHandler(t func()) {
 
 func (x *ModuleProvider) ProvideMockWriterHandler(t func(languages []string)) {
 	x.MockWriterHandler = t
-}
-
-func (x *ModuleProvider) ProvideTests(tests ...[]Test) {
-	for _, t := range tests {
-		x.Tests = append(x.Tests, t...)
-	}
 }
 
 func (x *ModuleProvider) ProvideEntityHandlers(t func(*gorm.DB) error) {

@@ -1,0 +1,43 @@
+content:
+  apiKey: کلید ای پی ای
+  editMailProvider: ارائه دهنده ایمیل
+  emailProviders:
+    fieldApiKey: کلید API
+    fieldCurlScript: اسکریپت Curl
+    fieldCurlScriptDescription: |-
+      اسکریپت Curl که هنگام ارسال ایمیل فراخوانی می‌شود.
+                لطفاً توجه داشته باشید که این معنایی است تا
+                واقعاً اسکریپت بش، پس محدود به همین امکانات باشید و فراخوانی اضافی بش نداشته باشید.
+                <br />
+                مطمئن شوید اسرار، قالب‌ها و اعتبارنامه‌ها را همین‌جا قرار می‌دهید، جای دیگری برای
+                استفاده از آن‌ها وجود نخواهد داشت. هنگام ارسال ایمیل، متغیرهای زیر در
+                پیام curl شما جایگزین خواهند شد.
+                <br />
+
+                %FromName%  رشته <br />
+                %FromEmail% رشته <br />
+                %ToName%    رشته <br />
+                %ToEmail%   رشته <br />
+                %Subject%   رشته <br />
+                %Content%   رشته (با \" اسکیپ خواهد شد، پس از دابل‌کوتیشن استفاده کنید) <br />
+    fieldDomain: دامنه
+    fieldHost: میزبان
+    fieldPassword: رمز عبور
+    fieldPort: پورت
+    fieldServerToken: توکن سرور
+    fieldUsername: نام کاربری
+    mailSent: ایمیل ارسال شد
+    sendTestEmail: ارسال ایمیل آزمایشی
+    title: عنوان
+    titleHint: عنوان ارائه‌دهنده ایمیل، برای جستجو و تخصیص آسان‌تر.
+    typeCurl: Curl
+    typeMailgun: Mailgun
+    typePostmark: Postmark
+    typeResend: Resend
+    typeSendgrid: SendGrid
+    typeSmtp: SMTP
+    typeTerminal: ترمینال (دیباگ)
+  menuTitle: ارائه دهندگان ایمیل
+  newMailProvider: ارائه دهنده ایمیل جدید
+  type: نوع سرویس
+  typeHint: سرویس ایمیلی که توسط آن ایمیل ها ارسال میشوند

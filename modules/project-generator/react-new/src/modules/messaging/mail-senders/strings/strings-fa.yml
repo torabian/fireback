@@ -1,0 +1,14 @@
+content:
+  editMailSender: فرستنده ایمیل را ویرایش کنید
+  fromEmailAddress: از آدرس ایمیل
+  fromEmailAddressHint: آدرسی که از آن ارسال می کنید، معمولاً باید در سرویس پستی ثبت
+    شود
+  fromName: از نام
+  fromNameHint: نام فرستنده
+  menuTitle: ارسال کنندگان ایمیل
+  newMailSender: فرستنده ایمیل جدید
+  nickName: نام مستعار
+  nickNameHint: نام مستعار فرستنده ایمیل، معمولاً فروشنده یا پشتیبانی مشتری
+  replyTo: پاسخ دادن به
+  replyToHint: آدرسی که گیرنده قرار است به آن پاسخ دهد. (noreply@domain) به عنوان
+    مثال

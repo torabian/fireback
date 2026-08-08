@@ -1,0 +1,80 @@
+package abac
+
+import (
+	"errors"
+	"log"
+
+	"github.com/torabian/fireback/modules/abac/messaging"
+	"github.com/torabian/fireback/modules/fireback"
+)
+
+// EmailProvider/EmailSender CRUD, and the raw email-sending mechanics (SendMail et al.),
+// moved to modules/abac/messaging - see messaging.EmailProviderActions/EmailSenderActions
+// and messaging.SendMail. What's left here is the one orchestration function that ties
+// NotificationConfigEntity (which stays here, in abac) to a specific provider from
+// messaging.
+
+type EmailSenderCategory string
+
+const (
+	GENERAL_SENDER EmailSenderCategory = "GENERAL_SENDER"
+)
+
+func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, sender EmailSenderCategory) (*messaging.SendEmailWithProviderActionRes, *fireback.IError) {
+
+	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
+
+	if err != nil {
+		// If there are no configuration, skip returning error, we use some terminal stuff for development.
+		if err.HttpCode != 404 {
+			return nil, err
+		}
+	}
+
+	generalEmailProviderId, hasProvider := config.GeneralEmailProviderId.Get()
+	if !hasProvider || *generalEmailProviderId == "" {
+		log.Default().Println("There are no email providers configured, we are printing the email into the console assuming this is development.")
+		log.Default().Println(content.Json())
+
+		QueueId := "printed-to-terminal"
+		return &messaging.SendEmailWithProviderActionRes{QueueId: QueueId}, nil
+	} else {
+
+		provider, providerErr := messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
+		if providerErr != nil {
+			return nil, providerErr
+		}
+
+		// @todo: Give the option to set custom senders everywhere
+		if senderId, ok := config.AccountCenterEmailSenderId.Get(); ok && *senderId != "" {
+			sender, senderErr := messaging.EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *senderId})
+			if senderErr == nil && sender != nil {
+				content.FromEmail = sender.FromEmailAddress
+				content.FromName = sender.FromName
+			}
+		}
+
+		if err := messaging.SendMail(*content, provider); err != nil {
+			return nil, fireback.CastToIError(err)
+		} else {
+			return &messaging.SendEmailWithProviderActionRes{}, nil
+		}
+	}
+}
+
+func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*NotificationConfigEntity, error) {
+	query.Deep = true
+	items, _, err := NotificationConfigActions.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(items) == 0 {
+		return nil, errors.New("NO_NOTIFICATION_CONFIGURATION_AVAILABLE")
+	}
+
+	// @todo handle the region information based on the query
+
+	return items[0], nil
+}

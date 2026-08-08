@@ -1,0 +1,50 @@
+name: reactivesearch
+
+targets:
+  - compiler: go
+    output: ./
+    flags:
+      pkg: reactivesearch
+  - compiler: js
+    output: ../project-generator/react-new/src/modules/fireback/sdk/reactivesearch
+    flags:
+      js-sdk-location: ../sdk
+    tags:
+      - typescript
+      - react
+      - no-sdk
+  - compiler: preprocessor
+    output: ./
+
+description: >-
+  Reactive (websocket) search across whatever sources a project registers. Split out
+  of modules/fireback (which used to hardcode FirebackApp.SearchProviders and wire this
+  route for every project unconditionally) - a project only gets the /reactive-search
+  route if its main.go calls reactivesearch.ModuleSetup, passing the list of
+  SearchProviderFn sources it wants searched via ReactiveSearchModuleConfig.
+
+dtos:
+  - name: reactiveSearchResult
+    fields:
+      - type: string
+        name: uniqueId
+      - type: string
+        name: phrase
+      - type: string
+        name: icon
+      - type: string
+        name: description
+      - type: string
+        name: group
+      - type: string
+        name: uiLocation
+      - type: string
+        name: actionFn
+
+actions:
+  - name: ReactiveSearch
+    description:
+      Reactive search is a general purpose search mechanism for different modules,
+      and could be used in mobile apps or front-end to quickly search for a entity.
+    url: /reactive-search
+    method: reactive

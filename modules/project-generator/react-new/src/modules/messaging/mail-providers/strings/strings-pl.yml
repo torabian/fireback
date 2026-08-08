@@ -1,0 +1,44 @@
+content:
+  apiKey: Klucz Api
+  editMailProvider: Dostawca poczty
+  emailProviders:
+    fieldApiKey: Klucz API
+    fieldCurlScript: Skrypt Curl
+    fieldCurlScriptDescription: |-
+      Skrypt Curl, który zostanie wywołany podczas wysyłania wiadomości e-mail.
+                Należy pamiętać, że jest to podejście semantyczne, a nie
+                rzeczywisty skrypt bash, więc używaj ograniczonych funkcji i bez dodatkowych wywołań bash.
+                <br />
+                Upewnij się, że umieszczasz tutaj sekrety, szablony i dane uwierzytelniające, nie będzie
+                innego miejsca do ich użycia. Podczas wysyłania wiadomości e-mail poniższe zmienne zostaną
+                zastąpione w Twojej wiadomości curl.
+                <br />
+
+                %FromName%  ciąg znaków <br />
+                %FromEmail% ciąg znaków <br />
+                %ToName%    ciąg znaków <br />
+                %ToEmail%   ciąg znaków <br />
+                %Subject%   ciąg znaków <br />
+                %Content%   ciąg znaków (zostanie zabezpieczony znakiem \", więc używaj cudzysłowów podwójnych) <br />
+    fieldDomain: Domena
+    fieldHost: Host
+    fieldPassword: Hasło
+    fieldPort: Port
+    fieldServerToken: Token serwera
+    fieldUsername: Nazwa użytkownika
+    mailSent: Wiadomość e-mail została wysłana
+    sendTestEmail: Wyślij testową wiadomość e-mail
+    title: Tytuł
+    titleHint: Tytuł dostawcy poczty e-mail, aby ułatwić wyszukiwanie i przypisywanie.
+    typeCurl: Curl
+    typeMailgun: Mailgun
+    typePostmark: Postmark
+    typeResend: Resend
+    typeSendgrid: SendGrid
+    typeSmtp: SMTP
+    typeTerminal: Terminal (debugowanie)
+  menuTitle: Dostawcy poczty
+  newMailProvider: Nowy dostawca poczty
+  type: Typ usługi
+  typeHint: Wybierz dostawcę poczty z listy. Na liście znajdziesz wszystkich obsługiwanych
+    dostawców.

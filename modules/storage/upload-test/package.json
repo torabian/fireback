@@ -1,0 +1,15 @@
+{
+  "name": "upload-test",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "upload": "node index.js"
+  },
+  "dependencies": {
+    "tus-js-client": "^4.3.1"
+  }
+}

@@ -1,0 +1,227 @@
+/*
+ * All styles for the resumable-uploader feature live in this single file so
+ * the components stay free of inline `style={{...}}` objects. Each block
+ * below is commented with the component (and, where relevant, the specific
+ * element) it belongs to - keep new styles grouped the same way instead of
+ * reintroducing inline styles.
+ */
+
+/* ==========================================================================
+   FileUploader.tsx - UploadRow (one row in the in-progress upload queue)
+   ========================================================================== */
+
+.ru-upload-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #e2e2e5;
+  border-radius: 6px;
+  align-items: flex-start;
+}
+
+.ru-upload-row__preview {
+  flex-shrink: 0;
+}
+
+.ru-upload-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ru-upload-row__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ru-upload-row__filename {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ru-upload-row__size {
+  font-size: 12px;
+  color: #777;
+  flex-shrink: 0;
+}
+
+.ru-upload-row__status {
+  font-size: 12px;
+  color: #777;
+  margin-top: 2px;
+}
+
+.ru-upload-row__progress-track {
+  margin-top: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: #eee;
+  overflow: hidden;
+}
+
+.ru-upload-row__progress-bar {
+  /* --ru-progress is set inline per-row from live upload progress (bytesUploaded / bytesTotal) - the one value that can't live in a static stylesheet. */
+  width: var(--ru-progress, 0%);
+  height: 100%;
+  transition: width 150ms ease;
+}
+
+/* Bar color reflects state: blue while actively uploading, amber once paused
+   (manually or due to going offline). */
+.ru-upload-row__progress-bar--uploading {
+  background: #3b82f6;
+}
+
+.ru-upload-row__progress-bar--paused {
+  background: #f59e0b;
+}
+
+.ru-upload-row__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   FileUploader.tsx - ExistingValueRow (value from a previously-saved form,
+   previewed via config.getThumbnailUrl instead of a local File object)
+   ========================================================================== */
+
+.ru-existing-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #e2e2e5;
+  border-radius: 6px;
+  align-items: center;
+}
+
+.ru-existing-row__thumbnail {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.ru-existing-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ru-existing-row__label {
+  font-size: 12px;
+  color: #777;
+}
+
+.ru-existing-row__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   FileUploader.tsx - root FileUploader component (offline banner, drop zone,
+   max-size hint, hidden native file input, upload list container)
+   ========================================================================== */
+
+.ru-uploader {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ru-uploader__offline-banner {
+  padding: 8px;
+  border-radius: 6px;
+  background: #fff7ed;
+  color: #9a5b13;
+  font-size: 13px;
+}
+
+.ru-uploader__dropzone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  color: #555;
+  background: transparent;
+}
+
+/* Applied in addition to .ru-uploader__dropzone while a drag is over it. */
+.ru-uploader__dropzone--active {
+  border-color: #3b82f6;
+  background: #f0f6ff;
+}
+
+.ru-uploader__max-size-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.ru-uploader__hidden-input {
+  display: none;
+}
+
+.ru-uploader__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   FilePreview.tsx - inline preview of a locally-picked File, rendered per
+   mime type inside both UploadRow and (generic-icon variant only) also used
+   directly by ExistingValueRow's fallback markup
+   ========================================================================== */
+
+.ru-preview-image {
+  max-width: 100%;
+  max-height: 160px;
+  border-radius: 4px;
+  display: block;
+}
+
+.ru-preview-video {
+  max-width: 100%;
+  max-height: 200px;
+  display: block;
+}
+
+.ru-preview-audio {
+  width: 100%;
+}
+
+.ru-preview-pdf {
+  width: 100%;
+  height: 220px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.ru-preview-text {
+  background: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+  max-height: 160px;
+  overflow: auto;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Generic fallback icon (file extension badge) - shared by FilePreview's
+   default case and ExistingValueRow's thumbnail-load-failure fallback. */
+.ru-preview-generic {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: #e9e9ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #555;
+}

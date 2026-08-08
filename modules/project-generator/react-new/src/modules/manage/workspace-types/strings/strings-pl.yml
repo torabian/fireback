@@ -1,0 +1,20 @@
+content:
+  editWorkspaceType: Edytuj typ przestrzeni roboczej
+  menuTitle: Typy przestrzeni roboczych
+  newWorkspaceType: Nowy typ przestrzeni roboczej
+  roleFieldHint: Wybierz rolę(e), które chcesz nadać użytkownikowi po dołączeniu do
+    przestrzeni roboczej. Można to zmienić później.
+  roleFieldLabel: Rola
+  slug: Slug
+  title: Tytuł
+  typeDescription: Opis
+  typeDescriptionHint: Opisz typ przestrzeni roboczej, użytkownik zobaczy to podczas
+    rejestracji.
+  workspaceTypeSlug: Adres slug
+  workspaceTypeSlugHint: Ścieżka, która będzie publicznie dostępna dla użytkowników,
+    jeśli zarejestrują się przez to konto, ta rola zostanie im przypisana.
+  workspaceTypeTitle: Tytuł
+  workspaceTypeTitleHint: Tytuł przestrzeni roboczej
+  workspaceTypeUniqueId: Unikalny Id
+  workspaceTypeUniqueIdHint: Unikalny id może być użyty do przekierowania użytkownika
+    bezpośrednio do logowania

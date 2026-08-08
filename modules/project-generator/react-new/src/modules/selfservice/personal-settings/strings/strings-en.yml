@@ -1,0 +1,70 @@
+content:
+  accessibility:
+    description: Handle the accessibility settings
+    leftHand: Left handed
+    preferredHand: Prefered hand
+    preferredHandHint: Select which hand you are most often using phone so some options
+      would be closer to your primary hand
+    rightHand: Right handed
+    title: Accessibility
+  apply: Apply
+  debugInfo: Show debug information
+  debugSettings:
+    description: See the debug information of the app, for developers or help desks
+    title: Debug Settings
+  debugger:
+    data: 'Data:'
+    error: 'Error:'
+    firebackContext: 'Fireback context:'
+    goToLalaland: Go to Lalaland
+    userRoleWorkspaces: User Role Workspaces
+    view3d: View 3D
+  grpcMethod: Over grpc
+  hostAddress: Host address
+  httpMethod: Over http
+  inaccessibleRemote: In accessible remote.
+  interfaceLang:
+    description: Here you can change your software interface language settings
+    hint: The language that you like the interface to be shown to you
+    label: Interface language
+    title: Language & Region
+  languages:
+    russian: Russian (Русский)
+    ukrainian: Ukrainain (українська)
+  locale:
+    englishWorldwide: English (Worldwide)
+    persianIran: Persian (Iran)
+    polishPoland: Polish (Polski)
+  notifications:
+    description: Here you can manage your notifications
+    failedToSubscribe: Failed to subscribe.
+    failedToUnsubscribe: Failed to unsubscribe.
+    noSubscriptionFound: No subscription found
+    subscribe: Subscribe
+    title: Notification settings
+    unsubscribe: Unsubscribe
+  pageTitle: Settings
+  port: Port
+  remoteAddress: Remote address
+  remoteDescription: Remote service, is the place that all data, logics, and services
+    are installed there. It could be cloud, or locally. Only advanced users, changing
+    it to wrong address might cause inaccessibility.
+  remoteTitle: Remote service
+  richTextEditor:
+    description: Manage how you want to edit textual content in the app
+    hint: You can select between different text editors we provide, and use the one
+      you are more comfortable with
+    label: Text Editor Module
+    title: Text Editor
+  richThemes:
+    macAutomatic: MacOSX Automatic
+    macDark: MacOSX Dark
+    macLight: MacOSX Light
+  serverConnected: Server is connected successfully
+  simpleTextEditor: System simple text editor
+  theme:
+    description: Change the interface theme color
+    hint: Select the interface theme
+    label: Theme
+    title: Theme
+  tinymceeditor: TinyMCE Editor

@@ -1,12 +1,16 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	"github.com/torabian/fireback/modules/abac/interfacetools"
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/reactivesearch"
+)
 
-func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.ReactiveSearchResultDto) {
+func QueryMenusReact(query fireback.QueryDSL, chanStream chan *reactivesearch.ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "label %" + query.SearchPhrase + "%"
-	items, _, _ := AppMenuActions.Query(query)
+	items, _, _ := interfacetools.AppMenuActions.Query(query)
 
 	for _, item := range items {
 		if !item.ParentId.IsSet() {
@@ -14,9 +18,13 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 		}
 
 		uid := fireback.UUID()
-		chanStream <- &fireback.ReactiveSearchResultDto{
-			Phrase:      item.Label,
-			Description: item.Label,
+		// item.Label is a complexes.TString (locale -> text map) now; ReactiveSearchResultDto
+		// needs a single display string, so resolve it the same way TString.String() always
+		// has (DefaultLocale, falling back to whatever locale is present).
+		label := item.Label.String()
+		chanStream <- &reactivesearch.ReactiveSearchResultDto{
+			Phrase:      label,
+			Description: label,
 			Icon:        item.Icon,
 			Group:       item.ParentId.OrDefault(""),
 			ActionFn:    actionFnNavigate,
@@ -26,7 +34,7 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 	}
 
 }
-func QueryRolesReact(query fireback.QueryDSL, chanStream chan *fireback.ReactiveSearchResultDto) {
+func QueryRolesReact(query fireback.QueryDSL, chanStream chan *reactivesearch.ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "name %" + query.SearchPhrase + "%"
@@ -38,7 +46,7 @@ func QueryRolesReact(query fireback.QueryDSL, chanStream chan *fireback.Reactive
 
 		uid := fireback.UUID()
 
-		chanStream <- &fireback.ReactiveSearchResultDto{
+		chanStream <- &reactivesearch.ReactiveSearchResultDto{
 			Phrase:      item.Name,
 			Description: item.Name,
 			Group:       roles,

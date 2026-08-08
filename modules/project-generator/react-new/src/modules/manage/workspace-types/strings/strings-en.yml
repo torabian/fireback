@@ -1,0 +1,19 @@
+content:
+  editWorkspaceType: Edit Workspace Type
+  menuTitle: Workspace Types
+  newWorkspaceType: New Workspace Type
+  roleFieldHint: Select the role(s) you want to give the user when they join the workspace.
+    This can be changed later as well.
+  roleFieldLabel: Role
+  slug: Slug
+  title: Title
+  typeDescription: Description
+  typeDescriptionHint: Describe the workspace type, when user tries to signup will
+    see.
+  workspaceTypeSlug: Slug address
+  workspaceTypeSlugHint: The path that publicly will be available to users, if they
+    signup through this account this role would be assigned to them.
+  workspaceTypeTitle: Title
+  workspaceTypeTitleHint: The title of the Workspace
+  workspaceTypeUniqueId: Unique Id
+  workspaceTypeUniqueIdHint: Unique id can be used to redirect user to direct signin

@@ -1,0 +1,13 @@
+content:
+  editMailSender: Edytuj nadawcę poczty
+  fromEmailAddress: Adres e-mail nadawcy
+  fromEmailAddressHint: Adres, z którego wysyłasz, zazwyczaj musi być zarejestrowany
+    w usłudze pocztowej
+  fromName: Nazwa nadawcy
+  fromNameHint: Nazwa nadawcy
+  menuTitle: Nadawcy poczty
+  newMailSender: Nowy nadawca poczty
+  nickName: Pseudonim
+  nickNameHint: Pseudonim nadawcy e-maila, zwykle sprzedawca lub obsługa klienta
+  replyTo: Odpowiedz do
+  replyToHint: Adres, na który odpowie odbiorca. (noreply@domain) na przykład

@@ -1,0 +1,146 @@
+complexes:
+  - compiler: go
+    location: github.com/torabian/fireback/modules/abac/abaccomplexes
+    name: PlainTime
+    namespace: abaccomplexes
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: TString
+    namespace: complexes
+
+targets:
+  - compiler: go
+    output: ./
+    flags:
+      pkg: interfacetools
+  - compiler: js
+    output: ../../project-generator/react-new/src/modules/fireback/sdk/interfacetools
+    flags:
+      js-sdk-location: ../sdk
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: preprocessor
+    output: ./
+
+name: interfacetools
+description:
+  Small, front-end-facing utility entities with no cross-entity dependencies of their
+  own - app menu/sidebar definitions (including the recursive /cte-app-menus tree
+  query), per-table column-width persistence, and the timezone picker list. Split out
+  of abac since none of them need Role/Workspace/User types directly (workspaceId/userId
+  are plain nullable strings on all three, same as elsewhere in this migration).
+
+actions:
+  - name: CteAppMenus
+    url: /cte-app-menus
+    cliName: cte-app-menus
+    method: get
+    description: >-
+      Returns "appMenu" rows assembled into a tree (each item's children nested
+      under it via a recursive query) instead of Browse's flat list - restores the
+      old Module3-generated /cte-app-menus route. See AppMenuActions.CteQuery /
+      AppMenuTreeNode. Note: Emi has no self-referencing dto, so the declared
+      response type here is the flat AppMenuOptionalDto - the actual JSON payload
+      additionally nests a "children" array of the same shape under each item.
+    qs:
+      - name: filter
+        type: string
+      - name: sort
+        type: string
+      - name: startIndex
+        type: int
+      - name: itemsPerPage
+        type: int
+      - name: cursor
+        type: string
+    out:
+      dto: AppMenuOptionalDto
+      envelope: GResponse
+
+entities:
+  - name: appMenu
+    description: >-
+      Manages the menus in the app, (for example tab views, sidebar items,
+      etc.)
+    fields:
+      - name: label
+        type: complex
+        complex: TString
+        description: >-
+          Label that will be visible to user, as a locale -> text map (e.g.
+          {"en": "Home", "fa": "خانه"}) - see complexes.TString.
+      - name: href
+        type: string
+        description: Location that will be navigated in case of click or selection on ui
+      - name: icon
+        type: string
+        description: Icon string address which matches the resources on the front-end apps.
+      - name: activeMatcher
+        type: string
+        description: Custom window location url matchers, for inner screens.
+      - name: capabilityId
+        type: string?
+        description: The unique-id of the capability which is required for the menu to be visible.
+      - name: parentId
+        type: string?
+        description: The unique-id of the parent menu item, for nested/tree menus.
+      - name: workspaceId
+        type: string?
+      - name: userId
+        type: string?
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+
+  - name: tableViewSizing
+    cliShort: tvs
+    description: >-
+      Used to store meta data about user tables (in front-end, or apps for
+      example) about the size of the columns
+    fields:
+      - name: tableName
+        type: string
+        tags:
+          validate: required
+      - name: sizes
+        type: string
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
+      - name: userId
+        type: string?
+        description: The unique-id of the user which created/owns the record.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+        description: The time the record was created. Populated automatically by gorm.
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+        description: The time the record was last updated. Populated automatically by gorm.
+
+  - name: timezoneGroup
+    description: World timezone information
+    cliName: tz
+    fields:
+      - name: title
+        type: string
+        description: Title which is shown to the user and allows them to select.
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
+      - name: userId
+        type: string?
+        description: The unique-id of the user which created/owns the record.
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
