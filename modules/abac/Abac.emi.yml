@@ -1497,8 +1497,16 @@ entities:
         type: string
       - name: slug
         type: string
+        description: >-
+          Unique, URL-safe identifier for this workspace type. Must start
+          with "/", contain only lowercase a-z and dashes after that, and be
+          at most 50 characters long. Format is enforced in
+          ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go);
+          gorm:"unique" here is the DB-level backstop for the uniqueness
+          half of that.
         tags:
           validate: "required,omitempty,min=2,max=50"
+          gorm: unique
       - name: roleId
         type: string
         tags:

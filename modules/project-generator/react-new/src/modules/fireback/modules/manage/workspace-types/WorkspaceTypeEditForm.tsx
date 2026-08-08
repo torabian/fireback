@@ -19,6 +19,7 @@ export const WorkspaceTypeEditForm = ({
 
   return (
     <>
+      <pre>{JSON.stringify(form.errors)}</pre>
       <FormText
         value={values.uniqueId}
         onChange={(value) =>
@@ -53,18 +54,14 @@ export const WorkspaceTypeEditForm = ({
         hint={t.wokspaces.invite.roleHint}
         fnLabelFormat={(role) => role.name}
         querySource={useRolesQuerySource}
-        formEffect={{ form, field: WorkspaceTypeDto.Fields.role$ }}
+        formEffect={{ form, field: "role" }}
         errorMessage={form.errors.roleId}
       />
 
       <FormRichText
         value={values.description}
         onChange={(value) =>
-          form.setFieldValue(
-            WorkspaceTypeDto.Fields.description,
-            value,
-            false
-          )
+          form.setFieldValue(WorkspaceTypeDto.Fields.description, value, false)
         }
         errorMessage={form.errors.description}
         label={t.wokspaces.typeDescription}

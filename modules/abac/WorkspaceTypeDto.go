@@ -12,7 +12,8 @@ type WorkspaceTypeDto struct {
 	UniqueId    emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
 	Title       string                 `json:"title" yaml:"title"`
 	Description string                 `json:"description" yaml:"description"`
-	Slug        string                 `json:"slug" yaml:"slug"`
+	// Unique, URL-safe identifier for this workspace type. Must start with "/", contain only lowercase a-z and dashes after that, and be at most 50 characters long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go); gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
+	Slug string `json:"slug" yaml:"slug"`
 	// The role which will be used to define the functionality of this workspace. Role needs to be created before hand, and only roles which belong to root workspace are possible to be selected.
 	RoleId      string                  `json:"roleId" yaml:"roleId"`
 	WorkspaceId emigo.Nullable[string]  `json:"workspaceId" yaml:"workspaceId"`
@@ -43,8 +44,9 @@ func GetWorkspaceTypeDtoCliFlags(prefix string) []emigo.CliFlag {
 			Type: "string",
 		},
 		{
-			Name: prefix + "slug",
-			Type: "string",
+			Name:        prefix + "slug",
+			Type:        "string",
+			Description: "Unique, URL-safe identifier for this workspace type. Must start with \"/\", contain only lowercase a-z and dashes after that, and be at most 50 characters long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go); gorm:\"unique\" here is the DB-level backstop for the uniqueness half of that.",
 		},
 		{
 			Name:        prefix + "role-id",

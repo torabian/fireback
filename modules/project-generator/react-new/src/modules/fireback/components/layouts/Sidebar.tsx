@@ -7,6 +7,7 @@ import React, { useContext } from "react";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
+import { useSortableOrder } from "../../hooks/useSortableOrder";
 import { osResources } from "../../resources/resources";
 import type { AppMenuOptionalDto } from "../../sdk/interfacetools/AppMenuOptionalDto";
 import { AppMenuDto } from "../../sdk/interfacetools/AppMenuDto";
@@ -16,6 +17,22 @@ import { MenuParticle } from "./MenuParticle";
 import { useWorkspacesMenuPresenter } from "./useWorkspacesMenuPresenter";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { GripVertical } from "lucide-react";
 
 export function dataMenuToMenu(
   data: AppMenuOptionalDto,
@@ -96,6 +113,28 @@ function Sidebar({
   const { menus: workspaceMenus } = useWorkspacesMenuPresenter();
   menus.push(workspaceMenus[0]);
 
+  const menuGroups = menus.map((m, index) => ({
+    id: (typeof m.label === "string" && m.label) || `group-${index}`,
+    menu: m,
+  }));
+
+  // Session-only reordering of the top-level menu groups — see
+  // useSortableOrder. Nothing is persisted, so this resets on refresh.
+  const { ordered: orderedGroups, reorder: reorderGroups } = useSortableOrder(
+    menuGroups,
+    (g) => g.id,
+  );
+  const groupSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+  );
+
+  function handleGroupDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      reorderGroups(String(active.id), String(over.id));
+    }
+  }
+
   return (
     <div
       data-wails-drag
@@ -114,16 +153,32 @@ function Sidebar({
         <img src={source(osResources.cancel)} />
       </button>
 
-      {menus.map((menu) => (
-        <MenuParticle
-          onClick={() => {
-            sidebarItemSelected();
-            sidebarItemSelectedExtra?.();
-          }}
-          key={JSON.stringify(menu)}
-          menu={menu}
-        />
-      ))}
+      <DndContext
+        sensors={groupSensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleGroupDragEnd}
+        // See MenuParticle.tsx — the sidebar is a scroll container, and
+        // dnd-kit's default auto-scroll fights with that while dragging.
+        autoScroll={false}
+        modifiers={[restrictToVerticalAxis]}
+      >
+        <SortableContext
+          items={orderedGroups.map((g) => g.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {orderedGroups.map((g) => (
+            <SortableMenuGroup
+              key={g.id}
+              id={g.id}
+              menu={g.menu}
+              onClick={() => {
+                sidebarItemSelected();
+                sidebarItemSelectedExtra?.();
+              }}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
       {BUILD_VARIABLES.GITHUB_DEMO === "true" && (
         <MenuParticle
           onClick={() => {
@@ -161,6 +216,45 @@ function Sidebar({
           sidebarItemSelectedExtra?.();
         }}
       />
+    </div>
+  );
+}
+
+function SortableMenuGroup({
+  id,
+  menu,
+  onClick,
+}: {
+  id: string;
+  menu: MenuItem;
+  onClick: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const dragHandle = (
+    <span
+      className="drag-handle"
+      aria-hidden="true"
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical size={14} />
+    </span>
+  );
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={classNames("sortable-menu-group", isDragging && "is-dragging")}
+    >
+      <MenuParticle menu={menu} onClick={onClick} dragHandle={dragHandle} />
     </div>
   );
 }

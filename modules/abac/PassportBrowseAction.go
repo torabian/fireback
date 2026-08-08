@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 /**
@@ -305,7 +306,66 @@ func PassportBrowseActionHandler(
 		}
 		resp, err := handler(req)
 		if err != nil {
-			m.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			// Some deeper call inside handler (e.g. a security/authorization check
+			// that rejects the request before the handler's own business logic ever
+			// runs) may have already written and aborted the response itself - gin
+			// tracks that on the ResponseWriter regardless of who did the writing.
+			// Rendering the bubbled-up error on top of that would append a second,
+			// invalid JSON body after the first.
+			if m.Writer.Written() {
+				return
+			}
+			status := http.StatusInternalServerError
+			// If the error knows how to render itself for a given language (e.g.
+			// fireback.IError, whose ferror.Error.ToPublicJSON resolves its
+			// {"$": ..., "en": ..., "fa": ...} message map down to one string), let it -
+			// picking the language the same way the rest of the app resolves it: the
+			// "acceptLanguage" query param first, else the Accept-Language header, else
+			// "en".
+			if converter, ok := err.(interface {
+				ToPublicJSON(lang string) ([]byte, int32)
+			}); ok {
+				lang := m.Query("acceptLanguage")
+				if lang == "" {
+					lang = m.GetHeader("Accept-Language")
+					if i := strings.IndexAny(lang, ",;-"); i >= 0 {
+						lang = lang[:i]
+					}
+					lang = strings.ToLower(strings.TrimSpace(lang))
+				}
+				if lang == "" {
+					lang = "en"
+				}
+				body, code := converter.ToPublicJSON(lang)
+				if code != 0 {
+					status = int(code)
+				}
+				// Nest the resolved object under "error" (rather than writing it as the
+				// bare response body) so every error shape - this one, the generic
+				// forwarded-JSON one below, and the plain-string one - answers with the
+				// same {"error": ...} envelope. json.RawMessage keeps body embedded as
+				// real JSON instead of being re-escaped into a string.
+				m.JSON(status, gin.H{"error": json.RawMessage(body)})
+				return
+			}
+			// Otherwise, other action errors may still stringify themselves as an
+			// indented JSON object via their Error() method. If that's what we got,
+			// forward it nested under "error" as real JSON (optionally honoring its own
+			// "httpCode" field for the response status) instead of re-escaping it into a
+			// string, which is what plain errors still get.
+			msg := err.Error()
+			trimmed := strings.TrimSpace(msg)
+			if strings.HasPrefix(trimmed, "{") && json.Valid([]byte(trimmed)) {
+				var probe struct {
+					HttpCode int32 `json:"httpCode"`
+				}
+				if uErr := json.Unmarshal([]byte(trimmed), &probe); uErr == nil && probe.HttpCode != 0 {
+					status = int(probe.HttpCode)
+				}
+				m.JSON(status, gin.H{"error": json.RawMessage(trimmed)})
+				return
+			}
+			m.JSON(status, gin.H{"error": msg})
 			return
 		}
 		// If the handler returned nil (and no error), it means the response was handled manually.
@@ -492,9 +552,71 @@ func PassportBrowseActionHttpHandler(
 		}
 		resp, err := handler(req)
 		if err != nil {
+			status := http.StatusInternalServerError
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+			// If the error knows how to render itself for a given language (e.g.
+			// fireback.IError, whose ferror.Error.ToPublicJSON resolves its
+			// {"$": ..., "en": ..., "fa": ...} message map down to one string), let it -
+			// picking the language the same way the rest of the app resolves it: the
+			// "acceptLanguage" query param first, else the Accept-Language header, else
+			// "en".
+			if converter, ok := err.(interface {
+				ToPublicJSON(lang string) ([]byte, int32)
+			}); ok {
+				lang := r.URL.Query().Get("acceptLanguage")
+				if lang == "" {
+					lang = r.Header.Get("Accept-Language")
+					if i := strings.IndexAny(lang, ",;-"); i >= 0 {
+						lang = lang[:i]
+					}
+					lang = strings.ToLower(strings.TrimSpace(lang))
+				}
+				if lang == "" {
+					lang = "en"
+				}
+				body, code := converter.ToPublicJSON(lang)
+				if code != 0 {
+					status = int(code)
+				}
+				// Nest the resolved object under "error" (rather than writing it as the
+				// bare response body) so every error shape - this one, the generic
+				// forwarded-JSON one below, and the plain-string one - answers with the
+				// same {"error": ...} envelope. json.RawMessage keeps body embedded as
+				// real JSON instead of being re-escaped into a string.
+				wrapped, wErr := json.Marshal(map[string]json.RawMessage{"error": json.RawMessage(body)})
+				w.WriteHeader(status)
+				if wErr == nil {
+					w.Write(wrapped)
+				} else {
+					w.Write(body)
+				}
+				return
+			}
+			// Otherwise, other action errors may still stringify themselves as an
+			// indented JSON object via their Error() method. If that's what we got,
+			// forward it nested under "error" as real JSON (optionally honoring its own
+			// "httpCode" field for the response status) instead of re-escaping it into a
+			// string, which is what plain errors still get.
+			msg := err.Error()
+			trimmed := strings.TrimSpace(msg)
+			if strings.HasPrefix(trimmed, "{") && json.Valid([]byte(trimmed)) {
+				var probe struct {
+					HttpCode int32 `json:"httpCode"`
+				}
+				if uErr := json.Unmarshal([]byte(trimmed), &probe); uErr == nil && probe.HttpCode != 0 {
+					status = int(probe.HttpCode)
+				}
+				wrapped, wErr := json.Marshal(map[string]json.RawMessage{"error": json.RawMessage(trimmed)})
+				w.WriteHeader(status)
+				if wErr == nil {
+					w.Write(wrapped)
+				} else {
+					w.Write([]byte(trimmed))
+				}
+				return
+			}
+			w.WriteHeader(status)
+			json.NewEncoder(w).Encode(map[string]string{"error": msg})
 			return
 		}
 		// If the handler returned nil (and no error), the response was handled

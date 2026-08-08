@@ -4,14 +4,11 @@ import {
   CommonEntityManager,
   type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
-// import { useGetWorkspaceWorkspaceTypeByUniqueId } from "../../sdk/modules/passports/useGetWorkspaceWorkspaceTypeByUniqueId";
-// import { usePatchWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePatchWorkspaceWorkspaceType";
-// import { usePostWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePostWorkspaceWorkspaceType";
-import { WorkspaceTypeEditForm } from "./WorkspaceTypeEditForm";
-import { useWorkspaceTypeGetActionQuery } from "../../../sdk/abac/WorkspaceTypeGetAction";
 import { useWorkspaceTypeCreateAction } from "../../../sdk/abac/WorkspaceTypeCreateAction";
-import { useWorkspaceTypeUpdateAction } from "../../../sdk/abac/WorkspaceTypeUpdateAction";
 import { WorkspaceTypeDto } from "../../../sdk/abac/WorkspaceTypeDto";
+import { useWorkspaceTypeGetActionQuery } from "../../../sdk/abac/WorkspaceTypeGetAction";
+import { useWorkspaceTypeUpdateAction } from "../../../sdk/abac/WorkspaceTypeUpdateAction";
+import { WorkspaceTypeEditForm } from "./WorkspaceTypeEditForm";
 
 export const WorkspaceTypeEntityManager = ({
   data,

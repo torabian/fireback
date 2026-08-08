@@ -12,6 +12,7 @@ targets:
   - react
   - no-package
   - no-sdk
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Fireback ABAC module provides user authentication, basic support for
@@ -815,6 +816,10 @@ dtos:
   - name: description
     type: string?
   - name: slug
+    description: Unique, URL-safe identifier for this workspace type. Must start with
+      "/", contain only lowercase a-z and dashes after that, and be at most 50 characters
+      long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go);
+      gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
     type: string?
   - name: roleId
     description: The role which will be used to define the functionality of this workspace.
@@ -1524,6 +1529,10 @@ dtos:
   - name: description
     type: string
   - name: slug
+    description: Unique, URL-safe identifier for this workspace type. Must start with
+      "/", contain only lowercase a-z and dashes after that, and be at most 50 characters
+      long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go);
+      gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
     type: string
   - name: roleId
     description: The role which will be used to define the functionality of this workspace.
@@ -2294,8 +2303,13 @@ entities:
   - name: description
     type: string
   - name: slug
+    description: Unique, URL-safe identifier for this workspace type. Must start with
+      "/", contain only lowercase a-z and dashes after that, and be at most 50 characters
+      long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go);
+      gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
     type: string
     tags:
+      gorm: unique
       validate: required,omitempty,min=2,max=50
   - name: roleId
     description: The role which will be used to define the functionality of this workspace.

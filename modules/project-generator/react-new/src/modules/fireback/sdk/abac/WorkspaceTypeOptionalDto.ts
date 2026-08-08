@@ -79,19 +79,19 @@ export class WorkspaceTypeOptionalDto {
     return this;
   }
   /**
-   *
+   * Unique, URL-safe identifier for this workspace type. Must start with "/", contain only lowercase a-z and dashes after that, and be at most 50 characters long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go); gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
    * @type {string}
    **/
   #slug?: string | null = undefined;
   /**
-   *
+   * Unique, URL-safe identifier for this workspace type. Must start with "/", contain only lowercase a-z and dashes after that, and be at most 50 characters long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go); gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
    * @returns {string}
    **/
   get slug() {
     return this.#slug;
   }
   /**
-   *
+   * Unique, URL-safe identifier for this workspace type. Must start with "/", contain only lowercase a-z and dashes after that, and be at most 50 characters long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go); gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
    * @type {string}
    **/
   set slug(value: string | null | undefined) {
@@ -369,7 +369,7 @@ export type WorkspaceTypeOptionalDtoType = {
    **/
   description?: string;
   /**
-   *
+   * Unique, URL-safe identifier for this workspace type. Must start with "/", contain only lowercase a-z and dashes after that, and be at most 50 characters long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go); gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
    * @type {string}
    **/
   slug?: string;

@@ -19,6 +19,7 @@ package ferror
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -161,6 +162,34 @@ func (r *Error) ToPublicEndUser(q interface {
 func (r *Error) Error() string {
 	str, _ := json.MarshalIndent(r, "", "  ")
 	return string(str)
+}
+
+// languageOnly is the minimal adapter ToPublicJSON needs to call ToPublicEndUser
+// (which wants anything with a GetLanguage() string method, e.g. QueryDSL) from just a
+// plain language code string.
+type languageOnly string
+
+func (l languageOnly) GetLanguage() string { return string(l) }
+
+// ToPublicJSON resolves this Error to the given language via ToPublicEndUser and
+// marshals the result - one message string per field, not the full
+// {"$": ..., "en": ..., "fa": ...} language map Error.Error()'s plain JSON dump would
+// include.
+//
+// This is a small, transport-agnostic duck-typed interface - `interface{
+// ToPublicJSON(lang string) ([]byte, int32) }` - that the Emi-generated Gin/http action
+// handlers (see go-action-gin-render.go / go-action-http-render.go in the emi compiler)
+// type-assert errors against before falling back to their generic "is the error string
+// JSON?" handling. Emi itself has no dependency on fireback/ferror; any error type is
+// free to opt in by implementing this same method shape.
+func (r *Error) ToPublicJSON(lang string) ([]byte, int32) {
+	pub := r.ToPublicEndUser(languageOnly(lang))
+	body, _ := json.MarshalIndent(pub, "", "  ")
+	code := pub.HttpCode
+	if code == 0 {
+		code = http.StatusInternalServerError
+	}
+	return body, code
 }
 
 func Create401Error(msg *ErrorItem, list []string) *Error {

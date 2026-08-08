@@ -12,6 +12,9 @@ import { usePageTitle } from "../page-title/PageTitle";
 import { type IResponse } from "../../definitions/JSONStyle";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { get, set } from "lodash";
+import type { GResponse } from "../../sdk/sdk/envelopes";
+import { mutationErrorsToFormik } from "../../sdk/core/http-tools";
+import { ErrorsView } from "../error-view/ErrorView";
 
 export interface CommonEntityManagerProps<T> {
   data?: T | null;
@@ -104,8 +107,8 @@ export const CommonEntityManager = ({
         ? patchHook?.mutateAsync(JSON.stringify(values), d)
         : postHook?.mutateAsync(JSON.stringify(values), d);
 
-    op.then((response: any) => {
-      if (response.data?.uniqueId) {
+    op.then((response: GResponse<unknown>) => {
+      if (response.data?.item) {
         if (onSuccessPatchOrPost) {
           onSuccessPatchOrPost(response);
         } else if (onFinishUriResolver) {
@@ -113,6 +116,11 @@ export const CommonEntityManager = ({
         } else {
           Toast(s.components.done, { type: "success" });
         }
+      }
+      if (response.error) {
+        formik.current.setErrors(
+          mutationErrorsToFormik(response.error.toJSON()),
+        );
       }
     }).catch((err) => httpErrorHanlder(err, t));
   };
@@ -160,7 +168,7 @@ export const CommonEntityManager = ({
           }
         >
           {/* <pre>{JSON.stringify(form.values, null, 2)}</pre> */}
-          {/* <ErrorsView errors={form.errors} /> */}
+          <ErrorsView errors={form.errors} />
           <fieldset disabled={formWorking}>
             <div style={{ marginBottom: "15px" }}>
               <QueryErrorView

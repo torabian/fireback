@@ -679,8 +679,17 @@ func RealEscape(portion string, values ...string) string {
 func UpdateEntity[T any](query QueryDSL, fields *T) (*T, *IError) {
 
 	var item T
-	err := GetDbRef().Where(RealEscape("unique_id = ?", GetFieldString(fields, "UniqueId"))).First(&item).UpdateColumns(fields).Error
-	if err != nil {
+	if err := GetDbRef().Where(RealEscape("unique_id = ?", GetFieldString(fields, "UniqueId"))).First(&item).Error; err != nil {
+		return &item, GormErrorToIError(err)
+	}
+
+	// Deliberately a fresh GetDbRef().Model(&item) chain rather than continuing to
+	// chain .UpdateColumns directly onto the .First() call above: reusing that same
+	// *gorm.DB session/Statement for the UPDATE (as this used to do) makes Postgres
+	// see the table referenced twice - `ERROR: table name "..." specified more than
+	// once (SQLSTATE 42712)` - on every single entity update, since this generic
+	// function backs every *_Update/PATCH action in the app.
+	if err := GetDbRef().Model(&item).UpdateColumns(fields).Error; err != nil {
 		return &item, GormErrorToIError(err)
 	}
 
