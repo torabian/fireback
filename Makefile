@@ -42,7 +42,9 @@ dockerpublish:
 
 defs:
 	./app emi compile --path modules/fireback/Fireback.emi.yml && \
-	./app emi compile --path modules/abac/Abac.emi.yml
+	./app emi compile --path modules/abac/Abac.emi.yml && \
+	./app emi compile --path modules/eventbus/EventBus.emi.yml && \
+	./app emi compile --path modules/reactivesearch/ReactiveSearch.emi.yml
 
 interface: interface-manage interface-ss
 
