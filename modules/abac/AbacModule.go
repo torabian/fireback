@@ -242,12 +242,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		return RepairTheWorkspaces()
 	})
 
-	module.ProvideMockWriterHandler(func(languages []string) {
-		// WorkspaceTypeWriteQueryMock(MockQueryContext{Languages: languages})
-		// GsmProviderWriteQueryMock(MockQueryContext{Languages: languages})
-		// AppMenuWriteQueryCteMock(MockQueryContext{Languages: languages})
-	})
-
 	// TimezoneGroupSyncSeeders moved to modules/abac/interfacetools - see
 	// interfacetools.ModuleSetup's own ProvideSeederImportHandler call.
 
