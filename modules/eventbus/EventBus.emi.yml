@@ -6,7 +6,7 @@ targets:
     flags:
       pkg: eventbus
   - compiler: js
-    output: ../../ui/src/modules/fireback/sdk/eventbus
+    output: ../../ui/src/modules/sdk/eventbus
     flags:
       js-sdk-location: ../sdk
     tags:

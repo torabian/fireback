@@ -6,7 +6,7 @@ targets:
 - compiler: js
   flags:
     js-sdk-location: ../sdk
-  output: ../../../ui/src/modules/fireback/sdk/messaging
+  output: ../../../ui/src/modules/sdk/messaging
   tags:
   - typescript
   - react

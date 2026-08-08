@@ -14,7 +14,7 @@ targets:
     flags:
       pkg: interfacetools
   - compiler: js
-    output: ../../../ui/src/modules/fireback/sdk/interfacetools
+    output: ../../../ui/src/modules/sdk/interfacetools
     flags:
       js-sdk-location: ../sdk
     tags:
