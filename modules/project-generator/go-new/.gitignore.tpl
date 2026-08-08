@@ -1,2 +1,0 @@
-.jsonschemas
-cachemap.json

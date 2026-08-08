@@ -438,6 +438,7 @@ func NotificationConfigCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetNotificationConfigDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func NotificationConfigCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastNotificationConfigDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

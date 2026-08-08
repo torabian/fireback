@@ -438,6 +438,7 @@ func RegionalContentCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetRegionalContentDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func RegionalContentCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastRegionalContentDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

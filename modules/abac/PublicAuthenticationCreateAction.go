@@ -438,6 +438,7 @@ func PublicAuthenticationCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetPublicAuthenticationDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func PublicAuthenticationCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastPublicAuthenticationDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

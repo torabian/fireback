@@ -438,6 +438,7 @@ func TimezoneGroupCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetTimezoneGroupDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func TimezoneGroupCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastTimezoneGroupDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

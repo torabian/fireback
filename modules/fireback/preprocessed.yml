@@ -6,7 +6,7 @@ targets:
 - compiler: js
   flags:
     js-sdk-location: ../sdk
-  output: ../project-generator/react-new/src/modules/fireback/sdk/fireback
+  output: ../project-generator/react-new/src/modules/sdk/fireback
   tags:
   - typescript
   - react

@@ -8,6 +8,7 @@ export GOEXPERIMENT = jsonv2
 
 deb:
 	bash ./fireback-deb.sh
+
 dev:
 	go build --tags "fts5" -ldflags "-s -w" -o ../../artifacts/$(project)/$(projectBinary) . && \
 	cp ../../artifacts/$(project)/$(projectBinary) ../../app && \
@@ -15,16 +16,6 @@ dev:
 
 # Ui2 also copies the fireback-manage, in case it has a different built required
 # make sure you change it here too.
-
-ui2:
-	cd ../../modules/fireback/codegen/react-new && npm run self-service:build && cd - && \
-	rm -rf ../../modules/fireback/codegen/selfservice && cp -R ../../modules/fireback/codegen/react-new/dist ../../modules/fireback/codegen/selfservice && \
-	git checkout ../../modules/fireback/codegen/selfservice/index.go 
-	cd ../../modules/fireback/codegen/react-new && npm run manage:build && cd - && \
-	rm -rf ../../modules/fireback/codegen/fireback-manage && \
-	cp -R ../../modules/fireback/codegen/react-new/dist ../../modules/fireback/codegen/fireback-manage && \
-	git checkout ../../modules/fireback/codegen/fireback-manage/index.go
-
 wasm:
 	GOOS=js GOARCH=wasm go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project).wasm .
 linux-arm64:
@@ -52,7 +43,6 @@ mac-pkg:
 	packagesbuild --project ./macos-installer.pkgproj && mv ../../artifacts/$(project)-server-all/$(project).pkg ../../artifacts/$(project)-server-all/$(project)_silicon_arm64.pkg
 everything:
 	make clean && \
-	make ui2 && \
 	GOARCH=amd64 GOOS=darwin go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-all/$(project) .
 	cd ../../artifacts/$(project)-server-all && zip $(project)_amd64_darwin.zip $(project) && cd -
 	packagesbuild --project ./macos-installer.pkgproj && mv ../../artifacts/$(project)-server-all/$(project).pkg ../../artifacts/$(project)-server-all/$(project)_intel_amd64.pkg
@@ -84,9 +74,6 @@ linux-zip:
 pkg:
 	go build -ldflags "-s -w" -o ../../artifacts/$(project)-server-mac/$(project) . && \
 	packagesbuild --project ./macos-installer.pkgproj
-
-npm:
-	make npmc npmp
 
 clean:
 	rm -rf ../../artifacts/$(project)-server-all && mkdir -p ../../artifacts/$(project)-server-all

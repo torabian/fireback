@@ -438,6 +438,7 @@ func PreferenceCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetPreferenceDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func PreferenceCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastPreferenceDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

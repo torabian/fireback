@@ -435,6 +435,7 @@ func WorkspaceConfigDistinctUpdateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetWorkspaceConfigOptionalDtoCliFlags(""))...)
 	return flags
 }
 
@@ -458,6 +459,7 @@ func WorkspaceConfigDistinctUpdateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastWorkspaceConfigOptionalDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

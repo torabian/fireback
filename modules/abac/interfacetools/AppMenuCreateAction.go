@@ -438,6 +438,7 @@ func AppMenuCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetAppMenuDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func AppMenuCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastAppMenuDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}
