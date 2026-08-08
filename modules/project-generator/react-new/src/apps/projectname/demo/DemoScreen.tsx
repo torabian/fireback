@@ -1,4 +1,4 @@
-import Link from "@/modules/fireback/components/link/Link";
+import Link from "@/modules/fireback-ui/components/link/Link";
 
 export function DemoScreen() {
   return (

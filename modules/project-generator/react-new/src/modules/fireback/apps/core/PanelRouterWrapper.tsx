@@ -1,7 +1,7 @@
 import { type ReactNode, useContext } from "react";
 import { Panel } from "react-resizable-panels";
-import { ResizeHandle } from "../../components/layouts/ResizeHandle";
-import { useUiState } from "../../hooks/uiStateContext";
+import { ResizeHandle } from "../../../fireback-ui/components/layouts/ResizeHandle";
+import { useUiState } from "../../../fireback-ui/hooks/uiStateContext";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { SidebarPanel } from "./SidebarPanel";
 

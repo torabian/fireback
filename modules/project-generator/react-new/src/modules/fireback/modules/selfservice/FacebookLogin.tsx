@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { source } from "../../hooks/source";
-import { useS } from "../../hooks/useS";
+import { source } from "../../../fireback-ui/hooks/source";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 
 export const FacebookLogin = ({

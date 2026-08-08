@@ -1,6 +1,6 @@
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 
 export const EmailSenderEditForm = ({

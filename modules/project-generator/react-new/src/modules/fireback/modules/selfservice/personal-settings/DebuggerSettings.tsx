@@ -1,8 +1,8 @@
-import { FormCheckbox } from "../../../components/forms/form-switch/FormSwitch";
-import Link from "../../../components/link/Link";
-import { PageSection } from "../../../components/page-section/PageSection";
-import { useT } from "../../../hooks/useT";
-import { useS } from "../../../hooks/useS";
+import { FormCheckbox } from "../../../../fireback-ui/components/forms/form-switch/FormSwitch";
+import Link from "../../../../fireback-ui/components/link/Link";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
+import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useUserWorkspaceBrowseActionQuery } from "../../../sdk/abac/UserWorkspaceBrowseAction";
 import { useContext, useState } from "react";
 import {

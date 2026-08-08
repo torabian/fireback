@@ -1,17 +1,17 @@
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 
 
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { PassportEditForm } from "./PassportEditForm";
 import { usePassportGetActionQuery } from "../../../sdk/abac/PassportGetAction";
 import { usePassportCreateAction } from "../../../sdk/abac/PassportCreateAction";
 import { usePassportUpdateAction } from "../../../sdk/abac/PassportUpdateAction";
 import { PassportDto } from "../../../sdk/abac/PassportDto";
 import { PassportNavigation } from "../../../sdk/navigation/AbacNavigation";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 
 export const PassportEntityManager = ({ data }: DtoEntity<PassportDto>) => {

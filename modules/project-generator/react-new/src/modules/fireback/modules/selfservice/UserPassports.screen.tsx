@@ -1,6 +1,6 @@
-import { QueryErrorView } from "../../components/error-view/QueryError";
-import ActiveLink from "../../components/link/ActiveLink";
-import { useS } from "../../hooks/useS";
+import { QueryErrorView } from "../../../fireback-ui/components/error-view/QueryError";
+import ActiveLink from "../../../fireback-ui/components/link/ActiveLink";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import type { UserPassportsActionResType } from "../../sdk/abac/UserPassportsAction";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./UserPassports.presenter";

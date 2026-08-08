@@ -4,17 +4,12 @@
   "private": true,
   "scripts": {
     "start": "vite --mode 'projectname/local'",
-    "start:mock": "vite --mode 'projectname/local.demo'",
-    "build:mock": "vite build --mode 'projectname/local.demo'",
     "self-service": "vite --mode 'self-service/embed'",
     "self-service:build": "vite build --mode 'self-service/embed'",
     "manage:start": "vite --mode 'projectname/manage'",
     "manage:build": "vite build --mode 'projectname/manage'",
-    "fbgithubpages": "vite build --mode 'projectname/fbgithubpages'",
     "build": "vite build --mode 'projectname/bundle'",
-    "build:bundle:demo": "vite build --mode 'projectname/bundle.demo'",
-    "build:capacitor": "vite build --mode 'projectname/capacitor'",
-    "github": "vite build --mode 'projectname/githubpages'"
+    "build:capacitor": "vite build --mode 'projectname/capacitor'"
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",
@@ -65,8 +60,7 @@
     "react-window-infinite-loader": "^1.0.9",
     "sass": "^1.84.0",
     "tus-js-client": "^4.1.0",
-    "typescript": "^6.0.2",
-    "url-matcher": "^0.2.2"
+    "typescript": "^6.0.2"
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.6",

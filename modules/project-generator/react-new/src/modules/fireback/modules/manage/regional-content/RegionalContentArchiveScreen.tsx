@@ -1,6 +1,6 @@
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
-import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
+import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
 import { RegionalContentList } from "./RegionalContentList";
 import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
 import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";

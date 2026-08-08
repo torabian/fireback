@@ -1,6 +1,6 @@
-import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
-import { useS } from "../../../hooks/useS";
+import { CommonSingleManager } from "../../../../fireback-ui/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useWorkspaceConfigDistinctGetActionQuery } from "../../../sdk/abac/WorkspaceConfigDistinctGetAction";
 import { WorkspaceConfigNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";

@@ -1,13 +1,13 @@
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { WorkspaceTypeDto } from "../../../sdk/abac/WorkspaceTypeDto";
 
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { useRolesQuerySource } from "../../../hooks/useRolesQuerySource";
-import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { useRolesQuerySource } from "../../../../fireback-ui/hooks/useRolesQuerySource";
+import { FormRichText } from "../../../../fireback-ui/components/forms/form-richtext/FormRichText";
 
 export const WorkspaceTypeEditForm = ({
   form,

@@ -1,8 +1,8 @@
-import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "../../../components/page-title/PageTitle";
-import { useRouter } from "../../../hooks/useRouter";
-import { useT } from "../../../hooks/useT";
+import { CommonSingleManager } from "../../../../fireback-ui/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
+import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
+import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useWorkspaceTypeGetActionQuery } from "../../../sdk/abac/WorkspaceTypeGetAction";
 import { WorkspaceTypeNavigation } from "../../../sdk/navigation/AbacNavigation";
 

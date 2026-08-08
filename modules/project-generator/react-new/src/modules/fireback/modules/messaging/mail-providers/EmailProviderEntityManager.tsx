@@ -1,8 +1,8 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import { useEmailProviderGetActionQuery } from "../../../sdk/messaging/EmailProviderGetAction";
 import { useEmailProviderCreateAction } from "../../../sdk/messaging/EmailProviderCreateAction";
 import { useEmailProviderUpdateAction } from "../../../sdk/messaging/EmailProviderUpdateAction";

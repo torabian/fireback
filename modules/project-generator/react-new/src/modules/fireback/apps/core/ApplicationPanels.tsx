@@ -1,16 +1,16 @@
 import { QueryClient } from "@tanstack/react-query";
 import { PanelGroup } from "react-resizable-panels";
 import { BrowserRouter, HashRouter, MemoryRouter } from "react-router-dom";
-import { TabbarMenu } from "../../components/tabbar-menu/TabbarMenu";
-import { useUiState } from "../../hooks/uiStateContext";
+import { TabbarMenu } from "../../../fireback-ui/components/tabbar-menu/TabbarMenu";
+import { useUiState } from "../../../fireback-ui/hooks/uiStateContext";
 import { ApplicationOutlet } from "./ApplicationOutlet";
 import {
   PanelRouterWithSidebar,
   PanelRouterWrapper,
 } from "./PanelRouterWrapper";
 import classNames from "classnames";
-import { detectDeviceType } from "../../hooks/deviceInformation";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { detectDeviceType } from "../../../fireback-ui/hooks/deviceInformation";
+import { BUILD_VARIABLES } from "../../../fireback-ui/hooks/build-variables";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;

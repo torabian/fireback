@@ -7,8 +7,8 @@ import {
 } from "react-router-dom";
 
 import { type ReactNode, useContext, useEffect } from "react";
-import { useCheckAuthentication } from "../../components/layouts/ForcedAuthenticated";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { useCheckAuthentication } from "../../../fireback-ui/components/layouts/ForcedAuthenticated";
+import { BUILD_VARIABLES } from "../../../fireback-ui/hooks/build-variables";
 import { SelectWorkspaceScreen } from "../../modules/selfservice/SelectWorkspace.screen";
 import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";

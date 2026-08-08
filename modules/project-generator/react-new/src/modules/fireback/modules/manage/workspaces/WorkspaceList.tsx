@@ -1,9 +1,9 @@
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useWorkspaceBrowseActionQuery } from "../../../sdk/abac/WorkspaceBrowseAction";
 import { useWorkspaceAwareDeleteAction } from "../../../sdk/abac/WorkspaceAwareDeleteAction";
 
-import { CommonRowDetail } from "../../../components/detail-table/DetailTable";
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { CommonRowDetail } from "../../../../fireback-ui/components/detail-table/DetailTable";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
 import { columns } from "./WorkspaceColumns";
 import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 

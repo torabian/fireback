@@ -1,6 +1,6 @@
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { PublicJoinKeyList } from "./PublicJoinKeyList";
-import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
+import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
 import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
 import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
 

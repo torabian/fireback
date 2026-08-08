@@ -1,5 +1,5 @@
-import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
-import { useT } from "../../../hooks/useT";
+import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 
 import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
 import { EmailProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";

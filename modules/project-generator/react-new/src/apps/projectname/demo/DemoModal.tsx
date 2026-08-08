@@ -1,7 +1,7 @@
-import { FormButton } from "@/modules/fireback/components/forms/form-button/FormButton";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { commonDialogs } from "@/modules/fireback/components/overlay/CommonOverlays";
-import { useOverlay } from "@/modules/fireback/components/overlay/OverlayProvider";
+import { FormButton } from "@/modules/fireback-ui/components/forms/form-button/FormButton";
+import { FormText } from "@/modules/fireback-ui/components/forms/form-text/FormText";
+import { commonDialogs } from "@/modules/fireback-ui/components/overlay/CommonOverlays";
+import { useOverlay } from "@/modules/fireback-ui/components/overlay/OverlayProvider";
 import { useEffect, useRef, useState } from "react";
 import { CodeViewer } from "./CodeViewer";
 import { snippets } from "./DemoModal.snippets";

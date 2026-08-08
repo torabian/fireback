@@ -1,8 +1,8 @@
 import { type FormikProps } from "formik";
 import { useEffect, useRef, useState } from "react";
-import { useLocale } from "../../hooks/useLocale";
-import { useRouter } from "../../hooks/useRouter";
-import { useT } from "../../hooks/useT";
+import { useLocale } from "../../../fireback-ui/hooks/useLocale";
+import { useRouter } from "../../../fireback-ui/hooks/useRouter";
+import { useT } from "../../../fireback-ui/hooks/useT";
 import { useCheckPassportMethodsActionQuery } from "../../sdk/abac/CheckPassportMethodsAction";
 import {
   type AuthAvailableMethods,

@@ -1,9 +1,9 @@
-import { useRouter } from "../../../hooks/useRouter";
-import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "../../../components/page-title/PageTitle";
-import { useLocale } from "../../../hooks/useLocale";
-import { useT } from "../../../hooks/useT";
+import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
+import { CommonSingleManager } from "../../../../fireback-ui/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
+import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
+import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useWorkspaceGetActionQuery } from "../../../sdk/abac/WorkspaceGetAction";
 import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 

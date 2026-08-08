@@ -1,14 +1,14 @@
 import { type EntityFormProps } from "../../../definitions/definitions";
 import { strings } from "./strings/translations";
 import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
-import { useT } from "../../../hooks/useT";
-import { useS } from "../../../hooks/useS";
-import { createQuerySource } from "../../../hooks/useAsQuery";
-import { FormText } from "../../../components/forms/form-text/FormText";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
-import { useRolesQuerySource } from "../../../hooks/useRolesQuerySource";
-import { FormCheckbox } from "../../../components/forms/form-switch/FormSwitch";
+import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { FormRichText } from "../../../../fireback-ui/components/forms/form-richtext/FormRichText";
+import { useRolesQuerySource } from "../../../../fireback-ui/hooks/useRolesQuerySource";
+import { FormCheckbox } from "../../../../fireback-ui/components/forms/form-switch/FormSwitch";
 import { interfaceLanguages } from "../personal-settings/Langugages";
 
 export const WorkspaceInviteForm = ({

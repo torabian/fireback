@@ -1,9 +1,9 @@
-import { useS } from "../../../hooks/useS";
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
 import { strings } from "./strings/translations";
 import { userInvitationColumns } from "./UserInvitationColumns";
 
-import { ModalContext } from "../../../components/modal/Modal";
+import { ModalContext } from "../../../../fireback-ui/components/modal/Modal";
 import { useContext } from "react";
 import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "../../../sdk/abac/UserInvitationsAction";
 import {

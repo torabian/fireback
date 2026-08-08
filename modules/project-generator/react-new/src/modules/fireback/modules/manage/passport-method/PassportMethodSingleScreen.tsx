@@ -1,7 +1,7 @@
-import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
-import { useS } from "../../../hooks/useS";
+import { CommonSingleManager } from "../../../../fireback-ui/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { usePassportMethodGetActionQuery } from "../../../sdk/abac/PassportMethodGetAction";
 import { PassportMethodNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";

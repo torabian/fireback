@@ -1,7 +1,7 @@
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
 import { useRegionalContentBrowseActionQuery } from "../../../sdk/abac/RegionalContentBrowseAction";
 import { useRegionalContentAwareDeleteAction } from "../../../sdk/abac/RegionalContentAwareDeleteAction";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
 import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./RegionalContentColumns";

@@ -1,5 +1,5 @@
-import { Checkbox } from "../../../components/checkbox/Checkbox";
-import { ErrorsView } from "../../../components/error-view/ErrorView";
+import { Checkbox } from "../../../../fireback-ui/components/checkbox/Checkbox";
+import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorView";
 import { type IndeterminateCheck } from "../../../definitions/definitions";
 import { type CapabilityChild } from "../../../sdk/core/react-tools";
 import { useCapabilitiesTreeActionQuery } from "../../../sdk/abac/CapabilitiesTreeAction";

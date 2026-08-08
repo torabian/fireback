@@ -1,9 +1,9 @@
 import { type FormikProps } from "formik";
 import { type UseMutationResult } from "@tanstack/react-query";
-import { QueryErrorView } from "../../components/error-view/QueryError";
-import { FormButton } from "../../components/forms/form-button/FormButton";
-import { FormText } from "../../components/forms/form-text/FormText";
-import { useS } from "../../hooks/useS";
+import { QueryErrorView } from "../../../fireback-ui/components/error-view/QueryError";
+import { FormButton } from "../../../fireback-ui/components/forms/form-button/FormButton";
+import { FormText } from "../../../fireback-ui/components/forms/form-text/FormText";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import { usePresenter } from "./ClassicSigninPassword.presenter";
 import { strings } from "./strings/translations";
 import { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";

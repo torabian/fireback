@@ -1,5 +1,5 @@
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
-import { useS } from "../../../hooks/useS";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useCapabilityAwareDeleteAction } from "../../../sdk/abac/CapabilityAwareDeleteAction";
 import { useCapabilityBrowseActionQuery } from "../../../sdk/abac/CapabilityBrowseAction";
 import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";

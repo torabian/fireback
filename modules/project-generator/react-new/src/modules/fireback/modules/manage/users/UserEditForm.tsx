@@ -1,8 +1,8 @@
 import { useContext } from "react";
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../hooks/useT";
-import { useS } from "../../../hooks/useS";
+import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { UserDto } from "../../../sdk/abac/UserDto";
 import { strings } from "./strings/translations";

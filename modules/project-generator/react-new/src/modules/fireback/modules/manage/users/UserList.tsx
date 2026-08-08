@@ -1,11 +1,11 @@
-import { usePageTitle } from "../../../components/page-title/PageTitle";
+import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
 import { useUserBrowseActionQuery } from "../../../sdk/abac/UserBrowseAction";
 import { useUserAwareDeleteAction } from "../../../sdk/abac/UserAwareDeleteAction";
 
-import { useT } from "../../../hooks/useT";
-import { useS } from "../../../hooks/useS";
+import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
 import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./UserColumns";
 import { strings } from "./strings/translations";

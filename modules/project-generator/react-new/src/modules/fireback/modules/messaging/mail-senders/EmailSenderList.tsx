@@ -1,7 +1,7 @@
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
 import { useEmailSenderBrowseActionQuery } from "../../../sdk/messaging/EmailSenderBrowseAction";
 import { useEmailSenderAwareDeleteAction } from "../../../sdk/messaging/EmailSenderAwareDeleteAction";
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 import { EmailSenderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 import { columns } from "./EmailSenderColumns";

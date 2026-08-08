@@ -1,12 +1,12 @@
-import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
-import { useS } from "../../../hooks/useS";
+import { CommonSingleManager } from "../../../../fireback-ui/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useCapabilityGetActionQuery } from "../../../sdk/abac/CapabilityGetAction";
 import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
 import { CapabilityNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
-import { usePageTitle } from "../../../hooks/authContext";
+import { usePageTitle } from "../../../../fireback-ui/hooks/authContext";
 
 export const CapabilitySingleScreen = () => {
   const { uniqueId } = useCommonEntityManager<Partial<any>>({});

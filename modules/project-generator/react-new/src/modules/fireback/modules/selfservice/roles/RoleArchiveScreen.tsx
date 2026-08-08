@@ -1,7 +1,7 @@
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { RoleList } from "./RoleList";
-import { useCommonArchiveExportTools } from "../../../components/action-menu/ActionMenu";
-import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
+import { useCommonArchiveExportTools } from "../../../../fireback-ui/components/action-menu/ActionMenu";
+import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
 import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const RoleArchiveScreen = () => {

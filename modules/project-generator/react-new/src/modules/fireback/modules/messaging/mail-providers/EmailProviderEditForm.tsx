@@ -1,10 +1,10 @@
-import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormRichText } from "../../../../fireback-ui/components/forms/form-richtext/FormRichText";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { createQuerySource } from "../../../hooks/useAsQuery";
-import { useS } from "../../../hooks/useS";
-import { useT } from "../../../hooks/useT";
+import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
 import { strings } from "./strings/translations";
 

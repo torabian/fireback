@@ -1,6 +1,6 @@
 import { useContext } from "react";
-import { useRouter } from "../../hooks/useRouter";
-import { useS } from "../../hooks/useS";
+import { useRouter } from "../../../fireback-ui/hooks/useRouter";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 import { strings } from "./strings/translations";

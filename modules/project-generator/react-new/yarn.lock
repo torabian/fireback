@@ -1175,13 +1175,6 @@ input-format@^0.3.10:
   dependencies:
     prop-types "^15.8.1"
 
-invariant@^2.0.0:
-  version "2.2.4"
-  resolved "https://registry.npmjs.org/invariant/-/invariant-2.2.4.tgz"
-  integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
-  dependencies:
-    loose-envify "^1.0.0"
-
 is-alphabetical@^1.0.0:
   version "1.0.4"
   resolved "https://registry.npmjs.org/is-alphabetical/-/is-alphabetical-1.0.4.tgz"
@@ -2058,13 +2051,6 @@ update-browserslist-db@^1.1.1:
   dependencies:
     escalade "^3.2.0"
     picocolors "^1.1.1"
-
-url-matcher@^0.2.2:
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/url-matcher/-/url-matcher-0.2.2.tgz"
-  integrity sha512-5ATRLevACsAE9JLQ/64Q32dh8NtU2A85zChqBQlNvHF1+FbnqlGXBwzXa6ulvozjVID7o5SrIHvteENmlmIyqA==
-  dependencies:
-    invariant "^2.0.0"
 
 url-parse@^1.5.7:
   version "1.5.10"

@@ -6,7 +6,7 @@ import "../../../../modules/fireback/styles/styles.scss";
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 import "../../../..//modules/fireback/styles/apple-family/styles.scss";
 
-import { UIStateProvider } from "../../hooks/uiStateContext";
+import { UIStateProvider } from "../../../fireback-ui/hooks/uiStateContext";
 
 import {
   QueryClient,
@@ -17,10 +17,10 @@ import {
 import React, { useContext, useEffect } from "react";
 
 import { ErrorBoundary } from "react-error-boundary";
-import { Fallback } from "../../components/fallback/Fallback";
-import { AppConfigContext } from "../../hooks/appConfigTools";
-import { AuthProvider } from "../../hooks/authContext";
-import { usePureLocale } from "../../hooks/usePureLocale";
+import { Fallback } from "../../../fireback-ui/components/fallback/Fallback";
+import { AppConfigContext } from "../../../fireback-ui/hooks/appConfigTools";
+import { AuthProvider } from "../../../fireback-ui/hooks/authContext";
+import { usePureLocale } from "../../../fireback-ui/hooks/usePureLocale";
 import { SidebarMultiRouterSetup } from "./ApplicationPanels";
 import { WithFireback } from "./WithFireback";
 import { WithSelfServiceRoutes } from "./WithSelfServiceRoutes";
@@ -28,10 +28,8 @@ import { WithSelfServiceRoutes } from "./WithSelfServiceRoutes";
 export function EssentialApp({
   ApplicationRoutes,
   WithSdk,
-  mockServer,
   apiPrefix,
 }: {
-  mockServer: any;
   ApplicationRoutes: any;
   WithSdk: any;
   apiPrefix?: string;
@@ -60,14 +58,12 @@ export function EssentialApp({
               }}
             >
               <WithFireback
-                mockServer={mockServer}
                 config={config}
                 prefix={apiPrefix}
                 queryClient={queryClient}
                 locale={locale}
               >
                 <WithSdk
-                  mockServer={mockServer}
                   prefix={apiPrefix}
                   config={config}
                   queryClient={queryClient}

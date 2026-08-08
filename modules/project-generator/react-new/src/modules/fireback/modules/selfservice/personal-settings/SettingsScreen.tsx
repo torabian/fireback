@@ -1,13 +1,13 @@
-import { useT } from "../../../hooks/useT";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 
-import { usePageTitle } from "../../../components/page-title/PageTitle";
+import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
 import { AccessiblitySettings } from "./AccessiblitySettings";
 import { DebuggerSettings } from "./DebuggerSettings";
 import { InterfaceSettings } from "./InterfaceSettings";
 import { NotificationSettings } from "./NotificationSettings";
 import { RichTextEditorSettings } from "./RichTextEditorSettings";
 import { ThemeSettings } from "./ThemeSettings";
-import { BUILD_VARIABLES } from "../../../hooks/build-variables";
+import { BUILD_VARIABLES } from "../../../../fireback-ui/hooks/build-variables";
 
 export function SettingsScreen({}: {}) {
   const t = useT();

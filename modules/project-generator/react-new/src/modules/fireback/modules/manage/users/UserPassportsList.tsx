@@ -1,5 +1,5 @@
-import { PageSection } from "../../../components/page-section/PageSection";
-import { useS } from "../../../hooks/useS";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { PassportDto } from "../../../sdk/abac/PassportDto";
 import { usePassportBrowseActionQuery } from "../../../sdk/abac/PassportBrowseAction";
 import { strings } from "./strings/translations";

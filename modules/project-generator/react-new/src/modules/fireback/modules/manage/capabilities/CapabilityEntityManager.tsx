@@ -1,9 +1,9 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
-import { useS } from "../../../hooks/useS";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useCapabilityCreateAction } from "../../../sdk/abac/CapabilityCreateAction";
 import { useCapabilityGetActionQuery } from "../../../sdk/abac/CapabilityGetAction";
 import { useCapabilityUpdateAction } from "../../../sdk/abac/CapabilityUpdateAction";

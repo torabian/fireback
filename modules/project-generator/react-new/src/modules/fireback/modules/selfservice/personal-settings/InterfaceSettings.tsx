@@ -1,17 +1,17 @@
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect } from "react";
-import { ErrorsView } from "../../../components/error-view/ErrorView";
-import { FormButton } from "../../../components/forms/form-button/FormButton";
+import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorView";
+import { FormButton } from "../../../../fireback-ui/components/forms/form-button/FormButton";
 
-import { PageSection } from "../../../components/page-section/PageSection";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
 import { type KeyValue } from "../../../definitions/definitions";
-import { AppConfigContext } from "../../../hooks/appConfigTools";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
-import { useT } from "../../../hooks/useT";
-import { useS } from "../../../hooks/useS";
+import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { enTranslations } from "../../../translations/en";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { createQuerySource } from "../../../hooks/useAsQuery";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { interfaceLanguages } from "./Langugages";
 import { strings } from "./strings/translations";
 

@@ -1,4 +1,4 @@
-import { type AppConfig } from "@/modules/fireback/hooks/appConfigTools";
+import { type AppConfig } from "@/modules/fireback-ui/hooks/appConfigTools";
 
 import React from "react";
 import { QueryClient } from "@tanstack/react-query";
@@ -9,13 +9,11 @@ import { QueryClient } from "@tanstack/react-query";
 export function WithSdk({
   children,
   queryClient,
-  mockServer,
   config,
 }: {
   children: React.ReactNode;
   queryClient: QueryClient;
   config: AppConfig;
-  mockServer: any;
 }) {
   return children;
 
@@ -28,13 +26,7 @@ export function WithSdk({
   //     identifier="projectname"
   //     queryClient={queryClient}
   //     remote={BUILD_VARIABLES.REMOTE_SERVICE}
-  //     /// #if BUILD_VARIABLES.INACCURATE_MOCK_MODE == "true"
-  //     defaultExecFn={() => {
-  //       return (options: any) => mockExecFn(options, mockServer.current);
-  //     }}
-  //     /// #endif
-  //     // defaultExecFn={() => (options: any) =>
-  //     //   mockExecFn(options, mockServer.current, t)}
+  //     defaultExecFn={() => (options: any) => myCustomExecFn(options)}
   //   >
   //     {children}
   //   </TestQueryProviders>

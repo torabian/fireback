@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
-import { useLocale } from "../../hooks/useLocale";
-import { useRouter } from "../../hooks/useRouter";
-import { useS } from "../../hooks/useS";
+import { useLocale } from "../../../fireback-ui/hooks/useLocale";
+import { useRouter } from "../../../fireback-ui/hooks/useRouter";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { strings } from "./strings/translations";
 import type { ClassicPassportOtpActionRes } from "../../sdk/abac/ClassicPassportOtpAction";

@@ -1,12 +1,12 @@
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 
 import { useWorkspaceCreateAction } from "../../../sdk/abac/WorkspaceCreateAction";
 
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
-import { useT } from "../../../hooks/useT";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useWorkspaceGetActionQuery } from "../../../sdk/abac/WorkspaceGetAction";
 import { useWorkspaceUpdateAction } from "../../../sdk/abac/WorkspaceUpdateAction";
 import { WorkspaceEditForm } from "./WorkspaceEditForm";

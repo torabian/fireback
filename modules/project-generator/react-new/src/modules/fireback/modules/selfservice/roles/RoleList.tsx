@@ -1,5 +1,5 @@
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
-import { useT } from "../../../hooks/useT";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useRoleAwareDeleteAction } from "../../../sdk/abac/RoleAwareDeleteAction";
 import { useRoleBrowseActionQuery } from "../../../sdk/abac/RoleBrowseAction";
 import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";

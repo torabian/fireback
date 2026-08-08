@@ -1,8 +1,8 @@
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { createQuerySource } from "../../../hooks/useAsQuery";
-import { useS } from "../../../hooks/useS";
+import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { GsmProviderDto } from "../../../sdk/messaging/GsmProviderDto";
 import { useContext } from "react";

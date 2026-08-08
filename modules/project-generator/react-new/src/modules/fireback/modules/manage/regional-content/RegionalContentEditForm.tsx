@@ -2,12 +2,12 @@ import { type EntityFormProps } from "../../../definitions/definitions";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
 import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
-import { FormText } from "../../../components/forms/form-text/FormText";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { useS } from "../../../hooks/useS";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
-import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
-import { createQuerySource } from "../../../hooks/useAsQuery";
+import { FormRichText } from "../../../../fireback-ui/components/forms/form-richtext/FormRichText";
+import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 
 export const RegionalContentForm = ({
   form,

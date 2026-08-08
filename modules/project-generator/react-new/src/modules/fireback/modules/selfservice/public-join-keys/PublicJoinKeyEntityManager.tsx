@@ -1,8 +1,8 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import { usePublicJoinKeyGetActionQuery } from "../../../sdk/abac/PublicJoinKeyGetAction";
 import { usePublicJoinKeyCreateAction } from "../../../sdk/abac/PublicJoinKeyCreateAction";
 import { usePublicJoinKeyUpdateAction } from "../../../sdk/abac/PublicJoinKeyUpdateAction";

@@ -18,30 +18,22 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import { FirebackMockServer } from "./mockServer";
-import { useCheckAuthentication } from "@/modules/fireback/components/layouts/ForcedAuthenticated";
+import { useCheckAuthentication } from "@/modules/fireback-ui/components/layouts/ForcedAuthenticated";
 import {
   useSelfServiceAuthenticateRoutes,
   useSelfServicePublicRoutes,
 } from "@/modules/fireback/modules/selfservice/SelfServiceRoutes";
-import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
+import { BUILD_VARIABLES } from "@/modules/fireback-ui/hooks/build-variables";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
 
 function App() {
-  const mockServer = useRef<any>(FirebackMockServer);
-
   const queryClient = useRef(new QueryClient());
 
   return (
     <QueryClientProvider client={queryClient.current}>
-      <WithFireback
-        mockServer={mockServer}
-        config={{}}
-        prefix={""}
-        queryClient={queryClient.current}
-      >
+      <WithFireback config={{}} prefix={""} queryClient={queryClient.current}>
         <AppBody />
       </WithFireback>
     </QueryClientProvider>

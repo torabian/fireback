@@ -1,21 +1,21 @@
-import { AppConfigContext } from "../../hooks/appConfigTools";
-import { useT } from "../../hooks/useT";
+import { AppConfigContext } from "../../../fireback-ui/hooks/appConfigTools";
+import { useT } from "../../../fireback-ui/hooks/useT";
 
-import { NotFound404 } from "../../components/404/NotFound404";
-import { useLocale } from "../../hooks/useLocale";
-import { useRtlClass } from "../../hooks/useRtlClass";
+import { NotFound404 } from "../../../fireback-ui/components/404/NotFound404";
+import { useLocale } from "../../../fireback-ui/hooks/useLocale";
+import { useRtlClass } from "../../../fireback-ui/hooks/useRtlClass";
 
 import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import Layout from "../../components/layouts/Layout";
-import { PageTitleProvider } from "../../components/page-title/PageTitle";
-import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
+import Layout from "../../../fireback-ui/components/layouts/Layout";
+import { PageTitleProvider } from "../../../fireback-ui/components/page-title/PageTitle";
+import { useRemoteMenuResolver } from "../../../fireback-ui/hooks/useRemoteMenuResolver";
 import { useManageRoutes } from "../../modules/manage/ManageRoutes";
 import { useMobileKitRoutes } from "../../modules/mobile-kit/dashboard/ManageRoutes";
 import { SettingsScreen } from "../../modules/selfservice/personal-settings/SettingsScreen";
 import { useSelfServiceAuthenticateRoutes } from "../../modules/selfservice/SelfServiceRoutes";
 import { AnimatedRouteWrapper } from "./SwipeTransition";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { BUILD_VARIABLES } from "../../../fireback-ui/hooks/build-variables";
 
 export function FirebackEssentialRouterManager({
   children,

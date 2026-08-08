@@ -1,9 +1,9 @@
 import { useFormik } from "formik";
 import { useEffect } from "react";
-import { mutationErrorsToFormik } from "../../hooks/api";
-import { useLocale } from "../../hooks/useLocale";
-import { useRouter } from "../../hooks/useRouter";
-import { useS } from "../../hooks/useS";
+import { mutationErrorsToFormik } from "../../../fireback-ui/hooks/api";
+import { useLocale } from "../../../fireback-ui/hooks/useLocale";
+import { useRouter } from "../../../fireback-ui/hooks/useRouter";
+import { useS } from "../../../fireback-ui/hooks/useS";
 
 import {
   ClassicSigninActionReq,

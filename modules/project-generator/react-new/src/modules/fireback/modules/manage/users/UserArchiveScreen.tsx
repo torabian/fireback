@@ -1,8 +1,8 @@
-import { useT } from "../../../hooks/useT";
-import { useRouter } from "../../../hooks/useRouter";
+import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
 
-import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
-import { useLocale } from "../../../hooks/useLocale";
+import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
+import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
 import { UserList } from "./UserList";
 import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 

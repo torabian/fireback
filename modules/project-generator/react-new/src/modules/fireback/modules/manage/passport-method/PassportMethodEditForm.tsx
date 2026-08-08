@@ -1,12 +1,12 @@
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { PassportMethodDto } from "../../../sdk/abac/PassportMethodDto";
 import { useContext } from "react";
 import { strings } from "./strings/translations";
-import { createQuerySource } from "../../../hooks/useAsQuery";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
+import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
 
 export const PassportMethodForm = ({
   form,

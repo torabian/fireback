@@ -1,8 +1,8 @@
-import { FormDateRange } from "@/modules/fireback/components/forms/form-date-range/FormDateRange";
-import { FormDate } from "@/modules/fireback/components/forms/form-date/FormDate";
-import { FormDateTimeRange } from "@/modules/fireback/components/forms/form-datetime-range/FormDateTimeRange";
-import { FormDateTime } from "@/modules/fireback/components/forms/form-datetime/FormDateTime";
-import { FormTime } from "@/modules/fireback/components/forms/form-time/FormTime";
+import { FormDateRange } from "@/modules/fireback-ui/components/forms/form-date-range/FormDateRange";
+import { FormDate } from "@/modules/fireback-ui/components/forms/form-date/FormDate";
+import { FormDateTimeRange } from "@/modules/fireback-ui/components/forms/form-datetime-range/FormDateTimeRange";
+import { FormDateTime } from "@/modules/fireback-ui/components/forms/form-datetime/FormDateTime";
+import { FormTime } from "@/modules/fireback-ui/components/forms/form-time/FormTime";
 import { Formik, type FormikProps } from "formik";
 import { CodeViewer } from "./CodeViewer";
 import { snippets } from "./DemoFormDates.snippets";

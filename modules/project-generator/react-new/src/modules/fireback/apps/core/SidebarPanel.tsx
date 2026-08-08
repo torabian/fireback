@@ -1,13 +1,13 @@
-import { useUiState } from "../../hooks/uiStateContext";
+import { useUiState } from "../../../fireback-ui/hooks/uiStateContext";
 
 import { useRef } from "react";
 
 import { Panel } from "react-resizable-panels";
-import { ResizeHandle } from "../../components/layouts/ResizeHandle";
-import Sidebar from "../../components/layouts/Sidebar";
-import { AppConfigProvider } from "../../hooks/appConfigTools";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
-import { detectDeviceType } from "../../hooks/deviceInformation";
+import { ResizeHandle } from "../../../fireback-ui/components/layouts/ResizeHandle";
+import Sidebar from "../../../fireback-ui/components/layouts/Sidebar";
+import { AppConfigProvider } from "../../../fireback-ui/hooks/appConfigTools";
+import { BUILD_VARIABLES } from "../../../fireback-ui/hooks/build-variables";
+import { detectDeviceType } from "../../../fireback-ui/hooks/deviceInformation";
 
 const getSize = () => {
   if (detectDeviceType().isMobileView) {

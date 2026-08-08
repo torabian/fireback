@@ -1,13 +1,13 @@
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { type FormikProps, useFormik } from "formik";
 import { useContext } from "react";
-import { AuthLoader } from "../../components/auth-loader/AuthLoader";
-import { QueryErrorView } from "../../components/error-view/QueryError";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
-import { source } from "../../hooks/source";
-import { useLocale } from "../../hooks/useLocale";
-import { useRouter } from "../../hooks/useRouter";
-import { useS } from "../../hooks/useS";
+import { AuthLoader } from "../../../fireback-ui/components/auth-loader/AuthLoader";
+import { QueryErrorView } from "../../../fireback-ui/components/error-view/QueryError";
+import { BUILD_VARIABLES } from "../../../fireback-ui/hooks/build-variables";
+import { source } from "../../../fireback-ui/hooks/source";
+import { useLocale } from "../../../fireback-ui/hooks/useLocale";
+import { useRouter } from "../../../fireback-ui/hooks/useRouter";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import type { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";
 import {

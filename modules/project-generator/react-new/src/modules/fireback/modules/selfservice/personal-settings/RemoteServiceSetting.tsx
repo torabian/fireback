@@ -1,12 +1,12 @@
-import { PageSection } from "../../../components/page-section/PageSection";
-import { useT } from "../../../hooks/useT";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
-import { ErrorsView } from "../../../components/error-view/ErrorView";
-import { FormText } from "../../../components/forms/form-text/FormText";
-import { FormButton } from "../../../components/forms/form-button/FormButton";
-import { AppConfigContext } from "../../../hooks/appConfigTools";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorView";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
+import { FormButton } from "../../../../fireback-ui/components/forms/form-button/FormButton";
+import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 
 interface AppRemoteInformation {
   remote: string;

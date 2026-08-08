@@ -1,9 +1,9 @@
-import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
-import { PageSection } from "../../../components/page-section/PageSection";
-import { usePageTitle } from "../../../hooks/authContext";
-import { useRouter } from "../../../hooks/useRouter";
-import { useT } from "../../../hooks/useT";
+import { CommonSingleManager } from "../../../../fireback-ui/components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
+import { usePageTitle } from "../../../../fireback-ui/hooks/authContext";
+import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
+import { useT } from "../../../../fireback-ui/hooks/useT";
 import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { useEffect, useState } from "react";
 import { RolePermissionTree } from "./RolePermissionTree";

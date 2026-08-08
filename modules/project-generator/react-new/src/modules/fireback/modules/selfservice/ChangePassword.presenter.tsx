@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import { useEffect } from "react";
-import { useRouter } from "../../hooks/useRouter";
-import { useS } from "../../hooks/useS";
+import { useRouter } from "../../../fireback-ui/hooks/useRouter";
+import { useS } from "../../../fireback-ui/hooks/useS";
 import {
   ChangePasswordActionReq,
   useChangePasswordAction,

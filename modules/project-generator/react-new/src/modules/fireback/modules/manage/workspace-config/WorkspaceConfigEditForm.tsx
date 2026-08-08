@@ -1,14 +1,14 @@
-import { FormCheckbox } from "../../../components/forms/form-switch/FormSwitch";
-import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormCheckbox } from "../../../../fireback-ui/components/forms/form-switch/FormSwitch";
+import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { WorkspaceConfigDto } from "../../../sdk/abac/WorkspaceConfigDto";
 import { strings } from "./strings/translations";
-import { PageSection } from "../../../components/page-section/PageSection";
-import { FormSelect } from "../../../components/forms/form-select/FormSelect";
-import { useEmailProvidersQuerySource } from "../../../hooks/useEmailProvidersQuerySource";
-import { useGsmProvidersQuerySource } from "../../../hooks/useGsmProvidersQuerySource";
-import { useRegionalContentsQuerySource } from "../../../hooks/useRegionalContentsQuerySource";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
+import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
+import { useEmailProvidersQuerySource } from "../../../../fireback-ui/hooks/useEmailProvidersQuerySource";
+import { useGsmProvidersQuerySource } from "../../../../fireback-ui/hooks/useGsmProvidersQuerySource";
+import { useRegionalContentsQuerySource } from "../../../../fireback-ui/hooks/useRegionalContentsQuerySource";
 
 export const WorkspaceConfigForm = ({
   form,

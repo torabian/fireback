@@ -1,6 +1,6 @@
-import { ErrorsView } from "../../../components/error-view/ErrorView";
-import { PageSection } from "../../../components/page-section/PageSection";
-import { useS } from "../../../hooks/useS";
+import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorView";
+import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 import { usePushSubscription } from "./usePushSubscription";
 

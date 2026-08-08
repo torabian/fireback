@@ -1,7 +1,7 @@
-import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { CommonListManager } from "../../../../fireback-ui/components/entity-manager/CommonListManager";
 import { usePublicJoinKeyBrowseActionQuery } from "../../../sdk/abac/PublicJoinKeyBrowseAction";
 import { usePublicJoinKeyAwareDeleteAction } from "../../../sdk/abac/PublicJoinKeyAwareDeleteAction";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
 import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./PublicJoinKeyColumns";

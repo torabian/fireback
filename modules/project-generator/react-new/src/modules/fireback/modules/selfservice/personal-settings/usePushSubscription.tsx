@@ -1,6 +1,6 @@
 import { useWebPushConfigCreateAction } from "../../../sdk/messaging/WebPushConfigCreateAction";
 import { useEffect, useState } from "react";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 
 export function usePushSubscription() {

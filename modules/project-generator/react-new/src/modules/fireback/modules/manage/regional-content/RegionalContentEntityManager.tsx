@@ -1,15 +1,15 @@
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { RegionalContentForm } from "./RegionalContentEditForm";
 import { useRegionalContentGetActionQuery } from "../../../sdk/abac/RegionalContentGetAction";
 import { useRegionalContentCreateAction } from "../../../sdk/abac/RegionalContentCreateAction";
 import { useRegionalContentUpdateAction } from "../../../sdk/abac/RegionalContentUpdateAction";
 import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
 import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";
-import { useS } from "../../../hooks/useS";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 export const RegionalContentEntityManager = ({
   data,

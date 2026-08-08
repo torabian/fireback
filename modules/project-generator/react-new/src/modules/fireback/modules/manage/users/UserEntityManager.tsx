@@ -1,10 +1,10 @@
-import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 
 
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "../../../components/entity-manager/CommonEntityManager";
+} from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { UserEditForm } from "./UserEditForm";
 import { useUserGetActionQuery } from "../../../sdk/abac/UserGetAction";
 import { useUserCreateAction } from "../../../sdk/abac/UserCreateAction";

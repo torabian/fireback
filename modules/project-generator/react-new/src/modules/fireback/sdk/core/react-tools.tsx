@@ -349,10 +349,11 @@ interface IRemoteQueryProvider {
 
   /**
    * Allows developer to override the http call function. Basically all http requests
-   * going through a single function, and you can override it, for cases such a mock server:
+   * going through a single function, and you can override it - e.g. to reroute them
+   * somewhere other than the configured `remote`:
    *
    * defaultExecFn={() => {
-   *  return (options: any) => mockExecFn(options, mockServer.current);
+   *  return (options: any) => myCustomExecFn(options);
    * }}
    */
   defaultExecFn?: any;
