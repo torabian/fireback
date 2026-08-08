@@ -1,4 +1,4 @@
-package fireback
+package clitools
 
 import (
 	"encoding/json"

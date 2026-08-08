@@ -1,4 +1,4 @@
-package fireback
+package jsonlogic
 
 import (
 	"encoding/json"
@@ -120,16 +120,16 @@ func QuickOr(v reflect.Value, parent string) []FlatKeyPairCondition {
 	return res
 }
 
-func CaptureGinRequestIntoFilterQuery(qs any, c *gin.Context, f *QueryDSL) {
+func CaptureGinRequestIntoFilterQuery(qs any, c *gin.Context) {
 	CaptureRequestIntoFilterQuery(qs, func(field reflect.StructField) string {
 		return c.Query(field.Tag.Get("qs"))
-	}, f)
+	})
 }
 
-func CaptureCliRequestIntoFilterQuery(qs any, c *cli.Command, f *QueryDSL) {
+func CaptureCliRequestIntoFilterQuery(qs any, c *cli.Command) {
 	CaptureRequestIntoFilterQuery(qs, func(field reflect.StructField) string {
 		return c.String(field.Tag.Get("cli"))
-	}, f)
+	})
 }
 
 type FieldReader func(field reflect.StructField) string
@@ -149,7 +149,7 @@ func registerOperators(tr *jsonlogic2sql.Transpiler) {
 	})
 }
 
-func CaptureRequestIntoFilterQuery(qs any, read FieldReader, f *QueryDSL) {
+func CaptureRequestIntoFilterQuery(qs any, read FieldReader) {
 	v := reflect.ValueOf(qs)
 
 	CaptureQueryStringStruct(v, "", read)
@@ -167,5 +167,5 @@ func CaptureRequestIntoFilterQuery(qs any, read FieldReader, f *QueryDSL) {
 		return
 	}
 
-	f.FilterQuery = sql
+	fmt.Println("SQL", sql)
 }
