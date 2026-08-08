@@ -19,12 +19,6 @@ on:
       - "main"
   workflow_dispatch:
     inputs:
-      # target:
-      #   type: choice
-      #   options:
-      #     - ubuntu-x64
-      #     - windows-x64
-      #     - macosx
       release_artifacts:
         description: "Create draft release"
         required: false
@@ -35,27 +29,6 @@ on:
         required: false
         default: false
         type: boolean
-
-      fireback_windows:
-        description: "Build Windows"
-        required: false
-        default: false
-        type: boolean
-      fireback_macos:
-        description: "Build Macosx"
-        required: false
-        default: false
-        type: boolean
-      fireback_react:
-        description: "Build Fireback React Front-end"
-        required: false
-        default: false
-        type: boolean
-      fireback_capacitor:
-        description: "Build Capacitor Demo"
-        required: false
-        default: false
-        type: boolean
 jobs:
 
   deploy_github_release:
@@ -63,8 +36,6 @@ jobs:
       - build-windows
       - build-ubuntu
       - build-macos
-      - fireback-react
-      - test-react-code-gen
     name: deploy_github_release
     if: ${{ inputs.release_artifacts == true }}
     runs-on: ubuntu-latest
@@ -111,16 +82,6 @@ jobs:
           name: artifacts-capacitor
           path: artifacts-capacitor
 
-
-      - name: Upload Capacitor application
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts-capacitor/app-release.apk
-          asset_name: fireback-capcitor.apk
-          asset_content_type: application/apk
 
       - name: upload mac amd64 zip artifact
         uses: actions/upload-release-asset@v1
@@ -292,7 +253,7 @@ jobs:
         with:
           node-version: 22
       - name: Install the dependencies
-        run: cd modules/fireback/codegen/react-new && npm i --force
+        run: cd ui && npm i --force
 
       - name: Package windows
         run: cd cmd/fireback && make wininstaller
@@ -356,7 +317,7 @@ jobs:
       - name: install prettier, so compiler would pick it up
         run: sudo npm i -g prettier
       - name: Install the dependencies
-        run: cd modules/fireback/codegen/react-new && npm i --force
+        run: cd ui && npm i --force
       - name: Build and package deb files
         run: cd cmd/fireback && make deb && make linux-zip
       - name: Windows zip
@@ -370,7 +331,7 @@ jobs:
       - name: Refresh the fireback dependencies
         run: make refresh
       - name: Clean ui installation logs
-        run: git checkout modules/fireback/codegen/react-new/yarn.lock && git checkout modules/fireback/codegen/react-new/package-lock.json
+        run: git checkout ui/yarn.lock && git checkout ui/package-lock.json
 
       - name: 
           Refreshing golang modules should not make a commit.
@@ -420,11 +381,11 @@ jobs:
       - name: install fireback globally
         run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
       - name: install dependencies for react-new
-        run: cd modules/fireback/codegen/react-new  && yarn
+        run: cd ui  && yarn
       - name: regenerate SDKs
         run: make rebuild-sdks-ci
       - name: checkout yarn lock because it's unrelated
-        run: git checkout modules/fireback/codegen/react-new/yarn.lock
+        run: git checkout ui/yarn.lock
       - name: 
           Check if the sdk generated is already committed to the codebase.
           Fireback changes should not be out of sync with react.js
@@ -436,78 +397,6 @@ jobs:
             git diff --name-only
             exit 1
           fi
-    
-  fireback-capacitor:
-    if: ${{ inputs.fireback_capacitor == true }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: adopt
-          cache: gradle
-
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-      
-      - name: Remove the android platform, and recreate it. :(
-        run: rm -rf e2e/samples/fireback-capacitor/android
-      - name: Re-add cap
-        run: cd e2e/samples/fireback-capacitor && npm install --save-dev @capacitor/cli && npx cap add android
-
-      - name: Build front-end
-        run: cd modules/fireback/codegen/react-new && npm i --force && npm run build:bundle:demo
-      
-      - name: Build Cordova Android App
-        run: cd e2e/samples/fireback-capacitor && npm i --force && make rebuild
-
-      - name: Upload APK
-        uses: actions/upload-artifact@master
-        with:
-          name: artifacts-capacitor
-          path: e2e/samples/fireback-capacitor/android/app/build/outputs/apk/release
-
-      
-      
- 
-  fireback-react:
-    if: ${{ inputs.fireback_react == true }}
-    runs-on: ubuntu-latest
-    needs:
-      - run-cypress-sqlite
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 22
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
-      - run: cd docs && npm i --force && npm run build
-        name: Build the docs
-
-      - name: Build the front-end
-        run: cd modules/fireback/codegen/react-new && npm i --force && npm run fbgithubpages
-
-      - name: Copy docs to front-end build
-        run: cp -R modules/fireback/codegen/react-new/dist docs/build/demo
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./docs/build
-  
-      - name: Deploy 🚀
-        if: ${{ inputs.github_pages == true }}
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: ./docs/build # The folder the action should deploy.
 
   build-macos:
     if: ${{ inputs.fireback_macos == true }}
@@ -529,7 +418,7 @@ jobs:
           node-version: 22
       
       - name: Install the dependencies
-        run: cd modules/fireback/codegen/react-new && npm i --force
+        run: cd ui && npm i --force
       - name: Download Packages installer build tool
         run: wget http://s.sudre.free.fr/Software/files/Packages.dmg
 
@@ -546,65 +435,6 @@ jobs:
         with:
           name: artifacts-darwin
           path: artifacts
-      
-  # cypress-run:
-  #   runs-on: ubuntu-latest  
-  #   needs: 
-  #     - build-ubuntu
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4  
-
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 22  
-
-  #     - name: GET PWD
-  #       run: pwd
-  #     - name: Install dependencies
-  #       run: cd e2e && npm install  
-
-  #     - uses: actions/download-artifact@master
-  #       with:
-  #         name: artifacts-ubuntu
-  #         path: artifacts-ubuntu
-  #     - name: check artifacts
-  #       run: cd artifacts-ubuntu/fireback-server-all && ls -la
-  #     - name: install fireback globally
-  #       run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
-  #     - name: Init and run the fireback
-  #       run: fireback init --name test --port 3000 --db-name sample.db && fireback migration apply
-  #     - name: Add the admin account
-  #       run: fireback auth --in-root=true --value admin --workspace-type-id root --type email --password admin --first-name Ali --last-name Torabi
-  #     - name: Query the passports
-  #       run: fireback passport q
-  #     - name: Login on cli
-  #       run: fireback passport in --value admin --password admin
-  #     - name: Query the users
-  #       run: fireback user q
-  #     - name: Where is fireback?
-  #       run: whereis fireback
-  #     - name: Run Cypress tests
-  #       run: export FB_CWD=$(PWD) && export FB_APP=$(whereis fireback) && cd e2e && npm test  
-
-  #     - name: Upload Cypress screenshots on failure
-  #       if: failure()  
-  #       uses: actions/upload-artifact@master
-  #       with:
-  #         name: cypress-screenshots
-  #         path: e2e/cypress/screenshots
-
-  #     - name: Upload Cypress videos on failure
-  #       if: failure()  
-  #       uses: actions/upload-artifact@master
-  #       with:
-  #         name: cypress-videos
-  #         path: e2e/cypress/videos
-
-  #     - name: Cat the fireback.log in case of failure
-  #       if: failure()
-  #       run: cat fireback.log
 
   run-cypress-mysql:
     needs:

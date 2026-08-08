@@ -18,3 +18,13 @@ Codegen features are fully removed. We are using https://github.com/torabian/emi
 and rest will be written manually.
 
 <img src=".github/logo.svg" alt="Fireback logo" width="200"/>
+
+## How to use the project.
+
+There is no longer a "new" command in fireback. You can clone the repository, and rename some `main.go` and continue.
+Also if you already have a project, you can install `github.com/torabian/fireback` into it.
+
+## How to use Fireback for managing?
+
+Fireback binaries are built, with self-service and manage enabled, both as binaries as well as disk image called
+fireback. If you only need an authentication service use them instead of source code.

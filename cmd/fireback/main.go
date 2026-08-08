@@ -21,7 +21,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"
-	project_generator "github.com/torabian/fireback/modules/project-generator"
 	"github.com/torabian/fireback/modules/storage"
 )
 
@@ -50,7 +49,6 @@ func main() {
 		fireback.FirebackModuleSetup(nil),
 		{
 			CliHandlers: []*cli.Command{
-				project_generator.NewProjectCli(),
 				emiCommand,
 			},
 		},
