@@ -10,7 +10,7 @@ targets:
     flags:
       pkg: fireback
   - compiler: js
-    output: ../project-generator/react-new/src/modules/sdk/fireback
+    output: ../../ui/src/modules/sdk/fireback
     flags:
       js-sdk-location: ../sdk
     tags:

@@ -6,7 +6,7 @@ targets:
 - compiler: js
   flags:
     js-sdk-location: ../sdk
-  output: ../project-generator/react-new/src/modules/fireback/sdk/eventbus
+  output: ../../ui/src/modules/fireback/sdk/eventbus
   tags:
   - typescript
   - react

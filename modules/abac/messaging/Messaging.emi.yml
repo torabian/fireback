@@ -14,7 +14,7 @@ targets:
     flags:
       pkg: messaging
   - compiler: js
-    output: ../../project-generator/react-new/src/modules/fireback/sdk/messaging
+    output: ../../../ui/src/modules/fireback/sdk/messaging
     flags:
       js-sdk-location: ../sdk
     tags:

@@ -6,7 +6,7 @@ targets:
 - compiler: js
   flags:
     js-sdk-location: ../sdk
-  output: ../project-generator/react-new/src/modules/sdk/abac
+  output: ../../ui/src/modules/sdk/abac
   tags:
   - typescript
   - react

@@ -1,17 +1,16 @@
+# By default we only make the binary for testing - use make server for building all the packages
+# for release
+
 default:
 	rm -rf app && cd cmd/fireback && make dev
 
+# Compiles the project into wasm, which would run in browser
 wasm:
 	cd cmd/fireback-wasm && make
 
-mac-pkg:
-	cd cmd/fireback && make mac-pkg
-
+# Compiles everything, zips, and packages for all targets that we are planning.
 server:
 	cd cmd/fireback && make everything
-
-test:
-	FIREBACK_SDK_LOCATION=$(PWD) ./artifacts/fireback/f tests run
 
 # Fireback has some sdks on some projects which are commited due to fact I want it
 # be ready to use without any builds tools right away. They often get old over changes we make
@@ -34,12 +33,14 @@ test:
 checkendpointtests:
 	go run ./tools/checkendpointtests
 
+# Builds the disk image for docker hub, as fireback can be installed as disk image
 dockerbuild:
 	docker build -t fireback . 
 
 dockerpublish:
 	make dockerbuild && docker tag fireback fireback/fireback:latest && docker push fireback/fireback:latest
 
+# Recompiles the definitions using emi compiler.
 defs:
 	./app emi compile --path modules/fireback/Fireback.emi.yml && \
 	./app emi compile --path modules/abac/Abac.emi.yml && \
