@@ -1,22 +1,20 @@
 import { type Filter, type Sorting } from "@devexpress/dx-react-grid";
 import { parse, stringify } from "qs";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   type IMenuActionItem,
   useMenuTools,
 } from "../components/action-menu/ActionMenu";
-import { ModalContext } from "../components/modal/Modal";
 import { commonDialogs } from "../components/overlay/CommonOverlays";
-import { type Filters } from "./datatabletools";
-import { useRouter } from "./useRouter";
-import { osResources } from "./resources";
-import { type DeleteRequest } from "../../sdk/core/http-tools";
-import { useDebouncedEffect } from "./useDebouncedEffect";
-import { useKeyCombination } from "./useKeyPress";
-import { useS } from "./useS";
 import { strings } from "../components/strings/translations";
+import { type Filters } from "./datatabletools";
+import { osResources } from "./resources";
+import { useDebouncedEffect } from "./useDebouncedEffect";
 import { KeyboardAction } from "./useExportTools";
+import { useKeyCombination } from "./useKeyPress";
+import { useRouter } from "./useRouter";
+import { useS } from "./useS";
 
 export function useDatatableFiltering({
   urlMask,
@@ -128,15 +126,6 @@ export function useDatatableFiltering({
   const onFiltersChange = (filters: Filter[] | undefined) => {
     let newFilters = { startIndex: 0 };
     setFilter(newFilters);
-  };
-
-  const useModal = useContext(ModalContext);
-
-  const idsToQuery = (items: string[]): DeleteRequest => {
-    return {
-      query: (items || []).map((t) => `unique_id = ${t}`).join(" or "),
-      uniqueId: "",
-    };
   };
 
   const deleteItems = async () => {

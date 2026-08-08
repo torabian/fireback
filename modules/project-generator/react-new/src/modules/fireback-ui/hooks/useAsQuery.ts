@@ -2,13 +2,14 @@ import {
   type QueryObserverResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
-import { type IResponseList } from "../../sdk/core/http-tools";
+
 import { type UseRemoteQuery } from "../../sdk/core/react-tools";
+import type { ResponseDto } from "@/modules/sdk/sdk/envelopes/google-json-style-guide/generated/ResponseDto";
 
 export function createQuerySource<T>(items: T[]): (
   params: UseRemoteQuery & { items: T[] },
 ) => {
-  query: UseQueryResult<IResponseList<T>, any>;
+  query: UseQueryResult<ResponseDto<T>, any>;
   items: T[];
 } {
   return (otherParams) => useAsQuery<T>({ items, ...otherParams });
@@ -22,7 +23,7 @@ export function createQuerySource<T>(items: T[]): (
  * but you could edit it to meet your needs instead.
  */
 export function useAsQuery<T>(params: UseRemoteQuery & { items: T[] }): {
-  query: UseQueryResult<IResponseList<T>, any>;
+  query: UseQueryResult<ResponseDto<T>, any>;
   items: T[];
 } {
   let itemsPerPage = params.query?.itemsPerPage || 2;
@@ -31,7 +32,7 @@ export function useAsQuery<T>(params: UseRemoteQuery & { items: T[] }): {
   let items: T[] = params.items || [];
   items = items.slice(startIndex, startIndex + itemsPerPage);
 
-  const query: UseQueryResult<IResponseList<T>> = {
+  const query: UseQueryResult<ResponseDto<T>> = {
     data: {
       data: {
         items,
@@ -62,7 +63,7 @@ export function useAsQuery<T>(params: UseRemoteQuery & { items: T[] }): {
     },
     refetch() {
       console.log("Refetch is not working actually.");
-      return Promise.resolve<QueryObserverResult<IResponseList<T>, unknown>>(
+      return Promise.resolve<QueryObserverResult<ResponseDto<T>, unknown>>(
         undefined,
       );
     },

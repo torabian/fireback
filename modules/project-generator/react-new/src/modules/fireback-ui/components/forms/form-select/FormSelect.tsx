@@ -4,7 +4,6 @@ import { type FormikProps } from "formik";
 import { get, isArray, isObject, set } from "lodash";
 import { useState } from "react";
 import Select from "react-select/async";
-import { type IResponseList } from "../../../../sdk/core/http-tools";
 import { type UseRemoteQuery } from "../../../../sdk/core/react-tools";
 import { useS } from "../../../hooks/useS";
 import { strings } from "../../strings/translations";
@@ -12,6 +11,7 @@ import {
   BaseFormElement,
   type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
+import type { ResponseDto } from "@/modules/sdk/sdk/envelopes/google-json-style-guide/generated/ResponseDto";
 
 export interface FormSelectBase<
   T,
@@ -88,7 +88,7 @@ export interface FormSelectBase<
    * @returns
    */
   querySource: (params: UseRemoteQuery) => {
-    query: UseQueryResult<IResponseList<T>, any>;
+    query: UseQueryResult<ResponseDto<T>, any>;
     items: T[];
     keyExtractor?: (item: T) => any;
   };
