@@ -76,6 +76,9 @@ func excludeDatabaseConnection() bool {
 
 func CommonHeadlessAppStart(x *application.Application, onDatabaseCompleted func()) {
 
+	// Load the application configuration
+	envm.LoadFirebackAppConfiguration(config)
+
 	// Use the logger
 	initLogger()
 

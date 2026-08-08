@@ -19,7 +19,6 @@ import (
 	// deliberately not imported by cmd/fireback-wasm.
 	"github.com/torabian/fireback/modules/fireback/application"
 	_ "github.com/torabian/fireback/modules/fireback/clitools"
-	"github.com/torabian/fireback/modules/fireback/envm"
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"
@@ -30,9 +29,6 @@ import (
 // var ui embed.FS
 
 func main() {
-
-	// Load the application configuration
-	envm.LoadFirebackAppConfiguration(fireback.GetConfigRef())
 
 	// wal-g is embedded directly in this binary (see modules/backup/Exec.go)
 	// rather than shelling out to a separate installed executable. This
