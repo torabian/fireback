@@ -1,10 +1,9 @@
 import { FormRichText } from "../../../../fireback-ui/components/forms/form-richtext/FormRichText";
 import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { useS } from "../../../../fireback-ui/hooks/useS";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
 import { strings } from "./strings/translations";
 
@@ -42,7 +41,6 @@ export const EmailProviderEditForm = ({
   isEditing,
 }: EntityFormProps<EmailProviderDto>) => {
   const { values, setFieldValue, errors } = form;
-  const t = useT();
   const s = useS(strings);
 
   // =====================
@@ -131,8 +129,8 @@ export const EmailProviderEditForm = ({
         keyExtractor={(item) => item.value}
         querySource={querySource}
         errorMessage={errors.type}
-        label={t.mailProvider.type}
-        hint={t.mailProvider.typeHint}
+        label={s.type}
+        hint={s.typeHint}
       />
 
       {/* Dynamic Config Fields */}

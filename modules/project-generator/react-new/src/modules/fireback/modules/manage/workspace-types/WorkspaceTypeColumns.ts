@@ -1,21 +1,22 @@
 import { WorkspaceTypeDto } from "../../../sdk/abac/WorkspaceTypeDto";
-import { enTranslations } from "../../../translations/en";
+import { type strings as uiStrings } from "../../../../fireback-ui/components/strings/translations";
+import { type strings } from "./strings/translations";
 
-export const columns = (t: typeof enTranslations) => [
+export const columns = (s: typeof strings, uiS: typeof uiStrings) => [
   {
     name: "uniqueId",
-    title: t.table.uniqueId,
+    title: uiS.table.uniqueId,
     width: 200,
   },
   {
     name: "title",
-    title: t.wokspaces.title,
+    title: s.title,
     width: 200,
     getCellValue: (entity: WorkspaceTypeDto) => entity.title,
   },
   {
     name: "slug",
-    slug: t.wokspaces.slug,
+    slug: s.slug,
     width: 200,
     getCellValue: (entity: WorkspaceTypeDto) => entity.slug,
   },

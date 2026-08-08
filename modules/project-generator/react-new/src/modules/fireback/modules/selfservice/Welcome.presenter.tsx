@@ -2,7 +2,6 @@ import { type FormikProps } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../../fireback-ui/hooks/useLocale";
 import { useRouter } from "../../../fireback-ui/hooks/useRouter";
-import { useT } from "../../../fireback-ui/hooks/useT";
 import { useCheckPassportMethodsActionQuery } from "../../sdk/abac/CheckPassportMethodsAction";
 import {
   type AuthAvailableMethods,
@@ -12,7 +11,6 @@ import {
 import type { ClassicSigninActionReq } from "../../sdk/abac/ClassicSigninAction";
 
 export const usePresenter = () => {
-  const t = useT();
   const { locale } = useLocale();
   const { push } = useRouter();
   const formik = useRef<FormikProps<Partial<ClassicSigninActionReq>> | null>();
@@ -84,7 +82,6 @@ export const usePresenter = () => {
   }, [methodData]);
 
   return {
-    t,
     formik,
     onSelect,
     availableOptions,

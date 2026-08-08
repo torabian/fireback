@@ -1,6 +1,5 @@
 import { localizeNumber } from "../../hooks/fonts";
 import { useLocale } from "../../hooks/useLocale";
-import { useT } from "../../hooks/useT";
 import classNames from "classnames";
 
 export function CustomPageSize({
@@ -12,7 +11,6 @@ export function CustomPageSize({
   onPageSizeChange: (size: number) => void;
   currentPageSize: number;
 }) {
-  const t = useT();
   const { locale } = useLocale();
 
   return (

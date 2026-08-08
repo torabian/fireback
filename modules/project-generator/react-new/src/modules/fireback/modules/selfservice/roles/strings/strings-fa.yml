@@ -1,0 +1,10 @@
+content:
+  editRole: نقش را ویرایش کنید
+  inviteRoleHint: نقش(هایی) را که می خواهید به کاربر هنگام پیوستن به فضای کاری بدهید،
+    انتخاب کنید. این را می توان بعدا نیز تغییر داد.
+  inviteRoleLabel: نقش
+  menuTitle: نقش ها
+  newRole: نقش جدید
+  role:
+    name: نام
+    permissions: دسترسی ها

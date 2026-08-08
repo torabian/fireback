@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";
-import { useT } from "../../hooks/useT";
 import { useS } from "../../hooks/useS";
 import { osResources } from "../../../fireback/resources/resources";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
@@ -13,7 +12,6 @@ import { strings } from "../strings/translations";
 export function CurrentUser({ onClick }: { onClick: () => void }) {
   const { isAuthenticated, signout } = useContext(RemoteQueryContext);
   const router = useRouter();
-  const t = useT();
   const s = useS(strings);
   const queryClient = useQueryClient();
   const signout$ = () => {
@@ -38,7 +36,7 @@ export function CurrentUser({ onClick }: { onClick: () => void }) {
     return (
       <Link className="user-signin-section" href="/signin" onClick={onClick}>
         <img src={BUILD_VARIABLES.PUBLIC_URL + "/common/user.svg"} />
-        {t.currentUser.signin}
+        {s.currentUser.signin}
       </Link>
     );
   }
@@ -50,7 +48,7 @@ export function CurrentUser({ onClick }: { onClick: () => void }) {
           <a onClick={onSignoutClick} className="nav-link text-white">
             <span>
               <img className="menu-icon" src={source(osResources.turnoff)} />
-              <span className="nav-link-text">{t.currentUser.signout}</span>
+              <span className="nav-link-text">{s.currentUser.signout}</span>
             </span>
           </a>
         </li>

@@ -3,7 +3,6 @@
 // and saves them in database as string.
 // make sure database is keeping type text instead of string
 
-import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
 import {
   BaseFormElement,
@@ -28,7 +27,6 @@ export const FormInlineImage = ({
   ...props
 }: FormInlineImageProps) => {
   const readonly = !!onChange;
-  const t = useT();
   const s = useS(strings);
 
   const uploadFn = (file: File) => {
@@ -87,7 +85,7 @@ export const FormInlineImage = ({
           type="button"
           onClick={onUploadDialog}
         >
-          {t.drive.attachFile}
+          {s.drive.attachFile}
         </button>
       )}
     </BaseFormElement>

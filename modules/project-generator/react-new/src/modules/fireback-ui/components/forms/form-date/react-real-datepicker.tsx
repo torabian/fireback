@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import "react-phone-input-2/lib/style.css";
 var jalaali = require("jalaali-js");
 
-import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
+import { strings } from "../../strings/translations";
 import { localizeNumber } from "../../../hooks/fonts";
 import { useLocale } from "../../../hooks/useLocale";
 
@@ -48,7 +49,7 @@ export function ReactRealDatePicker({
   value?: string | null;
 }) {
   const { locale } = useLocale();
-  const t = useT();
+  const s = useS(strings);
 
   const [pickerContent] = useState({
     years: getYears(5),
@@ -56,7 +57,7 @@ export function ReactRealDatePicker({
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
       22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
     ],
-    months: Object.values(t.jalaliMonths),
+    months: Object.values(s.jalaliMonths),
   });
 
   useEffect(() => {

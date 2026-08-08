@@ -1,6 +1,7 @@
 import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
-import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
 import { useRolesQuerySource } from "../../../../fireback-ui/hooks/useRolesQuerySource";
@@ -12,17 +13,17 @@ export const PublicJoinKeyEditForm = ({
 }: EntityFormProps<Partial<PublicJoinKeyDto>>) => {
   const { values, setValues, setFieldValue, errors } = form;
   const { options } = useContext(RemoteQueryContext);
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <>
       <FormSelect
         formEffect={{ field: PublicJoinKeyDto.Fields.role$, form }}
         querySource={useRolesQuerySource}
-        label={t.wokspaces.invite.role}
+        label={s.roleFieldLabel}
         errorMessage={errors.roleId}
         fnLabelFormat={(item) => item.name}
-        hint={t.wokspaces.invite.roleHint}
+        hint={s.roleFieldHint}
       />
     </>
   );

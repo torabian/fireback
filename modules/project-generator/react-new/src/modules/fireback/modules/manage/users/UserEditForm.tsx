@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { UserDto } from "../../../sdk/abac/UserDto";
@@ -13,7 +12,6 @@ export const UserEditForm = ({
 }: EntityFormProps<Partial<UserDto>>) => {
   const { values, setFieldValue, errors, setValues } = form;
   const { options } = useContext(RemoteQueryContext);
-  const t = useT();
   const s = useS(strings);
 
   return (
@@ -27,8 +25,8 @@ export const UserEditForm = ({
             }
             autoFocus={!isEditing}
             errorMessage={errors?.firstName}
-            label={t.wokspaces.invite.firstName}
-            hint={t.wokspaces.invite.firstNameHint}
+            label={s.firstName}
+            hint={s.inviteFirstNameHint}
           />
         </div>
         <div className="col-md-12">
@@ -38,8 +36,8 @@ export const UserEditForm = ({
               setFieldValue(UserDto.Fields.lastName, value, false)
             }
             errorMessage={errors?.lastName}
-            label={t.wokspaces.invite.lastName}
-            hint={t.wokspaces.invite.lastNameHint}
+            label={s.lastName}
+            hint={s.inviteLastNameHint}
           />
         </div>
         <div className="col-md-12">

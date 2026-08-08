@@ -1,30 +1,31 @@
 import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
-import { enTranslations } from "../../../translations/en";
+import { type strings as uiStrings } from "../../../../fireback-ui/components/strings/translations";
+import { type strings } from "./strings/translations";
 
-export const columns = (t: typeof enTranslations) => [
+export const columns = (s: typeof strings, uiS: typeof uiStrings) => [
   {
     name: EmailSenderDto.Fields.uniqueId,
-    title: t.table.uniqueId,
+    title: uiS.table.uniqueId,
     width: 200,
   },
   {
     name: EmailSenderDto.Fields.fromName,
-    title: t.mailProvider.fromName,
+    title: s.fromName,
     width: 200,
   },
   {
     name: EmailSenderDto.Fields.fromEmailAddress,
-    title: t.mailProvider.fromEmailAddress,
+    title: s.fromEmailAddress,
     width: 200,
   },
   {
     name: EmailSenderDto.Fields.nickName,
-    title: t.mailProvider.nickName,
+    title: s.nickName,
     width: 200,
   },
   {
     name: EmailSenderDto.Fields.replyTo,
-    title: t.mailProvider.replyTo,
+    title: s.replyTo,
     width: 200,
   },
 ];

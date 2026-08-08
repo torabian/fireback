@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import Link from "../link/Link";
 
@@ -37,7 +38,7 @@ export function ForcedAuthenticated({
   byPass?: boolean;
   children: React.ReactNode;
 }) {
-  const t = useT();
+  const s = useS(strings);
   const { loadComplete, needsAuthentication, session, isFading } =
     useCheckAuthentication();
 
@@ -52,7 +53,7 @@ export function ForcedAuthenticated({
     >
       {needsAuthentication ? (
         <>
-          <div>{t.forcedLayout.forcedLayoutGeneralMessage}</div>
+          <div>{s.forcedLayout.forcedLayoutGeneralMessage}</div>
           <Link
             className="btn btn-secondary"
             replace
@@ -60,13 +61,13 @@ export function ForcedAuthenticated({
               window.location.pathname
             )}`}
           >
-            {t.signinInstead}
+            {s.signinInstead}
           </Link>
         </>
       ) : (
         <>
           <span className="anim-loader"></span>
-          <div>{t.forcedLayout.checkingSession}</div>
+          <div>{s.forcedLayout.checkingSession}</div>
         </>
       )}
     </div>

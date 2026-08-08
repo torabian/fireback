@@ -1,4 +1,6 @@
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings as uiStrings } from "../../../../fireback-ui/components/strings/translations";
+import { strings } from "./strings/translations";
 import { useWorkspaceBrowseActionQuery } from "../../../sdk/abac/WorkspaceBrowseAction";
 import { useWorkspaceAwareDeleteAction } from "../../../sdk/abac/WorkspaceAwareDeleteAction";
 
@@ -8,14 +10,15 @@ import { columns } from "./WorkspaceColumns";
 import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceList = () => {
-  const t = useT();
+  const s = useS(strings);
+  const uiS = useS(uiStrings);
   const uniqueIdHrefHandler = (uniqueId: string) =>
     WorkspaceNavigation.single(uniqueId);
 
   return (
     <>
       <CommonListManager
-        columns={columns(t)}
+        columns={columns(s, uiS)}
         queryHook={useWorkspaceBrowseActionQuery}
         onRecordsDeleted={({ queryClient }) => {
           queryClient.invalidateQueries("*fireback.UserRoleWorkspace");
@@ -24,7 +27,7 @@ export const WorkspaceList = () => {
         RowDetail={(props: any) => (
           <CommonRowDetail
             {...props}
-            columns={columns}
+            columns={() => columns(s, uiS)}
             uniqueIdHref
             Handler={uniqueIdHrefHandler}
           />

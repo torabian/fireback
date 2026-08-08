@@ -33,7 +33,8 @@ import {
 } from "../../../fireback/definitions/definitions";
 import { httpErrorHanlder } from "../../hooks/api";
 import { useKeyCombination } from "../../hooks/useKeyPress";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { Checkbox } from "../checkbox/Checkbox";
 import { QueryErrorView } from "../error-view/QueryError";
 import { WithPermissions } from "../layouts/WithPermissions";
@@ -103,7 +104,7 @@ export function CommonDataTable({
   bulkEditHook?: any;
   inlineInsertHook?: any;
 }) {
-  const t = useT();
+  const s = useS(strings);
 
   const {
     filters,
@@ -192,7 +193,7 @@ export function CommonDataTable({
       .then((res: any) => {
         onExecute();
       })
-      .catch((e: any) => httpErrorHanlder(e, t));
+      .catch((e: any) => httpErrorHanlder(e, s));
   };
 
   const onSubmitChanges = async (onExecute: () => void) => {
@@ -249,7 +250,7 @@ export function CommonDataTable({
                 <th colSpan={10}>
                   {query?.isLoading || query?.isError ? null : (
                     <span className="datatable-no-data">
-                      {t.table.noRecords}
+                      {s.table.noRecords}
                     </span>
                   )}
                   <QueryErrorView query={query} />
@@ -378,7 +379,7 @@ export function CommonDataTable({
             />
           )}
           {withFilters !== false && (
-            <TableFilterRow messages={t.table.filter} />
+            <TableFilterRow messages={s.table.filter} />
           )}
         </Grid>
         {withPagination !== false && (

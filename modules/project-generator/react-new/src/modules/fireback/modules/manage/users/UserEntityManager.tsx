@@ -1,5 +1,6 @@
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
-
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 
 import {
   CommonEntityManager,
@@ -13,11 +14,12 @@ import { UserDto } from "../../../sdk/abac/UserDto";
 import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const UserEntityManager = ({ data }: DtoEntity<UserDto>) => {
-  const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
+  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<UserDto>
   >({
     data,
   });
+  const s = useS(strings);
 
   const getSingleHook = useGetUserByUniqueId({
     query: { uniqueId, deep: true },
@@ -39,8 +41,8 @@ export const UserEntityManager = ({ data }: DtoEntity<UserDto>) => {
         UserNavigation.single(response.data?.uniqueId, locale)
       }
       Form={UserEditForm}
-      onEditTitle={t.user.editUser}
-      onCreateTitle={t.user.newUser}
+      onEditTitle={s.editUser}
+      onCreateTitle={s.newUser}
       data={data}
     />
   );

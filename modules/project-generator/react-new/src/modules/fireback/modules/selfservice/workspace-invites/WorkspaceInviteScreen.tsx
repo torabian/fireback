@@ -1,5 +1,4 @@
 import { strings } from "./strings/translations";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useWorkspaceInviteGetActionQuery } from "../../../sdk/abac/WorkspaceInviteGetAction";
@@ -12,7 +11,6 @@ import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
 
 export const WorkspaceInviteSingleScreen = () => {
   const router = useRouter();
-  const t = useT();
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
   const s = useS(strings);
@@ -36,19 +34,19 @@ export const WorkspaceInviteSingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: t.wokspaces.invite.firstName,
+              label: s.firstName,
               elem: d?.firstName,
             },
             {
-              label: t.wokspaces.invite.lastName,
+              label: s.lastName,
               elem: d?.lastName,
             },
             {
-              label: t.wokspaces.invite.email,
+              label: s.email,
               elem: d?.email,
             },
             {
-              label: t.wokspaces.invite.phoneNumber,
+              label: s.phoneNumber,
               elem: d?.phonenumber,
             },
             {

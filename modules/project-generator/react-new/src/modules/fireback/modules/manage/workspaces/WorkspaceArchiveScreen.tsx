@@ -1,16 +1,17 @@
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 
 import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
 import { WorkspaceList } from "./WorkspaceList";
 import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceArchiveScreen = () => {
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <>
       <CommonArchiveManager
-        pageTitle={t.fbMenu.workspaces}
+        pageTitle={s.menuTitle}
         newEntityHandler={({ locale, router }) => {
           router.push(WorkspaceNavigation.create());
         }}

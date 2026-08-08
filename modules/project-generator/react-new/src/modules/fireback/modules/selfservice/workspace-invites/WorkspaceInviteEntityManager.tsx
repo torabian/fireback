@@ -3,7 +3,8 @@ import {
   type DtoEntity,
 } from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { useWorkspaceInviteGetActionQuery } from "../../../sdk/abac/WorkspaceInviteGetAction";
 import { useWorkspaceInviteCreateAction } from "../../../sdk/abac/WorkspaceInviteCreateAction";
 import { useWorkspaceInviteUpdateAction } from "../../../sdk/abac/WorkspaceInviteUpdateAction";
@@ -13,7 +14,7 @@ import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
 export const WorkspaceInviteEntityManager = ({
   data,
 }: DtoEntity<WorkspaceInviteDto>) => {
-  const t = useT();
+  const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<WorkspaceInviteDto>
   >({
@@ -39,8 +40,8 @@ export const WorkspaceInviteEntityManager = ({
       }}
       onFinishUriResolver={(_, locale) => `/${locale}/workspace-invites`}
       Form={WorkspaceInviteForm}
-      onEditTitle={t.wokspaces.invite.editInvitation}
-      onCreateTitle={t.wokspaces.invite.createInvitation}
+      onEditTitle={s.editInvitation}
+      onCreateTitle={s.createInvitation}
       data={data}
     />
   );

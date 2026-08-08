@@ -4,8 +4,14 @@
 export const en = {
   accessibility: {
     description: "Handle the accessibility settings",
+    leftHand: "Left handed",
+    preferredHand: "Prefered hand",
+    preferredHandHint: "Select which hand you are most often using phone so some options would be closer to your primary hand",
+    rightHand: "Right handed",
     title: "Accessibility",
   },
+  apply: "Apply",
+  debugInfo: "Show debug information",
   debugSettings: {
     description: "See the debug information of the app, for developers or help desks",
     title: "Debug Settings",
@@ -21,13 +27,21 @@ export const en = {
   grpcMethod: "Over grpc",
   hostAddress: "Host address",
   httpMethod: "Over http",
+  inaccessibleRemote: "In accessible remote.",
   interfaceLang: {
     description: "Here you can change your software interface language settings",
-    title: "Language \u0026 Region",
+    hint: "The language that you like the interface to be shown to you",
+    label: "Interface language",
+    title: "Language & Region",
   },
   languages: {
     russian: "Russian (Русский)",
     ukrainian: "Ukrainain (українська)",
+  },
+  locale: {
+    englishWorldwide: "English (Worldwide)",
+    persianIran: "Persian (Iran)",
+    polishPoland: "Polish (Polski)",
   },
   notifications: {
     description: "Here you can manage your notifications",
@@ -38,11 +52,15 @@ export const en = {
     title: "Notification settings",
     unsubscribe: "Unsubscribe",
   },
+  pageTitle: "Settings",
   port: "Port",
+  remoteAddress: "Remote address",
   remoteDescription: "Remote service, is the place that all data, logics, and services are installed there. It could be cloud, or locally. Only advanced users, changing it to wrong address might cause inaccessibility.",
   remoteTitle: "Remote service",
   richTextEditor: {
     description: "Manage how you want to edit textual content in the app",
+    hint: "You can select between different text editors we provide, and use the one you are more comfortable with",
+    label: "Text Editor Module",
     title: "Text Editor",
   },
   richThemes: {
@@ -50,18 +68,29 @@ export const en = {
     macDark: "MacOSX Dark",
     macLight: "MacOSX Light",
   },
+  serverConnected: "Server is connected successfully",
+  simpleTextEditor: "System simple text editor",
   theme: {
     description: "Change the interface theme color",
+    hint: "Select the interface theme",
+    label: "Theme",
     title: "Theme",
   },
+  tinymceeditor: "TinyMCE Editor",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const fa = {
   accessibility: {
     description: "مدیریت تنظیمات دسترسی",
+    leftHand: "چپ دست",
+    preferredHand: "دست اصلی",
+    preferredHandHint: "از کدام دست بیشتر برای استفاده از موبایل بهره می‌برید؟",
+    rightHand: "راست دست",
     title: "دسترسی",
   },
+  apply: "ذخیره",
+  debugInfo: "نمایش اطلاعات دیباگ",
   debugSettings: {
     description: "نمایش اطلاعات اشکال زدایی برنامه، برای توسعه‌دهندگان یا مراکز کمک",
     title: "تنظیمات اشکال زدایی",
@@ -77,13 +106,21 @@ export const fa = {
   grpcMethod: "از طریق gRPC",
   hostAddress: "آدرس میزبان",
   httpMethod: "از طریق HTTP",
+  inaccessibleRemote: "سرور خارج از دسترس است",
   interfaceLang: {
     description: "در اینجا می‌توانید تنظیمات زبان و منطقه رابط کاربری نرم‌افزار را تغییر دهید",
+    hint: "زبانی که دوست دارید رابط کاربری به شما نشان داده شود",
+    label: "زبان رابط",
     title: "زبان و منطقه",
   },
   languages: {
     russian: "روسی (Русский)",
     ukrainian: "اوکراینی (українська)",
+  },
+  locale: {
+    englishWorldwide: "انگلیسی (جهانی)",
+    persianIran: "فارسی (ایران)",
+    polishPoland: "لهستانی (Polski)",
   },
   notifications: {
     description: "در اینجا می‌توانید اعلان‌های خود را مدیریت کنید",
@@ -94,11 +131,15 @@ export const fa = {
     title: "تنظیمات اعلان‌ها",
     unsubscribe: "لغو اشتراک",
   },
+  pageTitle: "تنظیمات",
   port: "پورت",
+  remoteAddress: "آدرس سرور",
   remoteDescription: "سرویس از راه دور، مکانی است که تمام داده‌ها، منطق‌ها و خدمات در آن نصب می‌شوند. ممکن است این ابری یا محلی باشد. تنها کاربران پیشرفته با تغییر آن به آدرس نادرست، ممکن است بر ندسترسی برخورد کنند.",
   remoteTitle: "سرویس از راه دور",
   richTextEditor: {
     description: "مدیریت نحوه ویرایش محتوای متنی در برنامه",
+    hint: "شما می‌توانید بین ویرایشگرهای متنی مختلفی که ما ارائه می‌دهیم، یکی را انتخاب کنید و از ویرایشگری که راحت‌تر هستید استفاده کنید",
+    label: "ماژول ویرایشگر متن",
     title: "ویرایشگر متن",
   },
   richThemes: {
@@ -106,18 +147,29 @@ export const fa = {
     macDark: "MacOSX تیره",
     macLight: "MacOSX روشن",
   },
+  serverConnected: "سرور با موفقیت و صحت کار می‌کند و متصل هستیم",
+  simpleTextEditor: "باکس ساده سیستم برای متن",
   theme: {
     description: "تغییر رنگ موضوع رابط کاربری",
+    hint: "قالب یا رنگ تم را انتخاب کنید",
+    label: "قالب",
     title: "موضوع",
   },
+  tinymceeditor: "ویرایش‌گر TinyMCE",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const pl = {
   accessibility: {
     description: "Obsługa ustawień dostępności",
+    leftHand: "Leworęczny",
+    preferredHand: "Preferowana ręka",
+    preferredHandHint: "Wybierz, której ręki najczęściej używasz do telefonu, aby niektóre opcje były bliżej Twojej głównej ręki",
+    rightHand: "Praworęczny",
     title: "Dostępność",
   },
+  apply: "Zastosuj",
+  debugInfo: "Pokaż informacje debugowania",
   debugSettings: {
     description: "Wyświetl informacje debugowania aplikacji, dla programistów lub biur pomocy",
     title: "Ustawienia debugowania",
@@ -133,13 +185,21 @@ export const pl = {
   grpcMethod: "Przez gRPC",
   hostAddress: "Adres hosta",
   httpMethod: "Przez HTTP",
+  inaccessibleRemote: "Zdalny serwer niedostępny.",
   interfaceLang: {
     description: "Tutaj możesz zmienić ustawienia języka interfejsu oprogramowania",
+    hint: "Język, w którym chcesz, aby interfejs był wyświetlany",
+    label: "Język interfejsu",
     title: "Język i Region",
   },
   languages: {
     russian: "Rosyjski (Русский)",
     ukrainian: "Ukraiński (українська)",
+  },
+  locale: {
+    englishWorldwide: "Angielski (świat)",
+    persianIran: "Perski (Iran)",
+    polishPoland: "Polski (Polska)",
   },
   notifications: {
     description: "Tutaj możesz zarządzać swoimi powiadomieniami",
@@ -150,11 +210,15 @@ export const pl = {
     title: "Ustawienia powiadomień",
     unsubscribe: "Anuluj subskrypcję",
   },
+  pageTitle: "Ustawienia",
   port: "Port",
+  remoteAddress: "Adres zdalny",
   remoteDescription: "Usługa zdalna, to miejsce, w którym zainstalowane są wszystkie dane, logiki i usługi. Może to być chmura lub lokalnie. Tylko zaawansowani użytkownicy, zmieniając go na błędny adres, mogą spowodować niedostępność.",
   remoteTitle: "Usługa zdalna",
   richTextEditor: {
     description: "Zarządzaj sposobem edycji treści tekstowej w aplikacji",
+    hint: "Możesz wybrać między różnymi edytorami tekstu, które oferujemy, i użyć tego, który jest dla Ciebie wygodniejszy",
+    label: "Moduł edytora tekstu",
     title: "Edytor tekstu",
   },
   richThemes: {
@@ -162,9 +226,14 @@ export const pl = {
     macDark: "MacOSX ciemny",
     macLight: "MacOSX jasny",
   },
+  serverConnected: "Serwer został pomyślnie połączony",
+  simpleTextEditor: "Prosty edytor tekstu systemowego",
   theme: {
     description: "Zmień kolor motywu interfejsu",
+    hint: "Wybierz motyw interfejsu",
+    label: "Motyw",
     title: "Motyw",
   },
+  tinymceeditor: "Edytor TinyMCE",
 };
  export const strings = {...en, $fa:fa,$pl:pl};

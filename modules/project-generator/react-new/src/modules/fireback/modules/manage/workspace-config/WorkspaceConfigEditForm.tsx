@@ -1,6 +1,6 @@
 import { FormCheckbox } from "../../../../fireback-ui/components/forms/form-switch/FormSwitch";
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { WorkspaceConfigDto } from "../../../sdk/abac/WorkspaceConfigDto";
 import { strings } from "./strings/translations";
@@ -28,7 +28,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.enableRecaptcha2,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.enableRecaptcha2}
@@ -43,7 +43,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.recaptcha2ServerKey,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.recaptcha2ServerKey}
@@ -57,7 +57,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.recaptcha2ClientKey,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.recaptcha2ClientKey}
@@ -86,7 +86,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.requireOtpOnSignup,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.requireOtpOnSignup}
@@ -100,7 +100,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.requireOtpOnSignin,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.requireOtpOnSignin}
@@ -142,7 +142,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.forcePasswordOnPhone,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.forcePasswordOnPhone}
@@ -156,7 +156,7 @@ export const WorkspaceConfigForm = ({
             setFieldValue(
               WorkspaceConfigDto.Fields.forcePersonNameOnPhone,
               value,
-              false
+              false,
             )
           }
           errorMessage={errors.forcePersonNameOnPhone}
@@ -168,7 +168,6 @@ export const WorkspaceConfigForm = ({
         title={s.workspaceConfigs.passwordSectionTitle}
         description={s.workspaceConfigs.passwordSectionDescription}
       >
-
         <FormSelect
           keyExtractor={(t) => t.uniqueId}
           formEffect={{
@@ -178,7 +177,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
+          fnLabelFormat={(e) => `${e.type} (${e.uniqueId})`}
           querySource={useEmailProvidersQuerySource}
           errorMessage={errors.generalEmailProviderId}
           label={s.workspaceConfigs.generalEmailProviderLabel}
@@ -194,7 +193,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
+          fnLabelFormat={(e) => `${e.type} (${e.uniqueId})`}
           querySource={useGsmProvidersQuerySource}
           errorMessage={errors.generalGsmProviderId}
           label={s.workspaceConfigs.generalGsmProviderLabel}
@@ -210,7 +209,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={e => `${e.title})`}
+          fnLabelFormat={(e) => `${e.title})`}
           querySource={useRegionalContentsQuerySource}
           errorMessage={errors.inviteToWorkspaceContentId}
           label={s.workspaceConfigs.inviteToWorkspaceContentLabel}
@@ -226,7 +225,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={e => `${e.title})`}
+          fnLabelFormat={(e) => `${e.title})`}
           querySource={useRegionalContentsQuerySource}
           errorMessage={errors.emailOtpContentId}
           label={s.workspaceConfigs.emailOtpContentLabel}
@@ -241,13 +240,12 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={e => `${e.title})`}
+          fnLabelFormat={(e) => `${e.title})`}
           querySource={useRegionalContentsQuerySource}
           errorMessage={errors.smsOtpContentId}
           label={s.workspaceConfigs.smsOtpContentLabel}
           hint={s.workspaceConfigs.smsOtpContentHint}
         />
-
       </PageSection>
     </>
   );

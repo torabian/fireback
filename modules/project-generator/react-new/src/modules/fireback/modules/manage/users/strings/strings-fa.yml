@@ -1,4 +1,3 @@
-extends: []
 content:
   addressLine1: آدرس خط ۱
   addressLine1Hint: خط آدرس ۱ مرتبط با کاربر.
@@ -10,12 +9,19 @@ content:
   cityNameHint: شهر آدرس مرتبط با کاربر.
   confirmed: 'تأیید شده:'
   countryCode: کد کشور
+  editUser: ویرایش کاربر
+  firstName: نام کوچک
   gender: جنسیت
   image: تصویر
+  inviteFirstNameHint: نام دعوت شده را بنویسید
+  inviteLastNameHint: نام خانوادگی دعوت شده را بنویسید
+  lastName: نام خانوادگی
+  menuTitle: کاربران
   na: موجود نیست
-  "no": خیر
+  newUser: کاربر جدید
+  'no': خیر
   passports: پاسپورت‌ها
   postalCode: کد پستی
   type: 'نوع:'
   value: 'مقدار:'
-  "yes": بله
+  'yes': بله

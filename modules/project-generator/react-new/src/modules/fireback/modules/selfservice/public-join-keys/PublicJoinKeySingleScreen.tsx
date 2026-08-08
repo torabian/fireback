@@ -2,14 +2,15 @@ import { CommonSingleManager } from "../../../../fireback-ui/components/entity-m
 import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
 import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
 import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
 import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { usePublicJoinKeyGetActionQuery } from "../../../sdk/abac/PublicJoinKeyGetAction";
 
 export const PublicJoinKeySingleScreen = () => {
   const router = useRouter();
-  const t = useT();
+  const s = useS(strings);
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
 
@@ -31,7 +32,7 @@ export const PublicJoinKeySingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: t.role.name,
+              label: s.roleName,
               elem: d?.role?.name,
             },
           ]}

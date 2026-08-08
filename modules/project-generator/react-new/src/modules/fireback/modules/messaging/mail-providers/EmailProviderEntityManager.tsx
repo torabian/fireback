@@ -3,6 +3,8 @@ import {
   type DtoEntity,
 } from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { useEmailProviderGetActionQuery } from "../../../sdk/messaging/EmailProviderGetAction";
 import { useEmailProviderCreateAction } from "../../../sdk/messaging/EmailProviderCreateAction";
 import { useEmailProviderUpdateAction } from "../../../sdk/messaging/EmailProviderUpdateAction";
@@ -13,11 +15,12 @@ import { EmailProviderEditForm } from "./EmailProviderEditForm";
 export const EmailProviderEntityManager = ({
   data,
 }: DtoEntity<EmailProviderDto>) => {
-  const { router, uniqueId, queryClient, t, locale } = useCommonEntityManager<
+  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<EmailProviderDto>
   >({
     data,
   });
+  const s = useS(strings);
 
   const getSingleHook = useEmailProviderGetActionQuery({
     params: { uniqueId },
@@ -41,8 +44,8 @@ export const EmailProviderEntityManager = ({
         EmailProviderNavigation.single(response.data?.uniqueId, locale)
       }
       Form={EmailProviderEditForm}
-      onEditTitle={t.fb.editMailProvider}
-      onCreateTitle={t.fb.newMailProvider}
+      onEditTitle={s.editMailProvider}
+      onCreateTitle={s.newMailProvider}
       data={data}
     />
   );

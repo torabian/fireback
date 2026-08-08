@@ -1,5 +1,5 @@
 import { Toast } from "./toast";
-import { enTranslations } from "../../fireback/translations/en";
+import { strings } from "../components/strings/translations";
 
 /*
  * Converts all errors, network, api into an object that can
@@ -45,9 +45,9 @@ export function uuidv4() {
   );
 }
 
-const errorToStirng = (error: any, t: typeof enTranslations) => {
+const errorToStirng = (error: any, s: typeof strings) => {
   if (!error) {
-    return t.errors.UNKOWN_ERRROR;
+    return s.errors.UNKOWN_ERRROR;
   }
   let message = error?.messageTranslated || error?.message;
   for (let erritem of error?.errors || []) {
@@ -56,7 +56,7 @@ const errorToStirng = (error: any, t: typeof enTranslations) => {
   return message;
 };
 
-export function httpErrorHanlder(res: any, t: typeof enTranslations) {
+export function httpErrorHanlder(res: any, s: typeof strings) {
   // Toast has errors
   // Toast("failed", { type: "error" });
 }

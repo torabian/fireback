@@ -1,0 +1,20 @@
+content:
+  editWorkspaceType: ویرایش نوع تیم
+  menuTitle: انواع تیم ها
+  newWorkspaceType: تیم جدید
+  roleFieldHint: نقش(هایی) را که می خواهید به کاربر هنگام پیوستن به فضای کاری بدهید،
+    انتخاب کنید. این را می توان بعدا نیز تغییر داد.
+  roleFieldLabel: نقش
+  slug: اسلاگ
+  title: عنوان
+  typeDescription: توضیحات
+  typeDescriptionHint: نوع فضای کاری را شرح دهید، وقتی کاربر ثبت نام می کند خواهد
+    دید.
+  workspaceTypeSlug: آدرس اسلاگ
+  workspaceTypeSlugHint: آدرسی که به صورت عمومی در دسترس خواهد بود و وقتی کسی از این
+    طریق ثبت نام کند رول مشخصی دریافت میکند.
+  workspaceTypeTitle: عنوان
+  workspaceTypeTitleHint: عنوان ورک اسپیس
+  workspaceTypeUniqueId: شناسه یکتا
+  workspaceTypeUniqueIdHint: شناسه یکتا می تواند برای هدایت کاربر به ورود مستقیم استفاده
+    شود

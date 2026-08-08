@@ -1,4 +1,5 @@
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
 
 import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
@@ -7,7 +8,7 @@ import { UserList } from "./UserList";
 import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const UserArchiveScreen = () => {
-  const t = useT();
+  const s = useS(strings);
   const router = useRouter();
   const { locale } = useLocale();
 
@@ -17,7 +18,7 @@ export const UserArchiveScreen = () => {
         newEntityHandler={() => {
           router.push(UserNavigation.create());
         }}
-        pageTitle={t.fbMenu.users}
+        pageTitle={s.menuTitle}
       >
         <UserList />
       </CommonArchiveManager>

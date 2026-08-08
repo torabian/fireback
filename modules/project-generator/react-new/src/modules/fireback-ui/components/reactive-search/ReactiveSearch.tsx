@@ -1,7 +1,8 @@
 import { useDebouncedEffect } from "../../hooks/useDebouncedEffect";
 import { useKeyPress } from "../../hooks/useKeyPress";
 import { useLocale } from "../../hooks/useLocale";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { useRouter } from "../../hooks/useRouter";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";
@@ -12,7 +13,7 @@ import { ReactiveSearchAction } from "../../../fireback/sdk/reactivesearch/React
 import type { ReactiveSearchResultDtoType } from "../../../fireback/sdk/reactivesearch/ReactiveSearchResultDto";
 
 export function ReactiveSearch() {
-  const t = useT();
+  const s = useS(strings);
   const { withDebounce } = useDebouncedEffect();
   const { setResult, setPhrase, phrase, result, reset } = useContext(
     ReactiveSearchContext
@@ -113,7 +114,7 @@ export function ReactiveSearch() {
           input.current = ref;
         }}
         value={value}
-        placeholder={t.reactiveSearch.placeholder}
+        placeholder={s.reactiveSearch.placeholder}
         onInput={(e) => {
           setValue((e.target as any).value);
           oninput((e.target as any).value);

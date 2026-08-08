@@ -1,6 +1,7 @@
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { WorkspaceTypeDto } from "../../../sdk/abac/WorkspaceTypeDto";
 
 import { useContext } from "react";
@@ -15,7 +16,7 @@ export const WorkspaceTypeEditForm = ({
 }: EntityFormProps<Partial<WorkspaceTypeDto>>) => {
   const { values, setValues } = form;
   const { options } = useContext(RemoteQueryContext);
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <>
@@ -25,9 +26,9 @@ export const WorkspaceTypeEditForm = ({
           form.setFieldValue(WorkspaceTypeDto.Fields.uniqueId, value, false)
         }
         errorMessage={form.errors.uniqueId}
-        label={t.wokspaces.workspaceTypeUniqueId}
+        label={s.workspaceTypeUniqueId}
         autoFocus={!isEditing}
-        hint={t.wokspaces.workspaceTypeUniqueIdHint}
+        hint={s.workspaceTypeUniqueIdHint}
       />
       <FormText
         value={values.title}
@@ -35,9 +36,9 @@ export const WorkspaceTypeEditForm = ({
           form.setFieldValue(WorkspaceTypeDto.Fields.title, value, false)
         }
         errorMessage={form.errors.title}
-        label={t.wokspaces.workspaceTypeTitle}
+        label={s.workspaceTypeTitle}
         autoFocus={!isEditing}
-        hint={t.wokspaces.workspaceTypeTitleHint}
+        hint={s.workspaceTypeTitleHint}
       />
       <FormText
         value={values.slug}
@@ -45,12 +46,12 @@ export const WorkspaceTypeEditForm = ({
           form.setFieldValue(WorkspaceTypeDto.Fields.slug, value, false)
         }
         errorMessage={form.errors.slug}
-        label={t.wokspaces.workspaceTypeSlug}
-        hint={t.wokspaces.workspaceTypeSlugHint}
+        label={s.workspaceTypeSlug}
+        hint={s.workspaceTypeSlugHint}
       />
       <FormSelect
-        label={t.wokspaces.invite.role}
-        hint={t.wokspaces.invite.roleHint}
+        label={s.roleFieldLabel}
+        hint={s.roleFieldHint}
         fnLabelFormat={(role) => role.name}
         querySource={useRolesQuerySource}
         formEffect={{ form, field: "role" }}
@@ -63,8 +64,8 @@ export const WorkspaceTypeEditForm = ({
           form.setFieldValue(WorkspaceTypeDto.Fields.description, value, false)
         }
         errorMessage={form.errors.description}
-        label={t.wokspaces.typeDescription}
-        hint={t.wokspaces.typeDescriptionHint}
+        label={s.typeDescription}
+        hint={s.typeDescriptionHint}
       />
     </>
   );

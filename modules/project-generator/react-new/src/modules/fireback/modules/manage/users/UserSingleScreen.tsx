@@ -3,7 +3,8 @@ import { CommonSingleManager } from "../../../../fireback-ui/components/entity-m
 import { GeneralEntityView } from "../../../../fireback-ui/components/general-entity-view/GeneralEntityView";
 import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
 import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { UserDto } from "../../../sdk/abac/UserDto";
 import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { useUserGetActionQuery } from "../../../sdk/abac/UserGetAction";
@@ -11,7 +12,7 @@ import { UserPassportList } from "./UserPassportsList";
 
 export const UserSingleScreen = () => {
   const router = useRouter();
-  const t = useT();
+  const s = useS(strings);
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
 
@@ -31,11 +32,11 @@ export const UserSingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: t.users.firstName,
+              label: s.firstName,
               elem: d?.firstName,
             },
             {
-              label: t.users.lastName,
+              label: s.lastName,
               elem: d?.lastName,
             },
           ]}

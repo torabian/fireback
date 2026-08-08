@@ -1,4 +1,5 @@
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 
 import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
 import { AccessiblitySettings } from "./AccessiblitySettings";
@@ -10,8 +11,8 @@ import { ThemeSettings } from "./ThemeSettings";
 import { BUILD_VARIABLES } from "../../../../fireback-ui/hooks/build-variables";
 
 export function SettingsScreen({}: {}) {
-  const t = useT();
-  usePageTitle(t.menu.settings);
+  const s = useS(strings);
+  usePageTitle(s.pageTitle);
  
   return (
     <div>

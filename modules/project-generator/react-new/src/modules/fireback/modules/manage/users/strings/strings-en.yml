@@ -9,12 +9,19 @@ content:
   cityNameHint: The city address associated with user.
   confirmed: 'Confirmed:'
   countryCode: Country code
+  editUser: Edit User
+  firstName: First name
   gender: Gender
   image: Image
+  inviteFirstNameHint: Write the first name of invitee
+  inviteLastNameHint: Write the last name of inviteee
+  lastName: Last name
+  menuTitle: Users
   na: n/a
-  no: 'No'
+  newUser: New User
+  'no': 'No'
   passports: Passports
   postalCode: Postal Code
   type: 'Type:'
   value: 'Value:'
-  yes: 'Yes'
+  'yes': 'Yes'

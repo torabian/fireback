@@ -8,7 +8,6 @@ import { PageSection } from "../../../../fireback-ui/components/page-section/Pag
 
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { strings } from "./strings/translations";
@@ -63,7 +62,6 @@ const availableRichThemes = (s: typeof strings): StringKeyValue[] => [
 export function ThemeSettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
-  const t = useT();
   const s = useS(strings);
   const { formik } = useCommonEntityManager<Partial<ThemeConfig>>({});
 
@@ -86,8 +84,8 @@ export function ThemeSettings({}: {}) {
   const themeQuerySource = createQuerySource(availableRichThemes(s));
 
   return (
-    <PageSection title={t.generalSettings.theme.title}>
-      <p>{t.generalSettings.theme.description}</p>
+    <PageSection title={s.theme.title}>
+      <p>{s.theme.description}</p>
       <Formik
         innerRef={(r) => {
           if (r) formik.current = r;
@@ -112,14 +110,14 @@ export function ThemeSettings({}: {}) {
               }}
               errorMessage={form.errors.theme}
               querySource={themeQuerySource}
-              label={t.settings.theme}
-              hint={t.settings.themeHint}
+              label={s.theme.label}
+              hint={s.theme.hint}
             />
             <FormButton
               disabled={
                 form.values.theme === "" || form.values.theme === config.theme
               }
-              label={t.settings.apply}
+              label={s.apply}
               onClick={() => form.submitForm()}
             />
           </form>

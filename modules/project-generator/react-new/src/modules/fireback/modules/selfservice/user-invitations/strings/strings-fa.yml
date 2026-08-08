@@ -1,4 +1,3 @@
-extends: []
 content:
   accept: پذیرفتن
   acceptBtn: بله
@@ -8,6 +7,7 @@ content:
   confirmRejectDescription: آیا مطمئن هستید که می‌خواهید این دعوت‌نامه را رد کنید؟
     برای عضویت مجدد باید دوباره از سوی مدیران دعوت شوید.
   confirmRejectTitle: رد دعوت‌نامه
+  menuTitle: دعوتنامه های من
   method: روش
   passport: پاسپورت
   reject: رد کردن

@@ -1,44 +1,44 @@
-import { enTranslations } from "../../fireback/translations/en";
+import { strings } from "../components/strings/translations";
 
 export function withEssentials(
-  t: typeof enTranslations,
+  s: typeof strings,
   items: Array<any>
 ): Array<any> {
   return [
     {
       name: "uniqueId",
-      title: t.table.uniqueId,
+      title: s.table.uniqueId,
       width: 200,
     },
     ...items,
     {
       name: "createdFormatted",
-      title: t.table.created,
+      title: s.table.created,
       width: 200,
     },
     {
       name: "updatedFormatted",
-      title: t.table.updated,
+      title: s.table.updated,
       width: 200,
     },
   ];
 }
 export function withExtended(
-  t: typeof enTranslations,
+  s: typeof strings,
   items: Array<any>
 ): Array<any> {
   return [
     {
       name: "workspaceId",
-      title: t.table.workspaceId,
+      title: s.table.workspaceId,
       width: 200,
     },
     {
       name: "userId",
-      title: t.table.userId,
+      title: s.table.userId,
       width: 200,
     },
 
-    ...withEssentials(t, items),
+    ...withEssentials(s, items),
   ];
 }

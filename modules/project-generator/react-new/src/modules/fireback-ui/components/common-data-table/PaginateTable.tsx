@@ -12,7 +12,6 @@ import { type UseQueryResult } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { type DatatableColumn } from "../../../fireback/definitions/definitions";
 import { type Udf } from "../../hooks/useDatatableFiltering";
-import { useT } from "../../hooks/useT";
 import { castColumns, type TableColumnWidthInfo } from "./PaginateUtils";
 import { useReindexedContent } from "./useReindex";
 import { useLocale } from "../../hooks/useLocale";
@@ -56,7 +55,6 @@ export function PaginateTable({
   bulkEditHook?: any;
   inlineInsertHook?: any;
 }) {
-  const t = useT();
   const { pathname } = useLocation();
   const { dir } = useLocale();
 

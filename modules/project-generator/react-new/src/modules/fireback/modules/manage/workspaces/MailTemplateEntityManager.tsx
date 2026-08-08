@@ -1,7 +1,8 @@
 import { usePageTitle } from "../../../../fireback-ui/components/page-title/PageTitle";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { FormRichText } from "../../../../fireback-ui/components/forms/form-richtext/FormRichText";
 import { FormButton } from "../../../../fireback-ui/components/forms/form-button/FormButton";
@@ -22,14 +23,14 @@ export const MailTemplateEntityManager = ({
   data,
   setInnerRef,
 }: DtoEntity<MailTemplateEditor>) => {
-  const t = useT();
+  const s = useS(strings);
   const { router, uniqueId, queryClient, isEditing, locale, formik } =
     useCommonEntityManager<Partial<MailTemplateEditor>>({
       data,
     });
 
   usePageTitle(
-    isEditing ? t.wokspaces.createNewWorkspace : t.wokspaces.editWorkspae
+    isEditing ? s.createNewWorkspace : s.editWorkspae
   );
   const onSubmit = (
     values: Partial<MailTemplateEditor>,
@@ -52,15 +53,15 @@ export const MailTemplateEntityManager = ({
           <FormText
             value={form.values.title}
             onChange={(val) => form.setFieldValue("title", val)}
-            label={t.wokspaces.title}
+            label={s.title}
           />
           <FormRichText
             onChange={(val) => form.setFieldValue("body", val)}
             value={form.values.body}
-            label={t.wokspaces.body}
+            label={s.body}
           />
           <FormButton
-            label={t.wokspaces.resetToDefault}
+            label={s.resetToDefault}
             onClick={() =>
               form.setValues({
                 ...form.values,

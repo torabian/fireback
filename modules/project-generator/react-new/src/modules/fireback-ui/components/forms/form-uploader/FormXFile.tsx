@@ -1,6 +1,5 @@
 import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
 import { useFileUploader } from "../../../../fireback/modules/manage/drive/DriveTools";
 import { useFileListener } from "../../window-drop/WindowDrop";
@@ -90,7 +89,6 @@ export const FormXFile = ({
   label,
   validateFile,
 }: FormXFileProps) => {
-  const t = useT();
   const s = useS(strings);
   const { uploadSingle } = useFileUploader(); // assumes a custom tus uploader
   const [uploadError, setUploadError] = useState();
@@ -192,7 +190,7 @@ export const FormXFile = ({
           className="btn btn-primary"
           onClick={openFileDialog}
         >
-          {t.drive.attachFile}
+          {s.drive.attachFile}
         </button>
       )}
       {uploadError ? (

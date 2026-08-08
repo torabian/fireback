@@ -1,7 +1,6 @@
 import { FormCheckbox } from "../../../../fireback-ui/components/forms/form-switch/FormSwitch";
 import Link from "../../../../fireback-ui/components/link/Link";
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { useUserWorkspaceBrowseActionQuery } from "../../../sdk/abac/UserWorkspaceBrowseAction";
 import { useContext, useState } from "react";
@@ -42,16 +41,15 @@ export function DebuggerSettings({}: {}) {
   const [debugVisible, setDebugVisible] = useState(false);
   const firebackContext = useContext(FirebackContext);
 
-  const t = useT();
   const s = useS(strings);
 
   return (
-    <PageSection title={t.generalSettings.debugSettings.title}>
-      <p>{t.generalSettings.debugSettings.description}</p>
+    <PageSection title={s.debugSettings.title}>
+      <p>{s.debugSettings.description}</p>
 
       <FormCheckbox
         value={debugVisible}
-        label={t.debugInfo}
+        label={s.debugInfo}
         onChange={() => setDebugVisible((m) => !m)}
       />
       {debugVisible && (

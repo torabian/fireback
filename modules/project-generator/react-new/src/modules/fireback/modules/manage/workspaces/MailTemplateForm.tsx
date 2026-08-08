@@ -1,6 +1,7 @@
 import { ModalContext } from "../../../../fireback-ui/components/modal/Modal";
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { type FormikProps } from "formik";
 import { useContext } from "react";
@@ -13,15 +14,15 @@ export const MailTemplateForm = ({
   form: FormikProps<Partial<WorkspaceDto>>;
 }) => {
   const { values, setFieldValue, errors } = form;
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <>
-      <PageSection title={t.wokspaces.mailServerConfiguration}>
+      <PageSection title={s.mailServerConfiguration}>
         <EmailProviderEditForm form={form as any} />
       </PageSection>
-      <PageSection title={t.wokspaces.emailSendingConfiguration}>
-        <p>{t.wokspaces.emailSendingConfigurationHint}</p>
+      <PageSection title={s.emailSendingConfiguration}>
+        <p>{s.emailSendingConfigurationHint}</p>
         <MailTemplateConfiguration />
       </PageSection>
     </>
@@ -30,7 +31,6 @@ export const MailTemplateForm = ({
 
 function MailTemplateConfiguration() {
   const { options } = useContext(RemoteQueryContext);
-  const t = useT();
   const useModal = useContext(ModalContext);
 
   return <div>form here</div>;

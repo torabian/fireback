@@ -1,5 +1,6 @@
-extends: []
 content:
+  apiKey: کلید ای پی ای
+  editMailProvider: ارائه دهنده ایمیل
   emailProviders:
     fieldApiKey: کلید API
     fieldCurlScript: اسکریپت Curl
@@ -36,3 +37,7 @@ content:
     typeSendgrid: SendGrid
     typeSmtp: SMTP
     typeTerminal: ترمینال (دیباگ)
+  menuTitle: ارائه دهندگان ایمیل
+  newMailProvider: ارائه دهنده ایمیل جدید
+  type: نوع سرویس
+  typeHint: سرویس ایمیلی که توسط آن ایمیل ها ارسال میشوند

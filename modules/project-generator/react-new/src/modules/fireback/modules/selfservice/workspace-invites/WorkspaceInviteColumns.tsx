@@ -1,36 +1,40 @@
 import { type DatatableColumn } from "../../../definitions/definitions";
 import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
-import { enTranslations } from "../../../translations/en";
+import { type strings as uiStrings } from "../../../../fireback-ui/components/strings/translations";
+import { type strings } from "./strings/translations";
 
-export const columns = (t: typeof enTranslations): DatatableColumn[] => [
+export const columns = (
+  s: typeof strings,
+  uiS: typeof uiStrings,
+): DatatableColumn[] => [
   {
     name: WorkspaceInviteDto.Fields.uniqueId,
-    title: t.table.uniqueId,
+    title: uiS.table.uniqueId,
     width: 100,
   },
   {
     name: "firstName",
-    title: t.wokspaces.invite.firstName,
+    title: s.firstName,
     width: 100,
   },
   {
     name: "lastName",
-    title: t.wokspaces.invite.lastName,
+    title: s.lastName,
     width: 100,
   },
   {
     name: "phoneNumber",
-    title: t.wokspaces.invite.phoneNumber,
+    title: s.phoneNumber,
     width: 100,
   },
   {
     name: "email",
-    title: t.wokspaces.invite.email,
+    title: s.email,
     width: 100,
   },
   {
     name: "role_id",
-    title: t.wokspaces.invite.role,
+    title: s.roleLabel,
     width: 100,
     getCellValue: (invite?: WorkspaceInviteDto) => invite?.role?.name,
   },

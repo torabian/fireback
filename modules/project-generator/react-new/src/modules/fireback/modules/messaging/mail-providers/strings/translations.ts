@@ -2,10 +2,12 @@
 * Auto generated file by fireback language & translation manager.
 */
 export const en = {
+  apiKey: "Api Key",
+  editMailProvider: "Email provider",
   emailProviders: {
     fieldApiKey: "API Key",
     fieldCurlScript: "Curl script",
-    fieldCurlScriptDescription: "Curl script, which would be called upon sending email.\n          Kindly beaware, this is semantic rather\n          than actual bash script, so use limited features and no extra bash calls.\n          \u003cbr /\u003e\n          Make sure, you put the secrets, templates, credentials, here, there will be no\n          other place to use. While sending an email, following variables will be\n          replaced in your curl message.\n          \u003cbr /\u003e\n\n          %FromName%  string \u003cbr /\u003e\n          %FromEmail% string \u003cbr /\u003e\n          %ToName%    string \u003cbr /\u003e\n          %ToEmail%   string \u003cbr /\u003e\n          %Subject%   string \u003cbr /\u003e\n          %Content%   string (It will be escaped with \\\", so use double qoutes) \u003cbr /\u003e",
+    fieldCurlScriptDescription: "Curl script, which would be called upon sending email.\n          Kindly beaware, this is semantic rather\n          than actual bash script, so use limited features and no extra bash calls.\n          <br />\n          Make sure, you put the secrets, templates, credentials, here, there will be no\n          other place to use. While sending an email, following variables will be\n          replaced in your curl message.\n          <br />\n\n          %FromName%  string <br />\n          %FromEmail% string <br />\n          %ToName%    string <br />\n          %ToEmail%   string <br />\n          %Subject%   string <br />\n          %Content%   string (It will be escaped with \\\", so use double qoutes) <br />",
     fieldDomain: "Domain",
     fieldHost: "Host",
     fieldPassword: "Password",
@@ -24,14 +26,20 @@ export const en = {
     typeSmtp: "SMTP",
     typeTerminal: "Terminal (Debug)",
   },
+  menuTitle: "Email Providers",
+  newMailProvider: "New Email provider",
+  type: "Service Type",
+  typeHint: "Select the mail provider from list. Under the list you can find all providers we support.",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const fa = {
+  apiKey: "کلید ای پی ای",
+  editMailProvider: "ارائه دهنده ایمیل",
   emailProviders: {
     fieldApiKey: "کلید API",
     fieldCurlScript: "اسکریپت Curl",
-    fieldCurlScriptDescription: "اسکریپت Curl که هنگام ارسال ایمیل فراخوانی می‌شود.\n          لطفاً توجه داشته باشید که این معنایی است تا\n          واقعاً اسکریپت بش، پس محدود به همین امکانات باشید و فراخوانی اضافی بش نداشته باشید.\n          \u003cbr /\u003e\n          مطمئن شوید اسرار، قالب‌ها و اعتبارنامه‌ها را همین‌جا قرار می‌دهید، جای دیگری برای\n          استفاده از آن‌ها وجود نخواهد داشت. هنگام ارسال ایمیل، متغیرهای زیر در\n          پیام curl شما جایگزین خواهند شد.\n          \u003cbr /\u003e\n\n          %FromName%  رشته \u003cbr /\u003e\n          %FromEmail% رشته \u003cbr /\u003e\n          %ToName%    رشته \u003cbr /\u003e\n          %ToEmail%   رشته \u003cbr /\u003e\n          %Subject%   رشته \u003cbr /\u003e\n          %Content%   رشته (با \\\" اسکیپ خواهد شد، پس از دابل‌کوتیشن استفاده کنید) \u003cbr /\u003e",
+    fieldCurlScriptDescription: "اسکریپت Curl که هنگام ارسال ایمیل فراخوانی می‌شود.\n          لطفاً توجه داشته باشید که این معنایی است تا\n          واقعاً اسکریپت بش، پس محدود به همین امکانات باشید و فراخوانی اضافی بش نداشته باشید.\n          <br />\n          مطمئن شوید اسرار، قالب‌ها و اعتبارنامه‌ها را همین‌جا قرار می‌دهید، جای دیگری برای\n          استفاده از آن‌ها وجود نخواهد داشت. هنگام ارسال ایمیل، متغیرهای زیر در\n          پیام curl شما جایگزین خواهند شد.\n          <br />\n\n          %FromName%  رشته <br />\n          %FromEmail% رشته <br />\n          %ToName%    رشته <br />\n          %ToEmail%   رشته <br />\n          %Subject%   رشته <br />\n          %Content%   رشته (با \\\" اسکیپ خواهد شد، پس از دابل‌کوتیشن استفاده کنید) <br />",
     fieldDomain: "دامنه",
     fieldHost: "میزبان",
     fieldPassword: "رمز عبور",
@@ -50,14 +58,20 @@ export const fa = {
     typeSmtp: "SMTP",
     typeTerminal: "ترمینال (دیباگ)",
   },
+  menuTitle: "ارائه دهندگان ایمیل",
+  newMailProvider: "ارائه دهنده ایمیل جدید",
+  type: "نوع سرویس",
+  typeHint: "سرویس ایمیلی که توسط آن ایمیل ها ارسال میشوند",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const pl = {
+  apiKey: "Klucz Api",
+  editMailProvider: "Dostawca poczty",
   emailProviders: {
     fieldApiKey: "Klucz API",
     fieldCurlScript: "Skrypt Curl",
-    fieldCurlScriptDescription: "Skrypt Curl, który zostanie wywołany podczas wysyłania wiadomości e-mail.\n          Należy pamiętać, że jest to podejście semantyczne, a nie\n          rzeczywisty skrypt bash, więc używaj ograniczonych funkcji i bez dodatkowych wywołań bash.\n          \u003cbr /\u003e\n          Upewnij się, że umieszczasz tutaj sekrety, szablony i dane uwierzytelniające, nie będzie\n          innego miejsca do ich użycia. Podczas wysyłania wiadomości e-mail poniższe zmienne zostaną\n          zastąpione w Twojej wiadomości curl.\n          \u003cbr /\u003e\n\n          %FromName%  ciąg znaków \u003cbr /\u003e\n          %FromEmail% ciąg znaków \u003cbr /\u003e\n          %ToName%    ciąg znaków \u003cbr /\u003e\n          %ToEmail%   ciąg znaków \u003cbr /\u003e\n          %Subject%   ciąg znaków \u003cbr /\u003e\n          %Content%   ciąg znaków (zostanie zabezpieczony znakiem \\\", więc używaj cudzysłowów podwójnych) \u003cbr /\u003e",
+    fieldCurlScriptDescription: "Skrypt Curl, który zostanie wywołany podczas wysyłania wiadomości e-mail.\n          Należy pamiętać, że jest to podejście semantyczne, a nie\n          rzeczywisty skrypt bash, więc używaj ograniczonych funkcji i bez dodatkowych wywołań bash.\n          <br />\n          Upewnij się, że umieszczasz tutaj sekrety, szablony i dane uwierzytelniające, nie będzie\n          innego miejsca do ich użycia. Podczas wysyłania wiadomości e-mail poniższe zmienne zostaną\n          zastąpione w Twojej wiadomości curl.\n          <br />\n\n          %FromName%  ciąg znaków <br />\n          %FromEmail% ciąg znaków <br />\n          %ToName%    ciąg znaków <br />\n          %ToEmail%   ciąg znaków <br />\n          %Subject%   ciąg znaków <br />\n          %Content%   ciąg znaków (zostanie zabezpieczony znakiem \\\", więc używaj cudzysłowów podwójnych) <br />",
     fieldDomain: "Domena",
     fieldHost: "Host",
     fieldPassword: "Hasło",
@@ -76,5 +90,9 @@ export const pl = {
     typeSmtp: "SMTP",
     typeTerminal: "Terminal (debugowanie)",
   },
+  menuTitle: "Dostawcy poczty",
+  newMailProvider: "Nowy dostawca poczty",
+  type: "Typ usługi",
+  typeHint: "Wybierz dostawcę poczty z listy. Na liście znajdziesz wszystkich obsługiwanych dostawców.",
 };
  export const strings = {...en, $fa:fa,$pl:pl};

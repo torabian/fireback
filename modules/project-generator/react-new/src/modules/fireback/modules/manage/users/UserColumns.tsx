@@ -1,21 +1,21 @@
 import { type DatatableColumn } from "../../../definitions/definitions";
 import { UserDto } from "../../../sdk/abac/UserDto";
-import { enTranslations } from "../../../translations/en";
-import { strings } from "./strings/translations";
+import { type strings as uiStrings } from "../../../../fireback-ui/components/strings/translations";
+import { type strings } from "./strings/translations";
 import { GenderView } from "./GenderView";
 
 export const columns = (
-  t: typeof enTranslations,
   s: typeof strings,
+  uiS: typeof uiStrings,
 ): DatatableColumn[] => [
   {
     name: UserDto.Fields.uniqueId,
-    title: t.table.uniqueId,
+    title: uiS.table.uniqueId,
     width: 100,
   },
   {
     name: "firstName",
-    title: t.users.firstName,
+    title: s.firstName,
     width: 200,
     sortable: true,
     filterable: true,
@@ -26,7 +26,7 @@ export const columns = (
     filterable: true,
     name: "lastName",
     sortable: true,
-    title: t.users.lastName,
+    title: s.lastName,
     width: 200,
     getCellValue: (e: UserDto) => e?.lastName,
   },

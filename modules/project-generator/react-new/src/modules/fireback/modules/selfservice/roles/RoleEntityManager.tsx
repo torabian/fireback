@@ -3,7 +3,8 @@ import {
   type DtoEntity,
 } from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { useRoleCreateAction } from "../../../sdk/abac/RoleCreateAction";
 import { useRoleGetActionQuery } from "../../../sdk/abac/RoleGetAction";
 import { useRoleUpdateAction } from "../../../sdk/abac/RoleUpdateAction";
@@ -17,7 +18,7 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleDto>) => {
   >({
     data,
   });
-  const t = useT();
+  const s = useS(strings);
 
   const getSingleHook = useRoleGetActionQuery({
     params: { uniqueId },
@@ -48,8 +49,8 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleDto>) => {
         RoleNavigation.single(response.data?.uniqueId, locale)
       }
       Form={RoleEditForm}
-      onEditTitle={t.fb.editRole}
-      onCreateTitle={t.fb.newRole}
+      onEditTitle={s.editRole}
+      onCreateTitle={s.newRole}
       data={data}
     />
   );

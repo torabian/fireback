@@ -1,5 +1,3 @@
-import { useT } from "./useT";
-
 import { useExportActions } from "../components/action-menu/ActionMenu";
 
 export enum KeyboardAction {
@@ -96,7 +94,6 @@ export function useOctetDownload({ path }: { path: string }) {
 }
 
 export const useExportTools = ({ path }: { path?: string }) => {
-  const t = useT();
   const { options } = useContext(RemoteQueryContext);
 
   useExportActions(

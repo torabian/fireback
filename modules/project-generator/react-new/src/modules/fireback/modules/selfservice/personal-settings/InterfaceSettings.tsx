@@ -7,9 +7,7 @@ import { PageSection } from "../../../../fireback-ui/components/page-section/Pag
 import { type KeyValue } from "../../../definitions/definitions";
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useS } from "../../../../fireback-ui/hooks/useS";
-import { enTranslations } from "../../../translations/en";
 import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { interfaceLanguages } from "./Langugages";
@@ -38,7 +36,6 @@ const updateSettings = (
 export function InterfaceSettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
-  const t = useT();
   const s = useS(strings);
   const { router, uniqueId, queryClient, isEditing, locale, formik } =
     useCommonEntityManager<Partial<InterfaceSettingsInformation>>({});
@@ -61,12 +58,12 @@ export function InterfaceSettings({}: {}) {
     formik.current?.setValues({ interfaceLanguage: config.interfaceLanguage });
   }, [config.remote]);
 
-  const languages = interfaceLanguages(t, s);
+  const languages = interfaceLanguages(s);
   const languagesQuerySource = createQuerySource(languages);
 
   return (
-    <PageSection title={t.generalSettings.interfaceLang.title}>
-      <p>{t.generalSettings.interfaceLang.description}</p>
+    <PageSection title={s.interfaceLang.title}>
+      <p>{s.interfaceLang.description}</p>
       <Formik
         innerRef={(r) => {
           if (r) formik.current = r;
@@ -91,8 +88,8 @@ export function InterfaceSettings({}: {}) {
               }}
               errorMessage={form.errors.interfaceLanguage}
               querySource={languagesQuerySource}
-              label={t.settings.interfaceLanguage}
-              hint={t.settings.interfaceLanguageHint}
+              label={s.interfaceLang.label}
+              hint={s.interfaceLang.hint}
             />
 
             <FormButton
@@ -100,7 +97,7 @@ export function InterfaceSettings({}: {}) {
                 form.values.interfaceLanguage === "" ||
                 form.values.interfaceLanguage === config.interfaceLanguage
               }
-              label={t.settings.apply}
+              label={s.apply}
               onClick={() => form.submitForm()}
             />
           </form>

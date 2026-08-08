@@ -1,5 +1,6 @@
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { useQueryClient } from "@tanstack/react-query";
 import { AutoCardDrawer } from "./AutoCardDrawer";
 
@@ -16,7 +17,7 @@ export const MapListMode = ({
   columns: QueryArchiveColumn[];
   uniqueIdHrefHandler?: (id: string) => void;
 }) => {
-  const t = useT();
+  const s = useS(strings);
 
   const queryClient = useQueryClient();
 
@@ -33,7 +34,7 @@ export const MapListMode = ({
 
   return (
     <>
-      {total === 0 && <p>{t.table.noRecords}</p>}
+      {total === 0 && <p>{s.table.noRecords}</p>}
       {(items || []).map((item: any) => {
         return (
           <AutoCardDrawer

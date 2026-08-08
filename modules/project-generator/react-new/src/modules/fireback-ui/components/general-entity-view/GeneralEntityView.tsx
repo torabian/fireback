@@ -1,4 +1,5 @@
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { CopyCell } from "../entity-manager/CopyCell";
 
 export interface GeneralEntityField {
@@ -19,20 +20,20 @@ export function GeneralEntityView({
   description?: string;
 }) {
   const d = entity;
-  const t = useT();
+  const s = useS(strings);
   return (
     <div className="mt-4">
       <div className="general-entity-view ">
         {title ? <h1>{title}</h1> : null}
         {description ? <p>{description}</p> : null}
         <div className="entity-view-row entity-view-head">
-          <div className="field-info">{t.table.info}</div>
-          <div className="field-value">{t.table.value}</div>
+          <div className="field-info">{s.table.info}</div>
+          <div className="field-value">{s.table.value}</div>
         </div>
 
         {entity?.uniqueId && (
           <div className="entity-view-row entity-view-body">
-            <div className="field-info">{t.table.uniqueId}</div>
+            <div className="field-info">{s.table.uniqueId}</div>
             <div className="field-value">{entity.uniqueId}</div>
           </div>
         )}
@@ -40,17 +41,17 @@ export function GeneralEntityView({
           let value = field.elem === undefined ? "-" : field.elem;
 
           if (field.elem === true) {
-            value = t.common.yes;
+            value = s.common.yes;
           }
 
           if (field.elem === false) {
-            value = t.common.no;
+            value = s.common.no;
           }
 
           if (field.elem === null) {
             value = (
               <i>
-                <b>{t.common.isNUll}</b>
+                <b>{s.common.isNUll}</b>
               </i>
             );
           }
@@ -70,7 +71,7 @@ export function GeneralEntityView({
 
         {entity?.createdFormatted && (
           <div className="entity-view-row entity-view-body">
-            <div className="field-info">{t.table.created}</div>
+            <div className="field-info">{s.table.created}</div>
             <div className="field-value">{entity.createdFormatted}</div>
           </div>
         )}

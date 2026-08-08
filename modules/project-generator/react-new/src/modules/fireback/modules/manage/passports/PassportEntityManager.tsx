@@ -16,7 +16,7 @@ import { strings } from "./strings/translations";
 
 export const PassportEntityManager = ({ data }: DtoEntity<PassportDto>) => {
   const s = useS(strings);
-  const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
+  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<PassportDto>
   >({
     data,

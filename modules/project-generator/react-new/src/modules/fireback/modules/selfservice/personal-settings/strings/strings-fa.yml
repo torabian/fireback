@@ -1,8 +1,13 @@
-extends: []
 content:
   accessibility:
     description: مدیریت تنظیمات دسترسی
+    leftHand: چپ دست
+    preferredHand: دست اصلی
+    preferredHandHint: از کدام دست بیشتر برای استفاده از موبایل بهره می‌برید؟
+    rightHand: راست دست
     title: دسترسی
+  apply: ذخیره
+  debugInfo: نمایش اطلاعات دیباگ
   debugSettings:
     description: نمایش اطلاعات اشکال زدایی برنامه، برای توسعه‌دهندگان یا مراکز کمک
     title: تنظیمات اشکال زدایی
@@ -16,13 +21,20 @@ content:
   grpcMethod: از طریق gRPC
   hostAddress: آدرس میزبان
   httpMethod: از طریق HTTP
+  inaccessibleRemote: سرور خارج از دسترس است
   interfaceLang:
     description: در اینجا می‌توانید تنظیمات زبان و منطقه رابط کاربری نرم‌افزار را
       تغییر دهید
+    hint: زبانی که دوست دارید رابط کاربری به شما نشان داده شود
+    label: زبان رابط
     title: زبان و منطقه
   languages:
     russian: روسی (Русский)
     ukrainian: اوکراینی (українська)
+  locale:
+    englishWorldwide: انگلیسی (جهانی)
+    persianIran: فارسی (ایران)
+    polishPoland: لهستانی (Polski)
   notifications:
     description: در اینجا می‌توانید اعلان‌های خود را مدیریت کنید
     failedToSubscribe: اشتراک ناموفق بود.
@@ -31,18 +43,28 @@ content:
     subscribe: اشتراک
     title: تنظیمات اعلان‌ها
     unsubscribe: لغو اشتراک
+  pageTitle: تنظیمات
   port: پورت
+  remoteAddress: آدرس سرور
   remoteDescription: سرویس از راه دور، مکانی است که تمام داده‌ها، منطق‌ها و خدمات
     در آن نصب می‌شوند. ممکن است این ابری یا محلی باشد. تنها کاربران پیشرفته با تغییر
     آن به آدرس نادرست، ممکن است بر ندسترسی برخورد کنند.
   remoteTitle: سرویس از راه دور
   richTextEditor:
     description: مدیریت نحوه ویرایش محتوای متنی در برنامه
+    hint: شما می‌توانید بین ویرایشگرهای متنی مختلفی که ما ارائه می‌دهیم، یکی را انتخاب
+      کنید و از ویرایشگری که راحت‌تر هستید استفاده کنید
+    label: ماژول ویرایشگر متن
     title: ویرایشگر متن
   richThemes:
     macAutomatic: MacOSX خودکار
     macDark: MacOSX تیره
     macLight: MacOSX روشن
+  serverConnected: سرور با موفقیت و صحت کار می‌کند و متصل هستیم
+  simpleTextEditor: باکس ساده سیستم برای متن
   theme:
     description: تغییر رنگ موضوع رابط کاربری
+    hint: قالب یا رنگ تم را انتخاب کنید
+    label: قالب
     title: موضوع
+  tinymceeditor: ویرایش‌گر TinyMCE

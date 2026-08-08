@@ -1,19 +1,28 @@
 content:
+  coverLetter: Cover letter
+  coverLetterHint: The invitation text that user would get over sms or email, you
+    can modify it here.
+  createInvitation: Create invitation
+  editInvitation: Edit invitation
+  email: Email address
+  emailHint: Invitee email address, they will get the link using this email
+  firstName: First name
+  firstNameHint: Write the first name of invitee
   forcedEmailAddress: Force Email Address
-  forcedEmailAddressHint: 
-    If checked, user can only make the invitation using this email address,
-    and won't be able to change it. If account exists, they need to accept
-    invitation there.
+  forcedEmailAddressHint: If checked, user can only make the invitation using this
+    email address, and won't be able to change it. If account exists, they need to
+    accept invitation there.
   forcedPhone: Force Phone Number
-  forcedPhoneHint:
-    If checked, user only can create or join using this phone number
-
-  coverLetter:
-    Cover letter
-  coverLetterHint:
-    The invitation text that user would get over sms or email, you can modify it here.
-
+  forcedPhoneHint: If checked, user only can create or join using this phone number
+  lastName: Last name
+  lastNameHint: Write the last name of inviteee
+  menuTitle: Invites
+  phoneNumber: Phone number
+  phoneNumberHint: Invitee phone number, they will get invitation using sms if you
+    provide their number as well
+  roleHint: Select the role(s) you want to give the user when they join the workspace.
+    This can be changed later as well.
+  roleLabel: Role
   targetLocale: Target Locale
-  targetLocaleHint:
-    If the user has a different language available, the initial interface will
-    be on th selected value.
+  targetLocaleHint: If the user has a different language available, the initial interface
+    will be on th selected value.

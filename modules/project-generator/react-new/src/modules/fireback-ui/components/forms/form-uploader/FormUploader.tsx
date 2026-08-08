@@ -1,7 +1,6 @@
 import { useFileListener } from "../../window-drop/WindowDrop";
 import { useFileUploader } from "../../../../fireback/modules/manage/drive/DriveTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
-import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
 import { FileEntity } from "../../../../fireback/sdk/legacy-types/FileEntity";
 import { debounce } from "lodash";
@@ -55,7 +54,6 @@ export const FormUploader = ({ onChange, value, label }: FormUploaderProps) => {
   const readonly = !!onChange;
   const { upload } = useFileUploader();
   const data = useRef<FileEntity[]>([]);
-  const t = useT();
   const s = useS(strings);
   // Use debounced onChange
   const onChangeDebounced = debounce(
@@ -108,7 +106,7 @@ export const FormUploader = ({ onChange, value, label }: FormUploaderProps) => {
           type="button"
           onClick={onUploadDialog}
         >
-          {t.drive.attachFile}
+          {s.drive.attachFile}
         </button>
       )}
       <AttachmentViewer attachments={value || []} />

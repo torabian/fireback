@@ -3,7 +3,6 @@ import { GeneralEntityView } from "../../../../fireback-ui/components/general-en
 import { usePageTitle } from "../../../../fireback-ui/hooks/authContext";
 import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
 import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
 import { EmailProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
@@ -16,7 +15,6 @@ import { strings } from "./strings/translations";
 
 export const EmailProviderSingleScreen = () => {
   const router = useRouter();
-  const t = useT();
   const s = useS(strings);
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
@@ -46,7 +44,7 @@ export const EmailProviderSingleScreen = () => {
               elem: d?.title,
             },
             {
-              label: t.mailProvider.type,
+              label: s.type,
               elem: d?.type,
             },
           ]}

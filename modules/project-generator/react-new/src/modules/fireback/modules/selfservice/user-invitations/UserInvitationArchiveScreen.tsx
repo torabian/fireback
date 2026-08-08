@@ -1,14 +1,15 @@
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 
 import { CommonArchiveManager } from "../../../../fireback-ui/components/entity-manager/CommonArchiveManager";
 import { UserInvitationList } from "./UserInvitationList";
 
 export const UserInvitationArchiveScreen = () => {
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <>
-      <CommonArchiveManager pageTitle={t.fbMenu.myInvitations}>
+      <CommonArchiveManager pageTitle={s.menuTitle}>
         <UserInvitationList />
       </CommonArchiveManager>
     </>

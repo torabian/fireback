@@ -1,4 +1,3 @@
-extends: []
 content:
   addressLine1: Linia adresu 1
   addressLine1Hint: Linia adresu 1 powiązana z użytkownikiem.
@@ -10,12 +9,19 @@ content:
   cityNameHint: Miasto adresu powiązane z użytkownikiem.
   confirmed: 'Potwierdzone:'
   countryCode: Kod kraju
+  editUser: Edytuj użytkownika
+  firstName: Imię
   gender: Płeć
   image: Obraz
+  inviteFirstNameHint: Wpisz imię zaproszonej osoby
+  inviteLastNameHint: Wpisz nazwisko zaproszonej osoby
+  lastName: Nazwisko
+  menuTitle: Użytkownicy
   na: brak danych
-  "no": Nie
+  newUser: Nowy użytkownik
+  'no': Nie
   passports: Paszporty
   postalCode: Kod pocztowy
   type: 'Typ:'
   value: 'Wartość:'
-  "yes": Tak
+  'yes': Tak

@@ -1,4 +1,3 @@
-import { type IndeterminateCheck } from "../../../fireback/definitions/definitions";
 import { type HTMLProps, useEffect, useRef } from "react";
 
 export function Checkbox({
@@ -6,8 +5,8 @@ export function Checkbox({
   onChange,
   ...props
 }: {
-  onChange: (value: IndeterminateCheck) => void;
-  value: IndeterminateCheck;
+  onChange: (value: "checked" | "unchecked" | "indeterminate") => void;
+  value: "checked" | "unchecked" | "indeterminate";
 } & HTMLProps<HTMLInputElement>) {
   const cRef = useRef<any>();
 

@@ -9,7 +9,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
-import { type IResponse } from "../../../fireback/definitions/JSONStyle";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import { get, set } from "lodash";
 import type { GResponse } from "../../../fireback/sdk/sdk/envelopes";
@@ -33,15 +32,15 @@ export interface CommonEntityManagerProps<T> {
   onCreateTitle?: string;
   onCancel?: () => void;
   beforeSubmit?: (data: T) => T;
-  onSuccessPatchOrPost?: (response: IResponse<any>) => void;
-  onFinishUriResolver?: (response: IResponse<any>, locale: string) => string;
+  onSuccessPatchOrPost?: (response: GResponse<any>) => void;
+  onFinishUriResolver?: (response: GResponse<any>, locale: string) => string;
 }
 
 export interface DtoEntity<T, V = null> {
   data?: Partial<T> | null;
   setInnerRef?: (ref: FormikProps<Partial<T>>) => void;
   enabledFields?: Partial<V>;
-  onSuccess?: (response: IResponse<T>) => void;
+  onSuccess?: (response: GResponse<T>) => void;
   showSubmit?: boolean;
   Form?: any;
 }
@@ -66,7 +65,7 @@ export const CommonEntityManager = ({
   onSuccessPatchOrPost,
 }: CommonEntityManagerProps<any>) => {
   const [initialData, setInitialData] = useState();
-  const { router, isEditing, locale, formik, t } = useCommonEntityManager<
+  const { router, isEditing, locale, formik } = useCommonEntityManager<
     Partial<any>
   >({
     data,
@@ -123,7 +122,7 @@ export const CommonEntityManager = ({
           mutationErrorsToFormik(response.error.toJSON()),
         );
       }
-    }).catch((err) => httpErrorHanlder(err, t));
+    }).catch((err) => httpErrorHanlder(err, s));
   };
 
   const formWorking =
@@ -142,7 +141,7 @@ export const CommonEntityManager = ({
   });
 
   if (onlyOnRoot && selectedUrw.workspaceId !== "root") {
-    return <div>{t.onlyOnRoot}</div>;
+    return <div>{s.onlyOnRoot}</div>;
   }
 
   return (

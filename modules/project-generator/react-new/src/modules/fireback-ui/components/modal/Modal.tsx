@@ -1,5 +1,4 @@
 import { useKeyPress } from "../../hooks/useKeyPress";
-import { useT } from "../../hooks/useT";
 import { useS } from "../../hooks/useS";
 import classNames from "classnames";
 import React, { useContext, useEffect, useState } from "react";
@@ -45,7 +44,6 @@ export function ModalView({
   mref: ModalRef;
   context: IModalContext;
 }) {
-  const t = useT();
   const s = useS(strings);
   const Component = mref.component;
   const onSubmit = async () => {
@@ -82,14 +80,14 @@ export function ModalView({
               autoFocus
               onClick={() => context.closeModal(mref.id)}
             >
-              {t.close}
+              {s.close}
             </button>
             <button
               onClick={onSubmit}
               type="button"
               className="btn btn-primary"
             >
-              {mref.confirmButtonLabel || t.saveChanges}
+              {mref.confirmButtonLabel || s.saveChanges}
             </button>
           </div>
         </div>

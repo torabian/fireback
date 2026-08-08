@@ -3,7 +3,8 @@ import {
   type DtoEntity,
 } from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { useEmailSenderGetActionQuery } from "../../../sdk/messaging/EmailSenderGetAction";
 import { useEmailSenderCreateAction } from "../../../sdk/messaging/EmailSenderCreateAction";
 import { useEmailSenderUpdateAction } from "../../../sdk/messaging/EmailSenderUpdateAction";
@@ -18,7 +19,7 @@ export const EmailSenderEntityManager = ({
     useCommonEntityManager<Partial<EmailSenderDto>>({
       data,
     });
-  const t = useT();
+  const s = useS(strings);
 
   const getSingleHook = useEmailSenderGetActionQuery({
     params: { uniqueId },
@@ -42,8 +43,8 @@ export const EmailSenderEntityManager = ({
         EmailSenderNavigation.single(response.data?.uniqueId, locale)
       }
       Form={EmailSenderEditForm}
-      onEditTitle={t.fb.editMailSender}
-      onCreateTitle={t.fb.newMailSender}
+      onEditTitle={s.editMailSender}
+      onCreateTitle={s.newMailSender}
       data={data}
     />
   );

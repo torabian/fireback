@@ -1,6 +1,7 @@
 import { localizeNumber } from "../../hooks/fonts";
 import { useLocale } from "../../hooks/useLocale";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import classNames from "classnames";
 
 export interface PageItem {
@@ -58,7 +59,7 @@ export function CustomPagination({
   onPageSizeChange: () => void;
 }) {
   const totalPages = Math.ceil(totalCount / pageSize);
-  const t = useT();
+  const s = useS(strings);
   const pages = calcVisiblePages({ totalCount, pageSize, currentPage });
   const { locale } = useLocale();
 
@@ -73,7 +74,7 @@ export function CustomPagination({
             className="page-link"
             disabled={currentPage === 0}
           >
-            {t.table.previous}
+            {s.table.previous}
           </button>
         </li>
         {pages.map((page) => {
@@ -104,7 +105,7 @@ export function CustomPagination({
             className="page-link"
             disabled={currentPage === totalPages - 1}
           >
-            {t.table.next}
+            {s.table.next}
           </button>
         </li>
       </ul>

@@ -1,8 +1,9 @@
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
 import { RoleDto } from "../../../sdk/abac/RoleDto";
 import { RolePermissionTree } from "./RolePermissionTree";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 
 /**
  * Server does not return capabilities list id, because it's used only on post/patch
@@ -21,18 +22,16 @@ export const RoleEditForm = ({
   isEditing,
 }: EntityFormProps<Partial<RoleDto>>) => {
   const { values, setFieldValue, errors } = form;
-  const t = useT();
+  const s = useS(strings);
   return (
     <>
       <FormText
         value={values.name}
-        onChange={(value) =>
-          setFieldValue(RoleDto.Fields.name, value, false)
-        }
+        onChange={(value) => setFieldValue(RoleDto.Fields.name, value, false)}
         errorMessage={errors.name}
-        label={t.wokspaces.invite.role}
+        label={s.inviteRoleLabel}
         autoFocus={!isEditing}
-        hint={t.wokspaces.invite.roleHint}
+        hint={s.inviteRoleHint}
       />
 
       <RolePermissionTree

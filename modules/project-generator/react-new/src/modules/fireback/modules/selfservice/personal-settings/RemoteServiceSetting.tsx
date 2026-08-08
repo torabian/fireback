@@ -1,5 +1,5 @@
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
@@ -7,6 +7,7 @@ import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorV
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
 import { FormButton } from "../../../../fireback-ui/components/forms/form-button/FormButton";
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
+import { strings } from "./strings/translations";
 
 interface AppRemoteInformation {
   remote: string;
@@ -43,7 +44,7 @@ export function RemoteServiceSetting({}: {}) {
 
   const { config, patchConfig } = useContext(AppConfigContext);
 
-  const t = useT();
+  const s = useS(strings);
   const { router, uniqueId, queryClient, isEditing, locale, formik } =
     useCommonEntityManager<Partial<AppRemoteInformation>>({});
 
@@ -85,8 +86,8 @@ export function RemoteServiceSetting({}: {}) {
   }, [config.remote]);
 
   return (
-    <PageSection title={t.generalSettings.remoteTitle}>
-      <p>{t.generalSettings.remoteDescripton}</p>
+    <PageSection title={s.remoteTitle}>
+      <p>{s.remoteDescription}</p>
       <Formik
         innerRef={(r) => {
           if (r) formik.current = r;
@@ -102,7 +103,7 @@ export function RemoteServiceSetting({}: {}) {
             <ErrorsView errors={form.errors} />
             <FormText
               dir="ltr"
-              label={t.settings.remoteAddress}
+              label={s.remoteAddress}
               onChange={(value) =>
                 form.setFieldValue(
                   AppRemoteInformationFields.remote,
@@ -112,12 +113,12 @@ export function RemoteServiceSetting({}: {}) {
               }
               errorMessage={
                 remoteState === RemoteState.Inaccessible
-                  ? t.settings.inaccessibleRemote
+                  ? s.inaccessibleRemote
                   : ""
               }
               validMessage={
                 remoteState === RemoteState.Active
-                  ? t.settings.serverConnected
+                  ? s.serverConnected
                   : ""
               }
               value={form.values.remote}
@@ -127,7 +128,7 @@ export function RemoteServiceSetting({}: {}) {
                 form.values.remote === "" ||
                 form.values.remote === config.remote
               }
-              label={t.settings.apply}
+              label={s.apply}
               onClick={() => form.submitForm()}
             />
           </form>

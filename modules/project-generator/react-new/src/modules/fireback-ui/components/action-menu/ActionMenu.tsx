@@ -12,7 +12,8 @@ import { userMeetsAccess } from "../../hooks/accessLevels";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { KeyboardAction, toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 export interface PermissionLevel {
   onlyRoot?: boolean;
@@ -278,7 +279,7 @@ export function useCommonCrudActions({
     return userMeetsAccess(selectedUrw as any, access.permissions[0]);
   }, [selectedUrw, access]);
 
-  const t = useT();
+  const s = useS(strings);
   const editingCore = ({
     onSave,
     onCancel,
@@ -293,7 +294,7 @@ export function useCommonCrudActions({
     return [
       {
         icon: "",
-        label: t.common.save,
+        label: s.common.save,
         uniqueActionKey: "save",
         onSelect: () => {
           onSave();
@@ -301,7 +302,7 @@ export function useCommonCrudActions({
       },
       onCancel && {
         icon: "",
-        label: t.common.cancel,
+        label: s.common.cancel,
         uniqueActionKey: "cancel",
         onSelect: () => {
           onCancel();
@@ -323,14 +324,14 @@ export function useNewAction(
   onSelect: (() => void) | undefined,
   keyPressEventName?: KeyboardAction,
 ) {
-  const t = useT();
+  const s = useS(strings);
 
   useKeyCombination(keyPressEventName, onSelect);
 
   useActions("commonEntityActions", [
     onSelect && {
       icon: osResources.add,
-      label: t.actions.new,
+      label: s.actions.new,
       uniqueActionKey: "new",
       onSelect,
     },
@@ -341,14 +342,14 @@ export function useBackButton(
   onSelect: (() => void) | undefined,
   keyPressEventName?: KeyboardAction,
 ) {
-  const t = useT();
+  const s = useS(strings);
 
   useKeyCombination(keyPressEventName, onSelect);
 
   useActions("navigation", [
     onSelect && {
       icon: osResources.left,
-      label: t.actions.back,
+      label: s.actions.back,
       uniqueActionKey: "back",
       className: "navigator-back-button",
       onSelect,
@@ -387,14 +388,14 @@ export function useExportActions(
   onSelect: (() => void) | undefined,
   keyPressEventName?: KeyboardAction,
 ) {
-  const t = useT();
+  const s = useS(strings);
 
   useKeyCombination(keyPressEventName, onSelect);
 
   useActions("exportTools", [
     onSelect && {
       icon: osResources.export,
-      label: t.actions.new,
+      label: s.actions.new,
       uniqueActionKey: "export",
       onSelect,
     },
@@ -405,13 +406,13 @@ export function useEditAction(
   onSelect: (() => void) | undefined,
   keyPressEventName?: KeyboardAction,
 ) {
-  const t = useT();
+  const s = useS(strings);
   useKeyCombination(keyPressEventName, onSelect);
 
   useActions("commonEntityActions", [
     onSelect && {
       icon: osResources.edit,
-      label: t.actions.edit,
+      label: s.actions.edit,
       uniqueActionKey: "new",
       onSelect,
     },

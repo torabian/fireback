@@ -1,5 +1,6 @@
-extends: []
 content:
+  apiKey: Klucz Api
+  editMailProvider: Dostawca poczty
   emailProviders:
     fieldApiKey: Klucz API
     fieldCurlScript: Skrypt Curl
@@ -36,3 +37,8 @@ content:
     typeSendgrid: SendGrid
     typeSmtp: SMTP
     typeTerminal: Terminal (debugowanie)
+  menuTitle: Dostawcy poczty
+  newMailProvider: Nowy dostawca poczty
+  type: Typ usługi
+  typeHint: Wybierz dostawcę poczty z listy. Na liście znajdziesz wszystkich obsługiwanych
+    dostawców.

@@ -1,12 +1,13 @@
 import { source } from "../../hooks/source";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 
 export const EmptyList = () => {
-  const t = useT();
+  const s = useS(strings);
   return (
     <div className="empty-list-indicator">
       <img src={source("/common/empty.png")} />
-      <div>{t.table.noRecords}</div>
+      <div>{s.table.noRecords}</div>
     </div>
   );
 };

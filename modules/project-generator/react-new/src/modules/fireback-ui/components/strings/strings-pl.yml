@@ -1,5 +1,22 @@
-extends: []
 content:
+  actions:
+    addJob: + Dodaj zadanie
+    back: Wstecz
+    edit: Edytuj
+    new: Nowy
+  authenticatedOnly: Ta sekcja wymaga zalogowania przed przeglądaniem lub edycją jakiegokolwiek
+    rodzaju.
+  close: Zamknij
+  common:
+    cancel: Anuluj
+    isNUll: Nie określono
+    'no': Nie
+    noaccess: Nie masz dostępu do tej części aplikacji. Skontaktuj się z przełożonym
+      w celu konsultacji
+    parent: Rekord nadrzędny
+    parentHint: Wybierz encję nadrzędną, do której to należy
+    save: Zapisz
+    'yes': Tak
   components:
     attachDocumentsAboutThePayment: Załącz dokumenty dotyczące płatności
     autoReroute: Automatyczne przekierowanie
@@ -35,3 +52,76 @@ content:
     unknownError: Wystąpił nieznany błąd podczas pobierania informacji, jeśli problem
       się powtarza, skontaktuj się z dostawcą oprogramowania.
     view: Widok
+  confirm: Potwierdź
+  currentUser:
+    editProfile: Edytuj profil
+    profile: Profil
+    signin: Zaloguj się
+    signout: Wyloguj się
+  deleteAction: Usuń
+  deleteConfirmMessage: Czy na pewno chcesz usunąć wybrane elementy?
+  drive:
+    attachFile: Załącz plik
+  dropNFiles: Upuść {n} plik(i), aby rozpocząć przesyłanie
+  errors:
+    UNKOWN_ERRROR: Wystąpił nieznany błąd
+  forcedLayout:
+    checkingSession: Sprawdzanie tokenów i uwierzytelniania...
+    forcedLayoutGeneralMessage: Musisz się zalogować, aby uzyskać dostęp do tej sekcji
+  jalaliMonths:
+    '0': Farvardin
+    '1': Ordibehesht
+    '10': Bahman
+    '11': Isfand
+    '2': Khordad
+    '3': Tir
+    '4': Mordad
+    '5': Shahrivar
+    '6': Mehr
+    '7': Aban
+    '8': Azar
+    '9': Dey
+  lackOfPermission: Potrzebujesz więcej uprawnień, aby uzyskać dostęp do tej części
+    oprogramowania.
+  meta:
+    titleAffix: PixelPlux
+  networkError: Nie jesteś połączony z siecią, pobieranie danych nie powiodło się.
+    Sprawdź połączenie sieciowe. Jeśli masz połączenie, możliwe że nasz serwer jest
+    tymczasowo offline lub w trybie konserwacji
+  noOptions: Brak opcji
+  not_found_404: Strona, której szukasz, mogła zostać usunięta, jej adres URL zmieniony
+    lub jest tymczasowo niedostępna.
+  notfound: Zasób, którego szukasz, nie jest dostępny w tej wersji api.
+  onlyOnRoot: Ta funkcja jest dostępna tylko dla dostępu root, poproś administratora
+    o więcej informacji
+  reactiveSearch:
+    noResults: Brak wyników :)
+    placeholder: Szukaj (Naciśnij S)...
+  saveChanges: Zastosuj
+  searchplaceholder: Szukaj...
+  selectPlaceholder: '- Wybierz opcję -'
+  signinInstead: Zaloguj się
+  table:
+    created: Utworzono
+    filter:
+      contains: Zawiera
+      endsWith: Kończy się na
+      equal: Równe
+      filterPlaceholder: Filtruj...
+      greaterThan: Większe niż
+      greaterThanOrEqual: Większe lub równe
+      lessThan: Mniejsze niż
+      lessThanOrEqual: Mniejsze lub równe
+      notContains: Nie zawiera
+      notEqual: Różne
+      startsWith: Zaczyna się na
+    info: Informacje
+    next: Następny
+    noRecords: Brak dostępnych rekordów. Aby utworzyć jeden, naciśnij przycisk Plus.
+    previous: Poprzedni
+    uniqueId: id
+    updated: Zaktualizowano
+    userId: Id użytkownika
+    value: Wartość
+    workspaceId: Id przestrzeni roboczej
+  workspacesSideTitle: Przestrzenie robocze

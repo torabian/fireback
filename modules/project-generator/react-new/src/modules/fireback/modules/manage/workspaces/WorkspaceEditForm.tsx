@@ -1,6 +1,7 @@
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { WorkspaceDto } from "../../../sdk/abac/WorkspaceDto";
 
 export const WorkspaceEditForm = ({
@@ -8,7 +9,7 @@ export const WorkspaceEditForm = ({
   isEditing,
 }: EntityFormProps<Partial<WorkspaceDto>>) => {
   const { values, setFieldValue, errors } = form;
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <>
@@ -19,8 +20,8 @@ export const WorkspaceEditForm = ({
           setFieldValue(WorkspaceDto.Fields.name, value, false)
         }
         errorMessage={errors.name}
-        label={t.wokspaces.workspaceName}
-        hint={t.wokspaces.workspaceNameHint}
+        label={s.workspaceName}
+        hint={s.workspaceNameHint}
       />
     </>
   );

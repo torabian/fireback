@@ -3,7 +3,8 @@ import { GeneralEntityView } from "../../../../fireback-ui/components/general-en
 import { usePageTitle } from "../../../../fireback-ui/hooks/authContext";
 import { useLocale } from "../../../../fireback-ui/hooks/useLocale";
 import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 import { EmailSenderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 import { useEmailSenderGetActionQuery } from "../../../sdk/messaging/EmailSenderGetAction";
@@ -11,7 +12,7 @@ import { useState } from "react";
 
 export const EmailSenderSingleScreen = () => {
   const router = useRouter();
-  const t = useT();
+  const s = useS(strings);
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
   const [value, setValue] = useState<string[]>([]);
@@ -34,19 +35,19 @@ export const EmailSenderSingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: t.mailProvider.fromName,
+              label: s.fromName,
               elem: d?.fromName,
             },
             {
-              label: t.mailProvider.fromEmailAddress,
+              label: s.fromEmailAddress,
               elem: d?.fromEmailAddress,
             },
             {
-              label: t.mailProvider.nickName,
+              label: s.nickName,
               elem: d?.nickName,
             },
             {
-              label: t.mailProvider.replyTo,
+              label: s.replyTo,
               elem: d?.replyTo,
             },
           ]}

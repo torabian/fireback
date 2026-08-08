@@ -1,0 +1,22 @@
+content:
+  body: Treść
+  confirmEmailSender: E-mail potwierdzający rejestrację konta użytkownika
+  createNewWorkspace: Nowa przestrzeń robocza
+  customizedTemplate: Dostosuj szablon
+  editWorkspae: Edytuj przestrzeń roboczą
+  emailSendingConfiguration: Konfiguracja wysyłania e-maili
+  emailSendingConfigurationHint: Kontroluj sposób wysyłania e-maili systemowych, dostosuj
+    wiadomość itp.
+  forgetPasswordSender: Instrukcje przypomnienia hasła
+  inviteToWorkspace: Zaproś do przestrzeni roboczej
+  mailServerConfiguration: Konfiguracja serwera pocztowego
+  menuTitle: Przestrzenie robocze
+  name: Nazwa
+  notificationDialogTitle: Edytuj szablon wiadomości
+  resetToDefault: Przywróć domyślne
+  sender: Nadawca
+  sidetitle: Przestrzenie robocze
+  title: Tytuł
+  type: Typ
+  workspaceName: Nazwa przestrzeni roboczej
+  workspaceNameHint: Wprowadź nazwę przestrzeni roboczej

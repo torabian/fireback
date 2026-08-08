@@ -3,7 +3,8 @@ import { GeneralEntityView } from "../../../../fireback-ui/components/general-en
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
 import { usePageTitle } from "../../../../fireback-ui/hooks/authContext";
 import { useRouter } from "../../../../fireback-ui/hooks/useRouter";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { useEffect, useState } from "react";
 import { RolePermissionTree } from "./RolePermissionTree";
@@ -12,7 +13,7 @@ import { useRoleGetActionQuery } from "../../../sdk/abac/RoleGetAction";
 export const RoleSingleScreen = () => {
   const router = useRouter();
   const uniqueId = router.query.uniqueId as string;
-  const t = useT();
+  const s = useS(strings);
   const [value, setValue] = useState<string[]>([]);
 
   const getSingleHook = useRoleGetActionQuery({
@@ -40,13 +41,13 @@ export const RoleSingleScreen = () => {
           entity={d}
           fields={[
             {
-              label: t.role.name,
+              label: s.role.name,
               elem: d?.name,
             },
           ]}
         />
 
-        <PageSection title={t.role.permissions} className="mt-3">
+        <PageSection title={s.role.permissions} className="mt-3">
           <RolePermissionTree value={value} />
         </PageSection>
       </CommonSingleManager>

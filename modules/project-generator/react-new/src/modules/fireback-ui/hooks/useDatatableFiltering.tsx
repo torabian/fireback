@@ -14,7 +14,8 @@ import { osResources } from "../../fireback/resources/resources";
 import { type DeleteRequest } from "../../fireback/sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";
-import { useT } from "./useT";
+import { useS } from "./useS";
+import { strings } from "../components/strings/translations";
 import { KeyboardAction } from "./useExportTools";
 
 export function useDatatableFiltering({
@@ -28,7 +29,7 @@ export function useDatatableFiltering({
   submitDelete?: any;
   initialFilters?: Partial<Filters>;
 }) {
-  const t = useT();
+  const s = useS(strings);
   const router = useRouter();
 
   const { confirmModal } = commonDialogs();
@@ -140,10 +141,10 @@ export function useDatatableFiltering({
 
   const deleteItems = async () => {
     confirmModal({
-      title: t.confirm,
-      confirmLabel: t.common.yes,
-      cancelLabel: t.common.no,
-      description: t.deleteConfirmMessage,
+      title: s.confirm,
+      confirmLabel: s.common.yes,
+      cancelLabel: s.common.no,
+      description: s.deleteConfirmMessage,
     })
       .promise.then(({ type }) => {
         if (type === "resolved") {
@@ -159,7 +160,7 @@ export function useDatatableFiltering({
   };
 
   const deleteAction = (): IMenuActionItem => ({
-    label: t.deleteAction,
+    label: s.deleteAction,
     onSelect() {
       deleteItems();
     },

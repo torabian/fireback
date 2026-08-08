@@ -3,6 +3,8 @@ import {
   type DtoEntity,
 } from "../../../../fireback-ui/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { usePublicJoinKeyGetActionQuery } from "../../../sdk/abac/PublicJoinKeyGetAction";
 import { usePublicJoinKeyCreateAction } from "../../../sdk/abac/PublicJoinKeyCreateAction";
 import { usePublicJoinKeyUpdateAction } from "../../../sdk/abac/PublicJoinKeyUpdateAction";
@@ -13,11 +15,12 @@ import { PublicJoinKeyEditForm } from "./PublicJoinKeyEditForm";
 export const PublicJoinKeyEntityManager = ({
   data,
 }: DtoEntity<PublicJoinKeyDto>) => {
-  const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
+  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<PublicJoinKeyDto>
   >({
     data,
   });
+  const s = useS(strings);
 
   const getSingleHook = usePublicJoinKeyGetActionQuery({
     params: { uniqueId },
@@ -39,8 +42,8 @@ export const PublicJoinKeyEntityManager = ({
         PublicJoinKeyNavigation.single(response.data?.uniqueId)
       }
       Form={PublicJoinKeyEditForm}
-      onEditTitle={t.fb.editPublicJoinKey}
-      onCreateTitle={t.fb.newPublicJoinKey}
+      onEditTitle={s.editPublicJoinKey}
+      onCreateTitle={s.newPublicJoinKey}
       data={data}
     />
   );

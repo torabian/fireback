@@ -1,4 +1,6 @@
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 
 import {
   CommonEntityManager,
@@ -13,11 +15,12 @@ import { WorkspaceTypeEditForm } from "./WorkspaceTypeEditForm";
 export const WorkspaceTypeEntityManager = ({
   data,
 }: DtoEntity<WorkspaceTypeDto>) => {
-  const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
+  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
     Partial<WorkspaceTypeDto>
   >({
     data,
   });
+  const s = useS(strings);
 
   const getSingleHook = useWorkspaceTypeGetActionQuery({
     params: { uniqueId },
@@ -39,8 +42,8 @@ export const WorkspaceTypeEntityManager = ({
         `/${locale}/workspace-type/${response.data?.uniqueId}`
       }
       Form={WorkspaceTypeEditForm}
-      onEditTitle={t.fb.editWorkspaceType}
-      onCreateTitle={t.fb.newWorkspaceType}
+      onEditTitle={s.editWorkspaceType}
+      onCreateTitle={s.newWorkspaceType}
       data={data}
     />
   );

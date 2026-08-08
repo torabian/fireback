@@ -3,7 +3,8 @@ import { useContext, useMemo } from "react";
 import { useQueryUserRoleWorkspacesActionQuery } from "../../../fireback/sdk/abac/QueryUserRoleWorkspacesAction";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import type { MArray } from "../../../fireback/sdk/sdk/common/operators";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import type { MenuItem } from "../../types/MenuItem";
 
 export enum MacTagsColor {
@@ -23,7 +24,7 @@ export enum MacTagsColor {
  * @returns
  */
 export function useWorkspacesMenuPresenter() {
-  const t = useT();
+  const s = useS(strings);
   const { selectedUrw, selectUrw, session } = useContext(RemoteQueryContext);
 
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
@@ -65,7 +66,7 @@ export function useWorkspacesMenuPresenter() {
 
     return [
       {
-        label: t.wokspaces.sidetitle,
+        label: s.workspacesSideTitle,
         children: workspacesAndRolesList.sort((a, b) =>
           a.key < b.key ? -1 : 1,
         ),

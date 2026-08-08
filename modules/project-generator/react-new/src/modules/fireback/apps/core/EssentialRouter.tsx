@@ -1,5 +1,6 @@
 import { AppConfigContext } from "../../../fireback-ui/hooks/appConfigTools";
-import { useT } from "../../../fireback-ui/hooks/useT";
+import { useS } from "../../../fireback-ui/hooks/useS";
+import { strings } from "../../../fireback-ui/components/strings/translations";
 
 import { NotFound404 } from "../../../fireback-ui/components/404/NotFound404";
 import { useLocale } from "../../../fireback-ui/hooks/useLocale";
@@ -24,7 +25,7 @@ export function FirebackEssentialRouterManager({
   children?: any;
   routerId?: string;
 }) {
-  const t = useT();
+  const s = useS(strings);
   useRtlClass();
   const { locale } = useLocale();
   const { config } = useContext(AppConfigContext);
@@ -38,7 +39,7 @@ export function FirebackEssentialRouterManager({
 
   
   return (
-    <PageTitleProvider affix={t.productName}>
+    <PageTitleProvider affix={s.productName}>
       <Routes>
         <Route
           path="/"

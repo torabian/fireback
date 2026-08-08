@@ -7,8 +7,6 @@ import { type KeyValue } from "../../../definitions/definitions";
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import { useS } from "../../../../fireback-ui/hooks/useS";
-import { useT } from "../../../../fireback-ui/hooks/useT";
-import { enTranslations } from "../../../translations/en";
 import { strings } from "./strings/translations";
 import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
@@ -30,13 +28,13 @@ const updateSettings = (
   }
 };
 
-const availableRichAccessibilitys = (t: typeof enTranslations): KeyValue[] => [
+const availableRichAccessibilitys = (s: typeof strings): KeyValue[] => [
   {
-    label: t.accesibility.leftHand,
+    label: s.accessibility.leftHand,
     value: "left",
   },
   {
-    label: t.accesibility.rightHand,
+    label: s.accessibility.rightHand,
     value: "right",
   },
 ];
@@ -44,7 +42,6 @@ const availableRichAccessibilitys = (t: typeof enTranslations): KeyValue[] => [
 export function AccessiblitySettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
-  const t = useT();
   const s = useS(strings);
 
   const { router, uniqueId, queryClient, isEditing, locale, formik } =
@@ -63,7 +60,7 @@ export function AccessiblitySettings({}: {}) {
   };
 
   const availbleAccessbilitySource = createQuerySource(
-    availableRichAccessibilitys(t)
+    availableRichAccessibilitys(s)
   );
 
   useEffect(() => {
@@ -71,7 +68,7 @@ export function AccessiblitySettings({}: {}) {
   }, [config.remote]);
 
   return (
-    <PageSection title={t.generalSettings.accessibility.title}>
+    <PageSection title={s.accessibility.title}>
       <p>{s.accessibility.description}</p>
       <Formik
         innerRef={(r) => {
@@ -97,8 +94,8 @@ export function AccessiblitySettings({}: {}) {
               keyExtractor={(item) => item.value}
               errorMessage={form.errors.preferredHand}
               querySource={availbleAccessbilitySource}
-              label={t.settings.preferredHand}
-              hint={t.settings.preferredHandHint}
+              label={s.accessibility.preferredHand}
+              hint={s.accessibility.preferredHandHint}
             />
 
             <FormButton
@@ -106,7 +103,7 @@ export function AccessiblitySettings({}: {}) {
                 form.values.preferredHand === "" ||
                 form.values.preferredHand === config.preferredHand
               }
-              label={t.settings.apply}
+              label={s.apply}
               onClick={() => form.submitForm()}
             />
           </form>

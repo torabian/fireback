@@ -1,11 +1,13 @@
 import { Checkbox } from "../../../../fireback-ui/components/checkbox/Checkbox";
 import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorView";
-import { type IndeterminateCheck } from "../../../definitions/definitions";
 import { type CapabilityChild } from "../../../sdk/core/react-tools";
 import { useCapabilitiesTreeActionQuery } from "../../../sdk/abac/CapabilitiesTreeAction";
 import { MCollection } from "../../../sdk/sdk/common/operators";
 
-type NodeChangeFn = (node: string, value: IndeterminateCheck) => void;
+type NodeChangeFn = (
+  node: string,
+  value: "checked" | "unchecked" | "indeterminate",
+) => void;
 
 export function RolePermissionTree({
   onChange,
@@ -69,9 +71,9 @@ export function PermissionTree({
           item.children?.length ? ".*" : ""
         }`;
 
-        const checkValue: IndeterminateCheck = (value || []).includes(
-          completeKey,
-        )
+        const checkValue: "checked" | "unchecked" | "indeterminate" = (
+          value || []
+        ).includes(completeKey)
           ? "checked"
           : "unchecked";
 

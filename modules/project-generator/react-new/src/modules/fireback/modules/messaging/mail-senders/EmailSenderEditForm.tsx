@@ -1,13 +1,14 @@
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
-import { type EntityFormProps } from "../../../definitions/definitions";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
+import { useS } from "../../../../fireback-ui/hooks/useS";
+import { strings } from "./strings/translations";
 import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 
 export const EmailSenderEditForm = ({
   form,
   isEditing,
 }: EntityFormProps<Partial<EmailSenderDto>>) => {
-  const t = useT();
+  const s = useS(strings);
   const { values, setFieldValue, errors } = form;
 
   return (
@@ -19,8 +20,8 @@ export const EmailSenderEditForm = ({
         }
         autoFocus={!isEditing}
         errorMessage={errors.fromEmailAddress}
-        label={t.mailProvider.fromEmailAddress}
-        hint={t.mailProvider.fromEmailAddressHint}
+        label={s.fromEmailAddress}
+        hint={s.fromEmailAddressHint}
       />
       <FormText
         value={values.fromName}
@@ -28,8 +29,8 @@ export const EmailSenderEditForm = ({
           setFieldValue(EmailSenderDto.Fields.fromName, value, false)
         }
         errorMessage={errors.fromName}
-        label={t.mailProvider.fromName}
-        hint={t.mailProvider.fromNameHint}
+        label={s.fromName}
+        hint={s.fromNameHint}
       />
       <FormText
         value={values.nickName}
@@ -37,8 +38,8 @@ export const EmailSenderEditForm = ({
           setFieldValue(EmailSenderDto.Fields.nickName, value, false)
         }
         errorMessage={errors.nickName}
-        label={t.mailProvider.nickName}
-        hint={t.mailProvider.nickNameHint}
+        label={s.nickName}
+        hint={s.nickNameHint}
       />
       <FormText
         value={values.replyTo}
@@ -46,8 +47,8 @@ export const EmailSenderEditForm = ({
           setFieldValue(EmailSenderDto.Fields.replyTo, value, false)
         }
         errorMessage={errors.replyTo}
-        label={t.mailProvider.replyTo}
-        hint={t.mailProvider.replyToHint}
+        label={s.replyTo}
+        hint={s.replyToHint}
       />
     </>
   );

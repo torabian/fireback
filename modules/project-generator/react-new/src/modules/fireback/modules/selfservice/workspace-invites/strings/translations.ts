@@ -4,35 +4,74 @@
 export const en = {
   coverLetter: "Cover letter",
   coverLetterHint: "The invitation text that user would get over sms or email, you can modify it here.",
+  createInvitation: "Create invitation",
+  editInvitation: "Edit invitation",
+  email: "Email address",
+  emailHint: "Invitee email address, they will get the link using this email",
+  firstName: "First name",
+  firstNameHint: "Write the first name of invitee",
   forcedEmailAddress: "Force Email Address",
   forcedEmailAddressHint: "If checked, user can only make the invitation using this email address, and won't be able to change it. If account exists, they need to accept invitation there.",
   forcedPhone: "Force Phone Number",
   forcedPhoneHint: "If checked, user only can create or join using this phone number",
+  lastName: "Last name",
+  lastNameHint: "Write the last name of inviteee",
+  menuTitle: "Invites",
+  phoneNumber: "Phone number",
+  phoneNumberHint: "Invitee phone number, they will get invitation using sms if you provide their number as well",
+  roleHint: "Select the role(s) you want to give the user when they join the workspace. This can be changed later as well.",
+  roleLabel: "Role",
   targetLocale: "Target Locale",
   targetLocaleHint: "If the user has a different language available, the initial interface will be on th selected value.",
-};/**
-* Auto generated file by fireback language & translation manager.
-*/
-export const pl = {
-  coverLetter: "List motywacyjny",
-  coverLetterHint: "Treść zaproszenia, którą użytkownik otrzyma przez SMS lub e-mail – możesz ją tutaj edytować.",
-  forcedEmailAddress: "Wymuszony adres e-mail",
-  forcedEmailAddressHint: "Jeśli zaznaczone, użytkownik może wysłać zaproszenie tylko na ten adres e-mail i nie będzie mógł go zmienić. Jeśli konto już istnieje, użytkownik musi zaakceptować zaproszenie na tym koncie.",
-  forcedPhone: "Wymuszony numer telefonu",
-  forcedPhoneHint: "Jeśli zaznaczone, użytkownik może utworzyć konto lub dołączyć tylko przy użyciu tego numeru telefonu",
-  targetLocale: "Docelowy język",
-  targetLocaleHint: "Jeśli użytkownik ma dostępny inny język, interfejs początkowy będzie ustawiony na wybraną wartość.",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
 export const fa = {
   coverLetter: "متن دعوت‌نامه",
   coverLetterHint: "متنی که کاربر از طریق پیامک یا ایمیل دریافت می‌کند؛ می‌توانید آن را در اینجا تغییر دهید.",
+  createInvitation: "ایجاد دعوت نامه",
+  editInvitation: "ویرایش دعوت نامه",
+  email: "آدرس ایمیل",
+  emailHint: "آدرس ایمیل دعوت کننده، آنها پیوند را با استفاده از این ایمیل دریافت خواهند کرد",
+  firstName: "نام کوچک",
+  firstNameHint: "نام دعوت شده را بنویسید",
   forcedEmailAddress: "الزام آدرس ایمیل",
   forcedEmailAddressHint: "در صورت فعال بودن، کاربر فقط می‌تواند با این آدرس ایمیل دعوت‌نامه را ایجاد کند و امکان تغییر آن را نخواهد داشت. اگر حساب کاربری از قبل وجود داشته باشد، باید دعوت‌نامه را از همان‌جا بپذیرد.",
   forcedPhone: "الزام شماره تلفن",
   forcedPhoneHint: "در صورت فعال بودن، کاربر فقط می‌تواند با این شماره تلفن ایجاد یا عضو شود",
+  lastName: "نام خانوادگی",
+  lastNameHint: "نام خانوادگی دعوت شده را بنویسید",
+  menuTitle: "دعوت نامه ها",
+  phoneNumber: "شماره تلفن",
+  phoneNumberHint: "شماره تلفن دعوت شوندگان، اگر شماره آنها را نیز ارائه دهید، از طریق پیامک دعوتنامه دریافت خواهند کرد",
+  roleHint: "نقش(هایی) را که می خواهید به کاربر هنگام پیوستن به فضای کاری بدهید، انتخاب کنید. این را می توان بعدا نیز تغییر داد.",
+  roleLabel: "نقش",
   targetLocale: "زبان مقصد",
   targetLocaleHint: "اگر کاربر زبان دیگری در دسترس داشته باشد، رابط کاربری اولیه بر اساس مقدار انتخاب‌شده خواهد بود.",
+};/**
+* Auto generated file by fireback language & translation manager.
+*/
+export const pl = {
+  coverLetter: "List motywacyjny",
+  coverLetterHint: "Treść zaproszenia, którą użytkownik otrzyma przez SMS lub e-mail – możesz ją tutaj edytować.",
+  createInvitation: "Utwórz zaproszenie",
+  editInvitation: "Edytuj zaproszenie",
+  email: "Adres e-mail",
+  emailHint: "Adres e-mail zaproszonego, otrzyma on link za pomocą tego e-maila",
+  firstName: "Imię",
+  firstNameHint: "Wpisz imię zaproszonej osoby",
+  forcedEmailAddress: "Wymuszony adres e-mail",
+  forcedEmailAddressHint: "Jeśli zaznaczone, użytkownik może wysłać zaproszenie tylko na ten adres e-mail i nie będzie mógł go zmienić. Jeśli konto już istnieje, użytkownik musi zaakceptować zaproszenie na tym koncie.",
+  forcedPhone: "Wymuszony numer telefonu",
+  forcedPhoneHint: "Jeśli zaznaczone, użytkownik może utworzyć konto lub dołączyć tylko przy użyciu tego numeru telefonu",
+  lastName: "Nazwisko",
+  lastNameHint: "Wpisz nazwisko zaproszonej osoby",
+  menuTitle: "Zaproszenia",
+  phoneNumber: "Numer telefonu",
+  phoneNumberHint: "Numer telefonu zaproszonego, otrzyma zaproszenie SMS-em, jeśli podasz jego numer",
+  roleHint: "Wybierz rolę(e), które chcesz nadać użytkownikowi po dołączeniu do przestrzeni roboczej. Można to zmienić później.",
+  roleLabel: "Rola",
+  targetLocale: "Docelowy język",
+  targetLocaleHint: "Jeśli użytkownik ma dostępny inny język, interfejs początkowy będzie ustawiony na wybraną wartość.",
 };
- export const strings = {...en, $pl:pl,$fa:fa};
+ export const strings = {...en, $fa:fa,$pl:pl};

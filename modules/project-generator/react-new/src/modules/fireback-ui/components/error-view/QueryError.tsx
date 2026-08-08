@@ -1,6 +1,4 @@
-import { useT } from "../../hooks/useT";
 import { useS } from "../../hooks/useS";
-import { enTranslations } from "../../../fireback/translations/en";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import { useContext } from "react";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
@@ -8,17 +6,16 @@ import { FormButton } from "../forms/form-button/FormButton";
 import { strings } from "../strings/translations";
 
 export function getQueryErrorString(
-  t: typeof enTranslations,
   s: typeof strings,
   query: UseQueryResult<any, any> | UseMutationResult<any, any>,
   params: any = {}
 ): string | null {
   if (query.isError) {
     if (query.error?.status === 404) {
-      return t.notfound + "(" + params.remote + ")";
+      return s.notfound + "(" + params.remote + ")";
     }
     if (query.error.message === "Failed to fetch") {
-      return t.networkError + "(" + params.remote + ")";
+      return s.networkError + "(" + params.remote + ")";
     }
 
     if (query.error?.error?.messageTranslated) {
@@ -47,7 +44,6 @@ export function QueryErrorView({
   query: UseQueryResult<any, any> | UseMutationResult<any, any> | any;
   children?: React.ReactNode;
 }) {
-  const t = useT();
   const s = useS(strings);
   const { options, setOverrideRemoteUrl, overrideRemoteUrl } =
     useContext(RemoteQueryContext);
@@ -77,7 +73,7 @@ export function QueryErrorView({
     <>
       {query.isError && (
         <div className="basic-error-box fadein">
-          {getQueryErrorString(t, s, query, { remote: options.prefix }) || ""}
+          {getQueryErrorString(s, query, { remote: options.prefix }) || ""}
           {showAutoAdjustTheUrl && (
             <button className="btn btn-sm btn-secondary" onClick={autoAdjust}>
               {s.components.autoReroute}

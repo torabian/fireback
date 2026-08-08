@@ -1,5 +1,22 @@
-extends: []
 content:
+  actions:
+    addJob: + اضافه کردن شغل
+    back: بازگشت
+    edit: ویرایش
+    new: جدید
+  authenticatedOnly: این بخش شما را ملزم می کند که قبل از مشاهده یا ویرایش هر نوع
+    وارد شوید.
+  close: بستن
+  common:
+    cancel: لغو
+    isNUll: تعیین نشده
+    'no': خیر
+    noaccess: شما به این بخش از برنامه دسترسی ندارید. برای مشاوره با سرپرست خود تماس
+      بگیرید
+    parent: رکورد مادر
+    parentHint: اگر این رکورد دارای سر مجموعه است آن را انتخاب کنید
+    save: ذخیره
+    'yes': بله
   components:
     attachDocumentsAboutThePayment: پیوست اسناد مربوط به پرداخت
     autoReroute: تنظیم خودکار مسیر
@@ -35,3 +52,76 @@ content:
     unknownError: خطای ناشناخته‌ای هنگام دریافت اطلاعات رخ داد، در صورت تداوم مشکل
       با ارائه‌دهنده نرم‌افزار خود تماس بگیرید.
     view: مشاهده
+  confirm: تایید
+  currentUser:
+    editProfile: ویرایش نمایه
+    profile: مشخصات
+    signin: ورود
+    signout: خروج از سیستم
+  deleteAction: حذف
+  deleteConfirmMessage: آیا از حذف کردن این آیتم ها مطمین هستید؟
+  drive:
+    attachFile: اضافه کردن فایل پیوست
+  dropNFiles: برای شروع آپلود، {n} فایل را رها کنید
+  errors:
+    UNKOWN_ERRROR: خطای ناشناخته ای رخ داده است
+  forcedLayout:
+    checkingSession: در حال بررسی توکن‌ها و احراز هویت...
+    forcedLayoutGeneralMessage: دسترسی به این بخش نیازمند حساب کاربری و ورود به سیستم
+      است
+  jalaliMonths:
+    '0': فروردین
+    '1': اردیبهشت
+    '10': بهمن
+    '11': اسفند
+    '2': خرداد
+    '3': تیر
+    '4': مرداد
+    '5': شهریور
+    '6': مهر
+    '7': آبان
+    '8': آذر
+    '9': دی
+  lackOfPermission: برای دسترسی به این بخش از نرم افزار به مجوزهای بیشتری نیاز دارید.
+  meta:
+    titleAffix: PixelPlux
+  networkError: شما به شبکه متصل نیستید، دریافت داده انجام نشد. اتصال شبکه خود را
+    بررسی کنید
+  noOptions: هیچ گزینه نیست، جستجو کنید
+  not_found_404: صفحه ای که به دنبال آن هستید وجود ندارد. ممکن است این قسمت در زبان
+    فارسی موجود نباشد و یا حذف شده باشد.
+  notfound: اطلاعات یا ماژول مورد نظر شما در این نسخه از سرور وجود ندارد.
+  onlyOnRoot: این بخش فقط برای دسترسی روت قابل مشاهده است. در صورت نیاز به اطلاعات
+    بیشتر با مدیر سیستم خود تماس بگیرید.
+  reactiveSearch:
+    noResults: جستجو هیچ نتیجه ای نداشت
+    placeholder: جستجو (کلید S)...
+  saveChanges: ذخیره
+  searchplaceholder: جستجو...
+  selectPlaceholder: '- انتخاب کنید -'
+  signinInstead: ورود
+  table:
+    created: ساخته شده
+    filter:
+      contains: شامل
+      endsWith: پایان یابد
+      equal: برابر
+      filterPlaceholder: فیلتر...
+      greaterThan: بزرگتر از
+      greaterThanOrEqual: بزرگتر یا مساوری
+      lessThan: کمتر از
+      lessThanOrEqual: کمتر یا مساوی
+      notContains: شامل نباشد
+      notEqual: برابر نباشد
+      startsWith: شروع با
+    info: داده
+    next: بعدی
+    noRecords: هیچ سابقه ای برای نمایش وجود ندارد. برای ایجاد یکی، دکمه مثبت را فشار
+      دهید.
+    previous: قبلی
+    uniqueId: شناسه
+    updated: به روز شده
+    userId: شناسه کاربر
+    value: مقدار
+    workspaceId: شناسه فضای کاری
+  workspacesSideTitle: فضاهای کاری

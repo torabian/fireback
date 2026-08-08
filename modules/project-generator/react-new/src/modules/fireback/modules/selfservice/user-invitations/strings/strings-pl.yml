@@ -1,4 +1,3 @@
-extends: []
 content:
   accept: Akceptuj
   acceptBtn: Tak
@@ -8,6 +7,7 @@ content:
   confirmRejectDescription: Czy na pewno chcesz odrzucić to zaproszenie? Aby dołączyć
     ponownie, musisz zostać ponownie zaproszony przez administratorów.
   confirmRejectTitle: Odrzuć zaproszenie
+  menuTitle: Moje zaproszenia
   method: Metoda
   passport: Paszport
   reject: Odrzuć

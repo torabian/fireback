@@ -1,4 +1,4 @@
-import { type EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
 import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
@@ -25,7 +25,7 @@ export const RegionalContentForm = ({
           label: item.k,
           value: item.k,
         };
-      })
+      }),
   );
 
   return (

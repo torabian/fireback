@@ -3,7 +3,6 @@ import { useRouter } from "./useRouter";
 import { type FormikProps } from "formik";
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useT } from "./useT";
 
 interface DtoEntity<T> {
   data?: T | null;
@@ -26,11 +25,9 @@ export function useCommonEntityManager<T>(props?: DtoEntity<T> | undefined) {
   const linkerId = router.query.linkerId as string;
   const isEditing = !!uniqueId;
   const { locale } = useLocale();
-  const t = useT();
 
   return {
     router,
-    t,
     isEditing,
     locale,
     queryClient,

@@ -1,5 +1,5 @@
 import { ModalContext } from "../../../../fireback-ui/components/modal/Modal";
-import { useT } from "../../../../fireback-ui/hooks/useT";
+import { useS } from "../../../../fireback-ui/hooks/useS";
 import { type FormikProps } from "formik";
 import { useContext, useRef } from "react";
 import {
@@ -7,7 +7,7 @@ import {
   MailTemplateEntityManager,
 } from "./MailTemplateEntityManager";
 import { FormEmailSenderPicker } from "./FormEmailSenderPicker";
-import { enTranslations } from "../../../translations/en";
+import { strings } from "./strings/translations";
 import { NotificationConfigDto } from "../../../sdk/abac/NotificationConfigDto";
 import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 
@@ -21,18 +21,18 @@ interface WorkspaceEmailConfigItem {
   key: string;
 }
 
-const mailTypes = (t: typeof enTranslations): WorkspaceEmailConfigItem[] => [
+const mailTypes = (s: typeof strings): WorkspaceEmailConfigItem[] => [
   {
-    title: t.wokspaces.inviteToWorkspace,
+    title: s.inviteToWorkspace,
     key: "inviteToWorkspaceSender",
   },
   {
-    title: t.wokspaces.confirmEmailSender,
+    title: s.confirmEmailSender,
     key: "confirmEmailSender",
   },
   {
     key: "forgetPasswordSender",
-    title: t.wokspaces.forgetPasswordSender,
+    title: s.forgetPasswordSender,
   },
 ];
 
@@ -41,7 +41,7 @@ export function MailTemplateConfiguration({
 }: {
   form: FormikProps<Partial<NotificationConfigDto>>;
 }) {
-  const t = useT();
+  const s = useS(strings);
   const useModal = useContext(ModalContext);
   const templateFormik = useRef<FormikProps<
     Partial<MailTemplateEditor>
@@ -78,7 +78,7 @@ export function MailTemplateConfiguration({
     }
 
     useModal.openModal({
-      title: t.wokspaces.notification.dialogTitle,
+      title: s.notificationDialogTitle,
       component: () => (
         <MailTemplateEntityManager
           setInnerRef={(r) => (templateFormik.current = r)}
@@ -140,13 +140,13 @@ export function MailTemplateConfiguration({
     <table className="table">
       <thead>
         <tr>
-          <th>{t.wokspaces.type}</th>
-          <th>{t.wokspaces.sender}</th>
-          <th>{t.wokspaces.customizedTemplate}</th>
+          <th>{s.type}</th>
+          <th>{s.sender}</th>
+          <th>{s.customizedTemplate}</th>
         </tr>
       </thead>
       <tbody>
-        {mailTypes(t).map((item) => (
+        {mailTypes(s).map((item) => (
           <tr key={item.key}>
             <td>{item.title}</td>
             <td width={400}>
@@ -168,7 +168,7 @@ export function MailTemplateConfiguration({
                 }
                 className="btn btn-secondary"
               >
-                {t.wokspaces.customizedTemplate}
+                {s.customizedTemplate}
               </button>
             </td>
           </tr>

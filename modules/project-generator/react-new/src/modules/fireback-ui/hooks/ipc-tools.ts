@@ -1,6 +1,7 @@
-import { type RemoteRequestOption } from "../../fireback/definitions/JSONStyle";
-
-export const ipcExecFn = (options: RemoteRequestOption) => {
+export const ipcExecFn = (options: {
+  headers?: { [key: string]: string };
+  prefix?: string;
+}) => {
   return function (method: string, url: string, body: any) {
     const finalUrl =
       url +

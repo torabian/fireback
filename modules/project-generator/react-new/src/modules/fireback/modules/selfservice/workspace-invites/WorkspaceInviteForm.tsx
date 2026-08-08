@@ -1,7 +1,7 @@
-import { type EntityFormProps } from "../../../definitions/definitions";
+import { type EntityFormProps } from "../../../../fireback-ui/types/EntityManagement";
 import { strings } from "./strings/translations";
+import { strings as personalSettingsStrings } from "../personal-settings/strings/translations";
 import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
-import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { FormText } from "../../../../fireback-ui/components/forms/form-text/FormText";
@@ -15,11 +15,11 @@ export const WorkspaceInviteForm = ({
   form,
   isEditing,
 }: EntityFormProps<Partial<WorkspaceInviteDto>>) => {
-  const t = useT();
   const { values, setValues, setFieldValue, errors } = form;
   const s = useS(strings);
+  const personalSettingsS = useS(personalSettingsStrings);
 
-  const languages = interfaceLanguages(t);
+  const languages = interfaceLanguages(personalSettingsS);
   const languagesQuerySource = createQuerySource(languages);
 
   return (
@@ -29,16 +29,12 @@ export const WorkspaceInviteForm = ({
           <FormText
             value={values.firstName}
             onChange={(value) =>
-              setFieldValue(
-                WorkspaceInviteDto.Fields.firstName,
-                value,
-                false
-              )
+              setFieldValue(WorkspaceInviteDto.Fields.firstName, value, false)
             }
             errorMessage={errors.firstName}
-            label={t.wokspaces.invite.firstName}
+            label={s.firstName}
             autoFocus={!isEditing}
-            hint={t.wokspaces.invite.firstNameHint}
+            hint={s.firstNameHint}
           />
         </div>
         <div className="col-md-12">
@@ -48,8 +44,8 @@ export const WorkspaceInviteForm = ({
               setFieldValue(WorkspaceInviteDto.Fields.lastName, value, false)
             }
             errorMessage={errors.lastName}
-            label={t.wokspaces.invite.lastName}
-            hint={t.wokspaces.invite.lastNameHint}
+            label={s.lastName}
+            hint={s.lastNameHint}
           />
         </div>
         <div className="col-md-12">
@@ -72,11 +68,7 @@ export const WorkspaceInviteForm = ({
           <FormRichText
             value={values.coverLetter}
             onChange={(value) =>
-              setFieldValue(
-                WorkspaceInviteDto.Fields.coverLetter,
-                value,
-                false
-              )
+              setFieldValue(WorkspaceInviteDto.Fields.coverLetter, value, false)
             }
             forceBasic
             errorMessage={errors.coverLetter}
@@ -89,10 +81,10 @@ export const WorkspaceInviteForm = ({
           <FormSelect
             formEffect={{ field: WorkspaceInviteDto.Fields.role$, form }}
             querySource={useRolesQuerySource}
-            label={t.wokspaces.invite.role}
+            label={s.roleLabel}
             errorMessage={errors.roleId}
             fnLabelFormat={(item) => item.name}
-            hint={t.wokspaces.invite.roleHint}
+            hint={s.roleHint}
           />
         </div>
       </div>
@@ -105,18 +97,15 @@ export const WorkspaceInviteForm = ({
               setFieldValue(WorkspaceInviteDto.Fields.email, value, false)
             }
             errorMessage={errors.email}
-            label={t.wokspaces.invite.email}
-            hint={t.wokspaces.invite.emailHint}
+            label={s.email}
+            hint={s.emailHint}
           />
         </div>
         <div className="col-md-12">
           <FormCheckbox
             value={values.forceEmailAddress}
             onChange={(value) =>
-              setFieldValue(
-                WorkspaceInviteDto.Fields.forceEmailAddress,
-                value
-              )
+              setFieldValue(WorkspaceInviteDto.Fields.forceEmailAddress, value)
             }
             errorMessage={errors.forceEmailAddress}
             label={s.forcedEmailAddress}
@@ -127,26 +116,19 @@ export const WorkspaceInviteForm = ({
           <FormText
             value={values.phonenumber}
             onChange={(value) =>
-              setFieldValue(
-                WorkspaceInviteDto.Fields.phonenumber,
-                value,
-                false
-              )
+              setFieldValue(WorkspaceInviteDto.Fields.phonenumber, value, false)
             }
             errorMessage={errors.phonenumber}
             type="phonenumber"
-            label={t.wokspaces.invite.phoneNumber}
-            hint={t.wokspaces.invite.phoneNumberHint}
+            label={s.phoneNumber}
+            hint={s.phoneNumberHint}
           />
         </div>
         <div className="col-md-12">
           <FormCheckbox
             value={values.forcePhoneNumber}
             onChange={(value) =>
-              setFieldValue(
-                WorkspaceInviteDto.Fields.forcePhoneNumber,
-                value
-              )
+              setFieldValue(WorkspaceInviteDto.Fields.forcePhoneNumber, value)
             }
             errorMessage={errors.forcePhoneNumber}
             label={s.forcedPhone}

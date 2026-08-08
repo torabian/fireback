@@ -1,19 +1,17 @@
-import { type JsonQuery } from "../../../../fireback/definitions/definitions";
-import { type IResponseList } from "../../../../fireback/sdk/core/http-tools";
-import { type UseRemoteQuery } from "../../../../fireback/sdk/core/react-tools";
+import { useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import classNames from "classnames";
 import { type FormikProps } from "formik";
 import { get, isArray, isObject, set } from "lodash";
 import { useState } from "react";
-import { useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import Select from "react-select/async";
-import { useT } from "../../../hooks/useT";
+import { type IResponseList } from "../../../../fireback/sdk/core/http-tools";
+import { type UseRemoteQuery } from "../../../../fireback/sdk/core/react-tools";
 import { useS } from "../../../hooks/useS";
+import { strings } from "../../strings/translations";
 import {
   BaseFormElement,
   type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
-import { strings } from "../../strings/translations";
 
 export interface FormSelectBase<
   T,
@@ -182,26 +180,10 @@ export interface FormSelectMultipleProps<
   formEffect?: FormSelectMultipleEffect<any, T, ValueIdentifier>;
 }
 
-function resolveJsonQuery(
-  keyword: string,
-  userInput?: (keyword: string) => JsonQuery,
-): JsonQuery {
-  if (userInput) {
-    return userInput(keyword);
-  }
-  return {
-    name: {
-      operation: "contains",
-      value: keyword,
-    },
-  };
-}
-
 export function FormSelectMultiple<T, V>(props: FormSelectMultipleProps<T, V>) {
   return <FormSelect<T, V> {...(props as any)} multiple={true} />;
 }
 export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
-  const t = useT();
   const s = useS(strings);
 
   const queryClient = useQueryClient();
@@ -216,9 +198,6 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
     query: {
       itemsPerPage: 20,
       withPreloads: props.withPreloads,
-    },
-    queryOptions: {
-      refetchOnWindowFocus: false,
     },
   });
 
@@ -323,7 +302,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
           aria-label={s.components.defaultSelectExample}
         >
           <option key={undefined} value={""}>
-            {t.selectPlaceholder}
+            {s.selectPlaceholder}
           </option>
           {options?.filter(Boolean).map((t) => {
             const itemValue = keyExtractor(t);
@@ -359,8 +338,8 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
             }}
             isSearchable
             defaultOptions={options}
-            placeholder={t.searchplaceholder}
-            noOptionsMessage={() => t.noOptions}
+            placeholder={s.searchplaceholder}
+            noOptionsMessage={() => s.noOptions}
             getOptionValue={keyExtractor as any}
             loadOptions={promiseOptions}
             formatOptionLabel={props.fnLabelFormat}

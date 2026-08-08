@@ -5,7 +5,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 
 import { AppConfigContext } from "../../../hooks/appConfigTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
-import { useT } from "../../../hooks/useT";
 import { Blob } from "buffer";
 import {
   BaseFormElement,
@@ -41,7 +40,6 @@ export enum EditorTypes {
 
 export const FormRichText = (props: FormRichTextProps) => {
   const { config } = useContext(AppConfigContext);
-  const t = useT();
   const {
     placeholder,
     label,

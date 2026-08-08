@@ -1,6 +1,5 @@
 import { uuidv4 } from "../../hooks/api";
 import { source } from "../../hooks/source";
-import { useT } from "../../hooks/useT";
 import { type FormikProps } from "formik";
 import { osResources } from "../../../fireback/resources/resources";
 
@@ -19,7 +18,6 @@ export function Repeater({
   form: FormikProps<any>;
   disabled?: boolean;
 }) {
-  const t = useT();
   const readOnly = !!onChange;
 
   if (!Component) {

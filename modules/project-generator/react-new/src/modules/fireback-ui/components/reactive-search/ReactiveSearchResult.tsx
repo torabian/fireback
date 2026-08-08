@@ -1,6 +1,7 @@
 import { groupBy } from "lodash";
 import { source } from "../../hooks/source";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import Link from "../link/Link";
 import { type IReactiveSearchResult } from "./ReactiveSearchDefinition";
 
@@ -11,14 +12,14 @@ export function ReactiveSearchResult({
   result: IReactiveSearchResult[];
   onComplete: () => void;
 }) {
-  const t = useT();
+  const s = useS(strings);
   const renderGroup = groupBy(result, "group");
   const keys = Object.keys(renderGroup);
 
   return (
     <div className="reactive-search-result">
       {keys.length === 0 ? (
-        <>{t.reactiveSearch.noResults}</>
+        <>{s.reactiveSearch.noResults}</>
       ) : (
         <ul>
           {keys.map((groupName, index) => {

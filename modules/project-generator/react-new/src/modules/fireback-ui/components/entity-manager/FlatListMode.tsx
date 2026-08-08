@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import AutoSizer from "react-virtualized-auto-sizer";
 import InfiniteLoader from "react-window-infinite-loader";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
-import { useT } from "../../hooks/useT";
 import {
   PullDownContent,
   PullToRefresh,
@@ -41,7 +40,6 @@ export const FlatListMode = ({
   uniqueIdHrefHandler?: (id: string) => void;
   CardComponent?: CardComponentType<unknown>;
 }) => {
-  const t = useT();
   // Used for cashing the query
   // const indexedData = useRef<Array<any>>([]);
   const previousQuery = useRef<any>();

@@ -1,5 +1,6 @@
 import { userMeetsAccess } from "../../hooks/accessLevels";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import { useContext, useMemo } from "react";
 
@@ -17,7 +18,7 @@ export function WithPermissions({
   permissions: string[] | undefined;
   onlyRoot?: boolean;
 }) {
-  const t = useT();
+  const s = useS(strings);
   const { selectedUrw } = useContext(RemoteQueryContext);
 
   const meets = useMemo(() => {
@@ -37,7 +38,7 @@ export function WithPermissions({
       {meets ? (
         children
       ) : (
-        <div className="basic-error-box">{t.lackOfPermission}</div>
+        <div className="basic-error-box">{s.lackOfPermission}</div>
       )}
     </>
   );

@@ -1,4 +1,5 @@
-import { useT } from "../../../hooks/useT";
+import { useS } from "../../../hooks/useS";
+import { strings } from "../../strings/translations";
 import { get } from "lodash";
 
 export const ChildForm = ({ form, Component, part }: any) => {
@@ -11,11 +12,11 @@ export const ChildForm = ({ form, Component, part }: any) => {
   };
   const data = get(form.values, part) || {};
   const errors = form.errors;
-  const t = useT();
+  const s = useS(strings);
 
   return (
     <Component
-      t={t}
+      t={s}
       data={data}
       errors={errors}
       setFieldValue={setChildValue}

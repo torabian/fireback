@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import { type MenuItem } from "../../types/MenuItem";
-import { useT } from "../../hooks/useT";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
 import Navbar from "./Navbar";
 
@@ -43,7 +42,6 @@ const Layout = ({
   navbarMenu?: MenuItem;
   routerId?: string;
 }) => {
-  const t = useT();
   const { result, phrase, reset } = useContext(ReactiveSearchContext);
 
   const { sidebarVisible, toggleSidebar: toggleSidebar$ } = useUiState();

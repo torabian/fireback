@@ -1,8 +1,11 @@
-import { useT } from "../../hooks/useT";
 import Link from "../link/Link";
 
+// `columns` is a zero-argument function that returns the already-resolved column
+// definitions - callers close over their own module-local translation strings (each
+// module has its own shape now, there's no shared central translation object anymore)
+// and pass e.g. `columns={() => columns(s, uiS)}` rather than a raw, still-needs-t
+// function reference.
 export const CommonRowDetail = ({ row, uniqueIdHrefHandler, columns }: any) => {
-  const t = useT();
   return (
     <>
       {(row.children || []).map((item: any) => {
@@ -10,7 +13,7 @@ export const CommonRowDetail = ({ row, uniqueIdHrefHandler, columns }: any) => {
           <tr>
             <td></td>
             <td></td>
-            {columns(t).map((col: any) => {
+            {columns().map((col: any) => {
               let v = item.getCellValue
                 ? item.getCellValue(row)
                 : item[col.name];

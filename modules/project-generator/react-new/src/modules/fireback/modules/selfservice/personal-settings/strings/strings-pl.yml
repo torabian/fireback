@@ -1,8 +1,14 @@
-extends: []
 content:
   accessibility:
     description: Obsługa ustawień dostępności
+    leftHand: Leworęczny
+    preferredHand: Preferowana ręka
+    preferredHandHint: Wybierz, której ręki najczęściej używasz do telefonu, aby niektóre
+      opcje były bliżej Twojej głównej ręki
+    rightHand: Praworęczny
     title: Dostępność
+  apply: Zastosuj
+  debugInfo: Pokaż informacje debugowania
   debugSettings:
     description: Wyświetl informacje debugowania aplikacji, dla programistów lub biur
       pomocy
@@ -17,12 +23,19 @@ content:
   grpcMethod: Przez gRPC
   hostAddress: Adres hosta
   httpMethod: Przez HTTP
+  inaccessibleRemote: Zdalny serwer niedostępny.
   interfaceLang:
     description: Tutaj możesz zmienić ustawienia języka interfejsu oprogramowania
+    hint: Język, w którym chcesz, aby interfejs był wyświetlany
+    label: Język interfejsu
     title: Język i Region
   languages:
     russian: Rosyjski (Русский)
     ukrainian: Ukraiński (українська)
+  locale:
+    englishWorldwide: Angielski (świat)
+    persianIran: Perski (Iran)
+    polishPoland: Polski (Polska)
   notifications:
     description: Tutaj możesz zarządzać swoimi powiadomieniami
     failedToSubscribe: Subskrypcja nie powiodła się.
@@ -31,18 +44,28 @@ content:
     subscribe: Subskrybuj
     title: Ustawienia powiadomień
     unsubscribe: Anuluj subskrypcję
+  pageTitle: Ustawienia
   port: Port
+  remoteAddress: Adres zdalny
   remoteDescription: Usługa zdalna, to miejsce, w którym zainstalowane są wszystkie
     dane, logiki i usługi. Może to być chmura lub lokalnie. Tylko zaawansowani użytkownicy,
     zmieniając go na błędny adres, mogą spowodować niedostępność.
   remoteTitle: Usługa zdalna
   richTextEditor:
     description: Zarządzaj sposobem edycji treści tekstowej w aplikacji
+    hint: Możesz wybrać między różnymi edytorami tekstu, które oferujemy, i użyć tego,
+      który jest dla Ciebie wygodniejszy
+    label: Moduł edytora tekstu
     title: Edytor tekstu
   richThemes:
     macAutomatic: MacOSX automatyczny
     macDark: MacOSX ciemny
     macLight: MacOSX jasny
+  serverConnected: Serwer został pomyślnie połączony
+  simpleTextEditor: Prosty edytor tekstu systemowego
   theme:
     description: Zmień kolor motywu interfejsu
+    hint: Wybierz motyw interfejsu
+    label: Motyw
     title: Motyw
+  tinymceeditor: Edytor TinyMCE

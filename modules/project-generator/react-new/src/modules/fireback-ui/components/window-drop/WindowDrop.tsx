@@ -1,5 +1,6 @@
 import { getOS } from "../../hooks/useHtmlClass";
-import { useT } from "../../hooks/useT";
+import { useS } from "../../hooks/useS";
+import { strings } from "../strings/translations";
 import React, { useContext, useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 
@@ -72,7 +73,7 @@ export function FileListenerProvider({
 export function WindowDrop({ children }: { children: React.ReactNode }) {
   const [filesToSettle, setFilesToSettle$] = useState<File[]>([]);
   const { refs } = useContext(FileListenerContext);
-  const t = useT();
+  const s = useS(strings);
 
   const setFilesToSettle = (files: File[]) => {
     setFilesToSettle$(files);
@@ -105,7 +106,7 @@ export function WindowDrop({ children }: { children: React.ReactNode }) {
                 className="file-dropping-indicator"
               >
                 <span className="dropin-files-hint">
-                  {t.dropNFiles.replace("{n}", `${refs.length}`)}
+                  {s.dropNFiles.replace("{n}", `${refs.length}`)}
                 </span>
                 {refs.map((r) => (
                   <span key={r.id}>{r.condition.label}</span>

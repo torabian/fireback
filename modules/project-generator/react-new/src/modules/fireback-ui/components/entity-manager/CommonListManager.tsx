@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from "react";
 import { useTableViewSizingGetActionQuery } from "../../../fireback/sdk/interfacetools/TableViewSizingGetAction";
 import { useTableViewSizingUpdateAction } from "../../../fireback/sdk/interfacetools/TableViewSizingUpdateAction";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
-import { useT } from "../../hooks/useT";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { PaginateTable } from "../common-data-table/PaginateTable";
 import { useReindexedContent } from "../common-data-table/useReindex";
@@ -108,7 +107,6 @@ export const CommonListManager = ({
   queryFilters?: Array<Filter | undefined>;
   CardComponent?: CardComponentType<unknown>;
 }) => {
-  const t = useT();
   const { view } = useViewMode();
   const queryClient = useQueryClient();
 
