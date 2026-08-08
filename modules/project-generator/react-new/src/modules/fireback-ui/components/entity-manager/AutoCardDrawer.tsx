@@ -1,5 +1,4 @@
-import { createElement } from "react";
-import { type QueryArchiveColumn } from "../../../fireback/definitions/common";
+import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import Link from "../link/Link";
 
 export function AutoCardDrawer({

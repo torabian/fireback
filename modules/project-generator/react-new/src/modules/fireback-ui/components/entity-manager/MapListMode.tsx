@@ -1,4 +1,4 @@
-import { type QueryArchiveColumn } from "../../../fireback/definitions/common";
+import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { useT } from "../../hooks/useT";
 import { useQueryClient } from "@tanstack/react-query";
 import { AutoCardDrawer } from "./AutoCardDrawer";

@@ -2,7 +2,7 @@ import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import AutoSizer from "react-virtualized-auto-sizer";
 import InfiniteLoader from "react-window-infinite-loader";
-import { type QueryArchiveColumn } from "../../../fireback/definitions/common";
+import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { useT } from "../../hooks/useT";
 import {
   PullDownContent,

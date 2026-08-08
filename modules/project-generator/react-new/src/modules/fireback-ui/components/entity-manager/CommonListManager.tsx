@@ -1,22 +1,21 @@
 import {
   DataTypeProvider,
+  type Filter,
   type Sorting,
   type TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { type QueryArchiveColumn } from "../../../fireback/definitions/common";
-import { type Filter } from "../../../fireback/definitions/definitions";
-import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
-import { useT } from "../../hooks/useT";
+import { useEffect, useRef, useState } from "react";
 import { useTableViewSizingGetActionQuery } from "../../../fireback/sdk/interfacetools/TableViewSizingGetAction";
 import { useTableViewSizingUpdateAction } from "../../../fireback/sdk/interfacetools/TableViewSizingUpdateAction";
+import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
+import { useT } from "../../hooks/useT";
+import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { PaginateTable } from "../common-data-table/PaginateTable";
+import { useReindexedContent } from "../common-data-table/useReindex";
 import Link from "../link/Link";
-import { filtersToJsonQuery } from "./EnttityManagerHelper";
 import { type CardComponentType, FlatListMode } from "./FlatListMode";
 import { MapListMode } from "./MapListMode";
-import { useReindexedContent } from "../common-data-table/useReindex";
 
 // `queryHook` is a *hook function* (e.g. `useGetCapabilities` from the old
 // "react-query" v3 generator, or `useCapabilityBrowseActionQuery` from the

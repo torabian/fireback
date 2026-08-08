@@ -1,4 +1,4 @@
-import { type QueryArchiveColumn } from "../../../definitions/common";
+import { type QueryArchiveColumn } from "../../../../fireback-ui/types/QueryArchiveColumn";
 import { RoleDto } from "../../../sdk/abac/RoleDto";
 import { enTranslations } from "../../../translations/en";
 

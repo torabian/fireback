@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { dataMenuToMenu } from "../components/layouts/Sidebar";
-import { type MenuItem } from "../../fireback/definitions/common";
 import { useCteAppMenusActionQuery } from "../../fireback/sdk/interfacetools/CteAppMenusAction";
 import { AppMenuOptionalDto } from "../../fireback/sdk/interfacetools/AppMenuOptionalDto";
 import { useQueryUserRoleWorkspacesActionQuery } from "../../fireback/sdk/abac/QueryUserRoleWorkspacesAction";
@@ -8,6 +7,7 @@ import { RemoteQueryContext } from "../../fireback/sdk/core/react-tools";
 import { GResponse } from "../../fireback/sdk/sdk/envelopes";
 import { userMeetsAccess2 } from "./accessLevels";
 import { useLocale } from "./useLocale";
+import type { MenuItem } from "../types/MenuItem";
 
 // AppMenuOptionalDto is Emi-generated from the "appMenu" entity - Emi has no
 // self-referencing dto, so it has no "children" field at all, and its constructor

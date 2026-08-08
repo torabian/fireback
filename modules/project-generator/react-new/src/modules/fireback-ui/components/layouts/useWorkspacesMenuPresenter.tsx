@@ -1,9 +1,20 @@
 import { useContext, useMemo } from "react";
-import { MacTagsColor, type MenuItem } from "../../../fireback/definitions/common";
-import { useT } from "../../hooks/useT";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+
 import { useQueryUserRoleWorkspacesActionQuery } from "../../../fireback/sdk/abac/QueryUserRoleWorkspacesAction";
+import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import type { MArray } from "../../../fireback/sdk/sdk/common/operators";
+import { useT } from "../../hooks/useT";
+import type { MenuItem } from "../../types/MenuItem";
+
+export enum MacTagsColor {
+  Green = "#00bd00",
+  Red = "#ff0313",
+  Orange = "#fa7a00",
+  Yellow = "#f4b700",
+  Blue = "#0072ff",
+  Purple = "#ad41d1",
+  Grey = "#717176",
+}
 
 /**
  * It computes the menu items related to the workspaces, and active role generally
