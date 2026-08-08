@@ -1,5 +1,5 @@
 import { useFileListener } from "../../window-drop/WindowDrop";
-import { useFileUploader } from "../../../../manage/drive/DriveTools";
+import { useFileUploader } from "../../../../sdk/core/react-tools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useS } from "../../../hooks/useS";
 import { FileEntity } from "../../../../sdk/legacy-types/FileEntity";

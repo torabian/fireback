@@ -1,7 +1,7 @@
 import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { useS } from "../../../hooks/useS";
-import { useFileUploader } from "../../../../manage/drive/DriveTools";
+import { useFileUploader } from "../../../../sdk/core/react-tools";
 import { useFileListener } from "../../window-drop/WindowDrop";
 import { strings } from "../../strings/translations";
 

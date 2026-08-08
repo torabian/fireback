@@ -6,7 +6,7 @@ import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { type FormikProps } from "formik";
 import { useContext } from "react";
 import { WorkspaceDto } from "../../sdk/abac/WorkspaceDto";
-import { EmailProviderEditForm } from "../mail-providers/EmailProviderEditForm";
+import { EmailProviderEditForm } from "../../messaging/mail-providers/EmailProviderEditForm";
 
 export const MailTemplateForm = ({
   form,
