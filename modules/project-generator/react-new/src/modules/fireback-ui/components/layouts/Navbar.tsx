@@ -1,4 +1,4 @@
-import { type MenuItem } from "../../../fireback/definitions/common";
+import { type MenuItem } from "../../types/MenuItem";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
 import { getOS } from "../../hooks/useHtmlClass";

@@ -9,37 +9,6 @@ export interface Timestamp {
   nanos: number;
 }
 
-export interface DisplayDetectionProps {
-  location?: string;
-  selectedUrw?: any;
-  asPath?: string;
-  userRoleWorkspaces?: any[];
-}
-
-export interface MenuItem {
-  label?: string | null;
-  href?: string | null;
-  color?: string | null;
-  icon?: string | null;
-  onClick?: () => void;
-  activeMatcher?: RegExp;
-  displayFn?: (props: DisplayDetectionProps) => boolean;
-  forceActive?: boolean;
-  children: MenuItem[];
-  key?: string;
-}
-
-export interface MenuItemRendered extends MenuItem {
-  isActive: boolean;
-  isVisible: boolean;
-}
-
-export interface MenuRendered {
-  name?: string | null;
-  href?: string | null;
-  children: MenuItemRendered[];
-}
-
 export enum MacTagsColor {
   Green = "#00bd00",
   Red = "#ff0313",

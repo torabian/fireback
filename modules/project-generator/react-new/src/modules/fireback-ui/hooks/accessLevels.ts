@@ -1,4 +1,10 @@
-import { type DisplayDetectionProps } from "../../fireback/definitions/common";
+export interface DisplayDetectionProps {
+  location?: string;
+  selectedUrw?: any;
+  asPath?: string;
+  userRoleWorkspaces?: any[];
+}
+
 import type { QueryUserRoleWorkspacesActionRes } from "../../fireback/sdk/abac/QueryUserRoleWorkspacesAction";
 import { CapabilityDto } from "../../fireback/sdk/abac/CapabilityDto";
 import type { MArray } from "../../fireback/sdk/sdk/common/operators";

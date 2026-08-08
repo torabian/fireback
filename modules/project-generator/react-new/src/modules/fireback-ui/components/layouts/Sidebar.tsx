@@ -1,4 +1,4 @@
-import { type MenuItem } from "../../../fireback/definitions/common";
+import { type MenuItem } from "../../types/MenuItem";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
 
@@ -229,8 +229,14 @@ function SortableMenuGroup({
   menu: MenuItem;
   onClick: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),

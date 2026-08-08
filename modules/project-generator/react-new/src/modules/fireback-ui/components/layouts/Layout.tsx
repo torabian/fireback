@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { type MenuItem } from "../../../fireback/definitions/common";
+import { type MenuItem } from "../../types/MenuItem";
 import { useT } from "../../hooks/useT";
 import { ActionMenuManager } from "../action-menu/ActionMenu";
 import Navbar from "./Navbar";

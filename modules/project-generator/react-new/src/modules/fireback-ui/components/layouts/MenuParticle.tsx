@@ -2,7 +2,7 @@ import {
   type MenuItem,
   type MenuItemRendered,
   type MenuRendered,
-} from "../../../fireback/definitions/common";
+} from "../../types/MenuItem";
 import { useLocale } from "../../hooks/useLocale";
 import { useSortableOrder } from "../../hooks/useSortableOrder";
 import classNames from "classnames";
@@ -169,7 +169,11 @@ function MenuUl({ items }: { items: MenuItemRendered[] }) {
       >
         <ul className="nav nav-pills flex-column mb-auto">
           {ordered.map((item) => (
-            <SortableLiItem key={menuItemId(item)} id={menuItemId(item)} item={item} />
+            <SortableLiItem
+              key={menuItemId(item)}
+              id={menuItemId(item)}
+              item={item}
+            />
           ))}
         </ul>
       </SortableContext>
@@ -202,8 +206,14 @@ function LiItemLink({ item }: { item: MenuItemRendered }) {
 }
 
 function SortableLiItem({ id, item }: { id: string; item: MenuItemRendered }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),

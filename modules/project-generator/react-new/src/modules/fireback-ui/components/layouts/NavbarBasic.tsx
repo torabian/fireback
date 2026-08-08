@@ -1,4 +1,4 @@
-import { type MenuItem } from "../../../fireback/definitions/common";
+import { type MenuItem } from "../../types/MenuItem";
 import classNames from "classnames";
 import React from "react";
 import ActiveLink from "../link/ActiveLink";
@@ -30,7 +30,7 @@ function Navbar({ menu }: { menu?: MenuItem }) {
               <li
                 className={classNames(
                   "nav-item",
-                  item.children?.length && "dropdown"
+                  item.children?.length && "dropdown",
                 )}
                 key={`${item.label}_${item.href}`}
               >
@@ -56,7 +56,7 @@ function Navbar({ menu }: { menu?: MenuItem }) {
                           <li
                             className={classNames(
                               "nav-item",
-                              item.children?.length && "dropdown"
+                              item.children?.length && "dropdown",
                             )}
                             key={`${item.label}_${item.href}`}
                           >

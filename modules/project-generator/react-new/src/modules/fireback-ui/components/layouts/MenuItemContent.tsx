@@ -1,4 +1,4 @@
-import { type MenuItem } from "../../../fireback/definitions/common";
+import { type MenuItem } from "../../types/MenuItem";
 import { source } from "../../hooks/source";
 
 export function MenuItemContent({ item }: { item: MenuItem }) {
