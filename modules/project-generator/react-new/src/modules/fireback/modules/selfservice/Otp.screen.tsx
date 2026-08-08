@@ -4,7 +4,7 @@ import { QueryErrorView } from "../../../fireback-ui/components/error-view/Query
 import { FormButton } from "../../../fireback-ui/components/forms/form-button/FormButton";
 
 import { useS } from "../../../fireback-ui/hooks/useS";
-import ReactCodeInput from "../../thirdparty/react-verification-code-input/index";
+import ReactCodeInput from "./components/react-verification-code-input/index";
 import { usePresenter } from "./Otp.presenter";
 import { strings } from "./strings/translations";
 import { ClassicPassportOtpActionReq } from "../../sdk/abac/ClassicPassportOtpAction";

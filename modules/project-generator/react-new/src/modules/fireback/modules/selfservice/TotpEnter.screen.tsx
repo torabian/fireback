@@ -3,7 +3,7 @@ import { type UseMutationResult } from "@tanstack/react-query";
 import { QueryErrorView } from "../../../fireback-ui/components/error-view/QueryError";
 import { FormButton } from "../../../fireback-ui/components/forms/form-button/FormButton";
 import { useS } from "../../../fireback-ui/hooks/useS";
-import ReactCodeInput from "../../thirdparty/react-verification-code-input";
+import ReactCodeInput from "./components/react-verification-code-input";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./TotpEnter.presenter";
 import { ConfirmClassicPassportTotpActionReq } from "../../sdk/abac/ConfirmClassicPassportTotpAction";

@@ -9,7 +9,7 @@ import {
   PullToRefresh,
   RefreshContent,
   ReleaseContent,
-} from "../../../fireback/thirdparty/react-pull-to-refresh";
+} from "../react-pull-to-refresh";
 import { QueryErrorView } from "../error-view/QueryError";
 import { AutoCardDrawer } from "./AutoCardDrawer";
 import { EmptyList } from "./EmptyList";
