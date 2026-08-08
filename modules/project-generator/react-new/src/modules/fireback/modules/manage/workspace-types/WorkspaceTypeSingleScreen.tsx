@@ -1,24 +1,21 @@
-import { useRouter } from "../../../hooks/useRouter";
 import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
 import { usePageTitle } from "../../../components/page-title/PageTitle";
-import { useLocale } from "../../../hooks/useLocale";
+import { useRouter } from "../../../hooks/useRouter";
 import { useT } from "../../../hooks/useT";
 import { useWorkspaceTypeGetActionQuery } from "../../../sdk/abac/WorkspaceTypeGetAction";
-import { WorkspaceTypeDto } from "../../../sdk/abac/WorkspaceTypeDto";
 import { WorkspaceTypeNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceTypeSingleScreen = () => {
   const router = useRouter();
   const t = useT();
   const uniqueId = router.query.uniqueId as string;
-  const { locale } = useLocale();
 
-  const getSingleHook = useGetWorkspaceTypeByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useWorkspaceTypeGetActionQuery({
+    params: { uniqueId },
   });
 
-  var d: WorkspaceTypeDto | undefined = getSingleHook.query.data?.data;
+  var d = getSingleHook.data?.data?.item;
   usePageTitle(d?.title || "");
 
   return (

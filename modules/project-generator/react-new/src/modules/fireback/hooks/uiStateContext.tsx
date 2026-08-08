@@ -75,10 +75,21 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     { id: "url-router" },
   ]);
 
+  // The group's own rendered width — not window.innerWidth, which only
+  // happens to match it in today's layout. Measuring the actual element
+  // is what react-resizable-panels itself does internally to turn drag
+  // deltas into percentages, so this stays correct even if the group
+  // stops spanning the full viewport later (e.g. a fixed-width chrome
+  // panel added outside it).
+  const getGroupWidthPx = () => {
+    const element = document.querySelector<HTMLElement>(".application-panels");
+    return element?.getBoundingClientRect().width || window.innerWidth;
+  };
+
   const syncSidebarWidthPx = () => {
     const size = panelRef.current?.getSize();
     if (size && size > 0) {
-      sidebarWidthPx.current = (size / 100) * window.innerWidth;
+      sidebarWidthPx.current = (size / 100) * getGroupWidthPx();
     }
   };
 
@@ -106,24 +117,26 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     resize(exceeded ? 0 : 20);
   });
 
-  // Re-apply the sidebar's fixed pixel width whenever the window resizes,
-  // so it holds its size while the router panel(s) grow/shrink instead of
-  // everything scaling together. Runs after useResizeThreshold above (both
-  // listen for "resize"), and re-reads the panel's live size each time
-  // rather than trusting React state, so it never fights that hook's
-  // collapse/expand at the 768px breakpoint.
+  // Re-apply the sidebar's fixed pixel width whenever the panel GROUP
+  // itself resizes, so it holds its size while the router panel(s)
+  // grow/shrink instead of everything scaling together. Re-reads the
+  // panel's live size each time rather than trusting React state, so it
+  // never fights useResizeThreshold's collapse/expand at the 768px
+  // breakpoint.
   //
-  // Throttled with rAF rather than debounced: a debounce only fires once
-  // events stop, so the sidebar would sit at the wrong (scaled) width for
-  // the whole drag and only snap into place on release. rAF instead
-  // applies it on every frame the browser gives us during the drag, so it
-  // tracks live.
+  // Uses a ResizeObserver on the group element itself (same pattern as
+  // useResponsiveThreshold.tsx) rather than a window "resize" listener:
+  // it fires continuously as the element's own box changes — including
+  // mid-drag while the OS window edge is being dragged — instead of only
+  // once events settle, and it reports the group's actual pixel size
+  // directly instead of us having to approximate it from the window.
   useEffect(() => {
-    let rafId: number | null = null;
+    const element = document.querySelector<HTMLElement>(".application-panels");
+    if (!element) {
+      return;
+    }
 
-    const applyLockedWidth = () => {
-      rafId = null;
-
+    const applyLockedWidth = (groupWidthPx: number) => {
       if (detectDeviceType().isMobileView) {
         return;
       }
@@ -135,29 +148,27 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (sidebarWidthPx.current == null) {
-        // No fixed target established yet — this resize just sets the
-        // baseline; it takes effect from the next one onward.
-        syncSidebarWidthPx();
+        // No fixed target established yet — this measurement just sets
+        // the baseline; it takes effect from the next one onward.
+        sidebarWidthPx.current = (currentSize / 100) * groupWidthPx;
         return;
       }
 
-      const newPercentage = (sidebarWidthPx.current / window.innerWidth) * 100;
+      const newPercentage = (sidebarWidthPx.current / groupWidthPx) * 100;
       resize(newPercentage);
     };
 
-    const onWindowResize = () => {
-      if (rafId == null) {
-        rafId = requestAnimationFrame(applyLockedWidth);
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        applyLockedWidth(entry.contentRect.width);
       }
-    };
+    });
 
-    window.addEventListener("resize", onWindowResize);
+    resizeObserver.observe(element);
 
     return () => {
-      window.removeEventListener("resize", onWindowResize);
-      if (rafId != null) {
-        cancelAnimationFrame(rafId);
-      }
+      resizeObserver.unobserve(element);
+      resizeObserver.disconnect();
     };
   }, []);
 
@@ -195,7 +206,7 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
     const width = panelRef.current?.getSize();
 
     // Good sidebar size is at least 180px.
-    const suggestedSize = (180 / window.innerWidth) * 100;
+    const suggestedSize = (180 / getGroupWidthPx()) * 100;
     let goodSize = suggestedSize;
     if (
       userPreferedWidth.current &&
