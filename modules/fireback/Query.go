@@ -12,7 +12,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/alexeyco/simpletable"
 	"github.com/schollz/progressbar/v3"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/exporting"
@@ -249,120 +248,6 @@ func ExtractStringValueFromReflectCell[T any](row *T, t string, n string) string
 		value = "N/A"
 	}
 	return value
-}
-
-func CommonCliTableCmd2[T any](
-	c *cli.Command,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
-	security *SecurityModel,
-	v reflect.Value,
-) {
-
-	verbose := false
-	if c.IsSet("verbose") && c.Bool("verbose") {
-		verbose = true
-	}
-
-	f := CommonCliQueryDSLBuilderAuthorize(c, security)
-	items, _, err := fn(f)
-
-	if err != nil {
-		fmt.Println(err)
-		panic("Cannot query")
-	}
-
-	table := simpletable.New()
-
-	table.Header = &simpletable.Header{
-		Cells: []*simpletable.Cell{
-			{Align: simpletable.AlignCenter, Text: "#"},
-		},
-	}
-
-	heads := GetColumnsFromReflect[T](v)
-
-	for _, n := range heads {
-		table.Header.Cells = append(table.Header.Cells,
-			&simpletable.Cell{Align: simpletable.AlignLeft, Text: n},
-		)
-	}
-
-	var counter = 0
-	for _, row := range items {
-		counter++
-		r := []*simpletable.Cell{
-			{Align: simpletable.AlignRight, Text: fmt.Sprintf("%d", counter)},
-		}
-
-		tds := ExtractRowStringValues[T](row, v, verbose)
-
-		for _, cellValue := range tds {
-
-			r = append(r, &simpletable.Cell{
-				Align: simpletable.AlignRight, Text: cellValue,
-			})
-		}
-
-		table.Body.Cells = append(table.Body.Cells, r)
-	}
-
-	table.SetStyle(simpletable.StyleDefault)
-	fmt.Println(table.String())
-}
-
-func CommonCliImportCmdAuthorized[T any](
-	c *cli.Command,
-	fn func(dto *T, query QueryDSL) (*T, *IError),
-	v reflect.Value,
-	importFilePath string,
-	security *SecurityModel,
-	initializer func() T,
-) {
-
-	f := CommonCliQueryDSLBuilderAuthorize(c, security)
-	f.Deep = true
-
-	// fmt.Println(72, f.UniqueId, f.WorkspaceId, f.UserId, f.UserHas)
-
-	if strings.Contains(importFilePath, ".yml") || strings.Contains(importFilePath, ".yaml") {
-		importYamlFromFileOnDisk(importFilePath, fn, f)
-	}
-
-	if strings.Contains(importFilePath, ".csv") {
-		importCsvFromFileReader(importFilePath, fn, f, initializer)
-	}
-
-}
-
-func CommonCliImportCmd[T any](
-	c *cli.Command,
-	fn func(dto *T, query QueryDSL) (*T, *IError),
-	v reflect.Value,
-	importFilePath string,
-) {
-
-	f := CommonCliQueryDSLBuilder(c)
-	f.Deep = true
-
-	if strings.Contains(importFilePath, ".yml") || strings.Contains(importFilePath, ".yaml") {
-		importYamlFromFileOnDisk(importFilePath, fn, f)
-	}
-
-	// if strings.Contains(importFilePath, ".csv") {
-	// 	importCsvFromFileReader(importFilePath, fn, f)
-	// }
-
-}
-
-func CommonCliImportEmbedCmd[T any](
-	c *cli.Command,
-	fn func(dto *T, query QueryDSL) (*T, *IError),
-	v reflect.Value,
-	fsRef *embed.FS,
-) {
-	f := CommonCliQueryDSLBuilder(c)
-	f.WorkspaceId = "system"
-	SeederFromFSImport(f, fn, v, fsRef, []string{}, false)
 }
 
 func SeederFromFSImport[T any](
