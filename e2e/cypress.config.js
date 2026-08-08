@@ -1,23 +1,56 @@
 const { defineConfig } = require("cypress");
 const { exec, spawn } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 const cypressFailFast = require("cypress-fail-fast/plugin.js");
 let firebackProcess; // Store the Fireback process reference
 
-let BINARY = "/home/ali/work/fireback/app";
-let CWD = "/home/ali/work/fireback";
+// Repo root is the parent of this e2e/ folder. Resolving it this way (instead
+// of hardcoding a specific developer's home directory) keeps this working for
+// every contributor's local checkout without edits.
+const REPO_ROOT = path.resolve(__dirname, "..");
+
+let BINARY = process.env.FIREBACK_BINARY || path.join(REPO_ROOT, "app");
+let CWD = process.env.FIREBACK_CWD || REPO_ROOT;
 const PORT = 7794;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
 if (isGitHubActions) {
-  // BINARY = "/usr/local/bin/fireback";
-  BINARY = "/usr/local/bin/fireback";
-  CWD = "/home/runner/work/fireback";
-  // CWD = "/home/runner/work/fireback-private/fireback-private";
+  // CI installs Fireback from the .deb artifact instead of building it locally.
+  BINARY = process.env.FIREBACK_BINARY || "/usr/local/bin/fireback";
+  CWD = process.env.FIREBACK_CWD || "/home/runner/work/fireback";
 }
 
 console.log(BINARY);
 console.log(CWD);
+
+// Best-effort parse of the repo root .env (same file `fireback config ... set`
+// writes to) so a locally running Postgres can be reused for e2e without
+// hardcoding one developer's credentials here. Falls back to the CI service
+// container's defaults (postgres/postgres@localhost:5432) when there's no
+// .env yet, e.g. on a fresh CI runner.
+function readDotEnv(file) {
+  const out = {};
+  let content;
+  try {
+    content = fs.readFileSync(file, "utf8");
+  } catch {
+    return out;
+  }
+  for (const line of content.split("\n")) {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)\s*$/);
+    if (match) out[match[1]] = match[2];
+  }
+  return out;
+}
+
+const dotEnv = readDotEnv(path.join(REPO_ROOT, ".env"));
+const PG_HOST = process.env.POSTGRES_HOST || dotEnv.DB_HOST || "localhost";
+const PG_PORT = process.env.POSTGRES_PORT || dotEnv.DB_PORT || "5432";
+const PG_USER = process.env.POSTGRES_USER || dotEnv.DB_USERNAME || "postgres";
+const PG_PASSWORD =
+  process.env.POSTGRES_PASSWORD || dotEnv.DB_PASSWORD || "postgres";
 
 const execAsync = (cmd, CWD = "") => {
   return new Promise((resolve, reject) => {
@@ -72,26 +105,31 @@ module.exports = defineConfig({
             }
           } else if (vendor === "postgres") {
             try {
-              console.log("Using postgres");
+              console.log("Using postgres", PG_HOST, PG_PORT, PG_USER);
               await execAsync(`${BINARY} config db-vendor set postgres`, CWD);
 
+              // Always a dedicated, disposable database, never whatever
+              // DB_NAME happens to be in .env — that may point at a real
+              // dev database on the shared instance and we don't want to
+              // DROP/CREATE over someone's data.
               const dbName = "fireback_test";
+              const psqlBase = `PGPASSWORD=${PG_PASSWORD} psql -U ${PG_USER} -h ${PG_HOST} -p ${PG_PORT} -d postgres`;
 
               // Drop and recreate database
               console.log(
                 await execAsync(
-                  `PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -c "DROP DATABASE IF EXISTS ${dbName};"`,
+                  `${psqlBase} -c "DROP DATABASE IF EXISTS ${dbName};"`,
                   CWD,
                 ),
               );
 
               await execAsync(
-                `PGPASSWORD=postgres psql -U postgres -h localhost -p 5432 -d postgres -c "CREATE DATABASE ${dbName};"`,
+                `${psqlBase} -c "CREATE DATABASE ${dbName};"`,
                 CWD,
               );
 
               await execAsync(
-                `${BINARY} config db-dsn set "host=localhost user=postgres password=postgres dbname=${dbName} port=5432 sslmode=disable TimeZone=UTC"`,
+                `${BINARY} config db-dsn set "host=${PG_HOST} user=${PG_USER} password=${PG_PASSWORD} dbname=${dbName} port=${PG_PORT} sslmode=disable TimeZone=UTC"`,
                 CWD,
               );
 
