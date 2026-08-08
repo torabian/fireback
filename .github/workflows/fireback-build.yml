@@ -1,4 +1,4 @@
-name: Fireback product(s) test, build and deploy
+name: Fireback Authentication Server
 env:
   CI: false
   TERM: dumb
@@ -215,10 +215,7 @@ jobs:
           asset_name: fireback_amd64_windows.zip
           asset_content_type: application/zip
 
-
-
   build-windows:
-    if: ${{ inputs.fireback_windows == true }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -279,26 +276,7 @@ jobs:
       #   if: ${{ inputs.release_artifacts == true }}
       #   run: echo y | .\pscp.exe -pw "${{ secrets.DIGITAL_OCEAN_KEY }}" .\fireback_latest_windows.exe root@pixelplux.com:/var/www/html/fireback-artifacts
 
-  child-project-test:
-    # if: ${{ inputs.target == 'ubuntu-x64' }}
-    needs: 
-      - build-ubuntu
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
-      - uses: actions/download-artifact@master
-        with:
-          name: artifacts-boilerplate
-          path: artifacts-boilerplate
-      - name: Unzip the project
-        run: cd artifacts-boilerplate && unzip fireback-boilerplate.zip -d ..
-  
   build-ubuntu:
-    # if: ${{ inputs.target == 'ubuntu-x64' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -357,49 +335,7 @@ jobs:
           name: artifacts-boilerplate
           path: boiler-artifacts
     
-
-  test-react-code-gen:
-    needs: 
-      - build-ubuntu
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 22
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-      - uses: actions/download-artifact@master
-        with:
-          name: artifacts-ubuntu
-          path: artifacts-ubuntu
-      - name: check artifacts
-        run: cd artifacts-ubuntu/fireback-server-all && ls -la
-      - name: install prettier, so compiler would pick it up
-        run: sudo npm i -g prettier
-      - name: install emi
-        run: go install github.com/torabian/emi/cmd/emi@latest
-      - name: install fireback globally
-        run: sudo dpkg -i artifacts-ubuntu/fireback-server-all/fireback-amd64.deb
-      - name: install dependencies for react-new
-        run: cd ui  && yarn
-      - name: regenerate SDKs
-        run: make rebuild-sdks-ci
-      - name: checkout yarn lock because it's unrelated
-        run: git checkout ui/yarn.lock
-      - name: 
-          Check if the sdk generated is already committed to the codebase.
-          Fireback changes should not be out of sync with react.js
-          SDK
-        run: |
-          git diff --exit-code
-          if [[ $(git diff --name-only) ]]; then
-            echo "Changes detected in the following files:"
-            git diff --name-only
-            exit 1
-          fi
-
   build-macos:
-    if: ${{ inputs.fireback_macos == true }}
     runs-on: macOS-latest
     steps:
       - uses: actions/checkout@v3
