@@ -1,5 +1,5 @@
-import { useEmailProviderBrowseActionQuery } from "../../fireback/sdk/messaging/EmailProviderBrowseAction";
-import { type EmailProviderDto } from "../../fireback/sdk/messaging/EmailProviderDto";
+import { useEmailProviderBrowseActionQuery } from "../../sdk/messaging/EmailProviderBrowseAction";
+import { type EmailProviderDto } from "../../sdk/messaging/EmailProviderDto";
 
 // Adapts useEmailProviderBrowseActionQuery (the generated per-action hook, returning a raw
 // @tanstack/react-query result whose payload is the {data: {items, ...}} envelope)

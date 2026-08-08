@@ -1,5 +1,5 @@
-import { useRegionalContentBrowseActionQuery } from "../../fireback/sdk/abac/RegionalContentBrowseAction";
-import { type RegionalContentDto } from "../../fireback/sdk/abac/RegionalContentDto";
+import { useRegionalContentBrowseActionQuery } from "../../sdk/abac/RegionalContentBrowseAction";
+import { type RegionalContentDto } from "../../sdk/abac/RegionalContentDto";
 
 // Adapts useRegionalContentBrowseActionQuery (the generated per-action hook, returning a raw
 // @tanstack/react-query result whose payload is the {data: {items, ...}} envelope)
@@ -9,7 +9,8 @@ import { type RegionalContentDto } from "../../fireback/sdk/abac/RegionalContent
 // that shape directly.
 export const useRegionalContentsQuerySource = () => {
   const query = useRegionalContentBrowseActionQuery({});
-  const items = ((query.data as any)?.data?.items ?? []) as RegionalContentDto[];
+  const items = ((query.data as any)?.data?.items ??
+    []) as RegionalContentDto[];
   return {
     query: query as any,
     items,

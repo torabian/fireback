@@ -1,0 +1,65 @@
+import { QueryClient } from "@tanstack/react-query";
+import classNames from "classnames";
+import { PanelGroup } from "react-resizable-panels";
+import { BrowserRouter, HashRouter, MemoryRouter } from "react-router-dom";
+import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
+import { detectDeviceType } from "../../modules/fireback-ui/hooks/deviceInformation";
+import { useUiState } from "../../modules/fireback-ui/hooks/uiStateContext";
+import { ApplicationOutlet } from "./ApplicationOutlet";
+import {
+  PanelRouterWithSidebar,
+  PanelRouterWrapper,
+} from "./PanelRouterWrapper";
+
+const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
+const Router = useHashRouter ? HashRouter : BrowserRouter;
+
+export function SidebarMultiRouterSetup({
+  ApplicationRoutes,
+  queryClient,
+}: {
+  ApplicationRoutes: any;
+  queryClient: QueryClient;
+}) {
+  const { routers } = useUiState();
+  const computedRouters = routers.map((item) => {
+    return {
+      ...item,
+      initialEntries: item?.href ? [{ pathname: item?.href }] : undefined,
+      Wrapper:
+        item.id === "url-router" ? PanelRouterWithSidebar : PanelRouterWrapper,
+      Router: item.id === "url-router" ? Router : MemoryRouter,
+      showHandle: routers.filter((x) => x.id !== "url-router").length > 0,
+    };
+  });
+
+  return (
+    <PanelGroup
+      direction="horizontal"
+      className={classNames(
+        "application-panels",
+        detectDeviceType().isMobileView ? "has-bottom-tab" : undefined,
+      )}
+    >
+      {computedRouters.map((router, count) => {
+        return (
+          <router.Router
+            key={router.id}
+            future={{ v7_startTransition: true }}
+            basename={useHashRouter ? undefined : BUILD_VARIABLES.PUBLIC_URL}
+            initialEntries={router.initialEntries}
+          >
+            <router.Wrapper showHandle={router.showHandle} routerId={router.id}>
+              <ApplicationOutlet
+                routerId={router.id}
+                ApplicationRoutes={ApplicationRoutes}
+                queryClient={queryClient}
+              />
+            </router.Wrapper>
+            {/* {detectDeviceType().isMobileView ? <TabbarMenu /> : undefined} */}
+          </router.Router>
+        );
+      })}
+    </PanelGroup>
+  );
+}

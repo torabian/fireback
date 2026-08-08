@@ -1,5 +1,5 @@
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
-import { type IResponse } from "../../../fireback/sdk/core/http-tools";
+import { type IResponse } from "../../../sdk/core/http-tools";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 
 import { useEffect } from "react";
@@ -61,7 +61,7 @@ export const HeadlessEntityManager = ({
 
   useEffect(() => {
     formik.current?.setSubmitting(
-      postHook?.mutation.isLoading || patchHook?.mutation.isLoading
+      postHook?.mutation.isLoading || patchHook?.mutation.isLoading,
     );
   }, [postHook?.isLoading, patchHook?.isLoading]);
 
@@ -115,10 +115,10 @@ export const HeadlessEntityManager = ({
                 postHook?.mutation?.isError
                   ? postHook.mutation
                   : patchHook?.mutation?.isError
-                  ? patchHook.mutation
-                  : getSingleHook?.query?.isError
-                  ? getSingleHook.query
-                  : null
+                    ? patchHook.mutation
+                    : getSingleHook?.query?.isError
+                      ? getSingleHook.query
+                      : null
               }
             />
           </div>

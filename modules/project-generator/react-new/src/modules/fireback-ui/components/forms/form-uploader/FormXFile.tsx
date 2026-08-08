@@ -1,7 +1,7 @@
 import { debounce } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { useS } from "../../../hooks/useS";
-import { useFileUploader } from "../../../../fireback/modules/manage/drive/DriveTools";
+import { useFileUploader } from "../../../../manage/drive/DriveTools";
 import { useFileListener } from "../../window-drop/WindowDrop";
 import { strings } from "../../strings/translations";
 
@@ -31,7 +31,7 @@ function buildAcceptString(rules: FileValidationRule[]): string {
 function validateFileAgainstRules(
   file: File,
   rules: FileValidationRule[],
-  s: typeof strings
+  s: typeof strings,
 ): string | null {
   for (const rule of rules) {
     const matchesType =
@@ -40,7 +40,7 @@ function validateFileAgainstRules(
       if (file.size > rule.maxSize) {
         return s.components.fileTooLarge.replace(
           "{size}",
-          String(Math.round(rule.maxSize / 1024 / 1024))
+          String(Math.round(rule.maxSize / 1024 / 1024)),
         );
       }
       return null; // valid

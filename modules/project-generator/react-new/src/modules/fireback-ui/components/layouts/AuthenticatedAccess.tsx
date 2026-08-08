@@ -1,4 +1,4 @@
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
 import Link from "../link/Link";
 import { useS } from "../../hooks/useS";

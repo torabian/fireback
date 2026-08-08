@@ -1,8 +1,8 @@
 import { useFileListener } from "../../window-drop/WindowDrop";
-import { useFileUploader } from "../../../../fireback/modules/manage/drive/DriveTools";
+import { useFileUploader } from "../../../../manage/drive/DriveTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useS } from "../../../hooks/useS";
-import { FileEntity } from "../../../../fireback/sdk/legacy-types/FileEntity";
+import { FileEntity } from "../../../../sdk/legacy-types/FileEntity";
 import { debounce } from "lodash";
 import { useRef } from "react";
 import { strings } from "../../strings/translations";
@@ -61,7 +61,7 @@ export const FormUploader = ({ onChange, value, label }: FormUploaderProps) => {
       onChange && onChange(items);
     },
     250,
-    { maxWait: 1000 }
+    { maxWait: 1000 },
   );
 
   const uploadFn = (files: File[]) => {

@@ -1,9 +1,10 @@
 import { Route } from "react-router-dom";
-import { FirebackEssentialRouterManager } from "../../modules/fireback/apps/core/EssentialRouter";
+
 import { DemoFormSelect } from "./demo/DemoFormSelect";
 import { DemoScreen } from "./demo/DemoScreen";
 import { DemoModal } from "./demo/DemoModal";
 import { DemoFormDates } from "./demo/DemoFormDates";
+import { FirebackEssentialRouterManager } from "../core/EssentialRouter";
 
 // ~ auto:useRouteImport
 

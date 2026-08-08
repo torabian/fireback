@@ -34,7 +34,7 @@ export const NumericKeys = [
   KeyboardAction.Select9Index,
 ];
 
-import { RemoteQueryContext } from "../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";
 
 export function toBinaryString(data: any) {

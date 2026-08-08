@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { useContext, useEffect, useState } from "react";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import Link from "../link/Link";
 
 export function useCheckAuthentication() {
@@ -58,7 +58,7 @@ export function ForcedAuthenticated({
             className="btn btn-secondary"
             replace
             href={`/selfservice?redirect=${encodeURIComponent(
-              window.location.pathname
+              window.location.pathname,
             )}`}
           >
             {s.signinInstead}

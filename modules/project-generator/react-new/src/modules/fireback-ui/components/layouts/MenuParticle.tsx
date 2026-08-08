@@ -9,8 +9,8 @@ import classNames from "classnames";
 import { useContext, type ReactNode } from "react";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
-import { useUserWorkspaceBrowseActionQuery } from "../../../fireback/sdk/abac/UserWorkspaceBrowseAction";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { useUserWorkspaceBrowseActionQuery } from "../../../sdk/abac/UserWorkspaceBrowseAction";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import {
   DndContext,
   PointerSensor,

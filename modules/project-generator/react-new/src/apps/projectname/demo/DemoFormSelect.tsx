@@ -5,7 +5,7 @@ import {
 } from "@/modules/fireback-ui/components/forms/form-select/FormSelect";
 import { createQuerySource } from "@/modules/fireback-ui/hooks/useAsQuery";
 import usePresistentState from "@/modules/fireback-ui/hooks/usePresistentState";
-import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
+import { RoleDto } from "@/modules/sdk/abac/RoleDto";
 import { useRolesQuerySource } from "@/modules/fireback-ui/hooks/useRolesQuerySource";
 import { Formik, type FormikProps } from "formik";
 import { useMemo, useState } from "react";
@@ -306,7 +306,7 @@ const Example6 = () => {
 const Example9 = () => {
   const [selectedValue, setValue] = usePresistentState<number>(
     "samplePrimitivenumeric",
-    3
+    3,
   );
 
   const querySource = createQuerySource([

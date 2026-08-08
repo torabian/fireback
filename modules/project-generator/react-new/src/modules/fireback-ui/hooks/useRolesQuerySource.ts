@@ -1,5 +1,5 @@
-import { useRoleBrowseActionQuery } from "../../fireback/sdk/abac/RoleBrowseAction";
-import { type RoleDto } from "../../fireback/sdk/abac/RoleDto";
+import { useRoleBrowseActionQuery } from "../../sdk/abac/RoleBrowseAction";
+import { type RoleDto } from "../../sdk/abac/RoleDto";
 
 // Adapts useRoleBrowseActionQuery (the generated per-action hook, returning a raw
 // @tanstack/react-query result whose payload is the {data: {items, ...}} envelope)

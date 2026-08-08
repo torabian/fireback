@@ -1,9 +1,12 @@
-import { type QueryObserverResult, type UseQueryResult } from "@tanstack/react-query";
-import { type IResponseList } from "../../fireback/sdk/core/http-tools";
-import { type UseRemoteQuery } from "../../fireback/sdk/core/react-tools";
+import {
+  type QueryObserverResult,
+  type UseQueryResult,
+} from "@tanstack/react-query";
+import { type IResponseList } from "../../sdk/core/http-tools";
+import { type UseRemoteQuery } from "../../sdk/core/react-tools";
 
 export function createQuerySource<T>(items: T[]): (
-  params: UseRemoteQuery & { items: T[] }
+  params: UseRemoteQuery & { items: T[] },
 ) => {
   query: UseQueryResult<IResponseList<T>, any>;
   items: T[];
@@ -60,7 +63,7 @@ export function useAsQuery<T>(params: UseRemoteQuery & { items: T[] }): {
     refetch() {
       console.log("Refetch is not working actually.");
       return Promise.resolve<QueryObserverResult<IResponseList<T>, unknown>>(
-        undefined
+        undefined,
       );
     },
     isSuccess: true,

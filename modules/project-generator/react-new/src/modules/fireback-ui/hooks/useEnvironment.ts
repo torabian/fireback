@@ -1,4 +1,4 @@
-import type { FileEntity } from "../../fireback/sdk/legacy-types/FileEntity";
+import type { FileEntity } from "../../sdk/legacy-types/FileEntity";
 import { replacePossibleMetaPaths } from "../components/helpers/MetaPathAwareContent";
 import { BUILD_VARIABLES } from "./build-variables";
 

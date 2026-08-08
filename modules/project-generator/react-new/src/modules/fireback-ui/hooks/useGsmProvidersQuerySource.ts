@@ -1,5 +1,5 @@
-import { useGsmProviderBrowseActionQuery } from "../../fireback/sdk/messaging/GsmProviderBrowseAction";
-import { type GsmProviderDto } from "../../fireback/sdk/messaging/GsmProviderDto";
+import { useGsmProviderBrowseActionQuery } from "../../sdk/messaging/GsmProviderBrowseAction";
+import { type GsmProviderDto } from "../../sdk/messaging/GsmProviderDto";
 
 // Adapts useGsmProviderBrowseActionQuery (the generated per-action hook, returning a raw
 // @tanstack/react-query result whose payload is the {data: {items, ...}} envelope)

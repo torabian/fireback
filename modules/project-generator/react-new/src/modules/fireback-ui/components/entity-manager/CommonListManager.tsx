@@ -6,8 +6,8 @@ import {
 } from "@devexpress/dx-react-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { useTableViewSizingGetActionQuery } from "../../../fireback/sdk/interfacetools/TableViewSizingGetAction";
-import { useTableViewSizingUpdateAction } from "../../../fireback/sdk/interfacetools/TableViewSizingUpdateAction";
+import { useTableViewSizingGetActionQuery } from "../../../sdk/interfacetools/TableViewSizingGetAction";
+import { useTableViewSizingUpdateAction } from "../../../sdk/interfacetools/TableViewSizingUpdateAction";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { PaginateTable } from "../common-data-table/PaginateTable";

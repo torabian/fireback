@@ -8,7 +8,7 @@ import "../../modules/fireback/styles/apple-family/styles.scss";
 // you could use it as a reference to build your own themes.
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 
-import { WithFireback } from "@/modules/fireback/apps/core/WithFireback";
+import { WithFireback } from "@/modules/core/WithFireback";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -22,7 +22,7 @@ import { useCheckAuthentication } from "@/modules/fireback-ui/components/layouts
 import {
   useSelfServiceAuthenticateRoutes,
   useSelfServicePublicRoutes,
-} from "@/modules/fireback/modules/selfservice/SelfServiceRoutes";
+} from "@/modules/selfservice/SelfServiceRoutes";
 import { BUILD_VARIABLES } from "@/modules/fireback-ui/hooks/build-variables";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";

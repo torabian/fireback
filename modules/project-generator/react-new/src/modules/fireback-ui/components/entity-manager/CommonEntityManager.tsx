@@ -9,10 +9,10 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { get, set } from "lodash";
-import type { GResponse } from "../../../fireback/sdk/sdk/envelopes";
-import { mutationErrorsToFormik } from "../../../fireback/sdk/core/http-tools";
+import type { GResponse } from "../../../sdk/sdk/envelopes";
+import { mutationErrorsToFormik } from "../../../sdk/core/http-tools";
 import { ErrorsView } from "../error-view/ErrorView";
 import { KeyboardAction } from "../../hooks/useExportTools";
 

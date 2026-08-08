@@ -1,7 +1,6 @@
+import EssentialApp from "../core/EssentialApp";
 import { ApplicationRoutes } from "./ApplicationRoutes";
 import { WithSdk } from "./WithSdk";
-
-import EssentialApp from "@/modules/fireback/apps/core/EssentialApp";
 
 function App() {
   return (

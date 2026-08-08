@@ -1,4 +1,4 @@
-import type { GResponse } from "@/modules/fireback/sdk/sdk/envelopes";
+import type { GResponse } from "@/modules/sdk/sdk/envelopes";
 import { type FormikProps } from "formik";
 
 export interface EntityFormProps<T> {

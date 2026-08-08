@@ -1,8 +1,8 @@
 import { useContext, useMemo } from "react";
 
-import { useQueryUserRoleWorkspacesActionQuery } from "../../../fireback/sdk/abac/QueryUserRoleWorkspacesAction";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
-import type { MArray } from "../../../fireback/sdk/sdk/common/operators";
+import { useQueryUserRoleWorkspacesActionQuery } from "../../../sdk/abac/QueryUserRoleWorkspacesAction";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import type { MArray } from "../../../sdk/sdk/common/operators";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
 import type { MenuItem } from "../../types/MenuItem";

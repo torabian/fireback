@@ -5,9 +5,9 @@ export interface DisplayDetectionProps {
   userRoleWorkspaces?: any[];
 }
 
-import type { QueryUserRoleWorkspacesActionRes } from "../../fireback/sdk/abac/QueryUserRoleWorkspacesAction";
-import { CapabilityDto } from "../../fireback/sdk/abac/CapabilityDto";
-import type { MArray } from "../../fireback/sdk/sdk/common/operators";
+import type { QueryUserRoleWorkspacesActionRes } from "../../sdk/abac/QueryUserRoleWorkspacesAction";
+import { CapabilityDto } from "../../sdk/abac/CapabilityDto";
+import type { MArray } from "../../sdk/sdk/common/operators";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;

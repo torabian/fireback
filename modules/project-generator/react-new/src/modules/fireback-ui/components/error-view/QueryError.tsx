@@ -1,5 +1,5 @@
 import { useS } from "../../hooks/useS";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { FormButton } from "../forms/form-button/FormButton";
@@ -8,7 +8,7 @@ import { strings } from "../strings/translations";
 export function getQueryErrorString(
   s: typeof strings,
   query: UseQueryResult<any, any> | UseMutationResult<any, any>,
-  params: any = {}
+  params: any = {},
 ): string | null {
   if (query.isError) {
     if (query.error?.status === 404) {
@@ -97,7 +97,9 @@ export function QueryErrorView({
             })}
           </ul>
           {query.refetch && (
-            <FormButton onClick={query.refetch}>{s.components.retry}</FormButton>
+            <FormButton onClick={query.refetch}>
+              {s.components.retry}
+            </FormButton>
           )}
         </div>
       )}

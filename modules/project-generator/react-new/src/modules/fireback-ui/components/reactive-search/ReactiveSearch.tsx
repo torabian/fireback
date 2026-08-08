@@ -7,16 +7,16 @@ import { useRouter } from "../../hooks/useRouter";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";
 import { detectDeviceType } from "../../hooks/deviceInformation";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
-import { useWebSocketX } from "../../../fireback/sdk/sdk/react/useWebSocketX";
-import { ReactiveSearchAction } from "../../../fireback/sdk/reactivesearch/ReactiveSearchAction";
-import type { ReactiveSearchResultDtoType } from "../../../fireback/sdk/reactivesearch/ReactiveSearchResultDto";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useWebSocketX } from "../../../sdk/sdk/react/useWebSocketX";
+import { ReactiveSearchAction } from "../../../sdk/reactivesearch/ReactiveSearchAction";
+import type { ReactiveSearchResultDtoType } from "../../../sdk/reactivesearch/ReactiveSearchResultDto";
 
 export function ReactiveSearch() {
   const s = useS(strings);
   const { withDebounce } = useDebouncedEffect();
   const { setResult, setPhrase, phrase, result, reset } = useContext(
-    ReactiveSearchContext
+    ReactiveSearchContext,
   );
   const { options } = useContext(RemoteQueryContext);
   // Holds whatever query params the next connection should carry - read
@@ -44,7 +44,7 @@ export function ReactiveSearch() {
       const path = ReactiveSearchAction.NewUrl(qsRef.current);
       return ReactiveSearchAction.Create(`${wsRemote}${path}`);
     },
-    { lazy: true }
+    { lazy: true },
   );
 
   const router = useRouter();
@@ -64,7 +64,9 @@ export function ReactiveSearch() {
     const parsed = messages
       .map((raw) => {
         try {
-          return JSON.parse(raw as unknown as string) as ReactiveSearchResultDtoType;
+          return JSON.parse(
+            raw as unknown as string,
+          ) as ReactiveSearchResultDtoType;
         } catch {
           return null;
         }

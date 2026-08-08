@@ -5,7 +5,7 @@ import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { osResources } from "../../hooks/resources";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import Link from "../link/Link";
 import { strings } from "../strings/translations";
 
@@ -21,7 +21,7 @@ export function CurrentUser({ onClick }: { onClick: () => void }) {
     if (BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT) {
       router.push(
         BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT,
-        BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT
+        BUILD_VARIABLES.NAVIGATE_ON_SIGNOUT,
       );
     }
   };

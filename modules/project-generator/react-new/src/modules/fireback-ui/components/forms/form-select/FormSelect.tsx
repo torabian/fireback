@@ -4,8 +4,8 @@ import { type FormikProps } from "formik";
 import { get, isArray, isObject, set } from "lodash";
 import { useState } from "react";
 import Select from "react-select/async";
-import { type IResponseList } from "../../../../fireback/sdk/core/http-tools";
-import { type UseRemoteQuery } from "../../../../fireback/sdk/core/react-tools";
+import { type IResponseList } from "../../../../sdk/core/http-tools";
+import { type UseRemoteQuery } from "../../../../sdk/core/react-tools";
 import { useS } from "../../../hooks/useS";
 import { strings } from "../../strings/translations";
 import {

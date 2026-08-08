@@ -1,7 +1,7 @@
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext, useMemo } from "react";
 
 export function useIsRoot() {
