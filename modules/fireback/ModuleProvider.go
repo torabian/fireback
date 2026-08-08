@@ -11,15 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type TableMetaData struct {
-	EntityName    string
-	TableNameInDb string
-	EntityObject  any
-	ExportKey     string
-	ExportStream  func(query QueryDSL) (chan []interface{}, *IError)
-	ImportQuery   func(dto interface{}, query QueryDSL) *IError
-}
-
 type Report struct {
 	Title        string
 	Description  string
@@ -57,7 +48,6 @@ type ModuleProvider struct {
 	PermissionsProvider []PermissionInfo
 	Name                string
 	CliHandlers         []*cli.Command
-	BackupTables        []TableMetaData
 	Tasks               []*TaskAction
 	Definitions         *embed.FS
 	Translations        map[string]map[string]string
