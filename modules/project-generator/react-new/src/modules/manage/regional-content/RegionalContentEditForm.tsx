@@ -17,16 +17,15 @@ export const RegionalContentForm = ({
   const { values, setValues, setFieldValue, errors } = form;
   const s = useS(strings);
 
-  const keyGroupSource = createQuerySource(
-    RegionalContentDto.definition.fields
-      .find((field) => field.name === "keyGroup")
-      .of.map((item) => {
-        return {
-          label: item.k,
-          value: item.k,
-        };
-      }),
-  );
+  const keyGroupSource = createQuerySource();
+  // RegionalContentDto.definition.fields
+  //   .find((field) => field.name === "keyGroup")
+  //   .of.map((item) => {
+  //     return {
+  //       label: item.k,
+  //       value: item.k,
+  //     };
+  //   }),
 
   return (
     <>

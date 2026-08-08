@@ -568,8 +568,8 @@ html[dir="rtl"] {
 }
 
 body.dark-theme .copy-button {
-  background-color: #333;
-  color: #fff;
+  background-color: #363a48;
+  color: #e2e3e9;
 }
 
 .swipe-enter {

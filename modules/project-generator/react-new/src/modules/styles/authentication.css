@@ -112,12 +112,12 @@
 
 body.mac-theme:not(.light-theme) {
   @media (prefers-color-scheme: dark) {
-    --auth-page-section-bg: #46414f;
+    --auth-page-section-bg: #242631;
   }
 }
 
 body.mac-theme.dark-theme {
-  --auth-page-section-bg: #46414f;
+  --auth-page-section-bg: #242631;
 }
 
 .step-header {
