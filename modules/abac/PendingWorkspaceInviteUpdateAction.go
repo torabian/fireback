@@ -486,6 +486,7 @@ func PendingWorkspaceInviteUpdateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetPendingWorkspaceInviteOptionalDtoCliFlags(""))...)
 	flags = append(flags, emigo.CastEmiFlagToUrfave(GetPendingWorkspaceInviteUpdateActionPathParameterCliFlags(""))...)
 	return flags
 }
@@ -511,6 +512,7 @@ func PendingWorkspaceInviteUpdateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastPendingWorkspaceInviteOptionalDtoFromCli(c),
 			Params:      PendingWorkspaceInviteUpdateActionPathParameterFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))

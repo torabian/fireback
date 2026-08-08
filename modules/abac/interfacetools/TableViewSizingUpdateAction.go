@@ -486,6 +486,7 @@ func TableViewSizingUpdateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetTableViewSizingOptionalDtoCliFlags(""))...)
 	flags = append(flags, emigo.CastEmiFlagToUrfave(GetTableViewSizingUpdateActionPathParameterCliFlags(""))...)
 	return flags
 }
@@ -511,6 +512,7 @@ func TableViewSizingUpdateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastTableViewSizingOptionalDtoFromCli(c),
 			Params:      TableViewSizingUpdateActionPathParameterFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))

@@ -486,6 +486,7 @@ func UserProfileUpdateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetUserProfileOptionalDtoCliFlags(""))...)
 	flags = append(flags, emigo.CastEmiFlagToUrfave(GetUserProfileUpdateActionPathParameterCliFlags(""))...)
 	return flags
 }
@@ -511,6 +512,7 @@ func UserProfileUpdateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastUserProfileOptionalDtoFromCli(c),
 			Params:      UserProfileUpdateActionPathParameterFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))

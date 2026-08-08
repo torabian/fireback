@@ -438,6 +438,7 @@ func CapabilityCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetCapabilityDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func CapabilityCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastCapabilityDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

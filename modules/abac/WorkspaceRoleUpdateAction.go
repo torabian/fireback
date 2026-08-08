@@ -486,6 +486,7 @@ func WorkspaceRoleUpdateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetWorkspaceRoleOptionalDtoCliFlags(""))...)
 	flags = append(flags, emigo.CastEmiFlagToUrfave(GetWorkspaceRoleUpdateActionPathParameterCliFlags(""))...)
 	return flags
 }
@@ -511,6 +512,7 @@ func WorkspaceRoleUpdateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastWorkspaceRoleOptionalDtoFromCli(c),
 			Params:      WorkspaceRoleUpdateActionPathParameterFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))

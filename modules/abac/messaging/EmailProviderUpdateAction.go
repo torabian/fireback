@@ -486,6 +486,7 @@ func EmailProviderUpdateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetEmailProviderOptionalDtoCliFlags(""))...)
 	flags = append(flags, emigo.CastEmiFlagToUrfave(GetEmailProviderUpdateActionPathParameterCliFlags(""))...)
 	return flags
 }
@@ -511,6 +512,7 @@ func EmailProviderUpdateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastEmailProviderOptionalDtoFromCli(c),
 			Params:      EmailProviderUpdateActionPathParameterFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))

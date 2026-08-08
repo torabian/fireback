@@ -438,6 +438,7 @@ func WorkspaceInviteCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetWorkspaceInviteDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func WorkspaceInviteCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastWorkspaceInviteDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

@@ -438,6 +438,7 @@ func UserCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetUserDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func UserCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastUserDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

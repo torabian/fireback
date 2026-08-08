@@ -438,6 +438,7 @@ func EmailProviderCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetEmailProviderDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func EmailProviderCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastEmailProviderDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

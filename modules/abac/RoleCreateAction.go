@@ -438,6 +438,7 @@ func RoleCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetRoleDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func RoleCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastRoleDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}

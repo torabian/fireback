@@ -438,6 +438,7 @@ func PassportMethodCreateActionCliFlags() []cli.Flag {
 			Usage:   `Raw request header as "Key: Value", repeatable`,
 		},
 	}
+	flags = append(flags, emigo.CastEmiFlagToUrfave(GetPassportMethodDtoCliFlags(""))...)
 	return flags
 }
 
@@ -462,6 +463,7 @@ func PassportMethodCreateActionCliHandler(
 			CliCtx:      c,
 			QueryParams: url.Values{},
 			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
+			Body:        CastPassportMethodDtoFromCli(c),
 		}
 		return emigo.HandleActionInCli(handler(req))
 	}
