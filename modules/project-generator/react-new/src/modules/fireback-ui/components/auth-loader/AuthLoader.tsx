@@ -1,4 +1,4 @@
-import "./AuthLoader.scss";
+import "./AuthLoader.css";
 
 export const AuthLoader = () => {
   return (

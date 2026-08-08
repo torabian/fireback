@@ -1,10 +1,10 @@
 import "react-toastify/dist/ReactToastify.css";
-import "../../modules/styles/styles.scss";
+import "../../modules/styles/styles.css";
 // You do not have to use the mac-os family theme at all.
 // this is the default theme which I use for mac desktop applications
 // you could use it as a reference to build your own themes.
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
-import "../../modules/styles/apple-family/styles.scss";
+import "../../modules/styles/apple-family/styles.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useContext, useEffect } from "react";

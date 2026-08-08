@@ -1,9 +1,9 @@
 .content-area-loader {
   position: fixed;
   z-index: 9999;
-  top: $navbar;
+  top: var(--navbar-height);
   left: 0;
-  right: $sidebarExpandedSize;
+  right: var(--sidebar-expanded-size);
   bottom: 0;
 
   &.fadeout {
@@ -11,7 +11,7 @@
     animation-fill-mode: forwards;
   }
 
-  background-color: white;
+  background-color: var(--dark-content-area-loader-bg, white);
   @media only screen and (max-width: 500px) {
     right: 0;
   }
@@ -34,44 +34,42 @@ h2 {
 
 .auto-card-drawer {
   @media only screen and (max-width: 200px) {
-    // flex-direction: column;
+    /* flex-direction: column; */
   }
 }
-
 
 .content-section {
   margin-top: 30px;
   flex: 1;
   @media only screen and (max-width: 500px) {
-    // margin-left: 0;
+    /* margin-left: 0; */
   }
   .content-container {
-
     .rdg-cell {
       width: 100%;
     }
-    
-    // background: white;
-    // box-shadow: 3px -4px 7px 0px #4a4a4a1a;
+
+    /* background: white;
+    box-shadow: 3px -4px 7px 0px #4a4a4a1a; */
     padding: 20px 25px;
-    // overflow: auto;
+    /* overflow: auto; */
     position: relative;
     max-width: calc(100vw - 155px);
 
-    $navHeight: 55px;
-    // overflow: auto;
-    margin-top: $navHeight;
-    margin-top: calc($navHeight + constant(safe-area-inset-top));
-    margin-top: calc($navHeight + env(safe-area-inset-top));
-     max-width: calc(100vw - 245px);
+    --nav-height: 55px;
+    /* overflow: auto; */
+    margin-top: var(--nav-height);
+    margin-top: calc(var(--nav-height) + constant(safe-area-inset-top));
+    margin-top: calc(var(--nav-height) + env(safe-area-inset-top));
+    max-width: calc(100vw - 245px);
 
-    // Compensate for fab buttons
+    /* Compensate for fab buttons */
     @media only screen and (max-width: 500px) {
       padding: 0 10px;
       padding-bottom: 60px;
 
-      // Since virtualize list we don't need this padding
-      // padding-bottom: 120px;
+      /* Since virtualize list we don't need this padding
+      padding-bottom: 120px; */
     }
   }
 }
@@ -101,10 +99,10 @@ html[dir="rtl"] {
     height: 50px;
   }
 }
- 
+
 .unauthorized-forced-area {
   opacity: 1;
-  transition: opacity 0.500s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
   flex-direction: column;
   text-align: center;
   margin: auto;
@@ -150,9 +148,6 @@ div[data-panel] {
   animation: fadeIn 0.5s ease-out;
 }
 
-
-
-
 .anim-loader {
   width: 64px;
   height: 64px;
@@ -162,7 +157,7 @@ div[data-panel] {
 }
 .anim-loader::after,
 .anim-loader::before {
-  content: '';  
+  content: "";
   box-sizing: border-box;
   width: 64px;
   height: 64px;

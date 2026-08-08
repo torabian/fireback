@@ -1,0 +1,356 @@
+/**
+* Dark-theme overrides.
+*
+* Two kinds of rule live here:
+*
+* 1) Custom-property definitions for selectors that already have a known
+*    light-mode value elsewhere (theme-osx-core.css, tabbar-menu.css, ...).
+*    Those files reference var(--token, <light-value>) at the declaration
+*    site, so defining --token here (only under the two dark scopes below)
+*    is the only thing needed to flip them - no selector duplication.
+*
+* 2) A handful of selectors that only ever get a background/color from a
+*    3rd-party library's own CSS (react-toastify, react-select's generated
+*    classes, bootstrap's form/modal/dropdown defaults, devexpress-grid
+*    internals, react-flow, ...). We don't know their light-mode value well
+*    enough to use as a safe var() fallback (an unset var() still wins the
+*    cascade and computes to the property's initial value, which would blank
+*    them out in light mode) - so these stay written out under both dark
+*    scopes explicitly, same as this file's own two scopes below, just
+*    without a token indirection. This is the direct CSS equivalent of what
+*    the old `@include osx-dark()` mixin call compiled to at each site - it's
+*    just now written once per scope instead of hidden behind a mixin.
+*
+* Remember: we have dark, light, automatic mode. Dark and light are a
+* choice of the user, regardless of system color; if it's automatic, we
+* use the system theme.
+*/
+
+@media (prefers-color-scheme: dark) {
+  body.mac-theme:not(.light-theme),
+  body.ios-theme:not(.light-theme) {
+    --dark-theme-root-bg: rgba(10, 10, 10, 0.7);
+    --dark-bottom-nav-tabbar-bg: #46414f;
+    --dark-panel-resize-handle-bg: linear-gradient(
+      90deg,
+      #5a565e,
+      rgb(70, 70, 70)
+    );
+    --dark-navbar-bg: #38333c;
+    --dark-navbar-border-color: #46414f;
+    --dark-content-container-bg: #2e2836;
+    --dark-table-even-row-bg: #382b29;
+    --dark-page-section-bg: #5a565e;
+    --dark-sidebar-bg: #5a565e;
+    --dark-table-cell-bg: transparent;
+    --dark-scrollbar-track-bg: transparent;
+    --dark-scrollbar-track-border-color: transparent;
+    --dark-scrollbar-thumb-bg: #76707d;
+    --dark-login-form-bg: #46414f;
+    --dark-content-area-loader-bg: #46414f;
+    --dark-basic-error-box-bg: #760002;
+    --dark-entity-view-field-value-bg: #5a565e;
+  }
+
+  .mac-theme:not(.light-theme),
+  .ios-theme:not(.light-theme) {
+    .bottom-nav-tabbar {
+      background: #46414f;
+    }
+    .Toastify__toast-theme--light {
+      background-color: #46414f !important;
+    }
+    select {
+      background-color: #4c454e;
+    }
+    .general-action-menu {
+      &.mobile-view {
+        .action-menu-item {
+          background-color: #5a565e;
+          color: #dad6d8;
+        }
+      }
+    }
+    .sidebar {
+      li .nav-link .nav-link-text {
+        color: #dad6d8;
+      }
+      li .active {
+        background-color: #4c454e;
+      }
+      li .nav-link {
+        &.active:hover {
+          background-color: #4c454e;
+        }
+      }
+      .current-user a strong,
+      .current-user a::after {
+        color: #dad6d8;
+      }
+    }
+    select.form-select,
+    textarea {
+      background-color: #615956;
+    }
+    .react-select-menu-area {
+      .css-d7l1ni-option {
+        background-color: #446ca8;
+      }
+    }
+    .css-b62m3t-container .form-control,
+    .react-select-menu-area,
+    ul.dropdown-menu {
+      background-color: #615956 !important;
+    }
+    .css-1p3m7a8-multiValue {
+      background-color: #4c454e;
+    }
+    .react-select-menu-area > div > div:hover {
+      background-color: #4c454e !important;
+    }
+    .menu-icon,
+    .action-menu-item img,
+    .page-navigator img {
+      filter: invert(0.5) sepia(1) saturate(5) hue-rotate(157deg);
+    }
+    .pagination a,
+    .modal-content {
+      background-color: #625765;
+    }
+    .pagination .active button.page-link {
+      background-color: #00beff;
+      color: #615956;
+    }
+    .pagination {
+      .page-item .page-link {
+        background-color: #2e2836;
+      }
+    }
+    input {
+      background-color: #5a565e;
+    }
+    .keybinding-combination {
+      > span {
+        background-color: #625765;
+      }
+      &:hover {
+        span {
+          background-color: #dad6d8;
+          color: #625765;
+        }
+      }
+    }
+    .form-control {
+      background-color: #6c6c6c;
+    }
+    .dx-g-bs4-table {
+      thead .input-group {
+        input {
+          background-color: transparent;
+          color: white;
+        }
+        input::placeholder {
+          color: white;
+        }
+      }
+    }
+    .card,
+    .section-title {
+      background-color: #5a565e;
+    }
+    *:not(.invalid-feedback),
+    input {
+      color: #dad6d8;
+      border-color: #46414f;
+    }
+    .styles_react-code-input__CRulA input {
+      color: white;
+    }
+    .diagram-fxfx {
+      .area-box {
+        background: #1e3249;
+        input.form-control,
+        textarea.form-control {
+          background-color: #152231;
+        }
+        .react-flow__handle {
+          background-color: white;
+        }
+      }
+    }
+    .react-flow__node.selected .area-box {
+      background-color: #373737;
+    }
+    .upload-header {
+      background-color: #152231;
+    }
+    .active-upload-box {
+      background-color: #333;
+    }
+    .upload-file-item:hover {
+      background-color: #1e3249;
+    }
+  }
+}
+
+body.mac-theme.dark-theme,
+body.ios-theme.dark-theme {
+  --dark-theme-root-bg: rgba(10, 10, 10, 0.7);
+  --dark-bottom-nav-tabbar-bg: #46414f;
+  --dark-panel-resize-handle-bg: linear-gradient(90deg, #5a565e, rgb(70, 70, 70));
+  --dark-navbar-bg: #38333c;
+  --dark-navbar-border-color: #46414f;
+  --dark-content-container-bg: #2e2836;
+  --dark-table-even-row-bg: #382b29;
+  --dark-page-section-bg: #5a565e;
+  --dark-sidebar-bg: #5a565e;
+  --dark-table-cell-bg: transparent;
+  --dark-scrollbar-track-bg: transparent;
+  --dark-scrollbar-track-border-color: transparent;
+  --dark-scrollbar-thumb-bg: #76707d;
+  --dark-login-form-bg: #46414f;
+  --dark-content-area-loader-bg: #46414f;
+  --dark-basic-error-box-bg: #760002;
+  --dark-entity-view-field-value-bg: #5a565e;
+  --dark-pagination-page-link-bg: #2e2836;
+}
+
+.mac-theme.dark-theme,
+.ios-theme.dark-theme {
+  .bottom-nav-tabbar {
+    background: #46414f;
+  }
+  .Toastify__toast-theme--light {
+    background-color: #46414f !important;
+  }
+  select {
+    background-color: #4c454e;
+  }
+  .general-action-menu {
+    &.mobile-view {
+      .action-menu-item {
+        background-color: #5a565e;
+        color: #dad6d8;
+      }
+    }
+  }
+  .sidebar {
+    li .nav-link .nav-link-text {
+      color: #dad6d8;
+    }
+    li .active {
+      background-color: #4c454e;
+    }
+    li .nav-link {
+      &.active:hover {
+        background-color: #4c454e;
+      }
+    }
+    .current-user a strong,
+    .current-user a::after {
+      color: #dad6d8;
+    }
+  }
+  select.form-select,
+  textarea {
+    background-color: #615956;
+  }
+  .react-select-menu-area {
+    .css-d7l1ni-option {
+      background-color: #446ca8;
+    }
+  }
+  .css-b62m3t-container .form-control,
+  .react-select-menu-area,
+  ul.dropdown-menu {
+    background-color: #615956 !important;
+  }
+  .css-1p3m7a8-multiValue {
+    background-color: #4c454e;
+  }
+  .react-select-menu-area > div > div:hover {
+    background-color: #4c454e !important;
+  }
+  .menu-icon,
+  .action-menu-item img,
+  .page-navigator img {
+    filter: invert(0.5) sepia(1) saturate(5) hue-rotate(157deg);
+  }
+  .pagination a,
+  .modal-content {
+    background-color: #625765;
+  }
+  .pagination .active button.page-link {
+    background-color: #00beff;
+    color: #615956;
+  }
+  .pagination {
+    .page-item .page-link {
+      background-color: #2e2836;
+    }
+  }
+  input {
+    background-color: #5a565e;
+  }
+  .keybinding-combination {
+    > span {
+      background-color: #625765;
+    }
+    &:hover {
+      span {
+        background-color: #dad6d8;
+        color: #625765;
+      }
+    }
+  }
+  .form-control {
+    background-color: #6c6c6c;
+  }
+  .dx-g-bs4-table {
+    thead .input-group {
+      input {
+        background-color: transparent;
+        color: white;
+      }
+      input::placeholder {
+        color: white;
+      }
+    }
+  }
+  .card,
+  .section-title {
+    background-color: #5a565e;
+  }
+  *:not(.invalid-feedback),
+  input {
+    color: #dad6d8;
+    border-color: #46414f;
+  }
+  .styles_react-code-input__CRulA input {
+    color: white;
+  }
+  .diagram-fxfx {
+    .area-box {
+      background: #1e3249;
+      input.form-control,
+      textarea.form-control {
+        background-color: #152231;
+      }
+      .react-flow__handle {
+        background-color: white;
+      }
+    }
+  }
+  .react-flow__node.selected .area-box {
+    background-color: #373737;
+  }
+  .upload-header {
+    background-color: #152231;
+  }
+  .active-upload-box {
+    background-color: #333;
+  }
+  .upload-file-item:hover {
+    background-color: #1e3249;
+  }
+}

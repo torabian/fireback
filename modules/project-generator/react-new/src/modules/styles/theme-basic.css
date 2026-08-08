@@ -1,11 +1,11 @@
-@import "./animations.scss";
-@import "./variables.scss";
-@import "./navbar.scss";
-@import "./sidebar.scss";
-@import "./layout.scss";
-@import "./keyboard.scss";
-@import "./datatable.scss";
-@import "./tabbar-menu.scss";
+@import "./animations.css";
+@import "./variables.css";
+@import "./navbar.css";
+@import "./sidebar.css";
+@import "./layout.css";
+@import "./keyboard.css";
+@import "./datatable.css";
+@import "./tabbar-menu.css";
 
 .headless-form-entity-manager {
   max-width: 500px;
@@ -91,7 +91,7 @@ html[dir="rtl"] {
 }
 
 .nestable-item-name {
-  background-color: $sidebargrey;
+  background-color: var(--sidebar-grey);
   padding: 5px 10px;
   border-radius: 5px;
   max-width: 400px;
@@ -139,7 +139,7 @@ html[dir="rtl"] {
   margin-top: 15px;
   padding: 10px 20px;
   border-radius: 10px;
-  background-color: #ffe5f8;
+  background-color: var(--dark-basic-error-box-bg, #ffe5f8);
   animation: showerroranim 0.3s forwards;
 }
 
@@ -369,7 +369,10 @@ html[dir="rtl"] {
 
     &.entity-view-body {
       .field-value {
-        background-color: rgb(222, 226, 230);
+        background-color: var(
+          --dark-entity-view-field-value-bg,
+          rgb(222, 226, 230)
+        );
       }
     }
   }
@@ -526,10 +529,10 @@ html[dir="rtl"] {
     transform: translateY(0);
   }
   10% {
-    transform: translateY(-8px); // quick jump
+    transform: translateY(-8px); /* quick jump */
   }
   100% {
-    transform: translateY(0); // slow fall
+    transform: translateY(0); /* slow fall */
   }
 }
 

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import "bootstrap/dist/css/bootstrap.css";
-import "../../modules/styles/styles.scss";
-import "../../modules/styles/apple-family/styles.scss";
+import "../../modules/styles/styles.css";
+import "../../modules/styles/apple-family/styles.css";
 
 // You do not have to use the mac-os family theme at all.
 // this is the default theme which I use for mac desktop applications

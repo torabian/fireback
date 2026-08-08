@@ -7,8 +7,6 @@
   @media only screen and (max-width: 600px) {
     flex-direction: column;
   }
-
-  
 }
 
 .signup-form {
@@ -19,14 +17,15 @@
 
 .login-form-section {
   display: flex;
-   max-width: 500px;
+  max-width: 500px;
   flex-direction: column;
   display: flex;
   flex-direction: column;
-  margin: 10px auto ;
+  margin: 10px auto;
   border: 1px solid #e9ecff;
   border-radius: 4px;
   padding: 30px;
+  background-color: var(--dark-login-form-bg, transparent);
 
   @media only screen and (max-width: 600px) {
     padding: 15px;
@@ -51,20 +50,20 @@
   }
   margin: 0;
   display: flex;
-  // margin-left: 15px;
+  /* margin-left: 15px; */
   overflow-y: auto;
-  // max-width: 360px;
+  /* max-width: 360px; */
   backdrop-filter: blur(9px);
   .page-section {
     overflow-y: auto;
     min-height: 100vh;
-    // border: 3px solid white;
+    /* border: 3px solid white; */
     margin: 0;
     background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    // max-width: 410px;
+    /* max-width: 410px; */
     margin: auto;
   }
 
@@ -97,26 +96,28 @@
   overflow-y: auto;
 }
 
-.mac-theme {
-  /**
-  * Remember, we have dark, light, automatic mode.
-  * dark and light are choice of the user, regardless of system color
-  * if it's automatic, we use system theme
-  */
-  &:not(.light-theme) {
-    @media (prefers-color-scheme: dark) {
-      .page-section {
-        background-color: #46414f;
-      }
-    }
-  }
+/**
+* Remember, we have dark, light, automatic mode.
+* dark and light are choice of the user, regardless of system color
+* if it's automatic, we use system theme.
+*
+* These two custom properties are only ever assigned inside the
+* dark-mode scopes below, so this rule is a no-op in light/auto-light
+* mode (an unset var() with no fallback makes the declaration invalid,
+* same as if it wasn't here at all).
+*/
+.mac-theme .page-section {
+  background-color: var(--auth-page-section-bg);
+}
 
-  // Now force the dark mode as well.
-  &.dark-theme {
-    .page-section {
-      background-color: #46414f;
-    }
+body.mac-theme:not(.light-theme) {
+  @media (prefers-color-scheme: dark) {
+    --auth-page-section-bg: #46414f;
   }
+}
+
+body.mac-theme.dark-theme {
+  --auth-page-section-bg: #46414f;
 }
 
 .step-header {
@@ -157,13 +158,14 @@
   }
 }
 
-html, body {
+html,
+body {
   height: 100%;
   overflow-y: auto; /* or auto */
   -webkit-overflow-scrolling: touch; /* important for momentum scrolling */
 }
 
-// The new stuff
+/* The new stuff */
 .signin-form-container {
   height: 100%;
   overflow-y: auto;
@@ -176,7 +178,6 @@ html, body {
     width: 16px;
     margin: 0 3px;
   }
- 
 
   .login-option-buttons {
     button {

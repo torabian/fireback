@@ -23,9 +23,9 @@
 .application-panels {
   height: 100vh;
 
-  // &.has-bottom-tab {
-  //   height: calc(100vh - 60px) !important;
-  // }
+  /* &.has-bottom-tab {
+    height: calc(100vh - 60px) !important;
+  } */
 }
 
 .sidebar {
@@ -40,9 +40,9 @@
     color: #8a8fa4;
   }
 
-  // &.has-bottom-tab {
-  //   height: calc(100vh - 60px) !important;
-  // }
+  /* &.has-bottom-tab {
+    height: calc(100vh - 60px) !important;
+  } */
 
   .category {
     color: black;
@@ -63,12 +63,12 @@
   }
 
   transition: 0.1s all cubic-bezier(0.075, 0.82, 0.165, 1);
-  // width: $sidebarExpandedSize;
-  //   position: fixed;
-  //   top: 0;
-  //   bottom: 0;
-  //   left: 0;
-  //   z-index: 10;
+  /* width: var(--sidebar-expanded-size); */
+  /*   position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10; */
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -133,13 +133,13 @@
 
   display: flex;
 
-  // @media only screen and (max-width: 500px) {
-  //   transform: translateX(-$sidebarExpandedSize);
+  /* @media only screen and (max-width: 500px) {
+    transform: translateX(-var(--sidebar-expanded-size));
 
-  //   &.open {
-  //     transform: translateX(0);
-  //   }
-  // }
+    &.open {
+      transform: translateX(0);
+    }
+  } */
 
   ul ul {
     margin-top: 5px;
@@ -152,9 +152,9 @@
     }
   }
 
-  // Absolutely positioned so it overlays the row instead of reserving
-  // space for itself, and only shown on hover/focus so it doesn't clutter
-  // the sidebar the rest of the time.
+  /* Absolutely positioned so it overlays the row instead of reserving
+  space for itself, and only shown on hover/focus so it doesn't clutter
+  the sidebar the rest of the time. */
   .drag-handle {
     position: absolute;
     top: 50%;
@@ -175,9 +175,9 @@
     }
   }
 
-  // Shared by the per-item row and the group header row below — whichever
-  // one wraps a .drag-handle needs to be the positioned ancestor it's
-  // anchored to, and the one whose hover/focus reveals it.
+  /* Shared by the per-item row and the group header row below — whichever
+  one wraps a .drag-handle needs to be the positioned ancestor it's
+  anchored to, and the one whose hover/focus reveals it. */
   .nav-item-row,
   .sidebar-menu-header {
     position: relative;
@@ -189,10 +189,10 @@
     }
   }
 
-  // The header's own .category label sits ~20px down (margin-top on
-  // .category), below the header span's vertical center — nudge the
-  // handle down to line up with the title instead of the empty space
-  // above it.
+  /* The header's own .category label sits ~20px down (margin-top on
+  .category), below the header span's vertical center — nudge the
+  handle down to line up with the title instead of the empty space
+  above it. */
   .sidebar-menu-header .drag-handle {
     top: calc(50% + 15px);
   }
@@ -239,10 +239,10 @@ html[dir="rtl"] {
   }
 
   .sidebar-overlay {
-    //   top: 0;
+    /*   top: 0; */
     left: 0;
-    right: $sidebarExpandedSize;
-    //   right: initial;
-    //   bottom: 0;
+    right: var(--sidebar-expanded-size);
+    /*   right: initial;
+      bottom: 0; */
   }
 }

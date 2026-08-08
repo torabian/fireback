@@ -22,11 +22,16 @@
     letter-spacing: 10px;
     margin: 0px;
     font-weight: 700;
-    text-shadow: 2px 2px 0px #c9c9c9, -2px -2px 0px #c9c9c9;
+    text-shadow:
+      2px 2px 0px #c9c9c9,
+      -2px -2px 0px #c9c9c9;
   }
 
   .content .font-404 h1 > span {
-    text-shadow: 2px 2px 0px #0957ff, -2px -2px 0px #0957ff, 0px 0px 8px #1150d6;
+    text-shadow:
+      2px 2px 0px #0957ff,
+      -2px -2px 0px #0957ff,
+      0px 0px 8px #1150d6;
   }
 
   .content p {

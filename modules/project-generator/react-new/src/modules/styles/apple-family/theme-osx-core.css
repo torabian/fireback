@@ -1,3 +1,6 @@
+@import "./theme-mac-variables.css";
+@import "./theme-osx-dark-override.css";
+
 @font-face {
   src: url(./fonts/SFNSDisplay-Semibold.otf);
   font-family: mac-custom;
@@ -7,9 +10,6 @@
   src: url(./fonts/SFNSDisplay-Medium.otf);
   font-family: mac-sidebar;
 }
-
-@import "./theme-mac-variables.scss";
-@import "./theme-osx-dark-override.scss";
 
 @keyframes fadein {
   from {
@@ -47,11 +47,11 @@
 
 .mac-theme,
 .ios-theme {
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: var(--dark-theme-root-bg, rgba(255, 255, 255, 0.7));
 
-  // think about this not make it global
-  // height: 100vh;
-  // overflow: hidden;
+  /* think about this not make it global
+  height: 100vh;
+  overflow: hidden; */
 
   .panel-resize-handle {
     width: 8px;
@@ -60,7 +60,10 @@
     position: absolute;
     right: 0;
     top: 0;
-    background: linear-gradient(90deg, rgb(224, 222, 227), rgb(207, 207, 206));
+    background: var(
+      --dark-panel-resize-handle-bg,
+      linear-gradient(90deg, rgb(224, 222, 227), rgb(207, 207, 206))
+    );
 
     &.minimal {
       width: 2px;
@@ -134,14 +137,14 @@
   }
 
   * {
-    // font-family: mac-sidebar, -apple-system, BlinkMacSystemFont, sans-serif;
+    /* font-family: mac-sidebar, -apple-system, BlinkMacSystemFont, sans-serif;
 
-    // -moz-user-select: none;
-    // -khtml-user-select: none;
-    // -webkit-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
 
-    // -ms-user-select: none;
-    // user-select: none;
+    -ms-user-select: none;
+    user-select: none; */
   }
 
   .user-signin-section {
@@ -185,8 +188,8 @@
 
   .content-section {
     margin-top: 0;
-    // margin-left: $sidebarExpandedSize;
-    // min-height: 100vh;
+    /* margin-left: var(--sidebar-expanded-size);
+    min-height: 100vh; */
     background-color: white;
 
     @media only screen and (max-width: 500px) {
@@ -196,7 +199,7 @@
 
   .table-container {
     background: transparent;
-    // animation: fadein 0.15s;
+    /* animation: fadein 0.15s; */
     font-size: 14px;
     margin: 0 -14px;
 
@@ -210,7 +213,7 @@
     }
 
     tbody tr:nth-child(even) {
-      background: #f4f5f5;
+      background: var(--dark-table-even-row-bg, #f4f5f5);
     }
 
     tbody tr {
@@ -231,8 +234,9 @@
   }
 
   nav.navbar {
-    background-color: #faf5f9 !important;
+    background-color: var(--dark-navbar-bg, #faf5f9) !important;
     border-bottom: 1px solid #dddddd;
+    border-bottom-color: var(--dark-navbar-border-color, #dddddd);
     min-height: 55px;
     height: auto;
     user-select: none;
@@ -250,20 +254,20 @@
     }
   }
 
-  // Think about this. fixing it down is not good idea
-  // @media only screen and (max-width: 500px) {
-  //   #navbarSupportedContent {
-  //     position: fixed;
-  //     padding: 10px 0;
-  //     bottom: 0;
-  //     right: 0;
-  //     left: 0;
-  //     background-color: #faf5f9;
-  //   }
-  // }
+  /* Think about this. fixing it down is not good idea
+  @media only screen and (max-width: 500px) {
+    #navbarSupportedContent {
+      position: fixed;
+      padding: 10px 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      background-color: #faf5f9;
+    }
+  } */
 
   .page-section {
-    background-color: #f2f2f2;
+    background-color: var(--dark-page-section-bg, #f2f2f2);
     box-shadow: none;
     padding: 20px;
     margin: 15px 0;
@@ -274,15 +278,17 @@
   }
 
   .content-container {
-    background-color: transparent;
+    background-color: var(--dark-content-container-bg, transparent);
     box-shadow: none;
-    $navHeight: 55px;
-    height: calc(100vh - $navHeight + constant(safe-area-inset-top));
-    height: calc(100vh - $navHeight + env(safe-area-inset-top));
+    --nav-height: 55px;
+    height: calc(100vh - var(--nav-height) + constant(safe-area-inset-top));
+    height: calc(100vh - var(--nav-height) + env(safe-area-inset-top));
     overflow: auto;
     margin-top: 0;
-    min-height: calc(100vh - $navHeight - constant(safe-area-inset-top));
-    min-height: calc(100vh - $navHeight - env(safe-area-inset-top));
+    min-height: calc(
+      100vh - var(--nav-height) - constant(safe-area-inset-top)
+    );
+    min-height: calc(100vh - var(--nav-height) - env(safe-area-inset-top));
     overflow-y: auto;
     max-width: calc(100vw - 185px);
     max-width: 100%;
@@ -303,7 +309,133 @@
   .sidebar-overlay {
   }
 
-  @import "./sidebar.scss";
+  /**
+   * Inlined from the old apple-family/sidebar.scss partial - it used to be
+   * @import-ed from right here, nested inside .mac-theme, .ios-theme {}, so
+   * that its rules only ever applied within a mac/ios themed root. Native
+   * CSS @import can't be nested inside a selector block the way Sass's
+   * could, so the content is folded in directly instead.
+   */
+  .sidebar {
+    .current-user > a {
+      padding: 0 5px;
+    }
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    padding: 10px !important;
+
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .sidebar-menu-particle,
+    .nav-item {
+      &.hide {
+        max-height: 0;
+        animation: closemenu 0.3s forwards;
+        overflow: hidden;
+      }
+    }
+
+    .nav-item {
+      animation: opensubmenu 0.3s forwards;
+    }
+
+    background-color: var(--dark-sidebar-bg, rgba(224, 222, 227));
+    overflow: auto;
+
+    .category {
+      font-size: 12px;
+      color: var(--sidebar-category);
+      margin: 15px 0 0px 0px;
+    }
+
+    hr {
+      display: none;
+    }
+
+    li {
+      .nav-link {
+        &:hover {
+          background-color: initial;
+        }
+        &.active:hover {
+          background-color: #cccacf;
+        }
+
+        padding: 0;
+        min-height: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        cursor: default;
+        color: var(--sidebar-items) !important;
+
+        span {
+          padding-left: 5px;
+          font-size: 14px;
+          color: var(--sidebar-items);
+          align-items: center;
+          display: flex;
+        }
+        .nav-link-text {
+          display: inline-block;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          padding-left: 0;
+          margin-left: 0;
+        }
+      }
+
+      .active {
+        background-color: #cccacf;
+        color: var(--sidebar-items);
+      }
+
+      img {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+        margin-top: 5px;
+      }
+    }
+  }
+
+  .sidebar {
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #b8b5b9;
+      border-radius: 5px;
+      margin-right: 2px;
+      right: 2px;
+    }
+  }
+
+  .sidebar-extra-small .sidebar .nav-link-text {
+    display: none !important;
+  }
+
+  .sidebar-extra-small {
+    justify-content: center;
+    align-items: center;
+  }
 
   .content-container,
   .table-responsive,
@@ -314,12 +446,12 @@
     }
 
     &::-webkit-scrollbar-track {
-      background: #fafafa;
-      border-left: 1px solid #e8e8e8;
+      background: var(--dark-scrollbar-track-bg, #fafafa);
+      border-left: 1px solid var(--dark-scrollbar-track-border-color, #e8e8e8);
     }
 
     &::-webkit-scrollbar-thumb {
-      background: #b8b5b9;
+      background: var(--dark-scrollbar-thumb-bg, #b8b5b9);
       border-radius: 5px;
     }
   }
@@ -368,38 +500,27 @@
         border: 1px solid #dc3545;
       }
     }
-  }
 
-  /**
-  * Remember, we have dark, light, automatic mode.
-  * dark and light are choice of the user, regardless of system color
-  * if it's automatic, we use system theme
-  */
-  &:not(.light-theme) {
-    @media (prefers-color-scheme: dark) {
-      @include osx-dark();
+    td,
+    th {
+      background-color: var(--dark-table-cell-bg, transparent);
     }
-  }
-
-  // Now force the dark mode as well.
-  &.dark-theme {
-    @include osx-dark();
   }
 }
 
 html[dir="rtl"] {
   .mac-theme,
   .ios-theme {
-    // * {
-    //   font-family: iransans;
-    // }
+    /* * {
+      font-family: iransans;
+    } */
     .panel-resize-handle {
       left: 0;
       right: initial;
     }
     .content-section {
       margin-left: 0;
-      // margin-right: $sidebarExpandedSize;
+      /* margin-right: var(--sidebar-expanded-size); */
 
       @media only screen and (max-width: 500px) {
         margin-right: 0;
@@ -417,12 +538,46 @@ html[dir="rtl"] {
     }
 
     nav.navbar {
-      right: $sidebarExpandedSize;
+      right: var(--sidebar-expanded-size);
       left: 0;
 
       @media only screen and (max-width: 500px) {
         right: 0;
       }
+    }
+
+    .sidebar {
+      right: 0;
+      left: initial;
+      @media only screen and (max-width: 500px) {
+        transform: translateX(185px);
+      }
+
+      &.open {
+        transform: translateX(0);
+      }
+
+      ul ul {
+        margin-right: 8px;
+        margin-left: 0;
+        li .nav-link span {
+          padding-right: 5px;
+          font-size: 12px;
+        }
+      }
+
+      .drag-handle {
+        right: auto;
+        left: 2px;
+      }
+    }
+
+    .sidebar-overlay {
+      /*   top: 0; */
+      left: 0;
+      right: var(--sidebar-expanded-size);
+      /*   right: initial;
+        bottom: 0; */
     }
   }
 }

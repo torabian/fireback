@@ -4,7 +4,7 @@ nav.navbar {
   position: fixed;
 
   right: 0;
-  left: $sidebarExpandedSize;
+  left: var(--sidebar-expanded-size);
   z-index: 9;
 
   @supports (-webkit-touch-callout: none) {
@@ -19,7 +19,7 @@ nav.navbar {
 
 html[dir="rtl"] {
   nav.navbar {
-    right: $sidebarExpandedSize;
+    right: var(--sidebar-expanded-size);
     left: 0;
     @media only screen and (max-width: 500px) {
       right: 0;
@@ -39,17 +39,16 @@ html[dir="rtl"] {
   }
 }
 
-// .navbar-menu-icon {
-//   display: none;
+/* .navbar-menu-icon {
+  display: none;
 
-//   @media only screen and (max-width: 500px) {
-//     display: inline-block;
-//   }
-// }
+  @media only screen and (max-width: 500px) {
+    display: inline-block;
+  }
+} */
 
 html[dir="rtl"] {
   .navigator-back-button {
-  
     img {
       transform: rotate(180deg);
     }
@@ -65,14 +64,13 @@ html[dir="rtl"] {
       border: 0;
     }
   }
-  
+
   &.mobile-view {
     position: fixed;
     bottom: 65px;
     right: 10px;
     z-index: 9999;
     .action-menu-item {
-    
       background-color: white;
       width: 40px;
       font-size: 14px;
@@ -98,7 +96,7 @@ html[dir="rtl"] {
       display: none;
     }
   }
-  // &.desktop-view {
+  /* &.desktop-view { */
 
   &.desktop-view {
     @media only screen and (max-width: 499px) {

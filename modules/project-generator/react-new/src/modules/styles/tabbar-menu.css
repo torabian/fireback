@@ -8,7 +8,7 @@
   justify-content: space-around;
   align-items: center;
   border-top: 1px solid #ccc;
-  background: #fff;
+  background: var(--dark-bottom-nav-tabbar-bg, #fff);
   z-index: 1000;
 
   .nav-link {
@@ -30,4 +30,3 @@
     font-weight: bold;
   }
 }
-

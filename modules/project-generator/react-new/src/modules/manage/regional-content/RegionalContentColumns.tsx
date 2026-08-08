@@ -1,6 +1,6 @@
 import { RegionalContentDto } from "../../sdk/abac/RegionalContentDto";
-import { useS } from "../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
+
 export const columns = (t: typeof strings) => [
   {
     name: "uniqueId",
