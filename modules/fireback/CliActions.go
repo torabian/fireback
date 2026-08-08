@@ -4,11 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 
 	"github.com/urfave/cli/v3"
-	"gopkg.in/yaml.v2"
 )
 
 // Fireback actions run in cli as well. In this file, we place tools and helpers for that.
@@ -113,28 +111,6 @@ func GetCommonRemoveQuery(el reflect.Value, fn ActionDeleteSignature) *cli.Comma
 
 }
 
-func GetCommonCteQuery[T any](fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError)) *cli.Command {
-
-	return &cli.Command{
-
-		Name:    "query-cte",
-		Aliases: []string{"cte"},
-		Flags:   CommonQueryFlags,
-		Usage:   "Same as query, but in recursive manner",
-		Action: func(ctx context.Context, c *cli.Command) error {
-			CommonCliQueryCmd3(
-				c,
-				fn,
-				nil,
-				nil,
-			)
-
-			return nil
-		},
-	}
-
-}
-
 type CliInteractiveFlag struct {
 	Name        string
 	StructField string
@@ -158,34 +134,6 @@ var AskBoolean func(label string) bool
 var AskForInputOptional func(label string, defaultV string) (string, bool, error)
 var AskForInput func(label string, defaultV string) string
 var AskForPassword func(label string, defaultV string) string
-
-func CommonInitSeeder[T any](format string, entity *T) {
-	body := []byte{}
-	var err error
-	data := []*T{}
-	data = append(data, entity)
-
-	if format == "" {
-		format = "yml"
-	}
-
-	if format == "yml" || format == "yaml" {
-		body, err = yaml.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if format == "json" {
-		body, err = json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-	}
-
-	fmt.Println(string(body))
-}
 
 // Use the actions bundle for ease and provide it to the ModuleProvider
 // and it would gather all actions in the module level, it's to make it easier

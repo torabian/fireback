@@ -255,10 +255,6 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		}
 	}
 
-	module.ProvideMockImportHandler(func() {
-		// GsmProviderImportMocks()
-	})
-
 	module.ProvideCliHandlers([]*cli.Command{
 		RoleBrowseActionCliHandler(RoleBrowseAction),
 		RoleGetActionCliHandler(RoleGetAction),

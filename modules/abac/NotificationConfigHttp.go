@@ -2,16 +2,15 @@ package abac
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
 )
 
-func HttpGetNotificationWorkspaceConfig(c *gin.Context) {
-	fireback.HttpGetEntity(c, NotificationWorkspaecConfigActionGet)
-}
+// func HttpGetNotificationWorkspaceConfig(c *gin.Context) {
+// 	fireback.HttpGetEntity(c, NotificationWorkspaecConfigActionGet)
+// }
 
-func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
-	fireback.HttpUpdateEntity(c, NotificationWorkspaceConfigActionUpdate)
-}
+// func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
+// 	fireback.HttpUpdateEntity(c, NotificationWorkspaceConfigActionUpdate)
+// }
 
 // AppendNotificationConfigRouter wires the custom /notification/testmail and
 // /notification/workspace/config routes directly into gin - moved out of the old
@@ -20,16 +19,16 @@ func HttpUpdateNotificationWorkspaceConfig(c *gin.Context) {
 // NotificationModule.go's GinWebServerInitHooks instead.
 func AppendNotificationConfigRouter(g *gin.RouterGroup) {
 
-	g.GET("/notification/workspace/config",
-		WithAuthorization(&fireback.SecurityModel{
-			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
-		}),
-		HttpGetNotificationWorkspaceConfig,
-	)
-	g.PATCH("/notification/workspace/config",
-		WithAuthorization(&fireback.SecurityModel{
-			ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
-		}),
-		HttpUpdateNotificationWorkspaceConfig,
-	)
+	// g.GET("/notification/workspace/config",
+	// 	WithAuthorization(&fireback.SecurityModel{
+	// 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+	// 	}),
+	// 	HttpGetNotificationWorkspaceConfig,
+	// )
+	// g.PATCH("/notification/workspace/config",
+	// 	WithAuthorization(&fireback.SecurityModel{
+	// 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+	// 	}),
+	// 	HttpUpdateNotificationWorkspaceConfig,
+	// )
 }

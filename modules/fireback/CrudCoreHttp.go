@@ -1,11 +1,8 @@
 package fireback
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 
@@ -45,181 +42,6 @@ func zeroValueT[T any]() T {
 	var zeroVal T
 	return zeroVal
 }
-func CastAnyToT[T any](val interface{}) T {
-	t, ok := val.(T)
-	if !ok {
-		// Handle the case where the type assertion fails
-		return zeroValueT[T]()
-	}
-	return t
-}
-
-func CliPostEntity[T any, V any](c *cli.Command, fn func(T, QueryDSL) (*V, *IError), security *SecurityModel) (*V, *IError) {
-	f := CommonCliQueryDSLBuilderAuthorize(c, security)
-	var body T
-
-	if result, err := BindCli(c, &body); err != nil {
-		fmt.Println("CORRECT_BODY_SIGNATURE_IS_NEEDED", err)
-		return nil, GormErrorToIError(err)
-	} else {
-		return fn(CastAnyToT[T](result), f)
-	}
-
-}
-
-func CliPatchEntity[T any, V any](c *cli.Command, fn func(QueryDSL, T) (*V, *IError), security *SecurityModel) (*V, *IError) {
-	f := CommonCliQueryDSLBuilderAuthorize(c, security)
-	var body T
-
-	if result, err := BindCli(c, &body); err != nil {
-		fmt.Println("CORRECT_BODY_SIGNATURE_IS_NEEDED", err)
-		return nil, GormErrorToIError(err)
-	} else {
-		return fn(f, CastAnyToT[T](result))
-	}
-
-}
-
-func ginBodyToBytes(c *gin.Context) ([]byte, *IError) {
-	bodyBytes, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return nil, Create401Error(&FirebackMessages.BodyIsEmptyEof, []string{})
-		} else if errors.Is(err, io.ErrUnexpectedEOF) {
-			return nil, Create401Error(&FirebackMessages.BodyUnexpectedEof, []string{})
-		} else if errors.Is(err, http.ErrBodyReadAfterClose) {
-			return nil, Create401Error(&FirebackMessages.BodyReadAfterClose, []string{})
-		} else {
-			return nil, Create401Error(&FirebackMessages.UnknownErrorReadingBody, []string{})
-		}
-	}
-
-	// Reset the body so it can be read again later
-	c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
-
-	return bodyBytes, nil
-}
-
-func isMap(m interface{}) bool {
-	if m == nil {
-		return false
-	}
-
-	rt := reflect.TypeOf(m)
-	return rt.Kind() == reflect.Map
-}
-
-func isSlice(m interface{}) bool {
-	if m == nil {
-		return false
-	}
-
-	rt := reflect.TypeOf(m)
-	return rt.Kind() == reflect.Slice
-}
-
-/**
-*	This is an specific type of translation. It gets a json recursivly,
-*   and if finds 'translations' field, it would replace the parent with that value
-**/
-func RecursiveJsonTranslate(content map[string]interface{}, lang string) map[string]interface{} {
-
-	val, hasTranslations := content["translations"]
-	if hasTranslations {
-		translations := val.([]interface{})
-		for _, translate := range translations {
-			dictionary, okay := translate.(map[string]interface{})
-
-			if !okay {
-				continue
-			}
-
-			if dictionary["languageId"] != lang {
-				continue
-			}
-
-			for key, value := range dictionary {
-				if key == "languageId" {
-					continue
-				}
-				content[key] = value.(string)
-			}
-		}
-	}
-
-	for k, v := range content {
-
-		if isMap(v) {
-			sub, ok := v.(map[string]interface{})
-			if ok {
-				content[k] = RecursiveJsonTranslate(sub, lang)
-			}
-		}
-		if isSlice(v) {
-			if k != "translations" {
-				var data []map[string]interface{} = []map[string]interface{}{}
-
-				for _, n := range v.([]interface{}) {
-					mapped, okay := n.(map[string]interface{})
-					if okay {
-						data = append(data, n.(map[string]interface{}))
-						continue
-					} else {
-						data = append(data, RecursiveJsonTranslate(mapped, lang))
-					}
-				}
-				content[k] = data
-
-			}
-
-		}
-
-	}
-
-	return content
-
-}
-
-func PolyglotQueryHandler(entity any, query *QueryDSL) map[string]interface{} {
-
-	str, _ := json.MarshalIndent(entity, "", "  ")
-	var content map[string]interface{}
-	json.Unmarshal(str, &content)
-
-	// @todo: Huge bug here. It touches also the json content, which it should not ever touch.
-	// perhaps querying the content from database level should be fixed
-	// RecursiveJsonTranslate(content, query.Language)
-
-	val, ok := content["translations"]
-
-	if !ok {
-		return content
-	}
-
-	translations := val.([]interface{})
-
-	for _, translate := range translations {
-		dictionary, okay := translate.(map[string]interface{})
-		if !okay {
-			continue
-		}
-
-		if dictionary["languageId"] != query.Language {
-			continue
-		}
-
-		for key, value := range dictionary {
-
-			if key == "languageId" {
-				continue
-			}
-			content[key] = value.(string)
-		}
-	}
-
-	return content
-
-}
 
 func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMeta) gin.H {
 
@@ -233,13 +55,6 @@ func QueryEntitySuccessResult[T any](f QueryDSL, items []T, meta *QueryResultMet
 			data, _ := json.Marshal(item)
 			formatted = append(formatted, json.RawMessage(data))
 		}
-	}
-
-	for index, item := range formatted {
-		content := PolyglotQueryHandler(item, &f)
-		raw, _ := json.Marshal(content)
-		jsonMsg := json.RawMessage(raw)
-		formatted[index] = jsonMsg
 	}
 
 	data := gin.H{

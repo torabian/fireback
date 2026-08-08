@@ -62,7 +62,7 @@ type workspaceActionsBundle struct {
 
 var WorkspaceActions = workspaceActionsBundle{
 	EntityActionsBundle: NewEntityActionsBundle[WorkspaceEntity](),
-	CteQuery:             WorkspaceActionCteQueryFn,
+	CteQuery:            WorkspaceActionCteQueryFn,
 }
 
 // WorkspaceActionCteQueryFn fetches every WorkspaceEntity row matching query (via the
@@ -194,7 +194,6 @@ func WorkspaceCliFn() *cli.Command {
 		WorkspaceUpdateActionCliHandler(WorkspaceUpdateAction),
 		WorkspaceAwareDeletePreviewActionCliHandler(WorkspaceAwareDeletePreviewAction),
 		WorkspaceAwareDeleteActionCliHandler(WorkspaceAwareDeleteAction),
-		fireback.GetCommonCteQuery(WorkspaceActions.CteQuery),
 	}
 	commands = append(commands, WorkspaceCliCommands...)
 	return &cli.Command{
