@@ -16,8 +16,9 @@ targets:
   output: ./
 description: Email and SMS/GSM provider configuration and sending mechanics, split
   out of abac's notification module - email providers (sendgrid/mailgun/postmark/resend/smtp/terminal),
-  sms gateways (url/terminal/mediana), and named "from" email senders. Depends on
-  abac for auth (ResolveActionContext/SecurityModel), but nothing in abac's other
+  sms gateways (url/terminal/mediana), named "from" email senders, and per-user browser
+  web-push subscriptions (webPushConfig, moved here from modules/fireback). Depends
+  on abac for auth (ResolveActionContext/SecurityModel), but nothing in abac's other
   entities depends back on this module - see modules/abac/NotificationConfigActions.go
   for the one place abac calls into this package (looking up which provider is "the
   general one" for a workspace).
