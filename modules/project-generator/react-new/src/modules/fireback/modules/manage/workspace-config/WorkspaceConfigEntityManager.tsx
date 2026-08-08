@@ -6,16 +6,17 @@ import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntity
 import { useS } from "@/modules/fireback/hooks/useS";
 import { useWorkspaceConfigDistinctGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctGetAction";
 import { useWorkspaceConfigDistinctUpdateAction } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctUpdateAction";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
+import { WorkspaceConfigDto } from "@/modules/fireback/sdk/abac/WorkspaceConfigDto";
+import { WorkspaceConfigNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
 import { strings } from "./strings/translations";
 
 export const WorkspaceConfigEntityManager = ({
   data,
-}: DtoEntity<WorkspaceConfigEntity>) => {
+}: DtoEntity<WorkspaceConfigDto>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<WorkspaceConfigEntity>
+    Partial<WorkspaceConfigDto>
   >({
     data,
   });
@@ -30,11 +31,11 @@ export const WorkspaceConfigEntityManager = ({
       forceEdit
       onCancel={() => {
         router.goBackOrDefault(
-          WorkspaceConfigEntity.Navigation.single(undefined, locale),
+          WorkspaceConfigNavigation.single(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        WorkspaceConfigEntity.Navigation.single(response.data?.uniqueId, locale)
+        WorkspaceConfigNavigation.single(response.data?.uniqueId, locale)
       }
       customClass="w-100"
       Form={WorkspaceConfigForm}

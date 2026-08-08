@@ -1,15 +1,15 @@
 import { type QueryArchiveColumn } from "@/modules/fireback/definitions/common";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
 import { enTranslations } from "@/modules/fireback/translations/en";
 
 export const columns = (t: typeof enTranslations): QueryArchiveColumn[] => [
   {
-    name: RoleEntity.Fields.uniqueId,
+    name: RoleDto.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 200,
   },
   {
-    name: RoleEntity.Fields.name,
+    name: RoleDto.Fields.name,
     title: t.role.name,
     width: 200,
   },

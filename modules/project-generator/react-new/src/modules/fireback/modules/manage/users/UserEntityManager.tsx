@@ -1,19 +1,20 @@
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
-import { useGetUserByUniqueId } from "../../../sdk/modules/abac/useGetUserByUniqueId";
-import { usePatchUser } from "../../../sdk/modules/abac/usePatchUser";
-import { usePostUser } from "../../../sdk/modules/abac/usePostUser";
 
 import {
   CommonEntityManager,
   type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { UserEditForm } from "./UserEditForm";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { useUserGetActionQuery } from "../../../sdk/abac/UserGetAction";
+import { useUserCreateAction } from "../../../sdk/abac/UserCreateAction";
+import { useUserUpdateAction } from "../../../sdk/abac/UserUpdateAction";
+import { UserDto } from "../../../sdk/abac/UserDto";
+import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 
-export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
+export const UserEntityManager = ({ data }: DtoEntity<UserDto>) => {
   const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
-    Partial<UserEntity>
+    Partial<UserDto>
   >({
     data,
   });
@@ -22,13 +23,9 @@ export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
     query: { uniqueId, deep: true },
   });
 
-  const postHook = usePostUser({
-    queryClient,
-  });
+  const postHook = useUserCreateAction({});
 
-  const patchHook = usePatchUser({
-    queryClient,
-  });
+  const patchHook = useUserUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager
@@ -36,10 +33,10 @@ export const UserEntityManager = ({ data }: DtoEntity<UserEntity>) => {
       getSingleHook={getSingleHook}
       patchHook={patchHook}
       onCancel={() => {
-        router.goBackOrDefault(UserEntity.Navigation.query(undefined, locale));
+        router.goBackOrDefault(UserNavigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        UserEntity.Navigation.single(response.data?.uniqueId, locale)
+        UserNavigation.single(response.data?.uniqueId, locale)
       }
       Form={UserEditForm}
       onEditTitle={t.user.editUser}

@@ -4,8 +4,9 @@ import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
-import { useGetEmailSenderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailSenderByUniqueId";
+import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
+import { EmailSenderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
+import { useEmailSenderGetActionQuery } from "@/modules/fireback/sdk/messaging/EmailSenderGetAction";
 import { useState } from "react";
 
 export const EmailSenderSingleScreen = () => {
@@ -18,14 +19,14 @@ export const EmailSenderSingleScreen = () => {
   const getSingleHook = useGetEmailSenderByUniqueId({
     query: { uniqueId },
   });
-  var d: EmailSenderEntity | undefined = getSingleHook.query.data?.data;
+  var d: EmailSenderDto | undefined = getSingleHook.query.data?.data;
   usePageTitle(d?.fromName || "");
 
   return (
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(EmailSenderEntity.Navigation.edit(uniqueId));
+          router.push(EmailSenderNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

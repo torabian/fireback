@@ -1,14 +1,14 @@
 import { usePageTitle } from "../../../components/page-title/PageTitle";
+import { useUserBrowseActionQuery } from "../../../sdk/abac/UserBrowseAction";
+import { useUserAwareDeleteAction } from "../../../sdk/abac/UserAwareDeleteAction";
 
 import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
 
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
-import { useGetUsers } from "../../../sdk/modules/abac/useGetUsers";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./UserColumns";
 import { strings } from "./strings/translations";
-import { usePostUserRemove } from "@/modules/fireback/sdk/modules/abac/usePostUserRemove";
 
 export const UserList = () => {
   const t = useT();
@@ -20,11 +20,11 @@ export const UserList = () => {
       <CommonListManager
         columns={columns(t, s)}
         // CardComponent={UserCard}
-        queryHook={useGetUsers}
+        queryHook={useUserBrowseActionQuery}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          UserEntity.Navigation.single(uniqueId)
+          UserNavigation.single(uniqueId)
         }
-        deleteHook={usePostUserRemove}
+        deleteHook={useUserAwareDeleteAction}
       ></CommonListManager>
     </>
   );

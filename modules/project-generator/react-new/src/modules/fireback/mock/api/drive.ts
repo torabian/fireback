@@ -1,6 +1,6 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponseList } from "../../sdk/core/http-tools";
-import { FileEntity } from "../../sdk/modules/abac/FileEntity";
+import type { FileEntity } from "../../sdk/legacy-types/FileEntity";
 import { MockFiles } from "../database/file.db";
 
 export class DriveMockServer {

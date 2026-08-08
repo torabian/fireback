@@ -1,4 +1,4 @@
-import { EmailSenderEntity } from "../../../sdk/modules/abac/EmailSenderEntity";
+import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 
@@ -6,8 +6,8 @@ export function FormEmailSenderPicker({
   value,
   onChange,
 }: {
-  value: EmailSenderEntity;
-  onChange: (entity: EmailSenderEntity) => void;
+  value: EmailSenderDto;
+  onChange: (entity: EmailSenderDto) => void;
 }) {
   const { options } = useContext(RemoteQueryContext);
 
@@ -25,7 +25,7 @@ export function FormEmailSenderPicker({
         }}
         value={value}
         onChange={onChange}
-        labelFn={(t: EmailSenderEntity) =>
+        labelFn={(t: EmailSenderDto) =>
           [t?.fromName, t.fromEmailAddress].join(" ")
         }
       /> */}

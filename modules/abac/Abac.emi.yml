@@ -27,6 +27,7 @@ targets:
       pkg: abac
   - compiler: js
     output: ../project-generator/react-new/src/modules/fireback/sdk/abac
+    clean: true
     flags:
       js-sdk-location: ../sdk
     tags:

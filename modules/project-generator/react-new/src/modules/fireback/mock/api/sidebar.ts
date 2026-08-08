@@ -1,6 +1,6 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponseList } from "../../sdk/core/http-tools";
-import { UserEntity } from "../../sdk/modules/abac/UserEntity";
+import { UserDto } from "../../sdk/abac/UserDto";
 import { AppMenuEntities } from "../database/app-menu";
 
 export class SidebarMockServer {
@@ -8,7 +8,7 @@ export class SidebarMockServer {
   @method("get")
   async getAppMenu(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<UserEntity>>> {
+  ): Promise<IResponseList<DeepPartial<UserDto>>> {
     return {
       data: {
         items: AppMenuEntities as any,

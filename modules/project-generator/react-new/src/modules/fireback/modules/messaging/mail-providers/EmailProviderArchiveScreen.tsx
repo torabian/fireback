@@ -1,7 +1,8 @@
 import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
 import { useT } from "../../../hooks/useT";
 
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { EmailProviderList } from "./EmailProviderList";
 
 export const EmailProviderArchiveScreen = () => {
@@ -12,7 +13,7 @@ export const EmailProviderArchiveScreen = () => {
       <CommonArchiveManager
         pageTitle={t.fbMenu.emailProviders}
         newEntityHandler={({ locale, router }) => {
-          router.push(EmailProviderEntity.Navigation.create());
+          router.push(EmailProviderNavigation.create());
         }}
       >
         <EmailProviderList />

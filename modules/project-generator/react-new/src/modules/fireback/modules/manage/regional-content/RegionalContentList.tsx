@@ -1,8 +1,9 @@
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { useRegionalContentBrowseActionQuery } from "@/modules/fireback/sdk/abac/RegionalContentBrowseAction";
+import { useRegionalContentAwareDeleteAction } from "@/modules/fireback/sdk/abac/RegionalContentAwareDeleteAction";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
-import { useGetRegionalContents } from "@/modules/fireback/sdk/modules/abac/useGetRegionalContents";
-import { usePostRegionalContentRemove } from "@/modules/fireback/sdk/modules/abac/usePostRegionalContentRemove";
+import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { columns } from "./RegionalContentColumns";
 import { strings } from "./strings/translations";
 export const RegionalContentList = () => {
@@ -11,11 +12,11 @@ export const RegionalContentList = () => {
     <>
       <CommonListManager
         columns={columns(s)}
-        queryHook={useGetRegionalContents}
+        queryHook={useRegionalContentBrowseActionQuery}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          RegionalContentEntity.Navigation.single(uniqueId)
+          RegionalContentNavigation.single(uniqueId)
         }
-        deleteHook={usePostRegionalContentRemove}
+        deleteHook={useRegionalContentAwareDeleteAction}
       ></CommonListManager>
     </>
   );

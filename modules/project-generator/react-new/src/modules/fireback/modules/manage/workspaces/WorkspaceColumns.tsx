@@ -1,14 +1,14 @@
-import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
+import { WorkspaceDto } from "../../../sdk/abac/WorkspaceDto";
 import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations) => [
   {
-    name: WorkspaceEntity.Fields.uniqueId,
+    name: WorkspaceDto.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 100,
   },
   {
-    name: WorkspaceEntity.Fields.name,
+    name: WorkspaceDto.Fields.name,
     title: t.wokspaces.name,
     width: 200,
   },

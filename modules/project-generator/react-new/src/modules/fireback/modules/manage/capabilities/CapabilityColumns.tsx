@@ -1,4 +1,4 @@
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
+import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
@@ -8,12 +8,12 @@ export const columns = (t: typeof strings) => [
     width: 200,
   },
   {
-    name: CapabilityEntity.Fields.name,
+    name: CapabilityDto.Fields.name,
     title: t.capabilities.name,
     width: 100,
   },
   {
-    name: CapabilityEntity.Fields.description,
+    name: CapabilityDto.Fields.description,
     title: t.capabilities.description,
     width: 100,
   },

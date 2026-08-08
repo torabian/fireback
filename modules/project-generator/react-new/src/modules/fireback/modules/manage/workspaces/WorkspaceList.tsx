@@ -1,21 +1,22 @@
 import { useT } from "../../../hooks/useT";
+import { useWorkspaceBrowseActionQuery } from "../../../sdk/abac/WorkspaceBrowseAction";
+import { useWorkspaceAwareDeleteAction } from "../../../sdk/abac/WorkspaceAwareDeleteAction";
 
 import { CommonRowDetail } from "../../../components/detail-table/DetailTable";
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
-import { useGetCteWorkspaces } from "../../../sdk/modules/abac/useGetCteWorkspaces";
 import { columns } from "./WorkspaceColumns";
-import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
+import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceList = () => {
   const t = useT();
   const uniqueIdHrefHandler = (uniqueId: string) =>
-    WorkspaceEntity.Navigation.single(uniqueId);
+    WorkspaceNavigation.single(uniqueId);
 
   return (
     <>
       <CommonListManager
         columns={columns(t)}
-        queryHook={useGetCteWorkspaces}
+        queryHook={useWorkspaceBrowseActionQuery}
         onRecordsDeleted={({ queryClient }) => {
           queryClient.invalidateQueries("*fireback.UserRoleWorkspace");
           queryClient.invalidateQueries("*fireback.WorkspaceEntity");

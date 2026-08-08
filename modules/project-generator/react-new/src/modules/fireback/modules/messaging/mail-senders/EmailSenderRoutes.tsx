@@ -1,6 +1,7 @@
 import { Route } from "react-router-dom";
 import { EmailSenderEntityManager } from "./EmailSenderEntityManager";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
+import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
+import { EmailSenderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { EmailSenderSingleScreen } from "./EmailSenderSingleScreen";
 import { EmailSenderArchiveScreen } from "./EmailSenderArchiveScreen";
 
@@ -9,19 +10,19 @@ export function useEmailSenderRoutes() {
     <>
       <Route
         element={<EmailSenderEntityManager />}
-        path={EmailSenderEntity.Navigation.Rcreate}
+        path={EmailSenderNavigation.Rcreate}
       />
       <Route
         element={<EmailSenderSingleScreen />}
-        path={EmailSenderEntity.Navigation.Rsingle}
+        path={EmailSenderNavigation.Rsingle}
       ></Route>
       <Route
         element={<EmailSenderEntityManager />}
-        path={EmailSenderEntity.Navigation.Redit}
+        path={EmailSenderNavigation.Redit}
       ></Route>
       <Route
         element={<EmailSenderArchiveScreen />}
-        path={EmailSenderEntity.Navigation.Rquery}
+        path={EmailSenderNavigation.Rquery}
       ></Route>
     </>
   );

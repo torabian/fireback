@@ -1,38 +1,35 @@
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
-import { usePostWorkspace } from "../../../sdk/modules/abac/usePostWorkspace";
+import { useWorkspaceCreateAction } from "../../../sdk/abac/WorkspaceCreateAction";
 
 import {
   CommonEntityManager,
   type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { useT } from "../../../hooks/useT";
-import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceByUniqueId";
-import { usePatchWorkspace } from "../../../sdk/modules/abac/usePatchWorkspace";
+import { useWorkspaceGetActionQuery } from "../../../sdk/abac/WorkspaceGetAction";
+import { useWorkspaceUpdateAction } from "../../../sdk/abac/WorkspaceUpdateAction";
 import { WorkspaceEditForm } from "./WorkspaceEditForm";
-import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
+import { WorkspaceDto } from "../../../sdk/abac/WorkspaceDto";
+import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceEntityManager = ({
   data,
-}: DtoEntity<WorkspaceEntity>) => {
+}: DtoEntity<WorkspaceDto>) => {
   const t = useT();
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<WorkspaceEntity>
+    Partial<WorkspaceDto>
   >({
     data,
   });
 
-  const getSingleHook = useGetWorkspaceByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useWorkspaceGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = usePostWorkspace({
-    queryClient,
-  });
+  const postHook = useWorkspaceCreateAction({});
 
-  const patchHook = usePatchWorkspace({
-    queryClient,
-  });
+  const patchHook = useWorkspaceUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager
@@ -41,11 +38,11 @@ export const WorkspaceEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          WorkspaceEntity.Navigation.query(undefined, locale)
+          WorkspaceNavigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        WorkspaceEntity.Navigation.single(response.data?.uniqueId, locale)
+        WorkspaceNavigation.single(response.data?.uniqueId, locale)
       }
       Form={WorkspaceEditForm}
       onEditTitle={t.wokspaces.editWorkspae}

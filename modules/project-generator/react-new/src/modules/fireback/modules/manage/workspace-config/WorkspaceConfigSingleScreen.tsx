@@ -2,7 +2,7 @@ import { CommonSingleManager } from "@/modules/fireback/components/entity-manage
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { useWorkspaceConfigDistinctGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctGetAction";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
+import { WorkspaceConfigNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
 
 export const WorkspaceConfigSingleScreen = () => {
@@ -15,7 +15,7 @@ export const WorkspaceConfigSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(WorkspaceConfigEntity.Navigation.edit(""));
+          router.push(WorkspaceConfigNavigation.edit(""));
         }}
         noBack
         disableOnGetFailed

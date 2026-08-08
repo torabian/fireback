@@ -1,10 +1,11 @@
 import { useT } from "@/modules/fireback/hooks/useT";
+import { useEmailProviderBrowseActionQuery } from "@/modules/fireback/sdk/messaging/EmailProviderBrowseAction";
+import { useEmailProviderAwareDeleteAction } from "@/modules/fireback/sdk/messaging/EmailProviderAwareDeleteAction";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { columns } from "./EmailProviderColumns";
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useGetEmailProviders } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviders";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
-import { usePostEmailProviderRemove } from "@/modules/fireback/sdk/modules/abac/usePostEmailProviderRemove";
+import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { strings } from "./strings/translations";
 
 export const EmailProviderList = () => {
@@ -15,11 +16,11 @@ export const EmailProviderList = () => {
     <>
       <CommonListManager
         columns={columns(t, s)}
-        queryHook={useGetEmailProviders}
+        queryHook={useEmailProviderBrowseActionQuery}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          EmailProviderEntity.Navigation.single(uniqueId)
+          EmailProviderNavigation.single(uniqueId)
         }
-        deleteHook={usePostEmailProviderRemove}
+        deleteHook={useEmailProviderAwareDeleteAction}
       ></CommonListManager>
     </>
   );

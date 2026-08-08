@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import { RoleEntityManager } from "./RoleEntityManager";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { RoleNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { RoleSingleScreen } from "./RoleSingleScreen";
 import { RoleArchiveScreen } from "./RoleArchiveScreen";
 
@@ -9,19 +9,19 @@ export function useRoleRoutes() {
     <>
       <Route
         element={<RoleEntityManager />}
-        path={RoleEntity.Navigation.Rcreate}
+        path={RoleNavigation.Rcreate}
       />
       <Route
         element={<RoleSingleScreen />}
-        path={RoleEntity.Navigation.Rsingle}
+        path={RoleNavigation.Rsingle}
       ></Route>
       <Route
         element={<RoleEntityManager />}
-        path={RoleEntity.Navigation.Redit}
+        path={RoleNavigation.Redit}
       ></Route>
       <Route
         element={<RoleArchiveScreen />}
-        path={RoleEntity.Navigation.Rquery}
+        path={RoleNavigation.Rquery}
       ></Route>
     </>
   );

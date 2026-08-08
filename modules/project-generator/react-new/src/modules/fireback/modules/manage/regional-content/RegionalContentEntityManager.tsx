@@ -4,30 +4,27 @@ import {
   type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { RegionalContentForm } from "./RegionalContentEditForm";
-import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
-import { useGetRegionalContentByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetRegionalContentByUniqueId";
-import { usePostRegionalContent } from "@/modules/fireback/sdk/modules/abac/usePostRegionalContent";
-import { usePatchRegionalContent } from "@/modules/fireback/sdk/modules/abac/usePatchRegionalContent";
+import { useRegionalContentGetActionQuery } from "@/modules/fireback/sdk/abac/RegionalContentGetAction";
+import { useRegionalContentCreateAction } from "@/modules/fireback/sdk/abac/RegionalContentCreateAction";
+import { useRegionalContentUpdateAction } from "@/modules/fireback/sdk/abac/RegionalContentUpdateAction";
+import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 export const RegionalContentEntityManager = ({
   data,
-}: DtoEntity<RegionalContentEntity>) => {
+}: DtoEntity<RegionalContentDto>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<RegionalContentEntity>
+    Partial<RegionalContentDto>
   >({
     data,
   });
-  const getSingleHook = useGetRegionalContentByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useRegionalContentGetActionQuery({
+    params: { uniqueId },
   });
-  const postHook = usePostRegionalContent({
-    queryClient,
-  });
-  const patchHook = usePatchRegionalContent({
-    queryClient,
-  });
+  const postHook = useRegionalContentCreateAction({});
+  const patchHook = useRegionalContentUpdateAction({ params: { uniqueId } });
   return (
     <CommonEntityManager
       postHook={postHook}
@@ -35,11 +32,11 @@ export const RegionalContentEntityManager = ({
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          RegionalContentEntity.Navigation.query(undefined, locale)
+          RegionalContentNavigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        RegionalContentEntity.Navigation.single(response.data?.uniqueId, locale)
+        RegionalContentNavigation.single(response.data?.uniqueId, locale)
       }
       Form={RegionalContentForm}
       onEditTitle={s.regionalContents.editRegionalContent}

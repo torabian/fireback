@@ -1,7 +1,7 @@
 import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
 import { useContext } from "react";
-import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
+import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
 import { useS } from "@/modules/fireback/hooks/useS";
@@ -12,13 +12,13 @@ import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 export const RegionalContentForm = ({
   form,
   isEditing,
-}: EntityFormProps<RegionalContentEntity>) => {
+}: EntityFormProps<RegionalContentDto>) => {
   const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
   const s = useS(strings);
 
   const keyGroupSource = createQuerySource(
-    RegionalContentEntity.definition.fields
+    RegionalContentDto.definition.fields
       .find((field) => field.name === "keyGroup")
       .of.map((item) => {
         return {
@@ -34,7 +34,7 @@ export const RegionalContentForm = ({
         keyExtractor={(t) => t.value}
         formEffect={{
           form,
-          field: RegionalContentEntity.Fields.keyGroup,
+          field: RegionalContentDto.Fields.keyGroup,
           beforeSet(item) {
             return item.value;
           },
@@ -49,7 +49,7 @@ export const RegionalContentForm = ({
         forceRich={values.keyGroup === "EMAIL_OTP"}
         forceBasic={values.keyGroup === "SMS_OTP"}
         onChange={(value) =>
-          setFieldValue(RegionalContentEntity.Fields.content, value, false)
+          setFieldValue(RegionalContentDto.Fields.content, value, false)
         }
         errorMessage={errors.content}
         label={s.regionalContents.content}
@@ -60,7 +60,7 @@ export const RegionalContentForm = ({
         value={"global"}
         readonly
         onChange={(value) =>
-          setFieldValue(RegionalContentEntity.Fields.region, value, false)
+          setFieldValue(RegionalContentDto.Fields.region, value, false)
         }
         errorMessage={errors.region}
         label={s.regionalContents.region}
@@ -69,7 +69,7 @@ export const RegionalContentForm = ({
       <FormText
         value={values.title}
         onChange={(value) =>
-          setFieldValue(RegionalContentEntity.Fields.title, value, false)
+          setFieldValue(RegionalContentDto.Fields.title, value, false)
         }
         errorMessage={errors.title}
         label={s.regionalContents.title}
@@ -78,7 +78,7 @@ export const RegionalContentForm = ({
       <FormText
         value={values.languageId}
         onChange={(value) =>
-          setFieldValue(RegionalContentEntity.Fields.languageId, value, false)
+          setFieldValue(RegionalContentDto.Fields.languageId, value, false)
         }
         errorMessage={errors.languageId}
         label={s.regionalContents.languageId}

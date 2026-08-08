@@ -3,7 +3,7 @@ import { useFileUploader } from "../../../modules/manage/drive/DriveTools";
 import { useRemoteInformation } from "../../../hooks/useEnvironment";
 import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
-import { FileEntity } from "../../../sdk/modules/abac/FileEntity";
+import { FileEntity } from "../../../sdk/legacy-types/FileEntity";
 import { debounce } from "lodash";
 import { useRef } from "react";
 import { strings } from "../../strings/translations";

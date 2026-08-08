@@ -1,10 +1,10 @@
-import { usePostWebPushConfig } from "@/modules/fireback/sdk/modules/abac/usePostWebPushConfig";
+import { useWebPushConfigCreateAction } from "@/modules/fireback/sdk/messaging/WebPushConfigCreateAction";
 import { useEffect, useState } from "react";
 import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 
 export function usePushSubscription() {
-  const { submit } = usePostWebPushConfig();
+  const { mutate: submit } = useWebPushConfigCreateAction();
   const s = useS(strings);
 
   useEffect(() => {

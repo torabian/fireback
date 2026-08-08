@@ -4,13 +4,13 @@ import { useT } from "../../../hooks/useT";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { type FormikProps } from "formik";
 import { useContext } from "react";
-import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
+import { WorkspaceDto } from "../../../sdk/abac/WorkspaceDto";
 import { EmailProviderEditForm } from "../mail-providers/EmailProviderEditForm";
 
 export const MailTemplateForm = ({
   form,
 }: {
-  form: FormikProps<Partial<WorkspaceEntity>>;
+  form: FormikProps<Partial<WorkspaceDto>>;
 }) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();

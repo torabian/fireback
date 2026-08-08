@@ -5,8 +5,8 @@ import {
 } from "@/modules/fireback/components/forms/form-select/FormSelect";
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import usePresistentState from "@/modules/fireback/hooks/usePresistentState";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
+import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
+import { useRolesQuerySource } from "@/modules/fireback/hooks/useRolesQuerySource";
 import { Formik, type FormikProps } from "formik";
 import { useMemo, useState } from "react";
 import { CodeViewer } from "./CodeViewer";
@@ -157,7 +157,7 @@ const Example2 = () => {
 };
 
 const Example3 = () => {
-  const [value, setValue] = useState<RoleEntity[]>();
+  const [value, setValue] = useState<RoleDto[]>();
 
   return (
     <div>
@@ -174,7 +174,7 @@ const Example3 = () => {
         label="Multiple users"
         keyExtractor={(value) => value.uniqueId}
         fnLabelFormat={(value) => value.name}
-        querySource={useGetRoles}
+        querySource={useRolesQuerySource}
         onChange={(value) => setValue(value)}
       />
     </div>
@@ -197,7 +197,7 @@ const Example4 = () => {
         label="Select single role"
         keyExtractor={(value) => value.uniqueId}
         fnLabelFormat={(value) => value.name}
-        querySource={useGetRoles}
+        querySource={useRolesQuerySource}
         onChange={(value) => setValue(value)}
       />
     </div>
@@ -207,7 +207,7 @@ const Example4 = () => {
 const Example5 = () => {
   class FormDataSample {
     user: {
-      role?: RoleEntity;
+      role?: RoleDto;
 
       // This is how fireback works actually, to choose an entity you need to select it with
       // the unique id of the record (not the primary key), and the object will be filled for you
@@ -248,7 +248,7 @@ const Example5 = () => {
               label="Select single role"
               keyExtractor={(value) => value.uniqueId}
               fnLabelFormat={(value) => value.name}
-              querySource={useGetRoles}
+              querySource={useRolesQuerySource}
               formEffect={{ field: FormDataSample.Fields.user.role, form }}
             />
           </div>
@@ -261,7 +261,7 @@ const Example5 = () => {
 const Example6 = () => {
   class FormDataSample {
     user: {
-      roles?: RoleEntity[];
+      roles?: RoleDto[];
     };
 
     static Fields = {
@@ -293,7 +293,7 @@ const Example6 = () => {
               label="Select multiple roles"
               keyExtractor={(value) => value.uniqueId}
               fnLabelFormat={(value) => value.name}
-              querySource={useGetRoles}
+              querySource={useRolesQuerySource}
               formEffect={{ field: FormDataSample.Fields.user.roles, form }}
             />
           </div>

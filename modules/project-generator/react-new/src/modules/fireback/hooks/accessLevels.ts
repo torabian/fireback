@@ -1,12 +1,12 @@
 import { type DisplayDetectionProps } from "../definitions/common";
 import type { QueryUserRoleWorkspacesActionRes } from "../sdk/abac/QueryUserRoleWorkspacesAction";
-import { CapabilityEntity } from "../sdk/modules/fireback/CapabilityEntity";
+import { CapabilityDto } from "../sdk/abac/CapabilityDto";
 import type { MArray } from "../sdk/sdk/common/operators";
 
 export function userMeetsAccess(urw: any, perm: string): boolean {
   let hasPermission = false;
 
-  for (const item of (urw?.role?.capabilities || []) as CapabilityEntity[]) {
+  for (const item of (urw?.role?.capabilities || []) as CapabilityDto[]) {
     if (
       item.uniqueId === perm ||
       item.uniqueId === "root.*" ||

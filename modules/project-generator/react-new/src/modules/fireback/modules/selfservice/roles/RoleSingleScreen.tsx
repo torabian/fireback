@@ -4,7 +4,7 @@ import { PageSection } from "@/modules/fireback/components/page-section/PageSect
 import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { RoleNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { useEffect, useState } from "react";
 import { RolePermissionTree } from "./RolePermissionTree";
 import { useRoleGetActionQuery } from "@/modules/fireback/sdk/abac/RoleGetAction";
@@ -32,7 +32,7 @@ export const RoleSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(RoleEntity.Navigation.edit(uniqueId));
+          router.push(RoleNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

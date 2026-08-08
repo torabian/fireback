@@ -2,14 +2,14 @@ import { FormSelect } from "@/modules/fireback/components/forms/form-select/Form
 import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
-import { useGetRoles } from "@/modules/fireback/sdk/modules/abac/useGetRoles";
+import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
+import { useRolesQuerySource } from "@/modules/fireback/hooks/useRolesQuerySource";
 import { useContext } from "react";
 
 export const PublicJoinKeyEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<Partial<PublicJoinKeyEntity>>) => {
+}: EntityFormProps<Partial<PublicJoinKeyDto>>) => {
   const { values, setValues, setFieldValue, errors } = form;
   const { options } = useContext(RemoteQueryContext);
   const t = useT();
@@ -17,8 +17,8 @@ export const PublicJoinKeyEditForm = ({
   return (
     <>
       <FormSelect
-        formEffect={{ field: PublicJoinKeyEntity.Fields.role$, form }}
-        querySource={useGetRoles}
+        formEffect={{ field: PublicJoinKeyDto.Fields.role$, form }}
+        querySource={useRolesQuerySource}
         label={t.wokspaces.invite.role}
         errorMessage={errors.roleId}
         fnLabelFormat={(item) => item.name}

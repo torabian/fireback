@@ -1,4 +1,4 @@
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
+import { PassportMethodDto } from "@/modules/fireback/sdk/abac/PassportMethodDto";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
@@ -8,12 +8,12 @@ export const columns = (t: typeof strings) => [
     width: 200,
   },
   {
-    name: PassportMethodEntity.Fields.type,
+    name: PassportMethodDto.Fields.type,
     title: t.passportMethods.type,
     width: 100,
   },
   {
-    name: PassportMethodEntity.Fields.region,
+    name: PassportMethodDto.Fields.region,
     title: t.passportMethods.region,
     width: 100,
   },

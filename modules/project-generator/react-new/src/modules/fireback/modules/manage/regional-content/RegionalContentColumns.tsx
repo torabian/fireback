@@ -1,4 +1,4 @@
-import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
+import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
@@ -8,27 +8,27 @@ export const columns = (t: typeof strings) => [
     width: 200,
   },
   {
-    name: RegionalContentEntity.Fields.content,
+    name: RegionalContentDto.Fields.content,
     title: t.regionalContents.content,
     width: 100,
   },
   {
-    name: RegionalContentEntity.Fields.region,
+    name: RegionalContentDto.Fields.region,
     title: t.regionalContents.region,
     width: 100,
   },
   {
-    name: RegionalContentEntity.Fields.title,
+    name: RegionalContentDto.Fields.title,
     title: t.regionalContents.title,
     width: 100,
   },
   {
-    name: RegionalContentEntity.Fields.languageId,
+    name: RegionalContentDto.Fields.languageId,
     title: t.regionalContents.languageId,
     width: 100,
   },
   {
-    name: RegionalContentEntity.Fields.keyGroup,
+    name: RegionalContentDto.Fields.keyGroup,
     title: t.regionalContents.keyGroup,
     width: 100,
   },

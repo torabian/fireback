@@ -1,21 +1,22 @@
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useGetRegionalContentByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetRegionalContentByUniqueId";
-import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
+import { useRegionalContentGetActionQuery } from "@/modules/fireback/sdk/abac/RegionalContentGetAction";
+import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 export const RegionalContentSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
-  const getSingleHook = useGetRegionalContentByUniqueId({ query: { uniqueId } });
-  var d: RegionalContentEntity | undefined = getSingleHook.query.data?.data;
+  const getSingleHook = useRegionalContentGetActionQuery({ params: { uniqueId } });
+  var d: RegionalContentDto | undefined = getSingleHook.query.data?.data;
   const t = useS(strings);
   // usePageTitle(`${d?.name}`);
   return (
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(RegionalContentEntity.Navigation.edit(uniqueId));
+          router.push(RegionalContentNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

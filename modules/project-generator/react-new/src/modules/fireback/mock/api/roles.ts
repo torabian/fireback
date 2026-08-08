@@ -1,6 +1,6 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponse, type IResponseList } from "../../sdk/core/http-tools";
-import { RoleEntity } from "../../sdk/modules/abac/RoleEntity";
+import { RoleDto } from "../../sdk/abac/RoleDto";
 import { MockRoles } from "./../database/role.db";
 import { QueryToId } from "../database/memory-db";
 
@@ -9,7 +9,7 @@ export class RoleMockServer {
   @method("get")
   async getRoles(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<RoleEntity>>> {
+  ): Promise<IResponseList<DeepPartial<RoleDto>>> {
     return {
       data: {
         items: MockRoles.items(ctx),
@@ -23,7 +23,7 @@ export class RoleMockServer {
   @method("get")
   async getRoleByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<RoleEntity>>> {
+  ): Promise<IResponse<DeepPartial<RoleDto>>> {
     return {
       data: MockRoles.getOne(ctx.paramValues[0]),
     };
@@ -33,7 +33,7 @@ export class RoleMockServer {
   @method("patch")
   async patchRoleByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<RoleEntity>>> {
+  ): Promise<IResponse<DeepPartial<RoleDto>>> {
     return {
       data: MockRoles.patchOne(ctx.body),
     };
@@ -43,7 +43,7 @@ export class RoleMockServer {
   @method("delete")
   async deleteRole(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<RoleEntity>>> {
+  ): Promise<IResponseList<DeepPartial<RoleDto>>> {
     MockRoles.deletes(QueryToId(ctx.body.query));
 
     return {
@@ -53,8 +53,8 @@ export class RoleMockServer {
 
   @uriMatch("role")
   @method("post")
-  async postRole(ctx: Context): Promise<IResponse<DeepPartial<RoleEntity>>> {
-    const entity = MockRoles.create(ctx.body as Partial<RoleEntity>);
+  async postRole(ctx: Context): Promise<IResponse<DeepPartial<RoleDto>>> {
+    const entity = MockRoles.create(ctx.body as Partial<RoleDto>);
 
     return {
       data: entity,

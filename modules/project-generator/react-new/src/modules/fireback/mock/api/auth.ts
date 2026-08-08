@@ -12,9 +12,9 @@ import { CheckPassportMethodsActionRes } from "../../sdk/abac/CheckPassportMetho
 import type { ClassicSignupActionRes } from "../../sdk/abac/ClassicSignupAction";
 import type { ConfirmClassicPassportTotpActionRes } from "../../sdk/abac/ConfirmClassicPassportTotpAction";
 import { UserSessionDto } from "../../sdk/abac/UserSessionDto";
-import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
+import { WorkspaceInviteDto } from "../../sdk/abac/WorkspaceInviteDto";
 
-import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
+import { WorkspaceTypeDto } from "../../sdk/abac/WorkspaceTypeDto";
 import { GResponse } from "../../sdk/sdk/envelopes";
 
 const commonSession: GResponse<DeepPartial<UserSessionDto>> = {
@@ -43,7 +43,7 @@ export class AuthMockServer {
   @method("get")
   async getUserInvites(
     ctx: Context,
-  ): Promise<IResponseList<DeepPartial<WorkspaceInviteEntity>>> {
+  ): Promise<IResponseList<DeepPartial<WorkspaceInviteDto>>> {
     return emptyList;
   }
 
@@ -163,7 +163,7 @@ export class AuthMockServer {
   @method("get")
   async getWorkspaceTypes(
     ctx: Context,
-  ): Promise<IResponseList<DeepPartial<WorkspaceTypeEntity>>> {
+  ): Promise<IResponseList<DeepPartial<WorkspaceTypeDto>>> {
     return {
       data: {
         items: [

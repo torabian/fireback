@@ -1,12 +1,12 @@
 import { FormText } from "../../../components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
-import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
+import { WorkspaceDto } from "../../../sdk/abac/WorkspaceDto";
 
 export const WorkspaceEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<Partial<WorkspaceEntity>>) => {
+}: EntityFormProps<Partial<WorkspaceDto>>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
 
@@ -16,7 +16,7 @@ export const WorkspaceEditForm = ({
         value={values.name}
         autoFocus={!isEditing}
         onChange={(value) =>
-          setFieldValue(WorkspaceEntity.Fields.name, value, false)
+          setFieldValue(WorkspaceDto.Fields.name, value, false)
         }
         errorMessage={errors.name}
         label={t.wokspaces.workspaceName}

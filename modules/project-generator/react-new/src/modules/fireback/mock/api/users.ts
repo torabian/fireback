@@ -1,6 +1,6 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponse, type IResponseList } from "../../sdk/core/http-tools";
-import { UserEntity } from "../../sdk/modules/abac/UserEntity";
+import { UserDto } from "../../sdk/abac/UserDto";
 import { MockUsers } from "./../database/user.db";
 import { QueryToId } from "../database/memory-db";
 
@@ -9,7 +9,7 @@ export class UserMockServer {
   @method("get")
   async getUsers(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<UserEntity>>> {
+  ): Promise<IResponseList<DeepPartial<UserDto>>> {
     return {
       data: {
         items: MockUsers.items(ctx),
@@ -23,7 +23,7 @@ export class UserMockServer {
   @method("delete")
   async deleteUser(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<UserEntity>>> {
+  ): Promise<IResponseList<DeepPartial<UserDto>>> {
     MockUsers.deletes(QueryToId(ctx.body.query));
 
     return {
@@ -35,7 +35,7 @@ export class UserMockServer {
   @method("get")
   async getUserByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<UserEntity>>> {
+  ): Promise<IResponse<DeepPartial<UserDto>>> {
     return {
       data: MockUsers.getOne(ctx.paramValues[0]),
     };
@@ -45,7 +45,7 @@ export class UserMockServer {
   @method("patch")
   async patchUserByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<UserEntity>>> {
+  ): Promise<IResponse<DeepPartial<UserDto>>> {
     return {
       data: MockUsers.patchOne(ctx.body),
     };
@@ -53,8 +53,8 @@ export class UserMockServer {
 
   @uriMatch("user")
   @method("post")
-  async postUser(ctx: Context): Promise<IResponse<DeepPartial<UserEntity>>> {
-    const entity = MockUsers.create(ctx.body as Partial<UserEntity>);
+  async postUser(ctx: Context): Promise<IResponse<DeepPartial<UserDto>>> {
+    const entity = MockUsers.create(ctx.body as Partial<UserDto>);
 
     return {
       data: entity,

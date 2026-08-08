@@ -10,11 +10,11 @@ import {
   uriMatch,
 } from "../../hooks/mock-tools";
 import { type IResponse, type IResponseList } from "../../sdk/core/http-tools";
-import { PublicJoinKeyEntity } from "../../sdk/modules/abac/PublicJoinKeyEntity";
-import { RoleEntity } from "../../sdk/modules/abac/RoleEntity";
-import { UserEntity } from "../../sdk/modules/abac/UserEntity";
+import { PublicJoinKeyDto } from "../../sdk/abac/PublicJoinKeyDto";
+import { RoleDto } from "../../sdk/abac/RoleDto";
+import { UserDto } from "../../sdk/abac/UserDto";
 import { UserSessionDto } from "../../sdk/abac/UserSessionDto";
-import { WorkspaceInviteEntity } from "../../sdk/modules/abac/WorkspaceInviteEntity";
+import { WorkspaceInviteDto } from "../../sdk/abac/WorkspaceInviteDto";
 
 export class SelfServiceMockProvider {
   @uriMatch("passport/signin/email")
@@ -53,14 +53,14 @@ export class SelfServiceMockProvider {
   @method("get")
   async getUsers(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<UserEntity>>> {
+  ): Promise<IResponseList<DeepPartial<UserDto>>> {
     return emptyList;
   }
   @uriMatch("workspace-invites")
   @method("get")
   async getWorkspaceInvites(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<UserEntity>>> {
+  ): Promise<IResponseList<DeepPartial<UserDto>>> {
     return emptyList;
   }
 
@@ -68,7 +68,7 @@ export class SelfServiceMockProvider {
   @method("get")
   async getAppMenu(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<UserEntity>>> {
+  ): Promise<IResponseList<DeepPartial<UserDto>>> {
     return getJsonList("AppMenu", ctx);
   }
 
@@ -76,7 +76,7 @@ export class SelfServiceMockProvider {
   @method("get")
   async getPublicJoinKeys(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<PublicJoinKeyEntity>>> {
+  ): Promise<IResponseList<DeepPartial<PublicJoinKeyDto>>> {
     return emptyList;
   }
 
@@ -84,7 +84,7 @@ export class SelfServiceMockProvider {
   @method("get")
   async getInvites(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<WorkspaceInviteEntity>>> {
+  ): Promise<IResponseList<DeepPartial<WorkspaceInviteDto>>> {
     return emptyList;
   }
 
@@ -92,7 +92,7 @@ export class SelfServiceMockProvider {
   @method("get")
   async getWorkspaceRoles(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<RoleEntity>>> {
+  ): Promise<IResponseList<DeepPartial<RoleDto>>> {
     return emptyList;
   }
 

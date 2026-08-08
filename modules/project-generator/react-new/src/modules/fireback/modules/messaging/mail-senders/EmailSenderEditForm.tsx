@@ -1,12 +1,12 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
+import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
 
 export const EmailSenderEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<Partial<EmailSenderEntity>>) => {
+}: EntityFormProps<Partial<EmailSenderDto>>) => {
   const t = useT();
   const { values, setFieldValue, errors } = form;
 
@@ -15,7 +15,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.fromEmailAddress}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntity.Fields.fromEmailAddress, value, false)
+          setFieldValue(EmailSenderDto.Fields.fromEmailAddress, value, false)
         }
         autoFocus={!isEditing}
         errorMessage={errors.fromEmailAddress}
@@ -25,7 +25,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.fromName}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntity.Fields.fromName, value, false)
+          setFieldValue(EmailSenderDto.Fields.fromName, value, false)
         }
         errorMessage={errors.fromName}
         label={t.mailProvider.fromName}
@@ -34,7 +34,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.nickName}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntity.Fields.nickName, value, false)
+          setFieldValue(EmailSenderDto.Fields.nickName, value, false)
         }
         errorMessage={errors.nickName}
         label={t.mailProvider.nickName}
@@ -43,7 +43,7 @@ export const EmailSenderEditForm = ({
       <FormText
         value={values.replyTo}
         onChange={(value) =>
-          setFieldValue(EmailSenderEntity.Fields.replyTo, value, false)
+          setFieldValue(EmailSenderDto.Fields.replyTo, value, false)
         }
         errorMessage={errors.replyTo}
         label={t.mailProvider.replyTo}

@@ -1,15 +1,16 @@
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useS } from "../../../hooks/useS";
-import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
-import { useGetPassports } from "../../../sdk/modules/abac/useGetPassports";
+import { PassportDto } from "../../../sdk/abac/PassportDto";
+import { usePassportBrowseActionQuery } from "../../../sdk/abac/PassportBrowseAction";
 import { strings } from "./strings/translations";
 
 export const UserPassportList = ({ userId }: { userId: string }) => {
-  const { items } = useGetPassports({
-    query: {
-      query: userId ? "user_id = " + userId : null,
-    },
+  const { data } = usePassportBrowseActionQuery({
+    qs: userId
+      ? new URLSearchParams({ query: "user_id = " + userId })
+      : undefined,
   });
+  const items = (data as any)?.data?.items as PassportDto[] | undefined;
   const s = useS(strings);
 
   return (
@@ -42,7 +43,7 @@ const UserPassportItem = ({
   passport,
   s,
 }: {
-  passport: PassportEntity;
+  passport: PassportDto;
   s: typeof strings;
 }) => {
   return (

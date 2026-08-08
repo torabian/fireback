@@ -267,6 +267,10 @@
           },
           "type": "array",
           "description": "Compiler tags"
+        },
+        "clean": {
+          "type": "boolean",
+          "description": "When true deletes this target's own Output directory before writing freshly generated content so stale files left over from removed entities or actions aren't kept around."
         }
       },
       "additionalProperties": false,

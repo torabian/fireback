@@ -1,4 +1,4 @@
-import { WorkspaceTypeEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceTypeEntity";
+import { WorkspaceTypeNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { WorkspaceTypeEntityManager } from "./WorkspaceTypeEntityManager";
 import { Route } from "react-router-dom";
 import { WorkspaceTypeArchiveScreen } from "./WorkspaceTypeArchiveScreen";
@@ -9,19 +9,19 @@ export function useWorkspaceTypeRoutes() {
     <>
       <Route
         element={<WorkspaceTypeEntityManager />}
-        path={WorkspaceTypeEntity.Navigation.Rcreate}
+        path={WorkspaceTypeNavigation.Rcreate}
       />
       <Route
         element={<WorkspaceTypeEntityManager />}
-        path={WorkspaceTypeEntity.Navigation.Redit}
+        path={WorkspaceTypeNavigation.Redit}
       />
       <Route
         element={<WorkspaceTypeSingleScreen />}
-        path={WorkspaceTypeEntity.Navigation.Rsingle}
+        path={WorkspaceTypeNavigation.Rsingle}
       />
       <Route
         element={<WorkspaceTypeArchiveScreen />}
-        path={WorkspaceTypeEntity.Navigation.Rquery}
+        path={WorkspaceTypeNavigation.Rquery}
       ></Route>
     </>
   );

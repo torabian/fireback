@@ -3,14 +3,14 @@ import { FormText } from "../../../components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../../definitions/definitions";
 import { createQuerySource } from "../../../hooks/useAsQuery";
 import { useS } from "../../../hooks/useS";
-import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
+import { PassportDto } from "../../../sdk/abac/PassportDto";
 import { getPassportTypes } from "./PassportCommon";
 import { strings } from "./strings/translations";
 
 export const PassportEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<Partial<PassportEntity>>) => {
+}: EntityFormProps<Partial<PassportDto>>) => {
   const { values, setFieldValue, errors, setValues } = form;
   const s = useS(strings);
   const passportTypesQuery = createQuerySource(getPassportTypes(s));
@@ -22,7 +22,7 @@ export const PassportEditForm = ({
           <FormSelect
             formEffect={{
               form,
-              field: PassportEntity.Fields.type,
+              field: PassportDto.Fields.type,
               beforeSet(item) {
                 return item.uniqueId;
               },
@@ -36,7 +36,7 @@ export const PassportEditForm = ({
           <FormText
             value={values.value}
             onChange={(value) =>
-              setFieldValue(PassportEntity.Fields.value, value, false)
+              setFieldValue(PassportDto.Fields.value, value, false)
             }
             autoFocus={!isEditing}
             label={s.value}

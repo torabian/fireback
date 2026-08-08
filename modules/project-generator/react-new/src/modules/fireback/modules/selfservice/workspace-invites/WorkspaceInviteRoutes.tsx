@@ -1,4 +1,4 @@
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
+import { WorkspaceInviteNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { WorkspaceInviteEntityManager } from "./WorkspaceInviteEntityManager";
 import { Route } from "react-router-dom";
 import { WorkspaceInviteSingleScreen } from "./WorkspaceInviteScreen";
@@ -9,19 +9,19 @@ export function useWorkspaceInviteRoutes() {
     <>
       <Route
         element={<WorkspaceInviteEntityManager />}
-        path={WorkspaceInviteEntity.Navigation.Rcreate}
+        path={WorkspaceInviteNavigation.Rcreate}
       />
       <Route
         element={<WorkspaceInviteEntityManager />}
-        path={WorkspaceInviteEntity.Navigation.Redit}
+        path={WorkspaceInviteNavigation.Redit}
       />
       <Route
         element={<WorkspaceInviteSingleScreen />}
-        path={WorkspaceInviteEntity.Navigation.Rsingle}
+        path={WorkspaceInviteNavigation.Rsingle}
       />
       <Route
         element={<WorkspaceInviteArchiveScreen />}
-        path={WorkspaceInviteEntity.Navigation.Rquery}
+        path={WorkspaceInviteNavigation.Rquery}
       ></Route>
     </>
   );

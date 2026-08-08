@@ -1,7 +1,7 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponse } from "../../definitions/JSONStyle";
 import { type IResponseList } from "../../sdk/core/http-tools";
-import { PublicJoinKeyEntity } from "../../sdk/modules/abac/PublicJoinKeyEntity";
+import { PublicJoinKeyDto } from "../../sdk/abac/PublicJoinKeyDto";
 import { mdb } from "../database/databases";
 import { QueryToId } from "../database/memory-db";
 
@@ -10,7 +10,7 @@ export class PublicJoinKeyMockServer {
   @method("get")
   async getPublicJoinKeys(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<PublicJoinKeyEntity>>> {
+  ): Promise<IResponseList<DeepPartial<PublicJoinKeyDto>>> {
     return {
       data: {
         items: mdb.publicJoinKey.items(ctx),
@@ -24,7 +24,7 @@ export class PublicJoinKeyMockServer {
   @method("get")
   async getPublicJoinKeyByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<PublicJoinKeyEntity>>> {
+  ): Promise<IResponse<DeepPartial<PublicJoinKeyDto>>> {
     return {
       data: mdb.publicJoinKey.getOne(ctx.paramValues[0]),
     };
@@ -34,7 +34,7 @@ export class PublicJoinKeyMockServer {
   @method("patch")
   async patchPublicJoinKeyByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<PublicJoinKeyEntity>>> {
+  ): Promise<IResponse<DeepPartial<PublicJoinKeyDto>>> {
     return {
       data: mdb.publicJoinKey.patchOne(ctx.body),
     };
@@ -44,9 +44,9 @@ export class PublicJoinKeyMockServer {
   @method("post")
   async postPublicJoinKey(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<PublicJoinKeyEntity>>> {
+  ): Promise<IResponse<DeepPartial<PublicJoinKeyDto>>> {
     const entity = mdb.publicJoinKey.create(
-      ctx.body as Partial<PublicJoinKeyEntity>
+      ctx.body as Partial<PublicJoinKeyDto>
     );
 
     return {
@@ -58,7 +58,7 @@ export class PublicJoinKeyMockServer {
   @method("delete")
   async deletePublicJoinKey(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<PublicJoinKeyEntity>>> {
+  ): Promise<IResponseList<DeepPartial<PublicJoinKeyDto>>> {
     mdb.publicJoinKey.deletes(QueryToId(ctx.body.query));
 
     return {

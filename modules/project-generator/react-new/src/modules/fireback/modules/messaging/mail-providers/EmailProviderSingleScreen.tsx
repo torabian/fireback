@@ -5,12 +5,13 @@ import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useRouter } from "@/modules/fireback/hooks/useRouter";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import {
   SendEmailActionReq,
   useSendEmailAction,
 } from "@/modules/fireback/sdk/messaging/SendEmailAction";
-import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
+import { useEmailProviderGetActionQuery } from "@/modules/fireback/sdk/messaging/EmailProviderGetAction";
 import { strings } from "./strings/translations";
 
 export const EmailProviderSingleScreen = () => {
@@ -25,7 +26,7 @@ export const EmailProviderSingleScreen = () => {
   const getSingleHook = useGetEmailProviderByUniqueId({
     query: { uniqueId },
   });
-  var d: EmailProviderEntity | undefined = getSingleHook.query.data?.data;
+  var d: EmailProviderDto | undefined = getSingleHook.query.data?.data;
 
   usePageTitle(d?.type || "");
 
@@ -33,7 +34,7 @@ export const EmailProviderSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(EmailProviderEntity.Navigation.edit(uniqueId));
+          router.push(EmailProviderNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

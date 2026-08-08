@@ -1,22 +1,23 @@
 import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 
-import { useGetPassportByUniqueId } from "../../../sdk/modules/abac/useGetPassportByUniqueId";
-import { usePatchPassport } from "../../../sdk/modules/abac/usePatchPassport";
-import { usePostPassport } from "../../../sdk/modules/abac/usePostPassport";
 
 import {
   CommonEntityManager,
   type DtoEntity,
 } from "../../../components/entity-manager/CommonEntityManager";
 import { PassportEditForm } from "./PassportEditForm";
-import { PassportEntity } from "../../../sdk/modules/abac/PassportEntity";
+import { usePassportGetActionQuery } from "../../../sdk/abac/PassportGetAction";
+import { usePassportCreateAction } from "../../../sdk/abac/PassportCreateAction";
+import { usePassportUpdateAction } from "../../../sdk/abac/PassportUpdateAction";
+import { PassportDto } from "../../../sdk/abac/PassportDto";
+import { PassportNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 
-export const PassportEntityManager = ({ data }: DtoEntity<PassportEntity>) => {
+export const PassportEntityManager = ({ data }: DtoEntity<PassportDto>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
-    Partial<PassportEntity>
+    Partial<PassportDto>
   >({
     data,
   });
@@ -25,13 +26,9 @@ export const PassportEntityManager = ({ data }: DtoEntity<PassportEntity>) => {
     query: { uniqueId, deep: true },
   });
 
-  const postHook = usePostPassport({
-    queryClient,
-  });
+  const postHook = usePassportCreateAction({});
 
-  const patchHook = usePatchPassport({
-    queryClient,
-  });
+  const patchHook = usePassportUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager
@@ -40,11 +37,11 @@ export const PassportEntityManager = ({ data }: DtoEntity<PassportEntity>) => {
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          PassportEntity.Navigation.query(undefined, locale)
+          PassportNavigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        PassportEntity.Navigation.single(response.data?.uniqueId, locale)
+        PassportNavigation.single(response.data?.uniqueId, locale)
       }
       Form={PassportEditForm}
       onEditTitle={s.editPassport}

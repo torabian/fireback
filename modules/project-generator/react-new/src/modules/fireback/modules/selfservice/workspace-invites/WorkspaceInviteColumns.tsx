@@ -1,10 +1,10 @@
 import { type DatatableColumn } from "@/modules/fireback/definitions/definitions";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
+import { WorkspaceInviteDto } from "@/modules/fireback/sdk/abac/WorkspaceInviteDto";
 import { enTranslations } from "@/modules/fireback/translations/en";
 
 export const columns = (t: typeof enTranslations): DatatableColumn[] => [
   {
-    name: WorkspaceInviteEntity.Fields.uniqueId,
+    name: WorkspaceInviteDto.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 100,
   },
@@ -32,6 +32,6 @@ export const columns = (t: typeof enTranslations): DatatableColumn[] => [
     name: "role_id",
     title: t.wokspaces.invite.role,
     width: 100,
-    getCellValue: (invite?: WorkspaceInviteEntity) => invite?.role?.name,
+    getCellValue: (invite?: WorkspaceInviteDto) => invite?.role?.name,
   },
 ];

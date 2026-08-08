@@ -1,7 +1,7 @@
 import { QueryErrorView } from "../../components/error-view/QueryError";
 import ActiveLink from "../../components/link/ActiveLink";
 import { useS } from "../../hooks/useS";
-import type { UserPassportsActionRes } from "../../sdk/modules/abac/UserPassports";
+import type { UserPassportsActionResType } from "../../sdk/abac/UserPassportsAction";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./UserPassports.presenter";
 
@@ -27,7 +27,7 @@ export const UserPassportsScreen = ({ }: {}) => {
 const PassportList = ({
   passports,
 }: {
-  passports: UserPassportsActionRes[];
+  passports: UserPassportsActionResType[];
 }) => {
   const s = useS(strings);
   return (

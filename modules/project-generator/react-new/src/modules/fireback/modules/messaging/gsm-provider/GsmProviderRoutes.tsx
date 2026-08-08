@@ -2,25 +2,26 @@ import { Route } from "react-router-dom";
 import { GsmProviderArchiveScreen } from "./GsmProviderArchiveScreen";
 import { GsmProviderEntityManager } from "./GsmProviderEntityManager";
 import { GsmProviderSingleScreen } from "./GsmProviderSingleScreen";
-import { GsmProviderEntity } from "@/modules/fireback/sdk/modules/abac/GsmProviderEntity";
+import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
+import { GsmProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 export function useGsmProviderRoutes() {
   return (
     <>
       <Route
         element={<GsmProviderEntityManager />}
-        path={ GsmProviderEntity.Navigation.Rcreate}
+        path={ GsmProviderNavigation.Rcreate}
       />
       <Route
         element={<GsmProviderSingleScreen />}
-        path={ GsmProviderEntity.Navigation.Rsingle}
+        path={ GsmProviderNavigation.Rsingle}
       ></Route>
       <Route
         element={<GsmProviderEntityManager />}
-        path={ GsmProviderEntity.Navigation.Redit}
+        path={ GsmProviderNavigation.Redit}
       ></Route>
       <Route
         element={<GsmProviderArchiveScreen />}
-        path={  GsmProviderEntity.Navigation.Rquery}
+        path={  GsmProviderNavigation.Rquery}
       ></Route>
     </>
   );

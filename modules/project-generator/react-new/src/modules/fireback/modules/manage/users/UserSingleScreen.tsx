@@ -4,9 +4,9 @@ import { GeneralEntityView } from "../../../components/general-entity-view/Gener
 import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useLocale } from "../../../hooks/useLocale";
 import { useT } from "../../../hooks/useT";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
-import { useGetUserByUniqueId } from "../../../sdk/modules/abac/useGetUserByUniqueId";
-import { useGetPassports } from "../../../sdk/modules/abac/useGetPassports";
+import { UserDto } from "../../../sdk/abac/UserDto";
+import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
+import { useUserGetActionQuery } from "../../../sdk/abac/UserGetAction";
 import { UserPassportList } from "./UserPassportsList";
 
 export const UserSingleScreen = () => {
@@ -15,15 +15,15 @@ export const UserSingleScreen = () => {
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
 
-  const getSingleHook = useGetUserByUniqueId({ query: { uniqueId } });
-  var d: UserEntity | undefined = getSingleHook.query.data?.data;
+  const getSingleHook = useUserGetActionQuery({ params: { uniqueId } });
+  var d: UserDto | undefined = getSingleHook.query.data?.data;
   usePageTitle(d?.firstName || "");
 
   return (
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(UserEntity.Navigation.edit(uniqueId));
+          router.push(UserNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

@@ -6,10 +6,9 @@ import {
 import { useLocale } from "../../hooks/useLocale";
 import classNames from "classnames";
 import { useContext } from "react";
-import { useQueryClient } from "react-query";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
-import { useGetUserWorkspaces } from "../../sdk/modules/abac/useGetUserWorkspaces";
+import { useUserWorkspaceBrowseActionQuery } from "../../sdk/abac/UserWorkspaceBrowseAction";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 function renderMenu(
@@ -76,16 +75,8 @@ export function MenuParticle({
   onClick: () => void;
 }) {
   const { asPath } = useLocale();
-  const queryClient = useQueryClient();
   const { selectedUrw } = useContext(RemoteQueryContext) as any;
-  const { query: queryWorkspaces } = useGetUserWorkspaces({
-    queryClient,
-    query: {},
-    queryOptions: {
-      refetchOnWindowFocus: false,
-      cacheTime: 0,
-    },
-  });
+  const queryWorkspaces = useUserWorkspaceBrowseActionQuery({});
 
   const menuRendered = renderMenu(menu, {
     asPath,

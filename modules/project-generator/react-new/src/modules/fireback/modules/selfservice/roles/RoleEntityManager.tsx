@@ -7,12 +7,13 @@ import { useT } from "@/modules/fireback/hooks/useT";
 import { useRoleCreateAction } from "@/modules/fireback/sdk/abac/RoleCreateAction";
 import { useRoleGetActionQuery } from "@/modules/fireback/sdk/abac/RoleGetAction";
 import { useRoleUpdateAction } from "@/modules/fireback/sdk/abac/RoleUpdateAction";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
+import { RoleNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { RoleEditForm } from "./RoleEditForm";
 
-export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
+export const RoleEntityManager = ({ data }: DtoEntity<RoleDto>) => {
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<RoleEntity>
+    Partial<RoleDto>
   >({
     data,
   });
@@ -41,10 +42,10 @@ export const RoleEntityManager = ({ data }: DtoEntity<RoleEntity>) => {
         return data;
       }}
       onCancel={() => {
-        router.goBackOrDefault(RoleEntity.Navigation.query(undefined, locale));
+        router.goBackOrDefault(RoleNavigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        RoleEntity.Navigation.single(response.data?.uniqueId, locale)
+        RoleNavigation.single(response.data?.uniqueId, locale)
       }
       Form={RoleEditForm}
       onEditTitle={t.fb.editRole}

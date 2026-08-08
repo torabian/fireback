@@ -7,16 +7,17 @@ import { useS } from "@/modules/fireback/hooks/useS";
 import { usePassportMethodCreateAction } from "@/modules/fireback/sdk/abac/PassportMethodCreateAction";
 import { usePassportMethodGetActionQuery } from "@/modules/fireback/sdk/abac/PassportMethodGetAction";
 import { usePassportMethodUpdateAction } from "@/modules/fireback/sdk/abac/PassportMethodUpdateAction";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
+import { PassportMethodDto } from "@/modules/fireback/sdk/abac/PassportMethodDto";
+import { PassportMethodNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { PassportMethodForm } from "./PassportMethodEditForm";
 import { strings } from "./strings/translations";
 
 export const PassportMethodEntityManager = ({
   data,
-}: DtoEntity<PassportMethodEntity>) => {
+}: DtoEntity<PassportMethodDto>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<PassportMethodEntity>
+    Partial<PassportMethodDto>
   >({
     data,
   });
@@ -34,11 +35,11 @@ export const PassportMethodEntityManager = ({
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          PassportMethodEntity.Navigation.query(undefined, locale),
+          PassportMethodNavigation.query(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        PassportMethodEntity.Navigation.single(response.data?.uniqueId, locale)
+        PassportMethodNavigation.single(response.data?.uniqueId, locale)
       }
       Form={PassportMethodForm}
       onEditTitle={s.passportMethods.editPassportMethod}

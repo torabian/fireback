@@ -5,7 +5,7 @@ import { userInvitationColumns } from "./UserInvitationColumns";
 
 import { ModalContext } from "@/modules/fireback/components/modal/Modal";
 import { useContext } from "react";
-import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
+import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "@/modules/fireback/sdk/abac/UserInvitationsAction";
 import {
   useAcceptInviteAction,
   AcceptInviteActionReq,

@@ -2,25 +2,26 @@ import { Route } from "react-router-dom";
 import { CapabilityArchiveScreen } from "./CapabilityArchiveScreen";
 import { CapabilityEntityManager } from "./CapabilityEntityManager";
 import { CapabilitySingleScreen } from "./CapabilitySingleScreen";
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
+import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 export function useCapabilityRoutes() {
   return (
     <>
       <Route
         element={<CapabilityEntityManager />}
-        path={CapabilityEntity.Navigation.Rcreate}
+        path={CapabilityNavigation.Rcreate}
       />
       <Route
         element={<CapabilitySingleScreen />}
-        path={CapabilityEntity.Navigation.Rsingle}
+        path={CapabilityNavigation.Rsingle}
       ></Route>
       <Route
         element={<CapabilityEntityManager />}
-        path={CapabilityEntity.Navigation.Redit}
+        path={CapabilityNavigation.Redit}
       ></Route>
       <Route
         element={<CapabilityArchiveScreen />}
-        path={CapabilityEntity.Navigation.Rquery}
+        path={CapabilityNavigation.Rquery}
       ></Route>
     </>
   );

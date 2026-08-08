@@ -4,18 +4,18 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { useGetWorkspaceInviteByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceInviteByUniqueId";
-import { usePatchWorkspaceInvite } from "@/modules/fireback/sdk/modules/abac/usePatchWorkspaceInvite";
-import { usePostWorkspaceInvite } from "@/modules/fireback/sdk/modules/abac/usePostWorkspaceInvite";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
+import { useWorkspaceInviteGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceInviteGetAction";
+import { useWorkspaceInviteCreateAction } from "@/modules/fireback/sdk/abac/WorkspaceInviteCreateAction";
+import { useWorkspaceInviteUpdateAction } from "@/modules/fireback/sdk/abac/WorkspaceInviteUpdateAction";
+import { WorkspaceInviteDto } from "@/modules/fireback/sdk/abac/WorkspaceInviteDto";
 import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
 
 export const WorkspaceInviteEntityManager = ({
   data,
-}: DtoEntity<WorkspaceInviteEntity>) => {
+}: DtoEntity<WorkspaceInviteDto>) => {
   const t = useT();
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<WorkspaceInviteEntity>
+    Partial<WorkspaceInviteDto>
   >({
     data,
   });
@@ -25,13 +25,9 @@ export const WorkspaceInviteEntityManager = ({
     queryClient,
   });
 
-  const postHook = usePostWorkspaceInvite({
-    queryClient,
-  });
+  const postHook = useWorkspaceInviteCreateAction({});
 
-  const patchHook = usePatchWorkspaceInvite({
-    queryClient,
-  });
+  const patchHook = useWorkspaceInviteUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager

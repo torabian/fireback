@@ -4,32 +4,29 @@ import {
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
-import { useGetEmailSenderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailSenderByUniqueId";
-import { usePatchEmailSender } from "@/modules/fireback/sdk/modules/abac/usePatchEmailSender";
-import { usePostEmailSender } from "@/modules/fireback/sdk/modules/abac/usePostEmailSender";
+import { useEmailSenderGetActionQuery } from "@/modules/fireback/sdk/messaging/EmailSenderGetAction";
+import { useEmailSenderCreateAction } from "@/modules/fireback/sdk/messaging/EmailSenderCreateAction";
+import { useEmailSenderUpdateAction } from "@/modules/fireback/sdk/messaging/EmailSenderUpdateAction";
+import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
+import { EmailSenderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { EmailSenderEditForm } from "./EmailSenderEditForm";
 
 export const EmailSenderEntityManager = ({
   data,
-}: DtoEntity<EmailSenderEntity>) => {
+}: DtoEntity<EmailSenderDto>) => {
   const { router, uniqueId, queryClient, locale, formik } =
-    useCommonEntityManager<Partial<EmailSenderEntity>>({
+    useCommonEntityManager<Partial<EmailSenderDto>>({
       data,
     });
   const t = useT();
 
-  const getSingleHook = useGetEmailSenderByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useEmailSenderGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = usePostEmailSender({
-    queryClient,
-  });
+  const postHook = useEmailSenderCreateAction({});
 
-  const patchHook = usePatchEmailSender({
-    queryClient,
-  });
+  const patchHook = useEmailSenderUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager
@@ -38,11 +35,11 @@ export const EmailSenderEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          EmailSenderEntity.Navigation.query(undefined, locale)
+          EmailSenderNavigation.query(undefined, locale)
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        EmailSenderEntity.Navigation.single(response.data?.uniqueId, locale)
+        EmailSenderNavigation.single(response.data?.uniqueId, locale)
       }
       Form={EmailSenderEditForm}
       onEditTitle={t.fb.editMailSender}

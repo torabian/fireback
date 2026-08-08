@@ -3,7 +3,7 @@ import { GeneralEntityView } from "@/modules/fireback/components/general-entity-
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { usePassportMethodGetActionQuery } from "@/modules/fireback/sdk/abac/PassportMethodGetAction";
-import { PassportMethodEntity } from "@/modules/fireback/sdk/modules/abac/PassportMethodEntity";
+import { PassportMethodNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
 
 export const PassportMethodSingleScreen = () => {
@@ -18,7 +18,7 @@ export const PassportMethodSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(PassportMethodEntity.Navigation.edit(uniqueId));
+          router.push(PassportMethodNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

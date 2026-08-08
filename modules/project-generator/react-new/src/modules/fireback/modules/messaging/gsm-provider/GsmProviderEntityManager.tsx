@@ -4,28 +4,25 @@ import {
   type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { GsmProviderForm } from "./GsmProviderEditForm";
-import { GsmProviderEntity } from "@/modules/fireback/sdk/modules/abac/GsmProviderEntity";
-import { useGetGsmProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetGsmProviderByUniqueId";
-import { usePostGsmProvider } from "@/modules/fireback/sdk/modules/abac/usePostGsmProvider";
-import { usePatchGsmProvider } from "@/modules/fireback/sdk/modules/abac/usePatchGsmProvider";
+import { useGsmProviderGetActionQuery } from "@/modules/fireback/sdk/messaging/GsmProviderGetAction";
+import { useGsmProviderCreateAction } from "@/modules/fireback/sdk/messaging/GsmProviderCreateAction";
+import { useGsmProviderUpdateAction } from "@/modules/fireback/sdk/messaging/GsmProviderUpdateAction";
+import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
+import { GsmProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
-export const GsmProviderEntityManager = ({ data }: DtoEntity<GsmProviderEntity>) => {
+export const GsmProviderEntityManager = ({ data }: DtoEntity<GsmProviderDto>) => {
   const s = useS(strings);
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
-    Partial<GsmProviderEntity>
+    Partial<GsmProviderDto>
   >({
     data,
   });
-  const getSingleHook = useGetGsmProviderByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useGsmProviderGetActionQuery({
+    params: { uniqueId },
   });
-  const postHook = usePostGsmProvider({
-    queryClient,
-  });
-  const patchHook = usePatchGsmProvider({
-    queryClient,
-  });
+  const postHook = useGsmProviderCreateAction({});
+  const patchHook = useGsmProviderUpdateAction({ params: { uniqueId } });
   return (
     <CommonEntityManager
       postHook={postHook}
@@ -33,11 +30,11 @@ export const GsmProviderEntityManager = ({ data }: DtoEntity<GsmProviderEntity>)
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          GsmProviderEntity.Navigation.query(undefined, locale)
+          GsmProviderNavigation.query(undefined, locale)
         );
       } }
       onFinishUriResolver={(response, locale) =>
-        GsmProviderEntity.Navigation.single(response.data?.uniqueId, locale)
+        GsmProviderNavigation.single(response.data?.uniqueId, locale)
       }
       Form={ GsmProviderForm }
       onEditTitle={s.gsmProviders.editGsmProvider }

@@ -1,4 +1,4 @@
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
+import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
 import { strings } from "./strings/translations";
 
 export const columns = (s: typeof strings) => [
@@ -11,6 +11,6 @@ export const columns = (s: typeof strings) => [
     name: "role",
     title: s.roleName,
     width: 200,
-    getCellValue: (entity: PublicJoinKeyEntity) => entity.role?.name,
+    getCellValue: (entity: PublicJoinKeyDto) => entity.role?.name,
   },
 ];

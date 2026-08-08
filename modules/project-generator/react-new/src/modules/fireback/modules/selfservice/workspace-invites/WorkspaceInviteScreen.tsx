@@ -2,8 +2,9 @@ import { strings } from "./strings/translations";
 import { useT } from "@/modules/fireback/hooks/useT";
 import { useLocale } from "@/modules/fireback/hooks/useLocale";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { useGetWorkspaceInviteByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetWorkspaceInviteByUniqueId";
-import { WorkspaceInviteEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceInviteEntity";
+import { useWorkspaceInviteGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceInviteGetAction";
+import { WorkspaceInviteDto } from "@/modules/fireback/sdk/abac/WorkspaceInviteDto";
+import { WorkspaceInviteNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
@@ -20,7 +21,7 @@ export const WorkspaceInviteSingleScreen = () => {
     query: { uniqueId },
   });
 
-  var d: WorkspaceInviteEntity | undefined = getSingleHook.query.data?.data;
+  var d: WorkspaceInviteDto | undefined = getSingleHook.query.data?.data;
   usePageTitle(d?.firstName + " " + d?.lastName || "");
 
   return (
@@ -28,7 +29,7 @@ export const WorkspaceInviteSingleScreen = () => {
       <CommonSingleManager
         getSingleHook={getSingleHook}
         editEntityHandler={() =>
-          router.push(WorkspaceInviteEntity.Navigation.edit(uniqueId))
+          router.push(WorkspaceInviteNavigation.edit(uniqueId))
         }
       >
         <GeneralEntityView

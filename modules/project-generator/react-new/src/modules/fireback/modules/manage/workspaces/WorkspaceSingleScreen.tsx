@@ -4,8 +4,8 @@ import { GeneralEntityView } from "../../../components/general-entity-view/Gener
 import { usePageTitle } from "../../../components/page-title/PageTitle";
 import { useLocale } from "../../../hooks/useLocale";
 import { useT } from "../../../hooks/useT";
-import { useGetWorkspaceByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceByUniqueId";
-import { WorkspaceEntity } from "../../../sdk/modules/abac/WorkspaceEntity";
+import { useWorkspaceGetActionQuery } from "../../../sdk/abac/WorkspaceGetAction";
+import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceSingleScreen = () => {
   const router = useRouter();
@@ -13,7 +13,7 @@ export const WorkspaceSingleScreen = () => {
   const uniqueId = router.query.uniqueId as string;
   const { locale } = useLocale();
 
-  const getSingleHook = useGetWorkspaceByUniqueId({ query: { uniqueId } });
+  const getSingleHook = useWorkspaceGetActionQuery({ params: { uniqueId } });
   var d: any | undefined = getSingleHook.query.data?.data;
   usePageTitle(d?.name || "");
 
@@ -21,7 +21,7 @@ export const WorkspaceSingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={() => {
-          router.push(WorkspaceEntity.Navigation.edit(uniqueId));
+          router.push(WorkspaceNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

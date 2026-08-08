@@ -1,7 +1,7 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponse } from "../../definitions/JSONStyle";
 import { type IResponseList } from "../../sdk/core/http-tools";
-import { EmailProviderEntity } from "../../sdk/modules/abac/EmailProviderEntity";
+import { EmailProviderDto } from "../../sdk/messaging/EmailProviderDto";
 import { mdb } from "../database/databases";
 import { QueryToId } from "../database/memory-db";
 
@@ -10,7 +10,7 @@ export class EmailProviderMockServer {
   @method("get")
   async getEmailProviders(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
+  ): Promise<IResponseList<DeepPartial<EmailProviderDto>>> {
     return {
       data: {
         items: mdb.emailProvider.items(ctx),
@@ -24,7 +24,7 @@ export class EmailProviderMockServer {
   @method("get")
   async getEmailProviderByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<EmailProviderEntity>>> {
+  ): Promise<IResponse<DeepPartial<EmailProviderDto>>> {
     return {
       data: mdb.emailProvider.getOne(ctx.paramValues[0]),
     };
@@ -34,7 +34,7 @@ export class EmailProviderMockServer {
   @method("patch")
   async patchEmailProviderByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<EmailProviderEntity>>> {
+  ): Promise<IResponse<DeepPartial<EmailProviderDto>>> {
     return {
       data: mdb.emailProvider.patchOne(ctx.body),
     };
@@ -44,9 +44,9 @@ export class EmailProviderMockServer {
   @method("post")
   async postRole(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<EmailProviderEntity>>> {
+  ): Promise<IResponse<DeepPartial<EmailProviderDto>>> {
     const entity = mdb.emailProvider.create(
-      ctx.body as Partial<EmailProviderEntity>
+      ctx.body as Partial<EmailProviderDto>
     );
 
     return {
@@ -58,7 +58,7 @@ export class EmailProviderMockServer {
   @method("delete")
   async deleteRole(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<EmailProviderEntity>>> {
+  ): Promise<IResponseList<DeepPartial<EmailProviderDto>>> {
     mdb.emailProvider.deletes(QueryToId(ctx.body.query));
 
     return {

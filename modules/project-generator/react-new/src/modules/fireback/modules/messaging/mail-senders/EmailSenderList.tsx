@@ -1,8 +1,9 @@
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { useEmailSenderBrowseActionQuery } from "@/modules/fireback/sdk/messaging/EmailSenderBrowseAction";
+import { useEmailSenderAwareDeleteAction } from "@/modules/fireback/sdk/messaging/EmailSenderAwareDeleteAction";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderEntity } from "@/modules/fireback/sdk/modules/abac/EmailSenderEntity";
-import { useGetEmailSenders } from "@/modules/fireback/sdk/modules/abac/useGetEmailSenders";
-import { usePostEmailSenderRemove } from "@/modules/fireback/sdk/modules/abac/usePostEmailSenderRemove";
+import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
+import { EmailSenderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { columns } from "./EmailSenderColumns";
 
 export const EmailSenderList = () => {
@@ -12,11 +13,11 @@ export const EmailSenderList = () => {
     <>
       <CommonListManager
         columns={columns(t)}
-        queryHook={useGetEmailSenders}
+        queryHook={useEmailSenderBrowseActionQuery}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          EmailSenderEntity.Navigation.single(uniqueId)
+          EmailSenderNavigation.single(uniqueId)
         }
-        deleteHook={usePostEmailSenderRemove}
+        deleteHook={useEmailSenderAwareDeleteAction}
       ></CommonListManager>
     </>
   );

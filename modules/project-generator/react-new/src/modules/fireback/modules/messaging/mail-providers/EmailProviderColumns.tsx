@@ -1,10 +1,10 @@
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
 import { enTranslations } from "../../../translations/en";
 import { strings } from "./strings/translations";
 
 export const columns = (t: typeof enTranslations, s: typeof strings) => [
   {
-    name: EmailProviderEntity.Fields.uniqueId,
+    name: EmailProviderDto.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 200,
   },
@@ -14,12 +14,12 @@ export const columns = (t: typeof enTranslations, s: typeof strings) => [
     width: 200,
   },
   {
-    name: EmailProviderEntity.Fields.type,
+    name: EmailProviderDto.Fields.type,
     title: t.mailProvider.type,
     width: 200,
   },
   {
-    name: EmailProviderEntity.Fields.apiKey,
+    name: EmailProviderDto.Fields.apiKey,
     title: t.mailProvider.apiKey,
     width: 200,
   },

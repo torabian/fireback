@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import { UserEntityManager } from "./UserEntityManager";
-import { UserEntity } from "@/modules/fireback/sdk/modules/abac/UserEntity";
+import { UserNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { UserSingleScreen } from "./UserSingleScreen";
 import { UserArchiveScreen } from "./UserArchiveScreen";
 
@@ -9,19 +9,19 @@ export function useUserRoutes() {
     <>
       <Route
         element={<UserEntityManager />}
-        path={UserEntity.Navigation.Rcreate}
+        path={UserNavigation.Rcreate}
       />
       <Route
         element={<UserSingleScreen />}
-        path={UserEntity.Navigation.Rsingle}
+        path={UserNavigation.Rsingle}
       ></Route>
       <Route
         element={<UserEntityManager />}
-        path={UserEntity.Navigation.Redit}
+        path={UserNavigation.Redit}
       ></Route>
       <Route
         element={<UserArchiveScreen />}
-        path={UserEntity.Navigation.Rquery}
+        path={UserNavigation.Rquery}
       ></Route>
     </>
   );

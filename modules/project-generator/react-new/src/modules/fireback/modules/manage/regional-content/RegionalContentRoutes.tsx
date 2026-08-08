@@ -2,25 +2,26 @@ import { Route } from "react-router-dom";
 import { RegionalContentArchiveScreen } from "./RegionalContentArchiveScreen";
 import { RegionalContentEntityManager } from "./RegionalContentEntityManager";
 import { RegionalContentSingleScreen } from "./RegionalContentSingleScreen";
-import { RegionalContentEntity } from "@/modules/fireback/sdk/modules/abac/RegionalContentEntity";
+import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 export function useRegionalContentRoutes() {
   return (
     <>
       <Route
         element={<RegionalContentEntityManager />}
-        path={ RegionalContentEntity.Navigation.Rcreate}
+        path={ RegionalContentNavigation.Rcreate}
       />
       <Route
         element={<RegionalContentSingleScreen />}
-        path={ RegionalContentEntity.Navigation.Rsingle}
+        path={ RegionalContentNavigation.Rsingle}
       ></Route>
       <Route
         element={<RegionalContentEntityManager />}
-        path={ RegionalContentEntity.Navigation.Redit}
+        path={ RegionalContentNavigation.Redit}
       ></Route>
       <Route
         element={<RegionalContentArchiveScreen />}
-        path={  RegionalContentEntity.Navigation.Rquery}
+        path={  RegionalContentNavigation.Rquery}
       ></Route>
     </>
   );

@@ -4,7 +4,7 @@ import { useT } from "../../../hooks/useT";
 
 import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
 import { WorkspaceTypeList } from "./WorkspaceTypeList";
-import { WorkspaceTypeEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceTypeEntity";
+import { WorkspaceTypeNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 
 export const WorkspaceTypeArchiveScreen = () => {
   const t = useT();
@@ -15,7 +15,7 @@ export const WorkspaceTypeArchiveScreen = () => {
     <>
       <CommonArchiveManager
         newEntityHandler={() => {
-          router.push(WorkspaceTypeEntity.Navigation.create());
+          router.push(WorkspaceTypeNavigation.create());
         }}
         pageTitle={t.fbMenu.workspaceTypes}
       >

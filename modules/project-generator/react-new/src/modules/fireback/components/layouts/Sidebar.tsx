@@ -9,7 +9,7 @@ import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { osResources } from "../../resources/resources";
 import type { AppMenuOptionalDto } from "../../sdk/interfacetools/AppMenuOptionalDto";
-import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
+import { AppMenuDto } from "../../sdk/interfacetools/AppMenuDto";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";
 import { CurrentUser } from "./CurrentUser";
 import { MenuParticle } from "./MenuParticle";
@@ -49,7 +49,7 @@ export function dataMenuToMenu(
   };
 }
 
-function castMenuDefinitionToDisplayFn(data: AppMenuEntity) {
+function castMenuDefinitionToDisplayFn(data: AppMenuDto) {
   return () => true;
 }
 

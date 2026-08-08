@@ -1,6 +1,6 @@
 import { type Context, type DeepPartial, method, uriMatch } from "../../hooks/mock-tools";
 import { type IResponse, type IResponseList } from "../../sdk/core/http-tools";
-import { WorkspaceTypeEntity } from "../../sdk/modules/abac/WorkspaceTypeEntity";
+import { WorkspaceTypeDto } from "../../sdk/abac/WorkspaceTypeDto";
 import { MockWorkspaceType } from "./../database/workspace-type.db";
 import { QueryToId } from "../database/memory-db";
 
@@ -9,7 +9,7 @@ export class WorkspaceTypeMockServer {
   @method("get")
   async getWorkspaceTypes(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<WorkspaceTypeEntity>>> {
+  ): Promise<IResponseList<DeepPartial<WorkspaceTypeDto>>> {
     return {
       data: {
         items: MockWorkspaceType.items(ctx),
@@ -23,7 +23,7 @@ export class WorkspaceTypeMockServer {
   @method("get")
   async getWorkspaceTypeByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<WorkspaceTypeEntity>>> {
+  ): Promise<IResponse<DeepPartial<WorkspaceTypeDto>>> {
     return {
       data: MockWorkspaceType.getOne(ctx.paramValues[0]),
     };
@@ -33,7 +33,7 @@ export class WorkspaceTypeMockServer {
   @method("patch")
   async patchWorkspaceTypeByUniqueId(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<WorkspaceTypeEntity>>> {
+  ): Promise<IResponse<DeepPartial<WorkspaceTypeDto>>> {
     return {
       data: MockWorkspaceType.patchOne(ctx.body),
     };
@@ -43,7 +43,7 @@ export class WorkspaceTypeMockServer {
   @method("delete")
   async deleteWorkspaceType(
     ctx: Context
-  ): Promise<IResponseList<DeepPartial<WorkspaceTypeEntity>>> {
+  ): Promise<IResponseList<DeepPartial<WorkspaceTypeDto>>> {
     MockWorkspaceType.deletes(QueryToId(ctx.body.query));
 
     return {
@@ -55,9 +55,9 @@ export class WorkspaceTypeMockServer {
   @method("post")
   async postWorkspaceType(
     ctx: Context
-  ): Promise<IResponse<DeepPartial<WorkspaceTypeEntity>>> {
+  ): Promise<IResponse<DeepPartial<WorkspaceTypeDto>>> {
     const entity = MockWorkspaceType.create(
-      ctx.body as Partial<WorkspaceTypeEntity>
+      ctx.body as Partial<WorkspaceTypeDto>
     );
 
     return {

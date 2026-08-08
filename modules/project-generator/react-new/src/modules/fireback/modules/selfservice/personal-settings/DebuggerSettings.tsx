@@ -3,9 +3,8 @@ import Link from "../../../components/link/Link";
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
-import { useGetUserWorkspaces } from "../../../sdk/modules/abac/useGetUserWorkspaces";
+import { useUserWorkspaceBrowseActionQuery } from "../../../sdk/abac/UserWorkspaceBrowseAction";
 import { useContext, useState } from "react";
-import { useQueryClient } from "react-query";
 import {
   RemoteQueryContext as FirebackContext,
   RemoteQueryContext,
@@ -13,14 +12,7 @@ import {
 import { strings } from "./strings/translations";
 
 function UserRoleWorkspaceDebug() {
-  const queryClient = useQueryClient();
-  const { query: queryWorkspaces } = useGetUserWorkspaces({
-    queryClient,
-    query: {},
-    queryOptions: {
-      cacheTime: 0,
-    },
-  });
+  const queryWorkspaces = useUserWorkspaceBrowseActionQuery({});
   const s = useS(strings);
 
   return (

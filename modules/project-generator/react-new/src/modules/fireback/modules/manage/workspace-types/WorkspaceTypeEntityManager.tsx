@@ -8,31 +8,27 @@ import {
 // import { usePatchWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePatchWorkspaceWorkspaceType";
 // import { usePostWorkspaceWorkspaceType } from "../../sdk/modules/passports/usePostWorkspaceWorkspaceType";
 import { WorkspaceTypeEditForm } from "./WorkspaceTypeEditForm";
-import { useGetWorkspaceTypeByUniqueId } from "../../../sdk/modules/abac/useGetWorkspaceTypeByUniqueId";
-import { usePostWorkspaceType } from "../../../sdk/modules/abac/usePostWorkspaceType";
-import { usePatchWorkspaceType } from "../../../sdk/modules/abac/usePatchWorkspaceType";
-import { WorkspaceTypeEntity } from "../../../sdk/modules/abac/WorkspaceTypeEntity";
+import { useWorkspaceTypeGetActionQuery } from "../../../sdk/abac/WorkspaceTypeGetAction";
+import { useWorkspaceTypeCreateAction } from "../../../sdk/abac/WorkspaceTypeCreateAction";
+import { useWorkspaceTypeUpdateAction } from "../../../sdk/abac/WorkspaceTypeUpdateAction";
+import { WorkspaceTypeDto } from "../../../sdk/abac/WorkspaceTypeDto";
 
 export const WorkspaceTypeEntityManager = ({
   data,
-}: DtoEntity<WorkspaceTypeEntity>) => {
+}: DtoEntity<WorkspaceTypeDto>) => {
   const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
-    Partial<WorkspaceTypeEntity>
+    Partial<WorkspaceTypeDto>
   >({
     data,
   });
 
-  const getSingleHook = useGetWorkspaceTypeByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useWorkspaceTypeGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = usePostWorkspaceType({
-    queryClient,
-  });
+  const postHook = useWorkspaceTypeCreateAction({});
 
-  const patchHook = usePatchWorkspaceType({
-    queryClient,
-  });
+  const patchHook = useWorkspaceTypeUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager

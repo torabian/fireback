@@ -7,15 +7,16 @@ import { useS } from "@/modules/fireback/hooks/useS";
 import { useCapabilityCreateAction } from "@/modules/fireback/sdk/abac/CapabilityCreateAction";
 import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/abac/CapabilityGetAction";
 import { useCapabilityUpdateAction } from "@/modules/fireback/sdk/abac/CapabilityUpdateAction";
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
+import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { CapabilityForm } from "./CapabilityEditForm";
 import { strings } from "./strings/translations";
 export const CapabilityEntityManager = ({
   data,
-}: DtoEntity<CapabilityEntity>) => {
+}: DtoEntity<CapabilityDto>) => {
   const s = useS(strings);
   const { router, uniqueId, locale } = useCommonEntityManager<
-    Partial<CapabilityEntity>
+    Partial<CapabilityDto>
   >({
     data,
   });
@@ -32,11 +33,11 @@ export const CapabilityEntityManager = ({
       getSingleHook={getSingleHook}
       onCancel={() => {
         router.goBackOrDefault(
-          CapabilityEntity.Navigation.query(undefined, locale),
+          CapabilityNavigation.query(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        CapabilityEntity.Navigation.single(response.data?.uniqueId, locale)
+        CapabilityNavigation.single(response.data?.uniqueId, locale)
       }
       Form={CapabilityForm}
       onEditTitle={s.capabilities.editCapability}

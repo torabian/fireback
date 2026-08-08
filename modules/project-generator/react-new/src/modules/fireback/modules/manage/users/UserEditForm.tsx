@@ -4,13 +4,13 @@ import { type EntityFormProps } from "../../../definitions/definitions";
 import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { UserDto } from "../../../sdk/abac/UserDto";
 import { strings } from "./strings/translations";
 
 export const UserEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<Partial<UserEntity>>) => {
+}: EntityFormProps<Partial<UserDto>>) => {
   const { values, setFieldValue, errors, setValues } = form;
   const { options } = useContext(RemoteQueryContext);
   const t = useT();
@@ -23,7 +23,7 @@ export const UserEditForm = ({
           <FormText
             value={values?.firstName}
             onChange={(value) =>
-              setFieldValue(UserEntity.Fields.firstName, value, false)
+              setFieldValue(UserDto.Fields.firstName, value, false)
             }
             autoFocus={!isEditing}
             errorMessage={errors?.firstName}
@@ -35,7 +35,7 @@ export const UserEditForm = ({
           <FormText
             value={values?.lastName}
             onChange={(value) =>
-              setFieldValue(UserEntity.Fields.lastName, value, false)
+              setFieldValue(UserDto.Fields.lastName, value, false)
             }
             errorMessage={errors?.lastName}
             label={t.wokspaces.invite.lastName}
@@ -46,7 +46,7 @@ export const UserEditForm = ({
           <FormText
             value={values?.primaryAddress?.city}
             onChange={(value) =>
-              setFieldValue(UserEntity.Fields.primaryAddress.city, value, false)
+              setFieldValue(UserDto.Fields.primaryAddress.city, value, false)
             }
             errorMessage={errors?.primaryAddress?.city}
             label={s.cityName}
@@ -58,7 +58,7 @@ export const UserEditForm = ({
             value={values?.primaryAddress?.addressLine1}
             onChange={(value) =>
               setFieldValue(
-                UserEntity.Fields.primaryAddress.addressLine1,
+                UserDto.Fields.primaryAddress.addressLine1,
                 value,
                 false,
               )
@@ -73,7 +73,7 @@ export const UserEditForm = ({
             value={values?.primaryAddress?.addressLine2}
             onChange={(value) =>
               setFieldValue(
-                UserEntity.Fields.primaryAddress.addressLine2,
+                UserDto.Fields.primaryAddress.addressLine2,
                 value,
                 false,
               )

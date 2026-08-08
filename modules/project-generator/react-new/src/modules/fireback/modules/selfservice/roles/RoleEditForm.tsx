@@ -1,6 +1,6 @@
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { RoleEntity } from "@/modules/fireback/sdk/modules/abac/RoleEntity";
+import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
 import { RolePermissionTree } from "./RolePermissionTree";
 import { useT } from "@/modules/fireback/hooks/useT";
 
@@ -19,7 +19,7 @@ const normalize = (caps: any, capList: any) => {
 export const RoleEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<Partial<RoleEntity>>) => {
+}: EntityFormProps<Partial<RoleDto>>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
   return (
@@ -27,7 +27,7 @@ export const RoleEditForm = ({
       <FormText
         value={values.name}
         onChange={(value) =>
-          setFieldValue(RoleEntity.Fields.name, value, false)
+          setFieldValue(RoleDto.Fields.name, value, false)
         }
         errorMessage={errors.name}
         label={t.wokspaces.invite.role}
@@ -37,7 +37,7 @@ export const RoleEditForm = ({
 
       <RolePermissionTree
         onChange={(value) =>
-          setFieldValue(RoleEntity.Fields.capabilitiesListId, value, false)
+          setFieldValue(RoleDto.Fields.capabilitiesListId, value, false)
         }
         value={normalize(values.capabilities, values.capabilitiesListId)}
       />

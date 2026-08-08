@@ -1,6 +1,7 @@
 import { Route } from "react-router-dom";
 import { PublicJoinKeyEntityManager } from "./PublicJoinKeyEntityManager";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
+import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { PublicJoinKeySingleScreen } from "./PublicJoinKeySingleScreen";
 import { PublicJoinKeyArchiveScreen } from "./PublicJoinKeyArchiveScreen";
 
@@ -9,19 +10,19 @@ export function usePublicJoinKeyRoutes() {
     <>
       <Route
         element={<PublicJoinKeyEntityManager />}
-        path={PublicJoinKeyEntity.Navigation.Rcreate}
+        path={PublicJoinKeyNavigation.Rcreate}
       />
       <Route
         element={<PublicJoinKeySingleScreen />}
-        path={PublicJoinKeyEntity.Navigation.Rsingle}
+        path={PublicJoinKeyNavigation.Rsingle}
       ></Route>
       <Route
         element={<PublicJoinKeyEntityManager />}
-        path={PublicJoinKeyEntity.Navigation.Redit}
+        path={PublicJoinKeyNavigation.Redit}
       ></Route>
       <Route
         element={<PublicJoinKeyArchiveScreen />}
-        path={PublicJoinKeyEntity.Navigation.Rquery}
+        path={PublicJoinKeyNavigation.Rquery}
       ></Route>
     </>
   );

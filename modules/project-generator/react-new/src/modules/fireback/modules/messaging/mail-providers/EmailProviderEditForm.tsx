@@ -5,7 +5,7 @@ import { type EntityFormProps } from "@/modules/fireback/definitions/definitions
 import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
+import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
 import { strings } from "./strings/translations";
 
 const placeholder = `
@@ -40,7 +40,7 @@ curl -X POST https://api.sendgrid.com/v3/mail/send \
 export const EmailProviderEditForm = ({
   form,
   isEditing,
-}: EntityFormProps<EmailProviderEntity>) => {
+}: EntityFormProps<EmailProviderDto>) => {
   const { values, setFieldValue, errors } = form;
   const t = useT();
   const s = useS(strings);
@@ -121,7 +121,7 @@ export const EmailProviderEditForm = ({
       <FormSelect
         formEffect={{
           form,
-          field: EmailProviderEntity.Fields.type,
+          field: EmailProviderDto.Fields.type,
           beforeSet(item) {
             // reset config when switching provider
             setFieldValue("config", {});

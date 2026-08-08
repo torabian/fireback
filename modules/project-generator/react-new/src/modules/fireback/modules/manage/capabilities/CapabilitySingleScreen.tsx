@@ -3,7 +3,8 @@ import { GeneralEntityView } from "@/modules/fireback/components/general-entity-
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
 import { useS } from "@/modules/fireback/hooks/useS";
 import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/abac/CapabilityGetAction";
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
+import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
 import { usePageTitle } from "@/modules/fireback/hooks/authContext";
 
@@ -18,7 +19,7 @@ export const CapabilitySingleScreen = () => {
     <>
       <CommonSingleManager
         editEntityHandler={({ locale, router }) => {
-          router.push(CapabilityEntity.Navigation.edit(uniqueId));
+          router.push(CapabilityNavigation.edit(uniqueId));
         }}
         getSingleHook={getSingleHook}
       >

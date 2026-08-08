@@ -1,4 +1,4 @@
-import { UserInvitationsQueryColumns } from "@/modules/fireback/sdk/modules/abac/UserInvitationsQueryColumns";
+import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "@/modules/fireback/sdk/abac/UserInvitationsAction";
 import { type DatatableColumn } from "../../../definitions/definitions";
 import { strings } from "./strings/translations";
 

@@ -3,32 +3,29 @@ import {
   type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
-import { useGetPublicJoinKeyByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetPublicJoinKeyByUniqueId";
-import { usePatchPublicJoinKey } from "@/modules/fireback/sdk/modules/abac/usePatchPublicJoinKey";
-import { usePostPublicJoinKey } from "@/modules/fireback/sdk/modules/abac/usePostPublicJoinKey";
+import { usePublicJoinKeyGetActionQuery } from "@/modules/fireback/sdk/abac/PublicJoinKeyGetAction";
+import { usePublicJoinKeyCreateAction } from "@/modules/fireback/sdk/abac/PublicJoinKeyCreateAction";
+import { usePublicJoinKeyUpdateAction } from "@/modules/fireback/sdk/abac/PublicJoinKeyUpdateAction";
+import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { PublicJoinKeyEditForm } from "./PublicJoinKeyEditForm";
 
 export const PublicJoinKeyEntityManager = ({
   data,
-}: DtoEntity<PublicJoinKeyEntity>) => {
+}: DtoEntity<PublicJoinKeyDto>) => {
   const { router, uniqueId, queryClient, locale, t } = useCommonEntityManager<
-    Partial<PublicJoinKeyEntity>
+    Partial<PublicJoinKeyDto>
   >({
     data,
   });
 
-  const getSingleHook = useGetPublicJoinKeyByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = usePublicJoinKeyGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = usePostPublicJoinKey({
-    queryClient,
-  });
+  const postHook = usePublicJoinKeyCreateAction({});
 
-  const patchHook = usePatchPublicJoinKey({
-    queryClient,
-  });
+  const patchHook = usePublicJoinKeyUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager
@@ -36,10 +33,10 @@ export const PublicJoinKeyEntityManager = ({
       getSingleHook={getSingleHook}
       patchHook={patchHook}
       onCancel={() => {
-        router.goBackOrDefault(PublicJoinKeyEntity.Navigation.query());
+        router.goBackOrDefault(PublicJoinKeyNavigation.query());
       }}
       onFinishUriResolver={(response, locale) =>
-        PublicJoinKeyEntity.Navigation.single(response.data?.uniqueId)
+        PublicJoinKeyNavigation.single(response.data?.uniqueId)
       }
       Form={PublicJoinKeyEditForm}
       onEditTitle={t.fb.editPublicJoinKey}

@@ -2,18 +2,18 @@ import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/Fo
 import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
 import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { WorkspaceConfigEntity } from "@/modules/fireback/sdk/modules/abac/WorkspaceConfigEntity";
+import { WorkspaceConfigDto } from "@/modules/fireback/sdk/abac/WorkspaceConfigDto";
 import { strings } from "./strings/translations";
 import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
 import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { useGetEmailProviders } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviders";
-import { useGetGsmProviders } from "@/modules/fireback/sdk/modules/abac/useGetGsmProviders";
-import { useGetRegionalContents } from "@/modules/fireback/sdk/modules/abac/useGetRegionalContents";
+import { useEmailProvidersQuerySource } from "@/modules/fireback/hooks/useEmailProvidersQuerySource";
+import { useGsmProvidersQuerySource } from "@/modules/fireback/hooks/useGsmProvidersQuerySource";
+import { useRegionalContentsQuerySource } from "@/modules/fireback/hooks/useRegionalContentsQuerySource";
 
 export const WorkspaceConfigForm = ({
   form,
   isEditing,
-}: EntityFormProps<WorkspaceConfigEntity>) => {
+}: EntityFormProps<WorkspaceConfigDto>) => {
   const { values, setValues, setFieldValue, errors } = form;
   const s = useS(strings);
   return (
@@ -26,7 +26,7 @@ export const WorkspaceConfigForm = ({
           value={values.enableRecaptcha2}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.enableRecaptcha2,
+              WorkspaceConfigDto.Fields.enableRecaptcha2,
               value,
               false
             )
@@ -41,7 +41,7 @@ export const WorkspaceConfigForm = ({
           disabled={!values.enableRecaptcha2}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.recaptcha2ServerKey,
+              WorkspaceConfigDto.Fields.recaptcha2ServerKey,
               value,
               false
             )
@@ -55,7 +55,7 @@ export const WorkspaceConfigForm = ({
           disabled={!values.enableRecaptcha2}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.recaptcha2ClientKey,
+              WorkspaceConfigDto.Fields.recaptcha2ClientKey,
               value,
               false
             )
@@ -73,7 +73,7 @@ export const WorkspaceConfigForm = ({
         <FormCheckbox
           value={values.enableOtp}
           onChange={(value) =>
-            setFieldValue(WorkspaceConfigEntity.Fields.enableOtp, value, false)
+            setFieldValue(WorkspaceConfigDto.Fields.enableOtp, value, false)
           }
           errorMessage={errors.enableOtp}
           label={s.workspaceConfigs.enableOtp}
@@ -84,7 +84,7 @@ export const WorkspaceConfigForm = ({
           value={values.requireOtpOnSignup}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.requireOtpOnSignup,
+              WorkspaceConfigDto.Fields.requireOtpOnSignup,
               value,
               false
             )
@@ -98,7 +98,7 @@ export const WorkspaceConfigForm = ({
           value={values.requireOtpOnSignin}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.requireOtpOnSignin,
+              WorkspaceConfigDto.Fields.requireOtpOnSignin,
               value,
               false
             )
@@ -115,7 +115,7 @@ export const WorkspaceConfigForm = ({
         <FormCheckbox
           value={values.enableTotp}
           onChange={(value) =>
-            setFieldValue(WorkspaceConfigEntity.Fields.enableTotp, value, false)
+            setFieldValue(WorkspaceConfigDto.Fields.enableTotp, value, false)
           }
           errorMessage={errors.enableTotp}
           label={s.workspaceConfigs.enableTotp}
@@ -125,7 +125,7 @@ export const WorkspaceConfigForm = ({
         <FormCheckbox
           value={values.forceTotp}
           onChange={(value) =>
-            setFieldValue(WorkspaceConfigEntity.Fields.forceTotp, value, false)
+            setFieldValue(WorkspaceConfigDto.Fields.forceTotp, value, false)
           }
           errorMessage={errors.forceTotp}
           label={s.workspaceConfigs.forceTotp}
@@ -140,7 +140,7 @@ export const WorkspaceConfigForm = ({
           value={values.forcePasswordOnPhone}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.forcePasswordOnPhone,
+              WorkspaceConfigDto.Fields.forcePasswordOnPhone,
               value,
               false
             )
@@ -154,7 +154,7 @@ export const WorkspaceConfigForm = ({
           value={values.forcePersonNameOnPhone}
           onChange={(value) =>
             setFieldValue(
-              WorkspaceConfigEntity.Fields.forcePersonNameOnPhone,
+              WorkspaceConfigDto.Fields.forcePersonNameOnPhone,
               value,
               false
             )
@@ -173,13 +173,13 @@ export const WorkspaceConfigForm = ({
           keyExtractor={(t) => t.uniqueId}
           formEffect={{
             form,
-            field: WorkspaceConfigEntity.Fields.generalEmailProviderId,
+            field: WorkspaceConfigDto.Fields.generalEmailProviderId,
             beforeSet(item) {
               return item.uniqueId;
             },
           }}
           fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
-          querySource={useGetEmailProviders}
+          querySource={useEmailProvidersQuerySource}
           errorMessage={errors.generalEmailProviderId}
           label={s.workspaceConfigs.generalEmailProviderLabel}
           hint={s.workspaceConfigs.generalEmailProviderHint}
@@ -189,13 +189,13 @@ export const WorkspaceConfigForm = ({
           keyExtractor={(t) => t.uniqueId}
           formEffect={{
             form,
-            field: WorkspaceConfigEntity.Fields.generalGsmProviderId,
+            field: WorkspaceConfigDto.Fields.generalGsmProviderId,
             beforeSet(item) {
               return item.uniqueId;
             },
           }}
           fnLabelFormat={e => `${e.type} (${e.uniqueId})`}
-          querySource={useGetGsmProviders}
+          querySource={useGsmProvidersQuerySource}
           errorMessage={errors.generalGsmProviderId}
           label={s.workspaceConfigs.generalGsmProviderLabel}
           hint={s.workspaceConfigs.generalGsmProviderHint}
@@ -205,13 +205,13 @@ export const WorkspaceConfigForm = ({
           keyExtractor={(t) => t.uniqueId}
           formEffect={{
             form,
-            field: WorkspaceConfigEntity.Fields.inviteToWorkspaceContentId,
+            field: WorkspaceConfigDto.Fields.inviteToWorkspaceContentId,
             beforeSet(item) {
               return item.uniqueId;
             },
           }}
           fnLabelFormat={e => `${e.title})`}
-          querySource={useGetRegionalContents}
+          querySource={useRegionalContentsQuerySource}
           errorMessage={errors.inviteToWorkspaceContentId}
           label={s.workspaceConfigs.inviteToWorkspaceContentLabel}
           hint={s.workspaceConfigs.inviteToWorkspaceContentHint}
@@ -221,13 +221,13 @@ export const WorkspaceConfigForm = ({
           keyExtractor={(t) => t.uniqueId}
           formEffect={{
             form,
-            field: WorkspaceConfigEntity.Fields.emailOtpContentId,
+            field: WorkspaceConfigDto.Fields.emailOtpContentId,
             beforeSet(item) {
               return item.uniqueId;
             },
           }}
           fnLabelFormat={e => `${e.title})`}
-          querySource={useGetRegionalContents}
+          querySource={useRegionalContentsQuerySource}
           errorMessage={errors.emailOtpContentId}
           label={s.workspaceConfigs.emailOtpContentLabel}
           hint={s.workspaceConfigs.emailOtpContentHint}
@@ -236,13 +236,13 @@ export const WorkspaceConfigForm = ({
           keyExtractor={(t) => t.uniqueId}
           formEffect={{
             form,
-            field: WorkspaceConfigEntity.Fields.smsOtpContentId,
+            field: WorkspaceConfigDto.Fields.smsOtpContentId,
             beforeSet(item) {
               return item.uniqueId;
             },
           }}
           fnLabelFormat={e => `${e.title})`}
-          querySource={useGetRegionalContents}
+          querySource={useRegionalContentsQuerySource}
           errorMessage={errors.smsOtpContentId}
           label={s.workspaceConfigs.smsOtpContentLabel}
           hint={s.workspaceConfigs.smsOtpContentHint}

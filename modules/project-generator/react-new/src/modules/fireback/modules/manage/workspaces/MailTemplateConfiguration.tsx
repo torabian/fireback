@@ -8,8 +8,8 @@ import {
 } from "./MailTemplateEntityManager";
 import { FormEmailSenderPicker } from "./FormEmailSenderPicker";
 import { enTranslations } from "../../../translations/en";
-import { NotificationConfigEntity } from "../../../sdk/modules/abac/NotificationConfigEntity";
-import { EmailSenderEntity } from "../../../sdk/modules/abac/EmailSenderEntity";
+import { NotificationConfigDto } from "../../../sdk/abac/NotificationConfigDto";
+import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 
 type Templates =
   | "inviteToWorkspaceSender"
@@ -39,7 +39,7 @@ const mailTypes = (t: typeof enTranslations): WorkspaceEmailConfigItem[] => [
 export function MailTemplateConfiguration({
   form,
 }: {
-  form: FormikProps<Partial<NotificationConfigEntity>>;
+  form: FormikProps<Partial<NotificationConfigDto>>;
 }) {
   const t = useT();
   const useModal = useContext(ModalContext);
@@ -48,7 +48,7 @@ export function MailTemplateConfiguration({
   > | null>();
 
   const customizeTemplate = (
-    item: Partial<NotificationConfigEntity>,
+    item: Partial<NotificationConfigDto>,
     key: Templates
   ) => {
     let body = "",
@@ -100,33 +100,33 @@ export function MailTemplateConfiguration({
 
         if (key === "confirmEmailSender") {
           form.setFieldValue(
-            NotificationConfigEntity.Fields.confirmEmailContent,
+            NotificationConfigDto.Fields.confirmEmailContent,
             body
           );
           form.setFieldValue(
-            NotificationConfigEntity.Fields.confirmEmailTitle,
+            NotificationConfigDto.Fields.confirmEmailTitle,
             title
           );
         }
 
         if (key === "forgetPasswordSender") {
           form.setFieldValue(
-            NotificationConfigEntity.Fields.forgetPasswordContent,
+            NotificationConfigDto.Fields.forgetPasswordContent,
             body
           );
           form.setFieldValue(
-            NotificationConfigEntity.Fields.forgetPasswordTitle,
+            NotificationConfigDto.Fields.forgetPasswordTitle,
             title
           );
         }
 
         if (key === "inviteToWorkspaceSender") {
           form.setFieldValue(
-            NotificationConfigEntity.Fields.inviteToWorkspaceContent,
+            NotificationConfigDto.Fields.inviteToWorkspaceContent,
             body
           );
           form.setFieldValue(
-            NotificationConfigEntity.Fields.inviteToWorkspaceTitle,
+            NotificationConfigDto.Fields.inviteToWorkspaceTitle,
             title
           );
         }
@@ -152,7 +152,7 @@ export function MailTemplateConfiguration({
             <td width={400}>
               <FormEmailSenderPicker
                 value={(form.values as any)[item.key]}
-                onChange={(entity: EmailSenderEntity) => {
+                onChange={(entity: EmailSenderDto) => {
                   form.setValues({
                     ...form.values,
                     [item.key]: entity,

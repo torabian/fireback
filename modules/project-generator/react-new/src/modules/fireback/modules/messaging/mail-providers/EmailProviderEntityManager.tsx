@@ -3,32 +3,29 @@ import {
   type DtoEntity,
 } from "@/modules/fireback/components/entity-manager/CommonEntityManager";
 import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { EmailProviderEntity } from "@/modules/fireback/sdk/modules/abac/EmailProviderEntity";
-import { useGetEmailProviderByUniqueId } from "@/modules/fireback/sdk/modules/abac/useGetEmailProviderByUniqueId";
-import { usePatchEmailProvider } from "@/modules/fireback/sdk/modules/abac/usePatchEmailProvider";
-import { usePostEmailProvider } from "@/modules/fireback/sdk/modules/abac/usePostEmailProvider";
+import { useEmailProviderGetActionQuery } from "@/modules/fireback/sdk/messaging/EmailProviderGetAction";
+import { useEmailProviderCreateAction } from "@/modules/fireback/sdk/messaging/EmailProviderCreateAction";
+import { useEmailProviderUpdateAction } from "@/modules/fireback/sdk/messaging/EmailProviderUpdateAction";
+import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
 import { EmailProviderEditForm } from "./EmailProviderEditForm";
 
 export const EmailProviderEntityManager = ({
   data,
-}: DtoEntity<EmailProviderEntity>) => {
+}: DtoEntity<EmailProviderDto>) => {
   const { router, uniqueId, queryClient, t, locale } = useCommonEntityManager<
-    Partial<EmailProviderEntity>
+    Partial<EmailProviderDto>
   >({
     data,
   });
 
-  const getSingleHook = useGetEmailProviderByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useEmailProviderGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = usePostEmailProvider({
-    queryClient,
-  });
+  const postHook = useEmailProviderCreateAction({});
 
-  const patchHook = usePatchEmailProvider({
-    queryClient,
-  });
+  const patchHook = useEmailProviderUpdateAction({ params: { uniqueId } });
 
   return (
     <CommonEntityManager
@@ -37,11 +34,11 @@ export const EmailProviderEntityManager = ({
       patchHook={patchHook}
       onCancel={() => {
         router.goBackOrDefault(
-          EmailProviderEntity.Navigation.query(undefined, locale),
+          EmailProviderNavigation.query(undefined, locale),
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        EmailProviderEntity.Navigation.single(response.data?.uniqueId, locale)
+        EmailProviderNavigation.single(response.data?.uniqueId, locale)
       }
       Form={EmailProviderEditForm}
       onEditTitle={t.fb.editMailProvider}

@@ -2,14 +2,15 @@ import { useS } from "@/modules/fireback/hooks/useS";
 import { strings } from "./strings/translations";
 import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
 import { CapabilityList } from "./CapabilityList";
-import { CapabilityEntity } from "@/modules/fireback/sdk/modules/fireback/CapabilityEntity";
+import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 export const CapabilityArchiveScreen = () => {
   const s = useS(strings);
   return (
     <CommonArchiveManager
       pageTitle={s.capabilities.archiveTitle}
       newEntityHandler={({ locale, router }) => {
-        router.push(CapabilityEntity.Navigation.create());
+        router.push(CapabilityNavigation.create());
       }}
     >
       <CapabilityList />

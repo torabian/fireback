@@ -4,7 +4,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
 import { useLocale } from "../../../hooks/useLocale";
 import { UserList } from "./UserList";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const UserArchiveScreen = () => {
   const t = useT();
@@ -15,7 +15,7 @@ export const UserArchiveScreen = () => {
     <>
       <CommonArchiveManager
         newEntityHandler={() => {
-          router.push(UserEntity.Navigation.create());
+          router.push(UserNavigation.create());
         }}
         pageTitle={t.fbMenu.users}
       >

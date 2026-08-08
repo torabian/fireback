@@ -1,8 +1,9 @@
 import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
+import { usePublicJoinKeyBrowseActionQuery } from "@/modules/fireback/sdk/abac/PublicJoinKeyBrowseAction";
+import { usePublicJoinKeyAwareDeleteAction } from "@/modules/fireback/sdk/abac/PublicJoinKeyAwareDeleteAction";
 import { useS } from "@/modules/fireback/hooks/useS";
-import { PublicJoinKeyEntity } from "@/modules/fireback/sdk/modules/abac/PublicJoinKeyEntity";
-import { useGetPublicJoinKeys } from "@/modules/fireback/sdk/modules/abac/useGetPublicJoinKeys";
-import { usePostPublicJoinKeyRemove } from "@/modules/fireback/sdk/modules/abac/usePostPublicJoinKeyRemove";
+import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
 import { columns } from "./PublicJoinKeyColumns";
 import { strings } from "./strings/translations";
 
@@ -13,11 +14,11 @@ export const PublicJoinKeyList = () => {
     <>
       <CommonListManager
         columns={columns(s)}
-        queryHook={useGetPublicJoinKeys}
+        queryHook={usePublicJoinKeyBrowseActionQuery}
         uniqueIdHrefHandler={(uniqueId: string) =>
-          PublicJoinKeyEntity.Navigation.single(uniqueId)
+          PublicJoinKeyNavigation.single(uniqueId)
         }
-        deleteHook={usePostPublicJoinKeyRemove}
+        deleteHook={usePublicJoinKeyAwareDeleteAction}
       ></CommonListManager>
     </>
   );

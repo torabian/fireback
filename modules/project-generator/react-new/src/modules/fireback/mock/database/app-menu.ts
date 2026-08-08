@@ -1,6 +1,6 @@
-import { AppMenuEntity } from "../../sdk/modules/abac/AppMenuEntity";
+import { AppMenuDto } from "../../sdk/interfacetools/AppMenuDto";
 
-export const AppMenuEntities: AppMenuEntity[] = [
+export const AppMenuEntities: AppMenuDto[] = [
   {
     activeMatcher: null,
     capability: null,

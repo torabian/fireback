@@ -1,5 +1,5 @@
 import { type DatatableColumn } from "@/modules/fireback/definitions/definitions";
-import { UserEntity } from "../../../sdk/modules/abac/UserEntity";
+import { UserDto } from "../../../sdk/abac/UserDto";
 import { enTranslations } from "../../../translations/en";
 import { strings } from "./strings/translations";
 import { GenderView } from "./GenderView";
@@ -9,7 +9,7 @@ export const columns = (
   s: typeof strings,
 ): DatatableColumn[] => [
   {
-    name: UserEntity.Fields.uniqueId,
+    name: UserDto.Fields.uniqueId,
     title: t.table.uniqueId,
     width: 100,
   },
@@ -19,7 +19,7 @@ export const columns = (
     width: 200,
     sortable: true,
     filterable: true,
-    getCellValue: (e: UserEntity) => e?.firstName,
+    getCellValue: (e: UserDto) => e?.firstName,
   },
 
   {
@@ -28,14 +28,14 @@ export const columns = (
     sortable: true,
     title: t.users.lastName,
     width: 200,
-    getCellValue: (e: UserEntity) => e?.lastName,
+    getCellValue: (e: UserDto) => e?.lastName,
   },
 
   {
     name: "birthDate",
     title: s.birthDate,
     width: 140,
-    getCellValue: (e: UserEntity) => <>{e?.birthDate}</>,
+    getCellValue: (e: UserDto) => <>{e?.birthDate}</>,
     filterType: "date",
     filterable: true,
     sortable: true,
@@ -44,7 +44,7 @@ export const columns = (
     name: "gender",
     title: s.gender,
     width: 50,
-    getCellValue: (e: UserEntity) => (
+    getCellValue: (e: UserDto) => (
       <>
         <GenderView gender={e.gender} />
       </>
@@ -55,7 +55,7 @@ export const columns = (
     name: "Image",
     title: s.image,
     width: 40,
-    getCellValue: (e: UserEntity) => (
+    getCellValue: (e: UserDto) => (
       <>
         {e?.photo && (
           <img src={e?.photo} style={{ width: "20px", height: "20px" }} />
@@ -64,36 +64,36 @@ export const columns = (
     ),
   },
   {
-    name: UserEntity.Fields.primaryAddress.countryCode,
+    name: UserDto.Fields.primaryAddress.countryCode,
     title: s.countryCode,
     width: 40,
-    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.countryCode}</>,
+    getCellValue: (e: UserDto) => <>{e.primaryAddress?.countryCode}</>,
   },
   {
     filterable: true,
-    name: UserEntity.Fields.primaryAddress.addressLine1,
+    name: UserDto.Fields.primaryAddress.addressLine1,
     title: s.addressLine1,
     width: 180,
-    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine1}</>,
+    getCellValue: (e: UserDto) => <>{e.primaryAddress?.addressLine1}</>,
   },
   {
     filterable: true,
-    name: UserEntity.Fields.primaryAddress.addressLine2,
+    name: UserDto.Fields.primaryAddress.addressLine2,
     title: s.addressLine2,
     width: 180,
-    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.addressLine2}</>,
+    getCellValue: (e: UserDto) => <>{e.primaryAddress?.addressLine2}</>,
   },
   {
     filterable: true,
-    name: UserEntity.Fields.primaryAddress.city,
+    name: UserDto.Fields.primaryAddress.city,
     title: s.city,
     width: 180,
-    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.city}</>,
+    getCellValue: (e: UserDto) => <>{e.primaryAddress?.city}</>,
   },
   {
-    name: UserEntity.Fields.primaryAddress.postalCode,
+    name: UserDto.Fields.primaryAddress.postalCode,
     title: s.postalCode,
     width: 80,
-    getCellValue: (e: UserEntity) => <>{e.primaryAddress?.postalCode}</>,
+    getCellValue: (e: UserDto) => <>{e.primaryAddress?.postalCode}</>,
   },
 ];
