@@ -35,9 +35,6 @@ type FirebackApp struct {
 	// it's useful to move all api in a prefix
 	ApiPrefix string
 
-	// the language and locales of the project, it's an indication of error translations
-	SupportedLanguages []string
-
 	// modules created by fireback are injected here
 	Modules []*ModuleProvider
 
@@ -151,16 +148,6 @@ func GetAppReportsString(items []Report) ([]string, error) {
 	return result, nil
 }
 
-func ExecuteMockWriter(x *FirebackApp) {
-
-	for _, item := range x.Modules {
-		if item.MockWriterHandler != nil {
-			item.MockWriterHandler(x.SupportedLanguages)
-		}
-
-	}
-
-}
 func hasSuffix(path string, suffixes []string) bool {
 	for _, suffix := range suffixes {
 		if strings.HasSuffix(path, suffix) {

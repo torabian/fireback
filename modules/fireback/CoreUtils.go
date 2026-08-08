@@ -41,7 +41,6 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
-		GetCliMockTools(xapp),
 		GetSeeder(xapp),
 
 		// Keep these in the last
@@ -59,11 +58,7 @@ func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),
-		GetCliMockTools(xapp),
 		GetSeeder(xapp),
-
-		// Report tools is not really ever used.
-		// GetReportsTool(xapp),
 	}
 }
 
@@ -493,36 +488,6 @@ var GetMacDaemon func() string
 // modules/eventbus, which defaults to this if a project doesn't override
 // EventBusModuleConfig.MeetsAccessLevel.
 var MeetsAccessLevel func(query QueryDSL, onlyRoot bool) (bool, []string)
-
-func GetCliMockTools(xapp *FirebackApp) *cli.Command {
-	return &cli.Command{
-		Name:  "mock",
-		Usage: "Generates or export mocks based on all available content inside the database",
-		Commands: []*cli.Command{
-			{
-
-				Name:  "import",
-				Usage: "Execute the mock services, and populates the entire backend with data and instructions",
-				Action: func(ctx context.Context, c *cli.Command) error {
-
-					fmt.Println("This function would create a virtual product, by first running mock data into database, and then run some actions as specified")
-					ExecuteMockImport(xapp)
-					return nil
-				},
-			},
-			{
-				Name:  "write",
-				Usage: "Writes the instructions and module mock data into the sample json files. Clean system before, run mock-import, and then execute this to keep data safe",
-				Action: func(ctx context.Context, c *cli.Command) error {
-
-					fmt.Println("Writing all mocks into artifacts folder...")
-					ExecuteMockWriter(xapp)
-					return nil
-				},
-			},
-		},
-	}
-}
 
 var CLIServiceCommand cli.Command = cli.Command{
 

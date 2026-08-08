@@ -24,10 +24,6 @@ import (
 	"github.com/torabian/fireback/modules/storage"
 )
 
-var PRODUCT_NAMESPACENAME = "fireback"
-var PRODUCT_DESCRIPTION = "Fireback core microservice - v" + fireback.FIREBACK_VERSION
-var PRODUCT_LANGUAGES = []string{"fa", "en"}
-
 // //go:embed all:ui
 // var ui embed.FS
 
@@ -75,8 +71,7 @@ func main() {
 	modules = append(modules, abac.AbacCompleteModules()...)
 
 	var xapp = &fireback.FirebackApp{
-		Title:              PRODUCT_DESCRIPTION,
-		SupportedLanguages: PRODUCT_LANGUAGES,
+		Title: "Fireback core microservice - v" + fireback.FIREBACK_VERSION,
 		SeedersSync: func() {
 			abac.PassportMethodSyncSeeders()
 			interfacetools.AppMenuSyncSeeders()
@@ -90,7 +85,7 @@ func main() {
 
 	// This is an important setting for some kind of app which will be installed
 	// it makes it easier for fireback to find the configuration.
-	os.Setenv("PRODUCT_UNIQUE_NAME", PRODUCT_NAMESPACENAME)
+	os.Setenv("PRODUCT_UNIQUE_NAME", "fireback")
 
 	// This AppStart function is a wrapper for few things commonly can handle entire backend project
 	// startup. For mobile or desktop might other functionality be used.
