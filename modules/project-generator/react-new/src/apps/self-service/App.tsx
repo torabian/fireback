@@ -53,7 +53,7 @@ function AppBody() {
             <Route path=":locale">{selfServicePublicRoutes}</Route>
             <Route
               path="*"
-              element={<Navigate to="/en/selftservice" replace />}
+              element={<Navigate to="/en/selfservice/welcome" replace />}
             />
           </Routes>
         </Router>

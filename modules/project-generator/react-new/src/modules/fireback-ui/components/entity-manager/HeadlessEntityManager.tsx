@@ -1,5 +1,5 @@
 import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
-import { type IResponse } from "../../../sdk/core/http-tools";
+import type { GResponse } from "../../../sdk/sdk/envelopes";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 
 import { useEffect } from "react";
@@ -18,15 +18,15 @@ export interface HeadlessEntityManagerProps<T> {
   forceEdit?: boolean;
   patchHook?: any;
   beforeSubmit?: (data: T) => T;
-  onSuccessPatchOrPost?: (response: IResponse<any>) => void;
-  onFinishUriResolver?: (response: IResponse<any>, locale: string) => string;
+  onSuccessPatchOrPost?: (response: GResponse<any>) => void;
+  onFinishUriResolver?: (response: GResponse<any>, locale: string) => string;
 }
 
 export interface DtoEntity<T, V = null> {
   data?: Partial<T> | null;
   setInnerRef?: (ref: FormikProps<Partial<T>>) => void;
   enabledFields?: Partial<V>;
-  onSuccess?: (response: IResponse<T>) => void;
+  onSuccess?: (response: GResponse<T>) => void;
   showSubmit?: boolean;
 }
 
