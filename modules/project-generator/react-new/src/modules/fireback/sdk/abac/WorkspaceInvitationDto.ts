@@ -1,5 +1,5 @@
 import { MOne } from "../sdk/common/operators";
-import { WorkspaceEntity } from "./WorkspaceEntity";
+import { WorkspaceDto as WorkspaceEntity } from "./WorkspaceDto";
 import { type PartialDeep } from "../sdk/common/fetchx";
 import { withPrefix } from "../sdk/common/withPrefix";
 /**

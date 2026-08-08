@@ -1,4 +1,4 @@
-import { EmailProviderEntity } from "./EmailProviderEntity";
+import { EmailProviderDto as EmailProviderEntity } from "./EmailProviderDto";
 import { MOne } from "../sdk/common/operators";
 import { buildUrl } from "../sdk/common/buildUrl";
 import {

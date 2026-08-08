@@ -1,7 +1,7 @@
 import { MCollection, MOne } from "../sdk/common/operators";
-import { PassportEntity } from "./PassportEntity";
-import { UserEntity } from "./UserEntity";
-import { UserWorkspaceEntity } from "./UserWorkspaceEntity";
+import { PassportDto as PassportEntity } from "./PassportDto";
+import { UserDto as UserEntity } from "./UserDto";
+import { UserWorkspaceDto as UserWorkspaceEntity } from "./UserWorkspaceDto";
 import { type PartialDeep } from "../sdk/common/fetchx";
 import { withPrefix } from "../sdk/common/withPrefix";
 /**
