@@ -22,7 +22,7 @@ import {
   SortingState,
   type TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
-import { type UseQueryResult, useQueryClient } from "react-query";
+import { type UseQueryResult, useQueryClient } from "@tanstack/react-query";
 import { LineLoader } from "../line-loader/LineLoader";
 
 import classNames from "classnames";

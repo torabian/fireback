@@ -7,7 +7,7 @@ import { useContext } from "react";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { FormSelect } from "../../../components/forms/form-select/FormSelect";
 import { useRolesQuerySource } from "../../../hooks/useRolesQuerySource";
-import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
+import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
 
 export const WorkspaceTypeEditForm = ({
   form,
@@ -19,7 +19,6 @@ export const WorkspaceTypeEditForm = ({
 
   return (
     <>
-      <pre>{JSON.stringify(form.errors)}</pre>
       <FormText
         value={values.uniqueId}
         onChange={(value) =>

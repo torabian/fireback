@@ -6,9 +6,9 @@ import {
   method,
   uriMatch,
   getItemUid,
-} from "@/modules/fireback/hooks/mock-tools";
-import { type IResponse } from "@/modules/fireback/sdk/core/http-tools";
-import { WorkspaceConfigDto } from "@/modules/fireback/sdk/abac/WorkspaceConfigDto";
+} from "../../../hooks/mock-tools";
+import { type IResponse } from "../../../sdk/core/http-tools";
+import { WorkspaceConfigDto } from "../../../sdk/abac/WorkspaceConfigDto";
 export class WorkspaceConfigMockProvider {
   @uriMatch("workspace-config")
   @method("get")

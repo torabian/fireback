@@ -1,4 +1,4 @@
-import { WorkspaceInviteNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { WorkspaceInviteNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { WorkspaceInviteEntityManager } from "./WorkspaceInviteEntityManager";
 import { Route } from "react-router-dom";
 import { WorkspaceInviteSingleScreen } from "./WorkspaceInviteScreen";

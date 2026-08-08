@@ -1,13 +1,13 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { usePublicJoinKeyGetActionQuery } from "@/modules/fireback/sdk/abac/PublicJoinKeyGetAction";
-import { usePublicJoinKeyCreateAction } from "@/modules/fireback/sdk/abac/PublicJoinKeyCreateAction";
-import { usePublicJoinKeyUpdateAction } from "@/modules/fireback/sdk/abac/PublicJoinKeyUpdateAction";
-import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
-import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { usePublicJoinKeyGetActionQuery } from "../../../sdk/abac/PublicJoinKeyGetAction";
+import { usePublicJoinKeyCreateAction } from "../../../sdk/abac/PublicJoinKeyCreateAction";
+import { usePublicJoinKeyUpdateAction } from "../../../sdk/abac/PublicJoinKeyUpdateAction";
+import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { PublicJoinKeyEditForm } from "./PublicJoinKeyEditForm";
 
 export const PublicJoinKeyEntityManager = ({

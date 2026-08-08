@@ -1,5 +1,5 @@
-import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { GsmProviderDto } from "../../../sdk/messaging/GsmProviderDto";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
   {

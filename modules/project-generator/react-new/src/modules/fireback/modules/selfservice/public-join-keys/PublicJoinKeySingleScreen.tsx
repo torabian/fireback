@@ -1,11 +1,11 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
-import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
-import { usePublicJoinKeyGetActionQuery } from "@/modules/fireback/sdk/abac/PublicJoinKeyGetAction";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { useLocale } from "../../../hooks/useLocale";
+import { useRouter } from "../../../hooks/useRouter";
+import { useT } from "../../../hooks/useT";
+import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
+import { usePublicJoinKeyGetActionQuery } from "../../../sdk/abac/PublicJoinKeyGetAction";
 
 export const PublicJoinKeySingleScreen = () => {
   const router = useRouter();

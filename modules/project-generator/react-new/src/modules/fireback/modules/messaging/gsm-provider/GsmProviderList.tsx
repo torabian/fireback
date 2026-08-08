@@ -1,10 +1,10 @@
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useGsmProviderBrowseActionQuery } from "@/modules/fireback/sdk/messaging/GsmProviderBrowseAction";
-import { useGsmProviderAwareDeleteAction } from "@/modules/fireback/sdk/messaging/GsmProviderAwareDeleteAction";
+import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { useGsmProviderBrowseActionQuery } from "../../../sdk/messaging/GsmProviderBrowseAction";
+import { useGsmProviderAwareDeleteAction } from "../../../sdk/messaging/GsmProviderAwareDeleteAction";
 import { columns } from "./GsmProviderColumns";
-import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
-import { GsmProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { GsmProviderDto } from "../../../sdk/messaging/GsmProviderDto";
+import { GsmProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const GsmProviderList = () => {
   const s = useS(strings);

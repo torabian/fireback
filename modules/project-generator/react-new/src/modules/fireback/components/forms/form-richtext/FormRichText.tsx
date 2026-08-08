@@ -11,7 +11,7 @@ import {
   BaseFormElement,
   type BaseFormElementProps,
 } from "../base-form-element/BaseFormElement";
-import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
+import { BUILD_VARIABLES } from "../../../hooks/build-variables";
 
 export interface FormRichTextProps extends BaseFormElementProps {
   placeholder?: string;

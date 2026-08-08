@@ -1,12 +1,12 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "@/modules/fireback/hooks/authContext";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
-import { EmailSenderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
-import { useEmailSenderGetActionQuery } from "@/modules/fireback/sdk/messaging/EmailSenderGetAction";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { usePageTitle } from "../../../hooks/authContext";
+import { useLocale } from "../../../hooks/useLocale";
+import { useRouter } from "../../../hooks/useRouter";
+import { useT } from "../../../hooks/useT";
+import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
+import { EmailSenderNavigation } from "../../../sdk/navigation/MessagingNavigation";
+import { useEmailSenderGetActionQuery } from "../../../sdk/messaging/EmailSenderGetAction";
 import { useState } from "react";
 
 export const EmailSenderSingleScreen = () => {

@@ -1,16 +1,16 @@
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useS } from "../../../hooks/useS";
 import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
 import { strings } from "./strings/translations";
 import { userInvitationColumns } from "./UserInvitationColumns";
 
-import { ModalContext } from "@/modules/fireback/components/modal/Modal";
+import { ModalContext } from "../../../components/modal/Modal";
 import { useContext } from "react";
-import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "@/modules/fireback/sdk/abac/UserInvitationsAction";
+import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "../../../sdk/abac/UserInvitationsAction";
 import {
   useAcceptInviteAction,
   AcceptInviteActionReq,
-} from "@/modules/fireback/sdk/abac/AcceptInviteAction";
-import { useUserInvitationsActionQuery } from "@/modules/fireback/sdk/abac/UserInvitationsAction";
+} from "../../../sdk/abac/AcceptInviteAction";
+import { useUserInvitationsActionQuery } from "../../../sdk/abac/UserInvitationsAction";
 
 export const UserInvitationList = () => {
   const s = useS(strings);

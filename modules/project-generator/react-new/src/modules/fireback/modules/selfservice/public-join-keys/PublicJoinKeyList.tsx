@@ -1,9 +1,9 @@
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { usePublicJoinKeyBrowseActionQuery } from "@/modules/fireback/sdk/abac/PublicJoinKeyBrowseAction";
-import { usePublicJoinKeyAwareDeleteAction } from "@/modules/fireback/sdk/abac/PublicJoinKeyAwareDeleteAction";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
-import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { usePublicJoinKeyBrowseActionQuery } from "../../../sdk/abac/PublicJoinKeyBrowseAction";
+import { usePublicJoinKeyAwareDeleteAction } from "../../../sdk/abac/PublicJoinKeyAwareDeleteAction";
+import { useS } from "../../../hooks/useS";
+import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./PublicJoinKeyColumns";
 import { strings } from "./strings/translations";
 

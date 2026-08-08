@@ -4,7 +4,7 @@ import { useT } from "../../../hooks/useT";
 
 import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
 import { WorkspaceTypeList } from "./WorkspaceTypeList";
-import { WorkspaceTypeNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { WorkspaceTypeNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const WorkspaceTypeArchiveScreen = () => {
   const t = useT();

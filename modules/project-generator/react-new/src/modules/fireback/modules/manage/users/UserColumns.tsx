@@ -1,4 +1,4 @@
-import { type DatatableColumn } from "@/modules/fireback/definitions/definitions";
+import { type DatatableColumn } from "../../../definitions/definitions";
 import { UserDto } from "../../../sdk/abac/UserDto";
 import { enTranslations } from "../../../translations/en";
 import { strings } from "./strings/translations";

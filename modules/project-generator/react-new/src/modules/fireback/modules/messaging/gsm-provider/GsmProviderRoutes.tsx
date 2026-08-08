@@ -2,8 +2,8 @@ import { Route } from "react-router-dom";
 import { GsmProviderArchiveScreen } from "./GsmProviderArchiveScreen";
 import { GsmProviderEntityManager } from "./GsmProviderEntityManager";
 import { GsmProviderSingleScreen } from "./GsmProviderSingleScreen";
-import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
-import { GsmProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
+import { GsmProviderDto } from "../../../sdk/messaging/GsmProviderDto";
+import { GsmProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 export function useGsmProviderRoutes() {
   return (
     <>

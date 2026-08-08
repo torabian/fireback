@@ -6,8 +6,8 @@ import {
   method,
   uriMatch,
   getItemUid,
-} from "@/modules/fireback/hooks/mock-tools";
-import { type IResponse } from "@/modules/fireback/sdk/core/http-tools";
+} from "../../../hooks/mock-tools";
+import { type IResponse } from "../../../sdk/core/http-tools";
 export class CapabilityMockProvider {
   @uriMatch("capabilities")
   @method("get")

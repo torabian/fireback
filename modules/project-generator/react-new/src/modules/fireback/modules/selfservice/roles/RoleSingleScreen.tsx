@@ -1,13 +1,13 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { usePageTitle } from "@/modules/fireback/hooks/authContext";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { RoleNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { PageSection } from "../../../components/page-section/PageSection";
+import { usePageTitle } from "../../../hooks/authContext";
+import { useRouter } from "../../../hooks/useRouter";
+import { useT } from "../../../hooks/useT";
+import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { useEffect, useState } from "react";
 import { RolePermissionTree } from "./RolePermissionTree";
-import { useRoleGetActionQuery } from "@/modules/fireback/sdk/abac/RoleGetAction";
+import { useRoleGetActionQuery } from "../../../sdk/abac/RoleGetAction";
 
 export const RoleSingleScreen = () => {
   const router = useRouter();

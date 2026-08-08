@@ -1,5 +1,5 @@
-import { PassportMethodDto } from "@/modules/fireback/sdk/abac/PassportMethodDto";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { PassportMethodDto } from "../../../sdk/abac/PassportMethodDto";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
   {

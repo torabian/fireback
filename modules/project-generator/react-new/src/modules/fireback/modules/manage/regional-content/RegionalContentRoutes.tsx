@@ -2,8 +2,8 @@ import { Route } from "react-router-dom";
 import { RegionalContentArchiveScreen } from "./RegionalContentArchiveScreen";
 import { RegionalContentEntityManager } from "./RegionalContentEntityManager";
 import { RegionalContentSingleScreen } from "./RegionalContentSingleScreen";
-import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
-import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";
 export function useRegionalContentRoutes() {
   return (
     <>

@@ -1,8 +1,8 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 import { PublicJoinKeyList } from "./PublicJoinKeyList";
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
-import { PublicJoinKeyNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
+import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyNavigation } from "../../../sdk/navigation/AbacNavigation";
 
 export const PublicJoinKeyArchiveScreen = () => {
   const t = useT();

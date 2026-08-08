@@ -1,7 +1,7 @@
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
+import { FormText } from "../../../components/forms/form-text/FormText";
+import { type EntityFormProps } from "../../../definitions/definitions";
+import { useT } from "../../../hooks/useT";
+import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
 
 export const EmailSenderEditForm = ({
   form,

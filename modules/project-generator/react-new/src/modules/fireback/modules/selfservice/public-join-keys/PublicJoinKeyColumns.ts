@@ -1,4 +1,4 @@
-import { PublicJoinKeyDto } from "@/modules/fireback/sdk/abac/PublicJoinKeyDto";
+import { PublicJoinKeyDto } from "../../../sdk/abac/PublicJoinKeyDto";
 import { strings } from "./strings/translations";
 
 export const columns = (s: typeof strings) => [

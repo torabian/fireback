@@ -2,7 +2,7 @@ import { useLocale } from "../hooks/useLocale";
 import { useRouter } from "../hooks/useRouter";
 import { type FormikProps } from "formik";
 import { useEffect, useRef } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useT } from "./useT";
 
 interface DtoEntity<T> {

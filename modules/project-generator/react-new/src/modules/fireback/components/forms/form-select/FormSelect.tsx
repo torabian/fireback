@@ -1,11 +1,11 @@
-import { type JsonQuery } from "@/modules/fireback/definitions/definitions";
-import { type IResponseList } from "@/modules/fireback/sdk/core/http-tools";
-import { type UseRemoteQuery } from "@/modules/fireback/sdk/core/react-tools";
+import { type JsonQuery } from "../../../definitions/definitions";
+import { type IResponseList } from "../../../sdk/core/http-tools";
+import { type UseRemoteQuery } from "../../../sdk/core/react-tools";
 import classNames from "classnames";
 import { type FormikProps } from "formik";
 import { get, isArray, isObject, set } from "lodash";
 import { useState } from "react";
-import { useQueryClient, type UseQueryResult } from "react-query";
+import { useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import Select from "react-select/async";
 import { useT } from "../../../hooks/useT";
 import { useS } from "../../../hooks/useS";

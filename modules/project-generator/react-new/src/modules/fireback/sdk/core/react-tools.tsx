@@ -15,7 +15,7 @@ import React, {
   useRef,
 } from "react";
 import { Upload } from "tus-js-client";
-import type { QueryClient, UseQueryOptions } from "react-query";
+import type { QueryClient, UseQueryOptions } from "@tanstack/react-query";
 
 /**
  * Removes the workspace id which is default present everywhere

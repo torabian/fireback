@@ -1,15 +1,15 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../../components/entity-manager/CommonEntityManager";
 import { RegionalContentForm } from "./RegionalContentEditForm";
-import { useRegionalContentGetActionQuery } from "@/modules/fireback/sdk/abac/RegionalContentGetAction";
-import { useRegionalContentCreateAction } from "@/modules/fireback/sdk/abac/RegionalContentCreateAction";
-import { useRegionalContentUpdateAction } from "@/modules/fireback/sdk/abac/RegionalContentUpdateAction";
-import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
-import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useRegionalContentGetActionQuery } from "../../../sdk/abac/RegionalContentGetAction";
+import { useRegionalContentCreateAction } from "../../../sdk/abac/RegionalContentCreateAction";
+import { useRegionalContentUpdateAction } from "../../../sdk/abac/RegionalContentUpdateAction";
+import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const RegionalContentEntityManager = ({
   data,

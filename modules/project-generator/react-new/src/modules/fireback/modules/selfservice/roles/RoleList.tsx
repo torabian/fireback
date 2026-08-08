@@ -1,8 +1,8 @@
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useRoleAwareDeleteAction } from "@/modules/fireback/sdk/abac/RoleAwareDeleteAction";
-import { useRoleBrowseActionQuery } from "@/modules/fireback/sdk/abac/RoleBrowseAction";
-import { RoleNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { useT } from "../../../hooks/useT";
+import { useRoleAwareDeleteAction } from "../../../sdk/abac/RoleAwareDeleteAction";
+import { useRoleBrowseActionQuery } from "../../../sdk/abac/RoleBrowseAction";
+import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./RoleColumns";
 
 export const RoleList = () => {

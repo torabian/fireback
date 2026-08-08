@@ -1,7 +1,7 @@
 import { type AppConfig } from "../../hooks/appConfigTools";
 
 import React, { useContext, useRef } from "react";
-import { QueryClient } from "react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { fetchXMock, mockExecFn } from "../../hooks/mock-tools";
 import {
   RemoteQueryProvider as FirebackQueryProvider,

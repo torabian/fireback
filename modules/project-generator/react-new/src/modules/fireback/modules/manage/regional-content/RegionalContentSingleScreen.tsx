@@ -1,10 +1,10 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useRegionalContentGetActionQuery } from "@/modules/fireback/sdk/abac/RegionalContentGetAction";
-import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
-import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useRegionalContentGetActionQuery } from "../../../sdk/abac/RegionalContentGetAction";
+import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const RegionalContentSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});

@@ -1,7 +1,7 @@
 import { type AppConfig } from "@/modules/fireback/hooks/appConfigTools";
 
 import React from "react";
-import { QueryClient } from "react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 // Import the Remote Query Provider from your new generated SDK
 // import { RemoteQueryProvider as TestQueryProviders } from "../../modules/sdk/projectname/core/react-tools";

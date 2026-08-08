@@ -1,14 +1,14 @@
 import { strings } from "./strings/translations";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useLocale } from "@/modules/fireback/hooks/useLocale";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { useWorkspaceInviteGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceInviteGetAction";
-import { WorkspaceInviteDto } from "@/modules/fireback/sdk/abac/WorkspaceInviteDto";
-import { WorkspaceInviteNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
-import { usePageTitle } from "@/modules/fireback/hooks/authContext";
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useRouter } from "@/modules/fireback/hooks/useRouter";
+import { useT } from "../../../hooks/useT";
+import { useLocale } from "../../../hooks/useLocale";
+import { useS } from "../../../hooks/useS";
+import { useWorkspaceInviteGetActionQuery } from "../../../sdk/abac/WorkspaceInviteGetAction";
+import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
+import { WorkspaceInviteNavigation } from "../../../sdk/navigation/AbacNavigation";
+import { usePageTitle } from "../../../hooks/authContext";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { useRouter } from "../../../hooks/useRouter";
 
 export const WorkspaceInviteSingleScreen = () => {
   const router = useRouter();

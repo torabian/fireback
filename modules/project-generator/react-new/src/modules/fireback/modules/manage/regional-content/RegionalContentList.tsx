@@ -1,9 +1,9 @@
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useRegionalContentBrowseActionQuery } from "@/modules/fireback/sdk/abac/RegionalContentBrowseAction";
-import { useRegionalContentAwareDeleteAction } from "@/modules/fireback/sdk/abac/RegionalContentAwareDeleteAction";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
-import { RegionalContentNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { useRegionalContentBrowseActionQuery } from "../../../sdk/abac/RegionalContentBrowseAction";
+import { useRegionalContentAwareDeleteAction } from "../../../sdk/abac/RegionalContentAwareDeleteAction";
+import { useS } from "../../../hooks/useS";
+import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
+import { RegionalContentNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./RegionalContentColumns";
 import { strings } from "./strings/translations";
 export const RegionalContentList = () => {

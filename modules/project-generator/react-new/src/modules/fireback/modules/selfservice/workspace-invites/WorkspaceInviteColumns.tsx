@@ -1,6 +1,6 @@
-import { type DatatableColumn } from "@/modules/fireback/definitions/definitions";
-import { WorkspaceInviteDto } from "@/modules/fireback/sdk/abac/WorkspaceInviteDto";
-import { enTranslations } from "@/modules/fireback/translations/en";
+import { type DatatableColumn } from "../../../definitions/definitions";
+import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
+import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations): DatatableColumn[] => [
   {

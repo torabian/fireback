@@ -1,8 +1,8 @@
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
+import { FormText } from "../../../components/forms/form-text/FormText";
+import { type EntityFormProps } from "../../../definitions/definitions";
+import { RoleDto } from "../../../sdk/abac/RoleDto";
 import { RolePermissionTree } from "./RolePermissionTree";
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 
 /**
  * Server does not return capabilities list id, because it's used only on post/patch

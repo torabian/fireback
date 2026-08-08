@@ -1,12 +1,12 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/abac/CapabilityGetAction";
-import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
-import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useS } from "../../../hooks/useS";
+import { useCapabilityGetActionQuery } from "../../../sdk/abac/CapabilityGetAction";
+import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
-import { usePageTitle } from "@/modules/fireback/hooks/authContext";
+import { usePageTitle } from "../../../hooks/authContext";
 
 export const CapabilitySingleScreen = () => {
   const { uniqueId } = useCommonEntityManager<Partial<any>>({});

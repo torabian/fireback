@@ -8,7 +8,7 @@ import {
   type DataGridHandle,
   SelectColumn,
 } from "react-data-grid";
-import { type UseQueryResult } from "react-query";
+import { type UseQueryResult } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { type DatatableColumn } from "../../definitions/definitions";
 import { type Udf } from "../../hooks/useDatatableFiltering";

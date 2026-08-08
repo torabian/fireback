@@ -1,4 +1,4 @@
-import { type QueryObserverResult, type UseQueryResult } from "react-query";
+import { type QueryObserverResult, type UseQueryResult } from "@tanstack/react-query";
 import { type IResponseList } from "../sdk/core/http-tools";
 import { type UseRemoteQuery } from "../sdk/core/react-tools";
 

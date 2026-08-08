@@ -1,5 +1,5 @@
-import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
   {

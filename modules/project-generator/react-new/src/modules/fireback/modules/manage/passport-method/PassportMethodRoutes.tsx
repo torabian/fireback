@@ -2,7 +2,7 @@ import { Route } from "react-router-dom";
 import { PassportMethodArchiveScreen } from "./PassportMethodArchiveScreen";
 import { PassportMethodEntityManager } from "./PassportMethodEntityManager";
 import { PassportMethodSingleScreen } from "./PassportMethodSingleScreen";
-import { PassportMethodNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { PassportMethodNavigation } from "../../../sdk/navigation/AbacNavigation";
 export function usePassportMethodRoutes() {
   return (
     <>

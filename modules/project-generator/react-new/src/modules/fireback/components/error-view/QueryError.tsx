@@ -3,7 +3,7 @@ import { useS } from "../../hooks/useS";
 import { enTranslations } from "../../translations/en";
 import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { useContext } from "react";
-import type { UseMutationResult, UseQueryResult } from "react-query";
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { FormButton } from "../forms/form-button/FormButton";
 import { strings } from "../strings/translations";
 

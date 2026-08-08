@@ -1,9 +1,9 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { usePassportMethodGetActionQuery } from "@/modules/fireback/sdk/abac/PassportMethodGetAction";
-import { PassportMethodNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useS } from "../../../hooks/useS";
+import { usePassportMethodGetActionQuery } from "../../../sdk/abac/PassportMethodGetAction";
+import { PassportMethodNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
 
 export const PassportMethodSingleScreen = () => {

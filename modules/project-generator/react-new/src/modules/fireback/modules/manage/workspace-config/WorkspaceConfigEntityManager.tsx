@@ -1,13 +1,13 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { useWorkspaceConfigDistinctGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctGetAction";
-import { useWorkspaceConfigDistinctUpdateAction } from "@/modules/fireback/sdk/abac/WorkspaceConfigDistinctUpdateAction";
-import { WorkspaceConfigDto } from "@/modules/fireback/sdk/abac/WorkspaceConfigDto";
-import { WorkspaceConfigNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useS } from "../../../hooks/useS";
+import { useWorkspaceConfigDistinctGetActionQuery } from "../../../sdk/abac/WorkspaceConfigDistinctGetAction";
+import { useWorkspaceConfigDistinctUpdateAction } from "../../../sdk/abac/WorkspaceConfigDistinctUpdateAction";
+import { WorkspaceConfigDto } from "../../../sdk/abac/WorkspaceConfigDto";
+import { WorkspaceConfigNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { WorkspaceConfigForm } from "./WorkspaceConfigEditForm";
 import { strings } from "./strings/translations";
 

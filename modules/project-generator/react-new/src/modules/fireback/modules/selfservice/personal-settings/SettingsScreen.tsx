@@ -7,7 +7,7 @@ import { InterfaceSettings } from "./InterfaceSettings";
 import { NotificationSettings } from "./NotificationSettings";
 import { RichTextEditorSettings } from "./RichTextEditorSettings";
 import { ThemeSettings } from "./ThemeSettings";
-import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
+import { BUILD_VARIABLES } from "../../../hooks/build-variables";
 
 export function SettingsScreen({}: {}) {
   const t = useT();

@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { type BaseFormElementProps } from "../base-form-element/BaseFormElement";
-import { type UseMutationResult } from "react-query";
+import { type UseMutationResult } from "@tanstack/react-query";
 
 export interface FormButtonProps extends BaseFormElementProps {
   placeholder?: string;

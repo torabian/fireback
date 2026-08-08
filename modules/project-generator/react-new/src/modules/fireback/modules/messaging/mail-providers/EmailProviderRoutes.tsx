@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
-import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
-import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
+import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 import { EmailProviderEntityManager } from "./EmailProviderEntityManager";
 import { EmailProviderSingleScreen } from "./EmailProviderSingleScreen";
 import { EmailProviderArchiveScreen } from "./EmailProviderArchiveScreen";

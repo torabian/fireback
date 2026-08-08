@@ -1,15 +1,15 @@
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
+} from "../../../components/entity-manager/CommonEntityManager";
 import { GsmProviderForm } from "./GsmProviderEditForm";
-import { useGsmProviderGetActionQuery } from "@/modules/fireback/sdk/messaging/GsmProviderGetAction";
-import { useGsmProviderCreateAction } from "@/modules/fireback/sdk/messaging/GsmProviderCreateAction";
-import { useGsmProviderUpdateAction } from "@/modules/fireback/sdk/messaging/GsmProviderUpdateAction";
-import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
-import { GsmProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useGsmProviderGetActionQuery } from "../../../sdk/messaging/GsmProviderGetAction";
+import { useGsmProviderCreateAction } from "../../../sdk/messaging/GsmProviderCreateAction";
+import { useGsmProviderUpdateAction } from "../../../sdk/messaging/GsmProviderUpdateAction";
+import { GsmProviderDto } from "../../../sdk/messaging/GsmProviderDto";
+import { GsmProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const GsmProviderEntityManager = ({ data }: DtoEntity<GsmProviderDto>) => {
   const s = useS(strings);

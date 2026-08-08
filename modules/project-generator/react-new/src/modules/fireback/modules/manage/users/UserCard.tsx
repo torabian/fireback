@@ -1,5 +1,5 @@
-import { type CardComponentType } from "@/modules/fireback/components/entity-manager/FlatListMode";
-import { UserDto } from "@/modules/fireback/sdk/abac/UserDto";
+import { type CardComponentType } from "../../../components/entity-manager/FlatListMode";
+import { UserDto } from "../../../sdk/abac/UserDto";
 
 export const UserCard: CardComponentType<UserDto> = ({ content }) => {
   return (

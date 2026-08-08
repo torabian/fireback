@@ -4,7 +4,7 @@ import {
   type TableColumnWidthInfo,
 } from "@devexpress/dx-react-grid";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { type QueryArchiveColumn } from "../../definitions/common";
 import { type Filter } from "../../definitions/definitions";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";

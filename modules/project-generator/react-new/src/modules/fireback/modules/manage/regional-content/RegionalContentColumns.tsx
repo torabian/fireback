@@ -1,5 +1,5 @@
-import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const columns = (t: typeof strings) => [
   {

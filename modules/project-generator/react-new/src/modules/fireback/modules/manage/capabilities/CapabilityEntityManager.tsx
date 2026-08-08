@@ -1,14 +1,14 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { useCapabilityCreateAction } from "@/modules/fireback/sdk/abac/CapabilityCreateAction";
-import { useCapabilityGetActionQuery } from "@/modules/fireback/sdk/abac/CapabilityGetAction";
-import { useCapabilityUpdateAction } from "@/modules/fireback/sdk/abac/CapabilityUpdateAction";
-import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
-import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useS } from "../../../hooks/useS";
+import { useCapabilityCreateAction } from "../../../sdk/abac/CapabilityCreateAction";
+import { useCapabilityGetActionQuery } from "../../../sdk/abac/CapabilityGetAction";
+import { useCapabilityUpdateAction } from "../../../sdk/abac/CapabilityUpdateAction";
+import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { CapabilityForm } from "./CapabilityEditForm";
 import { strings } from "./strings/translations";
 export const CapabilityEntityManager = ({

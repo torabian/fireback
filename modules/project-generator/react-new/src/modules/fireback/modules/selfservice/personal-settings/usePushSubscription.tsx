@@ -1,4 +1,4 @@
-import { useWebPushConfigCreateAction } from "@/modules/fireback/sdk/messaging/WebPushConfigCreateAction";
+import { useWebPushConfigCreateAction } from "../../../sdk/messaging/WebPushConfigCreateAction";
 import { useEffect, useState } from "react";
 import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";

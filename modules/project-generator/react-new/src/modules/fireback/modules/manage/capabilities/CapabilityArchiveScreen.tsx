@@ -1,9 +1,9 @@
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
+import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
 import { CapabilityList } from "./CapabilityList";
-import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
-import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "../../../sdk/navigation/AbacNavigation";
 export const CapabilityArchiveScreen = () => {
   const s = useS(strings);
   return (

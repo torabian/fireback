@@ -9,11 +9,12 @@ import "../../../..//modules/fireback/styles/apple-family/styles.scss";
 import { UIStateProvider } from "../../hooks/uiStateContext";
 
 import {
+  QueryClient,
   QueryClient as QueryClient2,
+  QueryClientProvider,
   QueryClientProvider as QueryClientProvider2,
 } from "@tanstack/react-query";
 import React, { useContext, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 
 import { ErrorBoundary } from "react-error-boundary";
 import { Fallback } from "../../components/fallback/Fallback";

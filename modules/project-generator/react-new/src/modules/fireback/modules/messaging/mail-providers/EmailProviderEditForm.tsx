@@ -1,11 +1,11 @@
-import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
+import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
+import { FormSelect } from "../../../components/forms/form-select/FormSelect";
+import { FormText } from "../../../components/forms/form-text/FormText";
+import { type EntityFormProps } from "../../../definitions/definitions";
+import { createQuerySource } from "../../../hooks/useAsQuery";
+import { useS } from "../../../hooks/useS";
+import { useT } from "../../../hooks/useT";
+import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
 import { strings } from "./strings/translations";
 
 const placeholder = `

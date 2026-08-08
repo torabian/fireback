@@ -1,4 +1,4 @@
-import { WorkspaceNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { WorkspaceNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { WorkspaceEntityManager } from "./WorkspaceEntityManager";
 import { Route } from "react-router-dom";
 import { WorkspaceArchiveScreen } from "./WorkspaceArchiveScreen";

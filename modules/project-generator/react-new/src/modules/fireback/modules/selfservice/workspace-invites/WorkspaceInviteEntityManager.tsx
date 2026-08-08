@@ -1,13 +1,13 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useWorkspaceInviteGetActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceInviteGetAction";
-import { useWorkspaceInviteCreateAction } from "@/modules/fireback/sdk/abac/WorkspaceInviteCreateAction";
-import { useWorkspaceInviteUpdateAction } from "@/modules/fireback/sdk/abac/WorkspaceInviteUpdateAction";
-import { WorkspaceInviteDto } from "@/modules/fireback/sdk/abac/WorkspaceInviteDto";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useT } from "../../../hooks/useT";
+import { useWorkspaceInviteGetActionQuery } from "../../../sdk/abac/WorkspaceInviteGetAction";
+import { useWorkspaceInviteCreateAction } from "../../../sdk/abac/WorkspaceInviteCreateAction";
+import { useWorkspaceInviteUpdateAction } from "../../../sdk/abac/WorkspaceInviteUpdateAction";
+import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
 import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
 
 export const WorkspaceInviteEntityManager = ({

@@ -1,14 +1,14 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { usePassportMethodCreateAction } from "@/modules/fireback/sdk/abac/PassportMethodCreateAction";
-import { usePassportMethodGetActionQuery } from "@/modules/fireback/sdk/abac/PassportMethodGetAction";
-import { usePassportMethodUpdateAction } from "@/modules/fireback/sdk/abac/PassportMethodUpdateAction";
-import { PassportMethodDto } from "@/modules/fireback/sdk/abac/PassportMethodDto";
-import { PassportMethodNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useS } from "../../../hooks/useS";
+import { usePassportMethodCreateAction } from "../../../sdk/abac/PassportMethodCreateAction";
+import { usePassportMethodGetActionQuery } from "../../../sdk/abac/PassportMethodGetAction";
+import { usePassportMethodUpdateAction } from "../../../sdk/abac/PassportMethodUpdateAction";
+import { PassportMethodDto } from "../../../sdk/abac/PassportMethodDto";
+import { PassportMethodNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { PassportMethodForm } from "./PassportMethodEditForm";
 import { strings } from "./strings/translations";
 

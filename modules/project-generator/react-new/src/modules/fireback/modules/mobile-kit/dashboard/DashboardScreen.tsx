@@ -1,4 +1,4 @@
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 
 export const DashboardScreen = () => {

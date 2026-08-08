@@ -2,8 +2,8 @@ import { Route } from "react-router-dom";
 import { CapabilityArchiveScreen } from "./CapabilityArchiveScreen";
 import { CapabilityEntityManager } from "./CapabilityEntityManager";
 import { CapabilitySingleScreen } from "./CapabilitySingleScreen";
-import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
-import { CapabilityNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
+import { CapabilityNavigation } from "../../../sdk/navigation/AbacNavigation";
 export function useCapabilityRoutes() {
   return (
     <>

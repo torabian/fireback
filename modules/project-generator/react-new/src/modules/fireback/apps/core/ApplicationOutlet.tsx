@@ -4,7 +4,7 @@ import { ModalManager, ModalProvider } from "../../components/modal/Modal";
 import { OverlayProvider } from "../../components/overlay/OverlayProvider";
 import { ReactiveSearchProvider } from "../../components/reactive-search/ReactiveSearchContext";
 import { AppConfigProvider } from "../../hooks/appConfigTools";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 /**

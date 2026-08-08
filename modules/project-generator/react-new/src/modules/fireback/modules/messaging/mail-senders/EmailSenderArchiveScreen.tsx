@@ -1,8 +1,8 @@
-import { useT } from "@/modules/fireback/hooks/useT";
+import { useT } from "../../../hooks/useT";
 import { EmailSenderList } from "./EmailSenderList";
-import { CommonArchiveManager } from "@/modules/fireback/components/entity-manager/CommonArchiveManager";
-import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
-import { EmailSenderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
+import { CommonArchiveManager } from "../../../components/entity-manager/CommonArchiveManager";
+import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
+import { EmailSenderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 
 export const EmailSenderArchiveScreen = () => {
   const t = useT();

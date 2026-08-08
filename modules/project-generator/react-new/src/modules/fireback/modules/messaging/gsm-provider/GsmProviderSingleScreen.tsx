@@ -1,10 +1,10 @@
-import { CommonSingleManager } from "@/modules/fireback/components/entity-manager/CommonSingleManager";
-import { GeneralEntityView } from "@/modules/fireback/components/general-entity-view/GeneralEntityView";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useGsmProviderGetActionQuery } from "@/modules/fireback/sdk/messaging/GsmProviderGetAction";
-import { GsmProviderDto } from "@/modules/fireback/sdk/messaging/GsmProviderDto";
-import { GsmProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { CommonSingleManager } from "../../../components/entity-manager/CommonSingleManager";
+import { GeneralEntityView } from "../../../components/general-entity-view/GeneralEntityView";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useGsmProviderGetActionQuery } from "../../../sdk/messaging/GsmProviderGetAction";
+import { GsmProviderDto } from "../../../sdk/messaging/GsmProviderDto";
+import { GsmProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const GsmProviderSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});

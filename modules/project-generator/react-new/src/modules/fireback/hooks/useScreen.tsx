@@ -1,7 +1,7 @@
 import { useRouter } from "./useRouter";
 import { useT } from "./useT";
 import { useLocale } from "./useLocale";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePageTitle } from "../components/page-title/PageTitle";
 import { enTranslations } from "../translations/en";
 

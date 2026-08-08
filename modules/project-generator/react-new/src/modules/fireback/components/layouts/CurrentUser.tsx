@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";

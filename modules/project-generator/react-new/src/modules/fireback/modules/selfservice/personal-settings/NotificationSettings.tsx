@@ -1,4 +1,4 @@
-import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
+import { ErrorsView } from "../../../components/error-view/ErrorView";
 import { PageSection } from "../../../components/page-section/PageSection";
 import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";

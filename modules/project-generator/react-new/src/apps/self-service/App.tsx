@@ -10,7 +10,7 @@ import "../../modules/fireback/styles/apple-family/styles.scss";
 
 import { WithFireback } from "@/modules/fireback/apps/core/WithFireback";
 
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,
   HashRouter,

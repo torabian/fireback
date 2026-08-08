@@ -1,14 +1,14 @@
-import { FormCheckbox } from "@/modules/fireback/components/forms/form-switch/FormSwitch";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { useS } from "@/modules/fireback/hooks/useS";
-import { WorkspaceConfigDto } from "@/modules/fireback/sdk/abac/WorkspaceConfigDto";
+import { FormCheckbox } from "../../../components/forms/form-switch/FormSwitch";
+import { FormText } from "../../../components/forms/form-text/FormText";
+import { type EntityFormProps } from "../../../definitions/definitions";
+import { useS } from "../../../hooks/useS";
+import { WorkspaceConfigDto } from "../../../sdk/abac/WorkspaceConfigDto";
 import { strings } from "./strings/translations";
-import { PageSection } from "@/modules/fireback/components/page-section/PageSection";
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { useEmailProvidersQuerySource } from "@/modules/fireback/hooks/useEmailProvidersQuerySource";
-import { useGsmProvidersQuerySource } from "@/modules/fireback/hooks/useGsmProvidersQuerySource";
-import { useRegionalContentsQuerySource } from "@/modules/fireback/hooks/useRegionalContentsQuerySource";
+import { PageSection } from "../../../components/page-section/PageSection";
+import { FormSelect } from "../../../components/forms/form-select/FormSelect";
+import { useEmailProvidersQuerySource } from "../../../hooks/useEmailProvidersQuerySource";
+import { useGsmProvidersQuerySource } from "../../../hooks/useGsmProvidersQuerySource";
+import { useRegionalContentsQuerySource } from "../../../hooks/useRegionalContentsQuerySource";
 
 export const WorkspaceConfigForm = ({
   form,

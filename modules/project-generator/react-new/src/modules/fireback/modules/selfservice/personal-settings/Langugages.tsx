@@ -1,4 +1,4 @@
-import { BUILD_VARIABLES } from "@/modules/fireback/hooks/build-variables";
+import { BUILD_VARIABLES } from "../../../hooks/build-variables";
 import { type KeyValue } from "../../../definitions/definitions";
 import { enTranslations } from "../../../translations/en";
 import { strings } from "./strings/translations";

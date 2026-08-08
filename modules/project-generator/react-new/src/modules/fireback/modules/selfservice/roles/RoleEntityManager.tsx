@@ -1,14 +1,14 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useRoleCreateAction } from "@/modules/fireback/sdk/abac/RoleCreateAction";
-import { useRoleGetActionQuery } from "@/modules/fireback/sdk/abac/RoleGetAction";
-import { useRoleUpdateAction } from "@/modules/fireback/sdk/abac/RoleUpdateAction";
-import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
-import { RoleNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useT } from "../../../hooks/useT";
+import { useRoleCreateAction } from "../../../sdk/abac/RoleCreateAction";
+import { useRoleGetActionQuery } from "../../../sdk/abac/RoleGetAction";
+import { useRoleUpdateAction } from "../../../sdk/abac/RoleUpdateAction";
+import { RoleDto } from "../../../sdk/abac/RoleDto";
+import { RoleNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { RoleEditForm } from "./RoleEditForm";
 
 export const RoleEntityManager = ({ data }: DtoEntity<RoleDto>) => {

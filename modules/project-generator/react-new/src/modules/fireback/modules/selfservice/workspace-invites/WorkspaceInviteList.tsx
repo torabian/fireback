@@ -1,8 +1,8 @@
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { useWorkspaceInviteBrowseActionQuery } from "@/modules/fireback/sdk/abac/WorkspaceInviteBrowseAction";
-import { useWorkspaceInviteAwareDeleteAction } from "@/modules/fireback/sdk/abac/WorkspaceInviteAwareDeleteAction";
-import { useT } from "@/modules/fireback/hooks/useT";
-import { WorkspaceInviteNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { useWorkspaceInviteBrowseActionQuery } from "../../../sdk/abac/WorkspaceInviteBrowseAction";
+import { useWorkspaceInviteAwareDeleteAction } from "../../../sdk/abac/WorkspaceInviteAwareDeleteAction";
+import { useT } from "../../../hooks/useT";
+import { WorkspaceInviteNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { columns } from "./WorkspaceInviteColumns";
 
 export const WorkspaceInviteList = () => {

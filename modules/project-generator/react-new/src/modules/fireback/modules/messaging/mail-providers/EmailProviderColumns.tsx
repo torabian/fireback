@@ -1,4 +1,4 @@
-import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
+import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
 import { enTranslations } from "../../../translations/en";
 import { strings } from "./strings/translations";
 

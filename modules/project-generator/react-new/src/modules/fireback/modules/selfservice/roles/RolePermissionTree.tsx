@@ -1,9 +1,9 @@
-import { Checkbox } from "@/modules/fireback/components/checkbox/Checkbox";
-import { ErrorsView } from "@/modules/fireback/components/error-view/ErrorView";
-import { type IndeterminateCheck } from "@/modules/fireback/definitions/definitions";
-import { type CapabilityChild } from "@/modules/fireback/sdk/core/react-tools";
-import { useCapabilitiesTreeActionQuery } from "@/modules/fireback/sdk/abac/CapabilitiesTreeAction";
-import { MCollection } from "@/modules/fireback/sdk/sdk/common/operators";
+import { Checkbox } from "../../../components/checkbox/Checkbox";
+import { ErrorsView } from "../../../components/error-view/ErrorView";
+import { type IndeterminateCheck } from "../../../definitions/definitions";
+import { type CapabilityChild } from "../../../sdk/core/react-tools";
+import { useCapabilitiesTreeActionQuery } from "../../../sdk/abac/CapabilitiesTreeAction";
+import { MCollection } from "../../../sdk/sdk/common/operators";
 
 type NodeChangeFn = (node: string, value: IndeterminateCheck) => void;
 

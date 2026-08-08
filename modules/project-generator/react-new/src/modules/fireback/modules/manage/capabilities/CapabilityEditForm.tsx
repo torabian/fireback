@@ -1,10 +1,10 @@
-import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
+import { type EntityFormProps } from "../../../definitions/definitions";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
-import { CapabilityDto } from "@/modules/fireback/sdk/abac/CapabilityDto";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { CapabilityDto } from "../../../sdk/abac/CapabilityDto";
+import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormSelect } from "../../../components/forms/form-select/FormSelect";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
 export const CapabilityForm = ({
   form,

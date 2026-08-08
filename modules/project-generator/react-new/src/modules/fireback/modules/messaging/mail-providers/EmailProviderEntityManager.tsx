@@ -1,13 +1,13 @@
 import {
   CommonEntityManager,
   type DtoEntity,
-} from "@/modules/fireback/components/entity-manager/CommonEntityManager";
-import { useCommonEntityManager } from "@/modules/fireback/hooks/useCommonEntityManager";
-import { useEmailProviderGetActionQuery } from "@/modules/fireback/sdk/messaging/EmailProviderGetAction";
-import { useEmailProviderCreateAction } from "@/modules/fireback/sdk/messaging/EmailProviderCreateAction";
-import { useEmailProviderUpdateAction } from "@/modules/fireback/sdk/messaging/EmailProviderUpdateAction";
-import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
-import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
+} from "../../../components/entity-manager/CommonEntityManager";
+import { useCommonEntityManager } from "../../../hooks/useCommonEntityManager";
+import { useEmailProviderGetActionQuery } from "../../../sdk/messaging/EmailProviderGetAction";
+import { useEmailProviderCreateAction } from "../../../sdk/messaging/EmailProviderCreateAction";
+import { useEmailProviderUpdateAction } from "../../../sdk/messaging/EmailProviderUpdateAction";
+import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 import { EmailProviderEditForm } from "./EmailProviderEditForm";
 
 export const EmailProviderEntityManager = ({

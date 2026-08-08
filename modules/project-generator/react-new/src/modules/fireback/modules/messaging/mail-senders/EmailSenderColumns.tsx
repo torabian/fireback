@@ -1,5 +1,5 @@
-import { EmailSenderDto } from "@/modules/fireback/sdk/messaging/EmailSenderDto";
-import { enTranslations } from "@/modules/fireback/translations/en";
+import { EmailSenderDto } from "../../../sdk/messaging/EmailSenderDto";
+import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations) => [
   {

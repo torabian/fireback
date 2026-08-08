@@ -1,11 +1,11 @@
-import { useT } from "@/modules/fireback/hooks/useT";
-import { useEmailProviderBrowseActionQuery } from "@/modules/fireback/sdk/messaging/EmailProviderBrowseAction";
-import { useEmailProviderAwareDeleteAction } from "@/modules/fireback/sdk/messaging/EmailProviderAwareDeleteAction";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { useT } from "../../../hooks/useT";
+import { useEmailProviderBrowseActionQuery } from "../../../sdk/messaging/EmailProviderBrowseAction";
+import { useEmailProviderAwareDeleteAction } from "../../../sdk/messaging/EmailProviderAwareDeleteAction";
+import { useS } from "../../../hooks/useS";
 import { columns } from "./EmailProviderColumns";
-import { CommonListManager } from "@/modules/fireback/components/entity-manager/CommonListManager";
-import { EmailProviderDto } from "@/modules/fireback/sdk/messaging/EmailProviderDto";
-import { EmailProviderNavigation } from "@/modules/fireback/sdk/navigation/MessagingNavigation";
+import { CommonListManager } from "../../../components/entity-manager/CommonListManager";
+import { EmailProviderDto } from "../../../sdk/messaging/EmailProviderDto";
+import { EmailProviderNavigation } from "../../../sdk/navigation/MessagingNavigation";
 import { strings } from "./strings/translations";
 
 export const EmailProviderList = () => {

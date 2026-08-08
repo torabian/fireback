@@ -1,4 +1,4 @@
-import { QueryClient } from "react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { PanelGroup } from "react-resizable-panels";
 import { BrowserRouter, HashRouter, MemoryRouter } from "react-router-dom";
 import { TabbarMenu } from "../../components/tabbar-menu/TabbarMenu";

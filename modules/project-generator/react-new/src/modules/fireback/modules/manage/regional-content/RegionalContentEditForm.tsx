@@ -1,13 +1,13 @@
-import { type EntityFormProps } from "@/modules/fireback/definitions/definitions";
-import { RemoteQueryContext } from "@/modules/fireback/sdk/core/react-tools";
+import { type EntityFormProps } from "../../../definitions/definitions";
+import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { useContext } from "react";
-import { RegionalContentDto } from "@/modules/fireback/sdk/abac/RegionalContentDto";
-import { FormText } from "@/modules/fireback/components/forms/form-text/FormText";
-import { FormSelect } from "@/modules/fireback/components/forms/form-select/FormSelect";
-import { useS } from "@/modules/fireback/hooks/useS";
+import { RegionalContentDto } from "../../../sdk/abac/RegionalContentDto";
+import { FormText } from "../../../components/forms/form-text/FormText";
+import { FormSelect } from "../../../components/forms/form-select/FormSelect";
+import { useS } from "../../../hooks/useS";
 import { strings } from "./strings/translations";
-import { FormRichText } from "@/modules/fireback/components/forms/form-richtext/FormRichText";
-import { createQuerySource } from "@/modules/fireback/hooks/useAsQuery";
+import { FormRichText } from "../../../components/forms/form-richtext/FormRichText";
+import { createQuerySource } from "../../../hooks/useAsQuery";
 
 export const RegionalContentForm = ({
   form,

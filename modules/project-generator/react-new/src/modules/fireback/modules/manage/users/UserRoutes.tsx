@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import { UserEntityManager } from "./UserEntityManager";
-import { UserNavigation } from "@/modules/fireback/sdk/navigation/AbacNavigation";
+import { UserNavigation } from "../../../sdk/navigation/AbacNavigation";
 import { UserSingleScreen } from "./UserSingleScreen";
 import { UserArchiveScreen } from "./UserArchiveScreen";
 

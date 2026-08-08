@@ -1,6 +1,6 @@
-import { type QueryArchiveColumn } from "@/modules/fireback/definitions/common";
-import { RoleDto } from "@/modules/fireback/sdk/abac/RoleDto";
-import { enTranslations } from "@/modules/fireback/translations/en";
+import { type QueryArchiveColumn } from "../../../definitions/common";
+import { RoleDto } from "../../../sdk/abac/RoleDto";
+import { enTranslations } from "../../../translations/en";
 
 export const columns = (t: typeof enTranslations): QueryArchiveColumn[] => [
   {
