@@ -6,10 +6,10 @@ import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
-import { osResources } from "../../hooks/resources";
 import { RemoteQueryContext } from "../../../sdk/core/react-tools";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { osResources } from "../../hooks/resources";
 import { KeyboardAction, toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
 import { useS } from "../../hooks/useS";
