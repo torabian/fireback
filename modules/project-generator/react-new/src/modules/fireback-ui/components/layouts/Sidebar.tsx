@@ -8,7 +8,7 @@ import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { detectDeviceType } from "../../hooks/deviceInformation";
 import { useRemoteMenuResolver } from "../../hooks/useRemoteMenuResolver";
 import { useSortableOrder } from "../../hooks/useSortableOrder";
-import { osResources } from "../../../fireback/resources/resources";
+import { osResources } from "../../hooks/resources";
 import type { AppMenuOptionalDto } from "../../../fireback/sdk/interfacetools/AppMenuOptionalDto";
 import { AppMenuDto } from "../../../fireback/sdk/interfacetools/AppMenuDto";
 import { ReactiveSearchContext } from "../reactive-search/ReactiveSearchContext";

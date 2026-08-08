@@ -6,7 +6,7 @@ import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
-import { osResources } from "../../../fireback/resources/resources";
+import { osResources } from "../../hooks/resources";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";

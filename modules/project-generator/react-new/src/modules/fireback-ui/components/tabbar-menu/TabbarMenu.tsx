@@ -1,6 +1,6 @@
 import { source } from "../../hooks/source";
 import { useS } from "../../hooks/useS";
-import { osResources } from "../../../fireback/resources/resources";
+import { osResources } from "../../hooks/resources";
 import ActiveLink from "../link/ActiveLink";
 import { strings } from "../strings/translations";
 

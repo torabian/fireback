@@ -1,8 +1,3 @@
-export interface KeyValue {
-  label?: string;
-  value?: string | number;
-}
-
 export interface DatatableColumn {
   name?: string;
   title?: string;

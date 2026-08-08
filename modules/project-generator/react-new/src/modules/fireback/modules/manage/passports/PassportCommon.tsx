@@ -1,4 +1,4 @@
-import { type KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../../fireback-ui/types/KeyValue";
 import { strings } from "./strings/translations";
 
 export const getPassportOptions = (s: typeof strings): KeyValue[] => {

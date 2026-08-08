@@ -4,7 +4,7 @@ import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
-import { osResources } from "../../../fireback/resources/resources";
+import { osResources } from "../../hooks/resources";
 import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import Link from "../link/Link";
 import { strings } from "../strings/translations";

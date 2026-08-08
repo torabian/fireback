@@ -2,7 +2,7 @@ import { type MenuItem } from "../../types/MenuItem";
 import { source } from "../../hooks/source";
 import { useUiState } from "../../hooks/uiStateContext";
 import { getOS } from "../../hooks/useHtmlClass";
-import { osResources } from "../../../fireback/resources/resources";
+import { osResources } from "../../hooks/resources";
 import classNames from "classnames";
 import React from "react";
 import { useKeyCombination } from "../../hooks/useKeyPress";

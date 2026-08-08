@@ -1,5 +1,5 @@
 import React from "react";
-import { type KeyValue } from "../../../fireback/definitions/definitions";
+import { type KeyValue } from "../../types/KeyValue";
 
 export const RowValue = (props: KeyValue) => {
   return (

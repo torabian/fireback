@@ -1,5 +1,5 @@
 import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "../../../sdk/abac/UserInvitationsAction";
-import { type DatatableColumn } from "../../../definitions/definitions";
+import { type DatatableColumn } from "../../../../fireback-ui/types/DatatableColumn";
 import { strings } from "./strings/translations";
 
 export const userInvitationColumns = (

@@ -1,5 +1,5 @@
 import { BUILD_VARIABLES } from "../../../../fireback-ui/hooks/build-variables";
-import { type KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../../fireback-ui/types/KeyValue";
 import { strings } from "./strings/translations";
 
 export const interfaceLanguages = (s: typeof strings): KeyValue[] => [

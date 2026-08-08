@@ -10,7 +10,7 @@ import { ModalContext } from "../components/modal/Modal";
 import { commonDialogs } from "../components/overlay/CommonOverlays";
 import { type Filters } from "./datatabletools";
 import { useRouter } from "./useRouter";
-import { osResources } from "../../fireback/resources/resources";
+import { osResources } from "./resources";
 import { type DeleteRequest } from "../../fireback/sdk/core/http-tools";
 import { useDebouncedEffect } from "./useDebouncedEffect";
 import { useKeyCombination } from "./useKeyPress";

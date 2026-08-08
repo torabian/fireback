@@ -1,4 +1,4 @@
-import { type DatatableColumn } from "../../../definitions/definitions";
+import { type DatatableColumn } from "../../../../fireback-ui/types/DatatableColumn";
 import { WorkspaceInviteDto } from "../../../sdk/abac/WorkspaceInviteDto";
 import { type strings as uiStrings } from "../../../../fireback-ui/components/strings/translations";
 import { type strings } from "./strings/translations";

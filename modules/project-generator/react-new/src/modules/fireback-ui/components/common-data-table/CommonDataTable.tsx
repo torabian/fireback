@@ -27,11 +27,9 @@ import { LineLoader } from "../line-loader/LineLoader";
 
 import classNames from "classnames";
 import React, { useRef } from "react";
-import {
-  type DatatableColumn,
-  NumericKeys
-} from "../../../fireback/definitions/definitions";
+import { type DatatableColumn } from "../../types/DatatableColumn";
 import { httpErrorHanlder } from "../../hooks/api";
+import { NumericKeys } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";

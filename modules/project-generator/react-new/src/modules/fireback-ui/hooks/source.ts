@@ -1,4 +1,4 @@
-import { osResources } from "../../fireback/resources/resources";
+import { osResources } from "./resources";
 import { BUILD_VARIABLES } from "./build-variables";
 
 export function source(uri: string) {

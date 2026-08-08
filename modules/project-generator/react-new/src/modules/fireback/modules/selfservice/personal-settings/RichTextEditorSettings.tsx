@@ -2,7 +2,7 @@ import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorV
 import { FormButton } from "../../../../fireback-ui/components/forms/form-button/FormButton";
 import { FormSelect } from "../../../../fireback-ui/components/forms/form-select/FormSelect";
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
-import { type KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../../fireback-ui/types/KeyValue";
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";

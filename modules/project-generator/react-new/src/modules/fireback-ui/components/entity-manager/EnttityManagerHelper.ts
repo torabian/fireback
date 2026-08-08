@@ -1,4 +1,4 @@
-import { type Filter } from "../../../fireback/definitions/definitions";
+import { type Filter } from "@devexpress/dx-react-grid";
 import { set } from "lodash";
 
 /**

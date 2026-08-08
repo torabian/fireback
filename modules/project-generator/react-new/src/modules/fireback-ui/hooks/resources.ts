@@ -1,4 +1,4 @@
-import { getOS } from "../../fireback-ui/hooks/useHtmlClass";
+import { getOS } from "./useHtmlClass";
 const OS = getOS();
 
 export type IconOsMap = {

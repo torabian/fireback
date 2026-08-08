@@ -2,7 +2,7 @@ import "react-data-grid/lib/styles.css";
 
 import { get } from "lodash";
 import { type ColumnOrColumnGroup } from "react-data-grid";
-import { type DatatableColumn } from "../../../fireback/definitions/definitions";
+import { type DatatableColumn } from "../../types/DatatableColumn";
 import { type Udf } from "../../hooks/useDatatableFiltering";
 import { CopyCell } from "../entity-manager/CopyCell";
 import { OpenInNewRouter } from "../entity-manager/OpenInNewRouter";

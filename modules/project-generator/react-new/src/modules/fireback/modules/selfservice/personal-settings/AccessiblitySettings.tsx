@@ -3,7 +3,7 @@ import { useContext, useEffect } from "react";
 import { ErrorsView } from "../../../../fireback-ui/components/error-view/ErrorView";
 import { FormButton } from "../../../../fireback-ui/components/forms/form-button/FormButton";
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
-import { type KeyValue } from "../../../definitions/definitions";
+import { type KeyValue } from "../../../../fireback-ui/types/KeyValue";
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import { useS } from "../../../../fireback-ui/hooks/useS";

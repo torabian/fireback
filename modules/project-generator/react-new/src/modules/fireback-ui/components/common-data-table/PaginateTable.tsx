@@ -10,7 +10,7 @@ import {
 } from "react-data-grid";
 import { type UseQueryResult } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
-import { type DatatableColumn } from "../../../fireback/definitions/definitions";
+import { type DatatableColumn } from "../../types/DatatableColumn";
 import { type Udf } from "../../hooks/useDatatableFiltering";
 import { castColumns, type TableColumnWidthInfo } from "./PaginateUtils";
 import { useReindexedContent } from "./useReindex";
