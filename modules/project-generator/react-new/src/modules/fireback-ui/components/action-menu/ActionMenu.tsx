@@ -5,15 +5,19 @@
 import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { KeyboardAction, type PermissionLevel } from "../../../fireback/definitions/definitions";
+import { KeyboardAction } from "../../../fireback/definitions/definitions";
+import { osResources } from "../../../fireback/resources/resources";
+import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
 import { userMeetsAccess } from "../../hooks/accessLevels";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
 import { useT } from "../../hooks/useT";
-import { osResources } from "../../../fireback/resources/resources";
-import { RemoteQueryContext } from "../../../fireback/sdk/core/react-tools";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
+export interface PermissionLevel {
+  onlyRoot?: boolean;
+  permissions: string[];
+}
 export function ActionMenuManager({
   filter,
 }: {
@@ -90,7 +94,7 @@ export interface ActionMenuRef {
 
 export type SetActionMenuFn = (
   menuName: string,
-  items: IMenuActionItem[]
+  items: IMenuActionItem[],
 ) => void;
 
 export interface IActionMenuContext {
@@ -139,7 +143,7 @@ export function useActions(
   menuName: string,
   items: Array<IMenuActionItem | undefined>,
   options?: ActionMenuOptions,
-  deps?: any[]
+  deps?: any[],
 ) {
   const t = useContext(ActionMenuContext);
 
@@ -163,7 +167,7 @@ export function useActions(
 
 function combineArray(
   items?: IMenuActionItem[],
-  items2?: IMenuActionItem[]
+  items2?: IMenuActionItem[],
 ): IMenuActionItem[] {
   if (!items && !items2) {
     return [];
@@ -217,7 +221,7 @@ export function ActionMenuProvider({
         let newMenu: IMenuActionItem[] = [];
         for (const y of x.actions) {
           const isInDeleteList = !!toDelete.find(
-            (t) => t === y.uniqueActionKey
+            (t) => t === y.uniqueActionKey,
           );
 
           if (!isInDeleteList) {
@@ -311,13 +315,13 @@ export function useCommonCrudActions({
     editingCore({
       onCancel,
       onSave,
-    })
+    }),
   );
 }
 
 export function useNewAction(
   onSelect: (() => void) | undefined,
-  keyPressEventName?: KeyboardAction
+  keyPressEventName?: KeyboardAction,
 ) {
   const t = useT();
 
@@ -335,7 +339,7 @@ export function useNewAction(
 
 export function useBackButton(
   onSelect: (() => void) | undefined,
-  keyPressEventName?: KeyboardAction
+  keyPressEventName?: KeyboardAction,
 ) {
   const t = useT();
 
@@ -367,7 +371,7 @@ export function useCommonArchiveExportTools() {
         data = "data:application/text;base64," + btoa(data);
         document.location = data;
       },
-      false
+      false,
     );
 
     const h: any = options?.headers;
@@ -381,7 +385,7 @@ export function useCommonArchiveExportTools() {
 
 export function useExportActions(
   onSelect: (() => void) | undefined,
-  keyPressEventName?: KeyboardAction
+  keyPressEventName?: KeyboardAction,
 ) {
   const t = useT();
 
@@ -399,7 +403,7 @@ export function useExportActions(
 
 export function useEditAction(
   onSelect: (() => void) | undefined,
-  keyPressEventName?: KeyboardAction
+  keyPressEventName?: KeyboardAction,
 ) {
   const t = useT();
   useKeyCombination(keyPressEventName, onSelect);

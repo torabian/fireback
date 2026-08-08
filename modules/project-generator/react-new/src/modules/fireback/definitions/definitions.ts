@@ -55,68 +55,6 @@ export interface OptionItem<T> extends KeyValue {
   description?: string;
 }
 
-export function toKeyValue<T>(
-  items?: Array<T>,
-  value?: string,
-  label?: string
-): KeyValue[] {
-  if (!items) {
-    return [];
-  }
-
-  return items.map((item: any) => {
-    return {
-      label: item[label || "name"],
-      value: item[value || "uniqueId"],
-    };
-  });
-}
-
-export interface IPriceTag {
-  amounts: Array<{
-    value: number;
-    currency: string;
-  }>;
-}
-
-/**
- * Every fireback entity must have these fields implemented, in all entites
- */
-export interface BaseRecord {
-  uniqueId?: string;
-  parentId?: string;
-  roleId?: string;
-  workspaceId?: string;
-  createdAt?: string;
-  deletedAt?: string;
-  updatedAt?: string;
-}
-
-export class BaseRecord2 {
-  static Fields = {
-    uniqueId: "uniqueId",
-    parentId: "parentId",
-    roleId: "roleId",
-    workspaceId: "workspaceId",
-    createdAt: "createdAt",
-    deletedAt: "deletedAt",
-    updatedAt: "updatedAt",
-  };
-  uniqueId?: string;
-  parentId?: string;
-  roleId?: string;
-  workspaceId?: string;
-  createdAt?: string;
-  deletedAt?: string;
-  updatedAt?: string;
-}
-
-export interface Hierarchy {
-  id: string;
-  label?: string;
-  chidlren?: Hierarchy[];
-}
-
 export type IndeterminateCheck = "checked" | "unchecked" | "indeterminate";
 
 export interface DatatableColumn {
@@ -127,11 +65,6 @@ export interface DatatableColumn {
   sortable?: boolean;
   filterType?: "string" | "date";
   getCellValue?: (dto: any) => any;
-}
-
-export interface PermissionLevel {
-  onlyRoot?: boolean;
-  permissions: string[];
 }
 
 export interface EntityManagerProps<T, V> {
@@ -153,29 +86,6 @@ export interface EntityFormProps<T> {
   isEditing?: boolean;
 }
 
-export type QuestionAnswerState = "correct" | "incorrect" | "blank";
-
-export type FilterOperation =
-  | `contains`
-  | `notContains`
-  | `startsWith`
-  | `endsWith`
-  | `equal`
-  | `notEqual`
-  | `greaterThan`
-  | `greaterThanOrEqual`
-  | `lessThan`
-  | `lessThanOrEqual`;
-
-export interface Filter {
-  /** Specifies the name of a column whose value is used for filtering. */
-  columnName: string;
-  /** Specifies the operation name. The value is 'contains' if the operation name is not set. */
-  operation?: FilterOperation;
-  /** Specifies the filter value. */
-  value?: any;
-}
-
 export type JsonQuery = any;
 
 export interface Context {
@@ -189,15 +99,3 @@ export interface Context {
   startIndex?: number;
   paramValues: Array<string>;
 }
-
-export type IconOsMap = {
-  [key: string]: {
-    mac?: string;
-    ios?: string;
-    windows?: string;
-    android?: string;
-    linux?: string;
-    web?: string;
-    default?: string;
-  };
-};

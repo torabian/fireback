@@ -1,6 +1,17 @@
-import { type IconOsMap } from "../definitions/definitions";
 import { getOS } from "../../fireback-ui/hooks/useHtmlClass";
 const OS = getOS();
+
+export type IconOsMap = {
+  [key: string]: {
+    mac?: string;
+    ios?: string;
+    windows?: string;
+    android?: string;
+    linux?: string;
+    web?: string;
+    default?: string;
+  };
+};
 
 const icons: IconOsMap = {
   edit: {
