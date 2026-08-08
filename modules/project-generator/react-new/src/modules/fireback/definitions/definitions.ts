@@ -6,21 +6,6 @@ export interface KeyValue {
   value?: string | number;
 }
 
-export interface StringKeyValue {
-  label?: string;
-  value?: string;
-}
-
-/**
- * Use this for selects, which provide more details than a key pair
- */
-export interface OptionItem<T> extends KeyValue {
-  data: Partial<T>;
-  icon?: string;
-  title?: string;
-  description?: string;
-}
-
 export type IndeterminateCheck = "checked" | "unchecked" | "indeterminate";
 
 export interface DatatableColumn {

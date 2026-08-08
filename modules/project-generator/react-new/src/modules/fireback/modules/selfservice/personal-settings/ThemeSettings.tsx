@@ -5,13 +5,18 @@ import { FormSelect } from "../../../../fireback-ui/components/forms/form-select
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
 import { useContext, useEffect } from "react";
 import { PageSection } from "../../../../fireback-ui/components/page-section/PageSection";
-import { type StringKeyValue } from "../../../definitions/definitions";
+
 import { AppConfigContext } from "../../../../fireback-ui/hooks/appConfigTools";
 import { useCommonEntityManager } from "../../../../fireback-ui/hooks/useCommonEntityManager";
 import { useT } from "../../../../fireback-ui/hooks/useT";
 import { useS } from "../../../../fireback-ui/hooks/useS";
 import { createQuerySource } from "../../../../fireback-ui/hooks/useAsQuery";
 import { strings } from "./strings/translations";
+
+export interface StringKeyValue {
+  label?: string;
+  value?: string;
+}
 
 interface ThemeConfig {
   theme: string;
@@ -23,7 +28,7 @@ const ThemeConfigFields = {
 
 const updateSettings = (
   values: Partial<ThemeConfig>,
-  d: FormikHelpers<Partial<ThemeConfig>>
+  d: FormikHelpers<Partial<ThemeConfig>>,
 ) => {
   if (values.theme) {
     localStorage.setItem("ui_theme", values.theme);
@@ -64,7 +69,7 @@ export function ThemeSettings({}: {}) {
 
   const onSubmit = (
     values: Partial<ThemeConfig>,
-    d: FormikHelpers<Partial<ThemeConfig>>
+    d: FormikHelpers<Partial<ThemeConfig>>,
   ) => {
     if (!values.theme) {
       return;
