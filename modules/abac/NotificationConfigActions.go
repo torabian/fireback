@@ -4,6 +4,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"gorm.io/gorm"
 )
 
@@ -21,9 +22,9 @@ var ALL_NOTIFICATION_CONFIG_PERMISSIONS = notificationConfigPerms.All
 
 var NotificationConfigActions = NewEntityActionsBundle[NotificationConfigEntity]()
 
-func notificationConfigSecurity(perm fireback.PermissionInfo, allowOnRoot bool) *fireback.SecurityModel {
+func notificationConfigSecurity(perm application.PermissionInfo, allowOnRoot bool) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
-		ActionRequires:  []fireback.PermissionInfo{perm},
+		ActionRequires:  []application.PermissionInfo{perm},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     allowOnRoot,
 	}
@@ -60,25 +61,25 @@ func NotificationConfigCreateAction(c NotificationConfigCreateActionRequest) (*N
 		return nil, err
 	}
 	entity := &NotificationConfigEntity{
-		CascadeToSubWorkspaces:                 c.Body.CascadeToSubWorkspaces,
-		ForcedCascadeEmailProvider:              c.Body.ForcedCascadeEmailProvider,
-		GeneralEmailProviderId:                  c.Body.GeneralEmailProviderId,
-		GeneralGsmProviderId:                    c.Body.GeneralGsmProviderId,
-		InviteToWorkspaceContent:                c.Body.InviteToWorkspaceContent,
-		InviteToWorkspaceContentExcerpt:         c.Body.InviteToWorkspaceContentExcerpt,
-		InviteToWorkspaceTitle:                  c.Body.InviteToWorkspaceTitle,
-		InviteToWorkspaceSenderId:               c.Body.InviteToWorkspaceSenderId,
-		AccountCenterEmailSenderId:              c.Body.AccountCenterEmailSenderId,
-		ForgetPasswordContent:                   c.Body.ForgetPasswordContent,
-		ForgetPasswordContentExcerpt:             c.Body.ForgetPasswordContentExcerpt,
-		ForgetPasswordTitle:                      c.Body.ForgetPasswordTitle,
-		ForgetPasswordSenderId:                   c.Body.ForgetPasswordSenderId,
-		AcceptLanguage:                           c.Body.AcceptLanguage,
-		ConfirmEmailSenderId:                     c.Body.ConfirmEmailSenderId,
-		ConfirmEmailContent:                      c.Body.ConfirmEmailContent,
-		ConfirmEmailContentExcerpt:               c.Body.ConfirmEmailContentExcerpt,
-		ConfirmEmailTitle:                        c.Body.ConfirmEmailTitle,
-		WorkspaceId:                              emigo.NullableOf(query.WorkspaceId),
+		CascadeToSubWorkspaces:          c.Body.CascadeToSubWorkspaces,
+		ForcedCascadeEmailProvider:      c.Body.ForcedCascadeEmailProvider,
+		GeneralEmailProviderId:          c.Body.GeneralEmailProviderId,
+		GeneralGsmProviderId:            c.Body.GeneralGsmProviderId,
+		InviteToWorkspaceContent:        c.Body.InviteToWorkspaceContent,
+		InviteToWorkspaceContentExcerpt: c.Body.InviteToWorkspaceContentExcerpt,
+		InviteToWorkspaceTitle:          c.Body.InviteToWorkspaceTitle,
+		InviteToWorkspaceSenderId:       c.Body.InviteToWorkspaceSenderId,
+		AccountCenterEmailSenderId:      c.Body.AccountCenterEmailSenderId,
+		ForgetPasswordContent:           c.Body.ForgetPasswordContent,
+		ForgetPasswordContentExcerpt:    c.Body.ForgetPasswordContentExcerpt,
+		ForgetPasswordTitle:             c.Body.ForgetPasswordTitle,
+		ForgetPasswordSenderId:          c.Body.ForgetPasswordSenderId,
+		AcceptLanguage:                  c.Body.AcceptLanguage,
+		ConfirmEmailSenderId:            c.Body.ConfirmEmailSenderId,
+		ConfirmEmailContent:             c.Body.ConfirmEmailContent,
+		ConfirmEmailContentExcerpt:      c.Body.ConfirmEmailContentExcerpt,
+		ConfirmEmailTitle:               c.Body.ConfirmEmailTitle,
+		WorkspaceId:                     emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := NotificationConfigActions.Create(entity, *query)
 	if err2 != nil {

@@ -1,15 +1,16 @@
 package fireback
 
 import (
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/migrations"
 	"github.com/urfave/cli/v3"
 )
 
 type FirebackModuleConfig struct{}
 
-func FirebackModuleSetup(setup *FirebackModuleConfig) *ModuleProvider {
+func FirebackModuleSetup(setup *FirebackModuleConfig) *application.ModuleProvider {
 
-	module := &ModuleProvider{
+	module := &application.ModuleProvider{
 		Name:               "fireback",
 		GoMigrateDirectory: &migrations.MigrationsFs,
 	}

@@ -16,49 +16,49 @@ no manual wiring in that app's `main.go`.
 
 > **Naming note**: the Go package, directory, and config/type names (`storage`,
 > `StorageModuleConfig`, ...) all say "storage", but `StorageModuleSetup`
-> registers the underlying `fireback.ModuleProvider` under the name
+> registers the underlying `application.ModuleProvider` under the name
 > `"fileupload"` (`StorageModule.go:87`), and several error strings/log lines
 > still say `"fileupload: ..."`. Both names refer to the same module — this
 > is a leftover from an in-progress rename, not two different things.
 
-| File                     | Purpose                                                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `migrations/*.sql`       | `tus_uploads` schema: create table → add `claimed_by`/`claimed_at` → add `user_id`/`workspace_id`/`access_level`                                                                                                                       |
-| `Migrate.go`             | `Migrate(connString)` — runs the migrations via goose                                                                                                                                                                                   |
-| `Store.go`               | `Store` — implements tus's `handler.DataStore`/`TerminaterDataStore` on top of Postgres large objects                                                                                                                                  |
-| `Handler.go`             | `Mount(router, basePath, store, cfg)` — wires the tus HTTP endpoints into gin, enforces auth/ownership/quota                                                                                                                            |
-| `Auth.go`                | `AuthContext`, `Anonymous` — the identity type every request/upload/quota check is expressed in terms of                                                                                                                               |
-| `Quota.go`               | `UsedBytes` — per-user byte total; `DefaultQuotaBytes`, `ErrQuotaExceeded`                                                                                                                                                              |
-| `Queries.go`             | `ListFiles` / `GetFile` — read upload metadata without touching tusd types                                                                                                                                                              |
-| `Download.go`            | `MountDownloads(router, basePath, pool, store, cfg)` — JSON metadata + range-capable download endpoints                                                                                                                                 |
-| `Claim.go`               | `ClaimFile` / `ReleaseFile` — attach/detach an upload to whatever feature ends up using it                                                                                                                                              |
-| `Reaper.go`              | `SweepOrphaned` / `StartReaper` — deletes uploads nothing ever claimed                                                                                                                                                                  |
-| `Admin.go`               | `WorkspaceUsedBytes`, `DeleteFile`, `UploadFile` — the same operations as HTTP, callable directly with no HTTP round trip (see §4)                                                                                                      |
-| `Cli.go`                 | `Commands()` — urfave/cli/v3 wrapper (`usage`/`upload`/`delete`) around `Admin.go`, resolving its own Postgres pool (see §4.3)                                                                                                          |
-| `Webserver.go`           | `MountAll` — wires everything above onto a gin router in one call; `Pool()` — shared pgxpool other modules can reuse; `NewPgxPool()` — opens a pool from fireback's own DB config; `mountOnFirebackApp` — the `GinWebServerInitHooks` callback |
-| `StorageModule.go`       | `StorageModuleSetup(cfg)` — the `fireback.ModuleProvider`; `cfg` controls base paths, reaper TTLs, auth, quota                                                                                                                          |
-| `StorageModule3.yml`     | Documentation-only manifest — explicitly **not** a real Module3 definition; nothing here is code-generated from it                                                                                                                     |
-| `StorageModule.dyno.go`  | Fireback-generated scaffolding (permission constant `PERM_ROOT_STORAGE_EVERYTHING`); regenerated by the fireback CLI, don't hand-edit                                                                                                  |
-| `Manifest.go`            | Unused Fireback-generated scaffold type (`Manifest{DB, FilterResolver}`) — nothing in this module references it                                                                                                                        |
-| `metas/`, `queries/`     | Empty `embed.FS` scaffolds Fireback generates for every Module3-style module; unused here since this module keeps its SQL in `migrations/` instead                                                                                    |
-| `upload-test/`           | Node.js resumable-upload test client (`tus-js-client`) exercising the tus endpoint end-to-end, including resuming after a killed process                                                                                               |
-| `../../cmd/fileupload-server` | Standalone gin server that mounts this module on its own, for exercising it without booting all of nima-server                                                                                                                    |
-| `../../cmd/fileupload-cli`    | Standalone CLI binary wrapping `storage.Commands()` — usage/upload/delete without any server running                                                                                                                              |
+| File                          | Purpose                                                                                                                                                                                                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `migrations/*.sql`            | `tus_uploads` schema: create table → add `claimed_by`/`claimed_at` → add `user_id`/`workspace_id`/`access_level`                                                                                                                               |
+| `Migrate.go`                  | `Migrate(connString)` — runs the migrations via goose                                                                                                                                                                                          |
+| `Store.go`                    | `Store` — implements tus's `handler.DataStore`/`TerminaterDataStore` on top of Postgres large objects                                                                                                                                          |
+| `Handler.go`                  | `Mount(router, basePath, store, cfg)` — wires the tus HTTP endpoints into gin, enforces auth/ownership/quota                                                                                                                                   |
+| `Auth.go`                     | `AuthContext`, `Anonymous` — the identity type every request/upload/quota check is expressed in terms of                                                                                                                                       |
+| `Quota.go`                    | `UsedBytes` — per-user byte total; `DefaultQuotaBytes`, `ErrQuotaExceeded`                                                                                                                                                                     |
+| `Queries.go`                  | `ListFiles` / `GetFile` — read upload metadata without touching tusd types                                                                                                                                                                     |
+| `Download.go`                 | `MountDownloads(router, basePath, pool, store, cfg)` — JSON metadata + range-capable download endpoints                                                                                                                                        |
+| `Claim.go`                    | `ClaimFile` / `ReleaseFile` — attach/detach an upload to whatever feature ends up using it                                                                                                                                                     |
+| `Reaper.go`                   | `SweepOrphaned` / `StartReaper` — deletes uploads nothing ever claimed                                                                                                                                                                         |
+| `Admin.go`                    | `WorkspaceUsedBytes`, `DeleteFile`, `UploadFile` — the same operations as HTTP, callable directly with no HTTP round trip (see §4)                                                                                                             |
+| `Cli.go`                      | `Commands()` — urfave/cli/v3 wrapper (`usage`/`upload`/`delete`) around `Admin.go`, resolving its own Postgres pool (see §4.3)                                                                                                                 |
+| `Webserver.go`                | `MountAll` — wires everything above onto a gin router in one call; `Pool()` — shared pgxpool other modules can reuse; `NewPgxPool()` — opens a pool from fireback's own DB config; `mountOnFirebackApp` — the `GinWebServerInitHooks` callback |
+| `StorageModule.go`            | `StorageModuleSetup(cfg)` — the `application.ModuleProvider`; `cfg` controls base paths, reaper TTLs, auth, quota                                                                                                                              |
+| `StorageModule3.yml`          | Documentation-only manifest — explicitly **not** a real Module3 definition; nothing here is code-generated from it                                                                                                                             |
+| `StorageModule.dyno.go`       | Fireback-generated scaffolding (permission constant `PERM_ROOT_STORAGE_EVERYTHING`); regenerated by the fireback CLI, don't hand-edit                                                                                                          |
+| `Manifest.go`                 | Unused Fireback-generated scaffold type (`Manifest{DB, FilterResolver}`) — nothing in this module references it                                                                                                                                |
+| `metas/`, `queries/`          | Empty `embed.FS` scaffolds Fireback generates for every Module3-style module; unused here since this module keeps its SQL in `migrations/` instead                                                                                             |
+| `upload-test/`                | Node.js resumable-upload test client (`tus-js-client`) exercising the tus endpoint end-to-end, including resuming after a killed process                                                                                                       |
+| `../../cmd/fileupload-server` | Standalone gin server that mounts this module on its own, for exercising it without booting all of nima-server                                                                                                                                 |
+| `../../cmd/fileupload-cli`    | Standalone CLI binary wrapping `storage.Commands()` — usage/upload/delete without any server running                                                                                                                                           |
 
 ## 1. Data model
 
 Everything lives in one table, `tus_uploads` (see `migrations/*.sql`):
 
-| Column                                        | Meaning                                                                                          |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `id` (text, PK)                                | The tus upload id (UUID), also the public id used in URLs and by CLI commands                     |
-| `oid` (oid, unique)                            | Postgres large object id holding the actual bytes                                                  |
-| `size`, `size_is_deferred`, `upload_offset`    | Declared size / whether it was unknown up front / bytes written so far                             |
-| `metadata` (jsonb)                             | Client-supplied tus metadata (e.g. `filename`, `filetype`) — **not** the reserved owner keys below |
-| `is_partial`, `is_final`, `partial_uploads`    | tus concatenation-extension bookkeeping (unused by this app's clients today, but supported)        |
-| `completed`, `completed_at`                    | Whether the upload has received all its declared bytes                                             |
-| `claimed_by`, `claimed_at`                     | Set by `ClaimFile` — see §5                                                                        |
-| `user_id`, `workspace_id`, `access_level`      | The `AuthContext` resolved for whoever created the upload — `NULL` for all three if made anonymously |
+| Column                                      | Meaning                                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `id` (text, PK)                             | The tus upload id (UUID), also the public id used in URLs and by CLI commands                        |
+| `oid` (oid, unique)                         | Postgres large object id holding the actual bytes                                                    |
+| `size`, `size_is_deferred`, `upload_offset` | Declared size / whether it was unknown up front / bytes written so far                               |
+| `metadata` (jsonb)                          | Client-supplied tus metadata (e.g. `filename`, `filetype`) — **not** the reserved owner keys below   |
+| `is_partial`, `is_final`, `partial_uploads` | tus concatenation-extension bookkeeping (unused by this app's clients today, but supported)          |
+| `completed`, `completed_at`                 | Whether the upload has received all its declared bytes                                               |
+| `claimed_by`, `claimed_at`                  | Set by `ClaimFile` — see §5                                                                          |
+| `user_id`, `workspace_id`, `access_level`   | The `AuthContext` resolved for whoever created the upload — `NULL` for all three if made anonymously |
 
 The actual file bytes are **not** in this table — they're in Postgres's
 `pg_largeobject` catalog, referenced by `oid`. Deleting the row without also
@@ -72,7 +72,7 @@ Nothing to wire up beyond listing the module, same as any other fireback
 module (`cmd/nima-server/main.go`):
 
 ```go
-Modules: []*fireback.ModuleProvider{
+Modules: []*application.ModuleProvider{
 	// ...
 	storage.StorageModuleSetup(&storage.StorageModuleConfig{
 		MountPoint: "/storage/",
@@ -105,7 +105,7 @@ both base paths with a mount point — `MountPoint` if set, otherwise the
 literal `"storage"`. So with `cfg == nil` (or `MountPoint` unset), routes end
 up at `/storage/files` and `/storage/downloads`, not `/files`/`/downloads`.
 Set `MountPoint` to change the prefix; there is currently no way to mount
-with *no* prefix at all.
+with _no_ prefix at all.
 
 ### Disabling the upload or download routes
 
@@ -228,7 +228,7 @@ what differs is how the Postgres connection gets resolved, tried in order:
 3. **`NewPgxPool()`** (`Webserver.go:117`) — derives the DSN from fireback's
    own config (`fireback.LoadConfiguration` + `GetDatabaseDsn`), the same
    source `mountOnFirebackApp` uses. This is what lets `nima-server storage
-   usage ...` work with **no flag at all**: it resolves the same database
+usage ...` work with **no flag at all**: it resolves the same database
    the running app's web server would.
 
 If none of the three resolve to a postgres connection, the command fails
@@ -242,7 +242,7 @@ columns directly, as if the given identity had uploaded it over HTTP.
 ## 5. Claiming an upload (avoiding orphaned files)
 
 The tus upload endpoint needs no prior context — a client uploads a file
-*before* whatever record is meant to reference it exists. If that record
+_before_ whatever record is meant to reference it exists. If that record
 never gets created (the user picks a file for a new score, then abandons the
 form), the upload has nothing tying its lifetime to anything else, and would
 otherwise sit there forever: wasted storage, and free anonymous file hosting
@@ -283,16 +283,16 @@ Mounted by `MountAll`/`mountOnFirebackApp` at `<MountPoint>/files` (tus
 protocol, default mount point `"storage"` — see §2) and
 `<MountPoint>/downloads` (read-only):
 
-| Method | Path                        | Purpose                                                                 |
-| ------ | --------------------------- | ------------------------------------------------------------------------ |
-| POST   | `/storage/files`            | Create an upload (tus `Upload-Length`/`Upload-Metadata` headers)        |
-| HEAD   | `/storage/files/:id`        | Current offset (`Upload-Offset` header) — for resuming                  |
-| PATCH  | `/storage/files/:id`        | Write the next chunk at the client's current offset                     |
-| GET    | `/storage/files/:id`        | tus's own read (no `Range` support — use `/downloads/:id/raw` instead)  |
-| DELETE | `/storage/files/:id`        | Terminate: removes both the large object and the `tus_uploads` row      |
-| GET    | `/storage/downloads/:id`    | JSON metadata: `size`, `metadata`, `completed`, timestamps, claim state |
-| HEAD   | `/storage/downloads/:id/raw`| Same headers a GET would send, no body                                  |
-| GET    | `/storage/downloads/:id/raw`| The file bytes, with `Range`/`If-Range`/`If-None-Match` support         |
+| Method | Path                         | Purpose                                                                 |
+| ------ | ---------------------------- | ----------------------------------------------------------------------- |
+| POST   | `/storage/files`             | Create an upload (tus `Upload-Length`/`Upload-Metadata` headers)        |
+| HEAD   | `/storage/files/:id`         | Current offset (`Upload-Offset` header) — for resuming                  |
+| PATCH  | `/storage/files/:id`         | Write the next chunk at the client's current offset                     |
+| GET    | `/storage/files/:id`         | tus's own read (no `Range` support — use `/downloads/:id/raw` instead)  |
+| DELETE | `/storage/files/:id`         | Terminate: removes both the large object and the `tus_uploads` row      |
+| GET    | `/storage/downloads/:id`     | JSON metadata: `size`, `metadata`, `completed`, timestamps, claim state |
+| HEAD   | `/storage/downloads/:id/raw` | Same headers a GET would send, no body                                  |
+| GET    | `/storage/downloads/:id/raw` | The file bytes, with `Range`/`If-Range`/`If-None-Match` support         |
 
 All of the above run through `cfg.Authenticate` (when set) and
 `authorizeOwner`: an upload with a recorded owner (`user_id` not `NULL`) is
@@ -307,7 +307,7 @@ with no recorded owner is open to anyone (`Auth.go:43`).
   metadata value can't turn this into a stored-XSS vector when opened
   directly in a browser (`contentTypeAndDisposition`, `Download.go:89`).
 - `Range: bytes=START-END` / `bytes=START-` / `bytes=-N` → `206 Partial
-  Content`. Lets a resumed download continue from an offset, or a download
+Content`. Lets a resumed download continue from an offset, or a download
   manager fetch several ranges concurrently over separate connections.
 - `If-Range`/`If-None-Match` are checked against the file's `ETag`
   (`"<id>-<size>"`).

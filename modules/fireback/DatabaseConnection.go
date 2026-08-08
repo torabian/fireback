@@ -13,6 +13,8 @@ import (
 	// on Android and IOS the golang version does not work. On the server, it's better not use cgo
 	// to make it portable on more operating systems.
 
+	"github.com/torabian/fireback/modules/fireback/application"
+	"github.com/torabian/fireback/modules/fireback/envm"
 	"github.com/torabian/fireback/modules/fireback/sqlitedriver"
 	"github.com/urfave/cli/v3"
 	"gorm.io/driver/mysql"
@@ -72,14 +74,7 @@ func excludeDatabaseConnection() bool {
 	return false
 }
 
-func (x *FirebackApp) CommonHeadlessAppStart(onDatabaseCompleted func()) {
-	commonHeadlessStarter(x, onDatabaseCompleted, true)
-}
-func (x *FirebackApp) CommonHeadlessMsStart(onDatabaseCompleted func()) {
-	commonHeadlessStarter(x, onDatabaseCompleted, false)
-}
-
-func commonHeadlessStarter(x *FirebackApp, onDatabaseCompleted func(), completeTool bool) {
+func CommonHeadlessAppStart(x *application.Application, onDatabaseCompleted func()) {
 
 	// Use the logger
 	initLogger()
@@ -110,17 +105,14 @@ func commonHeadlessStarter(x *FirebackApp, onDatabaseCompleted func(), completeT
 	}
 
 	x.CliActions = func() []*cli.Command {
-		if completeTool {
-			return GetCommonWebServerCliActions(x)
-		}
-		return GetCommonMicroserviceCliActions(x)
+		return GetCommonWebServerCliActions(x)
 	}
 
 	RunApp(x)
 }
 
 func GetDatabaseDsn(config Config) (vendor string, dsn string) {
-	uris := GetEnvironmentUris()
+	uris := envm.GetEnvironmentUris()
 	vendor = config.DbVendor
 
 	if vendor == "mysql" || vendor == "mariadb" {

@@ -2,7 +2,7 @@ package abac
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
@@ -11,12 +11,12 @@ import (
 // and EmailSender (CRUD + the SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider
 // actions) moved to their own module, see modules/abac/messaging.ModuleSetup, registered
 // alongside this one in AbacCompleteModules().
-func NotificationModuleSetup() *fireback.ModuleProvider {
-	module := &fireback.ModuleProvider{
+func NotificationModuleSetup() *application.ModuleProvider {
+	module := &application.ModuleProvider{
 		Name: "abac",
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				NotificationConfigBrowseActionGin(g, NotificationConfigBrowseAction)
 				NotificationConfigGetActionGin(g, NotificationConfigGetAction)
 				NotificationConfigCreateActionGin(g, NotificationConfigCreateAction)

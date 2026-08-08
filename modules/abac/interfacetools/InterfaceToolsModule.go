@@ -2,22 +2,22 @@ package interfacetools
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
 // ModuleSetup registers appMenu, tableViewSizing and timezoneGroup (plus the
-// /cte-app-menus action) as their own fireback.ModuleProvider - split out of abac since
+// /cte-app-menus action) as their own application.ModuleProvider - split out of abac since
 // none of them need Role/Workspace/User types directly. They have no dedicated
 // front-end management screens (unlike e.g. modules/abac/messaging's providers), so only
 // the backend moved here - see AbacCompleteModules.
-func ModuleSetup() *fireback.ModuleProvider {
-	module := &fireback.ModuleProvider{
+func ModuleSetup() *application.ModuleProvider {
+	module := &application.ModuleProvider{
 		Name: "abac",
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				AppMenuBrowseActionGin(g, AppMenuBrowseAction)
 				AppMenuGetActionGin(g, AppMenuGetAction)
 				AppMenuCreateActionGin(g, AppMenuCreateAction)

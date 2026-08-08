@@ -14,6 +14,7 @@ import (
 
 	"github.com/alexeyco/simpletable"
 	"github.com/schollz/progressbar/v3"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/exporting"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
@@ -23,7 +24,7 @@ func CliAuth(security *SecurityModel) (*AuthResultDto, *IError) {
 	context := &AuthContextDto{
 		WorkspaceId:  config.CliWorkspace,
 		Token:        config.CliToken,
-		Capabilities: []PermissionInfo{},
+		Capabilities: []application.PermissionInfo{},
 		Security:     security,
 	}
 

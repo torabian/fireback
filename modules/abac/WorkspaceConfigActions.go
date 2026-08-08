@@ -5,6 +5,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"gorm.io/gorm"
 )
 
@@ -23,11 +24,11 @@ var PERM_ROOT_WORKSPACE_CONFIG_DELETE = workspaceConfigPerms.Delete
 // The two GET/PATCH /workspace-config/distinct permissions predate NewCrudPermissionSet
 // (they're not part of the standard 5), so their CompleteKeys are declared by hand,
 // unchanged from the old Module3-generated code.
-var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = fireback.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE = application.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.get-distinct-workspace",
 	Name:        "Get workspace config Distinct",
 }
-var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = fireback.PermissionInfo{
+var PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE = application.PermissionInfo{
 	CompleteKey: "root.manage.abac.workspace-config.update-distinct-workspace",
 	Name:        "Update workspace config Distinct",
 }
@@ -39,9 +40,9 @@ var ALL_WORKSPACE_CONFIG_PERMISSIONS = append(
 
 var WorkspaceConfigActions = NewEntityActionsBundle[WorkspaceConfigEntity]()
 
-func workspaceConfigSecurity(perm fireback.PermissionInfo) *fireback.SecurityModel {
+func workspaceConfigSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
-		ActionRequires:  []fireback.PermissionInfo{perm},
+		ActionRequires:  []application.PermissionInfo{perm},
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
 	}

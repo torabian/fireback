@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // newTestSocketPair spins up a throwaway httptest websocket server and dials it. The
@@ -189,7 +190,7 @@ func TestHandleEventForSocketConnections_AccessControl(t *testing.T) {
 			"userId":      "user-1",
 		},
 		Security: &fireback.SecurityModel{
-			ActionRequires: []fireback.PermissionInfo{{CompleteKey: "root.some.perm"}},
+			ActionRequires: []application.PermissionInfo{{CompleteKey: "root.some.perm"}},
 		},
 	}
 

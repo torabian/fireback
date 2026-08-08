@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // joinMountPath joins a base URL path onto an optional mount point,
@@ -195,7 +196,7 @@ func defaultAuthenticate(c *gin.Context) (AuthContext, error) {
 	result, ierr := fireback.WithAuthorizationPure(&fireback.AuthContextDto{
 		WorkspaceId:  workspaceId,
 		Token:        c.GetHeader("Authorization"),
-		Capabilities: []fireback.PermissionInfo{},
+		Capabilities: []application.PermissionInfo{},
 	})
 	if ierr != nil {
 		return Anonymous, fmt.Errorf("fileupload: authentication failed: %s", ierr.Json())

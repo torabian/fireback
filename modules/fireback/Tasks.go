@@ -2,8 +2,8 @@ package fireback
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -41,18 +41,18 @@ type TaskEnqueueResult struct {
 var EnqueueTask func(task *TaskMessage) (*TaskEnqueueResult, error)
 var LiftAsyncqWorkerServer func(tasks []*TaskAction)
 
-func GetApplicationTasks(xapp *FirebackApp) *cli.Command {
+func GetApplicationTasks(xapp *application.Application) *cli.Command {
 	sub := []*cli.Command{}
 
-	for _, m := range xapp.Modules {
-		for _, t := range m.Tasks {
-			sub = append(sub, &cli.Command{
-				Name:   t.Name,
-				Flags:  t.Flags,
-				Action: t.Cli,
-			})
-		}
-	}
+	// for _, m := range xapp.Modules {
+	// for _, t := range m.Tasks {
+	// 	sub = append(sub, &cli.Command{
+	// 		Name:   t.Name,
+	// 		Flags:  t.Flags,
+	// 		Action: t.Cli,
+	// 	})
+	// }
+	// }
 
 	return &cli.Command{
 		Name:  "tasks",
@@ -68,12 +68,12 @@ func GetApplicationTasks(xapp *FirebackApp) *cli.Command {
 				Name:  "list",
 				Usage: "Lists all of the tasks in the app",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					for _, m := range xapp.Modules {
-						for _, t := range m.Tasks {
+					// for _, m := range xapp.Modules {
+					// 	for _, t := range m.Tasks {
 
-							fmt.Println(t.Name)
-						}
-					}
+					// 		fmt.Println(t.Name)
+					// 	}
+					// }
 					return nil
 				},
 			},
@@ -89,14 +89,14 @@ func GetApplicationTasks(xapp *FirebackApp) *cli.Command {
 	}
 }
 
-func taskServerLifter(xapp *FirebackApp) {
+func taskServerLifter(xapp *application.Application) {
 
 	tasks := []*TaskAction{}
-	for _, m := range xapp.Modules {
-		for _, t := range m.Tasks {
-			tasks = append(tasks, t)
-		}
-	}
+	// for _, m := range xapp.Modules {
+	// 	for _, t := range m.Tasks {
+	// 		tasks = append(tasks, t)
+	// 	}
+	// }
 
 	LiftAsyncqWorkerServer(tasks)
 }

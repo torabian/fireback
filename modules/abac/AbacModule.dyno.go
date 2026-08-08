@@ -5,14 +5,16 @@ package abac
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/fireback"
-import queries "github.com/torabian/fireback/modules/abac/queries"
-import "encoding/json"
-import "github.com/urfave/cli/v3"
-import "gopkg.in/yaml.v2"
-import "fmt"
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
+
+	queries "github.com/torabian/fireback/modules/abac/queries"
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
+	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v2"
 )
 
 func AbacJson() string {
@@ -26,10 +28,10 @@ func AbacJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_ABAC_EVERYTHING = fireback.PermissionInfo{
+var PERM_ROOT_ABAC_EVERYTHING = application.PermissionInfo{
 	CompleteKey: "root.modules.abac.*",
 }
-var ALL_PERM_ABAC_MODULE = []fireback.PermissionInfo{
+var ALL_PERM_ABAC_MODULE = []application.PermissionInfo{
 	PERM_ROOT_ABAC_EVERYTHING,
 }
 

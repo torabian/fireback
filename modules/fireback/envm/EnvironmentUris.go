@@ -1,4 +1,4 @@
-package fireback
+package envm
 
 import (
 	"encoding/json"
@@ -161,7 +161,7 @@ func EssentialVariablesMap() map[string]string {
 	}
 }
 
-func LoadFirebackAppConfiguration() {
+func LoadFirebackAppConfiguration(config interface{}) {
 
 	uri, err3 := ResolveConfigurationUri()
 	if err3 != nil {
@@ -174,9 +174,14 @@ func LoadFirebackAppConfiguration() {
 		}
 	}
 
-	envconfig.MustProcess("", &config)
+	envconfig.MustProcess("", config)
 }
 
-func init() {
-	LoadFirebackAppConfiguration()
+func Exists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }

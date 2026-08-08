@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var userProfilePerms = NewCrudPermissionSet("root.modules", "user-profile", "user profile")
@@ -15,7 +16,7 @@ var ALL_USER_PROFILE_PERMISSIONS = userProfilePerms.All
 var UserProfileActions = NewEntityActionsBundle[UserProfileEntity]()
 
 func UserProfileBrowseAction(c UserProfileBrowseActionRequest) (*UserProfileBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +28,7 @@ func UserProfileBrowseAction(c UserProfileBrowseActionRequest) (*UserProfileBrow
 }
 
 func UserProfileGetAction(c UserProfileGetActionRequest) (*UserProfileGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func UserProfileGetAction(c UserProfileGetActionRequest) (*UserProfileGetActionR
 }
 
 func UserProfileCreateAction(c UserProfileCreateActionRequest) (*UserProfileCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func UserProfileCreateAction(c UserProfileCreateActionRequest) (*UserProfileCrea
 }
 
 func UserProfileUpdateAction(c UserProfileUpdateActionRequest) (*UserProfileUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func UserProfileUpdateAction(c UserProfileUpdateActionRequest) (*UserProfileUpda
 }
 
 func UserProfileAwareDeletePreviewAction(c UserProfileAwareDeletePreviewActionRequest) (*UserProfileAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := UserProfileAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -85,7 +86,7 @@ func UserProfileAwareDeletePreviewAction(c UserProfileAwareDeletePreviewActionRe
 }
 
 func UserProfileAwareDeleteAction(c UserProfileAwareDeleteActionRequest) (*UserProfileAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := UserProfileEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var ROOT_VAR = "root"
@@ -110,7 +111,7 @@ func WithAuthorizationHttp(next http.Handler, byPassGetMethod bool) http.Handler
 		context := &fireback.AuthContextDto{
 			WorkspaceId:  wi,
 			Token:        tk,
-			Capabilities: []fireback.PermissionInfo{},
+			Capabilities: []application.PermissionInfo{},
 		}
 
 		_, err := WithAuthorizationPureDefault(context)

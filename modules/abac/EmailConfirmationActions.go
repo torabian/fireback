@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var emailConfirmationPerms = NewCrudPermissionSet("root.modules", "email-confirmation", "email confirmation")
@@ -16,7 +17,7 @@ var ALL_EMAIL_CONFIRMATION_PERMISSIONS = emailConfirmationPerms.All
 var EmailConfirmationActions = NewEntityActionsBundle[EmailConfirmationEntity]()
 
 func EmailConfirmationBrowseAction(c EmailConfirmationBrowseActionRequest) (*EmailConfirmationBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func EmailConfirmationBrowseAction(c EmailConfirmationBrowseActionRequest) (*Ema
 }
 
 func EmailConfirmationGetAction(c EmailConfirmationGetActionRequest) (*EmailConfirmationGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func EmailConfirmationGetAction(c EmailConfirmationGetActionRequest) (*EmailConf
 }
 
 func EmailConfirmationCreateAction(c EmailConfirmationCreateActionRequest) (*EmailConfirmationCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func EmailConfirmationCreateAction(c EmailConfirmationCreateActionRequest) (*Ema
 }
 
 func EmailConfirmationUpdateAction(c EmailConfirmationUpdateActionRequest) (*EmailConfirmationUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func EmailConfirmationUpdateAction(c EmailConfirmationUpdateActionRequest) (*Ema
 }
 
 func EmailConfirmationAwareDeletePreviewAction(c EmailConfirmationAwareDeletePreviewActionRequest) (*EmailConfirmationAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := EmailConfirmationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -101,7 +102,7 @@ func EmailConfirmationAwareDeletePreviewAction(c EmailConfirmationAwareDeletePre
 }
 
 func EmailConfirmationAwareDeleteAction(c EmailConfirmationAwareDeleteActionRequest) (*EmailConfirmationAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := EmailConfirmationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

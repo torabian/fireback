@@ -7,6 +7,7 @@ import (
 	"github.com/torabian/fireback/modules/abac/interfacetools/queries"
 	appMenuSeeders "github.com/torabian/fireback/modules/abac/interfacetools/seeders/AppMenu"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -108,7 +109,7 @@ func AppMenuActionCteQueryFn(query fireback.QueryDSL) ([]*AppMenuTreeNode, *fire
 }
 
 func AppMenuBrowseAction(c AppMenuBrowseActionRequest) (*AppMenuBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_APP_MENU_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,7 @@ func AppMenuBrowseAction(c AppMenuBrowseActionRequest) (*AppMenuBrowseActionResp
 }
 
 func AppMenuGetAction(c AppMenuGetActionRequest) (*AppMenuGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_APP_MENU_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func AppMenuGetAction(c AppMenuGetActionRequest) (*AppMenuGetActionResponse, err
 }
 
 func AppMenuCreateAction(c AppMenuCreateActionRequest) (*AppMenuCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_APP_MENU_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +154,7 @@ func AppMenuCreateAction(c AppMenuCreateActionRequest) (*AppMenuCreateActionResp
 }
 
 func AppMenuUpdateAction(c AppMenuUpdateActionRequest) (*AppMenuUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_APP_MENU_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func AppMenuUpdateAction(c AppMenuUpdateActionRequest) (*AppMenuUpdateActionResp
 }
 
 func AppMenuAwareDeletePreviewAction(c AppMenuAwareDeletePreviewActionRequest) (*AppMenuAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := AppMenuAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -198,7 +199,7 @@ func AppMenuAwareDeletePreviewAction(c AppMenuAwareDeletePreviewActionRequest) (
 }
 
 func AppMenuAwareDeleteAction(c AppMenuAwareDeleteActionRequest) (*AppMenuAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_APP_MENU_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := AppMenuEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

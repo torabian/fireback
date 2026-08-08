@@ -3,6 +3,7 @@ package eventbus
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // EventBusModuleConfig configures the parts of the event bus a project actually
@@ -27,23 +28,23 @@ type EventBusModuleConfig struct {
 // ModuleSetup registers the eventbus module - only a project that actually calls this
 // from its own main.go gets the /ws route wired and the event bus goroutine started
 // (via OnAppStart, see modules/fireback/DatabaseConnection.go's commonHeadlessStarter).
-func ModuleSetup(cfg *EventBusModuleConfig) *fireback.ModuleProvider {
+func ModuleSetup(cfg *EventBusModuleConfig) *application.ModuleProvider {
 	if cfg == nil {
 		cfg = &EventBusModuleConfig{}
 	}
 
 	meetsAccessLevel = cfg.MeetsAccessLevel
 
-	module := &fireback.ModuleProvider{
+	module := &application.ModuleProvider{
 		Name: "eventbus",
 
-		OnAppStart: func(x *fireback.FirebackApp) error {
+		OnAppStart: func(x *application.Application) error {
 			StartEventBus(cfg.RedisEventsUrl)
 			return nil
 		},
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				meta := EventBusSubscriptionActionMeta()
 				g.GET(meta.URL, EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
 				return nil

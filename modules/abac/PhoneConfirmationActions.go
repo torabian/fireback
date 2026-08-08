@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var phoneConfirmationPerms = NewCrudPermissionSet("root.manage", "phone-confirmation", "phone confirmation")
@@ -16,7 +17,7 @@ var ALL_PHONE_CONFIRMATION_PERMISSIONS = phoneConfirmationPerms.All
 var PhoneConfirmationActions = NewEntityActionsBundle[PhoneConfirmationEntity]()
 
 func PhoneConfirmationBrowseAction(c PhoneConfirmationBrowseActionRequest) (*PhoneConfirmationBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func PhoneConfirmationBrowseAction(c PhoneConfirmationBrowseActionRequest) (*Pho
 }
 
 func PhoneConfirmationGetAction(c PhoneConfirmationGetActionRequest) (*PhoneConfirmationGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func PhoneConfirmationGetAction(c PhoneConfirmationGetActionRequest) (*PhoneConf
 }
 
 func PhoneConfirmationCreateAction(c PhoneConfirmationCreateActionRequest) (*PhoneConfirmationCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func PhoneConfirmationCreateAction(c PhoneConfirmationCreateActionRequest) (*Pho
 }
 
 func PhoneConfirmationUpdateAction(c PhoneConfirmationUpdateActionRequest) (*PhoneConfirmationUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func PhoneConfirmationUpdateAction(c PhoneConfirmationUpdateActionRequest) (*Pho
 }
 
 func PhoneConfirmationAwareDeletePreviewAction(c PhoneConfirmationAwareDeletePreviewActionRequest) (*PhoneConfirmationAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := PhoneConfirmationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -101,7 +102,7 @@ func PhoneConfirmationAwareDeletePreviewAction(c PhoneConfirmationAwareDeletePre
 }
 
 func PhoneConfirmationAwareDeleteAction(c PhoneConfirmationAwareDeleteActionRequest) (*PhoneConfirmationAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PHONE_CONFIRMATION_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := PhoneConfirmationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

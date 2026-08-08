@@ -5,10 +5,14 @@ package fireback
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "encoding/json"
-import "github.com/urfave/cli/v3"
-import "gopkg.in/yaml.v2"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/torabian/fireback/modules/fireback/application"
+	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v2"
+)
 
 func FirebackJson() string {
 	e := cli.BoolFlag{}
@@ -21,10 +25,10 @@ func FirebackJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_FIREBACK_EVERYTHING = PermissionInfo{
+var PERM_ROOT_FIREBACK_EVERYTHING = application.PermissionInfo{
 	CompleteKey: "root.modules.fireback.*",
 }
-var ALL_PERM_FIREBACK_MODULE = []PermissionInfo{
+var ALL_PERM_FIREBACK_MODULE = []application.PermissionInfo{
 	PERM_ROOT_FIREBACK_EVERYTHING,
 }
 

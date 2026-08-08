@@ -5,6 +5,7 @@ import (
 
 	"github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -94,7 +95,7 @@ func WorkspaceActionCteQueryFn(query fireback.QueryDSL) ([]*WorkspaceTreeNode, *
 }
 
 func WorkspaceBrowseAction(c WorkspaceBrowseActionRequest) (*WorkspaceBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_QUERY}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_QUERY}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func WorkspaceBrowseAction(c WorkspaceBrowseActionRequest) (*WorkspaceBrowseActi
 }
 
 func WorkspaceGetAction(c WorkspaceGetActionRequest) (*WorkspaceGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_QUERY}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_QUERY}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +120,7 @@ func WorkspaceGetAction(c WorkspaceGetActionRequest) (*WorkspaceGetActionRespons
 }
 
 func WorkspaceCreateAction(c WorkspaceCreateActionRequest) (*WorkspaceCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +137,7 @@ func WorkspaceCreateAction(c WorkspaceCreateActionRequest) (*WorkspaceCreateActi
 }
 
 func WorkspaceUpdateAction(c WorkspaceUpdateActionRequest) (*WorkspaceUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +160,7 @@ func WorkspaceUpdateAction(c WorkspaceUpdateActionRequest) (*WorkspaceUpdateActi
 }
 
 func WorkspaceAwareDeletePreviewAction(c WorkspaceAwareDeletePreviewActionRequest) (*WorkspaceAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := WorkspaceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -171,7 +172,7 @@ func WorkspaceAwareDeletePreviewAction(c WorkspaceAwareDeletePreviewActionReques
 }
 
 func WorkspaceAwareDeleteAction(c WorkspaceAwareDeleteActionRequest) (*WorkspaceAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := WorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

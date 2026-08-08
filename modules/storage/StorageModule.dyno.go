@@ -5,11 +5,15 @@ package storage
 *	Written by Ali Torabi.
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
-import "github.com/torabian/fireback/modules/fireback"
-import "encoding/json"
-import "github.com/urfave/cli/v3"
-import "gopkg.in/yaml.v2"
-import "fmt"
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/torabian/fireback/modules/fireback/application"
+	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v2"
+)
 
 func StorageJson() string {
 	e := cli.BoolFlag{}
@@ -22,9 +26,9 @@ func StorageJson() string {
 }
 
 // Module dynamic things comes here. Don't touch it :D
-var PERM_ROOT_STORAGE_EVERYTHING = fireback.PermissionInfo{
+var PERM_ROOT_STORAGE_EVERYTHING = application.PermissionInfo{
 	CompleteKey: "root.modules.storage.*",
 }
-var ALL_PERM_STORAGE_MODULE = []fireback.PermissionInfo{
+var ALL_PERM_STORAGE_MODULE = []application.PermissionInfo{
 	PERM_ROOT_STORAGE_EVERYTHING,
 }

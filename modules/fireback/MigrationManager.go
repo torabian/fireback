@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/pressly/goose/v3"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"gorm.io/gorm/logger"
 )
 
@@ -39,7 +40,7 @@ func RunMigrationBasedOnGoose(db *sql.DB, moduleName string, dialect string, mdi
 	return nil
 }
 
-func ApplyMigration(xapp *FirebackApp, level int64) {
+func ApplyMigration(xapp *application.Application, level int64) {
 	db := GetDbRef()
 
 	newLogger := logger.New(

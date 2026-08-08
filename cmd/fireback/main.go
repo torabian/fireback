@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/torabian/emi/lib/gorunner"
@@ -17,7 +18,9 @@ import (
 	// (promptui/bubbletea prompts, os/exec service management, asynq
 	// workers, graceful HTTP shutdown) via init(). It's tagged !wasm and
 	// deliberately not imported by cmd/fireback-wasm.
+	"github.com/torabian/fireback/modules/fireback/application"
 	_ "github.com/torabian/fireback/modules/fireback/clitools"
+	"github.com/torabian/fireback/modules/fireback/envm"
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	FBManage "github.com/torabian/fireback/modules/interfaces/fireback-manage"
 	FbSelfService "github.com/torabian/fireback/modules/interfaces/selfservice"
@@ -28,6 +31,11 @@ import (
 // var ui embed.FS
 
 func main() {
+
+	// Load the application configuration
+	envm.LoadFirebackAppConfiguration(fireback.GetConfigRef())
+
+	fmt.Println(fireback.GetConfig().DbDsn)
 
 	// wal-g is embedded directly in this binary (see modules/backup/Exec.go)
 	// rather than shelling out to a separate installed executable. This
@@ -41,7 +49,7 @@ func main() {
 		Commands: gorunner.BuildCommands(),
 	}
 
-	modules := []*fireback.ModuleProvider{
+	modules := []*application.ModuleProvider{
 		fireback.FirebackModuleSetup(nil),
 		{
 			CliHandlers: []*cli.Command{
@@ -70,7 +78,7 @@ func main() {
 	// For fireback we have abac module added.
 	modules = append(modules, abac.AbacCompleteModules()...)
 
-	var xapp = &fireback.FirebackApp{
+	var xapp = &application.Application{
 		Title: "Fireback core microservice - v" + fireback.FIREBACK_VERSION,
 		SeedersSync: func() {
 			abac.PassportMethodSyncSeeders()
@@ -89,7 +97,7 @@ func main() {
 
 	// This AppStart function is a wrapper for few things commonly can handle entire backend project
 	// startup. For mobile or desktop might other functionality be used.
-	xapp.CommonHeadlessAppStart(func() {
+	fireback.CommonHeadlessAppStart(xapp, func() {
 		// If anything needs to be done after database initialized
 		// fireback.RegionalContentSyncSeeders()
 		// fireback.AppMenuSyncSeeders()

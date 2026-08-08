@@ -22,14 +22,14 @@ import (
 )
 
 func init() {
-	fireback.AskForSelect = askForSelect
+	fireback.AskForSelect = AskForSelect
 	fireback.AskBoolean = askBoolean
 	fireback.AskForInputOptional = askForInputOptional
-	fireback.AskForInput = askForInput
+	fireback.AskForInput = AskForInput
 	fireback.AskForPassword = askForPassword
 }
 
-func askForSelect(label string, items []string) string {
+func AskForSelect(label string, items []string) string {
 	prompt := promptui.Select{
 		Label: label,
 		Items: items,
@@ -54,7 +54,7 @@ func askForSelect(label string, items []string) string {
 }
 
 func askBoolean(label string) bool {
-	if r := askForSelect(label, []string{"true", "false"}); r == "true" {
+	if r := AskForSelect(label, []string{"true", "false"}); r == "true" {
 		return true
 	}
 
@@ -80,7 +80,7 @@ func askForInputOptional(label string, defaultV string) (string, bool, error) {
 	return value, false, nil
 }
 
-func askForInput(label string, defaultV string) string {
+func AskForInput(label string, defaultV string) string {
 	validate := func(input string) error {
 		if input == "" {
 			return errors.New("this is necessary")

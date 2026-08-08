@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var pendingWorkspaceInvitePerms = NewCrudPermissionSet("root.modules", "pending-workspace-invite", "pending workspace invite")
@@ -16,7 +17,7 @@ var ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS = pendingWorkspaceInvitePerms.All
 var PendingWorkspaceInviteActions = NewEntityActionsBundle[PendingWorkspaceInviteEntity]()
 
 func PendingWorkspaceInviteBrowseAction(c PendingWorkspaceInviteBrowseActionRequest) (*PendingWorkspaceInviteBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func PendingWorkspaceInviteBrowseAction(c PendingWorkspaceInviteBrowseActionRequ
 }
 
 func PendingWorkspaceInviteGetAction(c PendingWorkspaceInviteGetActionRequest) (*PendingWorkspaceInviteGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func PendingWorkspaceInviteGetAction(c PendingWorkspaceInviteGetActionRequest) (
 }
 
 func PendingWorkspaceInviteCreateAction(c PendingWorkspaceInviteCreateActionRequest) (*PendingWorkspaceInviteCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +63,7 @@ func PendingWorkspaceInviteCreateAction(c PendingWorkspaceInviteCreateActionRequ
 }
 
 func PendingWorkspaceInviteUpdateAction(c PendingWorkspaceInviteUpdateActionRequest) (*PendingWorkspaceInviteUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func PendingWorkspaceInviteUpdateAction(c PendingWorkspaceInviteUpdateActionRequ
 }
 
 func PendingWorkspaceInviteAwareDeletePreviewAction(c PendingWorkspaceInviteAwareDeletePreviewActionRequest) (*PendingWorkspaceInviteAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := PendingWorkspaceInviteAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -103,7 +104,7 @@ func PendingWorkspaceInviteAwareDeletePreviewAction(c PendingWorkspaceInviteAwar
 }
 
 func PendingWorkspaceInviteAwareDeleteAction(c PendingWorkspaceInviteAwareDeleteActionRequest) (*PendingWorkspaceInviteAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PENDING_WORKSPACE_INVITE_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := PendingWorkspaceInviteEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // passport had permRewrite root.modules -> root.manage, and security: { writeOnRoot: true }
@@ -62,7 +63,7 @@ func GetUserByPassport(value string) (*UserEntity, *PassportEntity, error) {
 }
 
 func PassportBrowseAction(c PassportBrowseActionRequest) (*PassportBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PASSPORT_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func PassportBrowseAction(c PassportBrowseActionRequest) (*PassportBrowseActionR
 }
 
 func PassportGetAction(c PassportGetActionRequest) (*PassportGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PASSPORT_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func PassportGetAction(c PassportGetActionRequest) (*PassportGetActionResponse, 
 }
 
 func PassportCreateAction(c PassportCreateActionRequest) (*PassportCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PASSPORT_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +111,7 @@ func PassportCreateAction(c PassportCreateActionRequest) (*PassportCreateActionR
 }
 
 func PassportUpdateAction(c PassportUpdateActionRequest) (*PassportUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PASSPORT_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +152,7 @@ func PassportUpdateAction(c PassportUpdateActionRequest) (*PassportUpdateActionR
 }
 
 func PassportAwareDeletePreviewAction(c PassportAwareDeletePreviewActionRequest) (*PassportAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PASSPORT_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := PassportAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -163,7 +164,7 @@ func PassportAwareDeletePreviewAction(c PassportAwareDeletePreviewActionRequest)
 }
 
 func PassportAwareDeleteAction(c PassportAwareDeleteActionRequest) (*PassportAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PASSPORT_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := PassportEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

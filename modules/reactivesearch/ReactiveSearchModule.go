@@ -2,7 +2,7 @@ package reactivesearch
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // ReactiveSearchModuleConfig lets a project pass the search sources it actually wants
@@ -27,16 +27,16 @@ type ReactiveSearchModuleConfig struct {
 // ModuleSetup registers the reactivesearch module - only a project that actually
 // calls this from its own main.go, passing the sources it wants searched, gets the
 // /reactive-search route wired.
-func ModuleSetup(cfg *ReactiveSearchModuleConfig) *fireback.ModuleProvider {
+func ModuleSetup(cfg *ReactiveSearchModuleConfig) *application.ModuleProvider {
 	if cfg == nil {
 		cfg = &ReactiveSearchModuleConfig{}
 	}
 
-	module := &fireback.ModuleProvider{
+	module := &application.ModuleProvider{
 		Name: "reactivesearch",
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				meta := ReactiveSearchActionMeta()
 				g.GET(
 					meta.URL,

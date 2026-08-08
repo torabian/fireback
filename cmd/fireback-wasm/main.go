@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // Fireback doesn't come with default ui in the cmd anymore.
@@ -14,9 +15,9 @@ import (
 // //go:embed all:ui
 // var ui embed.FS
 
-var xapp = &fireback.FirebackApp{
+var xapp = &application.Application{
 	Title: "Fireback core microservice - v" + fireback.FIREBACK_VERSION,
-	Modules: []*fireback.ModuleProvider{
+	Modules: []*application.ModuleProvider{
 		// Add the very core module, such as capabilities
 		fireback.FirebackModuleSetup(nil),
 	},

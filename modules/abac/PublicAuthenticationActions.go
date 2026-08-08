@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // publicAuthentication's old security block was { writeOnRoot: true }: the old generated
@@ -19,7 +20,7 @@ var ALL_PUBLIC_AUTHENTICATION_PERMISSIONS = publicAuthenticationPerms.All
 var PublicAuthenticationActions = NewEntityActionsBundle[PublicAuthenticationEntity]()
 
 func PublicAuthenticationBrowseAction(c PublicAuthenticationBrowseActionRequest) (*PublicAuthenticationBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func PublicAuthenticationBrowseAction(c PublicAuthenticationBrowseActionRequest)
 }
 
 func PublicAuthenticationGetAction(c PublicAuthenticationGetActionRequest) (*PublicAuthenticationGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func PublicAuthenticationGetAction(c PublicAuthenticationGetActionRequest) (*Pub
 }
 
 func PublicAuthenticationCreateAction(c PublicAuthenticationCreateActionRequest) (*PublicAuthenticationCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func PublicAuthenticationCreateAction(c PublicAuthenticationCreateActionRequest)
 }
 
 func PublicAuthenticationUpdateAction(c PublicAuthenticationUpdateActionRequest) (*PublicAuthenticationUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,7 @@ func PublicAuthenticationUpdateAction(c PublicAuthenticationUpdateActionRequest)
 }
 
 func PublicAuthenticationAwareDeletePreviewAction(c PublicAuthenticationAwareDeletePreviewActionRequest) (*PublicAuthenticationAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := PublicAuthenticationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -132,7 +133,7 @@ func PublicAuthenticationAwareDeletePreviewAction(c PublicAuthenticationAwareDel
 }
 
 func PublicAuthenticationAwareDeleteAction(c PublicAuthenticationAwareDeleteActionRequest) (*PublicAuthenticationAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := PublicAuthenticationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

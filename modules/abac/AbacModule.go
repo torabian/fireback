@@ -9,6 +9,7 @@ import (
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
@@ -18,8 +19,8 @@ type MicroserviceSetupConfig struct {
 }
 
 // Inject this into any project as a complete solution
-func AbacCompleteModules() []*fireback.ModuleProvider {
-	return []*fireback.ModuleProvider{
+func AbacCompleteModules() []*application.ModuleProvider {
+	return []*application.ModuleProvider{
 		WorkspaceModuleSetup(),
 		NotificationModuleSetup(),
 		messaging.ModuleSetup(),
@@ -28,7 +29,7 @@ func AbacCompleteModules() []*fireback.ModuleProvider {
 	}
 }
 
-func WorkspaceModuleSetup() *fireback.ModuleProvider {
+func WorkspaceModuleSetup() *application.ModuleProvider {
 
 	// Default Fireback authorization. You can Override this on microservices
 	fireback.WithAuthorizationPure = WithAuthorizationPureDefault
@@ -37,7 +38,7 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	fireback.WithSocketAuthorization = WithSocketAuthorization
 	fireback.MeetsAccessLevel = MeetsAccessLevel
 
-	module := &fireback.ModuleProvider{
+	module := &application.ModuleProvider{
 		Name:               "abac",
 		OnEnvInit:          OnInitEnvHook,
 		GoMigrateDirectory: &migrations.MigrationsFs,
@@ -45,8 +46,8 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 		// Actions declared in Abac.emi.yml (moved out of AbacModule3.yml's old actions:
 		// section) are wired directly here, the same way FirebackModuleSetup wires the
 		// Capability* actions - rather than through the legacy Module3Action/Impl glue.
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
 				InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
 				UserInvitationsActionGin(g, UserInvitationsAction)
@@ -245,11 +246,11 @@ func WorkspaceModuleSetup() *fireback.ModuleProvider {
 	// TimezoneGroupSyncSeeders moved to modules/abac/interfacetools - see
 	// interfacetools.ModuleSetup's own ProvideSeederImportHandler call.
 
-	module.MigrationFunction = func(x *fireback.FirebackApp, db *gorm.DB) {
+	module.MigrationFunction = func(x *application.Application, db *gorm.DB) {
 		SyncPermissionsInDatabase(x, db)
 	}
 
-	module.AppendCli = func(x *fireback.FirebackApp) []*cli.Command {
+	module.AppendCli = func(x *application.Application) []*cli.Command {
 		return []*cli.Command{
 			GetMigrationCommand(x),
 		}

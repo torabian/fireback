@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // emailSender's old security block was { writeOnRoot: true }: the old generated code
@@ -21,7 +22,7 @@ var ALL_EMAIL_SENDER_PERMISSIONS = emailSenderPerms.All
 var EmailSenderActions = NewEntityActionsBundle[EmailSenderEntity]()
 
 func EmailSenderBrowseAction(c EmailSenderBrowseActionRequest) (*EmailSenderBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func EmailSenderBrowseAction(c EmailSenderBrowseActionRequest) (*EmailSenderBrow
 }
 
 func EmailSenderGetAction(c EmailSenderGetActionRequest) (*EmailSenderGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func EmailSenderGetAction(c EmailSenderGetActionRequest) (*EmailSenderGetActionR
 }
 
 func EmailSenderCreateAction(c EmailSenderCreateActionRequest) (*EmailSenderCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +65,7 @@ func EmailSenderCreateAction(c EmailSenderCreateActionRequest) (*EmailSenderCrea
 }
 
 func EmailSenderUpdateAction(c EmailSenderUpdateActionRequest) (*EmailSenderUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func EmailSenderUpdateAction(c EmailSenderUpdateActionRequest) (*EmailSenderUpda
 }
 
 func EmailSenderAwareDeletePreviewAction(c EmailSenderAwareDeletePreviewActionRequest) (*EmailSenderAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := EmailSenderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -102,7 +103,7 @@ func EmailSenderAwareDeletePreviewAction(c EmailSenderAwareDeletePreviewActionRe
 }
 
 func EmailSenderAwareDeleteAction(c EmailSenderAwareDeleteActionRequest) (*EmailSenderAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := EmailSenderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

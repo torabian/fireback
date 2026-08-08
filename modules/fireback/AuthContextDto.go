@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -80,12 +81,12 @@ var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
 type AuthContextDto struct {
 	SkipWorkspaceId bool `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `
 	// For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content
-	AllowCascade bool                   `json:"allowCascade" yaml:"allowCascade"        `
-	WorkspaceId  string                 `json:"workspaceId" yaml:"workspaceId"        `
-	Token        string                 `json:"token" yaml:"token"        `
-	Security     *SecurityModel         `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
-	SecurityId   emigo.Nullable[string] `json:"securityId" yaml:"securityId"`
-	Capabilities []PermissionInfo       `json:"capabilities" yaml:"capabilities"        `
+	AllowCascade bool                         `json:"allowCascade" yaml:"allowCascade"        `
+	WorkspaceId  string                       `json:"workspaceId" yaml:"workspaceId"        `
+	Token        string                       `json:"token" yaml:"token"        `
+	Security     *SecurityModel               `json:"security" yaml:"security"    gorm:"foreignKey:SecurityId;references:UniqueId"      `
+	SecurityId   emigo.Nullable[string]       `json:"securityId" yaml:"securityId"`
+	Capabilities []application.PermissionInfo `json:"capabilities" yaml:"capabilities"        `
 }
 type AuthContextDtoList struct {
 	Items []*AuthContextDto

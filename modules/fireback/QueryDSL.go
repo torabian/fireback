@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/owner"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -100,7 +101,7 @@ type QueryDSL struct {
 	WorkspaceId string `json:"-"`
 
 	// Those capabilities which user has
-	ActionRequires []PermissionInfo `json:"-"`
+	ActionRequires []application.PermissionInfo `json:"-"`
 
 	// This is the capabilities that user has
 	UserHas []string `json:"-"`

@@ -12,6 +12,7 @@ import (
 	"text/template"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/envm"
 	systemconfigs "github.com/torabian/fireback/modules/fireback/systemconfigs"
 	"github.com/urfave/cli/v3"
 )
@@ -98,7 +99,7 @@ func serviceLoadDebian(c *cli.Command) error {
 		panic(err)
 	}
 
-	uri, err := fireback.ResolveConfigurationUri()
+	uri, err := envm.ResolveConfigurationUri()
 	td := systemServiceInfo{
 		Label:       config.DebianIdentifier,
 		Program:     binaryPath,
@@ -185,7 +186,7 @@ func serviceLoadMac(c *cli.Command) error {
 		Program: binaryPath,
 	}
 
-	uri, err := fireback.ResolveConfigurationUri()
+	uri, err := envm.ResolveConfigurationUri()
 	possibleConfigPath := filepath.Join(workingDirectory, uri)
 
 	if fireback.Exists(possibleConfigPath) {

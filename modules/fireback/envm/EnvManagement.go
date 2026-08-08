@@ -1,14 +1,18 @@
-package fireback
+package envm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
+	"github.com/manifoldco/promptui"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -16,7 +20,7 @@ import (
 Manages the code related to switching and creating environment (files)
 */
 
-func EnvManagement(xapp *FirebackApp) *cli.Command {
+func EnvManagement(xapp *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "env",
 		Usage: "Manages the environments and .env files",
@@ -38,7 +42,7 @@ func EnvManagement(xapp *FirebackApp) *cli.Command {
 						return err
 					}
 
-					if len(envs) == 0 || (len(envs) == 1 && Contains(envs, ".env")) {
+					if len(envs) == 0 || (len(envs) == 1 && slices.Contains(envs, ".env")) {
 						log.Fatalln("There are no environments to switch to, you need more than .env file to switch between")
 						return nil
 					}
@@ -95,7 +99,7 @@ func EnvManagement(xapp *FirebackApp) *cli.Command {
 					envName := c.String("name")
 
 					if !c.IsSet("name") {
-						envName = AskForInput("Define the file name of env", "")
+						envName = askForInput("Define the file name of env", "")
 					}
 
 					if !strings.HasPrefix(envName, ".env.") {
@@ -182,4 +186,54 @@ func switchEnvironment(to string) error {
 
 	fmt.Println("Switching to environment:", to)
 	return nil
+}
+
+func askForInput(label string, defaultV string) string {
+	validate := func(input string) error {
+		if input == "" {
+			return errors.New("this is necessary")
+		}
+		return nil
+	}
+
+	promptVariable := promptui.Prompt{
+		Label:    label,
+		Validate: validate,
+		Default:  defaultV,
+	}
+
+	value, err := promptVariable.Run()
+	if err != nil {
+		if err.Error() == "^C" {
+			os.Exit(35)
+			return ""
+		}
+		return ""
+	}
+
+	return value
+}
+
+func AskForSelect(label string, items []string) string {
+	prompt := promptui.Select{
+		Label: label,
+		Items: items,
+	}
+
+	_, result, err := prompt.Run()
+
+	if err != nil {
+		if err.Error() == "^C" {
+			os.Exit(35)
+			return ""
+		}
+		return ""
+	}
+
+	index := strings.Index(result, ">>>")
+	if index <= 0 {
+		return result
+	}
+	return strings.Trim(result[0:index], " ")
+
 }

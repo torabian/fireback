@@ -5,6 +5,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
@@ -142,8 +143,8 @@ func filterRolePermissions(dto *RoleEntity, query fireback.QueryDSL) {
 	// Let's filter out the permissions that user actually doesn't have
 	itemsFiltered := []string{}
 	for _, capability := range ids {
-		meetsUser := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: capability}}, rolesPermission)
-		meetsWorkspace := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: capability}}, workspaceAccesses)
+		meetsUser := MeetsCheck([]application.PermissionInfo{{CompleteKey: capability}}, rolesPermission)
+		meetsWorkspace := MeetsCheck([]application.PermissionInfo{{CompleteKey: capability}}, workspaceAccesses)
 
 		if !meetsUser || !meetsWorkspace {
 			continue
@@ -156,7 +157,7 @@ func filterRolePermissions(dto *RoleEntity, query fireback.QueryDSL) {
 }
 
 func RoleBrowseAction(c RoleBrowseActionRequest) (*RoleBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +169,7 @@ func RoleBrowseAction(c RoleBrowseActionRequest) (*RoleBrowseActionResponse, err
 }
 
 func RoleGetAction(c RoleGetActionRequest) (*RoleGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +182,7 @@ func RoleGetAction(c RoleGetActionRequest) (*RoleGetActionResponse, error) {
 }
 
 func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +215,7 @@ func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, err
 }
 
 func RoleUpdateAction(c RoleUpdateActionRequest) (*RoleUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -235,7 +236,7 @@ func RoleUpdateAction(c RoleUpdateActionRequest) (*RoleUpdateActionResponse, err
 }
 
 func RoleAwareDeletePreviewAction(c RoleAwareDeletePreviewActionRequest) (*RoleAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := RoleAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -247,7 +248,7 @@ func RoleAwareDeletePreviewAction(c RoleAwareDeletePreviewActionRequest) (*RoleA
 }
 
 func RoleAwareDeleteAction(c RoleAwareDeleteActionRequest) (*RoleAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := RoleEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

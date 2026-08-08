@@ -7,6 +7,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/terminal"
 )
 
@@ -14,7 +15,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
-		ActionRequires: []fireback.PermissionInfo{
+		ActionRequires: []application.PermissionInfo{
 			PERM_ROOT_CAPABILITY_QUERY,
 		},
 	})
@@ -49,8 +50,8 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 		}
 
 		// Filter based on the workspace and role and not allow to create more access than the user has.
-		meetsUser := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
-		meetsWorkspace := MeetsCheck([]fireback.PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
+		meetsUser := MeetsCheck([]application.PermissionInfo{{CompleteKey: item.UniqueId}}, rolesPermission)
+		meetsWorkspace := MeetsCheck([]application.PermissionInfo{{CompleteKey: item.UniqueId}}, workspaceAccesses)
 
 		if !meetsUser || !meetsWorkspace {
 			continue

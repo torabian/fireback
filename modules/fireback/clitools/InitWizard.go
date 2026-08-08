@@ -14,6 +14,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -377,7 +378,7 @@ func askRetry() bool {
 	return false
 }
 
-func cliInit(xapp *fireback.FirebackApp) *cli.Command {
+func cliInit(xapp *application.Application) *cli.Command {
 
 	return &cli.Command{
 		Name:  "init",
@@ -408,7 +409,7 @@ func cliInit(xapp *fireback.FirebackApp) *cli.Command {
 	}
 }
 
-func dataBaseConfigEnv(xapp *fireback.FirebackApp) error {
+func dataBaseConfigEnv(xapp *application.Application) error {
 
 	// 2. Determine the database type, test the connection, create tables
 	for {
@@ -445,7 +446,7 @@ func dataBaseConfigEnv(xapp *fireback.FirebackApp) error {
 	return nil
 }
 
-func executeSeeders(xapp *fireback.FirebackApp) error {
+func executeSeeders(xapp *application.Application) error {
 	if r := fireback.AskForSelect("Do you want to add the seed data, menu items, etc?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := fireback.CreateDatabasePool()
 		if db == nil && dbErr != nil {
@@ -458,7 +459,7 @@ func executeSeeders(xapp *fireback.FirebackApp) error {
 	return nil
 }
 
-func envRunMigration(xapp *fireback.FirebackApp) error {
+func envRunMigration(xapp *application.Application) error {
 	if r := fireback.AskForSelect("Do you want to run migration, adding tables or columns to database (both automigrate, and manual)?", []string{"yes", "no"}); r == "yes" {
 		db, dbErr := fireback.CreateDatabasePool()
 		if db == nil && dbErr != nil {
@@ -471,7 +472,7 @@ func envRunMigration(xapp *fireback.FirebackApp) error {
 	return nil
 }
 
-func initEnvironment(xapp *fireback.FirebackApp, envFileName string, c *cli.Command) error {
+func initEnvironment(xapp *application.Application, envFileName string, c *cli.Command) error {
 
 	if fireback.AskForSelect("This command is to generate a .env file, for existing project, or standalone fireback installation. You need to use `fireback new` to create new project. Agree?", []string{"yes", "no"}) == "no" {
 		return nil

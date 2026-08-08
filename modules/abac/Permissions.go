@@ -5,9 +5,10 @@ import (
 	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
-func MeetsCheck(actionRequires []fireback.PermissionInfo, perms []string) bool {
+func MeetsCheck(actionRequires []application.PermissionInfo, perms []string) bool {
 	meets := true
 	for _, requiredPermission := range actionRequires {
 

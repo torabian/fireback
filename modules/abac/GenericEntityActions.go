@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // StreamEntityQuery mirrors the paginated streaming iterator (<Entity>EntityStream) the
@@ -36,12 +37,12 @@ func StreamEntityQuery[T any](queryFn func(fireback.QueryDSL) ([]*T, *fireback.Q
 // exactly what the old generated code used, to preserve existing role/capability
 // records in any live database.
 type CrudPermissionSet struct {
-	Wildcard fireback.PermissionInfo
-	Query    fireback.PermissionInfo
-	Create   fireback.PermissionInfo
-	Update   fireback.PermissionInfo
-	Delete   fireback.PermissionInfo
-	All      []fireback.PermissionInfo
+	Wildcard application.PermissionInfo
+	Query    application.PermissionInfo
+	Create   application.PermissionInfo
+	Update   application.PermissionInfo
+	Delete   application.PermissionInfo
+	All      []application.PermissionInfo
 }
 
 // NewCrudPermissionSet builds the 5 CompleteKeys exactly as the old Module3-generated
@@ -50,14 +51,14 @@ type CrudPermissionSet struct {
 // entity in this package lives in the "abac" module) + kebabName + the operation.
 func NewCrudPermissionSet(prefix, kebabName, displayName string) CrudPermissionSet {
 	base := prefix + ".abac." + kebabName
-	w := fireback.PermissionInfo{CompleteKey: base + ".*", Name: "Entire " + displayName + " actions (*)"}
-	q := fireback.PermissionInfo{CompleteKey: base + ".query", Name: "Query " + displayName}
-	c := fireback.PermissionInfo{CompleteKey: base + ".create", Name: "Create " + displayName}
-	u := fireback.PermissionInfo{CompleteKey: base + ".update", Name: "Update " + displayName}
-	d := fireback.PermissionInfo{CompleteKey: base + ".delete", Name: "Delete " + displayName}
+	w := application.PermissionInfo{CompleteKey: base + ".*", Name: "Entire " + displayName + " actions (*)"}
+	q := application.PermissionInfo{CompleteKey: base + ".query", Name: "Query " + displayName}
+	c := application.PermissionInfo{CompleteKey: base + ".create", Name: "Create " + displayName}
+	u := application.PermissionInfo{CompleteKey: base + ".update", Name: "Update " + displayName}
+	d := application.PermissionInfo{CompleteKey: base + ".delete", Name: "Delete " + displayName}
 	return CrudPermissionSet{
 		Wildcard: w, Query: q, Create: c, Update: u, Delete: d,
-		All: []fireback.PermissionInfo{d, c, u, q, w},
+		All: []application.PermissionInfo{d, c, u, q, w},
 	}
 }
 

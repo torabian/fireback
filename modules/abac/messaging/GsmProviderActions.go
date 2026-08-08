@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 
 	medianasms "github.com/medianasms/go-rest-sdk"
@@ -34,7 +35,7 @@ type xGsmProviderType struct {
 var GsmProviderActions = NewEntityActionsBundle[GsmProviderEntity]()
 
 func GsmProviderBrowseAction(c GsmProviderBrowseActionRequest) (*GsmProviderBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func GsmProviderBrowseAction(c GsmProviderBrowseActionRequest) (*GsmProviderBrow
 }
 
 func GsmProviderGetAction(c GsmProviderGetActionRequest) (*GsmProviderGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func GsmProviderGetAction(c GsmProviderGetActionRequest) (*GsmProviderGetActionR
 }
 
 func GsmProviderCreateAction(c GsmProviderCreateActionRequest) (*GsmProviderCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func GsmProviderCreateAction(c GsmProviderCreateActionRequest) (*GsmProviderCrea
 }
 
 func GsmProviderUpdateAction(c GsmProviderUpdateActionRequest) (*GsmProviderUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,7 @@ func GsmProviderUpdateAction(c GsmProviderUpdateActionRequest) (*GsmProviderUpda
 }
 
 func GsmProviderAwareDeletePreviewAction(c GsmProviderAwareDeletePreviewActionRequest) (*GsmProviderAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := GsmProviderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -119,7 +120,7 @@ func GsmProviderAwareDeletePreviewAction(c GsmProviderAwareDeletePreviewActionRe
 }
 
 func GsmProviderAwareDeleteAction(c GsmProviderAwareDeleteActionRequest) (*GsmProviderAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := GsmProviderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

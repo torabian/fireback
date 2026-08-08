@@ -10,6 +10,7 @@ import (
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
@@ -35,11 +36,11 @@ var GetUserAccessScope cli.Command = cli.Command{
 	},
 }
 
-func PermissionInfoFromString(items []string) []fireback.PermissionInfo {
-	res := []fireback.PermissionInfo{}
+func PermissionInfoFromString(items []string) []application.PermissionInfo {
+	res := []application.PermissionInfo{}
 
 	for _, item := range items {
-		res = append(res, fireback.PermissionInfo{
+		res = append(res, application.PermissionInfo{
 			CompleteKey: item,
 		})
 	}

@@ -5,6 +5,7 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // emailProvider's old security block was { writeOnRoot: true, readOnRoot: true }: the old
@@ -20,8 +21,8 @@ var ALL_EMAIL_PROVIDER_PERMISSIONS = emailProviderPerms.All
 
 var EmailProviderActions = NewEntityActionsBundle[EmailProviderEntity]()
 
-func emailProviderSecurity(perm fireback.PermissionInfo) *fireback.SecurityModel {
-	return &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{perm}, AllowOnRoot: true}
+func emailProviderSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
+	return &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{perm}, AllowOnRoot: true}
 }
 
 func EmailProviderBrowseAction(c EmailProviderBrowseActionRequest) (*EmailProviderBrowseActionResponse, error) {

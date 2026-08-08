@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func GetWorkspaceAndUserAccesses(query fireback.QueryDSL) ([]string, []string) {
 	return workspaceAccesses, rolesPermission
 }
 
-func GetCapabilityRefreshCommand(xapp *fireback.FirebackApp) *cli.Command {
+func GetCapabilityRefreshCommand(xapp *application.Application) *cli.Command {
 	return &cli.Command{
 
 		Name:        "capsync",
@@ -48,7 +49,7 @@ func GetCapabilityRefreshCommand(xapp *fireback.FirebackApp) *cli.Command {
 
 }
 
-func GetStats(xapp *fireback.FirebackApp) cli.Command {
+func GetStats(xapp *application.Application) cli.Command {
 	return cli.Command{
 		Name:        "stats",
 		Flags:       fireback.CommonQueryFlags,
@@ -62,7 +63,7 @@ func GetStats(xapp *fireback.FirebackApp) cli.Command {
 
 }
 
-func SyncPermissionsInDatabase(x *fireback.FirebackApp, db *gorm.DB) {
+func SyncPermissionsInDatabase(x *application.Application, db *gorm.DB) {
 
 	for _, item := range x.Modules {
 
@@ -77,9 +78,9 @@ func SyncPermissionsInDatabase(x *fireback.FirebackApp, db *gorm.DB) {
 		// }
 
 		// Insert the permissions into the database
-		item.PermissionsProvider = append(item.PermissionsProvider, fireback.PermissionInfo{
+		item.PermissionsProvider = append(item.PermissionsProvider, application.PermissionInfo{
 			CompleteKey: ROOT_ALL_ACCESS,
-		}, fireback.PermissionInfo{
+		}, application.PermissionInfo{
 			CompleteKey: ROOT_ALL_MODULES,
 		})
 
@@ -99,7 +100,7 @@ func SyncPermissionsInDatabase(x *fireback.FirebackApp, db *gorm.DB) {
 
 }
 
-func PermissionInfoToString(items []fireback.PermissionInfo) []string {
+func PermissionInfoToString(items []application.PermissionInfo) []string {
 	res := []string{}
 
 	for _, j := range items {

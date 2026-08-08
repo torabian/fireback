@@ -8,6 +8,7 @@ import (
 	"text/template"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
@@ -26,7 +27,7 @@ var ALL_REGIONAL_CONTENT_PERMISSIONS = regionalContentPerms.All
 var RegionalContentActions = NewEntityActionsBundle[RegionalContentEntity]()
 
 func RegionalContentBrowseAction(c RegionalContentBrowseActionRequest) (*RegionalContentBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func RegionalContentBrowseAction(c RegionalContentBrowseActionRequest) (*Regiona
 }
 
 func RegionalContentGetAction(c RegionalContentGetActionRequest) (*RegionalContentGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func RegionalContentGetAction(c RegionalContentGetActionRequest) (*RegionalConte
 }
 
 func RegionalContentCreateAction(c RegionalContentCreateActionRequest) (*RegionalContentCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func RegionalContentCreateAction(c RegionalContentCreateActionRequest) (*Regiona
 }
 
 func RegionalContentUpdateAction(c RegionalContentUpdateActionRequest) (*RegionalContentUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +100,7 @@ func RegionalContentUpdateAction(c RegionalContentUpdateActionRequest) (*Regiona
 }
 
 func RegionalContentAwareDeletePreviewAction(c RegionalContentAwareDeletePreviewActionRequest) (*RegionalContentAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := RegionalContentAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -111,7 +112,7 @@ func RegionalContentAwareDeletePreviewAction(c RegionalContentAwareDeletePreview
 }
 
 func RegionalContentAwareDeleteAction(c RegionalContentAwareDeleteActionRequest) (*RegionalContentAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := RegionalContentEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

@@ -17,23 +17,18 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/fireback/application"
+	"github.com/torabian/fireback/modules/fireback/envm"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
-type PermissionInfo struct {
-	Name        string `yaml:"name,omitempty" json:"name,omitempty"`
-	Description string `yaml:"description,omitempty" json:"description,omitempty"`
-	CompleteKey string `yaml:"completeKey,omitempty" json:"completeKey,omitempty"`
-	GoVariable  string `yaml:"-" json:"-"`
-}
-
-func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
+func GetCommonWebServerCliActions(xapp *application.Application) []*cli.Command {
 
 	return []*cli.Command{
 		CLIInit(xapp),
-		EnvManagement(xapp),
+		envm.EnvManagement(xapp),
 		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
@@ -46,19 +41,6 @@ func GetCommonWebServerCliActions(xapp *FirebackApp) []*cli.Command {
 		// Keep these in the last
 		&CLIAboutCommand,
 		&Cliversion,
-	}
-}
-func GetCommonMicroserviceCliActions(xapp *FirebackApp) []*cli.Command {
-
-	return []*cli.Command{
-		CLIInit(xapp),
-		&CLIDoctor,
-		&CLIServiceCommand,
-		&ConfigCommand,
-		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
-			return SetupHttpServer(xapp, cfg)
-		}),
-		GetSeeder(xapp),
 	}
 }
 
@@ -124,9 +106,9 @@ type DoctorHeadData struct {
 	ComputedDataBaseDsn string `yaml:"computedDataBaseDsn"`
 }
 type GeneralDoctorData struct {
-	General         DoctorHeadData   `yaml:"general"`
-	EnvironmentUris *EnvironmentUris `yaml:"environmentUris"`
-	Config          Config           `yaml:"config"`
+	General         DoctorHeadData        `yaml:"general"`
+	EnvironmentUris *envm.EnvironmentUris `yaml:"environmentUris"`
+	Config          Config                `yaml:"config"`
 }
 
 func (x *GeneralDoctorData) Yaml() string {
@@ -139,7 +121,7 @@ func (x *GeneralDoctorData) Yaml() string {
 
 func Doctor() {
 
-	uri, _ := ResolveConfigurationUri()
+	uri, _ := envm.ResolveConfigurationUri()
 	vendor, dsn := GetDatabaseDsn(config)
 	data := GeneralDoctorData{
 		General: DoctorHeadData{
@@ -148,7 +130,7 @@ func Doctor() {
 			DatabaseVendor:      vendor,
 			ComputedDataBaseDsn: dsn,
 		},
-		EnvironmentUris: GetEnvironmentUris(),
+		EnvironmentUris: envm.GetEnvironmentUris(),
 		Config:          config,
 	}
 
@@ -157,7 +139,7 @@ func Doctor() {
 
 	fmt.Println()
 	fmt.Println(Bold + "Environment urls:" + Reset)
-	fmt.Println(FormatYamlKeys(GetEnvironmentUris().Yaml()))
+	fmt.Println(FormatYamlKeys(envm.GetEnvironmentUris().Yaml()))
 
 	fmt.Println()
 	fmt.Println(Bold + "Configuration:" + Reset)
@@ -554,7 +536,7 @@ var CLIServiceCommand cli.Command = cli.Command{
 // CLIInit is the interactive `fireback init` wizard. Its real implementation
 // lives in modules/fireback/clitools (tagged !wasm) and registers itself
 // here via init().
-var CLIInit func(xapp *FirebackApp) *cli.Command
+var CLIInit func(xapp *application.Application) *cli.Command
 
 var Cliversion cli.Command = cli.Command{
 

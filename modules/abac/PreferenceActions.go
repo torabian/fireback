@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var preferencePerms = NewCrudPermissionSet("root.modules", "preference", "preference")
@@ -15,7 +16,7 @@ var ALL_PREFERENCE_PERMISSIONS = preferencePerms.All
 var PreferenceActions = NewEntityActionsBundle[PreferenceEntity]()
 
 func PreferenceBrowseAction(c PreferenceBrowseActionRequest) (*PreferenceBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +28,7 @@ func PreferenceBrowseAction(c PreferenceBrowseActionRequest) (*PreferenceBrowseA
 }
 
 func PreferenceGetAction(c PreferenceGetActionRequest) (*PreferenceGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func PreferenceGetAction(c PreferenceGetActionRequest) (*PreferenceGetActionResp
 }
 
 func PreferenceCreateAction(c PreferenceCreateActionRequest) (*PreferenceCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func PreferenceCreateAction(c PreferenceCreateActionRequest) (*PreferenceCreateA
 }
 
 func PreferenceUpdateAction(c PreferenceUpdateActionRequest) (*PreferenceUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +71,7 @@ func PreferenceUpdateAction(c PreferenceUpdateActionRequest) (*PreferenceUpdateA
 }
 
 func PreferenceAwareDeletePreviewAction(c PreferenceAwareDeletePreviewActionRequest) (*PreferenceAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := PreferenceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -82,7 +83,7 @@ func PreferenceAwareDeletePreviewAction(c PreferenceAwareDeletePreviewActionRequ
 }
 
 func PreferenceAwareDeleteAction(c PreferenceAwareDeleteActionRequest) (*PreferenceAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := PreferenceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

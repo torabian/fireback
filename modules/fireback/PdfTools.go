@@ -3,7 +3,6 @@ package fireback
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/alexeyco/simpletable"
 	"github.com/schollz/progressbar/v3"
@@ -300,35 +299,6 @@ func PdfExporter[T any](
 
 }
 
-func PdfExporterNativeQuery[T any](
-	path string,
-	query QueryDSL,
-	report *Report,
-	refl reflect.Value,
-) *IError {
-
-	data := &PdfExportData{
-		Name:        report.Title,
-		Description: report.Description,
-	}
-
-	cfg, pdf, pdfCatalog := CreatePdfCatalog[T](refl, data)
-	y := pdf.GetY()
-
-	stream := DatabaseScannerNativeQuery[T](report.Query, report.QueryCounter, query)
-	for {
-		row, more := <-stream
-		if !more {
-			break
-		}
-		OperateOnRecord[T](&y, cfg, pdfCatalog, row, refl, pdf)
-	}
-
-	pdf.WritePdf(path)
-	return nil
-
-}
-
 func StructsToTerminalTable[T any](items []*T, v reflect.Value) {
 	table := simpletable.New()
 
@@ -358,35 +328,4 @@ func StructsToTerminalTable[T any](items []*T, v reflect.Value) {
 		table.Body.Cells = append(table.Body.Cells, r)
 	}
 	table.Println()
-}
-
-func GetReportById(id string, reports []Report) *Report {
-	var report *Report
-
-	for _, r := range reports {
-
-		if r.UniqueId == id {
-			report = &r
-			break
-		}
-	}
-
-	return report
-}
-
-func GetReport(reports []Report) *Report {
-
-	items, _ := GetAppReportsString(reports)
-	id := AskForSelect("Select report:", items)
-
-	if id == "" {
-		return nil
-	}
-	index := strings.Index(id, ">>>")
-	if index <= 0 {
-		return nil
-	}
-	id = strings.Trim(id[0:index], " ")
-	return GetReportById(id, reports)
-
 }

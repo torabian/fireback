@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
-func GetMigrationCommand(xapp *fireback.FirebackApp) *cli.Command {
+func GetMigrationCommand(xapp *application.Application) *cli.Command {
 	return &cli.Command{
 
 		Name:  "migration",

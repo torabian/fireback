@@ -5,32 +5,33 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // Permission keys are preserved verbatim from the old Module3-generated
 // TableViewSizingEntity.dyno.go (this entity had no permRewrite override), so existing
 // role/capability records in any live database keep matching these completeKeys.
-var PERM_ROOT_TABLE_VIEW_SIZING = fireback.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING = application.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.*",
 	Name:        "Entire table view sizing actions (*)",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = fireback.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_DELETE = application.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.delete",
 	Name:        "Delete table view sizing",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = fireback.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_CREATE = application.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.create",
 	Name:        "Create table view sizing",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = fireback.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_UPDATE = application.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.update",
 	Name:        "Update table view sizing",
 }
-var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = fireback.PermissionInfo{
+var PERM_ROOT_TABLE_VIEW_SIZING_QUERY = application.PermissionInfo{
 	CompleteKey: "root.modules.abac.table-view-sizing.query",
 	Name:        "Query table view sizing",
 }
-var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []fireback.PermissionInfo{
+var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []application.PermissionInfo{
 	PERM_ROOT_TABLE_VIEW_SIZING_DELETE,
 	PERM_ROOT_TABLE_VIEW_SIZING_CREATE,
 	PERM_ROOT_TABLE_VIEW_SIZING_UPDATE,
@@ -40,7 +41,7 @@ var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []fireback.PermissionInfo{
 
 func TableViewSizingBrowseAction(c TableViewSizingBrowseActionRequest) (*TableViewSizingBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	})
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func TableViewSizingBrowseAction(c TableViewSizingBrowseActionRequest) (*TableVi
 
 func TableViewSizingGetAction(c TableViewSizingGetActionRequest) (*TableViewSizingGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	})
 	if err != nil {
 		return nil, err
@@ -81,7 +82,7 @@ func TableViewSizingGetAction(c TableViewSizingGetActionRequest) (*TableViewSizi
 
 func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableViewSizingCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 	})
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableVi
 
 func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableViewSizingUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 	})
 	if err != nil {
 		return nil, err
@@ -150,7 +151,7 @@ func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableVi
 
 func TableViewSizingAwareDeletePreviewAction(c TableViewSizingAwareDeletePreviewActionRequest) (*TableViewSizingAwareDeletePreviewActionResponse, error) {
 	_, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	})
 	if err != nil {
 		return nil, err
@@ -169,7 +170,7 @@ func TableViewSizingAwareDeletePreviewAction(c TableViewSizingAwareDeletePreview
 
 func TableViewSizingAwareDeleteAction(c TableViewSizingAwareDeleteActionRequest) (*TableViewSizingAwareDeleteActionResponse, error) {
 	_, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	})
 	if err != nil {
 		return nil, err

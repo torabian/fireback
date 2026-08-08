@@ -3,8 +3,9 @@ package abac
 import (
 	"reflect"
 
-	"github.com/torabian/fireback/modules/fireback"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PassportMethod"
+	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 func PassportMethodSyncSeeders() {
@@ -50,9 +51,9 @@ func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*PassportMethodEnti
 // passportMethod's security block was { writeOnRoot: true, readOnRoot: true, resolveStrategy: workspace },
 // which the old generated code translated into AllowOnRoot: true, ResolveStrategy: "workspace" uniformly
 // across every action - preserved here exactly.
-func passportMethodSecurity(perm fireback.PermissionInfo) *fireback.SecurityModel {
+func passportMethodSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
-		ActionRequires:  []fireback.PermissionInfo{perm},
+		ActionRequires:  []application.PermissionInfo{perm},
 		ResolveStrategy: fireback.ResolveStrategyWorkspace,
 		AllowOnRoot:     true,
 	}

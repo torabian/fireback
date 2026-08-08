@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var workspaceInvitePerms = NewCrudPermissionSet("root.modules", "workspace-invite", "workspace invite")
@@ -19,7 +20,7 @@ var ALL_WORKSPACE_INVITE_PERMISSIONS = workspaceInvitePerms.All
 var WorkspaceInviteActions = NewEntityActionsBundle[WorkspaceInviteEntity]()
 
 func WorkspaceInviteBrowseAction(c WorkspaceInviteBrowseActionRequest) (*WorkspaceInviteBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func WorkspaceInviteBrowseAction(c WorkspaceInviteBrowseActionRequest) (*Workspa
 }
 
 func WorkspaceInviteGetAction(c WorkspaceInviteGetActionRequest) (*WorkspaceInviteGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -44,22 +45,22 @@ func WorkspaceInviteGetAction(c WorkspaceInviteGetActionRequest) (*WorkspaceInvi
 }
 
 func WorkspaceInviteCreateAction(c WorkspaceInviteCreateActionRequest) (*WorkspaceInviteCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
 	entity := &WorkspaceInviteEntity{
-		PublicKey:        c.Body.PublicKey,
-		CoverLetter:      c.Body.CoverLetter,
-		TargetUserLocale: c.Body.TargetUserLocale,
-		Email:            c.Body.Email,
-		Phonenumber:      c.Body.Phonenumber,
-		WorkspaceId:      c.Body.WorkspaceId,
-		FirstName:        c.Body.FirstName,
-		LastName:         c.Body.LastName,
+		PublicKey:         c.Body.PublicKey,
+		CoverLetter:       c.Body.CoverLetter,
+		TargetUserLocale:  c.Body.TargetUserLocale,
+		Email:             c.Body.Email,
+		Phonenumber:       c.Body.Phonenumber,
+		WorkspaceId:       c.Body.WorkspaceId,
+		FirstName:         c.Body.FirstName,
+		LastName:          c.Body.LastName,
 		ForceEmailAddress: c.Body.ForceEmailAddress,
 		ForcePhoneNumber:  c.Body.ForcePhoneNumber,
-		RoleId:           c.Body.RoleId,
+		RoleId:            c.Body.RoleId,
 	}
 	created, err2 := WorkspaceInviteActions.Create(entity, *query)
 	if err2 != nil {
@@ -69,7 +70,7 @@ func WorkspaceInviteCreateAction(c WorkspaceInviteCreateActionRequest) (*Workspa
 }
 
 func WorkspaceInviteUpdateAction(c WorkspaceInviteUpdateActionRequest) (*WorkspaceInviteUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +117,7 @@ func WorkspaceInviteUpdateAction(c WorkspaceInviteUpdateActionRequest) (*Workspa
 }
 
 func WorkspaceInviteAwareDeletePreviewAction(c WorkspaceInviteAwareDeletePreviewActionRequest) (*WorkspaceInviteAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := WorkspaceInviteAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -128,7 +129,7 @@ func WorkspaceInviteAwareDeletePreviewAction(c WorkspaceInviteAwareDeletePreview
 }
 
 func WorkspaceInviteAwareDeleteAction(c WorkspaceInviteAwareDeleteActionRequest) (*WorkspaceInviteAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := WorkspaceInviteEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // workspaceType had permRewrite root.modules -> root.manage, and
@@ -78,8 +79,8 @@ var WorkspaceTypeMessages = struct {
 
 var WorkspaceTypeActions = NewEntityActionsBundle[WorkspaceTypeEntity]()
 
-func workspaceTypeSecurity(perm fireback.PermissionInfo) *fireback.SecurityModel {
-	return &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{perm}, AllowOnRoot: true}
+func workspaceTypeSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
+	return &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{perm}, AllowOnRoot: true}
 }
 
 func WorkspaceTypeBrowseAction(c WorkspaceTypeBrowseActionRequest) (*WorkspaceTypeBrowseActionResponse, error) {

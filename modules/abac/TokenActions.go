@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 // token's old security block was { writeOnRoot: true } (permRewrite root.modules -> root.manage):
@@ -19,7 +20,7 @@ var ALL_TOKEN_PERMISSIONS = tokenPerms.All
 var TokenActions = NewEntityActionsBundle[TokenEntity]()
 
 func TokenBrowseAction(c TokenBrowseActionRequest) (*TokenBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func TokenBrowseAction(c TokenBrowseActionRequest) (*TokenBrowseActionResponse, 
 }
 
 func TokenGetAction(c TokenGetActionRequest) (*TokenGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func TokenGetAction(c TokenGetActionRequest) (*TokenGetActionResponse, error) {
 }
 
 func TokenCreateAction(c TokenCreateActionRequest) (*TokenCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func TokenCreateAction(c TokenCreateActionRequest) (*TokenCreateActionResponse, 
 }
 
 func TokenUpdateAction(c TokenUpdateActionRequest) (*TokenUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func TokenUpdateAction(c TokenUpdateActionRequest) (*TokenUpdateActionResponse, 
 }
 
 func TokenAwareDeletePreviewAction(c TokenAwareDeletePreviewActionRequest) (*TokenAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := TokenAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -90,7 +91,7 @@ func TokenAwareDeletePreviewAction(c TokenAwareDeletePreviewActionRequest) (*Tok
 }
 
 func TokenAwareDeleteAction(c TokenAwareDeleteActionRequest) (*TokenAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_TOKEN_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := TokenEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

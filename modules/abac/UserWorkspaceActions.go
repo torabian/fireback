@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var userWorkspacePerms = NewCrudPermissionSet("root.manage", "user-workspace", "user workspace")
@@ -19,9 +20,9 @@ var ALL_USER_WORKSPACE_PERMISSIONS = userWorkspacePerms.All
 // directly.
 var UserWorkspaceActions = NewEntityActionsBundle[UserWorkspaceEntity]()
 
-func userWorkspaceSecurity(perm fireback.PermissionInfo) *fireback.SecurityModel {
+func userWorkspaceSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
-		ActionRequires:  []fireback.PermissionInfo{perm},
+		ActionRequires:  []application.PermissionInfo{perm},
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	}
 }

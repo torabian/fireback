@@ -2,13 +2,13 @@ package abac
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
 
-func PassportsModuleSetup() *fireback.ModuleProvider {
-	module := &fireback.ModuleProvider{
+func PassportsModuleSetup() *application.ModuleProvider {
+	module := &application.ModuleProvider{
 
 		// it must write on the workspaces instead
 		Name: "abac",
@@ -16,8 +16,8 @@ func PassportsModuleSetup() *fireback.ModuleProvider {
 		// passportMethod/publicJoinKey/emailConfirmation/phoneConfirmation moved from
 		// AbacModule3.yml's old entities: section to Abac.emi.yml, so they're wired
 		// directly here now, the same way FirebackModuleSetup wires Capability* actions.
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				PassportMethodBrowseActionGin(g, PassportMethodBrowseAction)
 				PassportMethodGetActionGin(g, PassportMethodGetAction)
 				PassportMethodCreateActionGin(g, PassportMethodCreateAction)

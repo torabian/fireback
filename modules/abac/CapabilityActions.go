@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"gorm.io/gorm"
 )
 
@@ -12,27 +13,27 @@ import (
 // derive "root.manage.abac.capability.*" instead, which would silently invalidate every
 // already-granted role/capability record in a live database, so these are declared by hand,
 // unchanged, rather than through that helper.
-var PERM_ROOT_CAPABILITY = fireback.PermissionInfo{
+var PERM_ROOT_CAPABILITY = application.PermissionInfo{
 	CompleteKey: "root.manage.fireback.capability.*",
 	Name:        "Entire capability actions (*)",
 }
-var PERM_ROOT_CAPABILITY_DELETE = fireback.PermissionInfo{
+var PERM_ROOT_CAPABILITY_DELETE = application.PermissionInfo{
 	CompleteKey: "root.manage.fireback.capability.delete",
 	Name:        "Delete capability",
 }
-var PERM_ROOT_CAPABILITY_CREATE = fireback.PermissionInfo{
+var PERM_ROOT_CAPABILITY_CREATE = application.PermissionInfo{
 	CompleteKey: "root.manage.fireback.capability.create",
 	Name:        "Create capability",
 }
-var PERM_ROOT_CAPABILITY_UPDATE = fireback.PermissionInfo{
+var PERM_ROOT_CAPABILITY_UPDATE = application.PermissionInfo{
 	CompleteKey: "root.manage.fireback.capability.update",
 	Name:        "Update capability",
 }
-var PERM_ROOT_CAPABILITY_QUERY = fireback.PermissionInfo{
+var PERM_ROOT_CAPABILITY_QUERY = application.PermissionInfo{
 	CompleteKey: "root.manage.fireback.capability.query",
 	Name:        "Query capability",
 }
-var ALL_CAPABILITY_PERMISSIONS = []fireback.PermissionInfo{
+var ALL_CAPABILITY_PERMISSIONS = []application.PermissionInfo{
 	PERM_ROOT_CAPABILITY_DELETE,
 	PERM_ROOT_CAPABILITY_CREATE,
 	PERM_ROOT_CAPABILITY_UPDATE,
@@ -45,7 +46,7 @@ var ALL_CAPABILITY_PERMISSIONS = []fireback.PermissionInfo{
 // wired into fireback.UpsertPermission from WorkspaceModuleSetup below, the same
 // injection-point pattern AuthorizeRequest/WithAuthorizationFn/WithAuthorizationPure/
 // WithSocketAuthorization already use there.
-func CapabilityUpsertPermissionFn(permInfo *fireback.PermissionInfo, hasChildren bool, db *gorm.DB) {
+func CapabilityUpsertPermissionFn(permInfo *application.PermissionInfo, hasChildren bool, db *gorm.DB) {
 	var entity *CapabilityEntity = nil
 	perm := permInfo.CompleteKey
 
@@ -78,7 +79,7 @@ func CapabilityUpsertPermissionFn(permInfo *fireback.PermissionInfo, hasChildren
 func GetCapabilitiesAction(c CapabilityBrowseActionRequest) (*CapabilityBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
 	})
 	if err != nil {
 		return nil, err
@@ -102,7 +103,7 @@ func GetCapabilitiesAction(c CapabilityBrowseActionRequest) (*CapabilityBrowseAc
 func CapabilityGetAction(c CapabilityGetActionRequest) (*CapabilityGetActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_CAPABILITY_QUERY},
 	}); err != nil {
 		return nil, err
 	}
@@ -122,7 +123,7 @@ func CapabilityGetAction(c CapabilityGetActionRequest) (*CapabilityGetActionResp
 func CapabilityUpdateAction(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_CAPABILITY_UPDATE},
 	}); err != nil {
 		return nil, err
 	}
@@ -140,7 +141,7 @@ func CapabilityUpdateAction(c CapabilityUpdateActionRequest) (*CapabilityUpdateA
 func CapabilityAwareDeleteAction(c CapabilityAwareDeleteActionRequest) (*CapabilityAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,
-		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
 	}); err != nil {
 		return nil, err
 	}

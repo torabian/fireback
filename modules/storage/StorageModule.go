@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/storage/migrations"
 	"github.com/urfave/cli/v3"
 )
@@ -96,22 +96,10 @@ type StorageModuleConfig struct {
 	Quota func(auth AuthContext) int64
 }
 
-func StorageModuleSetup(cfg *StorageModuleConfig) *fireback.ModuleProvider {
-	module := &fireback.ModuleProvider{
-		Name:        "fileupload",
+func StorageModuleSetup(cfg *StorageModuleConfig) *application.ModuleProvider {
+	module := &application.ModuleProvider{
+		Name:        "storage",
 		Definitions: &Module3Definitions,
-		// Adds all of the actions as cli, you can remove it and modify specific
-		// actions which go to the cli.
-		// if the functions does not exist, make sure you compile .yml module once at least
-		// ActionsBundle: GetFileuploadActionsBundle(),
-		// each entity, has multiple features, such as permissions, events, translations
-		// *EntityBundle objects are a list of them which are auto generated,
-		// and by adding them here it will be automatically added.
-		// we cannot add them automatically upon saving yaml for you,
-		// when you add a new entity in yaml, add it manually here.
-		EntityBundles: []fireback.EntityBundle{
-			// Insert the NameEntityBundle here.
-		},
 		CliHandlers: []*cli.Command{
 			{
 				Name: "storage",
@@ -128,8 +116,8 @@ func StorageModuleSetup(cfg *StorageModuleConfig) *fireback.ModuleProvider {
 		// up; the reaper itself is non-blocking (StartReaper spawns its own
 		// goroutine), so this hook returns as soon as the routes are
 		// registered.
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				return mountOnFirebackApp(g, cfg)
 			},
 		},

@@ -6,6 +6,10 @@ func GetConfig() Config {
 	return config
 }
 
+func GetConfigRef() *Config {
+	return &config
+}
+
 func (x *Config) Yaml() string {
 	if x != nil {
 		str, _ := yaml.Marshal(x)

@@ -3,10 +3,11 @@ package fireback
 import (
 	"context"
 
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 )
 
-func GetSeeder(xapp *FirebackApp) *cli.Command {
+func GetSeeder(xapp *application.Application) *cli.Command {
 	return &cli.Command{
 
 		Name:  "seeders",
@@ -18,7 +19,7 @@ func GetSeeder(xapp *FirebackApp) *cli.Command {
 	}
 }
 
-func ExecuteSeederImport(x *FirebackApp) {
+func ExecuteSeederImport(x *application.Application) {
 
 	for _, item := range x.Modules {
 		if item.SeederHandler != nil {

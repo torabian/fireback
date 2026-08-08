@@ -2,7 +2,7 @@ package messaging
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
@@ -10,17 +10,17 @@ import (
 // ModuleSetup registers messaging (email/gsm providers, email senders, the
 // SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider actions, and webPushConfig -
 // moved here from modules/fireback, where its CRUD had never actually been implemented
-// or wired) as its own fireback.ModuleProvider - split out of abac's
+// or wired) as its own application.ModuleProvider - split out of abac's
 // NotificationModuleSetup, which now only wires notificationConfig itself. GsmSendSms
 // (the "use the workspace's default provider" variant) stays wired in abac's
 // WorkspaceModuleSetup, since it depends on NotificationConfigEntity, which lives in
 // abac.
-func ModuleSetup() *fireback.ModuleProvider {
-	module := &fireback.ModuleProvider{
+func ModuleSetup() *application.ModuleProvider {
+	module := &application.ModuleProvider{
 		Name: "abac",
 
-		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *fireback.FirebackApp) error{
-			func(g *gin.RouterGroup, x *fireback.FirebackApp) error {
+		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
+			func(g *gin.RouterGroup, x *application.Application) error {
 				GsmProviderBrowseActionGin(g, GsmProviderBrowseAction)
 				GsmProviderGetActionGin(g, GsmProviderGetAction)
 				GsmProviderCreateActionGin(g, GsmProviderCreateAction)

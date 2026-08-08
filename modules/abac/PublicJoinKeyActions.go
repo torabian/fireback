@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var publicJoinKeyPerms = NewCrudPermissionSet("root.modules", "public-join-key", "public join key")
@@ -16,7 +17,7 @@ var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = publicJoinKeyPerms.All
 var PublicJoinKeyActions = NewEntityActionsBundle[PublicJoinKeyEntity]()
 
 func PublicJoinKeyBrowseAction(c PublicJoinKeyBrowseActionRequest) (*PublicJoinKeyBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +29,7 @@ func PublicJoinKeyBrowseAction(c PublicJoinKeyBrowseActionRequest) (*PublicJoinK
 }
 
 func PublicJoinKeyGetAction(c PublicJoinKeyGetActionRequest) (*PublicJoinKeyGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func PublicJoinKeyGetAction(c PublicJoinKeyGetActionRequest) (*PublicJoinKeyGetA
 }
 
 func PublicJoinKeyCreateAction(c PublicJoinKeyCreateActionRequest) (*PublicJoinKeyCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func PublicJoinKeyCreateAction(c PublicJoinKeyCreateActionRequest) (*PublicJoinK
 }
 
 func PublicJoinKeyUpdateAction(c PublicJoinKeyUpdateActionRequest) (*PublicJoinKeyUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func PublicJoinKeyUpdateAction(c PublicJoinKeyUpdateActionRequest) (*PublicJoinK
 }
 
 func PublicJoinKeyAwareDeletePreviewAction(c PublicJoinKeyAwareDeletePreviewActionRequest) (*PublicJoinKeyAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := PublicJoinKeyAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -86,7 +87,7 @@ func PublicJoinKeyAwareDeletePreviewAction(c PublicJoinKeyAwareDeletePreviewActi
 }
 
 func PublicJoinKeyAwareDeleteAction(c PublicJoinKeyAwareDeleteActionRequest) (*PublicJoinKeyAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := PublicJoinKeyEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

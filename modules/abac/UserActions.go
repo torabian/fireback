@@ -7,6 +7,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 	"github.com/urfave/cli/v3"
 )
@@ -72,7 +73,7 @@ func (x *UserEntity) FullName() string {
 }
 
 func UserBrowseAction(c UserBrowseActionRequest) (*UserBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func UserBrowseAction(c UserBrowseActionRequest) (*UserBrowseActionResponse, err
 }
 
 func UserGetAction(c UserGetActionRequest) (*UserGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func UserGetAction(c UserGetActionRequest) (*UserGetActionResponse, error) {
 }
 
 func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_CREATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +130,7 @@ func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, err
 }
 
 func UserUpdateAction(c UserUpdateActionRequest) (*UserUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_UPDATE}, AllowOnRoot: true})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +176,7 @@ func UserUpdateAction(c UserUpdateActionRequest) (*UserUpdateActionResponse, err
 }
 
 func UserAwareDeletePreviewAction(c UserAwareDeletePreviewActionRequest) (*UserAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	uniqueIds := UserAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -187,7 +188,7 @@ func UserAwareDeletePreviewAction(c UserAwareDeletePreviewActionRequest) (*UserA
 }
 
 func UserAwareDeleteAction(c UserAwareDeleteActionRequest) (*UserAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
 	if err2 := UserEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

@@ -21,13 +21,13 @@ func AppendNotificationConfigRouter(g *gin.RouterGroup) {
 
 	// g.GET("/notification/workspace/config",
 	// 	WithAuthorization(&fireback.SecurityModel{
-	// 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
+	// 		ActionRequires: []application.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_QUERY},
 	// 	}),
 	// 	HttpGetNotificationWorkspaceConfig,
 	// )
 	// g.PATCH("/notification/workspace/config",
 	// 	WithAuthorization(&fireback.SecurityModel{
-	// 		ActionRequires: []fireback.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
+	// 		ActionRequires: []application.PermissionInfo{PERM_ROOT_NOTIFICATION_CONFIG_UPDATE},
 	// 	}),
 	// 	HttpUpdateNotificationWorkspaceConfig,
 	// )

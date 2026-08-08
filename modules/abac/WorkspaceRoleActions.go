@@ -3,6 +3,7 @@ package abac
 import (
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/application"
 )
 
 var workspaceRolePerms = NewCrudPermissionSet("root.manage", "workspace-role", "workspace role")
@@ -19,7 +20,7 @@ var ALL_WORKSPACE_ROLE_PERMISSIONS = workspaceRolePerms.All
 var WorkspaceRoleActions = NewEntityActionsBundle[WorkspaceRoleEntity]()
 
 func WorkspaceRoleBrowseAction(c WorkspaceRoleBrowseActionRequest) (*WorkspaceRoleBrowseActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func WorkspaceRoleBrowseAction(c WorkspaceRoleBrowseActionRequest) (*WorkspaceRo
 }
 
 func WorkspaceRoleGetAction(c WorkspaceRoleGetActionRequest) (*WorkspaceRoleGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_QUERY}})
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func WorkspaceRoleGetAction(c WorkspaceRoleGetActionRequest) (*WorkspaceRoleGetA
 }
 
 func WorkspaceRoleCreateAction(c WorkspaceRoleCreateActionRequest) (*WorkspaceRoleCreateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func WorkspaceRoleCreateAction(c WorkspaceRoleCreateActionRequest) (*WorkspaceRo
 }
 
 func WorkspaceRoleUpdateAction(c WorkspaceRoleUpdateActionRequest) (*WorkspaceRoleUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE}})
+	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,7 @@ func WorkspaceRoleUpdateAction(c WorkspaceRoleUpdateActionRequest) (*WorkspaceRo
 }
 
 func WorkspaceRoleAwareDeletePreviewAction(c WorkspaceRoleAwareDeletePreviewActionRequest) (*WorkspaceRoleAwareDeletePreviewActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}}); err != nil {
 		return nil, err
 	}
 	uniqueIds := WorkspaceRoleAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
@@ -89,7 +90,7 @@ func WorkspaceRoleAwareDeletePreviewAction(c WorkspaceRoleAwareDeletePreviewActi
 }
 
 func WorkspaceRoleAwareDeleteAction(c WorkspaceRoleAwareDeleteActionRequest) (*WorkspaceRoleAwareDeleteActionResponse, error) {
-	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []fireback.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}}); err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_ROLE_DELETE}}); err != nil {
 		return nil, err
 	}
 	if err2 := WorkspaceRoleEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
