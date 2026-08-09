@@ -24,7 +24,21 @@ export function useFirebackSocket(
   const [socketState, setSocketState] = useState({ state: "unknown" });
 
   useEffect(() => {
-    if (!remote || !token || token === "undefined" || enabled === false) {
+    if (
+      !remote ||
+      !token ||
+      token === "undefined" ||
+      // No workspace resolved yet (e.g. a multi-workspace account sitting on
+      // the workspace picker, before selectWorkspace() has run) - wait for
+      // one rather than opening a socket scoped to the literal string
+      // "undefined" (template-literal-stringified from an actual `undefined`
+      // workspaceId), which the backend now accepts as a value rather than
+      // rejecting outright, so this would otherwise silently subscribe to a
+      // bogus workspace instead of failing loudly.
+      !workspaceId ||
+      workspaceId === "undefined" ||
+      enabled === false
+    ) {
       return;
     }
     const wsRemote = remote.replace("https", "wss").replace("http", "ws");

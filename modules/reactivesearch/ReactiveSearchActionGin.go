@@ -58,7 +58,17 @@ func ReactiveSearchActionReactiveHandler(factory func(
 		session.QueryParams = ReactiveSearchActionQueryFromHttp(ctx.Request)
 		write, err := factory(session)
 		if err != nil {
-			c.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+			// factory rejected the session (e.g. authorization failed) -
+			// report it over the real websocket connection (safe: this is
+			// gorilla's own Conn, not gin's response writer, which is no
+			// longer usable once Upgrade succeeded above) and tear the
+			// connection down instead of falling through to the read/write
+			// loops below with a nil write channel, which would otherwise
+			// leave a half-open, non-functional connection and a leaked
+			// reader goroutine.
+			c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, err.Error()))
+			c.Close()
+			return
 		}
 		go func() {
 			for {

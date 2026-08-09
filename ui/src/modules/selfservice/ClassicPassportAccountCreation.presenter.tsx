@@ -18,6 +18,7 @@ import {
 import type { GResponse } from "../sdk/sdk/envelopes";
 import { useCompleteAuth } from "./auth.common";
 import { strings } from "./strings/translations";
+import { MOne } from "../sdk/sdk/common/operators";
 
 export const usePresenter = () => {
   const { goBack, state, push } = useRouter();
@@ -68,7 +69,10 @@ export const usePresenter = () => {
   // we expect either the account completion is successful this stage
   // only catch is, if the server requires totp (dual factor)
   const successful = (res: GResponse<ClassicSignupActionRes>) => {
-    if (res.data?.item?.session?.token) {
+    if (
+      res.data?.item?.session instanceof MOne &&
+      res.data?.item?.session?.get()?.token
+    ) {
       onComplete(res);
     } else if (res.data?.item?.continueToTotp) {
       push(`/${locale}/selfservice/totp-setup`, undefined, {
