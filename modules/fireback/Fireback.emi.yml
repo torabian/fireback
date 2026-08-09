@@ -9,6 +9,8 @@ targets:
     output: ./
     flags:
       pkg: fireback
+    tags:
+      - split-cli
   - compiler: js
     output: ../../ui/src/modules/sdk/fireback
     flags:
