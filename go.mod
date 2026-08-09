@@ -2,10 +2,6 @@ module github.com/torabian/fireback
 
 go 1.25.1
 
-// TEMPORARY: verifying the enum CLI-cast fix locally before cutting a real
-// emi tag. Remove this line once github.com/torabian/emi is bumped past v1.3.3.
-replace github.com/torabian/emi => /Users/ali.torabi@stxnext.pl/work/emi
-
 require (
 	github.com/474420502/gcurl v1.2.1
 	github.com/Rhymond/go-money v1.0.15
@@ -51,7 +47,7 @@ require (
 	github.com/tdewolff/minify/v2 v2.23.8
 	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.3.3
+	github.com/torabian/emi v1.3.5
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli/v3 v3.8.0
 	github.com/wal-g/wal-g v1.1.3-rc-with-build.0.20260120170815-f81943e64bdf
