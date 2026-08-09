@@ -59,19 +59,12 @@ export function SessionGate({
   const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  // Retries always call the *latest* checkSession without restarting the
-  // whole effect - so a parent re-render that passes a new function
-  // identity (e.g. an inline arrow function) doesn't reset progress or
-  // fire a second, overlapping check loop.
-  const checkSessionRef = useRef(checkSession);
-  checkSessionRef.current = checkSession;
-
   useEffect(() => {
     let alive = true;
     let timer: ReturnType<typeof setTimeout>;
 
     const attemptCheck = (n: number) => {
-      checkSessionRef.current().then(
+      checkSession().then(
         () => {
           if (alive) setReady(true);
         },

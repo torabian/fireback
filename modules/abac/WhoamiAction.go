@@ -41,7 +41,7 @@ func WhoamiActionMeta() struct {
 	}{
 		Name:        "WhoamiAction",
 		CliName:     "whoami",
-		URL:         "/",
+		URL:         "/whoami",
 		Method:      "GET",
 		Description: `Returns information about the currently authenticated user - their userId, and every workspace they belong to along with their role(s) and capabilities in each (the same UserRoleWorkspace shape QueryUserRoleWorkspaces returns).`,
 	}

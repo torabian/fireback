@@ -1,16 +1,12 @@
 import EssentialApp from "../core/EssentialApp";
 import { ApplicationRoutes } from "./ApplicationRoutes";
 import { WithSdk } from "./WithSdk";
-import {
-  SessionGate,
-  noopCheckSession,
-} from "@/modules/fireback-ui/components/session-gate/SessionGate";
+import { SessionGate } from "@/modules/fireback-ui/components/session-gate/SessionGate";
+import { checkSessionViaWhoami } from "@/modules/fireback-ui/components/session-gate/checkSessionViaWhoami";
 
-// TODO: swap noopCheckSession for a real session/whoami API call. Until then
-// this resolves instantly, so boot behavior is unchanged.
 function App() {
   return (
-    <SessionGate checkSession={noopCheckSession}>
+    <SessionGate checkSession={checkSessionViaWhoami}>
       <EssentialApp ApplicationRoutes={ApplicationRoutes} WithSdk={WithSdk} />
     </SessionGate>
   );

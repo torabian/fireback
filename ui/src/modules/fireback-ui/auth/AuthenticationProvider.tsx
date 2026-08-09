@@ -12,10 +12,9 @@ import {
   readStoredValue,
   resolveSelectedWorkspace,
   writeStoredValue,
+  SESSION_STORAGE_KEY,
+  WORKSPACE_STORAGE_KEY,
 } from "./authenticationUtils";
-
-const SESSION_STORAGE_KEY = "nima_ui_session";
-const WORKSPACE_STORAGE_KEY = "nima_ui_selected_workspace";
 
 export interface AuthenticationProviderProps<TExtra = unknown> {
   children: ReactNode;

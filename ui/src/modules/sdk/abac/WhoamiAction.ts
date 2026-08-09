@@ -129,7 +129,7 @@ export const useWhoamiAction = (options?: WhoamiActionMutationOptions) => {
  */
 export class WhoamiAction {
   //
-  static URL = "/";
+  static URL = "/whoami";
   static NewUrl = (qs?: URLSearchParams) =>
     buildUrl(WhoamiAction.URL, undefined, qs);
   static Method = "GET";
@@ -185,7 +185,7 @@ export class WhoamiAction {
   static Definition = {
     name: "Whoami",
     cliName: "whoami",
-    url: "/",
+    url: "/whoami",
     method: "get",
     description:
       "Returns information about the currently authenticated user - their userId, and every workspace they belong to along with their role(s) and capabilities in each (the same UserRoleWorkspace shape QueryUserRoleWorkspaces returns).",

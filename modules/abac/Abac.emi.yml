@@ -302,7 +302,7 @@ actions:
   - name: Whoami
     method: get
     cliName: whoami
-    url: /
+    url: /whoami
     description:
       Returns information about the currently authenticated user - their userId,
       and every workspace they belong to along with their role(s) and capabilities

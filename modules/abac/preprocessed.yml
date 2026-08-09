@@ -2666,7 +2666,7 @@ actions:
         primitive: string
 - name: Whoami
   cliName: whoami
-  url: /
+  url: /whoami
   method: get
   description: Returns information about the currently authenticated user - their
     userId, and every workspace they belong to along with their role(s) and capabilities

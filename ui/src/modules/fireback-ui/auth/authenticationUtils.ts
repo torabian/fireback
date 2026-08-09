@@ -5,6 +5,16 @@ import type {
 } from "./AuthenticationContext";
 
 /**
+ * localStorage keys the session/selected workspace are persisted under.
+ * Exported (rather than kept private to AuthenticationProvider) so other
+ * code that needs to read/clear the same storage without going through the
+ * provider - e.g. checkSessionViaWhoami, which runs before any provider is
+ * mounted - stays in sync with it instead of duplicating the key string.
+ */
+export const SESSION_STORAGE_KEY = "nima_ui_session";
+export const WORKSPACE_STORAGE_KEY = "nima_ui_selected_workspace";
+
+/**
  * localStorage is only present in a browser. Guarded so this module doesn't
  * blow up if it's ever imported in a non-DOM context (e.g. SSR, tests).
  */
