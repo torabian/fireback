@@ -58,7 +58,16 @@ func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.A
 	query := fireback.QueryDSL{
 		UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 		ActionRequires:         context.Capabilities,
+		WorkspaceId:            context.WorkspaceId,
 	}
+
+	// MeetsAccessLevel checks query.UserHas/WorkspaceHas directly - they don't
+	// come from UserAccessPerWorkspace automatically, so they need to be flattened
+	// out of it for the *active* workspace (context.WorkspaceId) first. Without
+	// this, both are always empty, which - combined with the now-fixed
+	// MeetsAccessLevel actually enforcing its verdict instead of always returning
+	// true - would deny every capability-gated action for everyone, root included.
+	query.WorkspaceHas, query.UserHas = GetWorkspaceAndUserAccesses(query)
 
 	meets, missing := MeetsAccessLevel(query, false)
 

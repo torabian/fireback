@@ -115,6 +115,16 @@ describe("Passport method management", () => {
         failOnStatusCode: false,
         headers: {
           authorization: token,
+          // A workspace-id the root token has no real standing in at all (not
+          // just "not root") now gets rejected one gate earlier than before:
+          // Permissions.go's MeetsAccessLevel used to always report "meets",
+          // regardless of the caller's actual capabilities, so every request
+          // sailed through it and only the dedicated AllowOnRoot check (root
+          // workspace required) ever caught this case, as 400
+          // ActionOnlyInRoot. Now that MeetsAccessLevel actually enforces its
+          // verdict, a workspace the caller isn't even a member of fails the
+          // capability check first, as 401 NotEnoughPermission - still a
+          // rejection either way, just a different (now correct) reason.
           "Workspace-id": "not-root",
         },
         body: {
@@ -122,8 +132,8 @@ describe("Passport method management", () => {
           region: "global",
         },
       }).then((response: Cypress.Response<{ error: { message: string } }>) => {
-        expect(response.status).to.equal(400);
-        expect(response.body.error.message).to.equal("ActionOnlyInRoot");
+        expect(response.status).to.equal(401);
+        expect(response.body.error.message).to.equal("NotEnoughPermission");
       });
     });
   });
