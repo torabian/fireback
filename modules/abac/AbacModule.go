@@ -133,6 +133,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 
 				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
 				CapabilityGetActionGin(g, CapabilityGetAction)
+				CapabilityCreateActionGin(g, CapabilityCreateAction)
 				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
 				CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
 				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
@@ -338,6 +339,7 @@ var AbacActions cli.Command = cli.Command{
 					PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
 					CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
 					CapabilityGetActionCliHandler(CapabilityGetAction),
+					CapabilityCreateActionCliHandler(CapabilityCreateAction),
 					CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
 					CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
 					CapabilitiesTreeActionCliHandler(CapabilitiesTreeAction),
