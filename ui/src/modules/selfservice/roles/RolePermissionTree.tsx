@@ -1,8 +1,15 @@
 import { Checkbox } from "../../fireback-ui/components/checkbox/Checkbox";
 import { ErrorsView } from "../../fireback-ui/components/error-view/ErrorView";
-import { type CapabilityChild } from "../../sdk/core/react-tools";
 import { useCapabilitiesTreeActionQuery } from "../../sdk/abac/CapabilitiesTreeAction";
 import { MCollection } from "../../sdk/sdk/common/operators";
+
+/**
+ * Moved from the old `sdk/core/react-tools.tsx` - this is the only consumer.
+ */
+interface CapabilityChild {
+  uniqueId: string;
+  children: CapabilityChild[];
+}
 
 type NodeChangeFn = (
   node: string,

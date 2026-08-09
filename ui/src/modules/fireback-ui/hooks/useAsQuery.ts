@@ -3,7 +3,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 
-import { type UseRemoteQuery } from "../../sdk/core/react-tools";
+import { type UseRemoteQuery } from "../types/remoteQuery";
 import type { ResponseDto } from "@/modules/sdk/sdk/envelopes/google-json-style-guide/generated/ResponseDto";
 
 export function createQuerySource<T>(items: T[]): (

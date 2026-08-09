@@ -4,7 +4,7 @@ import { type FormikProps } from "formik";
 import { get, isArray, isObject, set } from "lodash";
 import { useState } from "react";
 import Select from "react-select/async";
-import { type UseRemoteQuery } from "../../../../sdk/core/react-tools";
+import { type UseRemoteQuery } from "../../../types/remoteQuery";
 import { useS } from "../../../hooks/useS";
 import { strings } from "../../strings/translations";
 import {

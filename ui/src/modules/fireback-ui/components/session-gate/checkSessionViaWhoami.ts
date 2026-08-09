@@ -1,21 +1,18 @@
 import { WhoamiAction } from "@/modules/sdk/abac/WhoamiAction";
 import { FetchxContext } from "@/modules/sdk/sdk/common/fetchx";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { SESSION_STORAGE_KEY } from "../../auth/authenticationUtils";
 
-// The app's real session lives under this key (see WithFireback.tsx's
-// `<FirebackQueryProvider identifier="fireback" ...>` -> saveSession() in
-// sdk/core/react-tools.tsx, which persists to "fb_microservice_" + identifier)
-// - NOT modules/fireback-ui/auth's AuthenticationProvider/authenticationUtils,
-// which is a separate, still-unused session mechanism nothing in the app
-// actually reads from or writes to. checkSession runs as a plain function
-// (SessionGate can't be a context consumer of RemoteQueryContext, since it's
-// meant to sit above any provider - see SessionGate.tsx), so the real
-// session's storage key is read directly here rather than through a hook.
-const REMOTE_QUERY_SESSION_KEY = "fb_microservice_fireback";
-
+// The app's real session lives under this key - see
+// fireback-ui/auth/AuthenticationProvider.tsx, which persists it there via
+// authenticationUtils' writeStoredValue(SESSION_STORAGE_KEY, ...). checkSession
+// runs as a plain function (SessionGate can't be a context consumer of
+// AuthenticationContext, since it's meant to sit above any provider - see
+// SessionGate.tsx), so the real session's storage key is read directly here
+// rather than through a hook.
 function readRemoteQueryToken(): string | undefined {
   try {
-    const raw = localStorage.getItem(REMOTE_QUERY_SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
     if (!raw) return undefined;
     const parsed = JSON.parse(raw) as { token?: string };
     return parsed?.token || undefined;
@@ -60,7 +57,7 @@ export async function checkSessionViaWhoami(): Promise<void> {
   );
 
   if (response.status === 401 || response.status === 403) {
-    localStorage.removeItem(REMOTE_QUERY_SESSION_KEY);
+    localStorage.removeItem(SESSION_STORAGE_KEY);
     window.location.href = `/selfservice?redirect=${encodeURIComponent(
       window.location.pathname + window.location.search,
     )}`;

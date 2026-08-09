@@ -1,7 +1,7 @@
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useQueryUserRoleWorkspacesActionQuery } from "../../../sdk/abac/QueryUserRoleWorkspacesAction";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import type { MArray } from "../../../sdk/sdk/common/operators";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
@@ -25,7 +25,7 @@ export enum MacTagsColor {
  */
 export function useWorkspacesMenuPresenter() {
   const s = useS(strings);
-  const { selectedUrw, selectUrw, session } = useContext(RemoteQueryContext);
+  const { selectedWorkspace, selectWorkspace, session } = useAuthentication();
 
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
     enabled: !!session?.token,
@@ -35,9 +35,9 @@ export function useWorkspacesMenuPresenter() {
   const recomputeKey =
     (items || []).map((item) => item.uniqueId).join("-") +
     "_" +
-    selectedUrw?.roleId +
+    selectedWorkspace?.roleId +
     "_" +
-    selectedUrw?.workspaceId;
+    selectedWorkspace?.workspaceId;
 
   const menus: MenuItem[] = useMemo(() => {
     const workspacesAndRolesList: MenuItem[] = [];
@@ -48,17 +48,17 @@ export function useWorkspacesMenuPresenter() {
           label: `${workspace.name} (${role.name})`,
           children: [],
           forceActive:
-            selectedUrw?.roleId === role.uniqueId &&
-            selectedUrw?.workspaceId === workspace.uniqueId,
+            selectedWorkspace?.roleId === role.uniqueId &&
+            selectedWorkspace?.workspaceId === workspace.uniqueId,
           color:
             workspace.uniqueId === "root"
               ? MacTagsColor.Orange
               : MacTagsColor.Green,
           onClick: () => {
-            selectUrw({
+            selectWorkspace({
               roleId: role.uniqueId,
               workspaceId: workspace.uniqueId,
-            } as any);
+            });
           },
         });
       });

@@ -1,8 +1,6 @@
-import { useContext } from "react";
 import { FormText } from "../../fireback-ui/components/forms/form-text/FormText";
 import { type EntityFormProps } from "../../fireback-ui/types/EntityManagement";
 import { useS } from "../../fireback-ui/hooks/useS";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { UserDto } from "../../sdk/abac/UserDto";
 import { strings } from "./strings/translations";
 
@@ -11,7 +9,6 @@ export const UserEditForm = ({
   isEditing,
 }: EntityFormProps<Partial<UserDto>>) => {
   const { values, setFieldValue, errors, setValues } = form;
-  const { options } = useContext(RemoteQueryContext);
   const s = useS(strings);
 
   return (

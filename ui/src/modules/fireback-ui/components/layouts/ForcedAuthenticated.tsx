@@ -1,12 +1,12 @@
 import classNames from "classnames";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import Link from "../link/Link";
 
 export function useCheckAuthentication() {
-  const { session, checked } = useContext(RemoteQueryContext);
+  const { session, checked } = useAuthentication();
   const [loadComplete, setLoadComplete] = useState(false);
   const needsAuthentication = checked && !session;
   const [isFading, setFading] = useState(false);

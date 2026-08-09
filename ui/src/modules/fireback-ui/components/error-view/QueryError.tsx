@@ -1,6 +1,6 @@
 import { useS } from "../../hooks/useS";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
-import { useContext } from "react";
+import { useApiOptions } from "../../hooks/useApiOptions";
+import { useState } from "react";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { FormButton } from "../forms/form-button/FormButton";
 import { strings } from "../strings/translations";
@@ -34,6 +34,10 @@ export function getQueryErrorString(
     return unknownStr;
   }
 
+  if (query.data?.error?.messageTranslated) {
+    return query.data?.error?.messageTranslated;
+  }
+
   return null;
 }
 
@@ -45,8 +49,14 @@ export function QueryErrorView({
   children?: React.ReactNode;
 }) {
   const s = useS(strings);
-  const { options, setOverrideRemoteUrl, overrideRemoteUrl } =
-    useContext(RemoteQueryContext);
+  const options = useApiOptions();
+  // Dev-only "the app is pointed at the wrong host:port" helper - local to
+  // this component now (nothing else ever read it from the old
+  // RemoteQueryContext either, and it never actually affected the generated
+  // SDK's own requests, only this component's own display below).
+  const [overrideRemoteUrl, setOverrideRemoteUrl] = useState<
+    string | undefined
+  >(undefined);
 
   let showAutoAdjustTheUrl = false;
   let port = "80";
@@ -69,9 +79,12 @@ export function QueryErrorView({
   if (!query) {
     return null;
   }
+
+  const hasError = query.isError || query.data?.error?.messageTranslated;
+
   return (
     <>
-      {query.isError && (
+      {hasError && (
         <div className="basic-error-box fadein">
           {getQueryErrorString(s, query, { remote: options.prefix }) || ""}
           {showAutoAdjustTheUrl && (

@@ -45,6 +45,17 @@ export interface AuthenticationHeaders {
 export interface AuthenticationContextValue<TExtra = unknown> {
   /** The current session, or null when signed out. */
   session: AuthenticationSession<TExtra> | null;
+  /**
+   * Whether the provider has finished its boot-time read of persisted state
+   * (session + selected workspace) at least once. `AuthenticationProvider`
+   * reads storage synchronously, so this is briefly `false` only on the very
+   * first render and flips to `true` right after mount - consumers that show
+   * a "checking session" state before deciding to redirect to sign-in (e.g.
+   * `ForcedAuthenticated`) key off this rather than `session` alone, since a
+   * `null` session is ambiguous between "not checked yet" and "checked, and
+   * there really is none".
+   */
+  checked: boolean;
   /** Convenience flag, equivalent to `session !== null`. */
   isAuthenticated: boolean;
   /** The bearer token to send with API requests, or undefined when signed out. */

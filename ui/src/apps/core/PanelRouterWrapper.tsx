@@ -1,8 +1,8 @@
-import { type ReactNode, useContext } from "react";
+import { type ReactNode } from "react";
 import { Panel } from "react-resizable-panels";
 import { ResizeHandle } from "../../modules/fireback-ui/components/layouts/ResizeHandle";
 import { useUiState } from "../../modules/fireback-ui/hooks/uiStateContext";
-import { RemoteQueryContext } from "../../modules/sdk/core/react-tools";
+import { useAuthentication } from "../../modules/fireback-ui/auth/AuthenticationContext";
 import { SidebarPanel } from "./SidebarPanel";
 
 export const PanelRouterWithSidebar = ({
@@ -34,7 +34,7 @@ export const PanelRouterWrapper = ({
   routerId: string;
 }) => {
   const { routers, setFocusedRouter } = useUiState();
-  const { session } = useContext(RemoteQueryContext);
+  const { session } = useAuthentication();
 
   return (
     <Panel

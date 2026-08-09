@@ -73,6 +73,17 @@ export function AuthenticationProvider<TExtra = unknown>({
       undefined,
   );
 
+  // Storage is already read synchronously above (both lazy initializers run
+  // during the first render), so there's no real "still loading" window -
+  // this just flips true one tick after mount, matching the boot-flag
+  // pattern callers like ForcedAuthenticated build their loading/fade
+  // transition on top of (see AuthenticationContextValue.checked's doc
+  // comment).
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    setChecked(true);
+  }, []);
+
   /** Stores a session (or clears it, for null) both in state and in storage. */
   const setSession = (next: AuthenticationSession<TExtra> | null) => {
     writeStoredValue(SESSION_STORAGE_KEY, next);
@@ -151,6 +162,7 @@ export function AuthenticationProvider<TExtra = unknown>({
     );
     return {
       session,
+      checked,
       isAuthenticated: session !== null,
       token: session?.token,
       selectedWorkspace,
@@ -162,7 +174,14 @@ export function AuthenticationProvider<TExtra = unknown>({
       checkValidity,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, explicitWorkspace, selfServiceUrl, returnParam, checkValidityHook]);
+  }, [
+    session,
+    checked,
+    explicitWorkspace,
+    selfServiceUrl,
+    returnParam,
+    checkValidityHook,
+  ]);
 
   return (
     <AuthenticationContext.Provider value={value}>

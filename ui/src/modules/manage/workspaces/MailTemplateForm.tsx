@@ -2,7 +2,6 @@ import { ModalContext } from "../../fireback-ui/components/modal/Modal";
 import { PageSection } from "../../fireback-ui/components/page-section/PageSection";
 import { useS } from "../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { type FormikProps } from "formik";
 import { useContext } from "react";
 import { WorkspaceDto } from "../../sdk/abac/WorkspaceDto";
@@ -30,7 +29,6 @@ export const MailTemplateForm = ({
 };
 
 function MailTemplateConfiguration() {
-  const { options } = useContext(RemoteQueryContext);
   const useModal = useContext(ModalContext);
 
   return <div>form here</div>;

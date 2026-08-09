@@ -1,5 +1,4 @@
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
-import { useContext } from "react";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
 
@@ -8,7 +7,7 @@ export function AuthenticatedAccess({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated } = useContext(RemoteQueryContext);
+  const { isAuthenticated } = useAuthentication();
   const s = useS(strings);
 
   if (!isAuthenticated) {

@@ -6,9 +6,10 @@ import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
+import { useApiOptions } from "../../hooks/useApiOptions";
 import { osResources } from "../../hooks/resources";
 import { KeyboardAction, toBinaryString } from "../../hooks/useExportTools";
 import { useKeyCombination } from "../../hooks/useKeyPress";
@@ -261,14 +262,14 @@ export function useCommonCrudActions({
   onCancel?: () => void;
   access?: PermissionLevel;
 }) {
-  const { selectedUrw } = useContext(RemoteQueryContext);
+  const { selectedWorkspace } = useAuthentication();
 
   const meets = useMemo(() => {
     if (!access) {
       return true;
     }
 
-    if (selectedUrw?.workspaceId !== "root" && access?.onlyRoot) {
+    if (selectedWorkspace?.workspaceId !== "root" && access?.onlyRoot) {
       return false;
     }
 
@@ -276,8 +277,8 @@ export function useCommonCrudActions({
       return true;
     }
 
-    return userMeetsAccess(selectedUrw as any, access.permissions[0]);
-  }, [selectedUrw, access]);
+    return userMeetsAccess(selectedWorkspace as any, access.permissions[0]);
+  }, [selectedWorkspace, access]);
 
   const s = useS(strings);
   const editingCore = ({
@@ -358,7 +359,7 @@ export function useBackButton(
 }
 
 export function useCommonArchiveExportTools() {
-  const { session, options } = useContext(RemoteQueryContext);
+  const options = useApiOptions();
 
   useExportActions(() => {
     var xhr = new XMLHttpRequest();

@@ -1,16 +1,15 @@
-import { useContext } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { osResources } from "../../hooks/resources";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import Link from "../link/Link";
 import { strings } from "../strings/translations";
 
 export function CurrentUser({ onClick }: { onClick: () => void }) {
-  const { isAuthenticated, signout } = useContext(RemoteQueryContext);
+  const { isAuthenticated, signout } = useAuthentication();
   const router = useRouter();
   const s = useS(strings);
   const queryClient = useQueryClient();
