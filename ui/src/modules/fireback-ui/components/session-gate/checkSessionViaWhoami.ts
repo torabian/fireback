@@ -1,22 +1,39 @@
 import { WhoamiAction } from "@/modules/sdk/abac/WhoamiAction";
-import {
-  readStoredValue,
-  writeStoredValue,
-  SESSION_STORAGE_KEY,
-} from "@/modules/fireback-ui/auth/authenticationUtils";
-import type { AuthenticationSession } from "@/modules/fireback-ui/auth/AuthenticationContext";
+import { FetchxContext } from "@/modules/sdk/sdk/common/fetchx";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
+
+// The app's real session lives under this key (see WithFireback.tsx's
+// `<FirebackQueryProvider identifier="fireback" ...>` -> saveSession() in
+// sdk/core/react-tools.tsx, which persists to "fb_microservice_" + identifier)
+// - NOT modules/fireback-ui/auth's AuthenticationProvider/authenticationUtils,
+// which is a separate, still-unused session mechanism nothing in the app
+// actually reads from or writes to. checkSession runs as a plain function
+// (SessionGate can't be a context consumer of RemoteQueryContext, since it's
+// meant to sit above any provider - see SessionGate.tsx), so the real
+// session's storage key is read directly here rather than through a hook.
+const REMOTE_QUERY_SESSION_KEY = "fb_microservice_fireback";
+
+function readRemoteQueryToken(): string | undefined {
+  try {
+    const raw = localStorage.getItem(REMOTE_QUERY_SESSION_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { token?: string };
+    return parsed?.token || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Real `checkSession` for SessionGate (see SessionGate.tsx) - calls the
- * whoami endpoint (GET /, see Abac.emi.yml/WhoamiActionImplementation.go) to
- * decide whether the app is safe to render, distinguishing three outcomes:
+ * whoami endpoint (GET /whoami, see Abac.emi.yml/WhoamiActionImplementation.go)
+ * to decide whether the app is safe to render, distinguishing three outcomes:
  *
- *  - No session stored at all (readStoredValue finds nothing under the same
- *    key AuthenticationProvider persists to): there's nothing to verify, so
- *    this resolves immediately and lets the rest of the app render as
- *    normal - its own routes already handle the signed-out state (e.g.
- *    self-service's own welcome/signup screens, manage's "Authentication
- *    Currently Unavailable" welcome page).
+ *  - No session stored at all: there's nothing to verify, so this resolves
+ *    immediately and lets the rest of the app render as normal - its own
+ *    routes already handle the signed-out state (e.g. self-service's own
+ *    welcome/signup screens, manage's "Authentication Currently Unavailable"
+ *    welcome page).
  *  - A session IS stored, but whoami rejects it with 401/403: the token has
  *    expired or been revoked. That's an actual "you need to sign in again",
  *    not a "try later" - the stored session is cleared and the browser is
@@ -28,10 +45,22 @@ import type { AuthenticationSession } from "@/modules/fireback-ui/auth/Authentic
  *    keeps retrying, and the stored session is left untouched.
  */
 export async function checkSessionViaWhoami(): Promise<void> {
-  const { response } = await WhoamiAction.Fetch({});
+  const token = readRemoteQueryToken();
+  if (!token) {
+    return;
+  }
+
+  const { response } = await WhoamiAction.Fetch(
+    { headers: { authorization: token } },
+    {
+      ctx: new FetchxContext(
+        BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, ""),
+      ),
+    },
+  );
 
   if (response.status === 401 || response.status === 403) {
-    writeStoredValue(SESSION_STORAGE_KEY, null);
+    localStorage.removeItem(REMOTE_QUERY_SESSION_KEY);
     window.location.href = `/selfservice?redirect=${encodeURIComponent(
       window.location.pathname + window.location.search,
     )}`;

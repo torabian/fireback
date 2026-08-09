@@ -1,7 +1,7 @@
-import { useRef } from "react";
 import "bootstrap/dist/css/bootstrap.css";
-import "../../modules/styles/styles.css";
+import { useRef } from "react";
 import "../../modules/styles/apple-family/styles.css";
+import "../../modules/styles/styles.css";
 
 // You do not have to use the mac-os family theme at all.
 // this is the default theme which I use for mac desktop applications
@@ -10,6 +10,12 @@ import "../../modules/styles/apple-family/styles.css";
 
 import { WithFireback } from "../core/WithFireback";
 
+import { useCheckAuthentication } from "@/modules/fireback-ui/components/layouts/ForcedAuthenticated";
+import { BUILD_VARIABLES } from "@/modules/fireback-ui/hooks/build-variables";
+import {
+  useSelfServiceAuthenticateRoutes,
+  useSelfServicePublicRoutes,
+} from "@/modules/selfservice/SelfServiceRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,
@@ -18,14 +24,6 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
-import { useCheckAuthentication } from "@/modules/fireback-ui/components/layouts/ForcedAuthenticated";
-import {
-  useSelfServiceAuthenticateRoutes,
-  useSelfServicePublicRoutes,
-} from "@/modules/selfservice/SelfServiceRoutes";
-import { BUILD_VARIABLES } from "@/modules/fireback-ui/hooks/build-variables";
-import { SessionGate } from "@/modules/fireback-ui/components/session-gate/SessionGate";
-import { checkSessionViaWhoami } from "@/modules/fireback-ui/components/session-gate/checkSessionViaWhoami";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -34,17 +32,11 @@ function App() {
   const queryClient = useRef(new QueryClient());
 
   return (
-    <SessionGate checkSession={checkSessionViaWhoami}>
-      <QueryClientProvider client={queryClient.current}>
-        <WithFireback
-          config={{}}
-          prefix={""}
-          queryClient={queryClient.current}
-        >
-          <AppBody />
-        </WithFireback>
-      </QueryClientProvider>
-    </SessionGate>
+    <QueryClientProvider client={queryClient.current}>
+      <WithFireback config={{}} prefix={""} queryClient={queryClient.current}>
+        <AppBody />
+      </WithFireback>
+    </QueryClientProvider>
   );
 }
 

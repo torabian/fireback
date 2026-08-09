@@ -18,6 +18,43 @@ import { Upload } from "tus-js-client";
 import type { QueryClient, UseQueryOptions } from "@tanstack/react-query";
 
 /**
+ * Normalizes a field like `session.userWorkspaces` into a plain array,
+ * regardless of which of its three actual runtime shapes it's currently in:
+ *
+ *  - A real `MCollection` instance (see sdk/common/operators.ts) - e.g. right
+ *    after a fresh signin/signup response is cast into a `UserSessionDto`.
+ *  - A bare array - what `MCollection.toJSON()` degrades to for its default
+ *    "replace" operation. `saveSession`/`getSession` below round-trip the
+ *    session through `JSON.stringify`/`JSON.parse` for localStorage, which
+ *    always applies `toJSON()` and never restores the class wrapper - so
+ *    this is the shape session.userWorkspaces is *actually* in on every page
+ *    load that hydrates from a previously-saved session, not the MCollection
+ *    instance a fresh one is.
+ *  - The tagged `{ __operation: "append", items: [...] }` object -
+ *    `toJSON()`'s form for the "append" operation, same round-trip.
+ *
+ * Getting this wrong (assuming just one shape) crashes as either
+ * "`.len` is not a function" (assumed MCollection, got array/tagged-object)
+ * or silently drops every workspace via `.length`/`[0]` on a real MCollection
+ * (which has neither) - both bugs this app actually hit.
+ */
+export function collectionToArray<T = any>(value: unknown): T[] {
+  if (!value) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value as T[];
+  }
+  if (typeof (value as { get?: unknown }).get === "function") {
+    return (value as { get: () => T[] }).get();
+  }
+  if (Array.isArray((value as { items?: unknown }).items)) {
+    return (value as { items: T[] }).items;
+  }
+  return [];
+}
+
+/**
  * Removes the workspace id which is default present everywhere
  * @param options
  * @returns
@@ -451,10 +488,21 @@ export function RemoteQueryProvider({
   } else if (selectedUrw) {
     options.headers["workspace-id"] = selectedUrw.workspaceId;
     options.headers["role-id"] = selectedUrw.roleId;
-  } else if (session?.userWorkspaces && session.userWorkspaces.length > 0) {
-    const sess2 = session.userWorkspaces[0];
-    options.headers["workspace-id"] = sess2.workspaceId;
-    options.headers["role-id"] = sess2.roleId;
+  } else {
+    // userWorkspaces' actual runtime shape varies (real MCollection right
+    // after signin/signup vs. a plain array/tagged object once it's been
+    // through the JSON round-trip saveSession/getSession use for localStorage
+    // - see collectionToArray's own doc comment above) - collectionToArray
+    // normalizes either one instead of assuming a single shape, which
+    // previously either crashed (assumed MCollection, got an array) or
+    // silently matched nothing (assumed a plain array's `.length`/`[0]`,
+    // got an MCollection with neither).
+    const workspaces = collectionToArray(session?.userWorkspaces);
+    if (workspaces.length > 0) {
+      const sess2 = workspaces[0];
+      options.headers["workspace-id"] = sess2.workspaceId;
+      options.headers["role-id"] = sess2.roleId;
+    }
   }
 
   if (preferredAcceptLanguage) {
@@ -559,7 +607,20 @@ export function useSocket(
             queryClient.invalidateQueries(msg?.cacheKey);
           }
         } catch (e: any) {
-          console.error("Socket message parsing error", evt);
+          // The socket isn't guaranteed to send JSON - the server also
+          // pushes plain-text status messages, e.g. "Authorization general
+          // failed" when the token/workspace it was opened with gets
+          // rejected. That's not a parsing bug, so it shouldn't be logged
+          // (or read) as one - surface it as socket state instead, so
+          // callers can actually react to it (re-authenticate, show a
+          // banner, etc.) instead of it only ever showing up as a console
+          // error.
+          if (typeof evt?.data === "string") {
+            console.warn("Socket sent a non-JSON message:", evt.data);
+            setSocketState({ state: "error", message: evt.data });
+          } else {
+            console.error("Socket message parsing error", evt);
+          }
         }
       };
       conn.onopen = function (evt) {

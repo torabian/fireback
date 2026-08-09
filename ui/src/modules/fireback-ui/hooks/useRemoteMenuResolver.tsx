@@ -61,7 +61,12 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   };
 
   if (data instanceof GResponse) {
-    result = data?.data?.items
+    // `?.` on `data?.data?.items` only guards `data`/`data.data` being
+    // null/undefined - `items` itself can still legitimately come back as a
+    // bare `null` (e.g. cte-app-menus has no rows yet, a fresh install with
+    // no appmenu seeders run), and calling `.map` directly on that crashed
+    // the whole Sidebar (caught by its ErrorBoundary, but still broken).
+    result = (data?.data?.items ?? [])
       .map((item) => {
         return dataMenuToMenu(item, visibilityCheck, locale);
       })
