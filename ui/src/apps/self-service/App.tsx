@@ -24,19 +24,31 @@ import {
   useSelfServicePublicRoutes,
 } from "@/modules/selfservice/SelfServiceRoutes";
 import { BUILD_VARIABLES } from "@/modules/fireback-ui/hooks/build-variables";
+import {
+  SessionGate,
+  noopCheckSession,
+} from "@/modules/fireback-ui/components/session-gate/SessionGate";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
 
+// TODO: swap noopCheckSession for a real session/whoami API call. Until then
+// this resolves instantly, so boot behavior is unchanged.
 function App() {
   const queryClient = useRef(new QueryClient());
 
   return (
-    <QueryClientProvider client={queryClient.current}>
-      <WithFireback config={{}} prefix={""} queryClient={queryClient.current}>
-        <AppBody />
-      </WithFireback>
-    </QueryClientProvider>
+    <SessionGate checkSession={noopCheckSession}>
+      <QueryClientProvider client={queryClient.current}>
+        <WithFireback
+          config={{}}
+          prefix={""}
+          queryClient={queryClient.current}
+        >
+          <AppBody />
+        </WithFireback>
+      </QueryClientProvider>
+    </SessionGate>
   );
 }
 

@@ -1,0 +1,65 @@
+/*
+ * Styles for <SessionGate>. Namespaced under .session-gate on purpose and
+ * doesn't reuse any shared/global class (e.g. .anim-loader) - so this file
+ * can be deleted together with SessionGate.tsx without checking what else
+ * depends on it.
+ */
+
+.session-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #2b2b2b;
+}
+
+.session-gate__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 320px;
+  padding: 24px;
+  text-align: center;
+}
+
+.session-gate__spinner {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
+  border: 3px solid rgba(64, 153, 255, 0.25);
+  border-top-color: #4099ff;
+  animation: session-gate-spin 0.8s linear infinite;
+}
+
+.session-gate__message {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.session-gate__attempt {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #888888;
+}
+
+@keyframes session-gate-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .session-gate {
+    background: #1c1c1e;
+    color: #f2f2f2;
+  }
+
+  .session-gate__attempt {
+    color: #a0a0a0;
+  }
+}
