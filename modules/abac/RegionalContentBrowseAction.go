@@ -43,7 +43,7 @@ func RegionalContentBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "RegionalContentBrowseAction",
-		CliName:     "regional-content-browse-action",
+		CliName:     "browse",
 		CliShort:    "regionalContent-b",
 		URL:         "/regionalContent/browse",
 		Method:      "GET",

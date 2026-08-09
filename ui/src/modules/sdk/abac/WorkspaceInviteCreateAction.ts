@@ -134,6 +134,7 @@ export class WorkspaceInviteCreateAction {
   };
   static Definition = {
     name: "workspaceInviteCreate",
+    cliName: "create",
     cliShort: "workspaceInvite-c",
     url: "/workspaceInvite",
     method: "post",

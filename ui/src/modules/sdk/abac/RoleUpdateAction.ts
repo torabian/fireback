@@ -148,6 +148,7 @@ export class RoleUpdateAction {
   };
   static Definition = {
     name: "roleUpdate",
+    cliName: "update",
     cliShort: "role-u",
     url: "/role/:uniqueId string",
     method: "patch",

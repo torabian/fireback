@@ -43,7 +43,7 @@ func PhoneConfirmationCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "PhoneConfirmationCreateAction",
-		CliName:     "phone-confirmation-create-action",
+		CliName:     "create",
 		CliShort:    "phoneConfirmation-c",
 		URL:         "/phoneConfirmation",
 		Method:      "POST",

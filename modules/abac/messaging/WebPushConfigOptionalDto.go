@@ -12,7 +12,7 @@ import (
 type WebPushConfigOptionalDto struct {
 	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
 	// The json content of the web push after getting it from browser
-	Subscription complexes.JSON `json:"subscription" yaml:"subscription"`
+	Subscription complexes.JSON `json:"subscription" validate:"required" yaml:"subscription"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// The unique-id of the user which created/owns the record.

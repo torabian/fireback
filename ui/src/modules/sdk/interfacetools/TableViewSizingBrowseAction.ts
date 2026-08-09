@@ -197,6 +197,7 @@ export class TableViewSizingBrowseAction {
   };
   static Definition = {
     name: "tableViewSizingBrowse",
+    cliName: "browse",
     cliShort: "tableViewSizing-b",
     url: "/tableViewSizing/browse",
     method: "get",

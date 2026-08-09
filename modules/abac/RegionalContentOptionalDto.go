@@ -10,11 +10,11 @@ import (
 // The base class definition for regionalContentOptionalDto
 type RegionalContentOptionalDto struct {
 	UniqueId   emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	Content    emigo.Nullable[string] `json:"content" yaml:"content"`
-	Region     emigo.Nullable[string] `json:"region" yaml:"region"`
+	Content    emigo.Nullable[string] `json:"content" validate:"required" yaml:"content"`
+	Region     emigo.Nullable[string] `json:"region" validate:"required" yaml:"region"`
 	Title      emigo.Nullable[string] `json:"title" yaml:"title"`
-	LanguageId emigo.Nullable[string] `json:"languageId" yaml:"languageId"`
-	KeyGroup   emigo.Nullable[string] `json:"keyGroup" yaml:"keyGroup"`
+	LanguageId emigo.Nullable[string] `json:"languageId" validate:"required" yaml:"languageId"`
+	KeyGroup   emigo.Nullable[string] `json:"keyGroup" validate:"required" yaml:"keyGroup"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// The unique-id of the user which created/owns the record.

@@ -2,6 +2,10 @@ module github.com/torabian/fireback
 
 go 1.25.1
 
+// TEMPORARY: verifying the enum CLI-cast fix locally before cutting a real
+// emi tag. Remove this line once github.com/torabian/emi is bumped past v1.3.3.
+replace github.com/torabian/emi => /Users/ali.torabi@stxnext.pl/work/emi
+
 require (
 	github.com/474420502/gcurl v1.2.1
 	github.com/Rhymond/go-money v1.0.15
@@ -54,7 +58,6 @@ require (
 	github.com/yaa110/go-persian-calendar v1.1.5
 	go.uber.org/zap v1.27.1
 	golang.org/x/crypto v0.54.0
-	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
 	golang.org/x/sync v0.22.0
 	golang.org/x/text v0.40.0
 	gopkg.in/yaml.v2 v2.4.0

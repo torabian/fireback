@@ -43,7 +43,7 @@ func NotificationConfigBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "NotificationConfigBrowseAction",
-		CliName:     "notification-config-browse-action",
+		CliName:     "browse",
 		CliShort:    "notificationConfig-b",
 		URL:         "/notificationConfig/browse",
 		Method:      "GET",

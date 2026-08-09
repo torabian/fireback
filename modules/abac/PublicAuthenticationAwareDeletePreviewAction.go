@@ -42,7 +42,7 @@ func PublicAuthenticationAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "PublicAuthenticationAwareDeletePreviewAction",
-		CliName:     "public-authentication-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "publicAuthentication-dp",
 		URL:         "/publicAuthentication/delete-preview",
 		Method:      "GET",

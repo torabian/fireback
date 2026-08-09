@@ -43,7 +43,7 @@ func TokenBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "TokenBrowseAction",
-		CliName:     "token-browse-action",
+		CliName:     "browse",
 		CliShort:    "token-b",
 		URL:         "/token/browse",
 		Method:      "GET",

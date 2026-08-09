@@ -129,6 +129,7 @@ export class PassportCreateAction {
   };
   static Definition = {
     name: "passportCreate",
+    cliName: "create",
     cliShort: "passport-c",
     url: "/passport",
     method: "post",

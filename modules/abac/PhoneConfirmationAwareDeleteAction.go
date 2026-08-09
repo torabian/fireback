@@ -43,7 +43,7 @@ func PhoneConfirmationAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "PhoneConfirmationAwareDeleteAction",
-		CliName:     "phone-confirmation-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "phoneConfirmation-d",
 		URL:         "/phoneConfirmation/delete",
 		Method:      "POST",

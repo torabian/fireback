@@ -43,7 +43,7 @@ func PublicJoinKeyBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "PublicJoinKeyBrowseAction",
-		CliName:     "public-join-key-browse-action",
+		CliName:     "browse",
 		CliShort:    "publicJoinKey-b",
 		URL:         "/publicJoinKey/browse",
 		Method:      "GET",

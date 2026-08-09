@@ -210,6 +210,7 @@ export class NotificationConfigGetAction {
   };
   static Definition = {
     name: "notificationConfigGet",
+    cliName: "get",
     cliShort: "notificationConfig-g",
     url: "/notificationConfig/:uniqueId string",
     method: "get",

@@ -187,6 +187,7 @@ export class AppMenuBrowseAction {
   };
   static Definition = {
     name: "appMenuBrowse",
+    cliName: "browse",
     cliShort: "appMenu-b",
     url: "/appMenu/browse",
     method: "get",

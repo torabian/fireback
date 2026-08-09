@@ -43,7 +43,7 @@ func EmailProviderBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailProviderBrowseAction",
-		CliName:     "email-provider-browse-action",
+		CliName:     "browse",
 		CliShort:    "emailProvider-b",
 		URL:         "/emailProvider/browse",
 		Method:      "GET",

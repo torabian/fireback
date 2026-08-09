@@ -148,6 +148,7 @@ export class EmailSenderUpdateAction {
   };
   static Definition = {
     name: "emailSenderUpdate",
+    cliName: "update",
     cliShort: "emailSender-u",
     url: "/emailSender/:uniqueId string",
     method: "patch",

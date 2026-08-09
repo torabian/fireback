@@ -197,6 +197,7 @@ export class GsmProviderBrowseAction {
   };
   static Definition = {
     name: "gsmProviderBrowse",
+    cliName: "browse",
     cliShort: "gsmProvider-b",
     url: "/gsmProvider/browse",
     method: "get",

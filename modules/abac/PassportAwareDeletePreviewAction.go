@@ -42,7 +42,7 @@ func PassportAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "PassportAwareDeletePreviewAction",
-		CliName:     "passport-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "passport-dp",
 		URL:         "/passport/delete-preview",
 		Method:      "GET",

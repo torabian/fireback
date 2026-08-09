@@ -85,6 +85,11 @@ func PassportMethodGetAction(c PassportMethodGetActionRequest) (*PassportMethodG
 }
 
 func PassportMethodCreateAction(c PassportMethodCreateActionRequest) (*PassportMethodCreateActionResponse, error) {
+
+	if err := fireback.CommonStructValidatorPointer(&c.Body, false); !fireback.IsNilish(err) {
+		return nil, err
+	}
+
 	query, err := fireback.ResolveActionContext(c, passportMethodSecurity(PERM_ROOT_PASSPORT_METHOD_CREATE))
 	if err != nil {
 		return nil, err

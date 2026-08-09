@@ -134,6 +134,7 @@ export class GsmProviderCreateAction {
   };
   static Definition = {
     name: "gsmProviderCreate",
+    cliName: "create",
     cliShort: "gsmProvider-c",
     url: "/gsmProvider",
     method: "post",

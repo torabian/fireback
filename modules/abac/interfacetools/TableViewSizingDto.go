@@ -10,7 +10,7 @@ import (
 // The base class definition for tableViewSizingDto
 type TableViewSizingDto struct {
 	UniqueId  emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	TableName string                 `json:"tableName" yaml:"tableName"`
+	TableName string                 `json:"tableName" validate:"required" yaml:"tableName"`
 	Sizes     string                 `json:"sizes" yaml:"sizes"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`

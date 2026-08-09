@@ -42,7 +42,7 @@ func WebPushConfigAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "WebPushConfigAwareDeletePreviewAction",
-		CliName:     "web-push-config-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "webPushConfig-dp",
 		URL:         "/webPushConfig/delete-preview",
 		Method:      "GET",

@@ -42,7 +42,7 @@ func RegionalContentAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "RegionalContentAwareDeletePreviewAction",
-		CliName:     "regional-content-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "regionalContent-dp",
 		URL:         "/regionalContent/delete-preview",
 		Method:      "GET",

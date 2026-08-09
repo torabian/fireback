@@ -256,6 +256,8 @@ dtos:
       description: Users can be authenticated using their google account
     - k: facebook
       description: Users can be authenticated using their facebook account
+    tags:
+      validate: oneof=email phone google facebook,required
   - name: region
     description: The region which would be using this method of passports for authentication.
       In Fireback open-source, only 'global' is available.
@@ -263,6 +265,8 @@ dtos:
     default: global
     of:
     - k: global
+    tags:
+      validate: required,oneof=global
   - name: clientKey
     description: Client key for those methods such as 'google' which require oauth
       client key
@@ -479,9 +483,13 @@ dtos:
   - name: firstName
     description: First name of the person which is invited
     type: string?
+    tags:
+      validate: required
   - name: lastName
     description: Last name of the person which is invited.
     type: string?
+    tags:
+      validate: required
   - name: forceEmailAddress
     description: If forced, the email address cannot be changed by the user which
       has been invited.
@@ -493,6 +501,8 @@ dtos:
   - name: roleId
     description: The role which invitee get if they accept the request.
     type: string?
+    tags:
+      validate: required
   - name: userId
     description: The unique-id of the user which created/owns the record.
     type: string?
@@ -517,12 +527,18 @@ dtos:
   - name: userPermissions
     type: slice?
     primitive: string
+    tags:
+      sql: '-'
   - name: rolePermission
     type: slice?
     primitive: UserRoleWorkspaceDto
+    tags:
+      sql: '-'
   - name: workspacePermissions
     type: slice?
     primitive: string
+    tags:
+      sql: '-'
   - name: createdAt
     type: complex
     complex: PlainTime
@@ -561,12 +577,18 @@ dtos:
     type: string?
   - name: content
     type: string?
+    tags:
+      validate: required
   - name: region
     type: string?
+    tags:
+      validate: required
   - name: title
     type: string?
   - name: languageId
     type: string?
+    tags:
+      validate: required
   - name: keyGroup
     type: enum?
     of:
@@ -574,6 +596,8 @@ dtos:
       description: Used when an email would be sent with one time password
     - k: EMAIL_OTP
       description: Used when an sms would be sent with one time password
+    tags:
+      validate: required
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -622,6 +646,8 @@ dtos:
     type: string?
   - name: recoveryAbsoluteUrl
     type: string?
+    tags:
+      sql: '-'
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -651,12 +677,18 @@ dtos:
     type: string?
   - name: inviteToWorkspaceContentDefault
     type: string?
+    tags:
+      sql: '-'
   - name: inviteToWorkspaceContentDefaultExcerpt
     type: string?
+    tags:
+      sql: '-'
   - name: inviteToWorkspaceTitle
     type: string?
   - name: inviteToWorkspaceTitleDefault
     type: string?
+    tags:
+      sql: '-'
   - name: inviteToWorkspaceSenderId
     type: string?
   - name: accountCenterEmailSenderId
@@ -667,12 +699,18 @@ dtos:
     type: string?
   - name: forgetPasswordContentDefault
     type: string?
+    tags:
+      sql: '-'
   - name: forgetPasswordContentDefaultExcerpt
     type: string?
+    tags:
+      sql: '-'
   - name: forgetPasswordTitle
     type: string?
   - name: forgetPasswordTitleDefault
     type: string?
+    tags:
+      sql: '-'
   - name: forgetPasswordSenderId
     type: string?
   - name: acceptLanguage
@@ -685,12 +723,18 @@ dtos:
     type: string?
   - name: confirmEmailContentDefault
     type: string?
+    tags:
+      sql: '-'
   - name: confirmEmailContentDefaultExcerpt
     type: string?
+    tags:
+      sql: '-'
   - name: confirmEmailTitle
     type: string?
   - name: confirmEmailTitleDefault
     type: string?
+    tags:
+      sql: '-'
   - name: workspaceId
     type: string?
   - name: userId
@@ -784,6 +828,8 @@ dtos:
     type: string?
   - name: name
     type: string?
+    tags:
+      validate: required,omitempty,min=1,max=200
   - name: capabilitiesListId
     description: The list of capability completeKeys granted to this role, stored
       directly as JSON (replaces the old many-to-many role_capabilities join table
@@ -813,6 +859,8 @@ dtos:
     type: string?
   - name: title
     type: string?
+    tags:
+      validate: required,omitempty,min=1,max=250
   - name: description
     type: string?
   - name: slug
@@ -821,11 +869,15 @@ dtos:
       long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go);
       gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
     type: string?
+    tags:
+      validate: required,omitempty,min=2,max=50
   - name: roleId
     description: The role which will be used to define the functionality of this workspace.
       Role needs to be created before hand, and only roles which belong to root workspace
       are possible to be selected.
     type: string?
+    tags:
+      validate: required
   - name: workspaceId
     type: string?
   - name: userId
@@ -844,8 +896,12 @@ dtos:
     type: string?
   - name: firstName
     type: string?
+    tags:
+      validate: required
   - name: lastName
     type: string?
+    tags:
+      validate: required
   - name: photo
     type: string?
   - name: gender
@@ -903,10 +959,14 @@ dtos:
     type: string?
   - name: name
     type: string?
+    tags:
+      validate: required
   - name: typeId
     description: The unique-id of the workspace type which defines this workspace's
       role.
     type: string?
+    tags:
+      validate: required
   - name: parentId
     description: The unique-id of the parent workspace, for nested/tree workspaces.
     type: string?
@@ -933,10 +993,14 @@ dtos:
     type: string?
   - name: type
     type: string?
+    tags:
+      validate: required
   - name: userId
     type: string?
   - name: value
     type: string?
+    tags:
+      validate: required
   - name: totpSecret
     description: Store the secret of 2FA using time based dual factor authentication
       here for this specific passport. If set, during authorization will be asked.
@@ -948,6 +1012,9 @@ dtos:
     type: bool?
   - name: password
     type: string?
+    tags:
+      json: '-'
+      yaml: '-'
   - name: confirmed
     type: bool?
   - name: accessToken
@@ -985,6 +1052,8 @@ dtos:
       description: Users can be authenticated using their google account
     - k: facebook
       description: Users can be authenticated using their facebook account
+    tags:
+      validate: oneof=email phone google facebook,required
   - name: region
     description: The region which would be using this method of passports for authentication.
       In Fireback open-source, only 'global' is available.
@@ -992,6 +1061,8 @@ dtos:
     default: global
     of:
     - k: global
+    tags:
+      validate: required,oneof=global
   - name: clientKey
     description: Client key for those methods such as 'google' which require oauth
       client key
@@ -1200,9 +1271,13 @@ dtos:
   - name: firstName
     description: First name of the person which is invited
     type: string
+    tags:
+      validate: required
   - name: lastName
     description: Last name of the person which is invited.
     type: string
+    tags:
+      validate: required
   - name: forceEmailAddress
     description: If forced, the email address cannot be changed by the user which
       has been invited.
@@ -1214,6 +1289,8 @@ dtos:
   - name: roleId
     description: The role which invitee get if they accept the request.
     type: string?
+    tags:
+      validate: required
   - name: userId
     description: The unique-id of the user which created/owns the record.
     type: string?
@@ -1237,12 +1314,18 @@ dtos:
   - name: userPermissions
     type: slice
     primitive: string
+    tags:
+      sql: '-'
   - name: rolePermission
     type: slice
     primitive: UserRoleWorkspaceDto
+    tags:
+      sql: '-'
   - name: workspacePermissions
     type: slice
     primitive: string
+    tags:
+      sql: '-'
   - name: createdAt
     type: complex
     complex: PlainTime
@@ -1279,12 +1362,18 @@ dtos:
     type: string?
   - name: content
     type: string
+    tags:
+      validate: required
   - name: region
     type: string
+    tags:
+      validate: required
   - name: title
     type: string
   - name: languageId
     type: string
+    tags:
+      validate: required
   - name: keyGroup
     type: enum
     of:
@@ -1292,6 +1381,8 @@ dtos:
       description: Used when an email would be sent with one time password
     - k: EMAIL_OTP
       description: Used when an sms would be sent with one time password
+    tags:
+      validate: required
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -1339,6 +1430,8 @@ dtos:
     type: string
   - name: recoveryAbsoluteUrl
     type: string
+    tags:
+      sql: '-'
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -1367,12 +1460,18 @@ dtos:
     type: string
   - name: inviteToWorkspaceContentDefault
     type: string
+    tags:
+      sql: '-'
   - name: inviteToWorkspaceContentDefaultExcerpt
     type: string
+    tags:
+      sql: '-'
   - name: inviteToWorkspaceTitle
     type: string
   - name: inviteToWorkspaceTitleDefault
     type: string
+    tags:
+      sql: '-'
   - name: inviteToWorkspaceSenderId
     type: string?
   - name: accountCenterEmailSenderId
@@ -1383,12 +1482,18 @@ dtos:
     type: string
   - name: forgetPasswordContentDefault
     type: string
+    tags:
+      sql: '-'
   - name: forgetPasswordContentDefaultExcerpt
     type: string
+    tags:
+      sql: '-'
   - name: forgetPasswordTitle
     type: string
   - name: forgetPasswordTitleDefault
     type: string
+    tags:
+      sql: '-'
   - name: forgetPasswordSenderId
     type: string?
   - name: acceptLanguage
@@ -1401,12 +1506,18 @@ dtos:
     type: string
   - name: confirmEmailContentDefault
     type: string
+    tags:
+      sql: '-'
   - name: confirmEmailContentDefaultExcerpt
     type: string
+    tags:
+      sql: '-'
   - name: confirmEmailTitle
     type: string
   - name: confirmEmailTitleDefault
     type: string
+    tags:
+      sql: '-'
   - name: workspaceId
     type: string?
   - name: userId
@@ -1498,6 +1609,8 @@ dtos:
     type: string?
   - name: name
     type: string
+    tags:
+      validate: required,omitempty,min=1,max=200
   - name: capabilitiesListId
     description: The list of capability completeKeys granted to this role, stored
       directly as JSON (replaces the old many-to-many role_capabilities join table
@@ -1526,6 +1639,8 @@ dtos:
     type: string?
   - name: title
     type: string
+    tags:
+      validate: required,omitempty,min=1,max=250
   - name: description
     type: string
   - name: slug
@@ -1534,11 +1649,15 @@ dtos:
       long. Format is enforced in ValidateTheWorkspaceTypeEntity (WorkspaceTypeActions.go);
       gorm:"unique" here is the DB-level backstop for the uniqueness half of that.
     type: string
+    tags:
+      validate: required,omitempty,min=2,max=50
   - name: roleId
     description: The role which will be used to define the functionality of this workspace.
       Role needs to be created before hand, and only roles which belong to root workspace
       are possible to be selected.
     type: string
+    tags:
+      validate: required
   - name: workspaceId
     type: string?
   - name: userId
@@ -1556,8 +1675,12 @@ dtos:
     type: string?
   - name: firstName
     type: string
+    tags:
+      validate: required
   - name: lastName
     type: string
+    tags:
+      validate: required
   - name: photo
     type: string
   - name: gender
@@ -1614,10 +1737,14 @@ dtos:
     type: string
   - name: name
     type: string
+    tags:
+      validate: required
   - name: typeId
     description: The unique-id of the workspace type which defines this workspace's
       role.
     type: string
+    tags:
+      validate: required
   - name: parentId
     description: The unique-id of the parent workspace, for nested/tree workspaces.
     type: string?
@@ -1643,10 +1770,14 @@ dtos:
     type: string
   - name: type
     type: string
+    tags:
+      validate: required
   - name: userId
     type: string?
   - name: value
     type: string
+    tags:
+      validate: required
   - name: totpSecret
     description: Store the secret of 2FA using time based dual factor authentication
       here for this specific passport. If set, during authorization will be asked.
@@ -1658,6 +1789,9 @@ dtos:
     type: bool?
   - name: password
     type: string
+    tags:
+      json: '-'
+      yaml: '-'
   - name: confirmed
     type: bool?
   - name: accessToken
@@ -3029,6 +3163,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceConfigDto
 - name: capabilityCreate
+  cliName: create
   cliShort: capability-c
   url: /capability
   method: post
@@ -3039,6 +3174,7 @@ actions:
     envelope: GResponse
     dto: CapabilityDto
 - name: capabilityUpdate
+  cliName: update
   cliShort: capability-u
   url: /capability/:uniqueId
   method: patch
@@ -3049,6 +3185,7 @@ actions:
     envelope: GResponse
     dto: CapabilityDto
 - name: capabilityGet
+  cliName: get
   cliShort: capability-g
   url: /capability/:uniqueId
   method: get
@@ -3057,6 +3194,7 @@ actions:
     envelope: GResponse
     dto: CapabilityDto
 - name: capabilityBrowse
+  cliName: browse
   cliShort: capability-b
   url: /capability/browse
   method: get
@@ -3076,6 +3214,7 @@ actions:
     envelope: GResponse
     dto: CapabilityOptionalDto
 - name: capabilityAwareDeletePreview
+  cliName: delete-preview
   cliShort: capability-dp
   url: /capability/delete-preview
   method: get
@@ -3098,6 +3237,7 @@ actions:
       - name: count
         type: int64
 - name: capabilityAwareDelete
+  cliName: delete
   cliShort: capability-d
   url: /capability/delete
   method: post
@@ -3109,6 +3249,7 @@ actions:
       type: slice
       primitive: string
 - name: passportMethodCreate
+  cliName: create
   cliShort: passportMethod-c
   url: /passportMethod
   method: post
@@ -3119,6 +3260,7 @@ actions:
     envelope: GResponse
     dto: PassportMethodDto
 - name: passportMethodUpdate
+  cliName: update
   cliShort: passportMethod-u
   url: /passportMethod/:uniqueId
   method: patch
@@ -3129,6 +3271,7 @@ actions:
     envelope: GResponse
     dto: PassportMethodDto
 - name: passportMethodGet
+  cliName: get
   cliShort: passportMethod-g
   url: /passportMethod/:uniqueId
   method: get
@@ -3137,6 +3280,7 @@ actions:
     envelope: GResponse
     dto: PassportMethodDto
 - name: passportMethodBrowse
+  cliName: browse
   cliShort: passportMethod-b
   url: /passportMethod/browse
   method: get
@@ -3157,6 +3301,7 @@ actions:
     envelope: GResponse
     dto: PassportMethodOptionalDto
 - name: passportMethodAwareDeletePreview
+  cliName: delete-preview
   cliShort: passportMethod-dp
   url: /passportMethod/delete-preview
   method: get
@@ -3179,6 +3324,7 @@ actions:
       - name: count
         type: int64
 - name: passportMethodAwareDelete
+  cliName: delete
   cliShort: passportMethod-d
   url: /passportMethod/delete
   method: post
@@ -3190,6 +3336,7 @@ actions:
       type: slice
       primitive: string
 - name: pendingWorkspaceInviteCreate
+  cliName: create
   cliShort: pendingWorkspaceInvite-c
   url: /pendingWorkspaceInvite
   method: post
@@ -3200,6 +3347,7 @@ actions:
     envelope: GResponse
     dto: PendingWorkspaceInviteDto
 - name: pendingWorkspaceInviteUpdate
+  cliName: update
   cliShort: pendingWorkspaceInvite-u
   url: /pendingWorkspaceInvite/:uniqueId
   method: patch
@@ -3210,6 +3358,7 @@ actions:
     envelope: GResponse
     dto: PendingWorkspaceInviteDto
 - name: pendingWorkspaceInviteGet
+  cliName: get
   cliShort: pendingWorkspaceInvite-g
   url: /pendingWorkspaceInvite/:uniqueId
   method: get
@@ -3218,6 +3367,7 @@ actions:
     envelope: GResponse
     dto: PendingWorkspaceInviteDto
 - name: pendingWorkspaceInviteBrowse
+  cliName: browse
   cliShort: pendingWorkspaceInvite-b
   url: /pendingWorkspaceInvite/browse
   method: get
@@ -3238,6 +3388,7 @@ actions:
     envelope: GResponse
     dto: PendingWorkspaceInviteOptionalDto
 - name: pendingWorkspaceInviteAwareDeletePreview
+  cliName: delete-preview
   cliShort: pendingWorkspaceInvite-dp
   url: /pendingWorkspaceInvite/delete-preview
   method: get
@@ -3260,6 +3411,7 @@ actions:
       - name: count
         type: int64
 - name: pendingWorkspaceInviteAwareDelete
+  cliName: delete
   cliShort: pendingWorkspaceInvite-d
   url: /pendingWorkspaceInvite/delete
   method: post
@@ -3271,6 +3423,7 @@ actions:
       type: slice
       primitive: string
 - name: preferenceCreate
+  cliName: create
   cliShort: preference-c
   url: /preference
   method: post
@@ -3281,6 +3434,7 @@ actions:
     envelope: GResponse
     dto: PreferenceDto
 - name: preferenceUpdate
+  cliName: update
   cliShort: preference-u
   url: /preference/:uniqueId
   method: patch
@@ -3291,6 +3445,7 @@ actions:
     envelope: GResponse
     dto: PreferenceDto
 - name: preferenceGet
+  cliName: get
   cliShort: preference-g
   url: /preference/:uniqueId
   method: get
@@ -3299,6 +3454,7 @@ actions:
     envelope: GResponse
     dto: PreferenceDto
 - name: preferenceBrowse
+  cliName: browse
   cliShort: preference-b
   url: /preference/browse
   method: get
@@ -3318,6 +3474,7 @@ actions:
     envelope: GResponse
     dto: PreferenceOptionalDto
 - name: preferenceAwareDeletePreview
+  cliName: delete-preview
   cliShort: preference-dp
   url: /preference/delete-preview
   method: get
@@ -3340,6 +3497,7 @@ actions:
       - name: count
         type: int64
 - name: preferenceAwareDelete
+  cliName: delete
   cliShort: preference-d
   url: /preference/delete
   method: post
@@ -3351,6 +3509,7 @@ actions:
       type: slice
       primitive: string
 - name: userProfileCreate
+  cliName: create
   cliShort: userProfile-c
   url: /userProfile
   method: post
@@ -3361,6 +3520,7 @@ actions:
     envelope: GResponse
     dto: UserProfileDto
 - name: userProfileUpdate
+  cliName: update
   cliShort: userProfile-u
   url: /userProfile/:uniqueId
   method: patch
@@ -3371,6 +3531,7 @@ actions:
     envelope: GResponse
     dto: UserProfileDto
 - name: userProfileGet
+  cliName: get
   cliShort: userProfile-g
   url: /userProfile/:uniqueId
   method: get
@@ -3379,6 +3540,7 @@ actions:
     envelope: GResponse
     dto: UserProfileDto
 - name: userProfileBrowse
+  cliName: browse
   cliShort: userProfile-b
   url: /userProfile/browse
   method: get
@@ -3398,6 +3560,7 @@ actions:
     envelope: GResponse
     dto: UserProfileOptionalDto
 - name: userProfileAwareDeletePreview
+  cliName: delete-preview
   cliShort: userProfile-dp
   url: /userProfile/delete-preview
   method: get
@@ -3420,6 +3583,7 @@ actions:
       - name: count
         type: int64
 - name: userProfileAwareDelete
+  cliName: delete
   cliShort: userProfile-d
   url: /userProfile/delete
   method: post
@@ -3431,6 +3595,7 @@ actions:
       type: slice
       primitive: string
 - name: publicJoinKeyCreate
+  cliName: create
   cliShort: publicJoinKey-c
   url: /publicJoinKey
   method: post
@@ -3441,6 +3606,7 @@ actions:
     envelope: GResponse
     dto: PublicJoinKeyDto
 - name: publicJoinKeyUpdate
+  cliName: update
   cliShort: publicJoinKey-u
   url: /publicJoinKey/:uniqueId
   method: patch
@@ -3451,6 +3617,7 @@ actions:
     envelope: GResponse
     dto: PublicJoinKeyDto
 - name: publicJoinKeyGet
+  cliName: get
   cliShort: publicJoinKey-g
   url: /publicJoinKey/:uniqueId
   method: get
@@ -3459,6 +3626,7 @@ actions:
     envelope: GResponse
     dto: PublicJoinKeyDto
 - name: publicJoinKeyBrowse
+  cliName: browse
   cliShort: publicJoinKey-b
   url: /publicJoinKey/browse
   method: get
@@ -3478,6 +3646,7 @@ actions:
     envelope: GResponse
     dto: PublicJoinKeyOptionalDto
 - name: publicJoinKeyAwareDeletePreview
+  cliName: delete-preview
   cliShort: publicJoinKey-dp
   url: /publicJoinKey/delete-preview
   method: get
@@ -3500,6 +3669,7 @@ actions:
       - name: count
         type: int64
 - name: publicJoinKeyAwareDelete
+  cliName: delete
   cliShort: publicJoinKey-d
   url: /publicJoinKey/delete
   method: post
@@ -3511,6 +3681,7 @@ actions:
       type: slice
       primitive: string
 - name: emailConfirmationCreate
+  cliName: create
   cliShort: emailConfirmation-c
   url: /emailConfirmation
   method: post
@@ -3521,6 +3692,7 @@ actions:
     envelope: GResponse
     dto: EmailConfirmationDto
 - name: emailConfirmationUpdate
+  cliName: update
   cliShort: emailConfirmation-u
   url: /emailConfirmation/:uniqueId
   method: patch
@@ -3531,6 +3703,7 @@ actions:
     envelope: GResponse
     dto: EmailConfirmationDto
 - name: emailConfirmationGet
+  cliName: get
   cliShort: emailConfirmation-g
   url: /emailConfirmation/:uniqueId
   method: get
@@ -3539,6 +3712,7 @@ actions:
     envelope: GResponse
     dto: EmailConfirmationDto
 - name: emailConfirmationBrowse
+  cliName: browse
   cliShort: emailConfirmation-b
   url: /emailConfirmation/browse
   method: get
@@ -3559,6 +3733,7 @@ actions:
     envelope: GResponse
     dto: EmailConfirmationOptionalDto
 - name: emailConfirmationAwareDeletePreview
+  cliName: delete-preview
   cliShort: emailConfirmation-dp
   url: /emailConfirmation/delete-preview
   method: get
@@ -3581,6 +3756,7 @@ actions:
       - name: count
         type: int64
 - name: emailConfirmationAwareDelete
+  cliName: delete
   cliShort: emailConfirmation-d
   url: /emailConfirmation/delete
   method: post
@@ -3592,6 +3768,7 @@ actions:
       type: slice
       primitive: string
 - name: phoneConfirmationCreate
+  cliName: create
   cliShort: phoneConfirmation-c
   url: /phoneConfirmation
   method: post
@@ -3602,6 +3779,7 @@ actions:
     envelope: GResponse
     dto: PhoneConfirmationDto
 - name: phoneConfirmationUpdate
+  cliName: update
   cliShort: phoneConfirmation-u
   url: /phoneConfirmation/:uniqueId
   method: patch
@@ -3612,6 +3790,7 @@ actions:
     envelope: GResponse
     dto: PhoneConfirmationDto
 - name: phoneConfirmationGet
+  cliName: get
   cliShort: phoneConfirmation-g
   url: /phoneConfirmation/:uniqueId
   method: get
@@ -3620,6 +3799,7 @@ actions:
     envelope: GResponse
     dto: PhoneConfirmationDto
 - name: phoneConfirmationBrowse
+  cliName: browse
   cliShort: phoneConfirmation-b
   url: /phoneConfirmation/browse
   method: get
@@ -3640,6 +3820,7 @@ actions:
     envelope: GResponse
     dto: PhoneConfirmationOptionalDto
 - name: phoneConfirmationAwareDeletePreview
+  cliName: delete-preview
   cliShort: phoneConfirmation-dp
   url: /phoneConfirmation/delete-preview
   method: get
@@ -3662,6 +3843,7 @@ actions:
       - name: count
         type: int64
 - name: phoneConfirmationAwareDelete
+  cliName: delete
   cliShort: phoneConfirmation-d
   url: /phoneConfirmation/delete
   method: post
@@ -3673,6 +3855,7 @@ actions:
       type: slice
       primitive: string
 - name: tokenCreate
+  cliName: create
   cliShort: token-c
   url: /token
   method: post
@@ -3683,6 +3866,7 @@ actions:
     envelope: GResponse
     dto: TokenDto
 - name: tokenUpdate
+  cliName: update
   cliShort: token-u
   url: /token/:uniqueId
   method: patch
@@ -3693,6 +3877,7 @@ actions:
     envelope: GResponse
     dto: TokenDto
 - name: tokenGet
+  cliName: get
   cliShort: token-g
   url: /token/:uniqueId
   method: get
@@ -3701,6 +3886,7 @@ actions:
     envelope: GResponse
     dto: TokenDto
 - name: tokenBrowse
+  cliName: browse
   cliShort: token-b
   url: /token/browse
   method: get
@@ -3720,6 +3906,7 @@ actions:
     envelope: GResponse
     dto: TokenOptionalDto
 - name: tokenAwareDeletePreview
+  cliName: delete-preview
   cliShort: token-dp
   url: /token/delete-preview
   method: get
@@ -3742,6 +3929,7 @@ actions:
       - name: count
         type: int64
 - name: tokenAwareDelete
+  cliName: delete
   cliShort: token-d
   url: /token/delete
   method: post
@@ -3753,6 +3941,7 @@ actions:
       type: slice
       primitive: string
 - name: workspaceInviteCreate
+  cliName: create
   cliShort: workspaceInvite-c
   url: /workspaceInvite
   method: post
@@ -3763,6 +3952,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceInviteDto
 - name: workspaceInviteUpdate
+  cliName: update
   cliShort: workspaceInvite-u
   url: /workspaceInvite/:uniqueId
   method: patch
@@ -3773,6 +3963,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceInviteDto
 - name: workspaceInviteGet
+  cliName: get
   cliShort: workspaceInvite-g
   url: /workspaceInvite/:uniqueId
   method: get
@@ -3781,6 +3972,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceInviteDto
 - name: workspaceInviteBrowse
+  cliName: browse
   cliShort: workspaceInvite-b
   url: /workspaceInvite/browse
   method: get
@@ -3801,6 +3993,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceInviteOptionalDto
 - name: workspaceInviteAwareDeletePreview
+  cliName: delete-preview
   cliShort: workspaceInvite-dp
   url: /workspaceInvite/delete-preview
   method: get
@@ -3823,6 +4016,7 @@ actions:
       - name: count
         type: int64
 - name: workspaceInviteAwareDelete
+  cliName: delete
   cliShort: workspaceInvite-d
   url: /workspaceInvite/delete
   method: post
@@ -3834,6 +4028,7 @@ actions:
       type: slice
       primitive: string
 - name: userWorkspaceCreate
+  cliName: create
   cliShort: userWorkspace-c
   url: /userWorkspace
   method: post
@@ -3844,6 +4039,7 @@ actions:
     envelope: GResponse
     dto: UserWorkspaceDto
 - name: userWorkspaceUpdate
+  cliName: update
   cliShort: userWorkspace-u
   url: /userWorkspace/:uniqueId
   method: patch
@@ -3854,6 +4050,7 @@ actions:
     envelope: GResponse
     dto: UserWorkspaceDto
 - name: userWorkspaceGet
+  cliName: get
   cliShort: userWorkspace-g
   url: /userWorkspace/:uniqueId
   method: get
@@ -3862,6 +4059,7 @@ actions:
     envelope: GResponse
     dto: UserWorkspaceDto
 - name: userWorkspaceBrowse
+  cliName: browse
   cliShort: userWorkspace-b
   url: /userWorkspace/browse
   method: get
@@ -3881,6 +4079,7 @@ actions:
     envelope: GResponse
     dto: UserWorkspaceOptionalDto
 - name: userWorkspaceAwareDeletePreview
+  cliName: delete-preview
   cliShort: userWorkspace-dp
   url: /userWorkspace/delete-preview
   method: get
@@ -3903,6 +4102,7 @@ actions:
       - name: count
         type: int64
 - name: userWorkspaceAwareDelete
+  cliName: delete
   cliShort: userWorkspace-d
   url: /userWorkspace/delete
   method: post
@@ -3914,6 +4114,7 @@ actions:
       type: slice
       primitive: string
 - name: workspaceRoleCreate
+  cliName: create
   cliShort: workspaceRole-c
   url: /workspaceRole
   method: post
@@ -3924,6 +4125,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceRoleDto
 - name: workspaceRoleUpdate
+  cliName: update
   cliShort: workspaceRole-u
   url: /workspaceRole/:uniqueId
   method: patch
@@ -3934,6 +4136,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceRoleDto
 - name: workspaceRoleGet
+  cliName: get
   cliShort: workspaceRole-g
   url: /workspaceRole/:uniqueId
   method: get
@@ -3942,6 +4145,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceRoleDto
 - name: workspaceRoleBrowse
+  cliName: browse
   cliShort: workspaceRole-b
   url: /workspaceRole/browse
   method: get
@@ -3961,6 +4165,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceRoleOptionalDto
 - name: workspaceRoleAwareDeletePreview
+  cliName: delete-preview
   cliShort: workspaceRole-dp
   url: /workspaceRole/delete-preview
   method: get
@@ -3983,6 +4188,7 @@ actions:
       - name: count
         type: int64
 - name: workspaceRoleAwareDelete
+  cliName: delete
   cliShort: workspaceRole-d
   url: /workspaceRole/delete
   method: post
@@ -3994,6 +4200,7 @@ actions:
       type: slice
       primitive: string
 - name: regionalContentCreate
+  cliName: create
   cliShort: regionalContent-c
   url: /regionalContent
   method: post
@@ -4004,6 +4211,7 @@ actions:
     envelope: GResponse
     dto: RegionalContentDto
 - name: regionalContentUpdate
+  cliName: update
   cliShort: regionalContent-u
   url: /regionalContent/:uniqueId
   method: patch
@@ -4014,6 +4222,7 @@ actions:
     envelope: GResponse
     dto: RegionalContentDto
 - name: regionalContentGet
+  cliName: get
   cliShort: regionalContent-g
   url: /regionalContent/:uniqueId
   method: get
@@ -4022,6 +4231,7 @@ actions:
     envelope: GResponse
     dto: RegionalContentDto
 - name: regionalContentBrowse
+  cliName: browse
   cliShort: regionalContent-b
   url: /regionalContent/browse
   method: get
@@ -4042,6 +4252,7 @@ actions:
     envelope: GResponse
     dto: RegionalContentOptionalDto
 - name: regionalContentAwareDeletePreview
+  cliName: delete-preview
   cliShort: regionalContent-dp
   url: /regionalContent/delete-preview
   method: get
@@ -4064,6 +4275,7 @@ actions:
       - name: count
         type: int64
 - name: regionalContentAwareDelete
+  cliName: delete
   cliShort: regionalContent-d
   url: /regionalContent/delete
   method: post
@@ -4075,6 +4287,7 @@ actions:
       type: slice
       primitive: string
 - name: publicAuthenticationCreate
+  cliName: create
   cliShort: publicAuthentication-c
   url: /publicAuthentication
   method: post
@@ -4085,6 +4298,7 @@ actions:
     envelope: GResponse
     dto: PublicAuthenticationDto
 - name: publicAuthenticationUpdate
+  cliName: update
   cliShort: publicAuthentication-u
   url: /publicAuthentication/:uniqueId
   method: patch
@@ -4095,6 +4309,7 @@ actions:
     envelope: GResponse
     dto: PublicAuthenticationDto
 - name: publicAuthenticationGet
+  cliName: get
   cliShort: publicAuthentication-g
   url: /publicAuthentication/:uniqueId
   method: get
@@ -4103,6 +4318,7 @@ actions:
     envelope: GResponse
     dto: PublicAuthenticationDto
 - name: publicAuthenticationBrowse
+  cliName: browse
   cliShort: publicAuthentication-b
   url: /publicAuthentication/browse
   method: get
@@ -4123,6 +4339,7 @@ actions:
     envelope: GResponse
     dto: PublicAuthenticationOptionalDto
 - name: publicAuthenticationAwareDeletePreview
+  cliName: delete-preview
   cliShort: publicAuthentication-dp
   url: /publicAuthentication/delete-preview
   method: get
@@ -4145,6 +4362,7 @@ actions:
       - name: count
         type: int64
 - name: publicAuthenticationAwareDelete
+  cliName: delete
   cliShort: publicAuthentication-d
   url: /publicAuthentication/delete
   method: post
@@ -4156,6 +4374,7 @@ actions:
       type: slice
       primitive: string
 - name: notificationConfigCreate
+  cliName: create
   cliShort: notificationConfig-c
   url: /notificationConfig
   method: post
@@ -4166,6 +4385,7 @@ actions:
     envelope: GResponse
     dto: NotificationConfigDto
 - name: notificationConfigUpdate
+  cliName: update
   cliShort: notificationConfig-u
   url: /notificationConfig/:uniqueId
   method: patch
@@ -4176,6 +4396,7 @@ actions:
     envelope: GResponse
     dto: NotificationConfigDto
 - name: notificationConfigGet
+  cliName: get
   cliShort: notificationConfig-g
   url: /notificationConfig/:uniqueId
   method: get
@@ -4184,6 +4405,7 @@ actions:
     envelope: GResponse
     dto: NotificationConfigDto
 - name: notificationConfigBrowse
+  cliName: browse
   cliShort: notificationConfig-b
   url: /notificationConfig/browse
   method: get
@@ -4204,6 +4426,7 @@ actions:
     envelope: GResponse
     dto: NotificationConfigOptionalDto
 - name: notificationConfigAwareDeletePreview
+  cliName: delete-preview
   cliShort: notificationConfig-dp
   url: /notificationConfig/delete-preview
   method: get
@@ -4226,6 +4449,7 @@ actions:
       - name: count
         type: int64
 - name: notificationConfigAwareDelete
+  cliName: delete
   cliShort: notificationConfig-d
   url: /notificationConfig/delete
   method: post
@@ -4237,6 +4461,7 @@ actions:
       type: slice
       primitive: string
 - name: workspaceConfigCreate
+  cliName: create
   cliShort: workspaceConfig-c
   url: /workspaceConfig
   method: post
@@ -4247,6 +4472,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceConfigDto
 - name: workspaceConfigUpdate
+  cliName: update
   cliShort: workspaceConfig-u
   url: /workspaceConfig/:uniqueId
   method: patch
@@ -4257,6 +4483,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceConfigDto
 - name: workspaceConfigGet
+  cliName: get
   cliShort: workspaceConfig-g
   url: /workspaceConfig/:uniqueId
   method: get
@@ -4265,6 +4492,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceConfigDto
 - name: workspaceConfigBrowse
+  cliName: browse
   cliShort: workspaceConfig-b
   url: /workspaceConfig/browse
   method: get
@@ -4285,6 +4513,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceConfigOptionalDto
 - name: workspaceConfigAwareDeletePreview
+  cliName: delete-preview
   cliShort: workspaceConfig-dp
   url: /workspaceConfig/delete-preview
   method: get
@@ -4307,6 +4536,7 @@ actions:
       - name: count
         type: int64
 - name: workspaceConfigAwareDelete
+  cliName: delete
   cliShort: workspaceConfig-d
   url: /workspaceConfig/delete
   method: post
@@ -4318,6 +4548,7 @@ actions:
       type: slice
       primitive: string
 - name: roleCreate
+  cliName: create
   cliShort: role-c
   url: /role
   method: post
@@ -4328,6 +4559,7 @@ actions:
     envelope: GResponse
     dto: RoleDto
 - name: roleUpdate
+  cliName: update
   cliShort: role-u
   url: /role/:uniqueId
   method: patch
@@ -4338,6 +4570,7 @@ actions:
     envelope: GResponse
     dto: RoleDto
 - name: roleGet
+  cliName: get
   cliShort: role-g
   url: /role/:uniqueId
   method: get
@@ -4346,6 +4579,7 @@ actions:
     envelope: GResponse
     dto: RoleDto
 - name: roleBrowse
+  cliName: browse
   cliShort: role-b
   url: /role/browse
   method: get
@@ -4365,6 +4599,7 @@ actions:
     envelope: GResponse
     dto: RoleOptionalDto
 - name: roleAwareDeletePreview
+  cliName: delete-preview
   cliShort: role-dp
   url: /role/delete-preview
   method: get
@@ -4387,6 +4622,7 @@ actions:
       - name: count
         type: int64
 - name: roleAwareDelete
+  cliName: delete
   cliShort: role-d
   url: /role/delete
   method: post
@@ -4398,6 +4634,7 @@ actions:
       type: slice
       primitive: string
 - name: workspaceTypeCreate
+  cliName: create
   cliShort: workspaceType-c
   url: /workspaceType
   method: post
@@ -4408,6 +4645,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceTypeDto
 - name: workspaceTypeUpdate
+  cliName: update
   cliShort: workspaceType-u
   url: /workspaceType/:uniqueId
   method: patch
@@ -4418,6 +4656,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceTypeDto
 - name: workspaceTypeGet
+  cliName: get
   cliShort: workspaceType-g
   url: /workspaceType/:uniqueId
   method: get
@@ -4426,6 +4665,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceTypeDto
 - name: workspaceTypeBrowse
+  cliName: browse
   cliShort: workspaceType-b
   url: /workspaceType/browse
   method: get
@@ -4445,6 +4685,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceTypeOptionalDto
 - name: workspaceTypeAwareDeletePreview
+  cliName: delete-preview
   cliShort: workspaceType-dp
   url: /workspaceType/delete-preview
   method: get
@@ -4467,6 +4708,7 @@ actions:
       - name: count
         type: int64
 - name: workspaceTypeAwareDelete
+  cliName: delete
   cliShort: workspaceType-d
   url: /workspaceType/delete
   method: post
@@ -4478,6 +4720,7 @@ actions:
       type: slice
       primitive: string
 - name: userCreate
+  cliName: create
   cliShort: user-c
   url: /user
   method: post
@@ -4488,6 +4731,7 @@ actions:
     envelope: GResponse
     dto: UserDto
 - name: userUpdate
+  cliName: update
   cliShort: user-u
   url: /user/:uniqueId
   method: patch
@@ -4498,6 +4742,7 @@ actions:
     envelope: GResponse
     dto: UserDto
 - name: userGet
+  cliName: get
   cliShort: user-g
   url: /user/:uniqueId
   method: get
@@ -4506,6 +4751,7 @@ actions:
     envelope: GResponse
     dto: UserDto
 - name: userBrowse
+  cliName: browse
   cliShort: user-b
   url: /user/browse
   method: get
@@ -4525,6 +4771,7 @@ actions:
     envelope: GResponse
     dto: UserOptionalDto
 - name: userAwareDeletePreview
+  cliName: delete-preview
   cliShort: user-dp
   url: /user/delete-preview
   method: get
@@ -4547,6 +4794,7 @@ actions:
       - name: count
         type: int64
 - name: userAwareDelete
+  cliName: delete
   cliShort: user-d
   url: /user/delete
   method: post
@@ -4558,6 +4806,7 @@ actions:
       type: slice
       primitive: string
 - name: workspaceCreate
+  cliName: create
   cliShort: workspace-c
   url: /workspace
   method: post
@@ -4568,6 +4817,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceDto
 - name: workspaceUpdate
+  cliName: update
   cliShort: workspace-u
   url: /workspace/:uniqueId
   method: patch
@@ -4578,6 +4828,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceDto
 - name: workspaceGet
+  cliName: get
   cliShort: workspace-g
   url: /workspace/:uniqueId
   method: get
@@ -4586,6 +4837,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceDto
 - name: workspaceBrowse
+  cliName: browse
   cliShort: workspace-b
   url: /workspace/browse
   method: get
@@ -4605,6 +4857,7 @@ actions:
     envelope: GResponse
     dto: WorkspaceOptionalDto
 - name: workspaceAwareDeletePreview
+  cliName: delete-preview
   cliShort: workspace-dp
   url: /workspace/delete-preview
   method: get
@@ -4627,6 +4880,7 @@ actions:
       - name: count
         type: int64
 - name: workspaceAwareDelete
+  cliName: delete
   cliShort: workspace-d
   url: /workspace/delete
   method: post
@@ -4638,6 +4892,7 @@ actions:
       type: slice
       primitive: string
 - name: passportCreate
+  cliName: create
   cliShort: passport-c
   url: /passport
   method: post
@@ -4648,6 +4903,7 @@ actions:
     envelope: GResponse
     dto: PassportDto
 - name: passportUpdate
+  cliName: update
   cliShort: passport-u
   url: /passport/:uniqueId
   method: patch
@@ -4658,6 +4914,7 @@ actions:
     envelope: GResponse
     dto: PassportDto
 - name: passportGet
+  cliName: get
   cliShort: passport-g
   url: /passport/:uniqueId
   method: get
@@ -4666,6 +4923,7 @@ actions:
     envelope: GResponse
     dto: PassportDto
 - name: passportBrowse
+  cliName: browse
   cliShort: passport-b
   url: /passport/browse
   method: get
@@ -4685,6 +4943,7 @@ actions:
     envelope: GResponse
     dto: PassportOptionalDto
 - name: passportAwareDeletePreview
+  cliName: delete-preview
   cliShort: passport-dp
   url: /passport/delete-preview
   method: get
@@ -4707,6 +4966,7 @@ actions:
       - name: count
         type: int64
 - name: passportAwareDelete
+  cliName: delete
   cliShort: passport-d
   url: /passport/delete
   method: post

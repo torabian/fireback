@@ -44,7 +44,7 @@ func NotificationConfigUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "NotificationConfigUpdateAction",
-		CliName:     "notification-config-update-action",
+		CliName:     "update",
 		CliShort:    "notificationConfig-u",
 		URL:         "/notificationConfig/:uniqueId",
 		Method:      "PATCH",

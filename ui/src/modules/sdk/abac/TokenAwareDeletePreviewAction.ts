@@ -206,6 +206,7 @@ export class TokenAwareDeletePreviewAction {
   };
   static Definition = {
     name: "tokenAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "token-dp",
     url: "/token/delete-preview",
     method: "get",

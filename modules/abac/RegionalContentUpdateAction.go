@@ -44,7 +44,7 @@ func RegionalContentUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "RegionalContentUpdateAction",
-		CliName:     "regional-content-update-action",
+		CliName:     "update",
 		CliShort:    "regionalContent-u",
 		URL:         "/regionalContent/:uniqueId",
 		Method:      "PATCH",

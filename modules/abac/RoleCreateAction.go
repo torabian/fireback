@@ -43,7 +43,7 @@ func RoleCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "RoleCreateAction",
-		CliName:     "role-create-action",
+		CliName:     "create",
 		CliShort:    "role-c",
 		URL:         "/role",
 		Method:      "POST",

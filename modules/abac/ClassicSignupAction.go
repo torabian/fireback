@@ -118,6 +118,9 @@ func CastClassicSignupActionReqFromCli(c emigo.CliCastable) ClassicSignupActionR
 	if c.IsSet("session-secret") {
 		data.SessionSecret = c.String("session-secret")
 	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
 	if c.IsSet("password") {
 		data.Password = c.String("password")
 	}

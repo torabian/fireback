@@ -43,7 +43,7 @@ func UserGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "UserGetAction",
-		CliName:     "user-get-action",
+		CliName:     "get",
 		CliShort:    "user-g",
 		URL:         "/user/:uniqueId",
 		Method:      "GET",

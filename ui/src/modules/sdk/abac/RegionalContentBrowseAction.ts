@@ -197,6 +197,7 @@ export class RegionalContentBrowseAction {
   };
   static Definition = {
     name: "regionalContentBrowse",
+    cliName: "browse",
     cliShort: "regionalContent-b",
     url: "/regionalContent/browse",
     method: "get",

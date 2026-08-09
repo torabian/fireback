@@ -98,6 +98,9 @@ func CastGsmProviderEntityFromCli(c emigo.CliCastable) GsmProviderEntity {
 	if c.IsSet("main-sender-number") {
 		data.MainSenderNumber = c.String("main-sender-number")
 	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
 	if c.IsSet("invoke-url") {
 		data.InvokeUrl = c.String("invoke-url")
 	}

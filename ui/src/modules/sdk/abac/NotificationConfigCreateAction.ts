@@ -138,6 +138,7 @@ export class NotificationConfigCreateAction {
   };
   static Definition = {
     name: "notificationConfigCreate",
+    cliName: "create",
     cliShort: "notificationConfig-c",
     url: "/notificationConfig",
     method: "post",

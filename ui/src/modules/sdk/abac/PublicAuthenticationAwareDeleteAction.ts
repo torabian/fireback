@@ -114,6 +114,7 @@ export class PublicAuthenticationAwareDeleteAction {
   };
   static Definition = {
     name: "publicAuthenticationAwareDelete",
+    cliName: "delete",
     cliShort: "publicAuthentication-d",
     url: "/publicAuthentication/delete",
     method: "post",

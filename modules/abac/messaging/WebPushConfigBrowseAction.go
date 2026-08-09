@@ -43,7 +43,7 @@ func WebPushConfigBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "WebPushConfigBrowseAction",
-		CliName:     "web-push-config-browse-action",
+		CliName:     "browse",
 		CliShort:    "webPushConfig-b",
 		URL:         "/webPushConfig/browse",
 		Method:      "GET",

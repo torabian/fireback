@@ -42,7 +42,7 @@ func CapabilityAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "CapabilityAwareDeletePreviewAction",
-		CliName:     "capability-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "capability-dp",
 		URL:         "/capability/delete-preview",
 		Method:      "GET",

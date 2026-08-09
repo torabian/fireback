@@ -205,6 +205,7 @@ export class RegionalContentGetAction {
   };
   static Definition = {
     name: "regionalContentGet",
+    cliName: "get",
     cliShort: "regionalContent-g",
     url: "/regionalContent/:uniqueId string",
     method: "get",

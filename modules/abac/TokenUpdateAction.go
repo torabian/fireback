@@ -44,7 +44,7 @@ func TokenUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "TokenUpdateAction",
-		CliName:     "token-update-action",
+		CliName:     "update",
 		CliShort:    "token-u",
 		URL:         "/token/:uniqueId",
 		Method:      "PATCH",

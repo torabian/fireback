@@ -43,7 +43,7 @@ func GsmProviderGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "GsmProviderGetAction",
-		CliName:     "gsm-provider-get-action",
+		CliName:     "get",
 		CliShort:    "gsmProvider-g",
 		URL:         "/gsmProvider/:uniqueId",
 		Method:      "GET",

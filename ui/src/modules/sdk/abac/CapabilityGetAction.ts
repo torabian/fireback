@@ -205,6 +205,7 @@ export class CapabilityGetAction {
   };
   static Definition = {
     name: "capabilityGet",
+    cliName: "get",
     cliShort: "capability-g",
     url: "/capability/:uniqueId string",
     method: "get",

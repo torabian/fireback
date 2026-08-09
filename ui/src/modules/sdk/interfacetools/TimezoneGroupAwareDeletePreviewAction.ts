@@ -207,6 +207,7 @@ export class TimezoneGroupAwareDeletePreviewAction {
   };
   static Definition = {
     name: "timezoneGroupAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "timezoneGroup-dp",
     url: "/timezoneGroup/delete-preview",
     method: "get",

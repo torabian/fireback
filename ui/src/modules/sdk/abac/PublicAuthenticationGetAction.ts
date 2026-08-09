@@ -212,6 +212,7 @@ export class PublicAuthenticationGetAction {
   };
   static Definition = {
     name: "publicAuthenticationGet",
+    cliName: "get",
     cliShort: "publicAuthentication-g",
     url: "/publicAuthentication/:uniqueId string",
     method: "get",

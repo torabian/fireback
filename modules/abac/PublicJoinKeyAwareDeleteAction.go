@@ -43,7 +43,7 @@ func PublicJoinKeyAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "PublicJoinKeyAwareDeleteAction",
-		CliName:     "public-join-key-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "publicJoinKey-d",
 		URL:         "/publicJoinKey/delete",
 		Method:      "POST",

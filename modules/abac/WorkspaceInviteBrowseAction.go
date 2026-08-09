@@ -43,7 +43,7 @@ func WorkspaceInviteBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "WorkspaceInviteBrowseAction",
-		CliName:     "workspace-invite-browse-action",
+		CliName:     "browse",
 		CliShort:    "workspaceInvite-b",
 		URL:         "/workspaceInvite/browse",
 		Method:      "GET",

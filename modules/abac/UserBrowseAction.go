@@ -43,7 +43,7 @@ func UserBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "UserBrowseAction",
-		CliName:     "user-browse-action",
+		CliName:     "browse",
 		CliShort:    "user-b",
 		URL:         "/user/browse",
 		Method:      "GET",

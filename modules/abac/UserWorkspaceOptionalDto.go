@@ -14,9 +14,9 @@ type UserWorkspaceOptionalDto struct {
 	UserId emigo.Nullable[string] `json:"userId" yaml:"userId"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId          emigo.Nullable[string]        `json:"workspaceId" yaml:"workspaceId"`
-	UserPermissions      emigo.Nullable[[]string]      `json:"userPermissions" yaml:"userPermissions"`
-	RolePermission       emigo.Nullable[[]interface{}] `json:"rolePermission" yaml:"rolePermission"`
-	WorkspacePermissions emigo.Nullable[[]string]      `json:"workspacePermissions" yaml:"workspacePermissions"`
+	UserPermissions      emigo.Nullable[[]string]      `json:"userPermissions" sql:"-" yaml:"userPermissions"`
+	RolePermission       emigo.Nullable[[]interface{}] `json:"rolePermission" sql:"-" yaml:"rolePermission"`
+	WorkspacePermissions emigo.Nullable[[]string]      `json:"workspacePermissions" sql:"-" yaml:"workspacePermissions"`
 	CreatedAt            abaccomplexes.PlainTime       `json:"createdAt" yaml:"createdAt"`
 	UpdatedAt            abaccomplexes.PlainTime       `json:"updatedAt" yaml:"updatedAt"`
 }

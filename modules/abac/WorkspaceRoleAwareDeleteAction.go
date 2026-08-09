@@ -43,7 +43,7 @@ func WorkspaceRoleAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "WorkspaceRoleAwareDeleteAction",
-		CliName:     "workspace-role-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "workspaceRole-d",
 		URL:         "/workspaceRole/delete",
 		Method:      "POST",

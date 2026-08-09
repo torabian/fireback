@@ -43,7 +43,7 @@ func GsmProviderBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "GsmProviderBrowseAction",
-		CliName:     "gsm-provider-browse-action",
+		CliName:     "browse",
 		CliShort:    "gsmProvider-b",
 		URL:         "/gsmProvider/browse",
 		Method:      "GET",

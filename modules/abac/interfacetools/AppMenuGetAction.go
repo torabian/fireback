@@ -43,7 +43,7 @@ func AppMenuGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "AppMenuGetAction",
-		CliName:     "app-menu-get-action",
+		CliName:     "get",
 		CliShort:    "appMenu-g",
 		URL:         "/appMenu/:uniqueId",
 		Method:      "GET",

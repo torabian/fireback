@@ -148,6 +148,7 @@ export class PreferenceUpdateAction {
   };
   static Definition = {
     name: "preferenceUpdate",
+    cliName: "update",
     cliShort: "preference-u",
     url: "/preference/:uniqueId string",
     method: "patch",

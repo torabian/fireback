@@ -205,6 +205,7 @@ export class UserWorkspaceGetAction {
   };
   static Definition = {
     name: "userWorkspaceGet",
+    cliName: "get",
     cliShort: "userWorkspace-g",
     url: "/userWorkspace/:uniqueId string",
     method: "get",

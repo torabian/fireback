@@ -134,6 +134,7 @@ export class PassportMethodCreateAction {
   };
   static Definition = {
     name: "passportMethodCreate",
+    cliName: "create",
     cliShort: "passportMethod-c",
     url: "/passportMethod",
     method: "post",

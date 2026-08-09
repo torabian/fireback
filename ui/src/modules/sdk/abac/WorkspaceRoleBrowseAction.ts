@@ -197,6 +197,7 @@ export class WorkspaceRoleBrowseAction {
   };
   static Definition = {
     name: "workspaceRoleBrowse",
+    cliName: "browse",
     cliShort: "workspaceRole-b",
     url: "/workspaceRole/browse",
     method: "get",

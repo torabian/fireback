@@ -43,7 +43,7 @@ func CapabilityGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "CapabilityGetAction",
-		CliName:     "capability-get-action",
+		CliName:     "get",
 		CliShort:    "capability-g",
 		URL:         "/capability/:uniqueId",
 		Method:      "GET",

@@ -208,6 +208,7 @@ export class WorkspaceConfigAwareDeletePreviewAction {
   };
   static Definition = {
     name: "workspaceConfigAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "workspaceConfig-dp",
     url: "/workspaceConfig/delete-preview",
     method: "get",

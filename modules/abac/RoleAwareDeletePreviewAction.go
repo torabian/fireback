@@ -42,7 +42,7 @@ func RoleAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "RoleAwareDeletePreviewAction",
-		CliName:     "role-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "role-dp",
 		URL:         "/role/delete-preview",
 		Method:      "GET",

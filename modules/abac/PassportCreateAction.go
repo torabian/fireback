@@ -43,7 +43,7 @@ func PassportCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "PassportCreateAction",
-		CliName:     "passport-create-action",
+		CliName:     "create",
 		CliShort:    "passport-c",
 		URL:         "/passport",
 		Method:      "POST",

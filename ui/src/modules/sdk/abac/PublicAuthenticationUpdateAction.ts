@@ -152,6 +152,7 @@ export class PublicAuthenticationUpdateAction {
   };
   static Definition = {
     name: "publicAuthenticationUpdate",
+    cliName: "update",
     cliShort: "publicAuthentication-u",
     url: "/publicAuthentication/:uniqueId string",
     method: "patch",

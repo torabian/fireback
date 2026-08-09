@@ -205,6 +205,7 @@ export class WorkspaceConfigGetAction {
   };
   static Definition = {
     name: "workspaceConfigGet",
+    cliName: "get",
     cliShort: "workspaceConfig-g",
     url: "/workspaceConfig/:uniqueId string",
     method: "get",

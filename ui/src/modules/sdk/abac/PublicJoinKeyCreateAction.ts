@@ -134,6 +134,7 @@ export class PublicJoinKeyCreateAction {
   };
   static Definition = {
     name: "publicJoinKeyCreate",
+    cliName: "create",
     cliShort: "publicJoinKey-c",
     url: "/publicJoinKey",
     method: "post",

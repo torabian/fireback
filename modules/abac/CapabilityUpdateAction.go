@@ -44,7 +44,7 @@ func CapabilityUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "CapabilityUpdateAction",
-		CliName:     "capability-update-action",
+		CliName:     "update",
 		CliShort:    "capability-u",
 		URL:         "/capability/:uniqueId",
 		Method:      "PATCH",

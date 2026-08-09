@@ -42,7 +42,7 @@ func UserProfileAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "UserProfileAwareDeletePreviewAction",
-		CliName:     "user-profile-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "userProfile-dp",
 		URL:         "/userProfile/delete-preview",
 		Method:      "GET",

@@ -43,7 +43,7 @@ func NotificationConfigAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "NotificationConfigAwareDeleteAction",
-		CliName:     "notification-config-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "notificationConfig-d",
 		URL:         "/notificationConfig/delete",
 		Method:      "POST",

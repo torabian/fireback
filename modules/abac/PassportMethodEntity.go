@@ -86,6 +86,12 @@ func CastPassportMethodEntityFromCli(c emigo.CliCastable) PassportMethodEntity {
 	if c.IsSet("unique-id") {
 		data.UniqueId = c.String("unique-id")
 	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
+	if c.IsSet("region") {
+		data.Region = c.String("region")
+	}
 	if c.IsSet("client-key") {
 		data.ClientKey = c.String("client-key")
 	}

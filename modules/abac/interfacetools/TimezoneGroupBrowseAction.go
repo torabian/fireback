@@ -43,7 +43,7 @@ func TimezoneGroupBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "TimezoneGroupBrowseAction",
-		CliName:     "timezone-group-browse-action",
+		CliName:     "browse",
 		CliShort:    "timezoneGroup-b",
 		URL:         "/timezoneGroup/browse",
 		Method:      "GET",

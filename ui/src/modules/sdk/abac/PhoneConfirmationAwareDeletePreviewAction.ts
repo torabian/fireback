@@ -209,6 +209,7 @@ export class PhoneConfirmationAwareDeletePreviewAction {
   };
   static Definition = {
     name: "phoneConfirmationAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "phoneConfirmation-dp",
     url: "/phoneConfirmation/delete-preview",
     method: "get",

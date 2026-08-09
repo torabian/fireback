@@ -129,6 +129,7 @@ export class UserCreateAction {
   };
   static Definition = {
     name: "userCreate",
+    cliName: "create",
     cliShort: "user-c",
     url: "/user",
     method: "post",

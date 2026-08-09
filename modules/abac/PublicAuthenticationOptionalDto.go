@@ -25,7 +25,7 @@ type PublicAuthenticationOptionalDto struct {
 	Status              emigo.Nullable[string] `json:"status" yaml:"status"`
 	BlockedUntil        emigo.Nullable[int64]  `json:"blockedUntil" yaml:"blockedUntil"`
 	Otp                 emigo.Nullable[string] `json:"otp" yaml:"otp"`
-	RecoveryAbsoluteUrl emigo.Nullable[string] `json:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"`
+	RecoveryAbsoluteUrl emigo.Nullable[string] `json:"recoveryAbsoluteUrl" sql:"-" yaml:"recoveryAbsoluteUrl"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string]  `json:"workspaceId" yaml:"workspaceId"`
 	CreatedAt   abaccomplexes.PlainTime `json:"createdAt" yaml:"createdAt"`

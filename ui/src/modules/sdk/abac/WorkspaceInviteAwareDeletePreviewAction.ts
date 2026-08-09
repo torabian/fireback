@@ -208,6 +208,7 @@ export class WorkspaceInviteAwareDeletePreviewAction {
   };
   static Definition = {
     name: "workspaceInviteAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "workspaceInvite-dp",
     url: "/workspaceInvite/delete-preview",
     method: "get",

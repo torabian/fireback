@@ -129,6 +129,7 @@ export class CapabilityCreateAction {
   };
   static Definition = {
     name: "capabilityCreate",
+    cliName: "create",
     cliShort: "capability-c",
     url: "/capability",
     method: "post",

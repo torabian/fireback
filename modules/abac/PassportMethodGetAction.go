@@ -43,7 +43,7 @@ func PassportMethodGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "PassportMethodGetAction",
-		CliName:     "passport-method-get-action",
+		CliName:     "get",
 		CliShort:    "passportMethod-g",
 		URL:         "/passportMethod/:uniqueId",
 		Method:      "GET",

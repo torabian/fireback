@@ -193,6 +193,7 @@ export class TokenGetAction {
   };
   static Definition = {
     name: "tokenGet",
+    cliName: "get",
     cliShort: "token-g",
     url: "/token/:uniqueId string",
     method: "get",

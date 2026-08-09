@@ -205,6 +205,7 @@ export class PhoneConfirmationGetAction {
   };
   static Definition = {
     name: "phoneConfirmationGet",
+    cliName: "get",
     cliShort: "phoneConfirmation-g",
     url: "/phoneConfirmation/:uniqueId string",
     method: "get",

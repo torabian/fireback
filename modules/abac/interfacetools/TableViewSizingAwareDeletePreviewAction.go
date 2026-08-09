@@ -42,7 +42,7 @@ func TableViewSizingAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "TableViewSizingAwareDeletePreviewAction",
-		CliName:     "table-view-sizing-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "tableViewSizing-dp",
 		URL:         "/tableViewSizing/delete-preview",
 		Method:      "GET",

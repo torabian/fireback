@@ -42,7 +42,7 @@ func GsmProviderAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "GsmProviderAwareDeletePreviewAction",
-		CliName:     "gsm-provider-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "gsmProvider-dp",
 		URL:         "/gsmProvider/delete-preview",
 		Method:      "GET",

@@ -134,6 +134,7 @@ export class WorkspaceConfigCreateAction {
   };
   static Definition = {
     name: "workspaceConfigCreate",
+    cliName: "create",
     cliShort: "workspaceConfig-c",
     url: "/workspaceConfig",
     method: "post",

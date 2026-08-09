@@ -205,6 +205,7 @@ export class WorkspaceTypeGetAction {
   };
   static Definition = {
     name: "workspaceTypeGet",
+    cliName: "get",
     cliShort: "workspaceType-g",
     url: "/workspaceType/:uniqueId string",
     method: "get",
