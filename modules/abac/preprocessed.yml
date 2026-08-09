@@ -2664,6 +2664,40 @@ actions:
         description: Capabilities related to this role which are available
         type: slice
         primitive: string
+- name: Whoami
+  cliName: whoami
+  url: /
+  method: get
+  description: Returns information about the currently authenticated user - their
+    userId, and every workspace they belong to along with their role(s) and capabilities
+    in each (the same UserRoleWorkspace shape QueryUserRoleWorkspaces returns).
+  out:
+    envelope: GResponse
+    fields:
+    - name: userId
+      type: string
+    - name: workspaces
+      type: array
+      fields:
+      - name: name
+        type: string
+      - name: uniqueId
+        type: string
+      - name: capabilities
+        description: Workspace level capabilities which are available
+        type: slice
+        primitive: string
+      - name: roles
+        type: array
+        fields:
+        - name: name
+          type: string
+        - name: uniqueId
+          type: string
+        - name: capabilities
+          description: Capabilities related to this role which are available
+          type: slice
+          primitive: string
 - name: InviteToWorkspace
   cliName: invite
   url: /workspace/invite

@@ -48,6 +48,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// Capability* actions - rather than through the legacy Module3Action/Impl glue.
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
+				WhoamiActionGin(g, WhoamiAction)
 				QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
 				InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
 				UserInvitationsActionGin(g, UserInvitationsAction)
@@ -262,6 +263,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// QueryUserRoleWorkspaces/QueryWorkspaceTypesPublicly under WorkspaceCliFn,
 		// OsLoginAuthenticate/CheckPassportMethods/UserPassports/OauthAuthenticate under
 		// PassportCliFn - see UserEntity.go/WorkspaceCli.go/PassportCli.go).
+		WhoamiActionCliHandler(WhoamiAction),
 		SignoutActionCliHandler(SignoutAction),
 		InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
 		ConfirmClassicPassportTotpActionCliHandler(ConfirmClassicPassportTotpAction),
