@@ -64,19 +64,41 @@ func ModuleSetup() *application.ModuleProvider {
 	})
 
 	module.ProvideCliHandlers([]*cli.Command{
-		AppMenuCliFn(),
-		TableViewSizingBrowseActionCliHandler(TableViewSizingBrowseAction),
-		TableViewSizingGetActionCliHandler(TableViewSizingGetAction),
-		TableViewSizingCreateActionCliHandler(TableViewSizingCreateAction),
-		TableViewSizingUpdateActionCliHandler(TableViewSizingUpdateAction),
-		TableViewSizingAwareDeletePreviewActionCliHandler(TableViewSizingAwareDeletePreviewAction),
-		TableViewSizingAwareDeleteActionCliHandler(TableViewSizingAwareDeleteAction),
-		TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
-		TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
-		TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
-		TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
-		TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
-		TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
+		{
+			Name:        "interface",
+			Aliases:     []string{"intf", "if"},
+			Description: "Stores information about interface, which is useful for front-end application, such as menus, table sizes, sort orders",
+			Commands: []*cli.Command{
+
+				AppMenuCliFn(),
+				{
+					Name:        "tableviewsizing",
+					Aliases:     []string{"tvs"},
+					Description: "Stores the table column configuration per user in database",
+					Commands: []*cli.Command{
+						TableViewSizingBrowseActionCliHandler(TableViewSizingBrowseAction),
+						TableViewSizingGetActionCliHandler(TableViewSizingGetAction),
+						TableViewSizingCreateActionCliHandler(TableViewSizingCreateAction),
+						TableViewSizingUpdateActionCliHandler(TableViewSizingUpdateAction),
+						TableViewSizingAwareDeletePreviewActionCliHandler(TableViewSizingAwareDeletePreviewAction),
+						TableViewSizingAwareDeleteActionCliHandler(TableViewSizingAwareDeleteAction),
+					},
+				},
+				{
+					Name:        "timezone",
+					Aliases:     []string{"tz"},
+					Description: "Contains common timezones information",
+					Commands: []*cli.Command{
+						TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
+						TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
+						TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
+						TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
+						TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
+						TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
+					},
+				},
+			},
+		},
 	})
 
 	return module

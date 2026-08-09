@@ -62,62 +62,73 @@ describe("Logging in with the signin", () => {
       // registered flat at the top level, so its CliShort alias "role-c" is what's
       // reachable (see PassportCli.go's hand-written nesting vs. every other
       // entity, which is flat). "--capabilities" is also stale: the field is now
-      // "capabilitiesListId", a JSON array. The response envelope is
+      // "capabilitiesListId", a JSON array - and it can't be the "root.*" wildcard
+      // this test originally used, since WorkspaceTypeActions.go's
+      // ValidateTheWorkspaceTypeEntity explicitly rejects assigning a role with the
+      // root.* wildcard capability to a workspace type (it would hand every user of
+      // that workspace type super-admin powers). The response envelope is
       // {data: {item: {...}}} (GResponseSingleItem), not a bare object.
       cy.task(
         "exec",
-        ` role-c --name testagentrole --capabilities-list-id '["root.*"]'`,
+        ` role-c --name testagentrole --capabilities-list-id '["root.manage.abac.notification-config.query"]'`,
       ).then((res) => {
         roleId = JSON.parse(res).data.item.uniqueId;
         expect(roleId).to.be.a("string").and.not.be.empty;
       });
     });
 
-    // it("should be able to create a workspace name", () => {
-    //   cy.task(
-    //     "exec",
-    //     ` ws type c --title customer --slug customer --role-id ${roleId}`,
-    //   );
-    // });
+    it("should be able to create a workspace type", () => {
+      // "ws type c" doesn't exist either - WorkspaceType's actions are registered
+      // flat inside the "ws"/"workspace" group (WorkspaceCliCommands in
+      // WorkspaceCli.go), not under their own "type" sub-group, so
+      // "workspaceType-c" (its CliShort) is what's reachable there. The slug also
+      // now has an enforced format: must start with "/" (see
+      // ValidateTheWorkspaceTypeEntity/WorkspaceTypeActions.go) - "customer" alone
+      // fails validation, "/customer" doesn't.
+      cy.task(
+        "exec",
+        ` ws workspaceType-c --title customer --slug /customer --role-id ${roleId}`,
+      );
+    });
 
-    // it("should be able to create an account", () => {
-    //   Cypress.on("uncaught:exception", (err, runnable) => {
-    //     // returning false here prevents Cypress from
-    //     // failing the test
-    //     return false;
-    //   });
+    it("should be able to create an account", () => {
+      Cypress.on("uncaught:exception", (err, runnable) => {
+        // returning false here prevents Cypress from
+        // failing the test
+        return false;
+      });
 
-    //   cy.viewport(400, 750); // Set the window size dynamically
+      cy.viewport(400, 750); // Set the window size dynamically
 
-    //   cy.visit(ui("/manage/#/en/welcome"));
-    //   cy.get("#using-email").should("exist").click();
-    //   cy.url().should("include", "/selfservice/email");
-    //   cy.get("h1").should("have.text", "Continue with Email");
-    //   cy.wait(1000);
+      cy.visit(ui("/manage/#/en/welcome"));
+      cy.get("#using-email").should("exist").click();
+      cy.url().should("include", "/selfservice/email");
+      cy.get("h1").should("have.text", "Continue with Email");
+      cy.wait(1000);
 
-    //   // // Check if the go back works just fine.
-    //   cy.get("#go-back-button").should("exist").click({ force: true });
-    //   cy.url().should("match", /\/welcome$/);
+      // // Check if the go back works just fine.
+      cy.get("#go-back-button").should("exist").click({ force: true });
+      cy.url().should("match", /\/welcome$/);
 
-    //   cy.get("#using-email").should("exist").as("btn").click({ force: true });
-    //   cy.get("#value-input").type("test@test.com"); // Fill the input with "admin"
-    //   cy.wait(500);
+      cy.get("#using-email").should("exist").as("btn").click({ force: true });
+      cy.get("#value-input").type("test@test.com"); // Fill the input with "admin"
+      cy.wait(500);
 
-    //   cy.get("#submit-form").click({ force: true }); // Submit the form
+      cy.get("#submit-form").click({ force: true }); // Submit the form
 
-    //   cy.wait(500);
+      cy.wait(500);
 
-    //   cy.get("h1").should("have.text", "Complete your account");
+      cy.get("h1").should("have.text", "Complete your account");
 
-    //   cy.get("#first-name-input").type("Ali");
-    //   cy.get("#last-name-input").type("Torabi");
+      cy.get("#first-name-input").type("Ali");
+      cy.get("#last-name-input").type("Torabi");
 
-    //   cy.get("#password-input").type("123321");
+      cy.get("#password-input").type("123321");
 
-    //   cy.get("#submit-form").click({ force: true }); // Submit the form
+      cy.get("#submit-form").click({ force: true }); // Submit the form
 
-    //   cy.wait(500);
-    // });
+      cy.wait(500);
+    });
 
     // let successfulInserts = 0;
     // let appMenuItems = [];
