@@ -130,10 +130,6 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 				RegionalContentAwareDeletePreviewActionGin(g, RegionalContentAwareDeletePreviewAction)
 				RegionalContentAwareDeleteActionGin(g, RegionalContentAwareDeleteAction)
 
-				// AppMenu (and /cte-app-menus) moved to modules/abac/interfacetools - see
-				// interfacetools.ModuleSetup.
-
-				// CapabilityEntity moved here from modules/fireback - see CapabilityActions.go.
 				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
 				CapabilityGetActionGin(g, CapabilityGetAction)
 				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
@@ -257,12 +253,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 	}
 
 	module.ProvideCliHandlers([]*cli.Command{
-		RoleBrowseActionCliHandler(RoleBrowseAction),
-		RoleGetActionCliHandler(RoleGetAction),
-		RoleCreateActionCliHandler(RoleCreateAction),
-		RoleUpdateActionCliHandler(RoleUpdateAction),
-		RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
-		RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
+
 		UserCliFn(),
 		WorkspaceCliFn(),
 		&MiscCli,
@@ -285,36 +276,18 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// modules/abac/messaging - see messaging.ModuleSetup.
 		GsmSendSmsActionCliHandler(GsmSendSmsAction),
 
-		// TimezoneGroup CLI moved to modules/abac/interfacetools - see
-		// interfacetools.ModuleSetup.
-
-		PreferenceBrowseActionCliHandler(PreferenceBrowseAction),
-		PreferenceGetActionCliHandler(PreferenceGetAction),
-		PreferenceCreateActionCliHandler(PreferenceCreateAction),
-		PreferenceUpdateActionCliHandler(PreferenceUpdateAction),
-		PreferenceAwareDeletePreviewActionCliHandler(PreferenceAwareDeletePreviewAction),
-		PreferenceAwareDeleteActionCliHandler(PreferenceAwareDeleteAction),
-
-		UserProfileBrowseActionCliHandler(UserProfileBrowseAction),
-		UserProfileGetActionCliHandler(UserProfileGetAction),
-		UserProfileCreateActionCliHandler(UserProfileCreateAction),
-		UserProfileUpdateActionCliHandler(UserProfileUpdateAction),
-		UserProfileAwareDeletePreviewActionCliHandler(UserProfileAwareDeletePreviewAction),
-		UserProfileAwareDeleteActionCliHandler(UserProfileAwareDeleteAction),
-
-		PendingWorkspaceInviteBrowseActionCliHandler(PendingWorkspaceInviteBrowseAction),
-		PendingWorkspaceInviteGetActionCliHandler(PendingWorkspaceInviteGetAction),
-		PendingWorkspaceInviteCreateActionCliHandler(PendingWorkspaceInviteCreateAction),
-		PendingWorkspaceInviteUpdateActionCliHandler(PendingWorkspaceInviteUpdateAction),
-		PendingWorkspaceInviteAwareDeletePreviewActionCliHandler(PendingWorkspaceInviteAwareDeletePreviewAction),
-		PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
-
-		// CapabilityEntity moved here from modules/fireback - see CapabilityActions.go.
-		CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
-		CapabilityGetActionCliHandler(CapabilityGetAction),
-		CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
-		CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
-		CapabilitiesTreeActionCliHandler(CapabilitiesTreeAction),
+		{
+			Name:        "role",
+			Description: "Actions related to roles, creation, browsing and other.",
+			Commands: []*cli.Command{
+				RoleBrowseActionCliHandler(RoleBrowseAction),
+				RoleGetActionCliHandler(RoleGetAction),
+				RoleCreateActionCliHandler(RoleCreateAction),
+				RoleUpdateActionCliHandler(RoleUpdateAction),
+				RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
+				RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
+			},
+		},
 	})
 
 	module.ProvideCliHandlers([]*cli.Command{&AuthFlow, &AbacActions})
@@ -343,6 +316,29 @@ var AbacActions cli.Command = cli.Command{
 					PublicAuthenticationUpdateActionCliHandler(PublicAuthenticationUpdateAction),
 					PublicAuthenticationAwareDeletePreviewActionCliHandler(PublicAuthenticationAwareDeletePreviewAction),
 					PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
+					PreferenceBrowseActionCliHandler(PreferenceBrowseAction),
+					PreferenceGetActionCliHandler(PreferenceGetAction),
+					PreferenceCreateActionCliHandler(PreferenceCreateAction),
+					PreferenceUpdateActionCliHandler(PreferenceUpdateAction),
+					PreferenceAwareDeletePreviewActionCliHandler(PreferenceAwareDeletePreviewAction),
+					PreferenceAwareDeleteActionCliHandler(PreferenceAwareDeleteAction),
+					UserProfileBrowseActionCliHandler(UserProfileBrowseAction),
+					UserProfileGetActionCliHandler(UserProfileGetAction),
+					UserProfileCreateActionCliHandler(UserProfileCreateAction),
+					UserProfileUpdateActionCliHandler(UserProfileUpdateAction),
+					UserProfileAwareDeletePreviewActionCliHandler(UserProfileAwareDeletePreviewAction),
+					UserProfileAwareDeleteActionCliHandler(UserProfileAwareDeleteAction),
+					PendingWorkspaceInviteBrowseActionCliHandler(PendingWorkspaceInviteBrowseAction),
+					PendingWorkspaceInviteGetActionCliHandler(PendingWorkspaceInviteGetAction),
+					PendingWorkspaceInviteCreateActionCliHandler(PendingWorkspaceInviteCreateAction),
+					PendingWorkspaceInviteUpdateActionCliHandler(PendingWorkspaceInviteUpdateAction),
+					PendingWorkspaceInviteAwareDeletePreviewActionCliHandler(PendingWorkspaceInviteAwareDeletePreviewAction),
+					PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
+					CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
+					CapabilityGetActionCliHandler(CapabilityGetAction),
+					CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
+					CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
+					CapabilitiesTreeActionCliHandler(CapabilitiesTreeAction),
 				},
 			},
 		},

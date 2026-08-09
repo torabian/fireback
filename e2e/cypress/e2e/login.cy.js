@@ -16,59 +16,62 @@ describe("Logging in with the signin", () => {
       cy.get("h1").should("have.text", "Authentication Currently Unavailable");
     });
 
+    // Passport method CRUD, uniqueness/root-only enforcement, and the public
+    // available-methods API all moved to passport-method.cy.ts. This file still
+    // needs email+phone methods enabled as its own fixture, to test the welcome
+    // page's behavior once authentication is available.
+    it("should be able to create email and phone passport methods.", () => {
+      cy.task("exec", ` passport method create --region global --type email`);
+      cy.task("exec", ` passport method create --region global --type phone`);
+    });
+
     it("get the data of the public", () => {
       cy.request(
         "GET",
         "http://localhost:7794/passports/available-methods",
       ).then((response) => {
         cy.task("log", response.body);
-        expect(response.body.data.item.email).to.equal(false);
-        expect(response.body.data.item.phone).to.equal(false);
+        expect(response.body.data.item.email).to.equal(true);
+        expect(response.body.data.item.phone).to.equal(true);
       });
     });
 
-    it("should be able to create email method in database.", () => {
-      cy.task("exec", ` passport method c --region global --type email`);
+    it("should show welcome back when it's email and phone enabled.", () => {
+      cy.viewport(400, 750); // Set the window size dynamically
+      cy.visit(ui("/manage/#/en/welcome"));
+      cy.wait(1000);
+      cy.get("h1").should("have.text", "Welcome back");
     });
 
-    // it("should be able to create phone method in database.", () => {
-    //   cy.task("exec", ` passport method c --region global --type phone`);
-    // });
+    it("on creation of the passport method, both type and region need to be provided.", () => {
+      // The old CLI shorthand ("passport method c") and error shape
+      // ('"type, region"' as one combined string) are both stale - "c" doesn't
+      // resolve to anything under the current nested CLI structure, and
+      // validation now reports structured per-field errors (see
+      // fireback.CommonStructValidatorPointer) instead of one joined string.
+      cy.task("execSupress", ` passport method create`).then((content) => {
+        expect(content).to.contain("ValidationFailedOnSomeFields");
+        expect(content).to.contain('"location": "type"');
+        expect(content).to.contain('"location": "region"');
+      });
+    });
 
-    // it("get the data of the public", () => {
-    //   cy.request(
-    //     "GET",
-    //     "http://localhost:7794/passports/available-methods",
-    //   ).then((response) => {
-    //     cy.task("log", response.body);
-    //     expect(response.body.data.item.email).to.equal(true);
-    //     expect(response.body.data.item.phone).to.equal(true);
-    //   });
-    // });
-
-    // it("should show welcome back when it's email and phone enabled.", () => {
-    //   cy.viewport(400, 750); // Set the window size dynamically
-    //   cy.visit(ui("/manage/#/en/welcome"));
-    //   cy.wait(1000);
-    //   cy.get("h1").should("have.text", "Welcome back");
-    // });
-
-    // it("on creation of the passport method, both type and region need to be provided.", () => {
-    //   cy.task("execSupress", ` passport method c`).then((content) => {
-    //     expect(content).contain('"type, region"');
-    //   }).ca;
-    // });
-
-    // let roleId = "";
-    // it("should be able to create a role in order to assign it into the workspace type.", () => {
-    //   cy.task(
-    //     "exec",
-    //     ` role c --name testagentrole --capabilities "root.*"`,
-    //   ).then((res) => {
-    //     console.log("Role created:", res)
-    //     console.log((roleId = JSON.parse(res).uniqueId));
-    //   });
-    // });
+    let roleId = "";
+    it("should be able to create a role in order to assign it into the workspace type.", () => {
+      // "role c" (a nested two-word command) doesn't exist - Role's actions are
+      // registered flat at the top level, so its CliShort alias "role-c" is what's
+      // reachable (see PassportCli.go's hand-written nesting vs. every other
+      // entity, which is flat). "--capabilities" is also stale: the field is now
+      // "capabilitiesListId", a JSON array. The response envelope is
+      // {data: {item: {...}}} (GResponseSingleItem), not a bare object.
+      cy.task(
+        "exec",
+        ` role-c --name testagentrole --capabilities-list-id '["root.*"]'`,
+      ).then((res) => {
+        roleId = JSON.parse(res).data.item.uniqueId;
+        expect(roleId).to.be.a("string").and.not.be.empty;
+      });
+    });
 
     // it("should be able to create a workspace name", () => {
     //   cy.task(

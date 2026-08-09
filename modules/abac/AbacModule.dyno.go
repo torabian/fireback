@@ -65,6 +65,7 @@ const (
 	OtpCodeInvalid                            abacCode = "OtpCodeInvalid"
 	OtpFailed                                 abacCode = "OtpFailed"
 	OtpNotAvailableForThisType                abacCode = "OtpNotAvailableForThisType"
+	PassportMethodAlreadyExists               abacCode = "PassportMethodAlreadyExists"
 	PassportNotAvailable                      abacCode = "PassportNotAvailable"
 	PassportNotFound                          abacCode = "PassportNotFound"
 	PassportTotpNotConfirmed                  abacCode = "PassportTotpNotConfirmed"
@@ -205,6 +206,10 @@ func newAbacMessageCode() *abacMsgs {
 			"$":  "OtpNotAvailableForThisType",
 			"en": "This type of account does not have any otp method for authentication.",
 		},
+		PassportMethodAlreadyExists: fireback.ErrorItem{
+			"$":  "PassportMethodAlreadyExists",
+			"en": "A passport method with this type and region already exists. Type and region combination must be unique.",
+		},
 		PassportNotAvailable: fireback.ErrorItem{
 			"$":  "PassportNotAvailable",
 			"en": "This passport is not available. Please check credentials and try again",
@@ -340,6 +345,7 @@ type abacMsgs struct {
 	OtpCodeInvalid                            fireback.ErrorItem
 	OtpFailed                                 fireback.ErrorItem
 	OtpNotAvailableForThisType                fireback.ErrorItem
+	PassportMethodAlreadyExists               fireback.ErrorItem
 	PassportNotAvailable                      fireback.ErrorItem
 	PassportNotFound                          fireback.ErrorItem
 	PassportTotpNotConfirmed                  fireback.ErrorItem

@@ -3,6 +3,7 @@ package abac
 import (
 	"reflect"
 
+	"github.com/torabian/emi/emigo"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PassportMethod"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -84,6 +85,35 @@ func PassportMethodGetAction(c PassportMethodGetActionRequest) (*PassportMethodG
 	return &PassportMethodGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
+// passportMethodDuplicateCheck rejects a (type, region) pair another row already
+// occupies - the pair must be globally unique, never duplicated, regardless of
+// workspace (passport methods are root-only content in the first place - see
+// passportMethodSecurity). excludeUniqueId lets an update skip the row being updated
+// itself, so a no-op update (or one that doesn't touch type/region) doesn't trip on
+// the row's own existing values.
+func passportMethodDuplicateCheck(methodType string, region string, excludeUniqueId string) *fireback.IError {
+	db := fireback.GetDbRef().Model(&PassportMethodEntity{}).
+		Where(&PassportMethodEntity{Type: methodType, Region: region})
+
+	if excludeUniqueId != "" {
+		db = db.Where("unique_id <> ?", excludeUniqueId)
+	}
+
+	var count int64
+	if err := db.Count(&count).Error; err != nil {
+		return fireback.GormErrorToIError(err)
+	}
+
+	if count > 0 {
+		return &fireback.IError{
+			HttpCode: 400,
+			Message:  AbacMessages.PassportMethodAlreadyExists,
+		}
+	}
+
+	return nil
+}
+
 func PassportMethodCreateAction(c PassportMethodCreateActionRequest) (*PassportMethodCreateActionResponse, error) {
 
 	if err := fireback.CommonStructValidatorPointer(&c.Body, false); !fireback.IsNilish(err) {
@@ -94,10 +124,16 @@ func PassportMethodCreateAction(c PassportMethodCreateActionRequest) (*PassportM
 	if err != nil {
 		return nil, err
 	}
+
+	if dupErr := passportMethodDuplicateCheck(c.Body.Type, c.Body.Region, ""); dupErr != nil {
+		return nil, dupErr
+	}
+
 	entity := &PassportMethodEntity{
-		Type:      c.Body.Type,
-		Region:    c.Body.Region,
-		ClientKey: c.Body.ClientKey,
+		Type:        c.Body.Type,
+		Region:      c.Body.Region,
+		ClientKey:   c.Body.ClientKey,
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := PassportMethodActions.Create(entity, *query)
 	if err2 != nil {
@@ -113,15 +149,43 @@ func PassportMethodUpdateAction(c PassportMethodUpdateActionRequest) (*PassportM
 	}
 	query.UniqueId = c.Params.UniqueId
 	fields := &PassportMethodEntity{UniqueId: c.Params.UniqueId}
-	if v, ok := c.Body.Type.Get(); ok {
-		fields.Type = *v
+
+	newType, typeChanging := c.Body.Type.Get()
+	if typeChanging {
+		fields.Type = *newType
 	}
-	if v, ok := c.Body.Region.Get(); ok {
-		fields.Region = *v
+	newRegion, regionChanging := c.Body.Region.Get()
+	if regionChanging {
+		fields.Region = *newRegion
 	}
 	if v, ok := c.Body.ClientKey.Get(); ok {
 		fields.ClientKey = *v
 	}
+
+	// Only re-check uniqueness when type and/or region are actually part of this
+	// patch - an update that leaves both untouched can't create a new duplicate.
+	// Whichever of the two isn't being changed still needs to be read off the
+	// current row, so the pair being checked reflects what the row will actually
+	// end up as, not just the half that was patched.
+	if typeChanging || regionChanging {
+		checkType, checkRegion := fields.Type, fields.Region
+		if !typeChanging || !regionChanging {
+			current, currErr := PassportMethodActions.GetOne(*query)
+			if currErr != nil {
+				return nil, currErr
+			}
+			if !typeChanging {
+				checkType = current.Type
+			}
+			if !regionChanging {
+				checkRegion = current.Region
+			}
+		}
+		if dupErr := passportMethodDuplicateCheck(checkType, checkRegion, c.Params.UniqueId); dupErr != nil {
+			return nil, dupErr
+		}
+	}
+
 	updated, err2 := PassportMethodActions.Update(*query, fields)
 	if err2 != nil {
 		return nil, err2
