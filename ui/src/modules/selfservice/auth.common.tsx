@@ -1,8 +1,9 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { useLocale } from "../fireback-ui/hooks/useLocale";
 import { useRouter } from "../fireback-ui/hooks/useRouter";
 import { useS } from "../fireback-ui/hooks/useS";
-import { RemoteQueryContext } from "../sdk/core/react-tools";
+import { useAuthentication } from "../fireback-ui/auth/AuthenticationContext";
+import { mapRawSessionToAuthenticationSession } from "../fireback-ui/auth/authenticationUtils";
 import { strings } from "./strings/translations";
 import type { ClassicPassportOtpActionRes } from "../sdk/abac/ClassicPassportOtpAction";
 import type { ClassicSigninActionRes } from "../sdk/abac/ClassicSigninAction";
@@ -28,7 +29,7 @@ export interface AuthAvailableMethods {
 }
 
 export const useCompleteAuth = () => {
-  const { setSession, selectUrw, selectedUrw } = useContext(RemoteQueryContext);
+  const { setSession } = useAuthentication();
   const { locale } = useLocale();
   const { replace } = useRouter();
   const s = useS(strings);
@@ -62,7 +63,7 @@ export const useCompleteAuth = () => {
       return;
     }
 
-    setSession(session);
+    setSession(mapRawSessionToAuthenticationSession(session));
 
     // Clean up url options which are set earlier.
     sessionStorage.removeItem("redirect_temporary");

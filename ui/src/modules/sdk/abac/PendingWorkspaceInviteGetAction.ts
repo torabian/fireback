@@ -212,6 +212,7 @@ export class PendingWorkspaceInviteGetAction {
   };
   static Definition = {
     name: "pendingWorkspaceInviteGet",
+    cliName: "get",
     cliShort: "pendingWorkspaceInvite-g",
     url: "/pendingWorkspaceInvite/:uniqueId string",
     method: "get",

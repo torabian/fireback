@@ -42,7 +42,7 @@ func NotificationConfigAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "NotificationConfigAwareDeletePreviewAction",
-		CliName:     "notification-config-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "notificationConfig-dp",
 		URL:         "/notificationConfig/delete-preview",
 		Method:      "GET",

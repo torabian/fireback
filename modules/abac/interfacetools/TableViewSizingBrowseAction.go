@@ -43,7 +43,7 @@ func TableViewSizingBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "TableViewSizingBrowseAction",
-		CliName:     "table-view-sizing-browse-action",
+		CliName:     "browse",
 		CliShort:    "tableViewSizing-b",
 		URL:         "/tableViewSizing/browse",
 		Method:      "GET",

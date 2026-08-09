@@ -4,31 +4,35 @@ import { strings } from "../components/strings/translations";
 /*
  * Converts all errors, network, api into an object that can
  * be passed to setErrors of formik ref.
+ *
+ * `errors` can be either:
+ * - a rejected exception (network failure, thrown Error, ...), or
+ * - a *resolved* response envelope whose `.error` is populated - our fetch
+ *   layer doesn't reject the mutation promise for backend-returned errors
+ *   (4xx/5xx bodies still resolve), so callers that check
+ *   `res.error`/`res instanceof GResponse` themselves pass the envelope
+ *   straight in here instead of catching it.
+ *
+ * Field-level messages go under their `location` key (matched up with a
+ * form field's name); anything that isn't tied to a specific field goes
+ * under `form`, so a form-level error banner can render it.
  */
 export function mutationErrorsToFormik(errors: any): any {
   const err: { [key: string]: string } = {};
 
-  if (errors.error && Array.isArray(errors.error?.errors)) {
-    for (const field of errors.error?.errors) {
-      err[field.location] = field.message;
+  if (errors?.error && Array.isArray(errors.error?.errors)) {
+    for (const field of errors.error.errors) {
+      err[field.location] = field.messageTranslated || field.message;
     }
   }
 
-  // This is when a network failure happens
-  if (errors.status && errors.ok === false) {
-    return {
-      form: `${errors.status}`,
-    };
-  }
-
-  if (errors?.error?.message) {
-    err.form = errors?.error?.message;
-  }
-
-  if (errors.message) {
-    return {
-      form: `${errors.message}`,
-    };
+  if (errors?.error?.messageTranslated || errors?.error?.message) {
+    err.form = errors.error.messageTranslated || errors.error.message;
+  } else if (errors?.status && errors?.ok === false) {
+    // A raw, non-JSON HTTP failure (no parsed error envelope to read from).
+    err.form = `${errors.status}`;
+  } else if (errors?.message) {
+    err.form = `${errors.message}`;
   }
 
   return err;

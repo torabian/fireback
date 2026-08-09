@@ -1,9 +1,8 @@
-import { useContext } from "react";
 import { dataMenuToMenu } from "../components/layouts/Sidebar";
 import { useCteAppMenusActionQuery } from "../../sdk/interfacetools/CteAppMenusAction";
 import { AppMenuOptionalDto } from "../../sdk/interfacetools/AppMenuOptionalDto";
 import { useQueryUserRoleWorkspacesActionQuery } from "../../sdk/abac/QueryUserRoleWorkspacesAction";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
+import { useAuthentication } from "../auth/AuthenticationContext";
 import { GResponse } from "../../sdk/sdk/envelopes";
 import { userMeetsAccess2 } from "./accessLevels";
 import { useLocale } from "./useLocale";
@@ -34,7 +33,7 @@ function toAppMenuTree(item: unknown): AppMenuTreeItem {
  */
 export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
   const { locale } = useLocale();
-  const { selectedUrw, session } = useContext(RemoteQueryContext);
+  const { selectedWorkspace, session } = useAuthentication();
   const queryUrw = useQueryUserRoleWorkspacesActionQuery({
     enabled: !!session?.token,
   });
@@ -54,14 +53,19 @@ export function useRemoteMenuResolver(menuGroup: string): MenuItem[] {
     }
 
     return userMeetsAccess2(
-      selectedUrw,
+      selectedWorkspace as any,
       queryUrw.data?.data?.items || [],
       permissionKey,
     );
   };
 
   if (data instanceof GResponse) {
-    result = data?.data?.items
+    // `?.` on `data?.data?.items` only guards `data`/`data.data` being
+    // null/undefined - `items` itself can still legitimately come back as a
+    // bare `null` (e.g. cte-app-menus has no rows yet, a fresh install with
+    // no appmenu seeders run), and calling `.map` directly on that crashed
+    // the whole Sidebar (caught by its ErrorBoundary, but still broken).
+    result = (data?.data?.items ?? [])
       .map((item) => {
         return dataMenuToMenu(item, visibilityCheck, locale);
       })

@@ -43,7 +43,7 @@ func AppMenuBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "AppMenuBrowseAction",
-		CliName:     "app-menu-browse-action",
+		CliName:     "browse",
 		CliShort:    "appMenu-b",
 		URL:         "/appMenu/browse",
 		Method:      "GET",

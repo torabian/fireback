@@ -104,6 +104,9 @@ func CastRegionalContentEntityFromCli(c emigo.CliCastable) RegionalContentEntity
 	if c.IsSet("language-id") {
 		data.LanguageId = c.String("language-id")
 	}
+	if c.IsSet("key-group") {
+		data.KeyGroup = c.String("key-group")
+	}
 	if c.IsSet("workspace-id") {
 		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
 	}

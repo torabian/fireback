@@ -43,7 +43,7 @@ func PassportMethodAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "PassportMethodAwareDeleteAction",
-		CliName:     "passport-method-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "passportMethod-d",
 		URL:         "/passportMethod/delete",
 		Method:      "POST",

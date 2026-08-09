@@ -43,7 +43,7 @@ func PreferenceAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "PreferenceAwareDeleteAction",
-		CliName:     "preference-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "preference-d",
 		URL:         "/preference/delete",
 		Method:      "POST",

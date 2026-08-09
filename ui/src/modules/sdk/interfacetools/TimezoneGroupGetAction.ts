@@ -205,6 +205,7 @@ export class TimezoneGroupGetAction {
   };
   static Definition = {
     name: "timezoneGroupGet",
+    cliName: "get",
     cliShort: "timezoneGroup-g",
     url: "/timezoneGroup/:uniqueId string",
     method: "get",

@@ -44,7 +44,7 @@ func PassportMethodUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "PassportMethodUpdateAction",
-		CliName:     "passport-method-update-action",
+		CliName:     "update",
 		CliShort:    "passportMethod-u",
 		URL:         "/passportMethod/:uniqueId",
 		Method:      "PATCH",

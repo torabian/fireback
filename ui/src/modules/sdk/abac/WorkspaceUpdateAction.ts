@@ -148,6 +148,7 @@ export class WorkspaceUpdateAction {
   };
   static Definition = {
     name: "workspaceUpdate",
+    cliName: "update",
     cliShort: "workspace-u",
     url: "/workspace/:uniqueId string",
     method: "patch",

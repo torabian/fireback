@@ -187,6 +187,7 @@ export class TokenBrowseAction {
   };
   static Definition = {
     name: "tokenBrowse",
+    cliName: "browse",
     cliShort: "token-b",
     url: "/token/browse",
     method: "get",

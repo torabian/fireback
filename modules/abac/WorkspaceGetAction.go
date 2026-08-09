@@ -43,7 +43,7 @@ func WorkspaceGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "WorkspaceGetAction",
-		CliName:     "workspace-get-action",
+		CliName:     "get",
 		CliShort:    "workspace-g",
 		URL:         "/workspace/:uniqueId",
 		Method:      "GET",

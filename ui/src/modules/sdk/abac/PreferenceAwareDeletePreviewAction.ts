@@ -206,6 +206,7 @@ export class PreferenceAwareDeletePreviewAction {
   };
   static Definition = {
     name: "preferenceAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "preference-dp",
     url: "/preference/delete-preview",
     method: "get",

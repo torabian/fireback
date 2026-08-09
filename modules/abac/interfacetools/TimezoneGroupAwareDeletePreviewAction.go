@@ -42,7 +42,7 @@ func TimezoneGroupAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "TimezoneGroupAwareDeletePreviewAction",
-		CliName:     "timezone-group-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "timezoneGroup-dp",
 		URL:         "/timezoneGroup/delete-preview",
 		Method:      "GET",

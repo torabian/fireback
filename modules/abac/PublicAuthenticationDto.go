@@ -25,7 +25,7 @@ type PublicAuthenticationDto struct {
 	Status              string               `json:"status" yaml:"status"`
 	BlockedUntil        int64                `json:"blockedUntil" yaml:"blockedUntil"`
 	Otp                 string               `json:"otp" yaml:"otp"`
-	RecoveryAbsoluteUrl string               `json:"recoveryAbsoluteUrl" yaml:"recoveryAbsoluteUrl"`
+	RecoveryAbsoluteUrl string               `json:"recoveryAbsoluteUrl" sql:"-" yaml:"recoveryAbsoluteUrl"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string]  `json:"workspaceId" yaml:"workspaceId"`
 	CreatedAt   abaccomplexes.PlainTime `json:"createdAt" yaml:"createdAt"`

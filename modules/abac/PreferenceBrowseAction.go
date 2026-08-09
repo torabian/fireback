@@ -43,7 +43,7 @@ func PreferenceBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "PreferenceBrowseAction",
-		CliName:     "preference-browse-action",
+		CliName:     "browse",
 		CliShort:    "preference-b",
 		URL:         "/preference/browse",
 		Method:      "GET",

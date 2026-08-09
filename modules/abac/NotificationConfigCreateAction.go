@@ -43,7 +43,7 @@ func NotificationConfigCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "NotificationConfigCreateAction",
-		CliName:     "notification-config-create-action",
+		CliName:     "create",
 		CliShort:    "notificationConfig-c",
 		URL:         "/notificationConfig",
 		Method:      "POST",

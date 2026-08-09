@@ -129,6 +129,7 @@ export class PreferenceCreateAction {
   };
   static Definition = {
     name: "preferenceCreate",
+    cliName: "create",
     cliShort: "preference-c",
     url: "/preference",
     method: "post",

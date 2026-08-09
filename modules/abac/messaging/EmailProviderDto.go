@@ -12,7 +12,7 @@ import (
 type EmailProviderDto struct {
 	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
 	// Type of the service, or communication which actually is being used under the hood for providing the service, such as third party or printing right away for terminal or logs.
-	Type string `json:"type" yaml:"type"`
+	Type string `json:"type" validate:"required" yaml:"type"`
 	// Give the email provider configuration a name, which makes it easier later to query.
 	Title string `json:"title" yaml:"title"`
 	// JSON field which contains api keys, or other kind of configuration based on the type of the email provider.
@@ -77,6 +77,9 @@ func CastEmailProviderDtoFromCli(c emigo.CliCastable) EmailProviderDto {
 	data := EmailProviderDto{}
 	if c.IsSet("unique-id") {
 		emigo.ParseNullable(c.String("unique-id"), &data.UniqueId)
+	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
 	}
 	if c.IsSet("title") {
 		data.Title = c.String("title")

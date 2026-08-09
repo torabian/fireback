@@ -43,7 +43,7 @@ func EmailConfirmationAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailConfirmationAwareDeleteAction",
-		CliName:     "email-confirmation-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "emailConfirmation-d",
 		URL:         "/emailConfirmation/delete",
 		Method:      "POST",

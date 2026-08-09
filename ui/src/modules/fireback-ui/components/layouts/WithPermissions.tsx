@@ -1,12 +1,12 @@
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
-import { useContext, useMemo } from "react";
+import { useAuthentication } from "../../auth/AuthenticationContext";
+import { useMemo } from "react";
 
 export function useIsRoot() {
-  const { selectedUrw } = useContext(RemoteQueryContext);
-  return selectedUrw?.workspaceId === "root";
+  const { selectedWorkspace } = useAuthentication();
+  return selectedWorkspace?.workspaceId === "root";
 }
 
 export function WithPermissions({
@@ -19,10 +19,10 @@ export function WithPermissions({
   onlyRoot?: boolean;
 }) {
   const s = useS(strings);
-  const { selectedUrw } = useContext(RemoteQueryContext);
+  const { selectedWorkspace } = useAuthentication();
 
   const meets = useMemo(() => {
-    if (selectedUrw?.workspaceId !== "root" && onlyRoot) {
+    if (selectedWorkspace?.workspaceId !== "root" && onlyRoot) {
       return false;
     }
 
@@ -30,8 +30,8 @@ export function WithPermissions({
       return true;
     }
 
-    return userMeetsAccess(selectedUrw as any, permissions[0]);
-  }, [selectedUrw, permissions]);
+    return userMeetsAccess(selectedWorkspace as any, permissions[0]);
+  }, [selectedWorkspace, permissions]);
 
   return (
     <>

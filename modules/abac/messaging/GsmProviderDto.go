@@ -11,8 +11,8 @@ import (
 type GsmProviderDto struct {
 	UniqueId         emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
 	ApiKey           string                 `json:"apiKey" yaml:"apiKey"`
-	MainSenderNumber string                 `json:"mainSenderNumber" yaml:"mainSenderNumber"`
-	Type             string                 `json:"type" yaml:"type"`
+	MainSenderNumber string                 `json:"mainSenderNumber" validate:"required" yaml:"mainSenderNumber"`
+	Type             string                 `json:"type" validate:"required" yaml:"type"`
 	InvokeUrl        string                 `json:"invokeUrl" yaml:"invokeUrl"`
 	InvokeBody       string                 `json:"invokeBody" yaml:"invokeBody"`
 	// The unique-id of the workspace which content belongs to.
@@ -86,6 +86,9 @@ func CastGsmProviderDtoFromCli(c emigo.CliCastable) GsmProviderDto {
 	}
 	if c.IsSet("main-sender-number") {
 		data.MainSenderNumber = c.String("main-sender-number")
+	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
 	}
 	if c.IsSet("invoke-url") {
 		data.InvokeUrl = c.String("invoke-url")

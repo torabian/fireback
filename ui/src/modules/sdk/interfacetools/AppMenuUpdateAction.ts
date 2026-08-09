@@ -148,6 +148,7 @@ export class AppMenuUpdateAction {
   };
   static Definition = {
     name: "appMenuUpdate",
+    cliName: "update",
     cliShort: "appMenu-u",
     url: "/appMenu/:uniqueId string",
     method: "patch",

@@ -23,15 +23,15 @@ type WorkspaceInviteDto struct {
 	// The unique-id of the workspace which user is being invited to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// First name of the person which is invited
-	FirstName string `json:"firstName" yaml:"firstName"`
+	FirstName string `json:"firstName" validate:"required" yaml:"firstName"`
 	// Last name of the person which is invited.
-	LastName string `json:"lastName" yaml:"lastName"`
+	LastName string `json:"lastName" validate:"required" yaml:"lastName"`
 	// If forced, the email address cannot be changed by the user which has been invited.
 	ForceEmailAddress emigo.Nullable[bool] `json:"forceEmailAddress" yaml:"forceEmailAddress"`
 	// If forced, user cannot change the phone number and needs to complete signup.
 	ForcePhoneNumber emigo.Nullable[bool] `json:"forcePhoneNumber" yaml:"forcePhoneNumber"`
 	// The role which invitee get if they accept the request.
-	RoleId emigo.Nullable[string] `json:"roleId" yaml:"roleId"`
+	RoleId emigo.Nullable[string] `json:"roleId" validate:"required" yaml:"roleId"`
 	// The unique-id of the user which created/owns the record.
 	UserId    emigo.Nullable[string]  `json:"userId" yaml:"userId"`
 	CreatedAt abaccomplexes.PlainTime `json:"createdAt" yaml:"createdAt"`

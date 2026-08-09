@@ -10,10 +10,10 @@ import (
 // The base class definition for emailSenderDto
 type EmailSenderDto struct {
 	UniqueId         emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	FromName         string                 `json:"fromName" yaml:"fromName"`
-	FromEmailAddress string                 `json:"fromEmailAddress" yaml:"fromEmailAddress"`
-	ReplyTo          string                 `json:"replyTo" yaml:"replyTo"`
-	NickName         string                 `json:"nickName" yaml:"nickName"`
+	FromName         string                 `json:"fromName" validate:"required" yaml:"fromName"`
+	FromEmailAddress string                 `json:"fromEmailAddress" validate:"required" yaml:"fromEmailAddress"`
+	ReplyTo          string                 `json:"replyTo" validate:"required" yaml:"replyTo"`
+	NickName         string                 `json:"nickName" validate:"required" yaml:"nickName"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// The unique-id of the user which created/owns the record.

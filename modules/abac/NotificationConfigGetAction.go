@@ -43,7 +43,7 @@ func NotificationConfigGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "NotificationConfigGetAction",
-		CliName:     "notification-config-get-action",
+		CliName:     "get",
 		CliShort:    "notificationConfig-g",
 		URL:         "/notificationConfig/:uniqueId",
 		Method:      "GET",

@@ -43,7 +43,7 @@ func RegionalContentCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "RegionalContentCreateAction",
-		CliName:     "regional-content-create-action",
+		CliName:     "create",
 		CliShort:    "regionalContent-c",
 		URL:         "/regionalContent",
 		Method:      "POST",

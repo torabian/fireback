@@ -43,7 +43,7 @@ func PublicAuthenticationGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "PublicAuthenticationGetAction",
-		CliName:     "public-authentication-get-action",
+		CliName:     "get",
 		CliShort:    "publicAuthentication-g",
 		URL:         "/publicAuthentication/:uniqueId",
 		Method:      "GET",

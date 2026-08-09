@@ -52,6 +52,8 @@ const PG_USER = process.env.POSTGRES_USER || dotEnv.DB_USERNAME || "postgres";
 const PG_PASSWORD =
   process.env.POSTGRES_PASSWORD || dotEnv.DB_PASSWORD || "postgres";
 
+console.log("Database", PG_HOST, PG_PORT, PG_USER, PG_PASSWORD);
+
 const execAsync = (cmd, CWD = "") => {
   return new Promise((resolve, reject) => {
     exec(cmd, { cwd: CWD }, (error, stdout, stderr) => {
@@ -86,7 +88,7 @@ module.exports = defineConfig({
           return cy.visit(url);
         },
         async dbcon(cmd) {
-          const vendor = process.env.DB_TYPE;
+          const vendor = process.env.DB_TYPE || "postgres";
           console.log(100000, vendor);
           const dbname = `test_agent_${new Date().getTime()}`;
 
@@ -115,6 +117,18 @@ module.exports = defineConfig({
               const dbName = "fireback_test";
               const psqlBase = `PGPASSWORD=${PG_PASSWORD} psql -U ${PG_USER} -h ${PG_HOST} -p ${PG_PORT} -d postgres`;
 
+              // A previous spec's Fireback process may still be closing its
+              // connections when the next spec's dbcon runs (kill() doesn't
+              // wait for the pool to drain). DROP DATABASE fails with
+              // "database is being accessed by other users" in that case, so
+              // force out any lingering backends first.
+              console.log(
+                await execAsync(
+                  `${psqlBase} -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${dbName}' AND pid <> pg_backend_pid();"`,
+                  CWD,
+                ),
+              );
+
               // Drop and recreate database
               console.log(
                 await execAsync(
@@ -137,7 +151,11 @@ module.exports = defineConfig({
 
               return true;
             } catch (err) {
+              // Surface the failure instead of swallowing it: silently
+              // returning false here left the previous spec's stale
+              // database in place with no test failure to flag it.
               console.error("setup postgres failed:", err);
+              throw err;
             }
           } else {
             await execAsync(`${BINARY} config db-vendor set sqlite`, CWD);

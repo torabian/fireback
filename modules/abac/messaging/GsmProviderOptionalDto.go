@@ -11,8 +11,8 @@ import (
 type GsmProviderOptionalDto struct {
 	UniqueId         emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
 	ApiKey           emigo.Nullable[string] `json:"apiKey" yaml:"apiKey"`
-	MainSenderNumber emigo.Nullable[string] `json:"mainSenderNumber" yaml:"mainSenderNumber"`
-	Type             emigo.Nullable[string] `json:"type" yaml:"type"`
+	MainSenderNumber emigo.Nullable[string] `json:"mainSenderNumber" validate:"required" yaml:"mainSenderNumber"`
+	Type             emigo.Nullable[string] `json:"type" validate:"required" yaml:"type"`
 	InvokeUrl        emigo.Nullable[string] `json:"invokeUrl" yaml:"invokeUrl"`
 	InvokeBody       emigo.Nullable[string] `json:"invokeBody" yaml:"invokeBody"`
 	// The unique-id of the workspace which content belongs to.

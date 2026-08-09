@@ -114,6 +114,7 @@ export class GsmProviderAwareDeleteAction {
   };
   static Definition = {
     name: "gsmProviderAwareDelete",
+    cliName: "delete",
     cliShort: "gsmProvider-d",
     url: "/gsmProvider/delete",
     method: "post",

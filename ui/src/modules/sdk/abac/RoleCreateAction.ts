@@ -129,6 +129,7 @@ export class RoleCreateAction {
   };
   static Definition = {
     name: "roleCreate",
+    cliName: "create",
     cliShort: "role-c",
     url: "/role",
     method: "post",

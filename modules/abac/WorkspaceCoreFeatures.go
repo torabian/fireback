@@ -272,7 +272,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 		UniqueId:           roleId,
 		Name:               osRole,
 		WorkspaceId:        emigo.NullableOf(workspace.UniqueId),
-		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
+		CapabilitiesListId: RoleCapabilitiesListIdOf(ResolveWorkspaceTypeRoleCapabilities(workspace.TypeId)),
 	}
 
 	method, _ := DetectSignupMechanismOverValue(dto.Value)
@@ -290,6 +290,57 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 	}
 
 	return user, role, workspace, passport
+}
+
+// ResolveWorkspaceTypeRoleCapabilities looks up the role a workspace type is
+// configured with (WorkspaceTypeEntity.RoleId - validated on create/update by
+// ValidateTheWorkspaceTypeEntity in WorkspaceTypeActions.go to exist, belong to
+// root, have at least one capability, and never be root/root.* itself) and
+// returns that role's capabilities - what a fresh signup into that workspace
+// type should actually be granted.
+//
+// Bug fix: GetEmailPassportSignupMechanism previously hardcoded every fresh
+// signup's own role to ROOT_ALL_MODULES ("root.modules.*") regardless of which
+// workspace type was selected, so different workspace types never actually
+// granted different permissions to whoever signed up as them - only a
+// workspace-level capability list (fed from the type's role via a separate
+// path, GetWorkspaceAndUserAccesses) ever reflected the chosen type, while the
+// signed-up user's own role capabilities did not. Since MeetsAccessLevel
+// requires *both* the user's own role and their workspace to satisfy a given
+// permission (see Permissions.go), that mismatch could make a type's own
+// intended capabilities entirely unreachable whenever they fell outside
+// "root.modules.*" (e.g. anything under the "root.manage.*" prefix).
+//
+// Falls back to ROOT_ALL_MODULES (the previous, always-used default) if the
+// workspace type or its role can't be resolved for any reason - erring on the
+// side of the prior behavior rather than leaving a fresh signup with zero
+// capabilities. Uses bare GetOne lookups (no WorkspaceId/UserAccessPerWorkspace
+// on the query) the same way ValidateRoleAndItsExistence already does for the
+// same role, since this runs before any session/access-scope exists for the
+// user being created.
+func ResolveWorkspaceTypeRoleCapabilities(workspaceTypeId string) []string {
+	fallback := []string{ROOT_ALL_MODULES}
+
+	if workspaceTypeId == "" {
+		return fallback
+	}
+
+	workspaceType, err := WorkspaceTypeActions.GetOne(fireback.QueryDSL{UniqueId: workspaceTypeId})
+	if err != nil || workspaceType == nil {
+		return fallback
+	}
+
+	role, err := RoleActions.GetOne(fireback.QueryDSL{UniqueId: workspaceType.RoleId})
+	if err != nil || role == nil {
+		return fallback
+	}
+
+	capabilities := RoleCapabilitiesListIdGet(role)
+	if len(capabilities) == 0 {
+		return fallback
+	}
+
+	return capabilities
 }
 
 func GetUserAccessLevels(query fireback.QueryDSL) (*UserAccessLevelDto, *fireback.IError) {

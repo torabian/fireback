@@ -43,7 +43,7 @@ func WorkspaceTypeCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "WorkspaceTypeCreateAction",
-		CliName:     "workspace-type-create-action",
+		CliName:     "create",
 		CliShort:    "workspaceType-c",
 		URL:         "/workspaceType",
 		Method:      "POST",

@@ -43,7 +43,7 @@ func EmailSenderBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailSenderBrowseAction",
-		CliName:     "email-sender-browse-action",
+		CliName:     "browse",
 		CliShort:    "emailSender-b",
 		URL:         "/emailSender/browse",
 		Method:      "GET",

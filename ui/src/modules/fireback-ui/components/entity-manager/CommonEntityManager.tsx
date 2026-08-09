@@ -4,12 +4,12 @@ import { useCommonEntityManager } from "../../hooks/useCommonEntityManager";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
 import { Formik, type FormikHelpers, type FormikProps } from "formik";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import { get, set } from "lodash";
 import type { GResponse } from "../../../sdk/sdk/envelopes";
 import { ErrorsView } from "../error-view/ErrorView";
@@ -74,7 +74,7 @@ export const CommonEntityManager = ({
   const touchedData = useRef({});
 
   useBackButton(onCancel, KeyboardAction.CommonBack);
-  const { selectedUrw } = useContext(RemoteQueryContext);
+  const { selectedWorkspace } = useAuthentication();
   usePageTitle((isEditing || forceEdit ? onEditTitle : onCreateTitle) || "");
 
   const getQuery = getSingleHook;
@@ -139,7 +139,7 @@ export const CommonEntityManager = ({
     },
   });
 
-  if (onlyOnRoot && selectedUrw.workspaceId !== "root") {
+  if (onlyOnRoot && selectedWorkspace.workspaceId !== "root") {
     return <div>{s.onlyOnRoot}</div>;
   }
 

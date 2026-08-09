@@ -11,8 +11,8 @@ import (
 // The base class definition for userOptionalDto
 type UserOptionalDto struct {
 	UniqueId  emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	FirstName emigo.Nullable[string] `json:"firstName" yaml:"firstName"`
-	LastName  emigo.Nullable[string] `json:"lastName" yaml:"lastName"`
+	FirstName emigo.Nullable[string] `json:"firstName" validate:"required" yaml:"firstName"`
+	LastName  emigo.Nullable[string] `json:"lastName" validate:"required" yaml:"lastName"`
 	Photo     emigo.Nullable[string] `json:"photo" yaml:"photo"`
 	Gender    emigo.Nullable[int]    `json:"gender" yaml:"gender"`
 	Title     emigo.Nullable[string] `json:"title" yaml:"title"`

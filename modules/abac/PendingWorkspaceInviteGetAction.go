@@ -43,7 +43,7 @@ func PendingWorkspaceInviteGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "PendingWorkspaceInviteGetAction",
-		CliName:     "pending-workspace-invite-get-action",
+		CliName:     "get",
 		CliShort:    "pendingWorkspaceInvite-g",
 		URL:         "/pendingWorkspaceInvite/:uniqueId",
 		Method:      "GET",

@@ -43,7 +43,7 @@ func CapabilityAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "CapabilityAwareDeleteAction",
-		CliName:     "capability-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "capability-d",
 		URL:         "/capability/delete",
 		Method:      "POST",

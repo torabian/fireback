@@ -16,23 +16,13 @@ describe("Logging in with the signin", () => {
       cy.get("h1").should("have.text", "Authentication Currently Unavailable");
     });
 
-    it("get the data of the public", () => {
-      cy.request(
-        "GET",
-        "http://localhost:7794/passports/available-methods",
-      ).then((response) => {
-        cy.task("log", response.body);
-        expect(response.body.data.item.email).to.equal(false);
-        expect(response.body.data.item.phone).to.equal(false);
-      });
-    });
-
-    it("should be able to create email method in database.", () => {
-      cy.task("exec", ` passport method c --region global --type email`);
-    });
-
-    it("should be able to create phone method in database.", () => {
-      cy.task("exec", ` passport method c --region global --type phone`);
+    // Passport method CRUD, uniqueness/root-only enforcement, and the public
+    // available-methods API all moved to passport-method.cy.ts. This file still
+    // needs email+phone methods enabled as its own fixture, to test the welcome
+    // page's behavior once authentication is available.
+    it("should be able to create email and phone passport methods.", () => {
+      cy.task("exec", ` passport method create --region global --type email`);
+      cy.task("exec", ` passport method create --region global --type phone`);
     });
 
     it("get the data of the public", () => {
@@ -54,26 +44,49 @@ describe("Logging in with the signin", () => {
     });
 
     it("on creation of the passport method, both type and region need to be provided.", () => {
-      cy.task("execSupress", ` passport method c`).then((content) => {
-        expect(content).contain('"type, region"');
-      }).ca;
+      // The old CLI shorthand ("passport method c") and error shape
+      // ('"type, region"' as one combined string) are both stale - "c" doesn't
+      // resolve to anything under the current nested CLI structure, and
+      // validation now reports structured per-field errors (see
+      // fireback.CommonStructValidatorPointer) instead of one joined string.
+      cy.task("execSupress", ` passport method create`).then((content) => {
+        expect(content).to.contain("ValidationFailedOnSomeFields");
+        expect(content).to.contain('"location": "type"');
+        expect(content).to.contain('"location": "region"');
+      });
     });
 
     let roleId = "";
     it("should be able to create a role in order to assign it into the workspace type.", () => {
+      // "role c" doesn't exist, but Role's actions are now nested under their own
+      // "role" group (AbacModule.go), so "role create" is what's reachable there.
+      // "--capabilities" is also stale: the field is now "capabilitiesListId", a
+      // JSON array - and it can't be the "root.*" wildcard this test originally
+      // used, since WorkspaceTypeActions.go's ValidateTheWorkspaceTypeEntity
+      // explicitly rejects assigning a role with the root.* wildcard capability to
+      // a workspace type (it would hand every user of that workspace type
+      // super-admin powers). The response envelope is {data: {item: {...}}}
+      // (GResponseSingleItem), not a bare object.
       cy.task(
         "exec",
-        ` role c --name testagentrole --capabilities "root.*"`,
+        ` role create --name testagentrole --capabilities-list-id '["root.manage.abac.notification-config.query"]'`,
       ).then((res) => {
-        console.log("Role created:", res)
-        console.log((roleId = JSON.parse(res).uniqueId));
+        roleId = JSON.parse(res).data.item.uniqueId;
+        expect(roleId).to.be.a("string").and.not.be.empty;
       });
     });
 
-    it("should be able to create a workspace name", () => {
+    it("should be able to create a workspace type", () => {
+      // "ws type c" doesn't exist either - WorkspaceType's actions are registered
+      // flat inside the "ws"/"workspace" group (WorkspaceCliCommands in
+      // WorkspaceCli.go), not under their own "type" sub-group, so
+      // "workspaceType-c" (its CliShort) is what's reachable there. The slug also
+      // now has an enforced format: must start with "/" (see
+      // ValidateTheWorkspaceTypeEntity/WorkspaceTypeActions.go) - "customer" alone
+      // fails validation, "/customer" doesn't.
       cy.task(
         "exec",
-        ` ws type c --title customer --slug customer --role-id ${roleId}`,
+        ` ws workspaceType-c --title customer --slug /customer --role-id ${roleId}`,
       );
     });
 
@@ -116,82 +129,72 @@ describe("Logging in with the signin", () => {
       cy.wait(500);
     });
 
-    let successfulInserts = 0;
-    let appMenuItems = [];
+    // The old Module3-generated "misc appmenu wipe/ssync/q/cte" CLI commands don't
+    // exist anymore - AppMenu was migrated to the standard Emi-generated CRUD set
+    // (browse/get/create/update/delete-preview/delete) plus one restored custom
+    // command, "cte-app-menus" (see CteAppMenusActionImplementation.go), and moved
+    // from "misc" to its own nested "interface"/"intf"/"if" group
+    // (InterfaceToolsModule.go), so it's "interface appmenu ..." now. Kept as flat
+    // `it`s (not nested describes) for the same reason as above - a nested
+    // describe's tests run after every direct `it` in this describe, including
+    // endFirebackServer's "should stop fireback" call.
+    let appMenuTree = [];
 
-    describe("Login with the email address needs to be working", () => {
-      it("should be able to wipe the menu items", () => {
-        cy.task("exec", `misc appmenu wipe`).then((content) => {
-          expect(content).to.contain("of entities");
-        });
+    it("should be able to generate the menu items from seeders.", () => {
+      // "misc appmenu ssync" (scoped to just this entity) has no replacement -
+      // the only seeder-import command left is the global "seeders", which
+      // imports every module's seed data in one pass (time zones, passport
+      // methods, and the 3 appmenu yml files), not just appmenu's. So this only
+      // checks that nothing failed, rather than counting exactly 3 imported files.
+      cy.task("exec", ` seeders`).then((content) => {
+        const successLines = content
+          .split("\n")
+          .filter((line) => line.startsWith("Success"));
+        expect(successLines.length).to.be.greaterThan(0);
+        for (const line of successLines) {
+          expect(line).to.contain("Failure 0");
+        }
       });
+    });
 
-      it("should be able to generate back the menu items from seeder.", () => {
-        cy.task("exec", `misc appmenu ssync`).then((content) => {
-          console.log(100, content);
-          let countFilesImported = 0;
-          for (const line of content.split("\n")) {
-            if (line.startsWith("Success")) {
-              successfulInserts += +line.match(/Success (\d+)/)[1];
-              expect(line).to.contain("Failure 0");
-            }
-            if (line.endsWith(".yml")) {
-              countFilesImported++;
-            }
+    it("should be able to query the app menu items as a tree structure.", () => {
+      // "misc appmenu q" (flat query) is NOT usable here: AppMenuSyncSeeders
+      // stamps every seeded row workspaceId="system" (see the yml files under
+      // interfacetools/seeders/AppMenu/), but a CLI-authenticated root user's
+      // Browse scope only covers workspaces they belong to ("root"), so Browse
+      // silently returns 0 items even though the rows exist (confirmed directly
+      // in the database). Single-item Get/Update aren't scoped the same way and
+      // do reach "system" rows - and "cte-app-menus" doesn't go through Browse's
+      // scoping at all (AppMenuCte.vsql has no workspace filter), so it's what
+      // this test uses, which conveniently is also the direct replacement for the
+      // old "cte" command.
+      cy.task("exec", ` interface appmenu cte-app-menus`).then((content) => {
+        const res = JSON.parse(content);
+        appMenuTree = res.data.items;
+
+        // There should be 3 items because there are 3 root items
+        expect(res.data.totalItems).to.equal(3);
+
+        validateAppMenuEntity(appMenuTree);
+
+        // test if items are having children with more than 1 item in them.
+        for (const item of appMenuTree) {
+          if (item.children && item.children.length > 0) {
+            expect(item.children?.length).to.be.greaterThan(0);
           }
-
-          expect(countFilesImported).to.equal(3);
-        });
+        }
       });
+    });
 
-      it("should be able to query the created content, and total count of data in database are equal to what we have imported", () => {
-        cy.task("exec", `misc appmenu q`).then((content) => {
-          const res = JSON.parse(content);
-          expect(res.data.totalItems).to.equal(successfulInserts);
-          appMenuItems = res.data.items;
-        });
-      });
+    it("should be able to look up a single app menu item by its uniqueId.", () => {
+      const item = appMenuTree[0];
 
-      describe("testing the menu items content", () => {
-        it("all menu items, should have visibility of A", () => {
-          validateAppMenuEntity(appMenuItems);
-        });
-      });
-
-      describe("cte operations", () => {
-        it("should be able to query as a tree structure the menu items", () => {
-          cy.task("exec", `misc appmenu cte`).then((content) => {
-            console.log(content);
-            const res = JSON.parse(content);
-
-            // general validation
-            validateAppMenuEntity(res.data.items);
-
-            // There should be 3 items because there are 3 root items
-            expect(res.data.totalItems).to.equal(3);
-
-            // test if items are having children with more than 1 item in them.
-            for (const item of res.data.items) {
-              if (item.children && item.children.length > 0) {
-                expect(item.children?.length).to.be.greaterThan(0);
-              }
-            }
-          });
-        });
-      });
-
-      describe("operate on the single menu item", () => {
-        it("running update on the entity, should only affected the updated time.", () => {
-          const item = appMenuItems[0];
-
-          cy.task(
-            "exec",
-            `misc appmenu q --query "unique_id = ${item.uniqueId}"`,
-          ).then((content) => {
-            const res = JSON.parse(content);
-            console.log(res);
-          });
-        });
+      cy.task(
+        "exec",
+        ` interface appmenu get --pp-uniqueId ${item.uniqueId}`,
+      ).then((content) => {
+        const res = JSON.parse(content);
+        expect(res.data.item.uniqueId).to.equal(item.uniqueId);
       });
     });
 
@@ -200,8 +203,10 @@ describe("Logging in with the signin", () => {
 });
 
 function validateAppMenuEntity(items) {
+  // AppMenuEntity no longer has a "visibility" field (that check was dropped along
+  // with it) - what's left to validate structurally is the uniqueId shape and the
+  // recursive children nesting.
   for (const item of items) {
-    expect(item.visibility).to.equal("A");
     expect(typeof item.uniqueId).to.equal("string");
 
     if (item.children?.length > 0) {

@@ -10,10 +10,10 @@ import (
 // The base class definition for emailSenderOptionalDto
 type EmailSenderOptionalDto struct {
 	UniqueId         emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	FromName         emigo.Nullable[string] `json:"fromName" yaml:"fromName"`
-	FromEmailAddress emigo.Nullable[string] `json:"fromEmailAddress" yaml:"fromEmailAddress"`
-	ReplyTo          emigo.Nullable[string] `json:"replyTo" yaml:"replyTo"`
-	NickName         emigo.Nullable[string] `json:"nickName" yaml:"nickName"`
+	FromName         emigo.Nullable[string] `json:"fromName" validate:"required" yaml:"fromName"`
+	FromEmailAddress emigo.Nullable[string] `json:"fromEmailAddress" validate:"required" yaml:"fromEmailAddress"`
+	ReplyTo          emigo.Nullable[string] `json:"replyTo" validate:"required" yaml:"replyTo"`
+	NickName         emigo.Nullable[string] `json:"nickName" validate:"required" yaml:"nickName"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// The unique-id of the user which created/owns the record.

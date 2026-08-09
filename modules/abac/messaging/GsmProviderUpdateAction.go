@@ -44,7 +44,7 @@ func GsmProviderUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "GsmProviderUpdateAction",
-		CliName:     "gsm-provider-update-action",
+		CliName:     "update",
 		CliShort:    "gsmProvider-u",
 		URL:         "/gsmProvider/:uniqueId",
 		Method:      "PATCH",

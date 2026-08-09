@@ -42,7 +42,7 @@ func EmailConfirmationAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailConfirmationAwareDeletePreviewAction",
-		CliName:     "email-confirmation-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "emailConfirmation-dp",
 		URL:         "/emailConfirmation/delete-preview",
 		Method:      "GET",

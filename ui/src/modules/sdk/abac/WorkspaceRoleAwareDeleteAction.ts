@@ -114,6 +114,7 @@ export class WorkspaceRoleAwareDeleteAction {
   };
   static Definition = {
     name: "workspaceRoleAwareDelete",
+    cliName: "delete",
     cliShort: "workspaceRole-d",
     url: "/workspaceRole/delete",
     method: "post",

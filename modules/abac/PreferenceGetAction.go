@@ -43,7 +43,7 @@ func PreferenceGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "PreferenceGetAction",
-		CliName:     "preference-get-action",
+		CliName:     "get",
 		CliShort:    "preference-g",
 		URL:         "/preference/:uniqueId",
 		Method:      "GET",

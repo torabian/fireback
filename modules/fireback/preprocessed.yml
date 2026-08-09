@@ -3,6 +3,8 @@ targets:
   flags:
     pkg: fireback
   output: ./
+  tags:
+  - split-cli
 - compiler: js
   flags:
     js-sdk-location: ../sdk

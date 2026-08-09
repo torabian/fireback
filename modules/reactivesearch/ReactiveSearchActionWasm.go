@@ -11,7 +11,6 @@ import "github.com/torabian/emi/emigo"
 //
 // There is no gorilla, no gin, and no socket here: the reactor bridges the
 // session's channels straight to the WebSocketWasm JS class.
-//
 func ReactiveSearchActionReactiveHandlerWasm(
 	reactor *emigo.WasmReactor,
 	factory func(session ReactiveSearchActionSession) (chan []byte, error),

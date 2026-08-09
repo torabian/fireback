@@ -43,7 +43,7 @@ func PublicAuthenticationCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "PublicAuthenticationCreateAction",
-		CliName:     "public-authentication-create-action",
+		CliName:     "create",
 		CliShort:    "publicAuthentication-c",
 		URL:         "/publicAuthentication",
 		Method:      "POST",

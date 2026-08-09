@@ -37,8 +37,13 @@ func MeetsAccessLevel(query fireback.QueryDSL, onlyRoot bool) (bool, []string) {
 
 	missingPerms := []string{}
 
+	// A user (and their active workspace) holding the full root.* wildcard always
+	// meets every requirement - no need to check individual capabilities. This was
+	// previously inverted (returned false, i.e. denied, for exactly this case) and
+	// the real verdict below was discarded entirely (always returned true) - see
+	// the fix note on the final return.
 	if slices.Contains(query.UserHas, ROOT_ALL_ACCESS) && slices.Contains(query.WorkspaceHas, ROOT_ALL_ACCESS) {
-		return false, missingPerms
+		return true, missingPerms
 	}
 
 	meetsUser := MeetsCheck(query.ActionRequires, query.UserHas)
@@ -54,5 +59,9 @@ func MeetsAccessLevel(query fireback.QueryDSL, onlyRoot bool) (bool, []string) {
 		}
 	}
 
-	return true, missingPerms
+	// Bug fix: this always returned true regardless of meetsUser/meetsWorkspace,
+	// so every action requiring a capability the caller didn't actually have was
+	// silently allowed through - the only real gate left was the onlyRoot check
+	// above. missingPerms was still computed correctly, just never acted on.
+	return meetsUser && meetsWorkspace, missingPerms
 }

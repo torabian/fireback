@@ -1,6 +1,4 @@
 import { EmailSenderDto } from "../../sdk/messaging/EmailSenderDto";
-import { useContext } from "react";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 
 export function FormEmailSenderPicker({
   value,
@@ -9,8 +7,6 @@ export function FormEmailSenderPicker({
   value: EmailSenderDto;
   onChange: (entity: EmailSenderDto) => void;
 }) {
-  const { options } = useContext(RemoteQueryContext);
-
   return (
     <>
       {/* <FormEntitySelect

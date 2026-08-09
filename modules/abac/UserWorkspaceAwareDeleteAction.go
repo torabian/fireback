@@ -43,7 +43,7 @@ func UserWorkspaceAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "UserWorkspaceAwareDeleteAction",
-		CliName:     "user-workspace-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "userWorkspace-d",
 		URL:         "/userWorkspace/delete",
 		Method:      "POST",

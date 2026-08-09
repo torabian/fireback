@@ -205,6 +205,7 @@ export class EmailSenderGetAction {
   };
   static Definition = {
     name: "emailSenderGet",
+    cliName: "get",
     cliShort: "emailSender-g",
     url: "/emailSender/:uniqueId string",
     method: "get",

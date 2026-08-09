@@ -43,7 +43,7 @@ func PendingWorkspaceInviteAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "PendingWorkspaceInviteAwareDeleteAction",
-		CliName:     "pending-workspace-invite-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "pendingWorkspaceInvite-d",
 		URL:         "/pendingWorkspaceInvite/delete",
 		Method:      "POST",

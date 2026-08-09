@@ -3,15 +3,12 @@ import { FormText } from "../../fireback-ui/components/forms/form-text/FormText"
 import { type EntityFormProps } from "../../fireback-ui/types/EntityManagement";
 import { createQuerySource } from "../../fireback-ui/hooks/useAsQuery";
 import { useS } from "../../fireback-ui/hooks/useS";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { GsmProviderDto } from "../../sdk/messaging/GsmProviderDto";
-import { useContext } from "react";
 import { strings } from "./strings/translations";
 export const GsmProviderForm = ({
   form,
   isEditing,
 }: EntityFormProps<GsmProviderDto>) => {
-  const { options } = useContext(RemoteQueryContext);
   const { values, setValues, setFieldValue, errors } = form;
   const s = useS(strings);
   const gsmTypes = createQuerySource([

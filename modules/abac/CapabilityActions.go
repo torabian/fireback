@@ -118,6 +118,45 @@ func CapabilityGetAction(c CapabilityGetActionRequest) (*CapabilityGetActionResp
 	}, nil
 }
 
+// CapabilityCreateAction inserts a new row directly into the capability catalog.
+// AllowOnRoot is deliberate (not just PERM_ROOT_CAPABILITY_CREATE on its own): unlike
+// every other entity in this package, CapabilityEntity has no workspace_id/user_id
+// column at all, and CapabilityUpsertPermissionFn - the only other writer of this table -
+// only ever runs during the root migration pass. Letting a non-root workspace insert
+// rows here would pollute the single, global, cross-workspace catalog every
+// RolePermissionTree in every workspace renders from, so creation is restricted to the
+// root workspace the same way the seeded catalog itself is populated.
+func CapabilityCreateAction(c CapabilityCreateActionRequest) (*CapabilityCreateActionResponse, error) {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		AllowOnRoot:    true,
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_CAPABILITY_CREATE},
+	}); err != nil {
+		return nil, err
+	}
+
+	entity := &CapabilityEntity{
+		Name:        c.Body.Name,
+		Description: c.Body.Description,
+	}
+	// UniqueId is the entity's actual meaningful "key" (e.g. "students.*" below) rather
+	// than an opaque id, so - unlike RoleCreateAction/WorkspaceTypeCreateAction, which
+	// always let the db default generate it - it's taken straight from the body when the
+	// caller sets it, falling back to gen_random_uuid() (see CapabilityEntity's gorm tag)
+	// only when they don't.
+	if v, ok := c.Body.UniqueId.Get(); ok && v != nil {
+		entity.UniqueId = *v
+	}
+
+	created, err2 := CapabilityEntityActions.Create(fireback.GetDbRef(), entity)
+	if err2 != nil {
+		return nil, fireback.GormErrorToIError(err2)
+	}
+
+	return &CapabilityCreateActionResponse{
+		Payload: fireback.GResponseSingleItem(created),
+	}, nil
+}
+
 // See GetCapabilitiesAction - not workspace-scoped, so this calls the entity's own
 // generated, unscoped CapabilityEntityActions.Update directly.
 func CapabilityUpdateAction(c CapabilityUpdateActionRequest) (*CapabilityUpdateActionResponse, error) {

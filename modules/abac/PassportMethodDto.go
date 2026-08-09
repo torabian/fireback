@@ -10,9 +10,9 @@ import (
 // The base class definition for passportMethodDto
 type PassportMethodDto struct {
 	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	Type     string                 `json:"type" yaml:"type"`
+	Type     string                 `json:"type" validate:"oneof=email phone google facebook,required" yaml:"type"`
 	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
-	Region string `json:"region" yaml:"region"`
+	Region string `json:"region" validate:"required,oneof=global" yaml:"region"`
 	// Client key for those methods such as 'google' which require oauth client key
 	ClientKey string `json:"clientKey" yaml:"clientKey"`
 	// The unique-id of the workspace which content belongs to.
@@ -74,6 +74,12 @@ func CastPassportMethodDtoFromCli(c emigo.CliCastable) PassportMethodDto {
 	data := PassportMethodDto{}
 	if c.IsSet("unique-id") {
 		emigo.ParseNullable(c.String("unique-id"), &data.UniqueId)
+	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
+	if c.IsSet("region") {
+		data.Region = c.String("region")
 	}
 	if c.IsSet("client-key") {
 		data.ClientKey = c.String("client-key")

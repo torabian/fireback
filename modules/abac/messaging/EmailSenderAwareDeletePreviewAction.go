@@ -42,7 +42,7 @@ func EmailSenderAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailSenderAwareDeletePreviewAction",
-		CliName:     "email-sender-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "emailSender-dp",
 		URL:         "/emailSender/delete-preview",
 		Method:      "GET",

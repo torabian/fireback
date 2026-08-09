@@ -11,9 +11,9 @@ import (
 type WorkspaceDto struct {
 	UniqueId    emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
 	Description string                 `json:"description" yaml:"description"`
-	Name        string                 `json:"name" yaml:"name"`
+	Name        string                 `json:"name" validate:"required" yaml:"name"`
 	// The unique-id of the workspace type which defines this workspace's role.
-	TypeId string `json:"typeId" yaml:"typeId"`
+	TypeId string `json:"typeId" validate:"required" yaml:"typeId"`
 	// The unique-id of the parent workspace, for nested/tree workspaces.
 	ParentId    emigo.Nullable[string]  `json:"parentId" yaml:"parentId"`
 	WorkspaceId emigo.Nullable[string]  `json:"workspaceId" yaml:"workspaceId"`

@@ -43,7 +43,7 @@ func EmailSenderGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailSenderGetAction",
-		CliName:     "email-sender-get-action",
+		CliName:     "get",
 		CliShort:    "emailSender-g",
 		URL:         "/emailSender/:uniqueId",
 		Method:      "GET",

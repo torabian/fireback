@@ -43,7 +43,7 @@ func EmailProviderCreateActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailProviderCreateAction",
-		CliName:     "email-provider-create-action",
+		CliName:     "create",
 		CliShort:    "emailProvider-c",
 		URL:         "/emailProvider",
 		Method:      "POST",

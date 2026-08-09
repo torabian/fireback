@@ -197,6 +197,7 @@ export class EmailProviderBrowseAction {
   };
   static Definition = {
     name: "emailProviderBrowse",
+    cliName: "browse",
     cliShort: "emailProvider-b",
     url: "/emailProvider/browse",
     method: "get",

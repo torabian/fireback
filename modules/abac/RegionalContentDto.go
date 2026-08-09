@@ -10,11 +10,11 @@ import (
 // The base class definition for regionalContentDto
 type RegionalContentDto struct {
 	UniqueId   emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	Content    string                 `json:"content" yaml:"content"`
-	Region     string                 `json:"region" yaml:"region"`
+	Content    string                 `json:"content" validate:"required" yaml:"content"`
+	Region     string                 `json:"region" validate:"required" yaml:"region"`
 	Title      string                 `json:"title" yaml:"title"`
-	LanguageId string                 `json:"languageId" yaml:"languageId"`
-	KeyGroup   string                 `json:"keyGroup" yaml:"keyGroup"`
+	LanguageId string                 `json:"languageId" validate:"required" yaml:"languageId"`
+	KeyGroup   string                 `json:"keyGroup" validate:"required" yaml:"keyGroup"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// The unique-id of the user which created/owns the record.
@@ -92,6 +92,9 @@ func CastRegionalContentDtoFromCli(c emigo.CliCastable) RegionalContentDto {
 	}
 	if c.IsSet("language-id") {
 		data.LanguageId = c.String("language-id")
+	}
+	if c.IsSet("key-group") {
+		data.KeyGroup = c.String("key-group")
 	}
 	if c.IsSet("workspace-id") {
 		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)

@@ -43,7 +43,7 @@ func EmailConfirmationBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailConfirmationBrowseAction",
-		CliName:     "email-confirmation-browse-action",
+		CliName:     "browse",
 		CliShort:    "emailConfirmation-b",
 		URL:         "/emailConfirmation/browse",
 		Method:      "GET",

@@ -202,6 +202,7 @@ export class UserAwareDeletePreviewAction {
   };
   static Definition = {
     name: "userAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "user-dp",
     url: "/user/delete-preview",
     method: "get",

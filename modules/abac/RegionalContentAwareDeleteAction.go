@@ -43,7 +43,7 @@ func RegionalContentAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "RegionalContentAwareDeleteAction",
-		CliName:     "regional-content-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "regionalContent-d",
 		URL:         "/regionalContent/delete",
 		Method:      "POST",

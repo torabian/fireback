@@ -1,14 +1,13 @@
 import { type AppConfig } from "../../modules/fireback-ui/hooks/appConfigTools";
 
-import React, { useContext, useRef } from "react";
+import React from "react";
 import { QueryClient } from "@tanstack/react-query";
-import {
-  RemoteQueryProvider as FirebackQueryProvider,
-  RemoteQueryContext,
-} from "../../modules/sdk/core/react-tools";
+import { useAuthentication } from "../../modules/fireback-ui/auth/AuthenticationContext";
+import { AuthenticationProvider } from "../../modules/fireback-ui/auth/AuthenticationProvider";
 import { FetchxContext } from "../../modules/sdk/sdk/common/fetchx";
 import { FetchxProvider } from "../../modules/sdk/sdk/react/useFetchx";
 import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
+import { useFirebackSocket } from "../../modules/fireback-ui/hooks/useFirebackSocket";
 
 export function WithFireback({
   children,
@@ -24,30 +23,36 @@ export function WithFireback({
   locale?: string;
 }) {
   return (
-    <FirebackQueryProvider
-      socket
-      preferredAcceptLanguage={locale || config.interfaceLanguage}
-      identifier="fireback"
-      prefix={prefix}
-      queryClient={queryClient}
-      remote={BUILD_VARIABLES.REMOTE_SERVICE}
-    >
-      <WithFetchX children={children} />
-    </FirebackQueryProvider>
+    <AuthenticationProvider selfServiceUrl="/selfservice">
+      <WithFetchX queryClient={queryClient} children={children} />
+    </AuthenticationProvider>
   );
 }
 
-const WithFetchX = ({ children }: { children: any }) => {
-  const { options, session } = useContext(RemoteQueryContext);
+const WithFetchX = ({
+  children,
+  queryClient,
+}: {
+  children: any;
+  queryClient: QueryClient;
+}) => {
+  const { token, selectedWorkspace } = useAuthentication();
 
-  const fetchContext = useRef(
+  const fetchContext = React.useRef(
     new FetchxContext(BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, "")),
   );
 
   fetchContext.current.defaultHeaders = {
-    authorization: session?.token,
-    "workspace-id": options?.headers["workspace-id"],
+    authorization: token,
+    "workspace-id": selectedWorkspace?.workspaceId,
   };
+
+  useFirebackSocket(
+    BUILD_VARIABLES.REMOTE_SERVICE,
+    token,
+    selectedWorkspace?.workspaceId,
+    queryClient,
+  );
 
   return (
     <FetchxProvider value={fetchContext.current}>{children}</FetchxProvider>

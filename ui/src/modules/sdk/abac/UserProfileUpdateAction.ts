@@ -148,6 +148,7 @@ export class UserProfileUpdateAction {
   };
   static Definition = {
     name: "userProfileUpdate",
+    cliName: "update",
     cliShort: "userProfile-u",
     url: "/userProfile/:uniqueId string",
     method: "patch",

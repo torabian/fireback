@@ -187,6 +187,7 @@ export class UserBrowseAction {
   };
   static Definition = {
     name: "userBrowse",
+    cliName: "browse",
     cliShort: "user-b",
     url: "/user/browse",
     method: "get",

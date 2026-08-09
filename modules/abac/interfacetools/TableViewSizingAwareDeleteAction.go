@@ -43,7 +43,7 @@ func TableViewSizingAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "TableViewSizingAwareDeleteAction",
-		CliName:     "table-view-sizing-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "tableViewSizing-d",
 		URL:         "/tableViewSizing/delete",
 		Method:      "POST",

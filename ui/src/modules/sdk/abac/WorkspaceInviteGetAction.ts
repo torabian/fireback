@@ -205,6 +205,7 @@ export class WorkspaceInviteGetAction {
   };
   static Definition = {
     name: "workspaceInviteGet",
+    cliName: "get",
     cliShort: "workspaceInvite-g",
     url: "/workspaceInvite/:uniqueId string",
     method: "get",

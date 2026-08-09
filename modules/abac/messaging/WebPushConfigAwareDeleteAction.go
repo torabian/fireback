@@ -43,7 +43,7 @@ func WebPushConfigAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "WebPushConfigAwareDeleteAction",
-		CliName:     "web-push-config-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "webPushConfig-d",
 		URL:         "/webPushConfig/delete",
 		Method:      "POST",

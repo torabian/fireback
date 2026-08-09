@@ -43,7 +43,7 @@ func AppMenuAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "AppMenuAwareDeleteAction",
-		CliName:     "app-menu-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "appMenu-d",
 		URL:         "/appMenu/delete",
 		Method:      "POST",

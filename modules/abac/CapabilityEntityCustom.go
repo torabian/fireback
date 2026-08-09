@@ -2,7 +2,6 @@ package abac
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -29,7 +28,6 @@ func GetWorkspaceAndUserAccesses(query fireback.QueryDSL) ([]string, []string) {
 		}
 	}
 
-	fmt.Println(5, workspaceAccesses, rolesPermission)
 	return workspaceAccesses, rolesPermission
 }
 

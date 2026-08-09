@@ -4,8 +4,6 @@ import { useS } from "../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 import { WorkspaceTypeDto } from "../../sdk/abac/WorkspaceTypeDto";
 
-import { useContext } from "react";
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
 import { FormSelect } from "../../fireback-ui/components/forms/form-select/FormSelect";
 import { useRolesQuerySource } from "../../fireback-ui/hooks/useRolesQuerySource";
 import { FormRichText } from "../../fireback-ui/components/forms/form-richtext/FormRichText";
@@ -15,7 +13,6 @@ export const WorkspaceTypeEditForm = ({
   isEditing,
 }: EntityFormProps<Partial<WorkspaceTypeDto>>) => {
   const { values, setValues } = form;
-  const { options } = useContext(RemoteQueryContext);
   const s = useS(strings);
 
   return (

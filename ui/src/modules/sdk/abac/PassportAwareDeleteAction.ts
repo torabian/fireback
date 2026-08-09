@@ -114,6 +114,7 @@ export class PassportAwareDeleteAction {
   };
   static Definition = {
     name: "passportAwareDelete",
+    cliName: "delete",
     cliShort: "passport-d",
     url: "/passport/delete",
     method: "post",

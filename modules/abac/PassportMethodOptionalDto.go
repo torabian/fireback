@@ -10,9 +10,9 @@ import (
 // The base class definition for passportMethodOptionalDto
 type PassportMethodOptionalDto struct {
 	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	Type     emigo.Nullable[string] `json:"type" yaml:"type"`
+	Type     emigo.Nullable[string] `json:"type" validate:"oneof=email phone google facebook,required" yaml:"type"`
 	// The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.
-	Region emigo.Nullable[string] `json:"region" yaml:"region"`
+	Region emigo.Nullable[string] `json:"region" validate:"required,oneof=global" yaml:"region"`
 	// Client key for those methods such as 'google' which require oauth client key
 	ClientKey emigo.Nullable[string] `json:"clientKey" yaml:"clientKey"`
 	// The unique-id of the workspace which content belongs to.

@@ -68,6 +68,8 @@ dtos:
     type: string?
   - name: tableName
     type: string?
+    tags:
+      validate: required
   - name: sizes
     type: string?
   - name: workspaceId
@@ -151,6 +153,8 @@ dtos:
     type: string?
   - name: tableName
     type: string
+    tags:
+      validate: required
   - name: sizes
     type: string
   - name: workspaceId
@@ -306,6 +310,7 @@ actions:
     envelope: GResponse
     dto: AppMenuOptionalDto
 - name: appMenuCreate
+  cliName: create
   cliShort: appMenu-c
   url: /appMenu
   method: post
@@ -316,6 +321,7 @@ actions:
     envelope: GResponse
     dto: AppMenuDto
 - name: appMenuUpdate
+  cliName: update
   cliShort: appMenu-u
   url: /appMenu/:uniqueId
   method: patch
@@ -326,6 +332,7 @@ actions:
     envelope: GResponse
     dto: AppMenuDto
 - name: appMenuGet
+  cliName: get
   cliShort: appMenu-g
   url: /appMenu/:uniqueId
   method: get
@@ -334,6 +341,7 @@ actions:
     envelope: GResponse
     dto: AppMenuDto
 - name: appMenuBrowse
+  cliName: browse
   cliShort: appMenu-b
   url: /appMenu/browse
   method: get
@@ -353,6 +361,7 @@ actions:
     envelope: GResponse
     dto: AppMenuOptionalDto
 - name: appMenuAwareDeletePreview
+  cliName: delete-preview
   cliShort: appMenu-dp
   url: /appMenu/delete-preview
   method: get
@@ -375,6 +384,7 @@ actions:
       - name: count
         type: int64
 - name: appMenuAwareDelete
+  cliName: delete
   cliShort: appMenu-d
   url: /appMenu/delete
   method: post
@@ -386,6 +396,7 @@ actions:
       type: slice
       primitive: string
 - name: tableViewSizingCreate
+  cliName: create
   cliShort: tableViewSizing-c
   url: /tableViewSizing
   method: post
@@ -396,6 +407,7 @@ actions:
     envelope: GResponse
     dto: TableViewSizingDto
 - name: tableViewSizingUpdate
+  cliName: update
   cliShort: tableViewSizing-u
   url: /tableViewSizing/:uniqueId
   method: patch
@@ -406,6 +418,7 @@ actions:
     envelope: GResponse
     dto: TableViewSizingDto
 - name: tableViewSizingGet
+  cliName: get
   cliShort: tableViewSizing-g
   url: /tableViewSizing/:uniqueId
   method: get
@@ -414,6 +427,7 @@ actions:
     envelope: GResponse
     dto: TableViewSizingDto
 - name: tableViewSizingBrowse
+  cliName: browse
   cliShort: tableViewSizing-b
   url: /tableViewSizing/browse
   method: get
@@ -434,6 +448,7 @@ actions:
     envelope: GResponse
     dto: TableViewSizingOptionalDto
 - name: tableViewSizingAwareDeletePreview
+  cliName: delete-preview
   cliShort: tableViewSizing-dp
   url: /tableViewSizing/delete-preview
   method: get
@@ -456,6 +471,7 @@ actions:
       - name: count
         type: int64
 - name: tableViewSizingAwareDelete
+  cliName: delete
   cliShort: tableViewSizing-d
   url: /tableViewSizing/delete
   method: post
@@ -467,6 +483,7 @@ actions:
       type: slice
       primitive: string
 - name: timezoneGroupCreate
+  cliName: create
   cliShort: timezoneGroup-c
   url: /timezoneGroup
   method: post
@@ -477,6 +494,7 @@ actions:
     envelope: GResponse
     dto: TimezoneGroupDto
 - name: timezoneGroupUpdate
+  cliName: update
   cliShort: timezoneGroup-u
   url: /timezoneGroup/:uniqueId
   method: patch
@@ -487,6 +505,7 @@ actions:
     envelope: GResponse
     dto: TimezoneGroupDto
 - name: timezoneGroupGet
+  cliName: get
   cliShort: timezoneGroup-g
   url: /timezoneGroup/:uniqueId
   method: get
@@ -495,6 +514,7 @@ actions:
     envelope: GResponse
     dto: TimezoneGroupDto
 - name: timezoneGroupBrowse
+  cliName: browse
   cliShort: timezoneGroup-b
   url: /timezoneGroup/browse
   method: get
@@ -514,6 +534,7 @@ actions:
     envelope: GResponse
     dto: TimezoneGroupOptionalDto
 - name: timezoneGroupAwareDeletePreview
+  cliName: delete-preview
   cliShort: timezoneGroup-dp
   url: /timezoneGroup/delete-preview
   method: get
@@ -536,6 +557,7 @@ actions:
       - name: count
         type: int64
 - name: timezoneGroupAwareDelete
+  cliName: delete
   cliShort: timezoneGroup-d
   url: /timezoneGroup/delete
   method: post

@@ -44,7 +44,7 @@ func PreferenceUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "PreferenceUpdateAction",
-		CliName:     "preference-update-action",
+		CliName:     "update",
 		CliShort:    "preference-u",
 		URL:         "/preference/:uniqueId",
 		Method:      "PATCH",

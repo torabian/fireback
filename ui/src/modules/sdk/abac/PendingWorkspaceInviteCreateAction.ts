@@ -138,6 +138,7 @@ export class PendingWorkspaceInviteCreateAction {
   };
   static Definition = {
     name: "pendingWorkspaceInviteCreate",
+    cliName: "create",
     cliShort: "pendingWorkspaceInvite-c",
     url: "/pendingWorkspaceInvite",
     method: "post",

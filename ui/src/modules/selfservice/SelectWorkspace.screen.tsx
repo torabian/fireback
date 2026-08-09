@@ -1,6 +1,5 @@
-import { useContext } from "react";
 import { usePresenter } from "./SelectWorkspace.presenter";
-import { RemoteQueryContext } from "../sdk/core/react-tools";
+import { useAuthentication } from "../fireback-ui/auth/AuthenticationContext";
 import {
   QueryUserRoleWorkspacesActionRes,
   useQueryUserRoleWorkspacesActionQuery,
@@ -14,7 +13,7 @@ export const SelectWorkspaceScreen = () => {
   });
 
   const items = queryUrw.data?.data?.items || [];
-  const { selectedUrw, selectUrw } = useContext(RemoteQueryContext);
+  const { selectWorkspace } = useAuthentication();
 
   return (
     <div className="signin-form-container">
@@ -32,7 +31,7 @@ export const SelectWorkspaceScreen = () => {
                 key={role.uniqueId}
                 className="btn btn-outline-primary w-100"
                 onClick={() =>
-                  selectUrw({
+                  selectWorkspace({
                     workspaceId: workspace.uniqueId,
                     roleId: role.uniqueId,
                   })

@@ -3,11 +3,8 @@ import Link from "../../fireback-ui/components/link/Link";
 import { PageSection } from "../../fireback-ui/components/page-section/PageSection";
 import { useS } from "../../fireback-ui/hooks/useS";
 import { useUserWorkspaceBrowseActionQuery } from "../../sdk/abac/UserWorkspaceBrowseAction";
-import { useContext, useState } from "react";
-import {
-  RemoteQueryContext as FirebackContext,
-  RemoteQueryContext,
-} from "../../sdk/core/react-tools";
+import { useState } from "react";
+import { useAuthentication } from "../../fireback-ui/auth/AuthenticationContext";
 import { strings } from "./strings/translations";
 
 function UserRoleWorkspaceDebug() {
@@ -26,7 +23,7 @@ function UserRoleWorkspaceDebug() {
 }
 
 export function SessionDebug() {
-  const fireback = useContext(RemoteQueryContext);
+  const fireback = useAuthentication();
   const s = useS(strings);
 
   return (
@@ -39,7 +36,6 @@ export function SessionDebug() {
 
 export function DebuggerSettings({}: {}) {
   const [debugVisible, setDebugVisible] = useState(false);
-  const firebackContext = useContext(FirebackContext);
 
   const s = useS(strings);
 

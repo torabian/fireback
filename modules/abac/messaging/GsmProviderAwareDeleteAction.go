@@ -43,7 +43,7 @@ func GsmProviderAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "GsmProviderAwareDeleteAction",
-		CliName:     "gsm-provider-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "gsmProvider-d",
 		URL:         "/gsmProvider/delete",
 		Method:      "POST",

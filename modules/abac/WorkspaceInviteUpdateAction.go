@@ -44,7 +44,7 @@ func WorkspaceInviteUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "WorkspaceInviteUpdateAction",
-		CliName:     "workspace-invite-update-action",
+		CliName:     "update",
 		CliShort:    "workspaceInvite-u",
 		URL:         "/workspaceInvite/:uniqueId",
 		Method:      "PATCH",

@@ -43,7 +43,7 @@ func RoleBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "RoleBrowseAction",
-		CliName:     "role-browse-action",
+		CliName:     "browse",
 		CliShort:    "role-b",
 		URL:         "/role/browse",
 		Method:      "GET",

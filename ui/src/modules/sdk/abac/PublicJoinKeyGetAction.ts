@@ -205,6 +205,7 @@ export class PublicJoinKeyGetAction {
   };
   static Definition = {
     name: "publicJoinKeyGet",
+    cliName: "get",
     cliShort: "publicJoinKey-g",
     url: "/publicJoinKey/:uniqueId string",
     method: "get",

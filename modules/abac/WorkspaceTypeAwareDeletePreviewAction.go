@@ -42,7 +42,7 @@ func WorkspaceTypeAwareDeletePreviewActionMeta() struct {
 		Description string
 	}{
 		Name:        "WorkspaceTypeAwareDeletePreviewAction",
-		CliName:     "workspace-type-aware-delete-preview-action",
+		CliName:     "delete-preview",
 		CliShort:    "workspaceType-dp",
 		URL:         "/workspaceType/delete-preview",
 		Method:      "GET",

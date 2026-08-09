@@ -12,10 +12,9 @@ import {
   readStoredValue,
   resolveSelectedWorkspace,
   writeStoredValue,
+  SESSION_STORAGE_KEY,
+  WORKSPACE_STORAGE_KEY,
 } from "./authenticationUtils";
-
-const SESSION_STORAGE_KEY = "nima_ui_session";
-const WORKSPACE_STORAGE_KEY = "nima_ui_selected_workspace";
 
 export interface AuthenticationProviderProps<TExtra = unknown> {
   children: ReactNode;
@@ -73,6 +72,17 @@ export function AuthenticationProvider<TExtra = unknown>({
       readStoredValue<AuthenticationWorkspace>(WORKSPACE_STORAGE_KEY) ??
       undefined,
   );
+
+  // Storage is already read synchronously above (both lazy initializers run
+  // during the first render), so there's no real "still loading" window -
+  // this just flips true one tick after mount, matching the boot-flag
+  // pattern callers like ForcedAuthenticated build their loading/fade
+  // transition on top of (see AuthenticationContextValue.checked's doc
+  // comment).
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    setChecked(true);
+  }, []);
 
   /** Stores a session (or clears it, for null) both in state and in storage. */
   const setSession = (next: AuthenticationSession<TExtra> | null) => {
@@ -152,6 +162,7 @@ export function AuthenticationProvider<TExtra = unknown>({
     );
     return {
       session,
+      checked,
       isAuthenticated: session !== null,
       token: session?.token,
       selectedWorkspace,
@@ -163,7 +174,14 @@ export function AuthenticationProvider<TExtra = unknown>({
       checkValidity,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, explicitWorkspace, selfServiceUrl, returnParam, checkValidityHook]);
+  }, [
+    session,
+    checked,
+    explicitWorkspace,
+    selfServiceUrl,
+    returnParam,
+    checkValidityHook,
+  ]);
 
   return (
     <AuthenticationContext.Provider value={value}>

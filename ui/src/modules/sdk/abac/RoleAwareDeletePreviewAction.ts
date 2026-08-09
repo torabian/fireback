@@ -202,6 +202,7 @@ export class RoleAwareDeletePreviewAction {
   };
   static Definition = {
     name: "roleAwareDeletePreview",
+    cliName: "delete-preview",
     cliShort: "role-dp",
     url: "/role/delete-preview",
     method: "get",

@@ -43,7 +43,7 @@ func PhoneConfirmationBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "PhoneConfirmationBrowseAction",
-		CliName:     "phone-confirmation-browse-action",
+		CliName:     "browse",
 		CliShort:    "phoneConfirmation-b",
 		URL:         "/phoneConfirmation/browse",
 		Method:      "GET",

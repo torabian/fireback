@@ -134,6 +134,7 @@ export class UserWorkspaceCreateAction {
   };
   static Definition = {
     name: "userWorkspaceCreate",
+    cliName: "create",
     cliShort: "userWorkspace-c",
     url: "/userWorkspace",
     method: "post",

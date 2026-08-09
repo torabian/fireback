@@ -152,6 +152,7 @@ export class PublicJoinKeyUpdateAction {
   };
   static Definition = {
     name: "publicJoinKeyUpdate",
+    cliName: "update",
     cliShort: "publicJoinKey-u",
     url: "/publicJoinKey/:uniqueId string",
     method: "patch",

@@ -44,7 +44,7 @@ func AppMenuUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "AppMenuUpdateAction",
-		CliName:     "app-menu-update-action",
+		CliName:     "update",
 		CliShort:    "appMenu-u",
 		URL:         "/appMenu/:uniqueId",
 		Method:      "PATCH",

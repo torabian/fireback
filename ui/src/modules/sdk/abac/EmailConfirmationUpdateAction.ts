@@ -152,6 +152,7 @@ export class EmailConfirmationUpdateAction {
   };
   static Definition = {
     name: "emailConfirmationUpdate",
+    cliName: "update",
     cliShort: "emailConfirmation-u",
     url: "/emailConfirmation/:uniqueId string",
     method: "patch",

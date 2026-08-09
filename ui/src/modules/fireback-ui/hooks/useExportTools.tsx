@@ -34,8 +34,7 @@ export const NumericKeys = [
   KeyboardAction.Select9Index,
 ];
 
-import { RemoteQueryContext } from "../../sdk/core/react-tools";
-import { useContext } from "react";
+import { useApiOptions } from "./useApiOptions";
 
 export function toBinaryString(data: any) {
   var ret: string[] = [];
@@ -78,7 +77,7 @@ export function xhrStreamFile(
 }
 
 export function useOctetDownload({ path }: { path: string }) {
-  const { options } = useContext(RemoteQueryContext);
+  const options = useApiOptions();
   const h: any = options?.headers;
 
   const execute = () =>
@@ -94,7 +93,7 @@ export function useOctetDownload({ path }: { path: string }) {
 }
 
 export const useExportTools = ({ path }: { path?: string }) => {
-  const { options } = useContext(RemoteQueryContext);
+  const options = useApiOptions();
 
   useExportActions(
     path

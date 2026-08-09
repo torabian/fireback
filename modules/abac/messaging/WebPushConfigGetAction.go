@@ -43,7 +43,7 @@ func WebPushConfigGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "WebPushConfigGetAction",
-		CliName:     "web-push-config-get-action",
+		CliName:     "get",
 		CliShort:    "webPushConfig-g",
 		URL:         "/webPushConfig/:uniqueId",
 		Method:      "GET",

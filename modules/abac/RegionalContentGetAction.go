@@ -43,7 +43,7 @@ func RegionalContentGetActionMeta() struct {
 		Description string
 	}{
 		Name:        "RegionalContentGetAction",
-		CliName:     "regional-content-get-action",
+		CliName:     "get",
 		CliShort:    "regionalContent-g",
 		URL:         "/regionalContent/:uniqueId",
 		Method:      "GET",

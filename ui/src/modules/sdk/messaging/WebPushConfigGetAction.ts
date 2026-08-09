@@ -205,6 +205,7 @@ export class WebPushConfigGetAction {
   };
   static Definition = {
     name: "webPushConfigGet",
+    cliName: "get",
     cliShort: "webPushConfig-g",
     url: "/webPushConfig/:uniqueId string",
     method: "get",

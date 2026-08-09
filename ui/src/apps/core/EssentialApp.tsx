@@ -9,23 +9,21 @@ import "../../modules/styles/apple-family/styles.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useContext, useEffect } from "react";
 
-import { ErrorBoundary } from "react-error-boundary";
 import { Fallback } from "@/modules/fireback-ui/components/fallback/Fallback";
 import { AppConfigContext } from "@/modules/fireback-ui/hooks/appConfigTools";
 import { AuthProvider } from "@/modules/fireback-ui/hooks/authContext";
+import { UIStateProvider } from "@/modules/fireback-ui/hooks/uiStateContext";
 import { usePureLocale } from "@/modules/fireback-ui/hooks/usePureLocale";
+import { ErrorBoundary } from "react-error-boundary";
 import { SidebarMultiRouterSetup } from "./ApplicationPanels";
 import { WithFireback } from "./WithFireback";
 import { WithSelfServiceRoutes } from "./WithSelfServiceRoutes";
-import { UIStateProvider } from "@/modules/fireback-ui/hooks/uiStateContext";
 
 export function EssentialApp({
   ApplicationRoutes,
-  WithSdk,
   apiPrefix,
 }: {
   ApplicationRoutes: any;
-  WithSdk: any;
   apiPrefix?: string;
 }) {
   const [queryClient] = React.useState(() => new QueryClient());
@@ -55,18 +53,12 @@ export function EssentialApp({
               queryClient={queryClient}
               locale={locale}
             >
-              <WithSdk
-                prefix={apiPrefix}
-                config={config}
-                queryClient={queryClient}
-              >
-                <WithSelfServiceRoutes>
-                  <SidebarMultiRouterSetup
-                    queryClient={queryClient}
-                    ApplicationRoutes={ApplicationRoutes}
-                  />
-                </WithSelfServiceRoutes>
-              </WithSdk>
+              <WithSelfServiceRoutes>
+                <SidebarMultiRouterSetup
+                  queryClient={queryClient}
+                  ApplicationRoutes={ApplicationRoutes}
+                />
+              </WithSelfServiceRoutes>
             </WithFireback>
           </ErrorBoundary>
         </AuthProvider>

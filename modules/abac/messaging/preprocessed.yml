@@ -34,12 +34,16 @@ dtos:
     type: string?
   - name: mainSenderNumber
     type: string?
+    tags:
+      validate: required
   - name: type
     type: enum?
     of:
     - k: url
     - k: terminal
     - k: mediana
+    tags:
+      validate: required
   - name: invokeUrl
     type: string?
   - name: invokeBody
@@ -74,6 +78,8 @@ dtos:
     - k: resend
     - k: smtp
     - k: terminal
+    tags:
+      validate: required
   - name: title
     description: Give the email provider configuration a name, which makes it easier
       later to query.
@@ -103,12 +109,20 @@ dtos:
     type: string?
   - name: fromName
     type: string?
+    tags:
+      validate: required
   - name: fromEmailAddress
     type: string?
+    tags:
+      validate: required
   - name: replyTo
     type: string?
+    tags:
+      validate: required
   - name: nickName
     type: string?
+    tags:
+      validate: required
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -131,6 +145,8 @@ dtos:
     description: The json content of the web push after getting it from browser
     type: complex
     complex: JSON
+    tags:
+      validate: required
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -152,12 +168,16 @@ dtos:
     type: string
   - name: mainSenderNumber
     type: string
+    tags:
+      validate: required
   - name: type
     type: enum
     of:
     - k: url
     - k: terminal
     - k: mediana
+    tags:
+      validate: required
   - name: invokeUrl
     type: string
   - name: invokeBody
@@ -191,6 +211,8 @@ dtos:
     - k: resend
     - k: smtp
     - k: terminal
+    tags:
+      validate: required
   - name: title
     description: Give the email provider configuration a name, which makes it easier
       later to query.
@@ -219,12 +241,20 @@ dtos:
     type: string?
   - name: fromName
     type: string
+    tags:
+      validate: required
   - name: fromEmailAddress
     type: string
+    tags:
+      validate: required
   - name: replyTo
     type: string
+    tags:
+      validate: required
   - name: nickName
     type: string
+    tags:
+      validate: required
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -246,6 +276,8 @@ dtos:
     description: The json content of the web push after getting it from browser
     type: complex
     complex: JSON
+    tags:
+      validate: required
   - name: workspaceId
     description: The unique-id of the workspace which content belongs to.
     type: string?
@@ -464,6 +496,7 @@ actions:
     - name: queueId
       type: string
 - name: gsmProviderCreate
+  cliName: create
   cliShort: gsmProvider-c
   url: /gsmProvider
   method: post
@@ -474,6 +507,7 @@ actions:
     envelope: GResponse
     dto: GsmProviderDto
 - name: gsmProviderUpdate
+  cliName: update
   cliShort: gsmProvider-u
   url: /gsmProvider/:uniqueId
   method: patch
@@ -484,6 +518,7 @@ actions:
     envelope: GResponse
     dto: GsmProviderDto
 - name: gsmProviderGet
+  cliName: get
   cliShort: gsmProvider-g
   url: /gsmProvider/:uniqueId
   method: get
@@ -492,6 +527,7 @@ actions:
     envelope: GResponse
     dto: GsmProviderDto
 - name: gsmProviderBrowse
+  cliName: browse
   cliShort: gsmProvider-b
   url: /gsmProvider/browse
   method: get
@@ -511,6 +547,7 @@ actions:
     envelope: GResponse
     dto: GsmProviderOptionalDto
 - name: gsmProviderAwareDeletePreview
+  cliName: delete-preview
   cliShort: gsmProvider-dp
   url: /gsmProvider/delete-preview
   method: get
@@ -533,6 +570,7 @@ actions:
       - name: count
         type: int64
 - name: gsmProviderAwareDelete
+  cliName: delete
   cliShort: gsmProvider-d
   url: /gsmProvider/delete
   method: post
@@ -544,6 +582,7 @@ actions:
       type: slice
       primitive: string
 - name: emailProviderCreate
+  cliName: create
   cliShort: emailProvider-c
   url: /emailProvider
   method: post
@@ -554,6 +593,7 @@ actions:
     envelope: GResponse
     dto: EmailProviderDto
 - name: emailProviderUpdate
+  cliName: update
   cliShort: emailProvider-u
   url: /emailProvider/:uniqueId
   method: patch
@@ -564,6 +604,7 @@ actions:
     envelope: GResponse
     dto: EmailProviderDto
 - name: emailProviderGet
+  cliName: get
   cliShort: emailProvider-g
   url: /emailProvider/:uniqueId
   method: get
@@ -572,6 +613,7 @@ actions:
     envelope: GResponse
     dto: EmailProviderDto
 - name: emailProviderBrowse
+  cliName: browse
   cliShort: emailProvider-b
   url: /emailProvider/browse
   method: get
@@ -591,6 +633,7 @@ actions:
     envelope: GResponse
     dto: EmailProviderOptionalDto
 - name: emailProviderAwareDeletePreview
+  cliName: delete-preview
   cliShort: emailProvider-dp
   url: /emailProvider/delete-preview
   method: get
@@ -613,6 +656,7 @@ actions:
       - name: count
         type: int64
 - name: emailProviderAwareDelete
+  cliName: delete
   cliShort: emailProvider-d
   url: /emailProvider/delete
   method: post
@@ -624,6 +668,7 @@ actions:
       type: slice
       primitive: string
 - name: emailSenderCreate
+  cliName: create
   cliShort: emailSender-c
   url: /emailSender
   method: post
@@ -634,6 +679,7 @@ actions:
     envelope: GResponse
     dto: EmailSenderDto
 - name: emailSenderUpdate
+  cliName: update
   cliShort: emailSender-u
   url: /emailSender/:uniqueId
   method: patch
@@ -644,6 +690,7 @@ actions:
     envelope: GResponse
     dto: EmailSenderDto
 - name: emailSenderGet
+  cliName: get
   cliShort: emailSender-g
   url: /emailSender/:uniqueId
   method: get
@@ -652,6 +699,7 @@ actions:
     envelope: GResponse
     dto: EmailSenderDto
 - name: emailSenderBrowse
+  cliName: browse
   cliShort: emailSender-b
   url: /emailSender/browse
   method: get
@@ -671,6 +719,7 @@ actions:
     envelope: GResponse
     dto: EmailSenderOptionalDto
 - name: emailSenderAwareDeletePreview
+  cliName: delete-preview
   cliShort: emailSender-dp
   url: /emailSender/delete-preview
   method: get
@@ -693,6 +742,7 @@ actions:
       - name: count
         type: int64
 - name: emailSenderAwareDelete
+  cliName: delete
   cliShort: emailSender-d
   url: /emailSender/delete
   method: post
@@ -704,6 +754,7 @@ actions:
       type: slice
       primitive: string
 - name: webPushConfigCreate
+  cliName: create
   cliShort: webPushConfig-c
   url: /webPushConfig
   method: post
@@ -714,6 +765,7 @@ actions:
     envelope: GResponse
     dto: WebPushConfigDto
 - name: webPushConfigUpdate
+  cliName: update
   cliShort: webPushConfig-u
   url: /webPushConfig/:uniqueId
   method: patch
@@ -724,6 +776,7 @@ actions:
     envelope: GResponse
     dto: WebPushConfigDto
 - name: webPushConfigGet
+  cliName: get
   cliShort: webPushConfig-g
   url: /webPushConfig/:uniqueId
   method: get
@@ -732,6 +785,7 @@ actions:
     envelope: GResponse
     dto: WebPushConfigDto
 - name: webPushConfigBrowse
+  cliName: browse
   cliShort: webPushConfig-b
   url: /webPushConfig/browse
   method: get
@@ -751,6 +805,7 @@ actions:
     envelope: GResponse
     dto: WebPushConfigOptionalDto
 - name: webPushConfigAwareDeletePreview
+  cliName: delete-preview
   cliShort: webPushConfig-dp
   url: /webPushConfig/delete-preview
   method: get
@@ -773,6 +828,7 @@ actions:
       - name: count
         type: int64
 - name: webPushConfigAwareDelete
+  cliName: delete
   cliShort: webPushConfig-d
   url: /webPushConfig/delete
   method: post

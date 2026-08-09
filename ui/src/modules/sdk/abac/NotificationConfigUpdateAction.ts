@@ -152,6 +152,7 @@ export class NotificationConfigUpdateAction {
   };
   static Definition = {
     name: "notificationConfigUpdate",
+    cliName: "update",
     cliShort: "notificationConfig-u",
     url: "/notificationConfig/:uniqueId string",
     method: "patch",

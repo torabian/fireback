@@ -44,7 +44,7 @@ func EmailProviderUpdateActionMeta() struct {
 		Description string
 	}{
 		Name:        "EmailProviderUpdateAction",
-		CliName:     "email-provider-update-action",
+		CliName:     "update",
 		CliShort:    "emailProvider-u",
 		URL:         "/emailProvider/:uniqueId",
 		Method:      "PATCH",

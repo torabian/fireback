@@ -43,7 +43,7 @@ func TimezoneGroupAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "TimezoneGroupAwareDeleteAction",
-		CliName:     "timezone-group-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "timezoneGroup-d",
 		URL:         "/timezoneGroup/delete",
 		Method:      "POST",

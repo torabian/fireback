@@ -205,6 +205,7 @@ export class PreferenceGetAction {
   };
   static Definition = {
     name: "preferenceGet",
+    cliName: "get",
     cliShort: "preference-g",
     url: "/preference/:uniqueId string",
     method: "get",

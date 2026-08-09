@@ -205,6 +205,7 @@ export class TableViewSizingGetAction {
   };
   static Definition = {
     name: "tableViewSizingGet",
+    cliName: "get",
     cliShort: "tableViewSizing-g",
     url: "/tableViewSizing/:uniqueId string",
     method: "get",

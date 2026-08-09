@@ -11,7 +11,7 @@ import (
 // The base class definition for roleDto
 type RoleDto struct {
 	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	Name     string                 `json:"name" yaml:"name"`
+	Name     string                 `json:"name" validate:"required,omitempty,min=1,max=200" yaml:"name"`
 	// The list of capability completeKeys granted to this role, stored directly as JSON (replaces the old many-to-many role_capabilities join table - Emi has no relation mechanism compatible with fireback's string-uniqueId FK convention, see other entities' xId fields).
 	CapabilitiesListId complexes.JSON          `json:"capabilitiesListId" yaml:"capabilitiesListId"`
 	IsDeletable        emigo.Nullable[bool]    `json:"isDeletable" yaml:"isDeletable"`

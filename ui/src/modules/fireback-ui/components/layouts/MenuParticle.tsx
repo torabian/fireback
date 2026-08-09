@@ -6,11 +6,11 @@ import {
 import { useLocale } from "../../hooks/useLocale";
 import { useSortableOrder } from "../../hooks/useSortableOrder";
 import classNames from "classnames";
-import { useContext, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
 import { useUserWorkspaceBrowseActionQuery } from "../../../sdk/abac/UserWorkspaceBrowseAction";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useAuthentication } from "../../auth/AuthenticationContext";
 import {
   DndContext,
   PointerSensor,
@@ -89,12 +89,12 @@ export function MenuParticle({
   dragHandle?: ReactNode;
 }) {
   const { asPath } = useLocale();
-  const { selectedUrw } = useContext(RemoteQueryContext) as any;
+  const { selectedWorkspace } = useAuthentication();
   const queryWorkspaces = useUserWorkspaceBrowseActionQuery({});
 
   const menuRendered = renderMenu(menu, {
     asPath,
-    urw: selectedUrw as any,
+    urw: selectedWorkspace as any,
     urws: queryWorkspaces.data?.data?.items || [],
   });
 

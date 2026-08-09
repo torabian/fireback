@@ -11,8 +11,8 @@ import (
 // The base class definition for userDto
 type UserDto struct {
 	UniqueId  emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	FirstName string                 `json:"firstName" yaml:"firstName"`
-	LastName  string                 `json:"lastName" yaml:"lastName"`
+	FirstName string                 `json:"firstName" validate:"required" yaml:"firstName"`
+	LastName  string                 `json:"lastName" validate:"required" yaml:"lastName"`
 	Photo     string                 `json:"photo" yaml:"photo"`
 	Gender    emigo.Nullable[int]    `json:"gender" yaml:"gender"`
 	Title     string                 `json:"title" yaml:"title"`

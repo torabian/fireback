@@ -197,6 +197,7 @@ export class EmailConfirmationBrowseAction {
   };
   static Definition = {
     name: "emailConfirmationBrowse",
+    cliName: "browse",
     cliShort: "emailConfirmation-b",
     url: "/emailConfirmation/browse",
     method: "get",

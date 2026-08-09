@@ -1,7 +1,6 @@
 package abac
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -37,7 +36,6 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(*query)
 
-	fmt.Println(workspaceAccesses, rolesPermission, query.WorkspaceId)
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].UniqueId < items[j].UniqueId
 	})

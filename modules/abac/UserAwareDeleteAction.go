@@ -43,7 +43,7 @@ func UserAwareDeleteActionMeta() struct {
 		Description string
 	}{
 		Name:        "UserAwareDeleteAction",
-		CliName:     "user-aware-delete-action",
+		CliName:     "delete",
 		CliShort:    "user-d",
 		URL:         "/user/delete",
 		Method:      "POST",

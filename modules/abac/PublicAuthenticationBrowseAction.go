@@ -43,7 +43,7 @@ func PublicAuthenticationBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "PublicAuthenticationBrowseAction",
-		CliName:     "public-authentication-browse-action",
+		CliName:     "browse",
 		CliShort:    "publicAuthentication-b",
 		URL:         "/publicAuthentication/browse",
 		Method:      "GET",

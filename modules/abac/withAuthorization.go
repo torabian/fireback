@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -58,7 +59,16 @@ func WithAuthorizationPureDefault(context *fireback.AuthContextDto) (*fireback.A
 	query := fireback.QueryDSL{
 		UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 		ActionRequires:         context.Capabilities,
+		WorkspaceId:            context.WorkspaceId,
 	}
+
+	// MeetsAccessLevel checks query.UserHas/WorkspaceHas directly - they don't
+	// come from UserAccessPerWorkspace automatically, so they need to be flattened
+	// out of it for the *active* workspace (context.WorkspaceId) first. Without
+	// this, both are always empty, which - combined with the now-fixed
+	// MeetsAccessLevel actually enforcing its verdict instead of always returning
+	// true - would deny every capability-gated action for everyone, root included.
+	query.WorkspaceHas, query.UserHas = GetWorkspaceAndUserAccesses(query)
 
 	meets, missing := MeetsAccessLevel(query, false)
 
@@ -187,9 +197,35 @@ func WithSocketAuthorization(securityModel *fireback.SecurityModel) gin.HandlerF
 // Returns if the request became authroizated true, if false, do not continue.
 func AuthorizeRequest(securityModel *fireback.SecurityModel, c *gin.Context) bool {
 	q := fireback.ExtractQueryDslFromGinContext(c)
+
+	// A WebSocket handshake can't carry custom headers from the browser, so
+	// clients of a reactive action (e.g. eventbus's /ws, opened by the UI's
+	// useFirebackSocket) send token/workspace-id/role-id as query params
+	// instead. And by the time a reactive action's factory calls into this
+	// function (see EventBusSubscriptionActionSig), gorilla-websocket has
+	// already hijacked the connection to complete the upgrade - gin's
+	// response writer can no longer send an HTTP response onto it, so the
+	// c.AbortWithStatusJSON below would crash with "response.Write on
+	// hijacked connection" if reached. Both quirks trace back to the same
+	// signal, checked once here: is this request a websocket upgrade.
+	isWebsocketUpgrade := websocket.IsWebSocketUpgrade(c.Request)
+
 	wi := c.GetHeader("Workspace-id")
 	ri := c.GetHeader("Role-id")
 	tk := c.GetHeader("Authorization")
+
+	if isWebsocketUpgrade {
+		if wi == "" {
+			wi = c.Query("workspaceId")
+		}
+		if ri == "" {
+			ri = c.Query("roleId")
+		}
+		if tk == "" {
+			tk = c.Query("token")
+		}
+	}
+
 	ck, ckerr := c.Cookie("authorization")
 
 	if ckerr == nil && ck != "" {
@@ -207,6 +243,13 @@ func AuthorizeRequest(securityModel *fireback.SecurityModel, c *gin.Context) boo
 	result, err := WithAuthorizationPureDefault(context)
 
 	if err != nil {
+		if isWebsocketUpgrade {
+			// Already hijacked - can't send an HTTP response. The caller
+			// (the reactive action's generated Gin handler) reports the
+			// failure as a websocket frame instead, using the real
+			// connection rather than gin's now-unusable writer.
+			return false
+		}
 		c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
 		return false
 	}

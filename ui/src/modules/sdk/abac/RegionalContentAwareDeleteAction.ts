@@ -114,6 +114,7 @@ export class RegionalContentAwareDeleteAction {
   };
   static Definition = {
     name: "regionalContentAwareDelete",
+    cliName: "delete",
     cliShort: "regionalContent-d",
     url: "/regionalContent/delete",
     method: "post",

@@ -89,6 +89,9 @@ func CastEmailProviderEntityFromCli(c emigo.CliCastable) EmailProviderEntity {
 	if c.IsSet("unique-id") {
 		data.UniqueId = c.String("unique-id")
 	}
+	if c.IsSet("type") {
+		data.Type = c.String("type")
+	}
 	if c.IsSet("title") {
 		data.Title = c.String("title")
 	}

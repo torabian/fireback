@@ -138,6 +138,7 @@ export class EmailConfirmationCreateAction {
   };
   static Definition = {
     name: "emailConfirmationCreate",
+    cliName: "create",
     cliShort: "emailConfirmation-c",
     url: "/emailConfirmation",
     method: "post",

@@ -134,6 +134,7 @@ export class WorkspaceRoleCreateAction {
   };
   static Definition = {
     name: "workspaceRoleCreate",
+    cliName: "create",
     cliShort: "workspaceRole-c",
     url: "/workspaceRole",
     method: "post",

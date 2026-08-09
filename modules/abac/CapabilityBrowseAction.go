@@ -43,7 +43,7 @@ func CapabilityBrowseActionMeta() struct {
 		Description string
 	}{
 		Name:        "CapabilityBrowseAction",
-		CliName:     "capability-browse-action",
+		CliName:     "browse",
 		CliShort:    "capability-b",
 		URL:         "/capability/browse",
 		Method:      "GET",

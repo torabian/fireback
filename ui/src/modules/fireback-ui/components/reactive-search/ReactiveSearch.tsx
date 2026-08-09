@@ -7,7 +7,7 @@ import { useRouter } from "../../hooks/useRouter";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ReactiveSearchContext } from "./ReactiveSearchContext";
 import { detectDeviceType } from "../../hooks/deviceInformation";
-import { RemoteQueryContext } from "../../../sdk/core/react-tools";
+import { useApiOptions } from "../../hooks/useApiOptions";
 import { useWebSocketX } from "../../../sdk/sdk/react/useWebSocketX";
 import { ReactiveSearchAction } from "../../../sdk/reactivesearch/ReactiveSearchAction";
 import type { ReactiveSearchResultDtoType } from "../../../sdk/reactivesearch/ReactiveSearchResultDto";
@@ -18,7 +18,7 @@ export function ReactiveSearch() {
   const { setResult, setPhrase, phrase, result, reset } = useContext(
     ReactiveSearchContext,
   );
-  const { options } = useContext(RemoteQueryContext);
+  const options = useApiOptions();
   // Holds whatever query params the next connection should carry - read
   // synchronously by the factory below at restart() time, so a phrase typed
   // right before calling restart() is never one render behind (a plain
