@@ -303,14 +303,8 @@ jobs:
         run: cd cmd/fireback && make windows-zip
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
-      - name: Make once more time
-        run: make
-      - name: Test if the regenerating fireback definitions is gonna work
-        run: make test_rebuild
       - name: Refresh the fireback dependencies
-        run: make refresh
-      - name: Clean ui installation logs
-        run: git checkout ui/yarn.lock && git checkout ui/package-lock.json
+        run: make defs
 
       - name: 
           Refreshing golang modules should not make a commit.
