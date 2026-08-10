@@ -50,7 +50,16 @@ func WorkspaceRoleCreateAction(c abacdefs.WorkspaceRoleCreateActionRequest) (*ab
 	if err != nil {
 		return nil, err
 	}
-	entity := &abacdefs.WorkspaceRoleEntity{UserWorkspaceId: c.Body.UserWorkspaceId, RoleId: c.Body.RoleId}
+	// Bug fix: this never stamped WorkspaceId onto the created entity (only
+	// UserWorkspaceId/RoleId), so its workspace_id column stayed null - since browse/
+	// query here uses the plain workspace_id = query.WorkspaceId filter (no AllowOnRoot/
+	// ResolveStrategy override in this entity's security model), every freshly-created
+	// row was invisible to its own creator's /workspaceRole/browse.
+	entity := &abacdefs.WorkspaceRoleEntity{
+		UserWorkspaceId: c.Body.UserWorkspaceId,
+		RoleId:          c.Body.RoleId,
+		WorkspaceId:     emigo.NullableOf(query.WorkspaceId),
+	}
 	created, err2 := WorkspaceRoleActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2

@@ -285,79 +285,105 @@ func TestWorkspaceConfigAwareDeletePreview_HTTP_ThenDelete(t *testing.T) {
 	}
 }
 
-// TestWorkspaceConfigDistinct_HTTP_GetAndUpdate covers the two hand-declared
-// /workspace-config/distinct actions together, since Update's find-or-create and Get's
-// read need to agree on the same real root row - restores enableTotp to whatever it was
-// before this test ran, same reasoning as TestWorkspaceConfigUpdate_HTTP_Succeeds above.
-func TestWorkspaceConfigDistinct_HTTP_GetAndUpdate(t *testing.T) {
+// distinctGetWorkspaceConfig/distinctUpdateWorkspaceConfig back the two
+// TestWorkspaceConfigDistinct* tests below - split into package-level helpers (rather
+// than one combined test with local closures) so each hand-declared /workspace-config/
+// distinct action gets its own Test name containing "WorkspaceConfigDistinctGet"/
+// "WorkspaceConfigDistinctUpdate", matching what tools/checkendpointtests looks for.
+func distinctGetWorkspaceConfig(t *testing.T, cfg TestConfig, client *http.Client) workspaceConfigRes {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodGet, cfg.URL("/workspace-config/distinct"), nil)
+	if err != nil {
+		t.Fatalf("failed to build distinct-get request: %v", err)
+	}
+	req.Header.Set("Authorization", cfg.CliToken)
+	req.Header.Set("Workspace-id", "root")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("distinct-get request failed: %v", err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK on distinct-get, got %d: %s", resp.StatusCode, body)
+	}
+	var out googleResponseEnvelope[workspaceConfigRes]
+	if err := json.Unmarshal(body, &out); err != nil {
+		t.Fatalf("failed to decode distinct-get response: %v\nbody: %s", err, body)
+	}
+	return out.Data.Item
+}
+
+func distinctUpdateWorkspaceConfig(t *testing.T, cfg TestConfig, client *http.Client, enableTotp bool) workspaceConfigRes {
+	t.Helper()
+	body, _ := json.Marshal(map[string]any{"enableTotp": enableTotp})
+	req, err := http.NewRequest(http.MethodPatch, cfg.URL("/workspace-config/distinct"), bytes.NewReader(body))
+	if err != nil {
+		t.Fatalf("failed to build distinct-update request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", cfg.CliToken)
+	req.Header.Set("Workspace-id", "root")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("distinct-update request failed: %v", err)
+	}
+	defer resp.Body.Close()
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK on distinct-update, got %d: %s", resp.StatusCode, respBody)
+	}
+	var out googleResponseEnvelope[workspaceConfigRes]
+	if err := json.Unmarshal(respBody, &out); err != nil {
+		t.Fatalf("failed to decode distinct-update response: %v\nbody: %s", err, respBody)
+	}
+	return out.Data.Item
+}
+
+// TestWorkspaceConfigDistinctUpdate_HTTP_Succeeds covers PATCH /workspace-config/
+// distinct - restores enableTotp to whatever it was before this test ran afterwards
+// (same reasoning as TestWorkspaceConfigUpdate_HTTP_Succeeds above: this always targets
+// the single, real workspace_id='root' row shared by the whole running server).
+func TestWorkspaceConfigDistinctUpdate_HTTP_Succeeds(t *testing.T) {
 	cfg := LoadTestConfig(t)
 	cfg.RequireServer(t)
 	cfg.RequireAuth(t)
 
 	client := cfg.NewHTTPClient()
-
-	doGet := func() workspaceConfigRes {
-		req, err := http.NewRequest(http.MethodGet, cfg.URL("/workspace-config/distinct"), nil)
-		if err != nil {
-			t.Fatalf("failed to build distinct-get request: %v", err)
-		}
-		req.Header.Set("Authorization", cfg.CliToken)
-		req.Header.Set("Workspace-id", "root")
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("distinct-get request failed: %v", err)
-		}
-		defer resp.Body.Close()
-		body, _ := io.ReadAll(resp.Body)
-		if resp.StatusCode != http.StatusOK {
-			t.Fatalf("expected 200 OK on distinct-get, got %d: %s", resp.StatusCode, body)
-		}
-		var out googleResponseEnvelope[workspaceConfigRes]
-		if err := json.Unmarshal(body, &out); err != nil {
-			t.Fatalf("failed to decode distinct-get response: %v\nbody: %s", err, body)
-		}
-		return out.Data.Item
-	}
-
-	doUpdate := func(enableTotp bool) workspaceConfigRes {
-		body, _ := json.Marshal(map[string]any{"enableTotp": enableTotp})
-		req, err := http.NewRequest(http.MethodPatch, cfg.URL("/workspace-config/distinct"), bytes.NewReader(body))
-		if err != nil {
-			t.Fatalf("failed to build distinct-update request: %v", err)
-		}
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", cfg.CliToken)
-		req.Header.Set("Workspace-id", "root")
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Fatalf("distinct-update request failed: %v", err)
-		}
-		defer resp.Body.Close()
-		respBody, _ := io.ReadAll(resp.Body)
-		if resp.StatusCode != http.StatusOK {
-			t.Fatalf("expected 200 OK on distinct-update, got %d: %s", resp.StatusCode, respBody)
-		}
-		var out googleResponseEnvelope[workspaceConfigRes]
-		if err := json.Unmarshal(respBody, &out); err != nil {
-			t.Fatalf("failed to decode distinct-update response: %v\nbody: %s", err, respBody)
-		}
-		return out.Data.Item
-	}
-
-	original := doGet()
+	original := distinctGetWorkspaceConfig(t, cfg, client)
 	originalEnableTotp := false
 	if original.EnableTotp != nil {
 		originalEnableTotp = *original.EnableTotp
 	}
-	defer doUpdate(originalEnableTotp)
+	defer distinctUpdateWorkspaceConfig(t, cfg, client, originalEnableTotp)
 
 	toggled := !originalEnableTotp
-	updated := doUpdate(toggled)
+	updated := distinctUpdateWorkspaceConfig(t, cfg, client, toggled)
 	if updated.EnableTotp == nil || *updated.EnableTotp != toggled {
 		t.Errorf("expected enableTotp %v after distinct-update, got %+v", toggled, updated.EnableTotp)
 	}
+}
 
-	reGet := doGet()
+// TestWorkspaceConfigDistinctGet_HTTP_ReflectsUpdate covers GET /workspace-config/
+// distinct, and is also the regression guard tying it to DistinctUpdate: both must agree
+// on the same real root row. Restores enableTotp afterwards, same reasoning as above.
+func TestWorkspaceConfigDistinctGet_HTTP_ReflectsUpdate(t *testing.T) {
+	cfg := LoadTestConfig(t)
+	cfg.RequireServer(t)
+	cfg.RequireAuth(t)
+
+	client := cfg.NewHTTPClient()
+	original := distinctGetWorkspaceConfig(t, cfg, client)
+	originalEnableTotp := false
+	if original.EnableTotp != nil {
+		originalEnableTotp = *original.EnableTotp
+	}
+	defer distinctUpdateWorkspaceConfig(t, cfg, client, originalEnableTotp)
+
+	toggled := !originalEnableTotp
+	distinctUpdateWorkspaceConfig(t, cfg, client, toggled)
+
+	reGet := distinctGetWorkspaceConfig(t, cfg, client)
 	if reGet.EnableTotp == nil || *reGet.EnableTotp != toggled {
 		t.Errorf("expected distinct-get to reflect the update (enableTotp %v), got %+v", toggled, reGet.EnableTotp)
 	}

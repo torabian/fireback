@@ -11,11 +11,21 @@ import (
 func WorkspaceActionUpdate(query fireback.QueryDSL, fields *abacdefs.WorkspaceEntity) (*abacdefs.WorkspaceEntity, *fireback.IError) {
 
 	var item abacdefs.WorkspaceEntity
-	err := fireback.GetDbRef().
+	// Bug fix: .Where(...).First(&item).UpdateColumns(fields) chained the read and the
+	// write onto the very same *gorm.DB statement builder - First already consumes/sets
+	// the statement's table from the Where model, so the subsequent UpdateColumns
+	// re-inferred the table a second time on top of it, and every update failed with
+	// `table name "workspace_entities" specified more than once (SQLSTATE 42712)`. Also,
+	// the not-found case was only checked *after* the write had already been attempted.
+	// Split into two independent statements instead: fetch first (bailing out on error/
+	// not-found before writing anything), then a fresh Model(&item).UpdateColumns(fields).
+	if err := fireback.GetDbRef().
 		Where(&abacdefs.WorkspaceEntity{UniqueId: fields.UniqueId}).
-		First(&item).
-		UpdateColumns(fields).Error
-	if err != nil {
+		First(&item).Error; err != nil {
+		return &item, fireback.GormErrorToIError(err)
+	}
+
+	if err := fireback.GetDbRef().Model(&item).UpdateColumns(fields).Error; err != nil {
 		return &item, fireback.GormErrorToIError(err)
 	}
 

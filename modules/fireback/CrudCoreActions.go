@@ -53,6 +53,18 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
+		// Bug fix: a field tagged gorm:"-" (e.g. UserWorkspaceEntity.UserPermissions/
+		// RolePermission/WorkspacePermissions - computed, not a real relation) isn't a
+		// gorm association at all, but was still unconditionally appended to
+		// subEntities below (the loop only special-cased Translations sub-fields, not
+		// gorm:"-" itself) - every Deep/preload-driven Get or Browse against such an
+		// entity then called .Preload() with that field's name and failed with
+		// "<Field>: unsupported relations for schema <Entity>". Skip it outright, same
+		// as any other explicitly-excluded field above.
+		if field.Tag.Get("gorm") == "-" {
+			continue
+		}
+
 		if n == "Children" || n == "Parent" || n == "LinkedTo" {
 			continue
 		}
@@ -92,14 +104,25 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
+		// Bug fix: this used to assume every reflect.Slice-kind field was a has-many
+		// relation shaped []*SomeStruct, and called .Elem() twice unconditionally to dig
+		// out SomeStruct - elemType.Elem() panics with "reflect: Elem of invalid type
+		// <kind>" the moment the slice held anything else, e.g. a plain []string (see
+		// UserWorkspaceEntity.UserPermissions/WorkspacePermissions, tagged gorm:"-" since
+		// they're computed, not real relations) - crashing the whole request (and, since
+		// this runs mid-HTTP-handler, the server's goroutine) on any Get/Browse-with-Deep
+		// call against such an entity. Only descend into slice-of-pointer-to-struct now.
 		if kind == reflect.Slice && n != "Translations" {
 
+			elemType := f.Type().Elem()
 			hasSubTranslations := false
-			s := f.Type().Elem().Elem()
-			for rj := 0; rj < s.NumField(); rj++ {
-				n1 := s.Field(rj).Name
-				if n1 == "Translations" {
-					hasSubTranslations = true
+			if elemType.Kind() == reflect.Ptr && elemType.Elem().Kind() == reflect.Struct {
+				s := elemType.Elem()
+				for rj := 0; rj < s.NumField(); rj++ {
+					n1 := s.Field(rj).Name
+					if n1 == "Translations" {
+						hasSubTranslations = true
+					}
 				}
 			}
 

@@ -3,6 +3,7 @@ package abac
 import (
 	"reflect"
 
+	"github.com/torabian/emi/emigo"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
@@ -125,10 +126,15 @@ func WorkspaceCreateAction(c abacdefs.WorkspaceCreateActionRequest) (*abacdefs.W
 	if err != nil {
 		return nil, err
 	}
+	// Bug fix: this never stamped WorkspaceId onto the created entity, so its
+	// workspace_id column stayed null and it never matched its own creator's
+	// workspace_id = query.WorkspaceId browse filter (see PERM_ROOT_WORKSPACE_QUERY's
+	// AllowOnRoot: true - every call here runs in "root", same as query.WorkspaceId).
 	entity := abacdefs.WorkspaceEntity{
 		Description: c.Body.Description,
 		Name:        c.Body.Name,
 		TypeId:      c.Body.TypeId,
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := WorkspaceActions.Create(&entity, *query)
 	if err2 != nil {

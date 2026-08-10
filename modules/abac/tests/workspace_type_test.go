@@ -205,7 +205,22 @@ func TestWorkspaceTypeUpdate_HTTP_Succeeds(t *testing.T) {
 	defer deleteWorkspaceType(t, cfg, created.UniqueId)
 	defer deleteRole(t, cfg, role.UniqueId)
 
-	body, _ := json.Marshal(map[string]any{"title": "checkendpointtests renamed"})
+	// WorkspaceTypeEntity.RoleId/Slug have no "was this key present" tracking on the
+	// entity struct itself (only the optional dto's .Get() does), and
+	// ValidateTheWorkspaceTypeEntity always re-validates whatever ends up in
+	// fields.RoleId/fields.Slug against a real role / the slug format - an update that
+	// omits either leaves it as Go's zero value (""), which then fails validation
+	// (RoleIsNotAccessible / "Slug must start with '/'") instead of leaving the existing
+	// value alone. Same class of quirk as Role.CapabilitiesListId (see
+	// role_crud_test.go's TestRoleUpdate_HTTP_Succeeds) - a real caller (the manage UI's
+	// workspace type edit form) always resubmits the full form on every save for the
+	// same reason, so this test does too rather than attempting a schema/generator-level
+	// fix.
+	body, _ := json.Marshal(map[string]any{
+		"title":  "checkendpointtests renamed",
+		"roleId": role.UniqueId,
+		"slug":   created.Slug,
+	})
 	client := cfg.NewHTTPClient()
 	req, err := http.NewRequest(http.MethodPatch, cfg.URL("/workspaceType/"+created.UniqueId), bytes.NewReader(body))
 	if err != nil {
