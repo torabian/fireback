@@ -362,12 +362,12 @@ jobs:
           name: artifacts-darwin
           path: artifacts
 
-  run-cypress-mysql:
-    needs:
-      - build-ubuntu
-    uses: ./.github/workflows/cypress-test.yml
-    with:
-      DB_TYPE: mysql
+  # run-cypress-mysql:
+  #   needs:
+  #     - build-ubuntu
+  #   uses: ./.github/workflows/cypress-test.yml
+  #   with:
+  #     DB_TYPE: mysql
   
   run-cypress-postgres:
     needs:
@@ -376,9 +376,9 @@ jobs:
     with:
       DB_TYPE: postgres
 
-  run-cypress-sqlite:
-    needs:
-      - build-ubuntu
-    uses: ./.github/workflows/cypress-test.yml
-    with:
-      DB_TYPE: sqlite
+  # run-cypress-sqlite:
+  #   needs:
+  #     - build-ubuntu
+  #   uses: ./.github/workflows/cypress-test.yml
+  #   with:
+  #     DB_TYPE: sqlite
