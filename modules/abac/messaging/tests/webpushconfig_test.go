@@ -350,14 +350,25 @@ func TestWebPushConfigCreate_CLI_Help(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.CLITimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, bin, "messaging", "web-push-config-create-action", "--help")
+	// Bug fix: "web-push-config-create-action" was never a real command - every entity
+	// nested in the "messaging" group registers its create command under the bare Name
+	// "create" (colliding across entities) and is only unambiguously reachable via its
+	// own alias (see WebPushConfigCreateActionCliHandler's
+	// cmd.Aliases = []string{meta.CliShort}; confirmed against `./app messaging --help`).
+	// This test was failing (not skipping) against any actually-built binary.
+	cmd := exec.CommandContext(ctx, bin, "messaging", "webPushConfig-c", "--help")
 	cmd.Dir = cfg.WorkDir(t)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("`%s messaging web-push-config-create-action --help` failed: %v\noutput:\n%s", bin, err, out)
+		t.Fatalf("`%s messaging webPushConfig-c --help` failed: %v\noutput:\n%s", bin, err, out)
 	}
 
-	if !strings.Contains(string(out), "web-push-config-create-action") {
-		t.Errorf("expected --help output to mention the command name, got:\n%s", out)
+	// urfave's default help renderer only prints the primary Name ("create", shared by
+	// every entity in this group) in the NAME:/USAGE: header, never the Aliases actually
+	// used to route here - so the entity name from the auto-generated description
+	// ('Creates a new "webPushConfig" row.') is what actually proves this reached the
+	// right subcommand, not a coincidentally-successful but wrong one.
+	if !strings.Contains(string(out), "webPushConfig") {
+		t.Errorf("expected --help output to mention the webPushConfig entity, got:\n%s", out)
 	}
 }

@@ -6,14 +6,15 @@ import (
 	"log"
 	"strings"
 
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
 
-func GetWorkspaceNotificationConfig(workspaceId string) (*NotificationConfigEntity, *fireback.IError) {
+func GetWorkspaceNotificationConfig(workspaceId string) (*abacdefs.NotificationConfigEntity, *fireback.IError) {
 
-	var item NotificationConfigEntity
+	var item abacdefs.NotificationConfigEntity
 
 	err := fireback.GetDbRef().Where(fireback.RealEscape("workspace_id = ?", workspaceId)).First(&item).Error
 	if err != nil {
@@ -87,7 +88,7 @@ var EmailProviderTestCmd cli.Command = cli.Command{
 		var subject string = fireback.AskForInput("Subject", "Testing mail server")
 		var content string = fireback.AskForInput("Content", "This is a test, to see if our mail server is actually working")
 
-		_, err = NotificationTestMailAction(&TestMailDto{
+		_, err = NotificationTestMailAction(&abacdefs.TestMailDto{
 			SenderId: senderId,
 			ToName:   toName,
 			ToEmail:  toEmail,

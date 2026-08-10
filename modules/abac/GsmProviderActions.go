@@ -22,8 +22,21 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*messagin
 		}
 	}
 
+	// config is nil whenever NotificationConfigActionGetOneByWorkspace 404'd above (no
+	// row configured yet, e.g. a fresh install nobody has set GSM sending up on) -
+	// config.GeneralGsmProviderId.Get() below would panic with a nil pointer
+	// dereference on a nil *NotificationConfigEntity receiver if checked first, which
+	// crashed the whole request on every send attempt until any admin configured a
+	// provider.
+	if config == nil {
+		log.Default().Println("There is no gsm configuration unfortunately. We are printing the sms to the terminal for the sake of development.")
+		log.Default().Println(message, recp)
+
+		return &messaging.GsmSendSmsWithProviderActionRes{QueueId: "print-to-terminal"}, nil
+	}
+
 	generalGsmProviderId, hasProvider := config.GeneralGsmProviderId.Get()
-	if config == nil || !hasProvider || *generalGsmProviderId == "" {
+	if !hasProvider || *generalGsmProviderId == "" {
 		log.Default().Println("There is no gsm configuration unfortunately. We are printing the sms to the terminal for the sake of development.")
 		log.Default().Println(message, recp)
 

@@ -5,11 +5,12 @@ import (
 
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/security"
 )
 
-func ClassicSigninAction(c ClassicSigninActionRequest) (*ClassicSigninActionResponse, error) {
+func ClassicSigninAction(c abacdefs.ClassicSigninActionRequest) (*abacdefs.ClassicSigninActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -20,14 +21,14 @@ func ClassicSigninAction(c ClassicSigninActionRequest) (*ClassicSigninActionResp
 		return nil, err2
 	}
 
-	return &ClassicSigninActionResponse{
+	return &abacdefs.ClassicSigninActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 
 // classicSigninCore holds the actual implementation, reusable by callers which
 // already have a resolved QueryDSL (such as the cli-only AuthFlow).
-func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
+func classicSigninCore(dto abacdefs.ClassicSigninActionReq, query fireback.QueryDSL) (*abacdefs.ClassicSigninActionRes, *fireback.IError) {
 	req := dto
 	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
 		return nil, err
@@ -57,15 +58,15 @@ func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*Cl
 		}
 
 		// Here we need to do some comparison to make sure this is the correct session secret
-		var publicSession *PublicAuthenticationEntity = nil
-		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
+		var publicSession *abacdefs.PublicAuthenticationEntity = nil
+		fireback.GetDbRef().Where(&abacdefs.PublicAuthenticationEntity{SessionSecret: req.SessionSecret}).Find(&publicSession)
 
 		if strings.TrimSpace(req.SessionSecret) == "" {
 			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
 		}
 	}
 
-	session := &UserSessionDto{}
+	session := &abacdefs.UserSessionDto{}
 
 	if err := fetchPureUserAndPassToSession(req.Value, req.Password, session, query); err != nil {
 		return nil, err
@@ -90,14 +91,14 @@ func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*Cl
 			totpSecret := key.Secret()
 			totpLink := key.URL()
 
-			if _, err := PassportActions.Update(query, &PassportEntity{
+			if _, err := PassportActions.Update(query, &abacdefs.PassportEntity{
 				UniqueId:   passport.Item.UniqueId,
 				TotpSecret: totpSecret,
 			}); err != nil {
 				return nil, err
 			}
 
-			return &ClassicSigninActionRes{
+			return &abacdefs.ClassicSigninActionRes{
 				TotpUrl: totpLink,
 				Next:    []string{"setup-totp"},
 			}, nil
@@ -107,7 +108,7 @@ func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*Cl
 	if passport.Item.TotpSecret != "" && config != nil && config.EnableTotp.OrDefault(false) {
 		// Assume this is first time, so do not fail the response and allow user to go there.
 		if req.TotpCode == "" {
-			return &ClassicSigninActionRes{
+			return &abacdefs.ClassicSigninActionRes{
 				Next: []string{"enter-totp"},
 			}, nil
 		}
@@ -121,13 +122,13 @@ func classicSigninCore(dto ClassicSigninActionReq, query fireback.QueryDSL) (*Cl
 		return nil, err
 	}
 
-	return &ClassicSigninActionRes{
+	return &abacdefs.ClassicSigninActionRes{
 		Session: emigo.NewOne(*session),
 	}, nil
 }
 
-func convertPointersToValuesUserWorkspaceEntity(pointers []*UserWorkspaceEntity) []UserWorkspaceEntity {
-	values := make([]UserWorkspaceEntity, 0, len(pointers)) // preallocate
+func convertPointersToValuesUserWorkspaceEntity(pointers []*abacdefs.UserWorkspaceEntity) []abacdefs.UserWorkspaceEntity {
+	values := make([]abacdefs.UserWorkspaceEntity, 0, len(pointers)) // preallocate
 	for _, ptr := range pointers {
 		if ptr != nil {
 			values = append(values, *ptr) // dereference pointer and append
@@ -138,19 +139,19 @@ func convertPointersToValuesUserWorkspaceEntity(pointers []*UserWorkspaceEntity)
 
 // Can be used to authenticate only using value and passport.
 // Do not expose this publicly, by passes recaptcha and all other securities.
-func classicSinginInternalUnsafe(req *ClassicSigninActionReq, q fireback.QueryDSL) (*ClassicSigninActionRes, *fireback.IError) {
+func classicSinginInternalUnsafe(req *abacdefs.ClassicSigninActionReq, q fireback.QueryDSL) (*abacdefs.ClassicSigninActionRes, *fireback.IError) {
 
-	session := &UserSessionDto{}
+	session := &abacdefs.UserSessionDto{}
 
 	fetchPureUserAndPassToSession(req.Value, req.Password, session, q)
 	applyUserTokenAndWorkspacesToToken(session, q)
 
-	return &ClassicSigninActionRes{
+	return &abacdefs.ClassicSigninActionRes{
 		Session: emigo.NewOne(*session),
 	}, nil
 }
 
-func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
+func applyUserTokenAndWorkspacesToToken(session *abacdefs.UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 	user, _ := session.User.Get()
 	// Get the user workspaces as well
 	q.UserId = user.Item.UniqueId
@@ -165,7 +166,7 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.Quer
 	)
 
 	// Authorize the session, put the token
-	if token, err := user.Item.AuthorizeWithToken(q); err != nil {
+	if token, err := AuthorizeWithToken(&user.Item, q); err != nil {
 		return fireback.CastToIError(err)
 	} else {
 		session.Token = token
@@ -183,7 +184,7 @@ func applyUserTokenAndWorkspacesToToken(session *UserSessionDto, q fireback.Quer
 // This is an unsafe function and should not be exposed to outside.
 // If the password is nil, it means it would work without a password.
 // So make sure you have
-func fetchPureUserAndPassToSession(value string, password string, session *UserSessionDto, q fireback.QueryDSL) *fireback.IError {
+func fetchPureUserAndPassToSession(value string, password string, session *abacdefs.UserSessionDto, q fireback.QueryDSL) *fireback.IError {
 
 	passportPassword, err := fetchUserAndPassToSession(value, session, q)
 
@@ -200,7 +201,7 @@ func fetchPureUserAndPassToSession(value string, password string, session *UserS
 
 // Unsafe function, which reads a user passport and finds him and assigns to the
 // session. Just use in password less scenarios, such as oauth.
-func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback.QueryDSL) (*string, *fireback.IError) {
+func fetchUserAndPassToSession(value string, session *abacdefs.UserSessionDto, q fireback.QueryDSL) (*string, *fireback.IError) {
 	ClearPassportValue(&value)
 
 	var passportPassword = ""
@@ -219,17 +220,17 @@ func fetchUserAndPassToSession(value string, session *UserSessionDto, q fireback
 	return &passportPassword, nil
 }
 
-func UnsafeGetUserByPassportValue(value string, q fireback.QueryDSL) (*PassportEntity, *UserEntity, *fireback.IError) {
+func UnsafeGetUserByPassportValue(value string, q fireback.QueryDSL) (*abacdefs.PassportEntity, *abacdefs.UserEntity, *fireback.IError) {
 
 	// Check the passport if exists
-	var item PassportEntity
-	if err := fireback.GetRef(q).Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
+	var item abacdefs.PassportEntity
+	if err := fireback.GetRef(q).Model(&abacdefs.PassportEntity{}).Where(&abacdefs.PassportEntity{Value: value}).First(&item).Error; err != nil || item.Value == "" {
 
 		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 
-	var user UserEntity
-	if err := fireback.GetRef(q).Model(&UserEntity{}).Where(&UserEntity{UniqueId: item.UserId.OrDefault("")}).First(&user).Error; err != nil {
+	var user abacdefs.UserEntity
+	if err := fireback.GetRef(q).Model(&abacdefs.UserEntity{}).Where(&abacdefs.UserEntity{UniqueId: item.UserId.OrDefault("")}).First(&user).Error; err != nil {
 		return nil, nil, fireback.Create401Error(&AbacMessages.PassportNotAvailable, []string{})
 	}
 

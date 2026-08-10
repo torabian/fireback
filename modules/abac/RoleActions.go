@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/complexes"
@@ -43,7 +44,7 @@ func RoleCapabilitiesListIdOf(ids []string) complexes.JSON {
 }
 
 // RoleCapabilitiesListIdGet reads CapabilitiesListId back out as a plain []string.
-func RoleCapabilitiesListIdGet(role *RoleEntity) []string {
+func RoleCapabilitiesListIdGet(role *abacdefs.RoleEntity) []string {
 	if role == nil {
 		return nil
 	}
@@ -51,7 +52,7 @@ func RoleCapabilitiesListIdGet(role *RoleEntity) []string {
 	return ids
 }
 
-var RoleActions = NewEntityActionsBundle[RoleEntity]()
+var RoleActions = NewEntityActionsBundle[abacdefs.RoleEntity]()
 
 func init() {
 	// filterRolePermissions/the RoleNeedsOneCapability guard deliberately do NOT wrap
@@ -73,7 +74,7 @@ func init() {
 	// restores the old exemption for internal callers.
 
 	// The root role (uniqueId "root") is excluded from removal whenever InternalQuery is
-	// already set - preserved verbatim from the pre-migration RoleEntity.go hand file
+	// already set - preserved verbatim from the pre-migration abacdefs.RoleEntity.go hand file
 	// (note: it does NOT add the exclusion when InternalQuery starts out empty).
 	baseRemoveEnqueue := RoleActions.RemoveEnqueue
 	RoleActions.RemoveEnqueue = func(request fireback.DeleteRequest, query fireback.QueryDSL) (*fireback.DeleteResponse, *fireback.IError) {
@@ -89,7 +90,7 @@ func init() {
 	// non-root workspace's UI at all. When it IS visible (root workspace), it's reported
 	// as non-deletable/non-updatable in the response.
 	baseQuery := RoleActions.Query
-	RoleActions.Query = func(query fireback.QueryDSL) ([]*RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
+	RoleActions.Query = func(query fireback.QueryDSL) ([]*abacdefs.RoleEntity, *fireback.QueryResultMeta, *fireback.IError) {
 		roles, qrm, err := baseQuery(query)
 		if len(roles) > 0 {
 			filtered := roles[:0]
@@ -120,7 +121,7 @@ func init() {
 	// point is that it's not visible at all from here, not that it exists but is
 	// forbidden.
 	baseGetOne := RoleActions.GetOne
-	RoleActions.GetOne = func(query fireback.QueryDSL) (*RoleEntity, *fireback.IError) {
+	RoleActions.GetOne = func(query fireback.QueryDSL) (*abacdefs.RoleEntity, *fireback.IError) {
 		role, err := baseGetOne(query)
 		if err != nil {
 			return nil, err
@@ -135,7 +136,7 @@ func init() {
 	}
 }
 
-func filterRolePermissions(dto *RoleEntity, query fireback.QueryDSL) {
+func filterRolePermissions(dto *abacdefs.RoleEntity, query fireback.QueryDSL) {
 	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(query)
 
 	ids := RoleCapabilitiesListIdGet(dto)
@@ -156,7 +157,7 @@ func filterRolePermissions(dto *RoleEntity, query fireback.QueryDSL) {
 	dto.CapabilitiesListId = RoleCapabilitiesListIdOf(itemsFiltered)
 }
 
-func RoleBrowseAction(c RoleBrowseActionRequest) (*RoleBrowseActionResponse, error) {
+func RoleBrowseAction(c abacdefs.RoleBrowseActionRequest) (*abacdefs.RoleBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_QUERY}})
 	if err != nil {
 		return nil, err
@@ -165,10 +166,10 @@ func RoleBrowseAction(c RoleBrowseActionRequest) (*RoleBrowseActionResponse, err
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RoleBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.RoleBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func RoleGetAction(c RoleGetActionRequest) (*RoleGetActionResponse, error) {
+func RoleGetAction(c abacdefs.RoleGetActionRequest) (*abacdefs.RoleGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_QUERY}})
 	if err != nil {
 		return nil, err
@@ -178,10 +179,10 @@ func RoleGetAction(c RoleGetActionRequest) (*RoleGetActionResponse, error) {
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RoleGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.RoleGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, error) {
+func RoleCreateAction(c abacdefs.RoleCreateActionRequest) (*abacdefs.RoleCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_CREATE}})
 	if err != nil {
 		return nil, err
@@ -198,7 +199,7 @@ func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, err
 		return nil, fireback.Create401Error(&RoleMessages.RoleNameReserved, []string{})
 	}
 
-	entity := &RoleEntity{
+	entity := &abacdefs.RoleEntity{
 		Name:               c.Body.Name,
 		CapabilitiesListId: c.Body.CapabilitiesListId,
 		WorkspaceId:        emigo.NullableOf(query.WorkspaceId),
@@ -211,16 +212,16 @@ func RoleCreateAction(c RoleCreateActionRequest) (*RoleCreateActionResponse, err
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RoleCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.RoleCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func RoleUpdateAction(c RoleUpdateActionRequest) (*RoleUpdateActionResponse, error) {
+func RoleUpdateAction(c abacdefs.RoleUpdateActionRequest) (*abacdefs.RoleUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &RoleEntity{UniqueId: c.Params.UniqueId, CapabilitiesListId: c.Body.CapabilitiesListId}
+	fields := &abacdefs.RoleEntity{UniqueId: c.Params.UniqueId, CapabilitiesListId: c.Body.CapabilitiesListId}
 	if v, ok := c.Body.Name.Get(); ok {
 		fields.Name = *v
 	}
@@ -232,27 +233,27 @@ func RoleUpdateAction(c RoleUpdateActionRequest) (*RoleUpdateActionResponse, err
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RoleUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.RoleUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func RoleAwareDeletePreviewAction(c RoleAwareDeletePreviewActionRequest) (*RoleAwareDeletePreviewActionResponse, error) {
+func RoleAwareDeletePreviewAction(c abacdefs.RoleAwareDeletePreviewActionRequest) (*abacdefs.RoleAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
 		return nil, err
 	}
-	uniqueIds := RoleAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := RoleEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.RoleAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.RoleEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &RoleAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.RoleAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func RoleAwareDeleteAction(c RoleAwareDeleteActionRequest) (*RoleAwareDeleteActionResponse, error) {
+func RoleAwareDeleteAction(c abacdefs.RoleAwareDeleteActionRequest) (*abacdefs.RoleAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
 		return nil, err
 	}
-	if err2 := RoleEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.RoleEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &RoleAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.RoleAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

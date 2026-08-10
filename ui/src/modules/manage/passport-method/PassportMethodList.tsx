@@ -1,6 +1,6 @@
 import { CommonListManager } from "../../fireback-ui/components/entity-manager/CommonListManager";
 import { useS } from "../../fireback-ui/hooks/useS";
-import { usePassportAwareDeleteAction } from "../../sdk/abac/PassportAwareDeleteAction";
+import { usePassportMethodAwareDeleteAction } from "../../sdk/abac/PassportMethodAwareDeleteAction";
 import { usePassportMethodBrowseActionQuery } from "../../sdk/abac/PassportMethodBrowseAction";
 import { PassportMethodNavigation } from "../../sdk/navigation/AbacNavigation";
 import { columns } from "./PassportMethodColumns";
@@ -15,7 +15,7 @@ export const PassportMethodList = () => {
         uniqueIdHrefHandler={(uniqueId: string) =>
           PassportMethodNavigation.single(uniqueId)
         }
-        deleteHook={usePassportAwareDeleteAction}
+        deleteHook={usePassportMethodAwareDeleteAction}
       ></CommonListManager>
     </>
   );

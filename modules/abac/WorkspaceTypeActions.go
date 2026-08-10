@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -77,13 +78,13 @@ var WorkspaceTypeMessages = struct {
 	},
 }
 
-var WorkspaceTypeActions = NewEntityActionsBundle[WorkspaceTypeEntity]()
+var WorkspaceTypeActions = NewEntityActionsBundle[abacdefs.WorkspaceTypeEntity]()
 
 func workspaceTypeSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{perm}, AllowOnRoot: true}
 }
 
-func WorkspaceTypeBrowseAction(c WorkspaceTypeBrowseActionRequest) (*WorkspaceTypeBrowseActionResponse, error) {
+func WorkspaceTypeBrowseAction(c abacdefs.WorkspaceTypeBrowseActionRequest) (*abacdefs.WorkspaceTypeBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceTypeSecurity(PERM_ROOT_WORKSPACE_TYPE_QUERY))
 	if err != nil {
 		return nil, err
@@ -92,10 +93,10 @@ func WorkspaceTypeBrowseAction(c WorkspaceTypeBrowseActionRequest) (*WorkspaceTy
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceTypeBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.WorkspaceTypeBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func WorkspaceTypeGetAction(c WorkspaceTypeGetActionRequest) (*WorkspaceTypeGetActionResponse, error) {
+func WorkspaceTypeGetAction(c abacdefs.WorkspaceTypeGetActionRequest) (*abacdefs.WorkspaceTypeGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceTypeSecurity(PERM_ROOT_WORKSPACE_TYPE_QUERY))
 	if err != nil {
 		return nil, err
@@ -105,15 +106,15 @@ func WorkspaceTypeGetAction(c WorkspaceTypeGetActionRequest) (*WorkspaceTypeGetA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceTypeGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.WorkspaceTypeGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func WorkspaceTypeCreateAction(c WorkspaceTypeCreateActionRequest) (*WorkspaceTypeCreateActionResponse, error) {
+func WorkspaceTypeCreateAction(c abacdefs.WorkspaceTypeCreateActionRequest) (*abacdefs.WorkspaceTypeCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceTypeSecurity(PERM_ROOT_WORKSPACE_TYPE_CREATE))
 	if err != nil {
 		return nil, err
 	}
-	entity := &WorkspaceTypeEntity{
+	entity := &abacdefs.WorkspaceTypeEntity{
 		Title:       c.Body.Title,
 		Description: c.Body.Description,
 		Slug:        c.Body.Slug,
@@ -128,16 +129,16 @@ func WorkspaceTypeCreateAction(c WorkspaceTypeCreateActionRequest) (*WorkspaceTy
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceTypeCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.WorkspaceTypeCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func WorkspaceTypeUpdateAction(c WorkspaceTypeUpdateActionRequest) (*WorkspaceTypeUpdateActionResponse, error) {
+func WorkspaceTypeUpdateAction(c abacdefs.WorkspaceTypeUpdateActionRequest) (*abacdefs.WorkspaceTypeUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceTypeSecurity(PERM_ROOT_WORKSPACE_TYPE_UPDATE))
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &WorkspaceTypeEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.WorkspaceTypeEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.Title.Get(); ok {
 		fields.Title = *v
 	}
@@ -154,35 +155,35 @@ func WorkspaceTypeUpdateAction(c WorkspaceTypeUpdateActionRequest) (*WorkspaceTy
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceTypeUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.WorkspaceTypeUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func WorkspaceTypeAwareDeletePreviewAction(c WorkspaceTypeAwareDeletePreviewActionRequest) (*WorkspaceTypeAwareDeletePreviewActionResponse, error) {
+func WorkspaceTypeAwareDeletePreviewAction(c abacdefs.WorkspaceTypeAwareDeletePreviewActionRequest) (*abacdefs.WorkspaceTypeAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, workspaceTypeSecurity(PERM_ROOT_WORKSPACE_TYPE_DELETE)); err != nil {
 		return nil, err
 	}
-	uniqueIds := WorkspaceTypeAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	uniqueIds := abacdefs.WorkspaceTypeAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
 	if err := RejectRootWorkspaceTypeDeletion(uniqueIds); err != nil {
 		return nil, err
 	}
-	preview, err2 := WorkspaceTypeEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	preview, err2 := abacdefs.WorkspaceTypeEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WorkspaceTypeAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.WorkspaceTypeAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func WorkspaceTypeAwareDeleteAction(c WorkspaceTypeAwareDeleteActionRequest) (*WorkspaceTypeAwareDeleteActionResponse, error) {
+func WorkspaceTypeAwareDeleteAction(c abacdefs.WorkspaceTypeAwareDeleteActionRequest) (*abacdefs.WorkspaceTypeAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, workspaceTypeSecurity(PERM_ROOT_WORKSPACE_TYPE_DELETE)); err != nil {
 		return nil, err
 	}
 	if err := RejectRootWorkspaceTypeDeletion(c.Body.UniqueIds); err != nil {
 		return nil, err
 	}
-	if err2 := WorkspaceTypeEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.WorkspaceTypeEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WorkspaceTypeAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.WorkspaceTypeAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // RejectRootWorkspaceTypeDeletion blocks the seeded "root" workspace type (created in
@@ -201,11 +202,11 @@ func RejectRootWorkspaceTypeDeletion(uniqueIds []string) *fireback.IError {
 	return nil
 }
 
-// --- Hand business logic recovered from the pre-migration WorkspaceTypeEntity.go ---
+// --- Hand business logic recovered from the pre-migration abacdefs.WorkspaceTypeEntity.go ---
 
 func WorkspaceTypeActionCreate(
-	dto *WorkspaceTypeEntity, query fireback.QueryDSL,
-) (*WorkspaceTypeEntity, *fireback.IError) {
+	dto *abacdefs.WorkspaceTypeEntity, query fireback.QueryDSL,
+) (*abacdefs.WorkspaceTypeEntity, *fireback.IError) {
 
 	if errors := ValidateTheWorkspaceTypeEntity(dto); len(errors) > 0 {
 		return nil, &fireback.IError{
@@ -224,8 +225,8 @@ func WorkspaceTypeActionCreate(
 
 func WorkspaceTypeActionUpdate(
 	query fireback.QueryDSL,
-	fields *WorkspaceTypeEntity,
-) (*WorkspaceTypeEntity, *fireback.IError) {
+	fields *abacdefs.WorkspaceTypeEntity,
+) (*abacdefs.WorkspaceTypeEntity, *fireback.IError) {
 
 	if errors := ValidateTheWorkspaceTypeEntity(fields); len(errors) > 0 {
 		return nil, &fireback.IError{
@@ -238,7 +239,7 @@ func WorkspaceTypeActionUpdate(
 	return WorkspaceTypeActions.Update(query, fields)
 }
 
-func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*RoleEntity, []*fireback.IErrorItem) {
+func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*abacdefs.RoleEntity, []*fireback.IErrorItem) {
 	items := []*fireback.IErrorItem{}
 
 	// Bug fix: this condition was inverted (`!roleId.IsNull()`), so every workspace
@@ -285,7 +286,7 @@ func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*RoleEntity, []
 // Before write or update we need some extra validation for this.
 // It's important to check if the role actually exists, and has some previliges
 // before making it available
-func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IErrorItem {
+func ValidateTheWorkspaceTypeEntity(fields *abacdefs.WorkspaceTypeEntity) []*fireback.IErrorItem {
 	items := []*fireback.IErrorItem{}
 	role, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(fields.RoleId))
 	if len(roleErrors) != 0 {
@@ -326,7 +327,7 @@ func ValidateTheWorkspaceTypeEntity(fields *WorkspaceTypeEntity) []*fireback.IEr
 // wildcard capability - the same capability the reserved 'root' role itself carries,
 // and effectively equivalent to it for authorization purposes even if the role wasn't
 // literally created as 'root'.
-func roleHasRootWildcardCapability(role *RoleEntity) bool {
+func roleHasRootWildcardCapability(role *abacdefs.RoleEntity) bool {
 	for _, capability := range RoleCapabilitiesListIdGet(role) {
 		if capability == "root.*" {
 			return true
@@ -391,12 +392,12 @@ func ValidateWorkspaceTypeSlug(slug string, excludeUniqueId string) []*fireback.
 
 // workspaceTypeSlugTaken reports whether slug is already used by some other workspace
 // type. This is a friendly pre-check ahead of the gorm:"unique" constraint on
-// WorkspaceTypeEntity.Slug (see Abac.emi.yml) - that constraint is still the real
+// abacdefs.WorkspaceTypeEntity.Slug (see Abac.emi.yml) - that constraint is still the real
 // backstop against a race between this check and the insert, but hitting it directly
 // would surface as an opaque database error instead of this field-scoped one.
 func workspaceTypeSlugTaken(slug string, excludeUniqueId string) (bool, error) {
 	var count int64
-	q := fireback.GetDbRef().Model(&WorkspaceTypeEntity{}).Where("slug = ?", slug)
+	q := fireback.GetDbRef().Model(&abacdefs.WorkspaceTypeEntity{}).Where("slug = ?", slug)
 	if excludeUniqueId != "" {
 		q = q.Where("unique_id <> ?", excludeUniqueId)
 	}
@@ -406,7 +407,7 @@ func workspaceTypeSlugTaken(slug string, excludeUniqueId string) (bool, error) {
 	return count > 0, nil
 }
 
-func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceTypesPubliclyActionRes, *fireback.QueryResultMeta, *fireback.IError) {
+func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*abacdefs.QueryWorkspaceTypesPubliclyActionRes, *fireback.QueryResultMeta, *fireback.IError) {
 	// Make this API public, so the signup screen can get it.
 	// At this moment, we just move things back as are, but maybe later we need
 	// to add some limits on what kind of information is going out.
@@ -415,14 +416,14 @@ func WorkspaceTypeActionPublicQuery(query fireback.QueryDSL) ([]*QueryWorkspaceT
 
 	items, qr, err := WorkspaceTypeActions.Query(query)
 
-	var all []*QueryWorkspaceTypesPubliclyActionRes
+	var all []*abacdefs.QueryWorkspaceTypesPubliclyActionRes
 
 	for _, item := range items {
 		if item.UniqueId == "root" {
 			continue
 		}
 
-		all = append(all, &QueryWorkspaceTypesPubliclyActionRes{
+		all = append(all, &abacdefs.QueryWorkspaceTypesPubliclyActionRes{
 			Title:       item.Title,
 			Description: item.Description,
 			UniqueId:    item.UniqueId,

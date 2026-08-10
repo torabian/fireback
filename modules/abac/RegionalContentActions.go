@@ -7,6 +7,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
@@ -24,9 +26,9 @@ var PERM_ROOT_REGIONAL_CONTENT_UPDATE = regionalContentPerms.Update
 var PERM_ROOT_REGIONAL_CONTENT_DELETE = regionalContentPerms.Delete
 var ALL_REGIONAL_CONTENT_PERMISSIONS = regionalContentPerms.All
 
-var RegionalContentActions = NewEntityActionsBundle[RegionalContentEntity]()
+var RegionalContentActions = NewEntityActionsBundle[abacdefs.RegionalContentEntity]()
 
-func RegionalContentBrowseAction(c RegionalContentBrowseActionRequest) (*RegionalContentBrowseActionResponse, error) {
+func RegionalContentBrowseAction(c abacdefs.RegionalContentBrowseActionRequest) (*abacdefs.RegionalContentBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY}})
 	if err != nil {
 		return nil, err
@@ -35,10 +37,10 @@ func RegionalContentBrowseAction(c RegionalContentBrowseActionRequest) (*Regiona
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RegionalContentBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.RegionalContentBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func RegionalContentGetAction(c RegionalContentGetActionRequest) (*RegionalContentGetActionResponse, error) {
+func RegionalContentGetAction(c abacdefs.RegionalContentGetActionRequest) (*abacdefs.RegionalContentGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_QUERY}})
 	if err != nil {
 		return nil, err
@@ -48,35 +50,45 @@ func RegionalContentGetAction(c RegionalContentGetActionRequest) (*RegionalConte
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RegionalContentGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.RegionalContentGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func RegionalContentCreateAction(c RegionalContentCreateActionRequest) (*RegionalContentCreateActionResponse, error) {
+func RegionalContentCreateAction(c abacdefs.RegionalContentCreateActionRequest) (*abacdefs.RegionalContentCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
-	entity := &RegionalContentEntity{
+	// content/region/languageId/keyGroup are validate:"required" (see
+	// RegionalContentDto.go) but nothing was actually enforcing it - same fix as
+	// EmailProviderCreateAction/TableViewSizingCreateAction/PassportCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
+	entity := &abacdefs.RegionalContentEntity{
 		Content:    c.Body.Content,
 		Region:     c.Body.Region,
 		Title:      c.Body.Title,
 		LanguageId: c.Body.LanguageId,
 		KeyGroup:   c.Body.KeyGroup,
+		// Without this, the row is invisible to RegionalContentBrowseAction's
+		// workspace-scoped query (see GetSqlContext) - same workspace-stamping fix as
+		// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := RegionalContentActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RegionalContentCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.RegionalContentCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func RegionalContentUpdateAction(c RegionalContentUpdateActionRequest) (*RegionalContentUpdateActionResponse, error) {
+func RegionalContentUpdateAction(c abacdefs.RegionalContentUpdateActionRequest) (*abacdefs.RegionalContentUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &RegionalContentEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.RegionalContentEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.Content.Get(); ok {
 		fields.Content = *v
 	}
@@ -96,29 +108,29 @@ func RegionalContentUpdateAction(c RegionalContentUpdateActionRequest) (*Regiona
 	if err2 != nil {
 		return nil, err2
 	}
-	return &RegionalContentUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.RegionalContentUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func RegionalContentAwareDeletePreviewAction(c RegionalContentAwareDeletePreviewActionRequest) (*RegionalContentAwareDeletePreviewActionResponse, error) {
+func RegionalContentAwareDeletePreviewAction(c abacdefs.RegionalContentAwareDeletePreviewActionRequest) (*abacdefs.RegionalContentAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := RegionalContentAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := RegionalContentEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.RegionalContentAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.RegionalContentEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &RegionalContentAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.RegionalContentAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func RegionalContentAwareDeleteAction(c RegionalContentAwareDeleteActionRequest) (*RegionalContentAwareDeleteActionResponse, error) {
+func RegionalContentAwareDeleteAction(c abacdefs.RegionalContentAwareDeleteActionRequest) (*abacdefs.RegionalContentAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_REGIONAL_CONTENT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := RegionalContentEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.RegionalContentEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &RegionalContentAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.RegionalContentAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // --- Hand business logic recovered from the pre-migration RegionalContentEntity.go ---
@@ -140,7 +152,7 @@ func RegionContentKeys() []string {
 	return []string{string(EMAIL_OTP), string(SMS_OTP)}
 }
 
-func (x *RegionalContentEntity) CompileContent(data map[string]string) (string, error) {
+func CompileContent(x *abacdefs.RegionalContentEntity, data map[string]string) (string, error) {
 	if x.Content == "" {
 		return "", nil
 	}
@@ -175,7 +187,7 @@ Use the following code for single time authorization
 {{ .Otp }}
 `
 
-func QuickGetOtpMessage(q fireback.QueryDSL, field RegionContentKey) *RegionalContentEntity {
+func QuickGetOtpMessage(q fireback.QueryDSL, field RegionContentKey) *abacdefs.RegionalContentEntity {
 	if result, err := ResolveRegionalContentTemplate(&RegionalContentRequest{
 		LanguageId:       q.Language,
 		Region:           "any",
@@ -184,7 +196,7 @@ func QuickGetOtpMessage(q fireback.QueryDSL, field RegionContentKey) *RegionalCo
 
 		log.Default().Println("For otp, the default content has been used. Make sure you update the regional content, you can customize it for different users, regions, and languages")
 
-		return &RegionalContentEntity{
+		return &abacdefs.RegionalContentEntity{
 			Content:  DefaultOtpForEmailMessage,
 			Title:    DefaultOtpForEmailMessageTitle,
 			UniqueId: "~in-binary-default-content",
@@ -194,7 +206,7 @@ func QuickGetOtpMessage(q fireback.QueryDSL, field RegionContentKey) *RegionalCo
 	}
 }
 
-func (x *RegionalContentEntity) CompileTitle(data map[string]string) (string, error) {
+func CompileTitle(x *abacdefs.RegionalContentEntity, data map[string]string) (string, error) {
 	if x.Title == "" {
 		return "", nil
 	}
@@ -219,15 +231,15 @@ func (x *RegionalContentEntity) CompileTitle(data map[string]string) (string, er
 
 }
 
-func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q fireback.QueryDSL) (*RegionalContentEntity, *fireback.IError) {
+func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q fireback.QueryDSL) (*abacdefs.RegionalContentEntity, *fireback.IError) {
 
 	key := string(dto.RegionContentKey)
-	var item RegionalContentEntity
-	condition := &RegionalContentEntity{LanguageId: dto.LanguageId, Region: dto.Region, KeyGroup: key}
+	var item abacdefs.RegionalContentEntity
+	condition := &abacdefs.RegionalContentEntity{LanguageId: dto.LanguageId, Region: dto.Region, KeyGroup: key}
 
 	if err := fireback.GetRef(q).
 		Debug().
-		Model(&RegionalContentEntity{}).
+		Model(&abacdefs.RegionalContentEntity{}).
 		Where(condition).
 		First(&item).Error; err != nil {
 
@@ -239,7 +251,7 @@ func ResolveRegionalContentTemplate(dto *RegionalContentRequest, q fireback.Quer
 
 			if err2 := fireback.GetRef(q).
 				Debug().
-				Model(&RegionalContentEntity{}).
+				Model(&abacdefs.RegionalContentEntity{}).
 				Where(condition).
 				First(&item).Error; err2 != nil {
 				return nil, fireback.GormErrorToIError(err2)

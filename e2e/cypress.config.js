@@ -83,6 +83,33 @@ module.exports = defineConfig({
         },
       });
 
+      // cy.session() (used by specs that log into the manage UI more than once,
+      // e.g. workspace-invite.cy.ts) reloads the whole spec runner the first
+      // time each named session is established - which resets any in-browser
+      // JS state (plain `let`s at describe-scope, and even Cypress.env()
+      // overrides set at runtime) back to its initial value. This plugin
+      // process, on the other hand, is not reloaded by anything that happens
+      // in the browser, so a plain object here is a reload-proof place for a
+      // spec to stash values (ids, tokens, ...) it needs to read again in a
+      // later it() than its first loginAs()-style call.
+      const sharedState = {};
+      on("task", {
+        setShared({ key, value }) {
+          sharedState[key] = value;
+          return null;
+        },
+        // Takes an array of keys and returns a {key: value} object so a spec
+        // that needs several values at once (e.g. a token plus a workspace id
+        // for a request's headers) can do it in a single round trip.
+        getSharedState(keys) {
+          const result = {};
+          for (const key of keys) {
+            result[key] = sharedState[key] ?? "";
+          }
+          return result;
+        },
+      });
+
       on("task", {
         view(url) {
           return cy.visit(url);

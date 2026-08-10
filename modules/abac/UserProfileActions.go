@@ -1,6 +1,8 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -13,9 +15,9 @@ var PERM_ROOT_USER_PROFILE_UPDATE = userProfilePerms.Update
 var PERM_ROOT_USER_PROFILE_DELETE = userProfilePerms.Delete
 var ALL_USER_PROFILE_PERMISSIONS = userProfilePerms.All
 
-var UserProfileActions = NewEntityActionsBundle[UserProfileEntity]()
+var UserProfileActions = NewEntityActionsBundle[abacdefs.UserProfileEntity]()
 
-func UserProfileBrowseAction(c UserProfileBrowseActionRequest) (*UserProfileBrowseActionResponse, error) {
+func UserProfileBrowseAction(c abacdefs.UserProfileBrowseActionRequest) (*abacdefs.UserProfileBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY}})
 	if err != nil {
 		return nil, err
@@ -24,10 +26,10 @@ func UserProfileBrowseAction(c UserProfileBrowseActionRequest) (*UserProfileBrow
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserProfileBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.UserProfileBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func UserProfileGetAction(c UserProfileGetActionRequest) (*UserProfileGetActionResponse, error) {
+func UserProfileGetAction(c abacdefs.UserProfileGetActionRequest) (*abacdefs.UserProfileGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_QUERY}})
 	if err != nil {
 		return nil, err
@@ -37,29 +39,32 @@ func UserProfileGetAction(c UserProfileGetActionRequest) (*UserProfileGetActionR
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserProfileGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.UserProfileGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func UserProfileCreateAction(c UserProfileCreateActionRequest) (*UserProfileCreateActionResponse, error) {
+func UserProfileCreateAction(c abacdefs.UserProfileCreateActionRequest) (*abacdefs.UserProfileCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_CREATE}})
 	if err != nil {
 		return nil, err
 	}
-	entity := &UserProfileEntity{FirstName: c.Body.FirstName, LastName: c.Body.LastName}
+	// Without this, the row is invisible to UserProfileBrowseAction's workspace-scoped
+	// query (see GetSqlContext) - same workspace-stamping fix as
+	// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+	entity := &abacdefs.UserProfileEntity{FirstName: c.Body.FirstName, LastName: c.Body.LastName, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	created, err2 := UserProfileActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserProfileCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.UserProfileCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func UserProfileUpdateAction(c UserProfileUpdateActionRequest) (*UserProfileUpdateActionResponse, error) {
+func UserProfileUpdateAction(c abacdefs.UserProfileUpdateActionRequest) (*abacdefs.UserProfileUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &UserProfileEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.UserProfileEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.FirstName.Get(); ok {
 		fields.FirstName = *v
 	}
@@ -70,27 +75,27 @@ func UserProfileUpdateAction(c UserProfileUpdateActionRequest) (*UserProfileUpda
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserProfileUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.UserProfileUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func UserProfileAwareDeletePreviewAction(c UserProfileAwareDeletePreviewActionRequest) (*UserProfileAwareDeletePreviewActionResponse, error) {
+func UserProfileAwareDeletePreviewAction(c abacdefs.UserProfileAwareDeletePreviewActionRequest) (*abacdefs.UserProfileAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}}); err != nil {
 		return nil, err
 	}
-	uniqueIds := UserProfileAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := UserProfileEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.UserProfileAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.UserProfileEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &UserProfileAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.UserProfileAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func UserProfileAwareDeleteAction(c UserProfileAwareDeleteActionRequest) (*UserProfileAwareDeleteActionResponse, error) {
+func UserProfileAwareDeleteAction(c abacdefs.UserProfileAwareDeleteActionRequest) (*abacdefs.UserProfileAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_PROFILE_DELETE}}); err != nil {
 		return nil, err
 	}
-	if err2 := UserProfileEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.UserProfileEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &UserProfileAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.UserProfileAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

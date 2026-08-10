@@ -79,7 +79,17 @@ export const WorkspaceInviteForm = ({
         </div>
         <div className="col-md-12">
           <FormSelect
-            formEffect={{ field: WorkspaceInviteDto.Fields.role$, form }}
+            // Bug fix: WorkspaceInviteDto.Fields has no "role$" key (only "roleId" -
+            // this DTO's role relation is a plain id, not a one/object relation with
+            // its own Fields.<x>$ alias), so formEffect.field was always undefined and
+            // FormSelect's `set(newValue, formEffect.field, value)` +
+            // `set(newValue, formEffect.field + "Id", value.uniqueId)` silently did
+            // nothing useful - selecting a role never actually reached the submitted
+            // roleId. The plain "role" - which FormSelect appends "Id" to itself, see
+            // FormSelect.tsx's onChange - is the working convention already used
+            // in-repo for this exact pattern (see WorkspaceTypeEditForm.tsx's
+            // `formEffect={{ form, field: "role" }}`).
+            formEffect={{ field: "role", form }}
             querySource={useRolesQuerySource}
             label={s.roleLabel}
             errorMessage={errors.roleId}

@@ -1,8 +1,11 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
-func UserInvitationsAction(c UserInvitationsActionRequest) (*UserInvitationsActionResponse, error) {
+func UserInvitationsAction(c abacdefs.UserInvitationsActionRequest) (*abacdefs.UserInvitationsActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
@@ -17,7 +20,7 @@ func UserInvitationsAction(c UserInvitationsActionRequest) (*UserInvitationsActi
 		return nil, fireback.CastToIError(err3)
 	}
 
-	return &UserInvitationsActionResponse{
+	return &abacdefs.UserInvitationsActionResponse{
 		Payload: fireback.GResponseQuery(invitations, qrm, &q),
 	}, nil
 }

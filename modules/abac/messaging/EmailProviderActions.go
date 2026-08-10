@@ -4,6 +4,7 @@ import (
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -55,7 +56,16 @@ func EmailProviderCreateAction(c EmailProviderCreateActionRequest) (*EmailProvid
 	if err != nil {
 		return nil, err
 	}
-	entity := &EmailProviderEntity{Type: c.Body.Type, Title: c.Body.Title, Config: c.Body.Config}
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
+	entity := &EmailProviderEntity{
+		Type:        c.Body.Type,
+		Title:       c.Body.Title,
+		Config:      c.Body.Config,
+		UserId:      emigo.NullableOf(query.UserId),
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
+	}
 	created, err2 := EmailProviderActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2

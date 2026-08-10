@@ -1,8 +1,11 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
-func QueryWorkspaceTypesPubliclyAction(c QueryWorkspaceTypesPubliclyActionRequest) (*QueryWorkspaceTypesPubliclyActionResponse, error) {
+func QueryWorkspaceTypesPubliclyAction(c abacdefs.QueryWorkspaceTypesPubliclyActionRequest) (*abacdefs.QueryWorkspaceTypesPubliclyActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -14,7 +17,7 @@ func QueryWorkspaceTypesPubliclyAction(c QueryWorkspaceTypesPubliclyActionReques
 		return nil, err2
 	}
 
-	return &QueryWorkspaceTypesPubliclyActionResponse{
+	return &abacdefs.QueryWorkspaceTypesPubliclyActionResponse{
 		Payload: fireback.GResponseQuery(res, qrm, &q),
 	}, nil
 }

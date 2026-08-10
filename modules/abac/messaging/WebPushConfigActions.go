@@ -66,6 +66,9 @@ func WebPushConfigCreateAction(c WebPushConfigCreateActionRequest) (*WebPushConf
 	if err != nil {
 		return nil, err
 	}
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
 	entity := &WebPushConfigEntity{
 		Subscription: c.Body.Subscription,
 		UserId:       emigo.NullableOf(query.UserId),

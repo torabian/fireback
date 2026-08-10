@@ -2,11 +2,12 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/security"
 )
 
-func ChangePasswordAction(c ChangePasswordActionRequest) (*ChangePasswordActionResponse, error) {
+func ChangePasswordAction(c abacdefs.ChangePasswordActionRequest) (*abacdefs.ChangePasswordActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
@@ -29,8 +30,8 @@ func ChangePasswordAction(c ChangePasswordActionRequest) (*ChangePasswordActionR
 
 	// Passports all belong to root workspace, so we need to query that
 	// thats why it's changed manually here. Passport needs to belong to current user.
-	passports := []PassportEntity{}
-	err2 := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
+	passports := []abacdefs.PassportEntity{}
+	err2 := fireback.GetRef(q).Where(abacdefs.PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
 	if err2 != nil {
 		return nil, fireback.CastToIError(err2)
 	}
@@ -46,7 +47,7 @@ func ChangePasswordAction(c ChangePasswordActionRequest) (*ChangePasswordActionR
 		return nil, fireback.CastToIError(err1)
 	}
 
-	updated, err3 := PassportActions.Update(q, &PassportEntity{
+	updated, err3 := PassportActions.Update(q, &abacdefs.PassportEntity{
 		Password: passwordHashed,
 		UniqueId: passports[0].UniqueId,
 	})
@@ -58,7 +59,7 @@ func ChangePasswordAction(c ChangePasswordActionRequest) (*ChangePasswordActionR
 		return nil, fireback.Create401Error(&AbacMessages.PasswordDidNotUpdated, []string{})
 	}
 
-	return &ChangePasswordActionResponse{
-		Payload: fireback.GResponseSingleItem(ChangePasswordActionRes{Changed: true}),
+	return &abacdefs.ChangePasswordActionResponse{
+		Payload: fireback.GResponseSingleItem(abacdefs.ChangePasswordActionRes{Changed: true}),
 	}, nil
 }

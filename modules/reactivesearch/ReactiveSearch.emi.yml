@@ -2,9 +2,9 @@ name: reactivesearch
 
 targets:
   - compiler: go
-    output: ./
+    output: ./defs
     flags:
-      pkg: reactivesearch
+      pkg: reactivesearchdefs
   - compiler: js
     output: ../../ui/src/modules/sdk/reactivesearch
     flags:

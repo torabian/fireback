@@ -15,8 +15,8 @@ export const WorkspaceInviteSingleScreen = () => {
   const { locale } = useLocale();
   const s = useS(strings);
 
-  const getSingleHook = useGetWorkspaceInviteByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useWorkspaceInviteGetActionQuery({
+    params: { uniqueId },
   });
 
   var d: WorkspaceInviteDto | undefined = getSingleHook.query.data?.data;

@@ -1,6 +1,8 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -16,7 +18,7 @@ var PERM_ROOT_PASSPORT_UPDATE = passportPerms.Update
 var PERM_ROOT_PASSPORT_DELETE = passportPerms.Delete
 var ALL_PASSPORT_PERMISSIONS = passportPerms.All
 
-var PassportActions = NewEntityActionsBundle[PassportEntity]()
+var PassportActions = NewEntityActionsBundle[abacdefs.PassportEntity]()
 
 var PASSPORT_METHOD_EMAIL = "email"
 var PASSPORT_METHOD_PHONE = "phone"
@@ -38,31 +40,31 @@ type passportType struct {
 	PhoneNumber   string
 }
 
-func GetUserByPassport2(value string) (*UserEntity, *PassportEntity, *fireback.IError) {
-	passport := &PassportEntity{}
-	err := fireback.GetDbRef().Where(&PassportEntity{Value: value}).First(passport).Error
+func GetUserByPassport2(value string) (*abacdefs.UserEntity, *abacdefs.PassportEntity, *fireback.IError) {
+	passport := &abacdefs.PassportEntity{}
+	err := fireback.GetDbRef().Where(&abacdefs.PassportEntity{Value: value}).First(passport).Error
 
 	if err != nil {
 		return nil, nil, fireback.GormErrorToIError(err)
 	}
 
-	user := &UserEntity{}
-	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.OrDefault("")}).First(user)
+	user := &abacdefs.UserEntity{}
+	fireback.GetDbRef().Where(&abacdefs.UserEntity{UniqueId: passport.UserId.OrDefault("")}).First(user)
 
 	return user, passport, nil
 }
 
-func GetUserByPassport(value string) (*UserEntity, *PassportEntity, error) {
-	passport := &PassportEntity{}
-	fireback.GetDbRef().Where(&PassportEntity{Value: value}).First(passport)
+func GetUserByPassport(value string) (*abacdefs.UserEntity, *abacdefs.PassportEntity, error) {
+	passport := &abacdefs.PassportEntity{}
+	fireback.GetDbRef().Where(&abacdefs.PassportEntity{Value: value}).First(passport)
 
-	user := &UserEntity{}
-	fireback.GetDbRef().Where(&UserEntity{UniqueId: passport.UserId.OrDefault("")}).First(user)
+	user := &abacdefs.UserEntity{}
+	fireback.GetDbRef().Where(&abacdefs.UserEntity{UniqueId: passport.UserId.OrDefault("")}).First(user)
 
 	return user, passport, nil
 }
 
-func PassportBrowseAction(c PassportBrowseActionRequest) (*PassportBrowseActionResponse, error) {
+func PassportBrowseAction(c abacdefs.PassportBrowseActionRequest) (*abacdefs.PassportBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_QUERY}})
 	if err != nil {
 		return nil, err
@@ -71,10 +73,10 @@ func PassportBrowseAction(c PassportBrowseActionRequest) (*PassportBrowseActionR
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.PassportBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func PassportGetAction(c PassportGetActionRequest) (*PassportGetActionResponse, error) {
+func PassportGetAction(c abacdefs.PassportGetActionRequest) (*abacdefs.PassportGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_QUERY}})
 	if err != nil {
 		return nil, err
@@ -84,15 +86,22 @@ func PassportGetAction(c PassportGetActionRequest) (*PassportGetActionResponse, 
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.PassportGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func PassportCreateAction(c PassportCreateActionRequest) (*PassportCreateActionResponse, error) {
+func PassportCreateAction(c abacdefs.PassportCreateActionRequest) (*abacdefs.PassportCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
-	entity := &PassportEntity{
+	// type/value are validate:"required" (see PassportDto.go) but nothing was actually
+	// enforcing it - same fix as
+	// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction /
+	// modules/abac/interfacetools's TableViewSizingCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
+	entity := &abacdefs.PassportEntity{
 		ThirdPartyVerifier: c.Body.ThirdPartyVerifier,
 		Type:               c.Body.Type,
 		UserId:             c.Body.UserId,
@@ -102,21 +111,29 @@ func PassportCreateAction(c PassportCreateActionRequest) (*PassportCreateActionR
 		Password:           c.Body.Password,
 		Confirmed:          c.Body.Confirmed,
 		AccessToken:        c.Body.AccessToken,
+		// AllowOnRoot above means query.WorkspaceId is always "root" here anyway (any
+		// other workspace is rejected before reaching this point) - matches "Passport
+		// and user always belong to the root workspace" elsewhere (see
+		// UnsafeGenerateUser). Without this, the row is invisible to
+		// PassportBrowseAction's workspace-scoped query (see GetSqlContext) - same
+		// workspace-stamping fix as EmailConfirmationCreateAction/
+		// AppMenuCreateAction/TimezoneGroupCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := PassportActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.PassportCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func PassportUpdateAction(c PassportUpdateActionRequest) (*PassportUpdateActionResponse, error) {
+func PassportUpdateAction(c abacdefs.PassportUpdateActionRequest) (*abacdefs.PassportUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &PassportEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.PassportEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.ThirdPartyVerifier.Get(); ok {
 		fields.ThirdPartyVerifier = *v
 	}
@@ -148,27 +165,27 @@ func PassportUpdateAction(c PassportUpdateActionRequest) (*PassportUpdateActionR
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.PassportUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func PassportAwareDeletePreviewAction(c PassportAwareDeletePreviewActionRequest) (*PassportAwareDeletePreviewActionResponse, error) {
+func PassportAwareDeletePreviewAction(c abacdefs.PassportAwareDeletePreviewActionRequest) (*abacdefs.PassportAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := PassportAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := PassportEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.PassportAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.PassportEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PassportAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.PassportAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func PassportAwareDeleteAction(c PassportAwareDeleteActionRequest) (*PassportAwareDeleteActionResponse, error) {
+func PassportAwareDeleteAction(c abacdefs.PassportAwareDeleteActionRequest) (*abacdefs.PassportAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PASSPORT_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := PassportEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.PassportEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PassportAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.PassportAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

@@ -1,6 +1,7 @@
 package messaging
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -51,11 +52,16 @@ func EmailSenderCreateAction(c EmailSenderCreateActionRequest) (*EmailSenderCrea
 	if err != nil {
 		return nil, err
 	}
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
 	entity := &EmailSenderEntity{
 		FromName:         c.Body.FromName,
 		FromEmailAddress: c.Body.FromEmailAddress,
 		ReplyTo:          c.Body.ReplyTo,
 		NickName:         c.Body.NickName,
+		UserId:           emigo.NullableOf(query.UserId),
+		WorkspaceId:      emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := EmailSenderActions.Create(entity, *query)
 	if err2 != nil {

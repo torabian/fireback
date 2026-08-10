@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/complexes"
@@ -15,7 +16,7 @@ import (
 // UserCliFn mirrors the old Module3-generated grouped "user" cli command (minus the
 // import/export/dev commands, which had no hand-written equivalent to recover) - tokens,
 // accept-invite and user-invitations are nested here too, since they're user-scoped
-// actions without their own cli home (preserved from the pre-migration UserEntity.go
+// actions without their own cli home (preserved from the pre-migration abacdefs.UserEntity.go
 // hand file's "Tokens are related to users, so let's move them there." comment).
 func UserCliFn() *cli.Command {
 	return &cli.Command{
@@ -23,20 +24,20 @@ func UserCliFn() *cli.Command {
 		Description: `Manage the users who are in the current app (root only)`,
 		Usage:       `Manage the users who are in the current app (root only)`,
 		Commands: []*cli.Command{
-			UserBrowseActionCliHandler(UserBrowseAction),
-			UserGetActionCliHandler(UserGetAction),
-			UserCreateActionCliHandler(UserCreateAction),
-			UserUpdateActionCliHandler(UserUpdateAction),
-			UserAwareDeletePreviewActionCliHandler(UserAwareDeletePreviewAction),
-			UserAwareDeleteActionCliHandler(UserAwareDeleteAction),
-			TokenBrowseActionCliHandler(TokenBrowseAction),
-			TokenGetActionCliHandler(TokenGetAction),
-			TokenCreateActionCliHandler(TokenCreateAction),
-			TokenUpdateActionCliHandler(TokenUpdateAction),
-			TokenAwareDeletePreviewActionCliHandler(TokenAwareDeletePreviewAction),
-			TokenAwareDeleteActionCliHandler(TokenAwareDeleteAction),
-			AcceptInviteActionCliHandler(AcceptInviteAction),
-			UserInvitationsActionCliHandler(UserInvitationsAction),
+			abacdefs.UserBrowseActionCliHandler(UserBrowseAction),
+			abacdefs.UserGetActionCliHandler(UserGetAction),
+			abacdefs.UserCreateActionCliHandler(UserCreateAction),
+			abacdefs.UserUpdateActionCliHandler(UserUpdateAction),
+			abacdefs.UserAwareDeletePreviewActionCliHandler(UserAwareDeletePreviewAction),
+			abacdefs.UserAwareDeleteActionCliHandler(UserAwareDeleteAction),
+			abacdefs.TokenBrowseActionCliHandler(TokenBrowseAction),
+			abacdefs.TokenGetActionCliHandler(TokenGetAction),
+			abacdefs.TokenCreateActionCliHandler(TokenCreateAction),
+			abacdefs.TokenUpdateActionCliHandler(TokenUpdateAction),
+			abacdefs.TokenAwareDeletePreviewActionCliHandler(TokenAwareDeletePreviewAction),
+			abacdefs.TokenAwareDeleteActionCliHandler(TokenAwareDeleteAction),
+			abacdefs.AcceptInviteActionCliHandler(AcceptInviteAction),
+			abacdefs.UserInvitationsActionCliHandler(UserInvitationsAction),
 		},
 	}
 }
@@ -54,9 +55,9 @@ var PERM_ROOT_USER_UPDATE = userPerms.Update
 var PERM_ROOT_USER_DELETE = userPerms.Delete
 var ALL_USER_PERMISSIONS = userPerms.All
 
-var UserActions = NewEntityActionsBundle[UserEntity]()
+var UserActions = NewEntityActionsBundle[abacdefs.UserEntity]()
 
-func (x *UserEntity) FullName() string {
+func FullName(x *abacdefs.UserEntity) string {
 
 	full := ""
 
@@ -72,7 +73,7 @@ func (x *UserEntity) FullName() string {
 
 }
 
-func UserBrowseAction(c UserBrowseActionRequest) (*UserBrowseActionResponse, error) {
+func UserBrowseAction(c abacdefs.UserBrowseActionRequest) (*abacdefs.UserBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}})
 	if err != nil {
 		return nil, err
@@ -81,10 +82,10 @@ func UserBrowseAction(c UserBrowseActionRequest) (*UserBrowseActionResponse, err
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.UserBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func UserGetAction(c UserGetActionRequest) (*UserGetActionResponse, error) {
+func UserGetAction(c abacdefs.UserGetActionRequest) (*abacdefs.UserGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}})
 	if err != nil {
 		return nil, err
@@ -94,15 +95,21 @@ func UserGetAction(c UserGetActionRequest) (*UserGetActionResponse, error) {
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.UserGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, error) {
+func UserCreateAction(c abacdefs.UserCreateActionRequest) (*abacdefs.UserCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
-	entity := &UserEntity{
+	// firstName/lastName are validate:"required" (see UserDto.go) but nothing was
+	// actually enforcing it - same fix as
+	// EmailProviderCreateAction/TableViewSizingCreateAction/PassportCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
+	entity := &abacdefs.UserEntity{
 		FirstName:     c.Body.FirstName,
 		LastName:      c.Body.LastName,
 		Photo:         c.Body.Photo,
@@ -113,7 +120,7 @@ func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, err
 		LastIpAddress: c.Body.LastIpAddress,
 	}
 	if v, ok := c.Body.PrimaryAddress.Get(); ok && v != nil {
-		entity.PrimaryAddress = emigo.NullableOf(UserEntityPrimaryAddress{
+		entity.PrimaryAddress = emigo.NullableOf(abacdefs.UserEntityPrimaryAddress{
 			AddressLine1:    v.AddressLine1,
 			AddressLine2:    v.AddressLine2,
 			City:            v.City,
@@ -126,16 +133,16 @@ func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, err
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.UserCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func UserUpdateAction(c UserUpdateActionRequest) (*UserUpdateActionResponse, error) {
+func UserUpdateAction(c abacdefs.UserUpdateActionRequest) (*abacdefs.UserUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &UserEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.UserEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.FirstName.Get(); ok {
 		fields.FirstName = *v
 	}
@@ -159,7 +166,7 @@ func UserUpdateAction(c UserUpdateActionRequest) (*UserUpdateActionResponse, err
 		fields.LastIpAddress = *v
 	}
 	if v, ok := c.Body.PrimaryAddress.Get(); ok && v != nil {
-		fields.PrimaryAddress = emigo.NullableOf(UserEntityPrimaryAddress{
+		fields.PrimaryAddress = emigo.NullableOf(abacdefs.UserEntityPrimaryAddress{
 			AddressLine1:    v.AddressLine1.OrDefault(""),
 			AddressLine2:    v.AddressLine2,
 			City:            v.City,
@@ -172,32 +179,32 @@ func UserUpdateAction(c UserUpdateActionRequest) (*UserUpdateActionResponse, err
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.UserUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func UserAwareDeletePreviewAction(c UserAwareDeletePreviewActionRequest) (*UserAwareDeletePreviewActionResponse, error) {
+func UserAwareDeletePreviewAction(c abacdefs.UserAwareDeletePreviewActionRequest) (*abacdefs.UserAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := UserAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := UserEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.UserAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.UserEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &UserAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.UserAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func UserAwareDeleteAction(c UserAwareDeleteActionRequest) (*UserAwareDeleteActionResponse, error) {
+func UserAwareDeleteAction(c abacdefs.UserAwareDeleteActionRequest) (*abacdefs.UserAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := UserEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.UserEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &UserAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.UserAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
-// --- Hand business logic recovered from the pre-migration UserActions.go/UserEntity.go ---
+// --- Hand business logic recovered from the pre-migration UserActions.go/abacdefs.UserEntity.go ---
 
 /*
 This file holds in memory some temporary solution to tokens that need to be used upon redirection
@@ -220,7 +227,7 @@ func PutTokenInExchangePool(token string) string {
 	return uniqueId
 }
 
-func GetTokenFromExchangePoolAction(query fireback.QueryDSL) (*ExchangeKeyInformationDto, *fireback.IError) {
+func GetTokenFromExchangePoolAction(query fireback.QueryDSL) (*abacdefs.ExchangeKeyInformationDto, *fireback.IError) {
 	item := exchangePool[query.UniqueId]
 	token := item.token
 	delete(exchangePool, query.UniqueId)
@@ -229,15 +236,15 @@ func GetTokenFromExchangePoolAction(query fireback.QueryDSL) (*ExchangeKeyInform
 		return nil, fireback.Create401Error(&AbacMessages.InvalidExchangeKey, []string{})
 	}
 
-	return &ExchangeKeyInformationDto{Key: token}, nil
+	return &abacdefs.ExchangeKeyInformationDto{Key: token}, nil
 }
 
-func GetUserFromToken(tokenString string) (*UserEntity, error) {
+func GetUserFromToken(tokenString string) (*abacdefs.UserEntity, error) {
 
-	var item TokenEntity
+	var item abacdefs.TokenEntity
 
 	if err := fireback.GetDbRef().Where(fireback.RealEscape("token = ?", tokenString)).First(&item).Error; err != nil {
-		return &UserEntity{}, err
+		return &abacdefs.UserEntity{}, err
 	}
 
 	user, _ := UserActions.GetOne(fireback.QueryDSL{UniqueId: item.UserId.OrDefault("")})
@@ -245,16 +252,28 @@ func GetUserFromToken(tokenString string) (*UserEntity, error) {
 }
 
 func UserActionCreate(
-	dto *UserEntity, query fireback.QueryDSL,
-) (*UserEntity, *fireback.IError) {
+	dto *abacdefs.UserEntity, query fireback.QueryDSL,
+) (*abacdefs.UserEntity, *fireback.IError) {
 	query.WorkspaceId = "root"
+	// Setting query.WorkspaceId above has no effect on the stored row by itself - the
+	// generic EntityActionsBundle.Create this calls into (UserActions.Create) just does
+	// fireback.CreateEntity(*dto), which never reads query at all. Without also
+	// stamping dto.WorkspaceId directly, every user ever created through this
+	// function - not just UserCreateAction's own admin endpoint, but the shared
+	// signup/OS-login/OAuth path too (see UnsafeGenerateUser) - got a permanently null
+	// workspaceId, making them invisible to UserBrowseAction's workspace-scoped query
+	// (confirmed empirically: /user/browse reported totalItems:1 for a single-user dev
+	// database but returned zero actual items).
+	if dto != nil {
+		dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	}
 	return UserActions.Create(dto, query)
 }
 
 func UserActionUpdate(
 	query fireback.QueryDSL,
-	fields *UserEntity,
-) (*UserEntity, *fireback.IError) {
+	fields *abacdefs.UserEntity,
+) (*abacdefs.UserEntity, *fireback.IError) {
 	return UserActions.Update(query, fields)
 }
 
@@ -395,10 +414,10 @@ var addresses = []sampleAddress{
 	{"SA", "Riyadh", "Riyadh", "Olaya St 234", "Floor 6", "12211"},
 }
 
-func RandomUserPrimaryAddress() *UserEntityPrimaryAddress {
+func RandomUserPrimaryAddress() *abacdefs.UserEntityPrimaryAddress {
 	rand.Seed(time.Now().UnixNano())
 	s := addresses[rand.Intn(len(addresses))]
-	return &UserEntityPrimaryAddress{
+	return &abacdefs.UserEntityPrimaryAddress{
 		AddressLine1:    (s.Address1),
 		AddressLine2:    emigo.NullableOf(s.Address2),
 		City:            emigo.NullableOf(s.City),
@@ -410,8 +429,8 @@ func RandomUserPrimaryAddress() *UserEntityPrimaryAddress {
 
 func init() {
 
-	UserActions.SeederInit = func() *UserEntity {
-		return &UserEntity{
+	UserActions.SeederInit = func() *abacdefs.UserEntity {
+		return &abacdefs.UserEntity{
 			FirstName:      getRandomName(firstNames),
 			LastName:       getRandomName(lastNames),
 			BirthDate:      complexes.XDate((getRandomBirthDate())),

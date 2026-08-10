@@ -10,14 +10,15 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	reactivesearchdefs "github.com/torabian/fireback/modules/reactivesearch/defs"
 )
 
-// collect drains a chan *ReactiveSearchResultDto until it's closed or the deadline
+// collect drains a chan *reactivesearchdefs.ReactiveSearchResultDto until it's closed or the deadline
 // passes, returning whatever arrived.
-func collect(t *testing.T, ch chan *ReactiveSearchResultDto) []*ReactiveSearchResultDto {
+func collect(t *testing.T, ch chan *reactivesearchdefs.ReactiveSearchResultDto) []*reactivesearchdefs.ReactiveSearchResultDto {
 	t.Helper()
 
-	var got []*ReactiveSearchResultDto
+	var got []*reactivesearchdefs.ReactiveSearchResultDto
 	deadline := time.After(2 * time.Second)
 	for {
 		select {
@@ -37,15 +38,15 @@ func collect(t *testing.T, ch chan *ReactiveSearchResultDto) []*ReactiveSearchRe
 // provider gets called and everything each one streams back ends up on the merged
 // channel, regardless of how many results each one sends or how long it takes.
 func TestRunSearchProviders_MergesResultsFromAllProviders(t *testing.T) {
-	menus := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
-		out <- &ReactiveSearchResultDto{UniqueId: "menu-1", Group: "menus"}
-		out <- &ReactiveSearchResultDto{UniqueId: "menu-2", Group: "menus"}
+	menus := func(query fireback.QueryDSL, out chan *reactivesearchdefs.ReactiveSearchResultDto) {
+		out <- &reactivesearchdefs.ReactiveSearchResultDto{UniqueId: "menu-1", Group: "menus"}
+		out <- &reactivesearchdefs.ReactiveSearchResultDto{UniqueId: "menu-2", Group: "menus"}
 	}
-	roles := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+	roles := func(query fireback.QueryDSL, out chan *reactivesearchdefs.ReactiveSearchResultDto) {
 		time.Sleep(10 * time.Millisecond) // slower provider must not block/drop the others
-		out <- &ReactiveSearchResultDto{UniqueId: "role-1", Group: "roles"}
+		out <- &reactivesearchdefs.ReactiveSearchResultDto{UniqueId: "role-1", Group: "roles"}
 	}
-	empty := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+	empty := func(query fireback.QueryDSL, out chan *reactivesearchdefs.ReactiveSearchResultDto) {
 		// Finds nothing - must not stop the channel from eventually closing.
 	}
 
@@ -81,7 +82,7 @@ func TestRunSearchProviders_ClosesWithNoProviders(t *testing.T) {
 // the query runSearchProviders was given (e.g. SearchPhrase), not a zero value.
 func TestRunSearchProviders_PassesQueryThrough(t *testing.T) {
 	seen := make(chan string, 1)
-	provider := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+	provider := func(query fireback.QueryDSL, out chan *reactivesearchdefs.ReactiveSearchResultDto) {
 		seen <- query.SearchPhrase
 	}
 
@@ -100,19 +101,19 @@ func TestRunSearchProviders_PassesQueryThrough(t *testing.T) {
 // TestAdaptResultsToBytes_EncodesEachResult verifies each result gets JSON-encoded
 // individually onto the byte channel, preserving a single provider's own order.
 func TestAdaptResultsToBytes_EncodesEachResult(t *testing.T) {
-	in := make(chan *ReactiveSearchResultDto, 2)
-	in <- &ReactiveSearchResultDto{UniqueId: "1", Phrase: "first"}
-	in <- &ReactiveSearchResultDto{UniqueId: "2", Phrase: "second"}
+	in := make(chan *reactivesearchdefs.ReactiveSearchResultDto, 2)
+	in <- &reactivesearchdefs.ReactiveSearchResultDto{UniqueId: "1", Phrase: "first"}
+	in <- &reactivesearchdefs.ReactiveSearchResultDto{UniqueId: "2", Phrase: "second"}
 	close(in)
 
 	out := AdaptResultsToBytes(in)
 
-	var got []ReactiveSearchResultDto
+	var got []reactivesearchdefs.ReactiveSearchResultDto
 	deadline := time.After(2 * time.Second)
 	for i := 0; i < 2; i++ {
 		select {
 		case b := <-out:
-			var r ReactiveSearchResultDto
+			var r reactivesearchdefs.ReactiveSearchResultDto
 			if err := json.Unmarshal(b, &r); err != nil {
 				t.Fatalf("decoding %q: %v", b, err)
 			}
@@ -143,7 +144,7 @@ func TestCreateReactiveSearchHandler_UsesProvidedAuthorize(t *testing.T) {
 	}
 
 	seenPhrase := make(chan string, 1)
-	provider := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+	provider := func(query fireback.QueryDSL, out chan *reactivesearchdefs.ReactiveSearchResultDto) {
 		seenPhrase <- query.SearchPhrase
 	}
 
@@ -152,7 +153,7 @@ func TestCreateReactiveSearchHandler_UsesProvidedAuthorize(t *testing.T) {
 	// A pure-function Authorize like this one never needs to touch the socket - only
 	// the underlying Socket type has to satisfy GetSocket's assertion for the
 	// success path to reach runSearchProviders.
-	out, err := handler(ReactiveSearchActionSession{Socket: (*websocket.Conn)(nil)})
+	out, err := handler(reactivesearchdefs.ReactiveSearchActionSession{Socket: (*websocket.Conn)(nil)})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -180,7 +181,7 @@ func TestCreateReactiveSearchHandler_UsesProvidedAuthorize(t *testing.T) {
 func TestCreateReactiveSearchHandler_PropagatesAuthorizeError(t *testing.T) {
 	wantErr := errors.New("nope")
 	called := false
-	provider := func(query fireback.QueryDSL, out chan *ReactiveSearchResultDto) {
+	provider := func(query fireback.QueryDSL, out chan *reactivesearchdefs.ReactiveSearchResultDto) {
 		called = true
 	}
 
@@ -190,7 +191,7 @@ func TestCreateReactiveSearchHandler_PropagatesAuthorizeError(t *testing.T) {
 
 	// Socket/Ctx are deliberately left unset (nil interfaces) - if the handler
 	// tried to use them before returning the error, this would panic.
-	_, err := handler(ReactiveSearchActionSession{})
+	_, err := handler(reactivesearchdefs.ReactiveSearchActionSession{})
 	if !errors.Is(err, wantErr) {
 		t.Fatalf("expected Authorize's error to propagate, got %v", err)
 	}
@@ -204,7 +205,7 @@ func TestCreateReactiveSearchHandler_PropagatesAuthorizeError(t *testing.T) {
 // search never runs over CLI).
 func TestReactiveSearchRequestContext_AdaptsSession(t *testing.T) {
 	fakeCtx := "stand-in for a *gin.Context"
-	session := &ReactiveSearchActionSession{Ctx: fakeCtx}
+	session := &reactivesearchdefs.ReactiveSearchActionSession{Ctx: fakeCtx}
 	adapter := reactiveSearchRequestContext{session: session}
 
 	if adapter.GetGinCtx() != interface{}(fakeCtx) {
@@ -221,7 +222,7 @@ func TestReactiveSearchRequestContext_AdaptsSession(t *testing.T) {
 // matching fireback.ResolveActionContext's own documented behavior for a nilish
 // context.
 func TestDefaultAuthorize_NoGinContext(t *testing.T) {
-	query, err := defaultAuthorize(reactiveSearchRequestContext{session: &ReactiveSearchActionSession{}})
+	query, err := defaultAuthorize(reactiveSearchRequestContext{session: &reactivesearchdefs.ReactiveSearchActionSession{}})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

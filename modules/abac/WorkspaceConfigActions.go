@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"gorm.io/gorm"
@@ -38,7 +39,7 @@ var ALL_WORKSPACE_CONFIG_PERMISSIONS = append(
 	PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE,
 )
 
-var WorkspaceConfigActions = NewEntityActionsBundle[WorkspaceConfigEntity]()
+var WorkspaceConfigActions = NewEntityActionsBundle[abacdefs.WorkspaceConfigEntity]()
 
 func workspaceConfigSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
@@ -48,7 +49,7 @@ func workspaceConfigSecurity(perm application.PermissionInfo) *fireback.Security
 	}
 }
 
-func WorkspaceConfigBrowseAction(c WorkspaceConfigBrowseActionRequest) (*WorkspaceConfigBrowseActionResponse, error) {
+func WorkspaceConfigBrowseAction(c abacdefs.WorkspaceConfigBrowseActionRequest) (*abacdefs.WorkspaceConfigBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_QUERY))
 	if err != nil {
 		return nil, err
@@ -57,10 +58,10 @@ func WorkspaceConfigBrowseAction(c WorkspaceConfigBrowseActionRequest) (*Workspa
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceConfigBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.WorkspaceConfigBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func WorkspaceConfigGetAction(c WorkspaceConfigGetActionRequest) (*WorkspaceConfigGetActionResponse, error) {
+func WorkspaceConfigGetAction(c abacdefs.WorkspaceConfigGetActionRequest) (*abacdefs.WorkspaceConfigGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_QUERY))
 	if err != nil {
 		return nil, err
@@ -70,15 +71,15 @@ func WorkspaceConfigGetAction(c WorkspaceConfigGetActionRequest) (*WorkspaceConf
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceConfigGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.WorkspaceConfigGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func WorkspaceConfigCreateAction(c WorkspaceConfigCreateActionRequest) (*WorkspaceConfigCreateActionResponse, error) {
+func WorkspaceConfigCreateAction(c abacdefs.WorkspaceConfigCreateActionRequest) (*abacdefs.WorkspaceConfigCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_CREATE))
 	if err != nil {
 		return nil, err
 	}
-	entity := &WorkspaceConfigEntity{
+	entity := &abacdefs.WorkspaceConfigEntity{
 		EnableRecaptcha2:           c.Body.EnableRecaptcha2,
 		EnableOtp:                  c.Body.EnableOtp,
 		RequireOtpOnSignup:         c.Body.RequireOtpOnSignup,
@@ -100,13 +101,13 @@ func WorkspaceConfigCreateAction(c WorkspaceConfigCreateActionRequest) (*Workspa
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceConfigCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.WorkspaceConfigCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
 // workspaceConfigChangesFromOptionalDto turns whichever fields are actually set on body
 // into a gorm .Updates()-ready map - shared by every WorkspaceConfig update path
 // (per-workspace and the root-only /distinct one below).
-func workspaceConfigChangesFromOptionalDto(body WorkspaceConfigOptionalDto) map[string]interface{} {
+func workspaceConfigChangesFromOptionalDto(body abacdefs.WorkspaceConfigOptionalDto) map[string]interface{} {
 	changes := map[string]interface{}{}
 	if v, ok := body.EnableRecaptcha2.Get(); ok {
 		changes["EnableRecaptcha2"] = emigo.NullableOf(*v)
@@ -160,11 +161,11 @@ func workspaceConfigChangesFromOptionalDto(body WorkspaceConfigOptionalDto) map[
 // workspace in the old yaml) behind WorkspaceConfigUpdateAction - Query.WorkspaceId
 // (resolved from ResolveStrategy: workspace) is the condition for finding-or-creating the
 // row, not a uniqueId path param.
-func workspaceConfigUpsertByWorkspace(query fireback.QueryDSL, body WorkspaceConfigOptionalDto) (*WorkspaceConfigEntity, *fireback.IError) {
+func workspaceConfigUpsertByWorkspace(query fireback.QueryDSL, body abacdefs.WorkspaceConfigOptionalDto) (*abacdefs.WorkspaceConfigEntity, *fireback.IError) {
 	dbref := fireback.GetDbRef()
-	var item WorkspaceConfigEntity
+	var item abacdefs.WorkspaceConfigEntity
 	if err2 := dbref.
-		Where(&WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
+		Where(&abacdefs.WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
 		FirstOrCreate(&item).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
@@ -176,14 +177,14 @@ func workspaceConfigUpsertByWorkspace(query fireback.QueryDSL, body WorkspaceCon
 		}
 	}
 
-	var updated WorkspaceConfigEntity
+	var updated abacdefs.WorkspaceConfigEntity
 	if err2 := dbref.Where("id = ?", item.Id).First(&updated).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
 	return &updated, nil
 }
 
-func WorkspaceConfigUpdateAction(c WorkspaceConfigUpdateActionRequest) (*WorkspaceConfigUpdateActionResponse, error) {
+func WorkspaceConfigUpdateAction(c abacdefs.WorkspaceConfigUpdateActionRequest) (*abacdefs.WorkspaceConfigUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_UPDATE))
 	if err != nil {
 		return nil, err
@@ -192,7 +193,7 @@ func WorkspaceConfigUpdateAction(c WorkspaceConfigUpdateActionRequest) (*Workspa
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.WorkspaceConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
 // WorkspaceConfigDistinctGetAction restores the old Module3-generated GET
@@ -202,23 +203,23 @@ func WorkspaceConfigUpdateAction(c WorkspaceConfigUpdateActionRequest) (*Workspa
 // WorkspaceConfigActions.GetByWorkspace (which filters by the caller's own
 // query.WorkspaceId) and queries workspace_id = 'root' directly via plain gorm instead.
 // No uniqueId is involved either way - the row is found purely by that filter. Returns
-// an empty WorkspaceConfigEntity (not a 404) when none exists yet, matching the old
+// an empty abacdefs.WorkspaceConfigEntity (not a 404) when none exists yet, matching the old
 // behavior.
-func WorkspaceConfigDistinctGetAction(c WorkspaceConfigDistinctGetActionRequest) (*WorkspaceConfigDistinctGetActionResponse, error) {
+func WorkspaceConfigDistinctGetAction(c abacdefs.WorkspaceConfigDistinctGetActionRequest) (*abacdefs.WorkspaceConfigDistinctGetActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_GET_DISTINCT_WORKSPACE)); err != nil {
 		return nil, err
 	}
 
-	var item WorkspaceConfigEntity
-	err2 := fireback.GetDbRef().Where(&WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(ROOT_VAR)}).First(&item).Error
+	var item abacdefs.WorkspaceConfigEntity
+	err2 := fireback.GetDbRef().Where(&abacdefs.WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(ROOT_VAR)}).First(&item).Error
 	if err2 != nil {
 		if errors.Is(err2, gorm.ErrRecordNotFound) {
-			return &WorkspaceConfigDistinctGetActionResponse{Payload: fireback.GResponseSingleItem(&WorkspaceConfigEntity{})}, nil
+			return &abacdefs.WorkspaceConfigDistinctGetActionResponse{Payload: fireback.GResponseSingleItem(&abacdefs.WorkspaceConfigEntity{})}, nil
 		}
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	return &WorkspaceConfigDistinctGetActionResponse{Payload: fireback.GResponseSingleItem(&item)}, nil
+	return &abacdefs.WorkspaceConfigDistinctGetActionResponse{Payload: fireback.GResponseSingleItem(&item)}, nil
 }
 
 // WorkspaceConfigDistinctUpdateAction restores the old Module3-generated PATCH
@@ -226,15 +227,15 @@ func WorkspaceConfigDistinctGetAction(c WorkspaceConfigDistinctGetActionRequest)
 // WorkspaceConfigDistinctGetAction above - always finds-or-creates the row scoped to the
 // root workspace specifically (workspace_id = 'root'), via plain gorm, regardless of the
 // caller's own current workspace, and needs no uniqueId to do it.
-func WorkspaceConfigDistinctUpdateAction(c WorkspaceConfigDistinctUpdateActionRequest) (*WorkspaceConfigDistinctUpdateActionResponse, error) {
+func WorkspaceConfigDistinctUpdateAction(c abacdefs.WorkspaceConfigDistinctUpdateActionRequest) (*abacdefs.WorkspaceConfigDistinctUpdateActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_UPDATE_DISTINCT_WORKSPACE)); err != nil {
 		return nil, err
 	}
 
 	db := fireback.GetDbRef()
-	var item WorkspaceConfigEntity
+	var item abacdefs.WorkspaceConfigEntity
 	if err2 := db.
-		Where(&WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(ROOT_VAR)}).
+		Where(&abacdefs.WorkspaceConfigEntity{WorkspaceId: emigo.NullableOf(ROOT_VAR)}).
 		FirstOrCreate(&item).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
@@ -246,32 +247,32 @@ func WorkspaceConfigDistinctUpdateAction(c WorkspaceConfigDistinctUpdateActionRe
 		}
 	}
 
-	var updated WorkspaceConfigEntity
+	var updated abacdefs.WorkspaceConfigEntity
 	if err2 := db.Where("id = ?", item.Id).First(&updated).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	return &WorkspaceConfigDistinctUpdateActionResponse{Payload: fireback.GResponseSingleItem(&updated)}, nil
+	return &abacdefs.WorkspaceConfigDistinctUpdateActionResponse{Payload: fireback.GResponseSingleItem(&updated)}, nil
 }
 
-func WorkspaceConfigAwareDeletePreviewAction(c WorkspaceConfigAwareDeletePreviewActionRequest) (*WorkspaceConfigAwareDeletePreviewActionResponse, error) {
+func WorkspaceConfigAwareDeletePreviewAction(c abacdefs.WorkspaceConfigAwareDeletePreviewActionRequest) (*abacdefs.WorkspaceConfigAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_DELETE)); err != nil {
 		return nil, err
 	}
-	uniqueIds := WorkspaceConfigAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := WorkspaceConfigEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.WorkspaceConfigAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.WorkspaceConfigEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WorkspaceConfigAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.WorkspaceConfigAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func WorkspaceConfigAwareDeleteAction(c WorkspaceConfigAwareDeleteActionRequest) (*WorkspaceConfigAwareDeleteActionResponse, error) {
+func WorkspaceConfigAwareDeleteAction(c abacdefs.WorkspaceConfigAwareDeleteActionRequest) (*abacdefs.WorkspaceConfigAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, workspaceConfigSecurity(PERM_ROOT_WORKSPACE_CONFIG_DELETE)); err != nil {
 		return nil, err
 	}
-	if err2 := WorkspaceConfigEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.WorkspaceConfigEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WorkspaceConfigAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.WorkspaceConfigAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

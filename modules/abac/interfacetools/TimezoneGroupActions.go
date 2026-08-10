@@ -3,6 +3,7 @@ package interfacetools
 import (
 	"reflect"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/abac/interfacetools/seeders/TimezoneGroup"
 	"github.com/torabian/fireback/modules/fireback"
 )
@@ -61,7 +62,14 @@ func TimezoneGroupCreateAction(c TimezoneGroupCreateActionRequest) (*TimezoneGro
 	if err != nil {
 		return nil, err
 	}
-	entity := &TimezoneGroupEntity{Title: c.Body.Title}
+	// Without this, the row is invisible to TimezoneGroupBrowseAction's workspace-scoped
+	// query (see GetSqlContext) - same workspace-stamping fix as
+	// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction.
+	entity := &TimezoneGroupEntity{
+		Title:       c.Body.Title,
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
+		UserId:      emigo.NullableOf(query.UserId),
+	}
 	created, err2 := TimezoneGroupActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2

@@ -10,10 +10,11 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func CheckClassicPassportAction(c CheckClassicPassportActionRequest) (*CheckClassicPassportActionResponse, error) {
+func CheckClassicPassportAction(c abacdefs.CheckClassicPassportActionRequest) (*abacdefs.CheckClassicPassportActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -25,7 +26,7 @@ func CheckClassicPassportAction(c CheckClassicPassportActionRequest) (*CheckClas
 
 // checkClassicPassportCore holds the actual implementation, reusable by callers which
 // already have a resolved QueryDSL (such as the cli-only AuthFlow).
-func checkClassicPassportCore(req CheckClassicPassportActionReq, query fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
+func checkClassicPassportCore(req abacdefs.CheckClassicPassportActionReq, query fireback.QueryDSL) (*abacdefs.CheckClassicPassportActionRes, *fireback.IError) {
 	if err := validateValueFormat(req.Value); err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func checkClassicPassportCore(req CheckClassicPassportActionReq, query fireback.
 	}
 }
 
-func wrapCheckPassportResult(res *CheckClassicPassportActionRes, err *fireback.IError) (*CheckClassicPassportActionResponse, error) {
+func wrapCheckPassportResult(res *abacdefs.CheckClassicPassportActionRes, err *fireback.IError) (*abacdefs.CheckClassicPassportActionResponse, error) {
 	// err is a concrete *fireback.IError; returning it directly as the built-in error
 	// interface would wrap a nil pointer in a non-nil interface value on success (the
 	// classic Go typed-nil-in-interface gotcha), making every successful call still
@@ -56,15 +57,15 @@ func wrapCheckPassportResult(res *CheckClassicPassportActionRes, err *fireback.I
 	if err != nil {
 		return nil, err
 	}
-	return &CheckClassicPassportActionResponse{
+	return &abacdefs.CheckClassicPassportActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 
 // in some operations, the only option is otp either on signin or signup.
 // so we send the otp anyway, and next step can be immediately signup.
-func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckClassicPassportActionResOtpInfo, *fireback.IError) {
-	otpResponse, otpFailed := classicPassportRequestOtpCore(ClassicPassportRequestOtpActionReq{Value: passportValue}, q)
+func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*abacdefs.CheckClassicPassportActionResOtpInfo, *fireback.IError) {
+	otpResponse, otpFailed := classicPassportRequestOtpCore(abacdefs.ClassicPassportRequestOtpActionReq{Value: passportValue}, q)
 
 	// No point of continuing if the type doesn't support otp
 	if otpFailed != nil {
@@ -74,7 +75,7 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 	}
 
 	if otpResponse != nil {
-		otpInfo := &CheckClassicPassportActionResOtpInfo{
+		otpInfo := &abacdefs.CheckClassicPassportActionResOtpInfo{
 			SuspendUntil:     otpResponse.SuspendUntil,
 			ValidUntil:       otpResponse.ValidUntil,
 			BlockedUntil:     otpResponse.BlockedUntil,
@@ -94,10 +95,10 @@ func implicitlyRequestForOtp(passportValue string, q fireback.QueryDSL) (*CheckC
 	return nil, otpFailed
 }
 
-func findPassport(value string, q fireback.QueryDSL) *PassportEntity {
-	var passport *PassportEntity
+func findPassport(value string, q fireback.QueryDSL) *abacdefs.PassportEntity {
+	var passport *abacdefs.PassportEntity
 	if err := fireback.GetRef(q).
-		Model(&PassportEntity{}).Where(&PassportEntity{Value: value}).
+		Model(&abacdefs.PassportEntity{}).Where(&abacdefs.PassportEntity{Value: value}).
 		First(&passport).Error; err == nil && passport.Value != "" {
 		if passport.Value == value {
 			return passport
@@ -120,7 +121,7 @@ func validateValueFormat(value string) *fireback.IError {
 }
 
 // Some general tests and preparation which doesn't affect logic much
-func prepareTheClassicPassport(req *CheckClassicPassportActionReq, q fireback.QueryDSL) (*WorkspaceConfigEntity, *fireback.IError) {
+func prepareTheClassicPassport(req *abacdefs.CheckClassicPassportActionReq, q fireback.QueryDSL) (*abacdefs.WorkspaceConfigEntity, *fireback.IError) {
 	if err := fireback.CommonStructValidatorPointer(req, false); err != nil {
 		return nil, err
 	}
@@ -186,8 +187,8 @@ func validatePassportType(input string) (bool, string) {
 }
 
 // used when a passport (email/phone) exists and they want to authenticate
-func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
-	res := &CheckClassicPassportActionRes{}
+func checkStepsForExistingAccount(passport *abacdefs.PassportEntity, config *abacdefs.WorkspaceConfigEntity, q fireback.QueryDSL) (*abacdefs.CheckClassicPassportActionRes, *fireback.IError) {
+	res := &abacdefs.CheckClassicPassportActionRes{}
 
 	// if otp is forced, then user can only authenticate using otp.
 	// basically password and 2FA for signin will become useless, because the otp
@@ -242,8 +243,8 @@ func checkStepsForExistingAccount(passport *PassportEntity, config *WorkspaceCon
 	return res, nil
 }
 
-func checkStepsForNonExistingAccount(value string, config *WorkspaceConfigEntity, q fireback.QueryDSL) (*CheckClassicPassportActionRes, *fireback.IError) {
-	res := &CheckClassicPassportActionRes{}
+func checkStepsForNonExistingAccount(value string, config *abacdefs.WorkspaceConfigEntity, q fireback.QueryDSL) (*abacdefs.CheckClassicPassportActionRes, *fireback.IError) {
+	res := &abacdefs.CheckClassicPassportActionRes{}
 
 	enableTotp := config != nil && config.EnableTotp.OrDefault(false)
 	forceTotp := config != nil && config.ForceTotp.OrDefault(false)

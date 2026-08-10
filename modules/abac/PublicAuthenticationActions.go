@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -17,9 +18,9 @@ var PERM_ROOT_PUBLIC_AUTHENTICATION_UPDATE = publicAuthenticationPerms.Update
 var PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE = publicAuthenticationPerms.Delete
 var ALL_PUBLIC_AUTHENTICATION_PERMISSIONS = publicAuthenticationPerms.All
 
-var PublicAuthenticationActions = NewEntityActionsBundle[PublicAuthenticationEntity]()
+var PublicAuthenticationActions = NewEntityActionsBundle[abacdefs.PublicAuthenticationEntity]()
 
-func PublicAuthenticationBrowseAction(c PublicAuthenticationBrowseActionRequest) (*PublicAuthenticationBrowseActionResponse, error) {
+func PublicAuthenticationBrowseAction(c abacdefs.PublicAuthenticationBrowseActionRequest) (*abacdefs.PublicAuthenticationBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY}})
 	if err != nil {
 		return nil, err
@@ -28,10 +29,10 @@ func PublicAuthenticationBrowseAction(c PublicAuthenticationBrowseActionRequest)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicAuthenticationBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.PublicAuthenticationBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func PublicAuthenticationGetAction(c PublicAuthenticationGetActionRequest) (*PublicAuthenticationGetActionResponse, error) {
+func PublicAuthenticationGetAction(c abacdefs.PublicAuthenticationGetActionRequest) (*abacdefs.PublicAuthenticationGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_QUERY}})
 	if err != nil {
 		return nil, err
@@ -41,15 +42,15 @@ func PublicAuthenticationGetAction(c PublicAuthenticationGetActionRequest) (*Pub
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicAuthenticationGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.PublicAuthenticationGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func PublicAuthenticationCreateAction(c PublicAuthenticationCreateActionRequest) (*PublicAuthenticationCreateActionResponse, error) {
+func PublicAuthenticationCreateAction(c abacdefs.PublicAuthenticationCreateActionRequest) (*abacdefs.PublicAuthenticationCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
-	entity := &PublicAuthenticationEntity{
+	entity := &abacdefs.PublicAuthenticationEntity{
 		UserId:              c.Body.UserId,
 		TotpSecret:          c.Body.TotpSecret,
 		TotpLink:            c.Body.TotpLink,
@@ -67,16 +68,16 @@ func PublicAuthenticationCreateAction(c PublicAuthenticationCreateActionRequest)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicAuthenticationCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.PublicAuthenticationCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func PublicAuthenticationUpdateAction(c PublicAuthenticationUpdateActionRequest) (*PublicAuthenticationUpdateActionResponse, error) {
+func PublicAuthenticationUpdateAction(c abacdefs.PublicAuthenticationUpdateActionRequest) (*abacdefs.PublicAuthenticationUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &PublicAuthenticationEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.PublicAuthenticationEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.UserId.Get(); ok {
 		fields.UserId = emigo.NullableOf(*v)
 	}
@@ -117,27 +118,27 @@ func PublicAuthenticationUpdateAction(c PublicAuthenticationUpdateActionRequest)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicAuthenticationUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.PublicAuthenticationUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func PublicAuthenticationAwareDeletePreviewAction(c PublicAuthenticationAwareDeletePreviewActionRequest) (*PublicAuthenticationAwareDeletePreviewActionResponse, error) {
+func PublicAuthenticationAwareDeletePreviewAction(c abacdefs.PublicAuthenticationAwareDeletePreviewActionRequest) (*abacdefs.PublicAuthenticationAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := PublicAuthenticationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := PublicAuthenticationEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.PublicAuthenticationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.PublicAuthenticationEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PublicAuthenticationAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.PublicAuthenticationAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func PublicAuthenticationAwareDeleteAction(c PublicAuthenticationAwareDeleteActionRequest) (*PublicAuthenticationAwareDeleteActionResponse, error) {
+func PublicAuthenticationAwareDeleteAction(c abacdefs.PublicAuthenticationAwareDeleteActionRequest) (*abacdefs.PublicAuthenticationAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_AUTHENTICATION_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := PublicAuthenticationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.PublicAuthenticationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PublicAuthenticationAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.PublicAuthenticationAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

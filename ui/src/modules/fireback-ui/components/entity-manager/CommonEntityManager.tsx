@@ -116,10 +116,23 @@ export const CommonEntityManager = ({
           Toast(s.components.done, { type: "success" });
         }
       }
-      if (response.error) {
-        formik.current.setErrors(
-          mutationErrorsToFormik(response.error.toJSON()),
-        );
+      // Bug fix: response.error is never actually undefined/null - ResponseDto's
+      // constructor (#lateInitFields, see the generated envelope class) always
+      // instantiates a ResponseDto.Error, even on a fully successful response, so
+      // `if (response.error)` was always true. The real signal that the request
+      // failed is whether that error object actually carries content. Also,
+      // mutationErrorsToFormik (see hooks/api.ts) expects the shape it's usually
+      // called with elsewhere - `{ error: { message, messageTranslated, errors } }` -
+      // but response.error.toJSON() IS already that inner `error` object, one level
+      // unwrapped too many. Passed directly, mutationErrorsToFormik's own
+      // `errors.error.errors`/`errors.error.messageTranslated` lookups always missed,
+      // so per-field errors (mainSenderNumber/type/etc. - every entity form's
+      // required-field validation) never reached the form, and the untranslated
+      // "$"-code (e.g. "ValidationFailedOnSomeFields") showed instead of the
+      // resolved message.
+      const errorInfo = response.error?.toJSON?.() ?? response.error;
+      if (errorInfo?.message || errorInfo?.messageTranslated || errorInfo?.errors?.length) {
+        formik.current.setErrors(mutationErrorsToFormik({ error: errorInfo }));
       }
     }).catch((err) => httpErrorHanlder(err, s));
   };

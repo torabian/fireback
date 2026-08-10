@@ -1,15 +1,18 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
-func UserSigninEmailAndPasswordValidator(dto *EmailAccountSigninDto, isPatch bool) *fireback.IError {
+func UserSigninEmailAndPasswordValidator(dto *abacdefs.EmailAccountSigninDto, isPatch bool) *fireback.IError {
 	return fireback.CommonStructValidatorPointer(dto, isPatch)
 }
 
-func UserWithEmailAndPasswordValidator(dto *ClassicAuthDto, isPatch bool) *fireback.IError {
+func UserWithEmailAndPasswordValidator(dto *abacdefs.ClassicAuthDto, isPatch bool) *fireback.IError {
 	return fireback.CommonStructValidatorPointer(dto, isPatch)
 }
 
-func UserWithPhoneValidator(dto PhoneNumberAccountCreationDto, isPatch bool) *fireback.IError {
+func UserWithPhoneValidator(dto abacdefs.PhoneNumberAccountCreationDto, isPatch bool) *fireback.IError {
 	return fireback.CommonStructValidatorPointer(&dto, isPatch)
 }

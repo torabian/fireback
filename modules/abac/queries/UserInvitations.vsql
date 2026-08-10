@@ -1,14 +1,14 @@
---- Generated VSQL file. Do not modify directly, check yaml definition instead 
+--- Generated VSQL file. Do not modify directly, check yaml definition instead
 {{ define "content" }}
-SELECT 
-  passport_entities.`value`,
-  passport_entities.`type`,
+SELECT
+  passport_entities.value,
+  passport_entities.type,
   passport_entities.user_id,
   workspace_invite_entities.unique_id,
   workspace_invite_entities.role_id,
   workspace_invite_entities.cover_letter,
-  role_entities.name AS `role_name`,
-  workspace_entities.name as `workspace_name`
+  role_entities.name AS role_name,
+  workspace_entities.name as workspace_name
 FROM  workspace_invite_entities
 LEFT JOIN passport_entities ON 
   workspace_invite_entities.{{ . }} = passport_entities.value 

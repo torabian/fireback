@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 )
@@ -15,7 +16,7 @@ import (
 // Before creating each token, we are looking for existing token in the database
 // and if it exists and is still valid for that specific user,
 // we skip generating new one.
-func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
+func AuthorizeWithToken(x *abacdefs.UserEntity, q fireback.QueryDSL) (string, error) {
 	appConfig := fireback.GetConfig()
 
 	ref := fireback.GetRef(q)
@@ -68,7 +69,7 @@ func (x *UserEntity) AuthorizeWithToken(q fireback.QueryDSL) (string, error) {
 	// }
 
 	until := complexes.XDateTimeFromTime(time.Now().Add(time.Minute * time.Duration(2)))
-	token := &TokenEntity{
+	token := &abacdefs.TokenEntity{
 		UniqueId:    fireback.UUID(),
 		UserId:      emigo.NullableOf(x.UniqueId),
 		Token:       tokenString,

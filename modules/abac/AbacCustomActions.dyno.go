@@ -8,6 +8,7 @@ package abac
 import (
 	"reflect"
 
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
@@ -41,18 +42,18 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 		interfacetools.AppMenuCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),
-		RoleBrowseActionCliHandler(RoleBrowseAction),
-		RoleGetActionCliHandler(RoleGetAction),
-		RoleCreateActionCliHandler(RoleCreateAction),
-		RoleUpdateActionCliHandler(RoleUpdateAction),
-		RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
-		RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
-		WorkspaceTypeBrowseActionCliHandler(WorkspaceTypeBrowseAction),
-		WorkspaceTypeGetActionCliHandler(WorkspaceTypeGetAction),
-		WorkspaceTypeCreateActionCliHandler(WorkspaceTypeCreateAction),
-		WorkspaceTypeUpdateActionCliHandler(WorkspaceTypeUpdateAction),
-		WorkspaceTypeAwareDeletePreviewActionCliHandler(WorkspaceTypeAwareDeletePreviewAction),
-		WorkspaceTypeAwareDeleteActionCliHandler(WorkspaceTypeAwareDeleteAction),
+		abacdefs.RoleBrowseActionCliHandler(RoleBrowseAction),
+		abacdefs.RoleGetActionCliHandler(RoleGetAction),
+		abacdefs.RoleCreateActionCliHandler(RoleCreateAction),
+		abacdefs.RoleUpdateActionCliHandler(RoleUpdateAction),
+		abacdefs.RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
+		abacdefs.RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
+		abacdefs.WorkspaceTypeBrowseActionCliHandler(WorkspaceTypeBrowseAction),
+		abacdefs.WorkspaceTypeGetActionCliHandler(WorkspaceTypeGetAction),
+		abacdefs.WorkspaceTypeCreateActionCliHandler(WorkspaceTypeCreateAction),
+		abacdefs.WorkspaceTypeUpdateActionCliHandler(WorkspaceTypeUpdateAction),
+		abacdefs.WorkspaceTypeAwareDeletePreviewActionCliHandler(WorkspaceTypeAwareDeletePreviewAction),
+		abacdefs.WorkspaceTypeAwareDeleteActionCliHandler(WorkspaceTypeAwareDeleteAction),
 		&PassportCli,
 	},
 }

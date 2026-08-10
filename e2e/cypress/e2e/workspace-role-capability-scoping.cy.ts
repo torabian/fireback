@@ -145,7 +145,12 @@ describe("Workspace role capability scoping (capabilities -> roles -> workspace 
     });
 
     cy.visit(ui("/manage/#/en/welcome"));
-    cy.get("#using-email").should("exist").click();
+    // Unlike login.cy.js (which seeds both email and phone, so the picker stays up and
+    // #using-email is clickable), this spec's earlier `it` only creates the email
+    // passport method - Welcome.presenter.tsx's useEffect auto-selects the single
+    // available method and pushes straight to /selfservice/email, without ever
+    // rendering the #using-email picker button. Wait for that redirect instead.
+    cy.url({ timeout: 10000 }).should("include", "/selfservice/email");
     cy.get("#value-input").type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
 
@@ -166,7 +171,10 @@ describe("Workspace role capability scoping (capabilities -> roles -> workspace 
     // Signing out goes through a plain window.confirm() (CurrentUser.tsx) - Cypress
     // auto-accepts that by default, no stub needed.
     cy.contains(".nav-link", "Sign out").click();
-    cy.get("h1", { timeout: 10000 }).should("have.text", "Welcome back");
+    // Same single-method auto-redirect as the earlier /welcome visit above - signing out
+    // lands back on /welcome, which immediately pushes on to /selfservice/email since
+    // email is still the only enabled passport method, so "Welcome back" never renders.
+    cy.get("h1", { timeout: 10000 }).should("have.text", "Continue with Email");
   });
 
   // --- Workspace types, one per role, created via the CLI (same mechanism already

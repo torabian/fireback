@@ -6,7 +6,6 @@ package storage
 *	Checkout the repository for licenses and contribution: https://github.com/torabian/fireback
  */
 import (
-	"embed"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,9 +13,6 @@ import (
 	"github.com/torabian/fireback/modules/storage/migrations"
 	"github.com/urfave/cli/v3"
 )
-
-//go:embed *Module3.yml
-var Module3Definitions embed.FS
 
 type StorageModuleConfig struct {
 	// MountPoint, if set, prefixes both UploadsBasePath and
@@ -98,8 +94,7 @@ type StorageModuleConfig struct {
 
 func StorageModuleSetup(cfg *StorageModuleConfig) *application.ModuleProvider {
 	module := &application.ModuleProvider{
-		Name:        "storage",
-		Definitions: &Module3Definitions,
+		Name: "storage",
 		CliHandlers: []*cli.Command{
 			{
 				Name: "storage",

@@ -6,12 +6,13 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
+	reactivesearchdefs "github.com/torabian/fireback/modules/reactivesearch/defs"
 )
 
 // SearchProviderFn is one search source ReactiveSearchModuleConfig.SearchProviders can
 // register - it streams its own results (if any) for query.SearchPhrase into
 // chanStream, and returns once it's done searching.
-type SearchProviderFn = func(query fireback.QueryDSL, chanStream chan *ReactiveSearchResultDto)
+type SearchProviderFn = func(query fireback.QueryDSL, chanStream chan *reactivesearchdefs.ReactiveSearchResultDto)
 
 // AuthorizeReactiveSearchFn resolves/authorizes an incoming reactive search request,
 // returning the QueryDSL SearchProviderFn handlers get called with. It's handed
@@ -30,7 +31,7 @@ type AuthorizeReactiveSearchFn func(req emigo.EmiRequestContexts) (fireback.Quer
 // search only ever runs over a live gin websocket connection, never CLI, so
 // GetCliCtx is always nil.
 type reactiveSearchRequestContext struct {
-	session *ReactiveSearchActionSession
+	session *reactivesearchdefs.ReactiveSearchActionSession
 }
 
 func (r reactiveSearchRequestContext) GetGinCtx() interface{} { return r.session.Ctx }
@@ -59,14 +60,14 @@ func defaultAuthorize(req emigo.EmiRequestContexts) (fireback.QueryDSL, error) {
 // (runSearchProviders) so the fan-out - the part with real logic worth testing - can
 // be tested without a live server; see ReactiveSearch_test.go.
 func createReactiveSearchHandler(providers []SearchProviderFn, authorize AuthorizeReactiveSearchFn) func(
-	session ReactiveSearchActionSession,
+	session reactivesearchdefs.ReactiveSearchActionSession,
 ) (chan []byte, error) {
 	if authorize == nil {
 		authorize = defaultAuthorize
 	}
 
 	return func(
-		session ReactiveSearchActionSession,
+		session reactivesearchdefs.ReactiveSearchActionSession,
 	) (chan []byte, error) {
 		query, err := authorize(reactiveSearchRequestContext{session: &session})
 		if err != nil {
@@ -84,8 +85,8 @@ func createReactiveSearchHandler(providers []SearchProviderFn, authorize Authori
 // each one streams back onto a single channel that's closed once they've all
 // finished. A provider that finds nothing (or panics/blocks forever) never stops the
 // others from being asked or from reporting what they found.
-func runSearchProviders(query fireback.QueryDSL, providers []SearchProviderFn) chan *ReactiveSearchResultDto {
-	resultChan := make(chan *ReactiveSearchResultDto)
+func runSearchProviders(query fireback.QueryDSL, providers []SearchProviderFn) chan *reactivesearchdefs.ReactiveSearchResultDto {
+	resultChan := make(chan *reactivesearchdefs.ReactiveSearchResultDto)
 
 	go func() {
 		var wg sync.WaitGroup
@@ -107,7 +108,7 @@ func runSearchProviders(query fireback.QueryDSL, providers []SearchProviderFn) c
 	return resultChan
 }
 
-func AdaptResultsToBytes(input chan *ReactiveSearchResultDto) chan []byte {
+func AdaptResultsToBytes(input chan *reactivesearchdefs.ReactiveSearchResultDto) chan []byte {
 	out := make(chan []byte)
 
 	go func() {

@@ -2,6 +2,7 @@ package eventbus
 
 import (
 	"github.com/gin-gonic/gin"
+	eventbusdefs "github.com/torabian/fireback/modules/eventbus/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -45,8 +46,8 @@ func ModuleSetup(cfg *EventBusModuleConfig) *application.ModuleProvider {
 
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				meta := EventBusSubscriptionActionMeta()
-				g.GET(meta.URL, EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
+				meta := eventbusdefs.EventBusSubscriptionActionMeta()
+				g.GET(meta.URL, eventbusdefs.EventBusSubscriptionActionReactiveHandler(EventBusSubscriptionActionSig))
 				return nil
 			},
 		},

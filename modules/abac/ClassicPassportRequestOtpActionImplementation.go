@@ -6,11 +6,12 @@ import (
 
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest) (*ClassicPassportRequestOtpActionResponse, error) {
+func ClassicPassportRequestOtpAction(c abacdefs.ClassicPassportRequestOtpActionRequest) (*abacdefs.ClassicPassportRequestOtpActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -21,14 +22,14 @@ func ClassicPassportRequestOtpAction(c ClassicPassportRequestOtpActionRequest) (
 		return nil, err2
 	}
 
-	return &ClassicPassportRequestOtpActionResponse{
+	return &abacdefs.ClassicPassportRequestOtpActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 
 // classicPassportRequestOtpCore holds the actual implementation, reusable by callers
 // which already have a resolved QueryDSL (such as checkClassicPassportCore, or the cli-only AuthFlow).
-func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query fireback.QueryDSL) (*ClassicPassportRequestOtpActionRes, *fireback.IError) {
+func classicPassportRequestOtpCore(req abacdefs.ClassicPassportRequestOtpActionReq, query fireback.QueryDSL) (*abacdefs.ClassicPassportRequestOtpActionRes, *fireback.IError) {
 
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
@@ -36,18 +37,18 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 
 	var secondsToUnblock int64 = 120
 
-	var olderEntity *PublicAuthenticationEntity = nil
-	fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Find(&olderEntity)
+	var olderEntity *abacdefs.PublicAuthenticationEntity = nil
+	fireback.GetDbRef().Where(&abacdefs.PublicAuthenticationEntity{PassportValue: req.Value}).Find(&olderEntity)
 
 	if olderEntity != nil && time.Now().UnixNano() < olderEntity.BlockedUntil {
 		remaining := (olderEntity.BlockedUntil - time.Now().UnixNano()) / 1000000000
-		return &ClassicPassportRequestOtpActionRes{
+		return &abacdefs.ClassicPassportRequestOtpActionRes{
 			BlockedUntil:     olderEntity.BlockedUntil,
 			SecondsToUnblock: remaining,
 		}, fireback.Create401Error(&AbacMessages.OtaRequestBlockedUntil, []string{})
 	} else {
 		// Let's delete the record, to start the process fresh
-		fireback.GetDbRef().Where(&PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&PublicAuthenticationEntity{})
+		fireback.GetDbRef().Where(&abacdefs.PublicAuthenticationEntity{PassportValue: req.Value}).Delete(&abacdefs.PublicAuthenticationEntity{})
 	}
 
 	passport, user, err := UnsafeGetUserByPassportValue(req.Value, query)
@@ -64,7 +65,7 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 	url := "http://localhost:8888/reset-password?session=" + uid
 	secret := fireback.UUID_Long() + "." + fireback.UUID_Long()
 
-	item := &PublicAuthenticationEntity{
+	item := &abacdefs.PublicAuthenticationEntity{
 		UniqueId:            uid,
 		BlockedUntil:        time.Now().Add(time.Second * time.Duration(secondsToUnblock)).UnixNano(),
 		Otp:                 otp,
@@ -113,7 +114,7 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 	if passportType == PASSPORT_METHOD_PHONE {
 
 		result := QuickGetOtpMessage(query, SMS_OTP)
-		body, err3 := result.CompileContent(map[string]string{"Otp": otp})
+		body, err3 := CompileContent(result, map[string]string{"Otp": otp})
 		if err3 != nil {
 			return nil, fireback.CastToIError(err3)
 		}
@@ -126,13 +127,13 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 		result := QuickGetOtpMessage(query, EMAIL_OTP)
 		var body = ""
 		var title = ""
-		if body0, err3 := result.CompileContent(map[string]string{"Otp": otp}); err3 != nil {
+		if body0, err3 := CompileContent(result, map[string]string{"Otp": otp}); err3 != nil {
 			return nil, fireback.CastToIError(err3)
 		} else {
 			body = body0
 		}
 
-		if title0, err3 := result.CompileTitle(map[string]string{"Otp": otp}); err3 != nil {
+		if title0, err3 := CompileTitle(result, map[string]string{"Otp": otp}); err3 != nil {
 			return nil, fireback.CastToIError(err3)
 		} else {
 			title = title0
@@ -158,7 +159,7 @@ func classicPassportRequestOtpCore(req ClassicPassportRequestOtpActionReq, query
 		return nil, &fireback.IError{Message: AbacMessages.OtpNotAvailableForThisType}
 	}
 
-	return &ClassicPassportRequestOtpActionRes{
+	return &abacdefs.ClassicPassportRequestOtpActionRes{
 		SecondsToUnblock: secondsToUnblock,
 	}, nil
 }

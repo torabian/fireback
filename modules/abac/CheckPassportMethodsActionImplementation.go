@@ -1,14 +1,17 @@
 package abac
 
-import "github.com/torabian/fireback/modules/fireback"
+import (
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
+	"github.com/torabian/fireback/modules/fireback"
+)
 
-func CheckPassportMethodsAction(c CheckPassportMethodsActionRequest) (*CheckPassportMethodsActionResponse, error) {
+func CheckPassportMethodsAction(c abacdefs.CheckPassportMethodsActionRequest) (*abacdefs.CheckPassportMethodsActionResponse, error) {
 	_, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	state := &CheckPassportMethodsActionRes{}
+	state := &abacdefs.CheckPassportMethodsActionRes{}
 
 	// Get the workspacec configuration as well, for different reasons such as captcha info
 	config, err2 := WorkspaceConfigActions.GetByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
@@ -72,5 +75,5 @@ func CheckPassportMethodsAction(c CheckPassportMethodsActionRequest) (*CheckPass
 		}
 	}
 
-	return &CheckPassportMethodsActionResponse{Payload: fireback.GResponseSingleItem(state)}, nil
+	return &abacdefs.CheckPassportMethodsActionResponse{Payload: fireback.GResponseSingleItem(state)}, nil
 }

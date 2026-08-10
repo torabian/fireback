@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -18,7 +19,7 @@ var ALL_USER_WORKSPACE_PERMISSIONS = userWorkspacePerms.All
 // Module3 entity compiler generated - AcceptInviteAction.go, AuthFlow.go,
 // ClassicSigninAction.go, UserCli.go and WorkspaceCoreFeatures.go all call into it
 // directly.
-var UserWorkspaceActions = NewEntityActionsBundle[UserWorkspaceEntity]()
+var UserWorkspaceActions = NewEntityActionsBundle[abacdefs.UserWorkspaceEntity]()
 
 func userWorkspaceSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
@@ -27,7 +28,7 @@ func userWorkspaceSecurity(perm application.PermissionInfo) *fireback.SecurityMo
 	}
 }
 
-func UserWorkspaceBrowseAction(c UserWorkspaceBrowseActionRequest) (*UserWorkspaceBrowseActionResponse, error) {
+func UserWorkspaceBrowseAction(c abacdefs.UserWorkspaceBrowseActionRequest) (*abacdefs.UserWorkspaceBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, userWorkspaceSecurity(PERM_ROOT_USER_WORKSPACE_QUERY))
 	if err != nil {
 		return nil, err
@@ -36,10 +37,10 @@ func UserWorkspaceBrowseAction(c UserWorkspaceBrowseActionRequest) (*UserWorkspa
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserWorkspaceBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.UserWorkspaceBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func UserWorkspaceGetAction(c UserWorkspaceGetActionRequest) (*UserWorkspaceGetActionResponse, error) {
+func UserWorkspaceGetAction(c abacdefs.UserWorkspaceGetActionRequest) (*abacdefs.UserWorkspaceGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, userWorkspaceSecurity(PERM_ROOT_USER_WORKSPACE_QUERY))
 	if err != nil {
 		return nil, err
@@ -49,29 +50,29 @@ func UserWorkspaceGetAction(c UserWorkspaceGetActionRequest) (*UserWorkspaceGetA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserWorkspaceGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.UserWorkspaceGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func UserWorkspaceCreateAction(c UserWorkspaceCreateActionRequest) (*UserWorkspaceCreateActionResponse, error) {
+func UserWorkspaceCreateAction(c abacdefs.UserWorkspaceCreateActionRequest) (*abacdefs.UserWorkspaceCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, userWorkspaceSecurity(PERM_ROOT_USER_WORKSPACE_CREATE))
 	if err != nil {
 		return nil, err
 	}
-	entity := &UserWorkspaceEntity{UserId: c.Body.UserId, WorkspaceId: c.Body.WorkspaceId}
+	entity := &abacdefs.UserWorkspaceEntity{UserId: c.Body.UserId, WorkspaceId: c.Body.WorkspaceId}
 	created, err2 := UserWorkspaceActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserWorkspaceCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.UserWorkspaceCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func UserWorkspaceUpdateAction(c UserWorkspaceUpdateActionRequest) (*UserWorkspaceUpdateActionResponse, error) {
+func UserWorkspaceUpdateAction(c abacdefs.UserWorkspaceUpdateActionRequest) (*abacdefs.UserWorkspaceUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, userWorkspaceSecurity(PERM_ROOT_USER_WORKSPACE_UPDATE))
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &UserWorkspaceEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.UserWorkspaceEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.UserId.Get(); ok {
 		fields.UserId = emigo.NullableOf(*v)
 	}
@@ -82,27 +83,27 @@ func UserWorkspaceUpdateAction(c UserWorkspaceUpdateActionRequest) (*UserWorkspa
 	if err2 != nil {
 		return nil, err2
 	}
-	return &UserWorkspaceUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.UserWorkspaceUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func UserWorkspaceAwareDeletePreviewAction(c UserWorkspaceAwareDeletePreviewActionRequest) (*UserWorkspaceAwareDeletePreviewActionResponse, error) {
+func UserWorkspaceAwareDeletePreviewAction(c abacdefs.UserWorkspaceAwareDeletePreviewActionRequest) (*abacdefs.UserWorkspaceAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, userWorkspaceSecurity(PERM_ROOT_USER_WORKSPACE_DELETE)); err != nil {
 		return nil, err
 	}
-	uniqueIds := UserWorkspaceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := UserWorkspaceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.UserWorkspaceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.UserWorkspaceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &UserWorkspaceAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.UserWorkspaceAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func UserWorkspaceAwareDeleteAction(c UserWorkspaceAwareDeleteActionRequest) (*UserWorkspaceAwareDeleteActionResponse, error) {
+func UserWorkspaceAwareDeleteAction(c abacdefs.UserWorkspaceAwareDeleteActionRequest) (*abacdefs.UserWorkspaceAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, userWorkspaceSecurity(PERM_ROOT_USER_WORKSPACE_DELETE)); err != nil {
 		return nil, err
 	}
-	if err2 := UserWorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.UserWorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &UserWorkspaceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.UserWorkspaceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

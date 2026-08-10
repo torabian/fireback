@@ -89,6 +89,13 @@ func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableVi
 	}
 	q := *query
 
+	// tableName is validate:"required" (see InterfaceTools.emi.yml) but nothing was
+	// actually enforcing it - same fix as
+	// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
+
 	entity := TableViewSizingEntity{
 		TableName:   c.Body.TableName,
 		Sizes:       c.Body.Sizes,

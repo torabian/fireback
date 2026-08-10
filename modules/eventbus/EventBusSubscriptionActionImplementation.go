@@ -2,6 +2,7 @@ package eventbus
 
 import (
 	"github.com/gorilla/websocket"
+	eventbusdefs "github.com/torabian/fireback/modules/eventbus/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"go.uber.org/zap"
 )
@@ -60,7 +61,7 @@ func addUserToEventBus(query fireback.QueryDSL) {
 
 }
 
-func EventBusSubscriptionActionSig(session EventBusSubscriptionActionSession) (chan []byte, error) {
+func EventBusSubscriptionActionSig(session eventbusdefs.EventBusSubscriptionActionSession) (chan []byte, error) {
 	query, err := fireback.ResolveActionContextFromGinContext(session.GinCtx(), &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyWorkspace,
 	})

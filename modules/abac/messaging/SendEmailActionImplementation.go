@@ -10,8 +10,13 @@ func SendEmailAction(c SendEmailActionRequest) (*SendEmailActionResponse, error)
 		return nil, err
 	}
 
+	req := c.Body
+	if err2 := fireback.CommonStructValidatorPointer(&req, false); err2 != nil {
+		return nil, err2
+	}
+
 	provider, err2 := EmailProviderActions.GetOne(fireback.QueryDSL{
-		UniqueId: c.Body.ProviderId,
+		UniqueId: req.ProviderId,
 	})
 
 	if fireback.IsErr(err2) {
@@ -21,13 +26,15 @@ func SendEmailAction(c SendEmailActionRequest) (*SendEmailActionResponse, error)
 	if err3 := SendMail(EmailMessageContent{
 		FromName:  "Test",
 		FromEmail: "test@test.com",
-		ToName:    "Test reciever",
-		ToEmail:   "test@test.com",
+		ToName:    req.ToAddress,
+		ToEmail:   req.ToAddress,
 		Subject:   "Testing email",
-		Content:   "Hello :)",
+		Content:   req.Body,
 	}, provider); err3 != nil {
 		return nil, err3
 	}
 
-	return nil, nil
+	return &SendEmailActionResponse{
+		Payload: &SendEmailActionRes{QueueId: fireback.UUID()},
+	}, nil
 }

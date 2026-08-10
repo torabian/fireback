@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	queries "github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/security"
@@ -14,17 +15,17 @@ import (
 type GenerateUserDto struct {
 	// The user we want to create, also can include the person object
 	// for personal information it can create that.
-	user *UserEntity
+	user *abacdefs.UserEntity
 
 	createUser bool
 
 	// Workspace that this user will be assigend to
-	workspace *WorkspaceEntity
+	workspace *abacdefs.WorkspaceEntity
 
 	createWorkspace bool
 
 	// The roles that this user will have
-	role *RoleEntity
+	role *abacdefs.RoleEntity
 
 	createRole bool
 
@@ -33,7 +34,7 @@ type GenerateUserDto struct {
 	restricted bool
 
 	createPassport bool
-	passport       *PassportEntity
+	passport       *abacdefs.PassportEntity
 }
 
 /**
@@ -42,14 +43,14 @@ type GenerateUserDto struct {
 *	and it would never be exported to public access directly
  */
 
-func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, session *UserSessionDto) *fireback.IError {
+func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, session *abacdefs.UserSessionDto) *fireback.IError {
 	workspaceId := dto.workspace.UniqueId
 	q.WorkspaceId = workspaceId
 
 	q.UserId = dto.user.UniqueId
 	dto.workspace.WorkspaceId = emigo.NullableOf(workspaceId)
 
-	var actualWorkspace *WorkspaceEntity = nil
+	var actualWorkspace *abacdefs.WorkspaceEntity = nil
 	if existingWs, err9 := WorkspaceActions.GetOne(fireback.QueryDSL{UniqueId: dto.workspace.UniqueId, Tx: q.Tx}); err9 == nil && existingWs != nil {
 		if existingWs.UniqueId == dto.workspace.UniqueId {
 			actualWorkspace = existingWs
@@ -62,24 +63,43 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 			if dto.restricted {
 				return err
 			}
+			// restricted is false: creation failed but the caller wants to proceed
+			// anyway (see the doc comment above dto.restricted) - there's nothing to
+			// link a user to below, so stop here rather than falling through to a nil
+			// actualWorkspace dereference. Not reachable from any caller today (both
+			// CreateWorkspaceAction and UnsafeGenerateUser always pass restricted:
+			// true), but left defensive since dto.restricted exists specifically to
+			// allow this path.
+			return nil
 		} else {
 			actualWorkspace = ws
 		}
 	}
 
+	// dto.workspace only ever carries the caller-supplied fields (e.g. just Name) -
+	// actualWorkspace is the real, fully-populated row (generated UniqueId included).
+	// Without writing it back here, CreateWorkspaceAction's response always reported
+	// workspaceId:"" even on a successful create, since it reads back dto.workspace
+	// (the same pointer it originally passed in) after this function returns.
+	dto.workspace = actualWorkspace
 	workspaceId = actualWorkspace.UniqueId
 	q.WorkspaceId = actualWorkspace.UniqueId
 
-	var userWorkspace *UserWorkspaceEntity
+	var userWorkspace *abacdefs.UserWorkspaceEntity
 	// This is a bit special table, I did not want introduce a new concept
 	// In fireback, so it would be like this to modify things directly.
 
-	// let's find that link, if not exists create it.
-	if errFinding := q.Tx.Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
+	// let's find that link, if not exists create it. q.Tx is nil whenever this is
+	// reached outside a runTransaction-wrapped caller (e.g. CreateWorkspaceAction calls
+	// this directly, with no transaction of its own) - fireback.GetRef falls back to
+	// the plain db ref in that case, same as everywhere else in this codebase; calling
+	// q.Tx.Model(...) directly on a nil *gorm.DB panicked with a nil pointer
+	// dereference on every single call.
+	if errFinding := fireback.GetRef(q).Model(&abacdefs.UserWorkspaceEntity{}).Where(&abacdefs.UserWorkspaceEntity{
 		WorkspaceId: emigo.NullableOf(workspaceId),
 		UserId:      emigo.NullableOf(q.UserId),
 	}).Find(&userWorkspace); errFinding != nil {
-		if createdWorkspace, err := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+		if createdWorkspace, err := UserWorkspaceActions.Create(&abacdefs.UserWorkspaceEntity{
 			WorkspaceId: emigo.NullableOf(workspaceId),
 			UserId:      emigo.NullableOf(q.UserId),
 		}, q); err == nil {
@@ -87,7 +107,7 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 		}
 	}
 	if userWorkspace != nil {
-		session.UserWorkspaces = emigo.CollectionReplace([]UserWorkspaceEntity{*userWorkspace})
+		session.UserWorkspaces = emigo.CollectionReplace([]abacdefs.UserWorkspaceEntity{*userWorkspace})
 	}
 
 	return nil
@@ -109,8 +129,8 @@ func runTransaction[T any](
 // This is core function of creating a new user in the system.
 // All passport methods, need to pass through this logic in order to
 // create account publicly.
-func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSessionDto, *fireback.IError) {
-	session := &UserSessionDto{}
+func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*abacdefs.UserSessionDto, *fireback.IError) {
+	session := &abacdefs.UserSessionDto{}
 
 	return runTransaction(session, q, func(tx *gorm.DB) error {
 		q.Tx = tx
@@ -162,7 +182,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 
 			// Note: here we skipped to add the workspace role into the session
 			// this is used somewhere else
-			wre := &WorkspaceRoleEntity{
+			wre := &abacdefs.WorkspaceRoleEntity{
 				UserWorkspaceId: emigo.NullableOf(session.UserWorkspaces.Items[0].UniqueId),
 				RoleId:          emigo.NullableOf(dto.role.UniqueId),
 				WorkspaceId:     emigo.NullableOf(dto.workspace.UniqueId),
@@ -186,7 +206,7 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 
 		// Token for the session is essential, a session without a token
 		// has absolutely no use.
-		if token, err := user.Item.AuthorizeWithToken(q); err != nil {
+		if token, err := AuthorizeWithToken(&user.Item, q); err != nil {
 			return err
 		} else {
 			session.Token = token
@@ -201,10 +221,10 @@ func UnsafeGenerateUser(dto *GenerateUserDto, q fireback.QueryDSL) (*UserSession
 *	Return the definition of operation, make sure it does not
 *	Do any effect on the database
 **/
-func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity) {
+func GetOsHostUserRoleWorkspaceDef() (*abacdefs.UserEntity, *abacdefs.RoleEntity, *abacdefs.WorkspaceEntity) {
 	osUser := fireback.GetOsUserWithPhone()
 	name := osUser.Name + "'s workspace"
-	user := &UserEntity{
+	user := &abacdefs.UserEntity{
 		UniqueId:    "OS_USER_" + osUser.Uid,
 		WorkspaceId: emigo.NullableOf(ROOT_VAR),
 		FirstName:   osUser.Username,
@@ -212,7 +232,7 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	}
 
 	wid := "OS_WORKSPACE_" + osUser.Uid
-	workspace := &WorkspaceEntity{
+	workspace := &abacdefs.WorkspaceEntity{
 		Name:        name,
 		UniqueId:    wid,
 		WorkspaceId: emigo.NullableOf(wid),
@@ -221,11 +241,11 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	}
 
 	osRole := "OS User"
-	role := &RoleEntity{
+	role := &abacdefs.RoleEntity{
 		UniqueId:           "ROLE_WORKSPACE_" + osUser.Uid,
-		Name:                osRole,
-		WorkspaceId:         emigo.NullableOf(workspace.UniqueId),
-		CapabilitiesListId:  RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
+		Name:               osRole,
+		WorkspaceId:        emigo.NullableOf(workspace.UniqueId),
+		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
 	}
 
 	return user, role, workspace
@@ -246,21 +266,21 @@ func DetectSignupMechanismOverValue(value string) (string, *fireback.IError) {
 
 }
 
-func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity) {
+func GetEmailPassportSignupMechanism(dto *abacdefs.ClassicSignupActionReq) (*abacdefs.UserEntity, *abacdefs.RoleEntity, *abacdefs.WorkspaceEntity, *abacdefs.PassportEntity) {
 
 	userId := fireback.UUID()
 	workspaceId := fireback.UUID()
 	roleId := fireback.UUID()
 	passportId := fireback.UUID()
 
-	user := &UserEntity{
+	user := &abacdefs.UserEntity{
 		UniqueId:  userId,
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
 	}
 
 	wname := "workspace"
-	workspace := &WorkspaceEntity{
+	workspace := &abacdefs.WorkspaceEntity{
 		UniqueId: workspaceId,
 		Name:     wname,
 		ParentId: emigo.NullableOf(ROOT_VAR),
@@ -268,7 +288,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 	}
 
 	osRole := "Admin"
-	role := &RoleEntity{
+	role := &abacdefs.RoleEntity{
 		UniqueId:           roleId,
 		Name:               osRole,
 		WorkspaceId:        emigo.NullableOf(workspace.UniqueId),
@@ -282,7 +302,7 @@ func GetEmailPassportSignupMechanism(dto *ClassicSignupActionReq) (*UserEntity, 
 		passwordHashed = genPass
 	}
 
-	passport := &PassportEntity{
+	passport := &abacdefs.PassportEntity{
 		Type:     method,
 		Password: passwordHashed,
 		Value:    dto.Value,
@@ -373,11 +393,22 @@ func GetUserAccessLevels(query fireback.QueryDSL) (*UserAccessLevelDto, *firebac
 		ws[item.WorkspaceId].Name = item.WorkspaceName
 
 		if item.Type == "account_restrict" {
-			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {
+			// Bug fix: this used to re-init the whole UserRoles map (wiping every
+			// other role already accumulated for this same workspace) whenever it hit
+			// a *second* role_id it hadn't seen yet - the map-is-nil check and the
+			// key-is-nil check were conflated into one condition. In practice this
+			// meant a user holding more than one role in the same workspace (e.g. via
+			// a Workspaceabacdefs.RoleEntity granting an extra role alongside their normal one)
+			// silently lost every role but the last one processed - for root, that
+			// could drop the seeded "root.*" wildcard role itself, causing
+			// MeetsAccessLevel to reject actions root should always be allowed.
+			if ws[item.WorkspaceId].UserRoles == nil {
 				ws[item.WorkspaceId].UserRoles = map[string]*struct {
 					Name     string
 					Accesses []string
 				}{}
+			}
+			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {
 				ws[item.WorkspaceId].UserRoles[item.RoleId] = &struct {
 					Name     string
 					Accesses []string

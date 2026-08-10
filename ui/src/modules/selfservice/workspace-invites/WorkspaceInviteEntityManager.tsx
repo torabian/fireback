@@ -6,7 +6,7 @@ import { useCommonEntityManager } from "../../fireback-ui/hooks/useCommonEntityM
 import { useS } from "../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 import { useWorkspaceInviteGetActionQuery } from "../../sdk/abac/WorkspaceInviteGetAction";
-import { useWorkspaceInviteCreateAction } from "../../sdk/abac/WorkspaceInviteCreateAction";
+import { useInviteToWorkspaceAction } from "../../sdk/abac/InviteToWorkspaceAction";
 import { useWorkspaceInviteUpdateAction } from "../../sdk/abac/WorkspaceInviteUpdateAction";
 import { WorkspaceInviteDto } from "../../sdk/abac/WorkspaceInviteDto";
 import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
@@ -21,12 +21,30 @@ export const WorkspaceInviteEntityManager = ({
     data,
   });
 
-  const getSingleHook = useGetWorkspaceInviteByUniqueId({
-    query: { uniqueId },
-    queryClient,
+  const getSingleHook = useWorkspaceInviteGetActionQuery({
+    params: { uniqueId },
   });
 
-  const postHook = useWorkspaceInviteCreateAction({});
+  // Creating an invite has to go through InviteToWorkspaceAction (not the plain CRUD
+  // WorkspaceInviteCreateAction) - it's the action that actually sends the invite
+  // email/SMS, see InviteToWorkspaceActionImplementation.go. WorkspaceInvitationDto
+  // (its body type) carries every field this form sets
+  // (firstName/lastName/email/phonenumber/roleId/coverLetter/targetUserLocale/
+  // forceEmailAddress/forcePhoneNumber), so no form changes are needed.
+  //
+  // creatorFn is overridden to the identity function as a workaround: unlike an
+  // entity's generated CreateAction (whose Fetch always wraps the response in
+  // GResponse.inject(), see e.g. GsmProviderCreateAction.ts), a hand-declared
+  // "dto in/out" action like this one's generated Fetch constructs its creatorFn's
+  // result (by default `new WorkspaceInvitationDto(item)`) directly from the raw
+  // response body - even though the backend actually sends the same
+  // {"data":{"item":...}}/{"error":...} envelope either way (see
+  // InviteToWorkspaceActionImplementation.go's fireback.GResponseSingleItem). Since
+  // none of WorkspaceInvitationDto's own fields are named "data"/"error", that default
+  // construction silently discards the whole payload. CommonEntityManager.tsx's
+  // response.data?.item/response.error handling needs the raw envelope shape, so this
+  // passes it through unchanged instead.
+  const postHook = useInviteToWorkspaceAction({ creatorFn: (item: unknown) => item as any });
 
   const patchHook = useWorkspaceInviteUpdateAction({ params: { uniqueId } });
 
