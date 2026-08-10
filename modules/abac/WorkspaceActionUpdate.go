@@ -35,7 +35,7 @@ func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fi
 
 	inviteToWorkspaceSenderId, hasSender := config.InviteToWorkspaceSenderId.Get()
 	if !hasSender || *inviteToWorkspaceSenderId == "" {
-		return fireback.Create401Error(&AbacMessages.UserWhichHasThisTokenDoesNotExist, []string{})
+		return fireback.Create401Error(&AbacMessages.InviteToWorkspaceMailSenderMissing, []string{})
 	}
 	sender, senderErr := messaging.EmailSenderActions.GetOne(fireback.QueryDSL{UniqueId: *inviteToWorkspaceSenderId})
 	if senderErr != nil {

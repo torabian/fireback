@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
@@ -64,12 +65,17 @@ func GsmProviderCreateAction(c GsmProviderCreateActionRequest) (*GsmProviderCrea
 	if err != nil {
 		return nil, err
 	}
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
 	entity := &GsmProviderEntity{
 		ApiKey:           c.Body.ApiKey,
 		MainSenderNumber: c.Body.MainSenderNumber,
 		Type:             c.Body.Type,
 		InvokeUrl:        c.Body.InvokeUrl,
 		InvokeBody:       c.Body.InvokeBody,
+		UserId:           emigo.NullableOf(query.UserId),
+		WorkspaceId:      emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := GsmProviderActions.Create(entity, *query)
 	if err2 != nil {

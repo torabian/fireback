@@ -81,7 +81,7 @@ func ListGormSubEntities(entity reflect.Value) []string {
 			continue
 		}
 
-		if t == "fireback.JSON" || t == "JSON" {
+		if t == "fireback.JSON" || t == "JSON" || t == "complexes.JSON" {
 			continue
 		}
 		if t == "fireback.Byte" || t == "Byte" {
