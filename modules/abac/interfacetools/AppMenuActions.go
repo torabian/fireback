@@ -145,6 +145,11 @@ func AppMenuCreateAction(c AppMenuCreateActionRequest) (*AppMenuCreateActionResp
 		ActiveMatcher: c.Body.ActiveMatcher,
 		CapabilityId:  c.Body.CapabilityId,
 		ParentId:      c.Body.ParentId,
+		// Without this, the row is invisible to AppMenuBrowseAction's workspace-scoped
+		// query (see GetSqlContext) - same workspace-stamping fix as
+		// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
+		UserId:      emigo.NullableOf(query.UserId),
 	}
 	created, err2 := AppMenuActions.Create(entity, *query)
 	if err2 != nil {
