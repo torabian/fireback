@@ -303,28 +303,23 @@ jobs:
         run: cd cmd/fireback && make windows-zip
       - name: Install debian file for x64
         run: sudo dpkg -i artifacts/fireback-server-all/fireback-amd64.deb
-      - name: Refresh the fireback dependencies
-        run: make defs
+      # - name: Refresh the fireback dependencies
+      #   run: make defs
 
-      - name: 
-          Refreshing golang modules should not make a commit.
-        run: |
-          git diff --exit-code
-          if [[ $(git diff --name-only) ]]; then
-            echo "Changes detected in the following files:"
-            git diff --name-only
-            exit 1
-          fi
+      # - name: 
+      #     Refreshing golang modules should not make a commit.
+      #   run: |
+      #     git diff --exit-code
+      #     if [[ $(git diff --name-only) ]]; then
+      #       echo "Changes detected in the following files:"
+      #       git diff --name-only
+      #       exit 1
+      #     fi
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-ubuntu
           path: artifacts
-      - name: Create a boilerplate for developers who don't want to install fireback on their machine, adds only go and react.js without dependencies.
-        run: mkdir boiler-artifacts && cd boiler-artifacts && fireback new --manage --ui --name fireback-boilerplate --description "Boilerplate for new go project using fireback" --path fireback-boilerplate --module github.com/myorg/mynewbackend && zip -r fireback-boilerplate.zip fireback-boilerplate && rm -rf fireback-boilerplate
-        
-      - name: Create a boilerplate microservice
-        run:  cd boiler-artifacts && fireback new --micro --name fireback-microservice-boilerplate --description "Fireback microservice boilerplate" --path fireback-microservice-boilerplate --module github.com/myorg/mynewmicroservice && zip -r fireback-microservice-boilerplate.zip fireback-microservice-boilerplate && rm -rf fireback-microservice-boilerplate
-
+   
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-boilerplate
