@@ -1,8 +1,8 @@
 targets:
 - compiler: go
   flags:
-    pkg: eventbus
-  output: ./
+    pkg: eventbusdefs
+  output: ./defs
 - compiler: js
   flags:
     js-sdk-location: ../sdk

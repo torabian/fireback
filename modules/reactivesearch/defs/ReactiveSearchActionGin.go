@@ -1,4 +1,4 @@
-package reactivesearch
+package reactivesearchdefs
 
 import (
 	"crypto/tls"

@@ -3,10 +3,10 @@ package abac
 import (
 	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/fireback"
-	"github.com/torabian/fireback/modules/reactivesearch"
+	reactivesearchdefs "github.com/torabian/fireback/modules/reactivesearch/defs"
 )
 
-func QueryMenusReact(query fireback.QueryDSL, chanStream chan *reactivesearch.ReactiveSearchResultDto) {
+func QueryMenusReact(query fireback.QueryDSL, chanStream chan *reactivesearchdefs.ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "label %" + query.SearchPhrase + "%"
@@ -22,7 +22,7 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *reactivesearch.Re
 		// needs a single display string, so resolve it the same way TString.String() always
 		// has (DefaultLocale, falling back to whatever locale is present).
 		label := item.Label.String()
-		chanStream <- &reactivesearch.ReactiveSearchResultDto{
+		chanStream <- &reactivesearchdefs.ReactiveSearchResultDto{
 			Phrase:      label,
 			Description: label,
 			Icon:        item.Icon,
@@ -34,7 +34,7 @@ func QueryMenusReact(query fireback.QueryDSL, chanStream chan *reactivesearch.Re
 	}
 
 }
-func QueryRolesReact(query fireback.QueryDSL, chanStream chan *reactivesearch.ReactiveSearchResultDto) {
+func QueryRolesReact(query fireback.QueryDSL, chanStream chan *reactivesearchdefs.ReactiveSearchResultDto) {
 	actionFnNavigate := "navigate"
 
 	query.Query = "name %" + query.SearchPhrase + "%"
@@ -46,7 +46,7 @@ func QueryRolesReact(query fireback.QueryDSL, chanStream chan *reactivesearch.Re
 
 		uid := fireback.UUID()
 
-		chanStream <- &reactivesearch.ReactiveSearchResultDto{
+		chanStream <- &reactivesearchdefs.ReactiveSearchResultDto{
 			Phrase:      item.Name,
 			Description: item.Name,
 			Group:       roles,

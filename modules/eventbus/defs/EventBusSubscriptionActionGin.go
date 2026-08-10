@@ -1,4 +1,4 @@
-package eventbus
+package eventbusdefs
 
 import (
 	"crypto/tls"

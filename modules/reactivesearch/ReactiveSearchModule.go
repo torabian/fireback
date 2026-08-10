@@ -3,6 +3,7 @@ package reactivesearch
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/application"
+	reactivesearchdefs "github.com/torabian/fireback/modules/reactivesearch/defs"
 )
 
 // ReactiveSearchModuleConfig lets a project pass the search sources it actually wants
@@ -37,10 +38,10 @@ func ModuleSetup(cfg *ReactiveSearchModuleConfig) *application.ModuleProvider {
 
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				meta := ReactiveSearchActionMeta()
+				meta := reactivesearchdefs.ReactiveSearchActionMeta()
 				g.GET(
 					meta.URL,
-					ReactiveSearchActionReactiveHandler(createReactiveSearchHandler(cfg.SearchProviders, cfg.Authorize)),
+					reactivesearchdefs.ReactiveSearchActionReactiveHandler(createReactiveSearchHandler(cfg.SearchProviders, cfg.Authorize)),
 				)
 				return nil
 			},

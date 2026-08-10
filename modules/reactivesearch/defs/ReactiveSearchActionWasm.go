@@ -1,6 +1,6 @@
 //go:build wasm
 
-package reactivesearch
+package reactivesearchdefs
 
 import "github.com/torabian/emi/emigo"
 

@@ -2,9 +2,10 @@ name: eventbus
 
 targets:
   - compiler: go
-    output: ./
+    output: ./defs
     flags:
-      pkg: eventbus
+      pkg: eventbusdefs
+
   - compiler: js
     output: ../../ui/src/modules/sdk/eventbus
     flags:
