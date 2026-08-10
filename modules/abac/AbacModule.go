@@ -135,6 +135,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 				CapabilityGetActionGin(g, CapabilityGetAction)
 				CapabilityCreateActionGin(g, CapabilityCreateAction)
 				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
+				CapabilityAwareDeletePreviewActionGin(g, CapabilityAwareDeletePreviewAction)
 				CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
 				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
 

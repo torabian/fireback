@@ -49,7 +49,10 @@ func TokenCreateAction(c TokenCreateActionRequest) (*TokenCreateActionResponse, 
 	if err != nil {
 		return nil, err
 	}
-	entity := &TokenEntity{UserId: c.Body.UserId, Token: c.Body.Token, ValidUntil: c.Body.ValidUntil}
+	// Without this, the row is invisible to TokenBrowseAction's workspace-scoped query
+	// (see GetSqlContext) - same workspace-stamping fix as
+	// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+	entity := &TokenEntity{UserId: c.Body.UserId, Token: c.Body.Token, ValidUntil: c.Body.ValidUntil, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	created, err2 := TokenActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2

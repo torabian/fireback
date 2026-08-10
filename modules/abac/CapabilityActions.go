@@ -177,6 +177,29 @@ func CapabilityUpdateAction(c CapabilityUpdateActionRequest) (*CapabilityUpdateA
 	}, nil
 }
 
+// CapabilityAwareDeletePreviewAction was never wired to a Gin route in AbacModule.go
+// (only Browse/Get/Create/Update/AwareDelete/CapabilitiesTree were) and had no hand
+// implementation beyond the generated file's own boilerplate example comment - so
+// GET /capability/delete-preview fell through to the next route that happened to match
+// its shape, GET /capability/:uniqueId (CapabilityGetAction), silently looking up a
+// capability literally named "delete-preview" instead of previewing anything. Mirrors
+// RegionalContentAwareDeletePreviewAction's implementation.
+func CapabilityAwareDeletePreviewAction(c CapabilityAwareDeletePreviewActionRequest) (*CapabilityAwareDeletePreviewActionResponse, error) {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+		AllowOnRoot:    true,
+		ActionRequires: []application.PermissionInfo{PERM_ROOT_CAPABILITY_DELETE},
+	}); err != nil {
+		return nil, err
+	}
+
+	uniqueIds := CapabilityAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := CapabilityEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	if err2 != nil {
+		return nil, fireback.GormErrorToIError(err2)
+	}
+	return &CapabilityAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+}
+
 func CapabilityAwareDeleteAction(c CapabilityAwareDeleteActionRequest) (*CapabilityAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		AllowOnRoot:    true,

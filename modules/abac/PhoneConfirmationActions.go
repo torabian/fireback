@@ -52,6 +52,10 @@ func PhoneConfirmationCreateAction(c PhoneConfirmationCreateActionRequest) (*Pho
 		PhoneNumber: c.Body.PhoneNumber,
 		Key:         c.Body.Key,
 		ExpiresAt:   c.Body.ExpiresAt,
+		// Without this, the row is invisible to PhoneConfirmationBrowseAction's
+		// workspace-scoped query (see GetSqlContext) - same workspace-stamping fix as
+		// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := PhoneConfirmationActions.Create(entity, *query)
 	if err2 != nil {

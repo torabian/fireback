@@ -62,11 +62,25 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 			if dto.restricted {
 				return err
 			}
+			// restricted is false: creation failed but the caller wants to proceed
+			// anyway (see the doc comment above dto.restricted) - there's nothing to
+			// link a user to below, so stop here rather than falling through to a nil
+			// actualWorkspace dereference. Not reachable from any caller today (both
+			// CreateWorkspaceAction and UnsafeGenerateUser always pass restricted:
+			// true), but left defensive since dto.restricted exists specifically to
+			// allow this path.
+			return nil
 		} else {
 			actualWorkspace = ws
 		}
 	}
 
+	// dto.workspace only ever carries the caller-supplied fields (e.g. just Name) -
+	// actualWorkspace is the real, fully-populated row (generated UniqueId included).
+	// Without writing it back here, CreateWorkspaceAction's response always reported
+	// workspaceId:"" even on a successful create, since it reads back dto.workspace
+	// (the same pointer it originally passed in) after this function returns.
+	dto.workspace = actualWorkspace
 	workspaceId = actualWorkspace.UniqueId
 	q.WorkspaceId = actualWorkspace.UniqueId
 
@@ -74,8 +88,13 @@ func CreateWorkspaceAndAssignUser(dto *GenerateUserDto, q fireback.QueryDSL, ses
 	// This is a bit special table, I did not want introduce a new concept
 	// In fireback, so it would be like this to modify things directly.
 
-	// let's find that link, if not exists create it.
-	if errFinding := q.Tx.Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
+	// let's find that link, if not exists create it. q.Tx is nil whenever this is
+	// reached outside a runTransaction-wrapped caller (e.g. CreateWorkspaceAction calls
+	// this directly, with no transaction of its own) - fireback.GetRef falls back to
+	// the plain db ref in that case, same as everywhere else in this codebase; calling
+	// q.Tx.Model(...) directly on a nil *gorm.DB panicked with a nil pointer
+	// dereference on every single call.
+	if errFinding := fireback.GetRef(q).Model(&UserWorkspaceEntity{}).Where(&UserWorkspaceEntity{
 		WorkspaceId: emigo.NullableOf(workspaceId),
 		UserId:      emigo.NullableOf(q.UserId),
 	}).Find(&userWorkspace); errFinding != nil {
@@ -223,9 +242,9 @@ func GetOsHostUserRoleWorkspaceDef() (*UserEntity, *RoleEntity, *WorkspaceEntity
 	osRole := "OS User"
 	role := &RoleEntity{
 		UniqueId:           "ROLE_WORKSPACE_" + osUser.Uid,
-		Name:                osRole,
-		WorkspaceId:         emigo.NullableOf(workspace.UniqueId),
-		CapabilitiesListId:  RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
+		Name:               osRole,
+		WorkspaceId:        emigo.NullableOf(workspace.UniqueId),
+		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_MODULES}),
 	}
 
 	return user, role, workspace
@@ -373,11 +392,22 @@ func GetUserAccessLevels(query fireback.QueryDSL) (*UserAccessLevelDto, *firebac
 		ws[item.WorkspaceId].Name = item.WorkspaceName
 
 		if item.Type == "account_restrict" {
-			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {
+			// Bug fix: this used to re-init the whole UserRoles map (wiping every
+			// other role already accumulated for this same workspace) whenever it hit
+			// a *second* role_id it hadn't seen yet - the map-is-nil check and the
+			// key-is-nil check were conflated into one condition. In practice this
+			// meant a user holding more than one role in the same workspace (e.g. via
+			// a WorkspaceRoleEntity granting an extra role alongside their normal one)
+			// silently lost every role but the last one processed - for root, that
+			// could drop the seeded "root.*" wildcard role itself, causing
+			// MeetsAccessLevel to reject actions root should always be allowed.
+			if ws[item.WorkspaceId].UserRoles == nil {
 				ws[item.WorkspaceId].UserRoles = map[string]*struct {
 					Name     string
 					Accesses []string
 				}{}
+			}
+			if ws[item.WorkspaceId].UserRoles[item.RoleId] == nil {
 				ws[item.WorkspaceId].UserRoles[item.RoleId] = &struct {
 					Name     string
 					Accesses []string

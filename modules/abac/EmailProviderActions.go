@@ -31,13 +31,26 @@ func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, se
 		}
 	}
 
-	generalEmailProviderId, hasProvider := config.GeneralEmailProviderId.Get()
-	if !hasProvider || *generalEmailProviderId == "" {
+	// config is nil whenever NotificationConfigActionGetOneByWorkspace 404'd above (no
+	// row configured yet, e.g. a fresh install nobody has set email sending up on) -
+	// config.GeneralEmailProviderId.Get() below would panic with a nil pointer
+	// dereference on a nil *NotificationConfigEntity receiver otherwise, which crashed
+	// the whole request (OTP emails, workspace invites, ...) on every send attempt
+	// until any admin configured a provider - same fix as
+	// GsmProviderActions.go's GsmSendSMSUsingNotificationConfig.
+	printToTerminal := func() (*messaging.SendEmailWithProviderActionRes, *fireback.IError) {
 		log.Default().Println("There are no email providers configured, we are printing the email into the console assuming this is development.")
 		log.Default().Println(content.Json())
+		return &messaging.SendEmailWithProviderActionRes{QueueId: "printed-to-terminal"}, nil
+	}
 
-		QueueId := "printed-to-terminal"
-		return &messaging.SendEmailWithProviderActionRes{QueueId: QueueId}, nil
+	if config == nil {
+		return printToTerminal()
+	}
+
+	generalEmailProviderId, hasProvider := config.GeneralEmailProviderId.Get()
+	if !hasProvider || *generalEmailProviderId == "" {
+		return printToTerminal()
 	} else {
 
 		provider, providerErr := messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})

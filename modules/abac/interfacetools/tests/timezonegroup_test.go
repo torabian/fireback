@@ -154,7 +154,7 @@ func TestTimezoneGroupBrowse_HTTP_IncludesOwnRecord(t *testing.T) {
 	defer deleteTimezoneGroup(t, cfg, created.UniqueId)
 
 	client := cfg.NewHTTPClient()
-	req, err := http.NewRequest(http.MethodGet, cfg.URL("/timezoneGroup/browse"), nil)
+	req, err := http.NewRequest(http.MethodGet, cfg.URL("/timezoneGroup/browse?itemsPerPage=1000"), nil)
 	if err != nil {
 		t.Fatalf("failed to build browse request: %v", err)
 	}

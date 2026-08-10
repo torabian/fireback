@@ -7,6 +7,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
@@ -56,12 +57,22 @@ func RegionalContentCreateAction(c RegionalContentCreateActionRequest) (*Regiona
 	if err != nil {
 		return nil, err
 	}
+	// content/region/languageId/keyGroup are validate:"required" (see
+	// RegionalContentDto.go) but nothing was actually enforcing it - same fix as
+	// EmailProviderCreateAction/TableViewSizingCreateAction/PassportCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
 	entity := &RegionalContentEntity{
 		Content:    c.Body.Content,
 		Region:     c.Body.Region,
 		Title:      c.Body.Title,
 		LanguageId: c.Body.LanguageId,
 		KeyGroup:   c.Body.KeyGroup,
+		// Without this, the row is invisible to RegionalContentBrowseAction's
+		// workspace-scoped query (see GetSqlContext) - same workspace-stamping fix as
+		// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := RegionalContentActions.Create(entity, *query)
 	if err2 != nil {

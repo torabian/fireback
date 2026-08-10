@@ -52,6 +52,11 @@ func EmailConfirmationCreateAction(c EmailConfirmationCreateActionRequest) (*Ema
 		Email:     c.Body.Email,
 		Key:       c.Body.Key,
 		ExpiresAt: c.Body.ExpiresAt,
+		// Without this, the row is invisible to EmailConfirmationBrowseAction's
+		// workspace-scoped query (see GetSqlContext) - same workspace-stamping fix as
+		// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction /
+		// modules/abac/interfacetools's AppMenuCreateAction/TimezoneGroupCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := EmailConfirmationActions.Create(entity, *query)
 	if err2 != nil {

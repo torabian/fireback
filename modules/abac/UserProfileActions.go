@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -45,7 +46,10 @@ func UserProfileCreateAction(c UserProfileCreateActionRequest) (*UserProfileCrea
 	if err != nil {
 		return nil, err
 	}
-	entity := &UserProfileEntity{FirstName: c.Body.FirstName, LastName: c.Body.LastName}
+	// Without this, the row is invisible to UserProfileBrowseAction's workspace-scoped
+	// query (see GetSqlContext) - same workspace-stamping fix as
+	// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+	entity := &UserProfileEntity{FirstName: c.Body.FirstName, LastName: c.Body.LastName, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	created, err2 := UserProfileActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2

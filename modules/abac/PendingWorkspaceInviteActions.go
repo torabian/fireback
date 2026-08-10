@@ -51,6 +51,10 @@ func PendingWorkspaceInviteCreateAction(c PendingWorkspaceInviteCreateActionRequ
 		Type:          c.Body.Type,
 		CoverLetter:   c.Body.CoverLetter,
 		WorkspaceName: c.Body.WorkspaceName,
+		// Without this, the row is invisible to PendingWorkspaceInviteBrowseAction's
+		// workspace-scoped query (see GetSqlContext) - same workspace-stamping fix as
+		// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	if v, ok := c.Body.RoleId.Get(); ok {
 		entity.RoleId = emigo.NullableOf(*v)

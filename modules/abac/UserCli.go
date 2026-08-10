@@ -371,6 +371,21 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 		if setForRoot {
 			user, _ := session.User.Get()
 
+			// GetEmailPassportSignupMechanism/UnsafeGenerateUser above always create a
+			// throwaway "workspace" + "Admin" role first (createWorkspace/createRole are
+			// unconditionally true, since the non-root signup path needs them) and
+			// enrolled this user into it via CreateWorkspaceAndAssignUser - that's the
+			// UserWorkspace row session.UserWorkspaces.Items[0] refers to. Bug fix: this
+			// throwaway membership was never cleaned up once root's own "root" workspace
+			// membership was granted below, so every root bootstrap (every `auth
+			// --in-root=true` call, including withFirebackServer()'s in every Cypress
+			// spec) left root belonging to *two* workspaces - the intended "root" one
+			// plus this orphaned "Admin"-role one - which made WithSelfServiceRoutes.tsx
+			// stop auto-selecting a workspace and show the "Select workspace" picker
+			// instead (see workspace-role-capability-scoping.cy.ts, which assumes root
+			// only ever has the one workspace).
+			throwawayUserWorkspaceId := session.UserWorkspaces.Items[0].UniqueId
+
 			query.WorkspaceId = ROOT_VAR
 			workspaceAs = ROOT_VAR
 			// user.Item.UserId is the "created/owned by" metadata field (blank for a
@@ -396,6 +411,20 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 
 			if err3 != nil {
 				return err3
+			}
+
+			if _, err4 := WorkspaceRoleActions.RemoveEnqueue(fireback.DeleteRequest{
+				Query:          "user_workspace_id = " + throwawayUserWorkspaceId,
+				ForceImmediate: true,
+			}, query); err4 != nil {
+				return err4
+			}
+
+			if _, err5 := UserWorkspaceActions.RemoveEnqueue(fireback.DeleteRequest{
+				Query:          "unique_id = " + throwawayUserWorkspaceId,
+				ForceImmediate: true,
+			}, query); err5 != nil {
+				return err5
 			}
 		}
 

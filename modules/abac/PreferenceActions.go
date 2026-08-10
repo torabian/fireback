@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -45,7 +46,10 @@ func PreferenceCreateAction(c PreferenceCreateActionRequest) (*PreferenceCreateA
 	if err != nil {
 		return nil, err
 	}
-	entity := &PreferenceEntity{Timezone: c.Body.Timezone}
+	// Without this, the row is invisible to PreferenceBrowseAction's workspace-scoped
+	// query (see GetSqlContext) - same workspace-stamping fix as
+	// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
+	entity := &PreferenceEntity{Timezone: c.Body.Timezone, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	created, err2 := PreferenceActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2

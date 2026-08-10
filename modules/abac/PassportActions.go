@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -92,6 +93,13 @@ func PassportCreateAction(c PassportCreateActionRequest) (*PassportCreateActionR
 	if err != nil {
 		return nil, err
 	}
+	// type/value are validate:"required" (see PassportDto.go) but nothing was actually
+	// enforcing it - same fix as
+	// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction /
+	// modules/abac/interfacetools's TableViewSizingCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
 	entity := &PassportEntity{
 		ThirdPartyVerifier: c.Body.ThirdPartyVerifier,
 		Type:               c.Body.Type,
@@ -102,6 +110,14 @@ func PassportCreateAction(c PassportCreateActionRequest) (*PassportCreateActionR
 		Password:           c.Body.Password,
 		Confirmed:          c.Body.Confirmed,
 		AccessToken:        c.Body.AccessToken,
+		// AllowOnRoot above means query.WorkspaceId is always "root" here anyway (any
+		// other workspace is rejected before reaching this point) - matches "Passport
+		// and user always belong to the root workspace" elsewhere (see
+		// UnsafeGenerateUser). Without this, the row is invisible to
+		// PassportBrowseAction's workspace-scoped query (see GetSqlContext) - same
+		// workspace-stamping fix as EmailConfirmationCreateAction/
+		// AppMenuCreateAction/TimezoneGroupCreateAction.
+		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 	}
 	created, err2 := PassportActions.Create(entity, *query)
 	if err2 != nil {

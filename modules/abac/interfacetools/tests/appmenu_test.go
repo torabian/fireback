@@ -173,7 +173,7 @@ func TestAppMenuBrowse_HTTP_IncludesOwnRecord(t *testing.T) {
 	defer deleteAppMenu(t, cfg, created.UniqueId)
 
 	client := cfg.NewHTTPClient()
-	req, err := http.NewRequest(http.MethodGet, cfg.URL("/appMenu/browse"), nil)
+	req, err := http.NewRequest(http.MethodGet, cfg.URL("/appMenu/browse?itemsPerPage=1000"), nil)
 	if err != nil {
 		t.Fatalf("failed to build browse request: %v", err)
 	}

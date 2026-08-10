@@ -102,6 +102,12 @@ func UserCreateAction(c UserCreateActionRequest) (*UserCreateActionResponse, err
 	if err != nil {
 		return nil, err
 	}
+	// firstName/lastName are validate:"required" (see UserDto.go) but nothing was
+	// actually enforcing it - same fix as
+	// EmailProviderCreateAction/TableViewSizingCreateAction/PassportCreateAction.
+	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
+		return nil, err2
+	}
 	entity := &UserEntity{
 		FirstName:     c.Body.FirstName,
 		LastName:      c.Body.LastName,
@@ -248,6 +254,18 @@ func UserActionCreate(
 	dto *UserEntity, query fireback.QueryDSL,
 ) (*UserEntity, *fireback.IError) {
 	query.WorkspaceId = "root"
+	// Setting query.WorkspaceId above has no effect on the stored row by itself - the
+	// generic EntityActionsBundle.Create this calls into (UserActions.Create) just does
+	// fireback.CreateEntity(*dto), which never reads query at all. Without also
+	// stamping dto.WorkspaceId directly, every user ever created through this
+	// function - not just UserCreateAction's own admin endpoint, but the shared
+	// signup/OS-login/OAuth path too (see UnsafeGenerateUser) - got a permanently null
+	// workspaceId, making them invisible to UserBrowseAction's workspace-scoped query
+	// (confirmed empirically: /user/browse reported totalItems:1 for a single-user dev
+	// database but returned zero actual items).
+	if dto != nil {
+		dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	}
 	return UserActions.Create(dto, query)
 }
 

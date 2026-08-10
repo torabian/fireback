@@ -601,7 +601,7 @@ func TestAcceptInvite_HTTP_Succeeds(t *testing.T) {
 	// checked here - is that AcceptInviteActionImplementation.go's transaction actually
 	// created a WorkspaceRoleEntity row carrying the exact roleId from the invite.
 	wrClient := cfg.NewHTTPClient()
-	wrReq, _ := http.NewRequest(http.MethodGet, cfg.URL("/workspaceRole/browse"), nil)
+	wrReq, _ := http.NewRequest(http.MethodGet, cfg.URL("/workspaceRole/browse?itemsPerPage=1000"), nil)
 	wrReq.Header.Set("Authorization", cfg.CliToken)
 	wrReq.Header.Set("Workspace-id", cfg.WorkspaceID)
 	wrResp, err := wrClient.Do(wrReq)
