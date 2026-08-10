@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	seeders "github.com/torabian/fireback/modules/abac/seeders/PassportMethod"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -13,7 +14,7 @@ func PassportMethodSyncSeeders() {
 	fireback.SeederFromFSImport(
 		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		PassportMethodActions.Create,
-		reflect.ValueOf(&PassportMethodEntity{}).Elem(),
+		reflect.ValueOf(&abacdefs.PassportMethodEntity{}).Elem(),
 		&seeders.ViewsFs,
 		[]string{},
 		true,
@@ -43,9 +44,9 @@ var PERM_ROOT_PASSPORT_METHOD_UPDATE = passportMethodPerms.Update
 var PERM_ROOT_PASSPORT_METHOD_DELETE = passportMethodPerms.Delete
 var ALL_PASSPORT_METHOD_PERMISSIONS = passportMethodPerms.All
 
-var PassportMethodActions = NewEntityActionsBundle[PassportMethodEntity]()
+var PassportMethodActions = NewEntityActionsBundle[abacdefs.PassportMethodEntity]()
 
-func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*PassportMethodEntity, *fireback.QueryResultMeta, *fireback.IError) {
+func PassportMethodEntityStream(q fireback.QueryDSL) (chan []*abacdefs.PassportMethodEntity, *fireback.QueryResultMeta, *fireback.IError) {
 	return StreamEntityQuery(PassportMethodActions.Query, q)
 }
 
@@ -60,7 +61,7 @@ func passportMethodSecurity(perm application.PermissionInfo) *fireback.SecurityM
 	}
 }
 
-func PassportMethodBrowseAction(c PassportMethodBrowseActionRequest) (*PassportMethodBrowseActionResponse, error) {
+func PassportMethodBrowseAction(c abacdefs.PassportMethodBrowseActionRequest) (*abacdefs.PassportMethodBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, passportMethodSecurity(PERM_ROOT_PASSPORT_METHOD_QUERY))
 	if err != nil {
 		return nil, err
@@ -69,10 +70,10 @@ func PassportMethodBrowseAction(c PassportMethodBrowseActionRequest) (*PassportM
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportMethodBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.PassportMethodBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func PassportMethodGetAction(c PassportMethodGetActionRequest) (*PassportMethodGetActionResponse, error) {
+func PassportMethodGetAction(c abacdefs.PassportMethodGetActionRequest) (*abacdefs.PassportMethodGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, passportMethodSecurity(PERM_ROOT_PASSPORT_METHOD_QUERY))
 	if err != nil {
 		return nil, err
@@ -82,7 +83,7 @@ func PassportMethodGetAction(c PassportMethodGetActionRequest) (*PassportMethodG
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportMethodGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.PassportMethodGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
 // passportMethodDuplicateCheck rejects a (type, region) pair another row already
@@ -92,8 +93,8 @@ func PassportMethodGetAction(c PassportMethodGetActionRequest) (*PassportMethodG
 // itself, so a no-op update (or one that doesn't touch type/region) doesn't trip on
 // the row's own existing values.
 func passportMethodDuplicateCheck(methodType string, region string, excludeUniqueId string) *fireback.IError {
-	db := fireback.GetDbRef().Model(&PassportMethodEntity{}).
-		Where(&PassportMethodEntity{Type: methodType, Region: region})
+	db := fireback.GetDbRef().Model(&abacdefs.PassportMethodEntity{}).
+		Where(&abacdefs.PassportMethodEntity{Type: methodType, Region: region})
 
 	if excludeUniqueId != "" {
 		db = db.Where("unique_id <> ?", excludeUniqueId)
@@ -114,7 +115,7 @@ func passportMethodDuplicateCheck(methodType string, region string, excludeUniqu
 	return nil
 }
 
-func PassportMethodCreateAction(c PassportMethodCreateActionRequest) (*PassportMethodCreateActionResponse, error) {
+func PassportMethodCreateAction(c abacdefs.PassportMethodCreateActionRequest) (*abacdefs.PassportMethodCreateActionResponse, error) {
 
 	if err := fireback.CommonStructValidatorPointer(&c.Body, false); !fireback.IsNilish(err) {
 		return nil, err
@@ -129,7 +130,7 @@ func PassportMethodCreateAction(c PassportMethodCreateActionRequest) (*PassportM
 		return nil, dupErr
 	}
 
-	entity := &PassportMethodEntity{
+	entity := &abacdefs.PassportMethodEntity{
 		Type:        c.Body.Type,
 		Region:      c.Body.Region,
 		ClientKey:   c.Body.ClientKey,
@@ -139,16 +140,16 @@ func PassportMethodCreateAction(c PassportMethodCreateActionRequest) (*PassportM
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportMethodCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.PassportMethodCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func PassportMethodUpdateAction(c PassportMethodUpdateActionRequest) (*PassportMethodUpdateActionResponse, error) {
+func PassportMethodUpdateAction(c abacdefs.PassportMethodUpdateActionRequest) (*abacdefs.PassportMethodUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, passportMethodSecurity(PERM_ROOT_PASSPORT_METHOD_UPDATE))
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &PassportMethodEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.PassportMethodEntity{UniqueId: c.Params.UniqueId}
 
 	newType, typeChanging := c.Body.Type.Get()
 	if typeChanging {
@@ -190,27 +191,27 @@ func PassportMethodUpdateAction(c PassportMethodUpdateActionRequest) (*PassportM
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PassportMethodUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.PassportMethodUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func PassportMethodAwareDeletePreviewAction(c PassportMethodAwareDeletePreviewActionRequest) (*PassportMethodAwareDeletePreviewActionResponse, error) {
+func PassportMethodAwareDeletePreviewAction(c abacdefs.PassportMethodAwareDeletePreviewActionRequest) (*abacdefs.PassportMethodAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, passportMethodSecurity(PERM_ROOT_PASSPORT_METHOD_DELETE)); err != nil {
 		return nil, err
 	}
-	uniqueIds := PassportMethodAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := PassportMethodEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.PassportMethodAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.PassportMethodEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PassportMethodAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.PassportMethodAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func PassportMethodAwareDeleteAction(c PassportMethodAwareDeleteActionRequest) (*PassportMethodAwareDeleteActionResponse, error) {
+func PassportMethodAwareDeleteAction(c abacdefs.PassportMethodAwareDeleteActionRequest) (*abacdefs.PassportMethodAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, passportMethodSecurity(PERM_ROOT_PASSPORT_METHOD_DELETE)); err != nil {
 		return nil, err
 	}
-	if err2 := PassportMethodEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.PassportMethodEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PassportMethodAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.PassportMethodAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

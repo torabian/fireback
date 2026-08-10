@@ -3,15 +3,16 @@ package abac
 import (
 	"strings"
 
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func WorkspaceActionUpdate(query fireback.QueryDSL, fields *WorkspaceEntity) (*WorkspaceEntity, *fireback.IError) {
+func WorkspaceActionUpdate(query fireback.QueryDSL, fields *abacdefs.WorkspaceEntity) (*abacdefs.WorkspaceEntity, *fireback.IError) {
 
-	var item WorkspaceEntity
+	var item abacdefs.WorkspaceEntity
 	err := fireback.GetDbRef().
-		Where(&WorkspaceEntity{UniqueId: fields.UniqueId}).
+		Where(&abacdefs.WorkspaceEntity{UniqueId: fields.UniqueId}).
 		First(&item).
 		UpdateColumns(fields).Error
 	if err != nil {
@@ -21,7 +22,7 @@ func WorkspaceActionUpdate(query fireback.QueryDSL, fields *WorkspaceEntity) (*W
 	return &item, nil
 }
 
-func SendInviteEmail(query fireback.QueryDSL, invite *WorkspaceInviteEntity) *fireback.IError {
+func SendInviteEmail(query fireback.QueryDSL, invite *abacdefs.WorkspaceInviteEntity) *fireback.IError {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 

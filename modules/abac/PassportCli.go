@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
@@ -43,7 +44,7 @@ var AppendEmailPassportToUser cli.Command = cli.Command{
 		email := c.String("email")
 		password := c.String("password")
 
-		session, err := PassportAppendEmailToUser(&ClassicAuthDto{
+		session, err := PassportAppendEmailToUser(&abacdefs.ClassicAuthDto{
 			Value: email, Password: password,
 		}, f)
 
@@ -70,23 +71,23 @@ var PassportCli cli.Command = cli.Command{
 		{
 			Name: "method",
 			Commands: []*cli.Command{
-				PassportMethodBrowseActionCliHandler(PassportMethodBrowseAction),
-				PassportMethodGetActionCliHandler(PassportMethodGetAction),
-				PassportMethodCreateActionCliHandler(PassportMethodCreateAction),
-				PassportMethodUpdateActionCliHandler(PassportMethodUpdateAction),
-				PassportMethodAwareDeletePreviewActionCliHandler(PassportMethodAwareDeletePreviewAction),
-				PassportMethodAwareDeleteActionCliHandler(PassportMethodAwareDeleteAction),
+				abacdefs.PassportMethodBrowseActionCliHandler(PassportMethodBrowseAction),
+				abacdefs.PassportMethodGetActionCliHandler(PassportMethodGetAction),
+				abacdefs.PassportMethodCreateActionCliHandler(PassportMethodCreateAction),
+				abacdefs.PassportMethodUpdateActionCliHandler(PassportMethodUpdateAction),
+				abacdefs.PassportMethodAwareDeletePreviewActionCliHandler(PassportMethodAwareDeletePreviewAction),
+				abacdefs.PassportMethodAwareDeleteActionCliHandler(PassportMethodAwareDeleteAction),
 			},
 		},
-		OsLoginAuthenticateActionCliHandler(OsLoginAuthenticateAction),
-		CheckPassportMethodsActionCliHandler(CheckPassportMethodsAction),
-		UserPassportsActionCliHandler(UserPassportsAction),
-		OauthAuthenticateActionCliHandler(OauthAuthenticateAction),
-		PassportBrowseActionCliHandler(PassportBrowseAction),
-		PassportGetActionCliHandler(PassportGetAction),
-		PassportCreateActionCliHandler(PassportCreateAction),
-		PassportUpdateActionCliHandler(PassportUpdateAction),
-		PassportAwareDeletePreviewActionCliHandler(PassportAwareDeletePreviewAction),
-		PassportAwareDeleteActionCliHandler(PassportAwareDeleteAction),
+		abacdefs.OsLoginAuthenticateActionCliHandler(OsLoginAuthenticateAction),
+		abacdefs.CheckPassportMethodsActionCliHandler(CheckPassportMethodsAction),
+		abacdefs.UserPassportsActionCliHandler(UserPassportsAction),
+		abacdefs.OauthAuthenticateActionCliHandler(OauthAuthenticateAction),
+		abacdefs.PassportBrowseActionCliHandler(PassportBrowseAction),
+		abacdefs.PassportGetActionCliHandler(PassportGetAction),
+		abacdefs.PassportCreateActionCliHandler(PassportCreateAction),
+		abacdefs.PassportUpdateActionCliHandler(PassportUpdateAction),
+		abacdefs.PassportAwareDeletePreviewActionCliHandler(PassportAwareDeletePreviewAction),
+		abacdefs.PassportAwareDeleteActionCliHandler(PassportAwareDeleteAction),
 	},
 }

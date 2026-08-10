@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -14,9 +15,9 @@ var PERM_ROOT_EMAIL_CONFIRMATION_UPDATE = emailConfirmationPerms.Update
 var PERM_ROOT_EMAIL_CONFIRMATION_DELETE = emailConfirmationPerms.Delete
 var ALL_EMAIL_CONFIRMATION_PERMISSIONS = emailConfirmationPerms.All
 
-var EmailConfirmationActions = NewEntityActionsBundle[EmailConfirmationEntity]()
+var EmailConfirmationActions = NewEntityActionsBundle[abacdefs.EmailConfirmationEntity]()
 
-func EmailConfirmationBrowseAction(c EmailConfirmationBrowseActionRequest) (*EmailConfirmationBrowseActionResponse, error) {
+func EmailConfirmationBrowseAction(c abacdefs.EmailConfirmationBrowseActionRequest) (*abacdefs.EmailConfirmationBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY}})
 	if err != nil {
 		return nil, err
@@ -25,10 +26,10 @@ func EmailConfirmationBrowseAction(c EmailConfirmationBrowseActionRequest) (*Ema
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailConfirmationBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.EmailConfirmationBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func EmailConfirmationGetAction(c EmailConfirmationGetActionRequest) (*EmailConfirmationGetActionResponse, error) {
+func EmailConfirmationGetAction(c abacdefs.EmailConfirmationGetActionRequest) (*abacdefs.EmailConfirmationGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_QUERY}})
 	if err != nil {
 		return nil, err
@@ -38,15 +39,15 @@ func EmailConfirmationGetAction(c EmailConfirmationGetActionRequest) (*EmailConf
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailConfirmationGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.EmailConfirmationGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func EmailConfirmationCreateAction(c EmailConfirmationCreateActionRequest) (*EmailConfirmationCreateActionResponse, error) {
+func EmailConfirmationCreateAction(c abacdefs.EmailConfirmationCreateActionRequest) (*abacdefs.EmailConfirmationCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_CREATE}})
 	if err != nil {
 		return nil, err
 	}
-	entity := &EmailConfirmationEntity{
+	entity := &abacdefs.EmailConfirmationEntity{
 		UserId:    c.Body.UserId,
 		Status:    c.Body.Status,
 		Email:     c.Body.Email,
@@ -62,16 +63,16 @@ func EmailConfirmationCreateAction(c EmailConfirmationCreateActionRequest) (*Ema
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailConfirmationCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.EmailConfirmationCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func EmailConfirmationUpdateAction(c EmailConfirmationUpdateActionRequest) (*EmailConfirmationUpdateActionResponse, error) {
+func EmailConfirmationUpdateAction(c abacdefs.EmailConfirmationUpdateActionRequest) (*abacdefs.EmailConfirmationUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &EmailConfirmationEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.EmailConfirmationEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.UserId.Get(); ok {
 		fields.UserId = emigo.NullableOf(*v)
 	}
@@ -91,27 +92,27 @@ func EmailConfirmationUpdateAction(c EmailConfirmationUpdateActionRequest) (*Ema
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailConfirmationUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.EmailConfirmationUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func EmailConfirmationAwareDeletePreviewAction(c EmailConfirmationAwareDeletePreviewActionRequest) (*EmailConfirmationAwareDeletePreviewActionResponse, error) {
+func EmailConfirmationAwareDeletePreviewAction(c abacdefs.EmailConfirmationAwareDeletePreviewActionRequest) (*abacdefs.EmailConfirmationAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}}); err != nil {
 		return nil, err
 	}
-	uniqueIds := EmailConfirmationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := EmailConfirmationEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.EmailConfirmationAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.EmailConfirmationEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &EmailConfirmationAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.EmailConfirmationAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func EmailConfirmationAwareDeleteAction(c EmailConfirmationAwareDeleteActionRequest) (*EmailConfirmationAwareDeleteActionResponse, error) {
+func EmailConfirmationAwareDeleteAction(c abacdefs.EmailConfirmationAwareDeleteActionRequest) (*abacdefs.EmailConfirmationAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_CONFIRMATION_DELETE}}); err != nil {
 		return nil, err
 	}
-	if err2 := EmailConfirmationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.EmailConfirmationEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &EmailConfirmationAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.EmailConfirmationAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

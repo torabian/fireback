@@ -4,10 +4,11 @@ import (
 	"sort"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest) (*QueryUserRoleWorkspacesActionResponse, error) {
+func QueryUserRoleWorkspacesAction(c abacdefs.QueryUserRoleWorkspacesActionRequest) (*abacdefs.QueryUserRoleWorkspacesActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
@@ -16,22 +17,22 @@ func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest) (*Que
 	}
 	q := *query
 
-	items := []*QueryUserRoleWorkspacesActionRes{}
+	items := []*abacdefs.QueryUserRoleWorkspacesActionRes{}
 
 	if q.UserAccessPerWorkspace != nil {
 
 		for workspaceId, content := range *q.UserAccessPerWorkspace {
-			roles := []QueryUserRoleWorkspacesActionResRoles{}
+			roles := []abacdefs.QueryUserRoleWorkspacesActionResRoles{}
 
 			for roleId, roleContent := range content.UserRoles {
-				roles = append(roles, QueryUserRoleWorkspacesActionResRoles{
+				roles = append(roles, abacdefs.QueryUserRoleWorkspacesActionResRoles{
 					Name:         roleContent.Name,
 					Capabilities: roleContent.Accesses,
 					UniqueId:     roleId,
 				})
 			}
 
-			items = append(items, &QueryUserRoleWorkspacesActionRes{
+			items = append(items, &abacdefs.QueryUserRoleWorkspacesActionRes{
 				Name:         content.Name,
 				UniqueId:     workspaceId,
 				Roles:        emigo.ArrayReplace(roles),
@@ -44,7 +45,7 @@ func QueryUserRoleWorkspacesAction(c QueryUserRoleWorkspacesActionRequest) (*Que
 		return items[i].UniqueId < items[j].UniqueId
 	})
 
-	return &QueryUserRoleWorkspacesActionResponse{
+	return &abacdefs.QueryUserRoleWorkspacesActionResponse{
 		Payload: fireback.GResponseQuery(items, nil, &q),
 	}, nil
 }

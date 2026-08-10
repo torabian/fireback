@@ -22,9 +22,9 @@ complexes:
 
 targets:
   - compiler: go
-    output: ./
+    output: ./defs
     flags:
-      pkg: abac
+      pkg: abacdefs
   - compiler: js
     output: ../../ui/src/modules/sdk/abac
     clean: true

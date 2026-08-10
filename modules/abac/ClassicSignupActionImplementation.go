@@ -6,11 +6,12 @@ import (
 
 	"github.com/pquerna/otp/totp"
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
 // Responsible for user creation from public flows in the application.
-func ClassicSignupAction(c ClassicSignupActionRequest) (*ClassicSignupActionResponse, error) {
+func ClassicSignupAction(c abacdefs.ClassicSignupActionRequest) (*abacdefs.ClassicSignupActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -21,14 +22,14 @@ func ClassicSignupAction(c ClassicSignupActionRequest) (*ClassicSignupActionResp
 		return nil, err2
 	}
 
-	return &ClassicSignupActionResponse{
+	return &abacdefs.ClassicSignupActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 
 // classicSignupCore holds the actual implementation, reusable by callers which
 // already have a resolved QueryDSL (such as the cli-only AuthFlow).
-func classicSignupCore(dto ClassicSignupActionReq, query fireback.QueryDSL) (*ClassicSignupActionRes, *fireback.IError) {
+func classicSignupCore(dto abacdefs.ClassicSignupActionReq, query fireback.QueryDSL) (*abacdefs.ClassicSignupActionRes, *fireback.IError) {
 
 	if err := fireback.CommonStructValidatorPointer(&dto, false); err != nil {
 		fmt.Println(err)
@@ -104,14 +105,14 @@ func classicSignupCore(dto ClassicSignupActionReq, query fireback.QueryDSL) (*Cl
 		}
 	}
 
-	var publicSession *PublicAuthenticationEntity = nil
+	var publicSession *abacdefs.PublicAuthenticationEntity = nil
 	if requiresSessionSecret {
 		if strings.TrimSpace(dto.SessionSecret) == "" {
 			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNeeded, []string{})
 		}
 
 		// Here we need to do some comparison to make sure this is the correct session secret
-		fireback.GetDbRef().Where(&PublicAuthenticationEntity{SessionSecret: dto.SessionSecret}).Find(&publicSession)
+		fireback.GetDbRef().Where(&abacdefs.PublicAuthenticationEntity{SessionSecret: dto.SessionSecret}).Find(&publicSession)
 
 		if strings.TrimSpace(dto.SessionSecret) == "" {
 			return nil, fireback.Create401Error(&AbacMessages.SessionSecretIsNotAvailable, []string{})
@@ -132,12 +133,12 @@ func classicSignupCore(dto ClassicSignupActionReq, query fireback.QueryDSL) (*Cl
 // In case we neeed to change the config slightly, you can get the config
 // and change it for this specific function
 func completeClassicSignupProcess(
-	dto ClassicSignupActionReq,
+	dto abacdefs.ClassicSignupActionReq,
 	q fireback.QueryDSL,
-	publicSession *PublicAuthenticationEntity,
-	config *WorkspaceConfigEntity,
-	beforeProcess func(*UserEntity, *RoleEntity, *WorkspaceEntity, *PassportEntity),
-) (ClassicSignupActionRes, *fireback.IError) {
+	publicSession *abacdefs.PublicAuthenticationEntity,
+	config *abacdefs.WorkspaceConfigEntity,
+	beforeProcess func(*abacdefs.UserEntity, *abacdefs.RoleEntity, *abacdefs.WorkspaceEntity, *abacdefs.PassportEntity),
+) (abacdefs.ClassicSignupActionRes, *fireback.IError) {
 
 	user, role, workspace, passport := GetEmailPassportSignupMechanism(&dto)
 
@@ -187,13 +188,13 @@ func completeClassicSignupProcess(
 	}, q)
 
 	if sessionError != nil {
-		return ClassicSignupActionRes{}, sessionError
+		return abacdefs.ClassicSignupActionRes{}, sessionError
 	}
 
 	forcedTotp := config != nil && config.ForceTotp.OrDefault(false)
 	// let's check for totp setup, if the session is successful.
 	if config != nil && config.ForceTotp.OrDefault(false) && session != nil {
-		return ClassicSignupActionRes{
+		return abacdefs.ClassicSignupActionRes{
 			ContinueToTotp: true,
 			TotpUrl:        totpLink,
 			ForcedTotp:     forcedTotp,
@@ -202,7 +203,7 @@ func completeClassicSignupProcess(
 
 	// Clear the value so next time user can login directly
 	if sessionError == nil && session != nil && passport != nil && passport.Value != "" {
-		fireback.GetRef(q).Where(&PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&PublicAuthenticationEntity{})
+		fireback.GetRef(q).Where(&abacdefs.PublicAuthenticationEntity{PassportValue: passport.Value}).Delete(&abacdefs.PublicAuthenticationEntity{})
 	}
 
 	// Let's also set the cookie.
@@ -210,7 +211,7 @@ func completeClassicSignupProcess(
 		q.G.SetCookie("authorization", session.Token, 3600*24, "/", "", true, true)
 	}
 
-	return ClassicSignupActionRes{
+	return abacdefs.ClassicSignupActionRes{
 		Session:        emigo.NewOne(*session),
 		ContinueToTotp: false,
 		ForcedTotp:     forcedTotp,

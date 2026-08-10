@@ -12,6 +12,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/pquerna/otp/totp"
 	emigo "github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
@@ -26,13 +27,13 @@ func discoverPassportMethodsAndPrint(c *cli.Command) []string {
 		fmt.Sprintf("%v >>> %v", ANONYMOUS_AUTHENTICATION, "Anonymous, can be also created as root, with a unique identifier"),
 	}
 
-	res, err := CheckPassportMethodsAction(CheckPassportMethodsActionRequest{CliCtx: c})
+	res, err := CheckPassportMethodsAction(abacdefs.CheckPassportMethodsActionRequest{CliCtx: c})
 	if err != nil {
 		log.Fatalln("Error on checking passport methods: %w", err)
 	}
 
-	var passport CheckPassportMethodsActionRes
-	if res, ok := res.Payload.(fireback.GoogleResponse[*CheckPassportMethodsActionRes]); ok {
+	var passport abacdefs.CheckPassportMethodsActionRes
+	if res, ok := res.Payload.(fireback.GoogleResponse[*abacdefs.CheckPassportMethodsActionRes]); ok {
 		passport = *res.Data.Item
 	} else {
 		log.Fatalln("Checking passport methods publicly has failed, might be not available, or result is not back.")
@@ -120,7 +121,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 
 		value := fireback.AskForInput(label, prefix)
 		query.C = c
-		m, err := checkClassicPassportCore(CheckClassicPassportActionReq{
+		m, err := checkClassicPassportCore(abacdefs.CheckClassicPassportActionReq{
 			Value: value,
 		}, query)
 
@@ -155,7 +156,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 		if nextStep == "otp" {
 			otpCode := fireback.AskForInput("Enter the otp code. You might see it a bit above this command.", "")
 
-			res, err := classicPassportOtpCore(ClassicPassportOtpActionReq{
+			res, err := classicPassportOtpCore(abacdefs.ClassicPassportOtpActionReq{
 				Value: value, Otp: otpCode,
 			}, query)
 			if err != nil {
@@ -181,7 +182,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 
 			workspaceType := UNSAFE_allow_selection_of_workspace_type()
 
-			dto := ClassicSignupActionReq{
+			dto := abacdefs.ClassicSignupActionReq{
 				Value:           value,
 				Type:            selectedMethod,
 				WorkspaceTypeId: emigo.NullableOf(workspaceType.UniqueId),
@@ -242,7 +243,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 					return err
 				}
 
-				m, err := confirmClassicPassportTotpCore(ConfirmClassicPassportTotpActionReq{
+				m, err := confirmClassicPassportTotpCore(abacdefs.ConfirmClassicPassportTotpActionReq{
 					Value:    value,
 					Password: dto.Password,
 					TotpCode: code,
@@ -266,7 +267,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				// fresh signup) - the user's actual identity is UniqueId. See the same
 				// fix in UserCli.go's CreateAdminTransaction.
 				query.UserId = user.Item.UniqueId
-				createdUserWorkspace, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+				createdUserWorkspace, err2 := UserWorkspaceActions.Create(&abacdefs.UserWorkspaceEntity{
 					UniqueId:    fireback.UUID(),
 					UserId:      emigo.NullableOf(user.Item.UniqueId),
 					WorkspaceId: emigo.NullableOf(ROOT_VAR),
@@ -276,7 +277,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 					return err2
 				}
 
-				_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
+				_, err3 := WorkspaceRoleActions.Create(&abacdefs.WorkspaceRoleEntity{
 					UserWorkspaceId: emigo.NullableOf(createdUserWorkspace.UniqueId),
 					RoleId:          emigo.NullableOf(ROOT_VAR),
 					WorkspaceId:     emigo.NullableOf(ROOT_VAR),
@@ -299,7 +300,7 @@ func IntegrateAuthFlow(c *cli.Command) error {
 				password = result
 			}
 
-			if signin, err := classicSigninCore(ClassicSigninActionReq{
+			if signin, err := classicSigninCore(abacdefs.ClassicSigninActionReq{
 				Value:    value,
 				Password: password,
 			}, query); err != nil {
@@ -357,7 +358,7 @@ var AuthFlow cli.Command = cli.Command{
 		// this is useful to create an account in one go.
 		if c.NumFlags() > 0 {
 			appConfig := fireback.GetConfig()
-			dto := CastClassicSignupActionReqFromCli(c)
+			dto := abacdefs.CastClassicSignupActionReqFromCli(c)
 			query := fireback.CommonCliQueryDSLBuilder(c)
 
 			fmt.Println("Type", dto.Type)
@@ -409,7 +410,7 @@ var AuthFlow cli.Command = cli.Command{
 	},
 }
 
-func authenticateCliWithSession(session *UserSessionDto, workspaceTypeId string) {
+func authenticateCliWithSession(session *abacdefs.UserSessionDto, workspaceTypeId string) {
 	// Now we need to select a workspace.
 	var selectedWorkspace = ""
 	var workspaces = []string{}
@@ -437,8 +438,8 @@ func authenticateCliWithSession(session *UserSessionDto, workspaceTypeId string)
 	}
 }
 
-func UNSAFE_allow_selection_of_workspace_type() *QueryWorkspaceTypesPubliclyActionRes {
-	var selectedWorkspace *QueryWorkspaceTypesPubliclyActionRes = &QueryWorkspaceTypesPubliclyActionRes{
+func UNSAFE_allow_selection_of_workspace_type() *abacdefs.QueryWorkspaceTypesPubliclyActionRes {
+	var selectedWorkspace *abacdefs.QueryWorkspaceTypesPubliclyActionRes = &abacdefs.QueryWorkspaceTypesPubliclyActionRes{
 		UniqueId: ROOT_VAR,
 		Title:    "ROOT",
 	}

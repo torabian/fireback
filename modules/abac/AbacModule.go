@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/abac/migrations"
@@ -48,133 +49,133 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// Capability* actions - rather than through the legacy Module3Action/Impl glue.
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				WhoamiActionGin(g, WhoamiAction)
-				QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
-				InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
-				UserInvitationsActionGin(g, UserInvitationsAction)
-				SignoutActionGin(g, SignoutAction)
-				OauthAuthenticateActionGin(g, OauthAuthenticateAction)
-				AcceptInviteActionGin(g, AcceptInviteAction)
-				ConfirmClassicPassportTotpActionGin(g, ConfirmClassicPassportTotpAction)
-				ChangePasswordActionGin(g, ChangePasswordAction)
-				UserPassportsActionGin(g, UserPassportsAction)
-				CreateWorkspaceActionGin(g, CreateWorkspaceAction)
-				ClassicPassportRequestOtpActionGin(g, ClassicPassportRequestOtpAction)
-				ClassicPassportOtpActionGin(g, ClassicPassportOtpAction)
-				CheckClassicPassportActionGin(g, CheckClassicPassportAction)
-				ClassicSignupActionGin(g, ClassicSignupAction)
-				ClassicSigninActionGin(g, ClassicSigninAction)
-				QueryWorkspaceTypesPubliclyActionGin(g, QueryWorkspaceTypesPubliclyAction)
-				CheckPassportMethodsActionGin(g, CheckPassportMethodsAction)
-				OsLoginAuthenticateActionGin(g, OsLoginAuthenticateAction)
+				abacdefs.WhoamiActionGin(g, WhoamiAction)
+				abacdefs.QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
+				abacdefs.InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
+				abacdefs.UserInvitationsActionGin(g, UserInvitationsAction)
+				abacdefs.SignoutActionGin(g, SignoutAction)
+				abacdefs.OauthAuthenticateActionGin(g, OauthAuthenticateAction)
+				abacdefs.AcceptInviteActionGin(g, AcceptInviteAction)
+				abacdefs.ConfirmClassicPassportTotpActionGin(g, ConfirmClassicPassportTotpAction)
+				abacdefs.ChangePasswordActionGin(g, ChangePasswordAction)
+				abacdefs.UserPassportsActionGin(g, UserPassportsAction)
+				abacdefs.CreateWorkspaceActionGin(g, CreateWorkspaceAction)
+				abacdefs.ClassicPassportRequestOtpActionGin(g, ClassicPassportRequestOtpAction)
+				abacdefs.ClassicPassportOtpActionGin(g, ClassicPassportOtpAction)
+				abacdefs.CheckClassicPassportActionGin(g, CheckClassicPassportAction)
+				abacdefs.ClassicSignupActionGin(g, ClassicSignupAction)
+				abacdefs.ClassicSigninActionGin(g, ClassicSigninAction)
+				abacdefs.QueryWorkspaceTypesPubliclyActionGin(g, QueryWorkspaceTypesPubliclyAction)
+				abacdefs.CheckPassportMethodsActionGin(g, CheckPassportMethodsAction)
+				abacdefs.OsLoginAuthenticateActionGin(g, OsLoginAuthenticateAction)
 				// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider moved to
 				// modules/abac/messaging - see messaging.ModuleSetup. GsmSendSms stays
 				// here since it depends on NotificationConfigEntity, which stays in abac.
-				GsmSendSmsActionGin(g, GsmSendSmsAction)
+				abacdefs.GsmSendSmsActionGin(g, GsmSendSmsAction)
 
 				// TableViewSizing, TimezoneGroup, AppMenu (and /cte-app-menus) moved to
 				// modules/abac/interfacetools - see interfacetools.ModuleSetup.
 
-				PreferenceBrowseActionGin(g, PreferenceBrowseAction)
-				PreferenceGetActionGin(g, PreferenceGetAction)
-				PreferenceCreateActionGin(g, PreferenceCreateAction)
-				PreferenceUpdateActionGin(g, PreferenceUpdateAction)
-				PreferenceAwareDeletePreviewActionGin(g, PreferenceAwareDeletePreviewAction)
-				PreferenceAwareDeleteActionGin(g, PreferenceAwareDeleteAction)
+				abacdefs.PreferenceBrowseActionGin(g, PreferenceBrowseAction)
+				abacdefs.PreferenceGetActionGin(g, PreferenceGetAction)
+				abacdefs.PreferenceCreateActionGin(g, PreferenceCreateAction)
+				abacdefs.PreferenceUpdateActionGin(g, PreferenceUpdateAction)
+				abacdefs.PreferenceAwareDeletePreviewActionGin(g, PreferenceAwareDeletePreviewAction)
+				abacdefs.PreferenceAwareDeleteActionGin(g, PreferenceAwareDeleteAction)
 
-				UserProfileBrowseActionGin(g, UserProfileBrowseAction)
-				UserProfileGetActionGin(g, UserProfileGetAction)
-				UserProfileCreateActionGin(g, UserProfileCreateAction)
-				UserProfileUpdateActionGin(g, UserProfileUpdateAction)
-				UserProfileAwareDeletePreviewActionGin(g, UserProfileAwareDeletePreviewAction)
-				UserProfileAwareDeleteActionGin(g, UserProfileAwareDeleteAction)
+				abacdefs.UserProfileBrowseActionGin(g, UserProfileBrowseAction)
+				abacdefs.UserProfileGetActionGin(g, UserProfileGetAction)
+				abacdefs.UserProfileCreateActionGin(g, UserProfileCreateAction)
+				abacdefs.UserProfileUpdateActionGin(g, UserProfileUpdateAction)
+				abacdefs.UserProfileAwareDeletePreviewActionGin(g, UserProfileAwareDeletePreviewAction)
+				abacdefs.UserProfileAwareDeleteActionGin(g, UserProfileAwareDeleteAction)
 
-				PendingWorkspaceInviteBrowseActionGin(g, PendingWorkspaceInviteBrowseAction)
-				PendingWorkspaceInviteGetActionGin(g, PendingWorkspaceInviteGetAction)
-				PendingWorkspaceInviteCreateActionGin(g, PendingWorkspaceInviteCreateAction)
-				PendingWorkspaceInviteUpdateActionGin(g, PendingWorkspaceInviteUpdateAction)
-				PendingWorkspaceInviteAwareDeletePreviewActionGin(g, PendingWorkspaceInviteAwareDeletePreviewAction)
-				PendingWorkspaceInviteAwareDeleteActionGin(g, PendingWorkspaceInviteAwareDeleteAction)
+				abacdefs.PendingWorkspaceInviteBrowseActionGin(g, PendingWorkspaceInviteBrowseAction)
+				abacdefs.PendingWorkspaceInviteGetActionGin(g, PendingWorkspaceInviteGetAction)
+				abacdefs.PendingWorkspaceInviteCreateActionGin(g, PendingWorkspaceInviteCreateAction)
+				abacdefs.PendingWorkspaceInviteUpdateActionGin(g, PendingWorkspaceInviteUpdateAction)
+				abacdefs.PendingWorkspaceInviteAwareDeletePreviewActionGin(g, PendingWorkspaceInviteAwareDeletePreviewAction)
+				abacdefs.PendingWorkspaceInviteAwareDeleteActionGin(g, PendingWorkspaceInviteAwareDeleteAction)
 
-				TokenBrowseActionGin(g, TokenBrowseAction)
-				TokenGetActionGin(g, TokenGetAction)
-				TokenCreateActionGin(g, TokenCreateAction)
-				TokenUpdateActionGin(g, TokenUpdateAction)
-				TokenAwareDeletePreviewActionGin(g, TokenAwareDeletePreviewAction)
-				TokenAwareDeleteActionGin(g, TokenAwareDeleteAction)
+				abacdefs.TokenBrowseActionGin(g, TokenBrowseAction)
+				abacdefs.TokenGetActionGin(g, TokenGetAction)
+				abacdefs.TokenCreateActionGin(g, TokenCreateAction)
+				abacdefs.TokenUpdateActionGin(g, TokenUpdateAction)
+				abacdefs.TokenAwareDeletePreviewActionGin(g, TokenAwareDeletePreviewAction)
+				abacdefs.TokenAwareDeleteActionGin(g, TokenAwareDeleteAction)
 
-				WorkspaceInviteBrowseActionGin(g, WorkspaceInviteBrowseAction)
-				WorkspaceInviteGetActionGin(g, WorkspaceInviteGetAction)
-				WorkspaceInviteCreateActionGin(g, WorkspaceInviteCreateAction)
-				WorkspaceInviteUpdateActionGin(g, WorkspaceInviteUpdateAction)
-				WorkspaceInviteAwareDeletePreviewActionGin(g, WorkspaceInviteAwareDeletePreviewAction)
-				WorkspaceInviteAwareDeleteActionGin(g, WorkspaceInviteAwareDeleteAction)
+				abacdefs.WorkspaceInviteBrowseActionGin(g, WorkspaceInviteBrowseAction)
+				abacdefs.WorkspaceInviteGetActionGin(g, WorkspaceInviteGetAction)
+				abacdefs.WorkspaceInviteCreateActionGin(g, WorkspaceInviteCreateAction)
+				abacdefs.WorkspaceInviteUpdateActionGin(g, WorkspaceInviteUpdateAction)
+				abacdefs.WorkspaceInviteAwareDeletePreviewActionGin(g, WorkspaceInviteAwareDeletePreviewAction)
+				abacdefs.WorkspaceInviteAwareDeleteActionGin(g, WorkspaceInviteAwareDeleteAction)
 
-				UserWorkspaceBrowseActionGin(g, UserWorkspaceBrowseAction)
-				UserWorkspaceGetActionGin(g, UserWorkspaceGetAction)
-				UserWorkspaceCreateActionGin(g, UserWorkspaceCreateAction)
-				UserWorkspaceUpdateActionGin(g, UserWorkspaceUpdateAction)
-				UserWorkspaceAwareDeletePreviewActionGin(g, UserWorkspaceAwareDeletePreviewAction)
-				UserWorkspaceAwareDeleteActionGin(g, UserWorkspaceAwareDeleteAction)
+				abacdefs.UserWorkspaceBrowseActionGin(g, UserWorkspaceBrowseAction)
+				abacdefs.UserWorkspaceGetActionGin(g, UserWorkspaceGetAction)
+				abacdefs.UserWorkspaceCreateActionGin(g, UserWorkspaceCreateAction)
+				abacdefs.UserWorkspaceUpdateActionGin(g, UserWorkspaceUpdateAction)
+				abacdefs.UserWorkspaceAwareDeletePreviewActionGin(g, UserWorkspaceAwareDeletePreviewAction)
+				abacdefs.UserWorkspaceAwareDeleteActionGin(g, UserWorkspaceAwareDeleteAction)
 
-				WorkspaceRoleBrowseActionGin(g, WorkspaceRoleBrowseAction)
-				WorkspaceRoleGetActionGin(g, WorkspaceRoleGetAction)
-				WorkspaceRoleCreateActionGin(g, WorkspaceRoleCreateAction)
-				WorkspaceRoleUpdateActionGin(g, WorkspaceRoleUpdateAction)
-				WorkspaceRoleAwareDeletePreviewActionGin(g, WorkspaceRoleAwareDeletePreviewAction)
-				WorkspaceRoleAwareDeleteActionGin(g, WorkspaceRoleAwareDeleteAction)
+				abacdefs.WorkspaceRoleBrowseActionGin(g, WorkspaceRoleBrowseAction)
+				abacdefs.WorkspaceRoleGetActionGin(g, WorkspaceRoleGetAction)
+				abacdefs.WorkspaceRoleCreateActionGin(g, WorkspaceRoleCreateAction)
+				abacdefs.WorkspaceRoleUpdateActionGin(g, WorkspaceRoleUpdateAction)
+				abacdefs.WorkspaceRoleAwareDeletePreviewActionGin(g, WorkspaceRoleAwareDeletePreviewAction)
+				abacdefs.WorkspaceRoleAwareDeleteActionGin(g, WorkspaceRoleAwareDeleteAction)
 
-				RegionalContentBrowseActionGin(g, RegionalContentBrowseAction)
-				RegionalContentGetActionGin(g, RegionalContentGetAction)
-				RegionalContentCreateActionGin(g, RegionalContentCreateAction)
-				RegionalContentUpdateActionGin(g, RegionalContentUpdateAction)
-				RegionalContentAwareDeletePreviewActionGin(g, RegionalContentAwareDeletePreviewAction)
-				RegionalContentAwareDeleteActionGin(g, RegionalContentAwareDeleteAction)
+				abacdefs.RegionalContentBrowseActionGin(g, RegionalContentBrowseAction)
+				abacdefs.RegionalContentGetActionGin(g, RegionalContentGetAction)
+				abacdefs.RegionalContentCreateActionGin(g, RegionalContentCreateAction)
+				abacdefs.RegionalContentUpdateActionGin(g, RegionalContentUpdateAction)
+				abacdefs.RegionalContentAwareDeletePreviewActionGin(g, RegionalContentAwareDeletePreviewAction)
+				abacdefs.RegionalContentAwareDeleteActionGin(g, RegionalContentAwareDeleteAction)
 
-				CapabilityBrowseActionGin(g, GetCapabilitiesAction)
-				CapabilityGetActionGin(g, CapabilityGetAction)
-				CapabilityCreateActionGin(g, CapabilityCreateAction)
-				CapabilityUpdateActionGin(g, CapabilityUpdateAction)
-				CapabilityAwareDeletePreviewActionGin(g, CapabilityAwareDeletePreviewAction)
-				CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
-				CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
+				abacdefs.CapabilityBrowseActionGin(g, GetCapabilitiesAction)
+				abacdefs.CapabilityGetActionGin(g, CapabilityGetAction)
+				abacdefs.CapabilityCreateActionGin(g, CapabilityCreateAction)
+				abacdefs.CapabilityUpdateActionGin(g, CapabilityUpdateAction)
+				abacdefs.CapabilityAwareDeletePreviewActionGin(g, CapabilityAwareDeletePreviewAction)
+				abacdefs.CapabilityAwareDeleteActionGin(g, CapabilityAwareDeleteAction)
+				abacdefs.CapabilitiesTreeActionGin(g, CapabilitiesTreeAction)
 
-				WorkspaceConfigBrowseActionGin(g, WorkspaceConfigBrowseAction)
-				WorkspaceConfigGetActionGin(g, WorkspaceConfigGetAction)
-				WorkspaceConfigCreateActionGin(g, WorkspaceConfigCreateAction)
-				WorkspaceConfigUpdateActionGin(g, WorkspaceConfigUpdateAction)
-				WorkspaceConfigAwareDeletePreviewActionGin(g, WorkspaceConfigAwareDeletePreviewAction)
-				WorkspaceConfigAwareDeleteActionGin(g, WorkspaceConfigAwareDeleteAction)
-				WorkspaceConfigDistinctGetActionGin(g, WorkspaceConfigDistinctGetAction)
-				WorkspaceConfigDistinctUpdateActionGin(g, WorkspaceConfigDistinctUpdateAction)
+				abacdefs.WorkspaceConfigBrowseActionGin(g, WorkspaceConfigBrowseAction)
+				abacdefs.WorkspaceConfigGetActionGin(g, WorkspaceConfigGetAction)
+				abacdefs.WorkspaceConfigCreateActionGin(g, WorkspaceConfigCreateAction)
+				abacdefs.WorkspaceConfigUpdateActionGin(g, WorkspaceConfigUpdateAction)
+				abacdefs.WorkspaceConfigAwareDeletePreviewActionGin(g, WorkspaceConfigAwareDeletePreviewAction)
+				abacdefs.WorkspaceConfigAwareDeleteActionGin(g, WorkspaceConfigAwareDeleteAction)
+				abacdefs.WorkspaceConfigDistinctGetActionGin(g, WorkspaceConfigDistinctGetAction)
+				abacdefs.WorkspaceConfigDistinctUpdateActionGin(g, WorkspaceConfigDistinctUpdateAction)
 
-				RoleBrowseActionGin(g, RoleBrowseAction)
-				RoleGetActionGin(g, RoleGetAction)
-				RoleCreateActionGin(g, RoleCreateAction)
-				RoleUpdateActionGin(g, RoleUpdateAction)
-				RoleAwareDeletePreviewActionGin(g, RoleAwareDeletePreviewAction)
-				RoleAwareDeleteActionGin(g, RoleAwareDeleteAction)
+				abacdefs.RoleBrowseActionGin(g, RoleBrowseAction)
+				abacdefs.RoleGetActionGin(g, RoleGetAction)
+				abacdefs.RoleCreateActionGin(g, RoleCreateAction)
+				abacdefs.RoleUpdateActionGin(g, RoleUpdateAction)
+				abacdefs.RoleAwareDeletePreviewActionGin(g, RoleAwareDeletePreviewAction)
+				abacdefs.RoleAwareDeleteActionGin(g, RoleAwareDeleteAction)
 
-				WorkspaceTypeBrowseActionGin(g, WorkspaceTypeBrowseAction)
-				WorkspaceTypeGetActionGin(g, WorkspaceTypeGetAction)
-				WorkspaceTypeCreateActionGin(g, WorkspaceTypeCreateAction)
-				WorkspaceTypeUpdateActionGin(g, WorkspaceTypeUpdateAction)
-				WorkspaceTypeAwareDeletePreviewActionGin(g, WorkspaceTypeAwareDeletePreviewAction)
-				WorkspaceTypeAwareDeleteActionGin(g, WorkspaceTypeAwareDeleteAction)
+				abacdefs.WorkspaceTypeBrowseActionGin(g, WorkspaceTypeBrowseAction)
+				abacdefs.WorkspaceTypeGetActionGin(g, WorkspaceTypeGetAction)
+				abacdefs.WorkspaceTypeCreateActionGin(g, WorkspaceTypeCreateAction)
+				abacdefs.WorkspaceTypeUpdateActionGin(g, WorkspaceTypeUpdateAction)
+				abacdefs.WorkspaceTypeAwareDeletePreviewActionGin(g, WorkspaceTypeAwareDeletePreviewAction)
+				abacdefs.WorkspaceTypeAwareDeleteActionGin(g, WorkspaceTypeAwareDeleteAction)
 
-				UserBrowseActionGin(g, UserBrowseAction)
-				UserGetActionGin(g, UserGetAction)
-				UserCreateActionGin(g, UserCreateAction)
-				UserUpdateActionGin(g, UserUpdateAction)
-				UserAwareDeletePreviewActionGin(g, UserAwareDeletePreviewAction)
-				UserAwareDeleteActionGin(g, UserAwareDeleteAction)
+				abacdefs.UserBrowseActionGin(g, UserBrowseAction)
+				abacdefs.UserGetActionGin(g, UserGetAction)
+				abacdefs.UserCreateActionGin(g, UserCreateAction)
+				abacdefs.UserUpdateActionGin(g, UserUpdateAction)
+				abacdefs.UserAwareDeletePreviewActionGin(g, UserAwareDeletePreviewAction)
+				abacdefs.UserAwareDeleteActionGin(g, UserAwareDeleteAction)
 
-				WorkspaceBrowseActionGin(g, WorkspaceBrowseAction)
-				WorkspaceGetActionGin(g, WorkspaceGetAction)
-				WorkspaceCreateActionGin(g, WorkspaceCreateAction)
-				WorkspaceUpdateActionGin(g, WorkspaceUpdateAction)
-				WorkspaceAwareDeletePreviewActionGin(g, WorkspaceAwareDeletePreviewAction)
-				WorkspaceAwareDeleteActionGin(g, WorkspaceAwareDeleteAction)
+				abacdefs.WorkspaceBrowseActionGin(g, WorkspaceBrowseAction)
+				abacdefs.WorkspaceGetActionGin(g, WorkspaceGetAction)
+				abacdefs.WorkspaceCreateActionGin(g, WorkspaceCreateAction)
+				abacdefs.WorkspaceUpdateActionGin(g, WorkspaceUpdateAction)
+				abacdefs.WorkspaceAwareDeletePreviewActionGin(g, WorkspaceAwareDeletePreviewAction)
+				abacdefs.WorkspaceAwareDeleteActionGin(g, WorkspaceAwareDeleteAction)
 
 				return nil
 			},
@@ -210,20 +211,20 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 
 		items := []interface{}{
-			&UserEntity{},
-			&TokenEntity{},
-			&PreferenceEntity{},
-			&RoleEntity{},
-			&WorkspaceEntity{},
-			&WorkspaceInviteEntity{},
-			&WorkspaceConfigEntity{},
-			&WorkspaceTypeEntity{},
-			&WorkspaceRoleEntity{},
-			&UserWorkspaceEntity{},
-			&RegionalContentEntity{},
-			&UserProfileEntity{},
-			&PendingWorkspaceInviteEntity{},
-			&CapabilityEntity{},
+			&abacdefs.UserEntity{},
+			&abacdefs.TokenEntity{},
+			&abacdefs.PreferenceEntity{},
+			&abacdefs.RoleEntity{},
+			&abacdefs.WorkspaceEntity{},
+			&abacdefs.WorkspaceInviteEntity{},
+			&abacdefs.WorkspaceConfigEntity{},
+			&abacdefs.WorkspaceTypeEntity{},
+			&abacdefs.WorkspaceRoleEntity{},
+			&abacdefs.UserWorkspaceEntity{},
+			&abacdefs.RegionalContentEntity{},
+			&abacdefs.UserProfileEntity{},
+			&abacdefs.PendingWorkspaceInviteEntity{},
+			&abacdefs.CapabilityEntity{},
 		}
 
 		items2 := []interface{}{}
@@ -265,31 +266,29 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// QueryUserRoleWorkspaces/QueryWorkspaceTypesPublicly under WorkspaceCliFn,
 		// OsLoginAuthenticate/CheckPassportMethods/UserPassports/OauthAuthenticate under
 		// PassportCliFn - see UserEntity.go/WorkspaceCli.go/PassportCli.go).
-		WhoamiActionCliHandler(WhoamiAction),
-		SignoutActionCliHandler(SignoutAction),
-		InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
-		ConfirmClassicPassportTotpActionCliHandler(ConfirmClassicPassportTotpAction),
-		ChangePasswordActionCliHandler(ChangePasswordAction),
-		CreateWorkspaceActionCliHandler(CreateWorkspaceAction),
-		ClassicPassportRequestOtpActionCliHandler(ClassicPassportRequestOtpAction),
-		ClassicPassportOtpActionCliHandler(ClassicPassportOtpAction),
-		CheckClassicPassportActionCliHandler(CheckClassicPassportAction),
-		ClassicSignupActionCliHandler(ClassicSignupAction),
-		ClassicSigninActionCliHandler(ClassicSigninAction),
-		// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider moved to
-		// modules/abac/messaging - see messaging.ModuleSetup.
-		GsmSendSmsActionCliHandler(GsmSendSmsAction),
+		abacdefs.WhoamiActionCliHandler(WhoamiAction),
+		abacdefs.SignoutActionCliHandler(SignoutAction),
+		abacdefs.InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
+		abacdefs.ConfirmClassicPassportTotpActionCliHandler(ConfirmClassicPassportTotpAction),
+		abacdefs.ChangePasswordActionCliHandler(ChangePasswordAction),
+		abacdefs.CreateWorkspaceActionCliHandler(CreateWorkspaceAction),
+		abacdefs.ClassicPassportRequestOtpActionCliHandler(ClassicPassportRequestOtpAction),
+		abacdefs.ClassicPassportOtpActionCliHandler(ClassicPassportOtpAction),
+		abacdefs.CheckClassicPassportActionCliHandler(CheckClassicPassportAction),
+		abacdefs.ClassicSignupActionCliHandler(ClassicSignupAction),
+		abacdefs.ClassicSigninActionCliHandler(ClassicSigninAction),
+		abacdefs.GsmSendSmsActionCliHandler(GsmSendSmsAction),
 
 		{
 			Name:        "role",
 			Description: "Actions related to roles, creation, browsing and other.",
 			Commands: []*cli.Command{
-				RoleBrowseActionCliHandler(RoleBrowseAction),
-				RoleGetActionCliHandler(RoleGetAction),
-				RoleCreateActionCliHandler(RoleCreateAction),
-				RoleUpdateActionCliHandler(RoleUpdateAction),
-				RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
-				RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
+				abacdefs.RoleBrowseActionCliHandler(RoleBrowseAction),
+				abacdefs.RoleGetActionCliHandler(RoleGetAction),
+				abacdefs.RoleCreateActionCliHandler(RoleCreateAction),
+				abacdefs.RoleUpdateActionCliHandler(RoleUpdateAction),
+				abacdefs.RoleAwareDeletePreviewActionCliHandler(RoleAwareDeletePreviewAction),
+				abacdefs.RoleAwareDeleteActionCliHandler(RoleAwareDeleteAction),
 			},
 		},
 	})
@@ -308,42 +307,42 @@ var AbacActions cli.Command = cli.Command{
 				Name:  "internal",
 				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",
 				Commands: []*cli.Command{
-					PublicJoinKeyBrowseActionCliHandler(PublicJoinKeyBrowseAction),
-					PublicJoinKeyGetActionCliHandler(PublicJoinKeyGetAction),
-					PublicJoinKeyCreateActionCliHandler(PublicJoinKeyCreateAction),
-					PublicJoinKeyUpdateActionCliHandler(PublicJoinKeyUpdateAction),
-					PublicJoinKeyAwareDeletePreviewActionCliHandler(PublicJoinKeyAwareDeletePreviewAction),
-					PublicJoinKeyAwareDeleteActionCliHandler(PublicJoinKeyAwareDeleteAction),
-					PublicAuthenticationBrowseActionCliHandler(PublicAuthenticationBrowseAction),
-					PublicAuthenticationGetActionCliHandler(PublicAuthenticationGetAction),
-					PublicAuthenticationCreateActionCliHandler(PublicAuthenticationCreateAction),
-					PublicAuthenticationUpdateActionCliHandler(PublicAuthenticationUpdateAction),
-					PublicAuthenticationAwareDeletePreviewActionCliHandler(PublicAuthenticationAwareDeletePreviewAction),
-					PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
-					PreferenceBrowseActionCliHandler(PreferenceBrowseAction),
-					PreferenceGetActionCliHandler(PreferenceGetAction),
-					PreferenceCreateActionCliHandler(PreferenceCreateAction),
-					PreferenceUpdateActionCliHandler(PreferenceUpdateAction),
-					PreferenceAwareDeletePreviewActionCliHandler(PreferenceAwareDeletePreviewAction),
-					PreferenceAwareDeleteActionCliHandler(PreferenceAwareDeleteAction),
-					UserProfileBrowseActionCliHandler(UserProfileBrowseAction),
-					UserProfileGetActionCliHandler(UserProfileGetAction),
-					UserProfileCreateActionCliHandler(UserProfileCreateAction),
-					UserProfileUpdateActionCliHandler(UserProfileUpdateAction),
-					UserProfileAwareDeletePreviewActionCliHandler(UserProfileAwareDeletePreviewAction),
-					UserProfileAwareDeleteActionCliHandler(UserProfileAwareDeleteAction),
-					PendingWorkspaceInviteBrowseActionCliHandler(PendingWorkspaceInviteBrowseAction),
-					PendingWorkspaceInviteGetActionCliHandler(PendingWorkspaceInviteGetAction),
-					PendingWorkspaceInviteCreateActionCliHandler(PendingWorkspaceInviteCreateAction),
-					PendingWorkspaceInviteUpdateActionCliHandler(PendingWorkspaceInviteUpdateAction),
-					PendingWorkspaceInviteAwareDeletePreviewActionCliHandler(PendingWorkspaceInviteAwareDeletePreviewAction),
-					PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
-					CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
-					CapabilityGetActionCliHandler(CapabilityGetAction),
-					CapabilityCreateActionCliHandler(CapabilityCreateAction),
-					CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
-					CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
-					CapabilitiesTreeActionCliHandler(CapabilitiesTreeAction),
+					abacdefs.PublicJoinKeyBrowseActionCliHandler(PublicJoinKeyBrowseAction),
+					abacdefs.PublicJoinKeyGetActionCliHandler(PublicJoinKeyGetAction),
+					abacdefs.PublicJoinKeyCreateActionCliHandler(PublicJoinKeyCreateAction),
+					abacdefs.PublicJoinKeyUpdateActionCliHandler(PublicJoinKeyUpdateAction),
+					abacdefs.PublicJoinKeyAwareDeletePreviewActionCliHandler(PublicJoinKeyAwareDeletePreviewAction),
+					abacdefs.PublicJoinKeyAwareDeleteActionCliHandler(PublicJoinKeyAwareDeleteAction),
+					abacdefs.PublicAuthenticationBrowseActionCliHandler(PublicAuthenticationBrowseAction),
+					abacdefs.PublicAuthenticationGetActionCliHandler(PublicAuthenticationGetAction),
+					abacdefs.PublicAuthenticationCreateActionCliHandler(PublicAuthenticationCreateAction),
+					abacdefs.PublicAuthenticationUpdateActionCliHandler(PublicAuthenticationUpdateAction),
+					abacdefs.PublicAuthenticationAwareDeletePreviewActionCliHandler(PublicAuthenticationAwareDeletePreviewAction),
+					abacdefs.PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
+					abacdefs.PreferenceBrowseActionCliHandler(PreferenceBrowseAction),
+					abacdefs.PreferenceGetActionCliHandler(PreferenceGetAction),
+					abacdefs.PreferenceCreateActionCliHandler(PreferenceCreateAction),
+					abacdefs.PreferenceUpdateActionCliHandler(PreferenceUpdateAction),
+					abacdefs.PreferenceAwareDeletePreviewActionCliHandler(PreferenceAwareDeletePreviewAction),
+					abacdefs.PreferenceAwareDeleteActionCliHandler(PreferenceAwareDeleteAction),
+					abacdefs.UserProfileBrowseActionCliHandler(UserProfileBrowseAction),
+					abacdefs.UserProfileGetActionCliHandler(UserProfileGetAction),
+					abacdefs.UserProfileCreateActionCliHandler(UserProfileCreateAction),
+					abacdefs.UserProfileUpdateActionCliHandler(UserProfileUpdateAction),
+					abacdefs.UserProfileAwareDeletePreviewActionCliHandler(UserProfileAwareDeletePreviewAction),
+					abacdefs.UserProfileAwareDeleteActionCliHandler(UserProfileAwareDeleteAction),
+					abacdefs.PendingWorkspaceInviteBrowseActionCliHandler(PendingWorkspaceInviteBrowseAction),
+					abacdefs.PendingWorkspaceInviteGetActionCliHandler(PendingWorkspaceInviteGetAction),
+					abacdefs.PendingWorkspaceInviteCreateActionCliHandler(PendingWorkspaceInviteCreateAction),
+					abacdefs.PendingWorkspaceInviteUpdateActionCliHandler(PendingWorkspaceInviteUpdateAction),
+					abacdefs.PendingWorkspaceInviteAwareDeletePreviewActionCliHandler(PendingWorkspaceInviteAwareDeletePreviewAction),
+					abacdefs.PendingWorkspaceInviteAwareDeleteActionCliHandler(PendingWorkspaceInviteAwareDeleteAction),
+					abacdefs.CapabilityBrowseActionCliHandler(GetCapabilitiesAction),
+					abacdefs.CapabilityGetActionCliHandler(CapabilityGetAction),
+					abacdefs.CapabilityCreateActionCliHandler(CapabilityCreateAction),
+					abacdefs.CapabilityUpdateActionCliHandler(CapabilityUpdateAction),
+					abacdefs.CapabilityAwareDeleteActionCliHandler(CapabilityAwareDeleteAction),
+					abacdefs.CapabilitiesTreeActionCliHandler(CapabilitiesTreeAction),
 				},
 			},
 		},

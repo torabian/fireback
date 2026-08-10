@@ -3,6 +3,8 @@ package abac
 import (
 	"strings"
 	"testing"
+
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 )
 
 // TestRejectRootWorkspaceTypeDeletion covers the guard added to
@@ -108,7 +110,7 @@ func TestRoleHasRootWildcardCapability(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			role := &RoleEntity{CapabilitiesListId: RoleCapabilitiesListIdOf(tc.capabilities)}
+			role := &abacdefs.RoleEntity{CapabilitiesListId: RoleCapabilitiesListIdOf(tc.capabilities)}
 			if got := roleHasRootWildcardCapability(role); got != tc.want {
 				t.Errorf("roleHasRootWildcardCapability(%v) = %v, want %v", tc.capabilities, got, tc.want)
 			}

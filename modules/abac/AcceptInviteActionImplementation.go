@@ -2,11 +2,12 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
 )
 
-func AcceptInviteAction(c AcceptInviteActionRequest) (*AcceptInviteActionResponse, error) {
+func AcceptInviteAction(c abacdefs.AcceptInviteActionRequest) (*abacdefs.AcceptInviteActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
@@ -60,7 +61,7 @@ func AcceptInviteAction(c AcceptInviteActionRequest) (*AcceptInviteActionRespons
 		// authenticated and calling this action right now to accept it - q.UserId, resolved
 		// by ResolveActionContext above from their own session, regardless of whether they
 		// already existed or just signed up to accept this invite.
-		uw, uwErr := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+		uw, uwErr := UserWorkspaceActions.Create(&abacdefs.UserWorkspaceEntity{
 			WorkspaceId: invite.WorkspaceId,
 			UserId:      emigo.NullableOf(q.UserId),
 		}, q)
@@ -69,7 +70,7 @@ func AcceptInviteAction(c AcceptInviteActionRequest) (*AcceptInviteActionRespons
 			return uwErr
 		}
 
-		wre := &WorkspaceRoleEntity{
+		wre := &abacdefs.WorkspaceRoleEntity{
 			UserWorkspaceId: emigo.NullableOf(uw.UniqueId),
 			RoleId:          invite.RoleId,
 			WorkspaceId:     invite.WorkspaceId,
@@ -98,7 +99,7 @@ func AcceptInviteAction(c AcceptInviteActionRequest) (*AcceptInviteActionRespons
 		return nil, err2d.(*fireback.IError)
 	}
 
-	return &AcceptInviteActionResponse{
-		Payload: fireback.GResponseSingleItem(&AcceptInviteActionRes{Accepted: true}),
+	return &abacdefs.AcceptInviteActionResponse{
+		Payload: fireback.GResponseSingleItem(&abacdefs.AcceptInviteActionRes{Accepted: true}),
 	}, nil
 }

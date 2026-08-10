@@ -4,11 +4,12 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
 
-func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest) (*InviteToWorkspaceActionResponse, error) {
+func InviteToWorkspaceAction(c abacdefs.InviteToWorkspaceActionRequest) (*abacdefs.InviteToWorkspaceActionResponse, error) {
 	queryPtr, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_INVITE_CREATE},
 	})
@@ -67,7 +68,7 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest) (*InviteToWorkspa
 		userLocale = req.TargetUserLocale
 	}
 
-	invite := WorkspaceInviteEntity{}
+	invite := abacdefs.WorkspaceInviteEntity{}
 
 	invite.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
 	invite.UniqueId = fireback.UUID()
@@ -106,7 +107,7 @@ func InviteToWorkspaceAction(c InviteToWorkspaceActionRequest) (*InviteToWorkspa
 		}
 	}
 
-	return &InviteToWorkspaceActionResponse{
+	return &abacdefs.InviteToWorkspaceActionResponse{
 		Payload: fireback.GResponseSingleItem(invite),
 	}, nil
 }

@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/gin-gonic/gin"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -18,47 +19,47 @@ func PassportsModuleSetup() *application.ModuleProvider {
 		// directly here now, the same way FirebackModuleSetup wires Capability* actions.
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				PassportMethodBrowseActionGin(g, PassportMethodBrowseAction)
-				PassportMethodGetActionGin(g, PassportMethodGetAction)
-				PassportMethodCreateActionGin(g, PassportMethodCreateAction)
-				PassportMethodUpdateActionGin(g, PassportMethodUpdateAction)
-				PassportMethodAwareDeletePreviewActionGin(g, PassportMethodAwareDeletePreviewAction)
-				PassportMethodAwareDeleteActionGin(g, PassportMethodAwareDeleteAction)
+				abacdefs.PassportMethodBrowseActionGin(g, PassportMethodBrowseAction)
+				abacdefs.PassportMethodGetActionGin(g, PassportMethodGetAction)
+				abacdefs.PassportMethodCreateActionGin(g, PassportMethodCreateAction)
+				abacdefs.PassportMethodUpdateActionGin(g, PassportMethodUpdateAction)
+				abacdefs.PassportMethodAwareDeletePreviewActionGin(g, PassportMethodAwareDeletePreviewAction)
+				abacdefs.PassportMethodAwareDeleteActionGin(g, PassportMethodAwareDeleteAction)
 
-				PublicJoinKeyBrowseActionGin(g, PublicJoinKeyBrowseAction)
-				PublicJoinKeyGetActionGin(g, PublicJoinKeyGetAction)
-				PublicJoinKeyCreateActionGin(g, PublicJoinKeyCreateAction)
-				PublicJoinKeyUpdateActionGin(g, PublicJoinKeyUpdateAction)
-				PublicJoinKeyAwareDeletePreviewActionGin(g, PublicJoinKeyAwareDeletePreviewAction)
-				PublicJoinKeyAwareDeleteActionGin(g, PublicJoinKeyAwareDeleteAction)
+				abacdefs.PublicJoinKeyBrowseActionGin(g, PublicJoinKeyBrowseAction)
+				abacdefs.PublicJoinKeyGetActionGin(g, PublicJoinKeyGetAction)
+				abacdefs.PublicJoinKeyCreateActionGin(g, PublicJoinKeyCreateAction)
+				abacdefs.PublicJoinKeyUpdateActionGin(g, PublicJoinKeyUpdateAction)
+				abacdefs.PublicJoinKeyAwareDeletePreviewActionGin(g, PublicJoinKeyAwareDeletePreviewAction)
+				abacdefs.PublicJoinKeyAwareDeleteActionGin(g, PublicJoinKeyAwareDeleteAction)
 
-				EmailConfirmationBrowseActionGin(g, EmailConfirmationBrowseAction)
-				EmailConfirmationGetActionGin(g, EmailConfirmationGetAction)
-				EmailConfirmationCreateActionGin(g, EmailConfirmationCreateAction)
-				EmailConfirmationUpdateActionGin(g, EmailConfirmationUpdateAction)
-				EmailConfirmationAwareDeletePreviewActionGin(g, EmailConfirmationAwareDeletePreviewAction)
-				EmailConfirmationAwareDeleteActionGin(g, EmailConfirmationAwareDeleteAction)
+				abacdefs.EmailConfirmationBrowseActionGin(g, EmailConfirmationBrowseAction)
+				abacdefs.EmailConfirmationGetActionGin(g, EmailConfirmationGetAction)
+				abacdefs.EmailConfirmationCreateActionGin(g, EmailConfirmationCreateAction)
+				abacdefs.EmailConfirmationUpdateActionGin(g, EmailConfirmationUpdateAction)
+				abacdefs.EmailConfirmationAwareDeletePreviewActionGin(g, EmailConfirmationAwareDeletePreviewAction)
+				abacdefs.EmailConfirmationAwareDeleteActionGin(g, EmailConfirmationAwareDeleteAction)
 
-				PhoneConfirmationBrowseActionGin(g, PhoneConfirmationBrowseAction)
-				PhoneConfirmationGetActionGin(g, PhoneConfirmationGetAction)
-				PhoneConfirmationCreateActionGin(g, PhoneConfirmationCreateAction)
-				PhoneConfirmationUpdateActionGin(g, PhoneConfirmationUpdateAction)
-				PhoneConfirmationAwareDeletePreviewActionGin(g, PhoneConfirmationAwareDeletePreviewAction)
-				PhoneConfirmationAwareDeleteActionGin(g, PhoneConfirmationAwareDeleteAction)
+				abacdefs.PhoneConfirmationBrowseActionGin(g, PhoneConfirmationBrowseAction)
+				abacdefs.PhoneConfirmationGetActionGin(g, PhoneConfirmationGetAction)
+				abacdefs.PhoneConfirmationCreateActionGin(g, PhoneConfirmationCreateAction)
+				abacdefs.PhoneConfirmationUpdateActionGin(g, PhoneConfirmationUpdateAction)
+				abacdefs.PhoneConfirmationAwareDeletePreviewActionGin(g, PhoneConfirmationAwareDeletePreviewAction)
+				abacdefs.PhoneConfirmationAwareDeleteActionGin(g, PhoneConfirmationAwareDeleteAction)
 
-				PublicAuthenticationBrowseActionGin(g, PublicAuthenticationBrowseAction)
-				PublicAuthenticationGetActionGin(g, PublicAuthenticationGetAction)
-				PublicAuthenticationCreateActionGin(g, PublicAuthenticationCreateAction)
-				PublicAuthenticationUpdateActionGin(g, PublicAuthenticationUpdateAction)
-				PublicAuthenticationAwareDeletePreviewActionGin(g, PublicAuthenticationAwareDeletePreviewAction)
-				PublicAuthenticationAwareDeleteActionGin(g, PublicAuthenticationAwareDeleteAction)
+				abacdefs.PublicAuthenticationBrowseActionGin(g, PublicAuthenticationBrowseAction)
+				abacdefs.PublicAuthenticationGetActionGin(g, PublicAuthenticationGetAction)
+				abacdefs.PublicAuthenticationCreateActionGin(g, PublicAuthenticationCreateAction)
+				abacdefs.PublicAuthenticationUpdateActionGin(g, PublicAuthenticationUpdateAction)
+				abacdefs.PublicAuthenticationAwareDeletePreviewActionGin(g, PublicAuthenticationAwareDeletePreviewAction)
+				abacdefs.PublicAuthenticationAwareDeleteActionGin(g, PublicAuthenticationAwareDeleteAction)
 
-				PassportBrowseActionGin(g, PassportBrowseAction)
-				PassportGetActionGin(g, PassportGetAction)
-				PassportCreateActionGin(g, PassportCreateAction)
-				PassportUpdateActionGin(g, PassportUpdateAction)
-				PassportAwareDeletePreviewActionGin(g, PassportAwareDeletePreviewAction)
-				PassportAwareDeleteActionGin(g, PassportAwareDeleteAction)
+				abacdefs.PassportBrowseActionGin(g, PassportBrowseAction)
+				abacdefs.PassportGetActionGin(g, PassportGetAction)
+				abacdefs.PassportCreateActionGin(g, PassportCreateAction)
+				abacdefs.PassportUpdateActionGin(g, PassportUpdateAction)
+				abacdefs.PassportAwareDeletePreviewActionGin(g, PassportAwareDeletePreviewAction)
+				abacdefs.PassportAwareDeleteActionGin(g, PassportAwareDeleteAction)
 
 				return nil
 			},
@@ -77,12 +78,12 @@ func PassportsModuleSetup() *application.ModuleProvider {
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 
 		return dbref.AutoMigrate(
-			&EmailConfirmationEntity{},
-			&PhoneConfirmationEntity{},
-			&PublicAuthenticationEntity{},
-			&PassportEntity{},
-			&PassportMethodEntity{},
-			&PublicJoinKeyEntity{},
+			&abacdefs.EmailConfirmationEntity{},
+			&abacdefs.PhoneConfirmationEntity{},
+			&abacdefs.PublicAuthenticationEntity{},
+			&abacdefs.PassportEntity{},
+			&abacdefs.PassportMethodEntity{},
+			&abacdefs.PublicJoinKeyEntity{},
 		)
 	})
 

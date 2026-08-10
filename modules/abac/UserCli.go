@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ import (
 var ROOT_ALL_ACCESS = "root.*"
 var ROOT_ALL_MODULES = "root.modules.*"
 
-var OS_SIGNIN_CAPABILITIES []*CapabilityEntity = []*CapabilityEntity{
+var OS_SIGNIN_CAPABILITIES []*abacdefs.CapabilityEntity = []*abacdefs.CapabilityEntity{
 	{UniqueId: ROOT_ALL_ACCESS, Name: "Root"},
 }
 
@@ -57,16 +58,16 @@ type CliUserCreationDto struct {
 	IsRoot    bool
 }
 
-func GetRoleByUniqueId(Id string) *RoleEntity {
-	workspace := &RoleEntity{}
-	fireback.GetDbRef().Where(RoleEntity{UniqueId: Id}).First(&workspace)
+func GetRoleByUniqueId(Id string) *abacdefs.RoleEntity {
+	workspace := &abacdefs.RoleEntity{}
+	fireback.GetDbRef().Where(abacdefs.RoleEntity{UniqueId: Id}).First(&workspace)
 
 	return workspace
 }
 
-func GetWorkspaceByUniqueId(Id string) *WorkspaceEntity {
-	workspace := &WorkspaceEntity{}
-	fireback.GetDbRef().Where(WorkspaceEntity{UniqueId: Id}).First(&workspace)
+func GetWorkspaceByUniqueId(Id string) *abacdefs.WorkspaceEntity {
+	workspace := &abacdefs.WorkspaceEntity{}
+	fireback.GetDbRef().Where(abacdefs.WorkspaceEntity{UniqueId: Id}).First(&workspace)
 
 	return workspace
 }
@@ -88,11 +89,11 @@ func RepairTheWorkspaces() error {
 		}
 	}
 	{
-		item := &WorkspaceTypeEntity{}
-		err := fireback.GetDbRef().Model(&WorkspaceTypeEntity{}).Where(&WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
+		item := &abacdefs.WorkspaceTypeEntity{}
+		err := fireback.GetDbRef().Model(&abacdefs.WorkspaceTypeEntity{}).Where(&abacdefs.WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
-			err = fireback.GetDbRef().Create(&WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: ROOT_VAR}).Error
+			err = fireback.GetDbRef().Create(&abacdefs.WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: ROOT_VAR}).Error
 			if err != nil {
 				return err
 			}
@@ -101,12 +102,12 @@ func RepairTheWorkspaces() error {
 
 	{
 
-		item := &WorkspaceEntity{}
-		err := fireback.GetDbRef().Model(&WorkspaceEntity{}).Where(&WorkspaceEntity{UniqueId: "root"}).First(item).Error
+		item := &abacdefs.WorkspaceEntity{}
+		err := fireback.GetDbRef().Model(&abacdefs.WorkspaceEntity{}).Where(&abacdefs.WorkspaceEntity{UniqueId: "root"}).First(item).Error
 
 		description := "The root system which holds entire software data tree"
 		if err == gorm.ErrRecordNotFound {
-			err = fireback.GetDbRef().Create(&WorkspaceEntity{
+			err = fireback.GetDbRef().Create(&abacdefs.WorkspaceEntity{
 				UniqueId: "root", Name: ROOT_VAR, Description: description,
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
 				TypeId:      ROOT_VAR,
@@ -131,12 +132,12 @@ func RepairTheWorkspaces() error {
 	}
 
 	{
-		item := &WorkspaceEntity{}
-		err := fireback.GetDbRef().Model(&WorkspaceEntity{}).Where(&WorkspaceEntity{UniqueId: "system"}).First(item).Error
+		item := &abacdefs.WorkspaceEntity{}
+		err := fireback.GetDbRef().Model(&abacdefs.WorkspaceEntity{}).Where(&abacdefs.WorkspaceEntity{UniqueId: "system"}).First(item).Error
 		system := "system"
 		if err == gorm.ErrRecordNotFound {
 			description := "The workspace content which applies to everyworkspace"
-			err = fireback.GetDbRef().Create(&WorkspaceEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "system", Name: system, Description: description}).Error
+			err = fireback.GetDbRef().Create(&abacdefs.WorkspaceEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "system", Name: system, Description: description}).Error
 
 			if err != nil {
 				return err
@@ -152,9 +153,9 @@ func RepairTheWorkspaces() error {
 	return nil
 }
 
-func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
+func CreateRootRoleInWorkspace(workspaceId string) (*abacdefs.RoleEntity, error) {
 	sampleName := "Root Access"
-	entity := &RoleEntity{
+	entity := &abacdefs.RoleEntity{
 		UniqueId:           "root",
 		WorkspaceId:        emigo.NullableOf(ROOT_VAR),
 		Name:               sampleName,
@@ -162,16 +163,16 @@ func CreateRootRoleInWorkspace(workspaceId string) (*RoleEntity, error) {
 	}
 
 	err := fireback.GetDbRef().
-		Where(&RoleEntity{UniqueId: "root"}).
+		Where(&abacdefs.RoleEntity{UniqueId: "root"}).
 		FirstOrCreate(&entity).Error
 
 	return entity, err
 }
 
-func CreateUserFromSchema(t *CliUserCreationDto) (*UserEntity, error) {
+func CreateUserFromSchema(t *CliUserCreationDto) (*abacdefs.UserEntity, error) {
 
 	userUniqueId := fireback.UUID()
-	user := &UserEntity{
+	user := &abacdefs.UserEntity{
 		UniqueId: userUniqueId,
 	}
 
@@ -180,16 +181,16 @@ func CreateUserFromSchema(t *CliUserCreationDto) (*UserEntity, error) {
 	return user, err
 }
 
-func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*WorkspaceTypeEntity) error {
+func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*abacdefs.WorkspaceTypeEntity) error {
 	var root = "root"
 	return db.Transaction(func(tx *gorm.DB) error {
 
 		for _, role := range roles {
 
-			item := &WorkspaceTypeEntity{}
+			item := &abacdefs.WorkspaceTypeEntity{}
 			err := tx.
-				Model(&WorkspaceTypeEntity{}).
-				Where(&WorkspaceTypeEntity{
+				Model(&abacdefs.WorkspaceTypeEntity{}).
+				Where(&abacdefs.WorkspaceTypeEntity{
 					WorkspaceId: emigo.NullableOf(ROOT_VAR),
 					UniqueId:    role.UniqueId,
 				}).First(item).Error
@@ -211,15 +212,15 @@ func SyncWorkspaceDefaultWorkspaceTypes(db *gorm.DB, roles []*WorkspaceTypeEntit
 
 }
 
-func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
+func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*abacdefs.RoleEntity) error {
 
 	return db.Transaction(func(tx *gorm.DB) error {
 
 		for _, role := range roles {
-			item := &RoleEntity{}
+			item := &abacdefs.RoleEntity{}
 			err := tx.
-				Model(&RoleEntity{}).
-				Where(&RoleEntity{WorkspaceId: role.WorkspaceId, UniqueId: role.UniqueId}).First(item).Error
+				Model(&abacdefs.RoleEntity{}).
+				Where(&abacdefs.RoleEntity{WorkspaceId: role.WorkspaceId, UniqueId: role.UniqueId}).First(item).Error
 
 			if err == gorm.ErrRecordNotFound {
 				_, err := RoleActions.Create(role, fireback.QueryDSL{Tx: tx, WorkspaceId: role.WorkspaceId.OrDefault("")})
@@ -242,10 +243,10 @@ func SyncWorkspaceDefaultRoles(db *gorm.DB, roles []*RoleEntity) error {
 *	Returns os user in the system, if it's added to fireback database.
 *	You need to create user, workspace and it's roles before thi function to give you the user.
 **/
-func GetOsUserInFireback() (*UserEntity, error) {
+func GetOsUserInFireback() (*abacdefs.UserEntity, error) {
 	currentUser := fireback.GetOsUserWithPhone()
 
-	var user *UserEntity = nil
+	var user *abacdefs.UserEntity = nil
 
 	err2 := fireback.GetDbRef().Where(fireback.RealEscape("unique_id = ?", "OS_"+currentUser.Uid)).First(&user).Error
 	if err2 != nil {
@@ -255,7 +256,7 @@ func GetOsUserInFireback() (*UserEntity, error) {
 	return user, nil
 }
 
-func SigninWithOsUser2(q fireback.QueryDSL) (*UserSessionDto, *fireback.IError) {
+func SigninWithOsUser2(q fireback.QueryDSL) (*abacdefs.UserSessionDto, *fireback.IError) {
 	user, role, workspace := GetOsHostUserRoleWorkspaceDef()
 
 	return UnsafeGenerateUser(&GenerateUserDto{
@@ -271,7 +272,7 @@ func SigninWithOsUser2(q fireback.QueryDSL) (*UserSessionDto, *fireback.IError) 
 	}, q)
 }
 
-func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
+func WorkpaceTypeToString(items []*abacdefs.WorkspaceTypeEntity) []string {
 	result := []string{}
 	for _, item := range items {
 		result = append(result, item.UniqueId+" >>> "+item.Title+"("+item.Slug+")")
@@ -280,8 +281,8 @@ func WorkpaceTypeToString(items []*WorkspaceTypeEntity) []string {
 	return result
 }
 
-func CreateUserInteractiveQuestions(query fireback.QueryDSL) (*ClassicSignupActionReq, bool, error) {
-	dto := &ClassicSignupActionReq{}
+func CreateUserInteractiveQuestions(query fireback.QueryDSL) (*abacdefs.ClassicSignupActionReq, bool, error) {
+	dto := &abacdefs.ClassicSignupActionReq{}
 	setForRoot := true
 	defaultValue := "a@a.com"
 
@@ -329,7 +330,7 @@ type AdminCreationInfo struct {
 	WorkspaceAs string
 }
 
-func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query fireback.QueryDSL) (AdminCreationInfo, error) {
+func CreateAdminTransaction(dto *abacdefs.ClassicSignupActionReq, setForRoot bool, query fireback.QueryDSL) (AdminCreationInfo, error) {
 
 	result := AdminCreationInfo{}
 
@@ -393,7 +394,7 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 			// identity is UniqueId. Using UserId here left every root UserWorkspace/
 			// WorkspaceRole row created below with an empty user reference.
 			query.UserId = user.Item.UniqueId
-			createdUserWorkspace, err2 := UserWorkspaceActions.Create(&UserWorkspaceEntity{
+			createdUserWorkspace, err2 := UserWorkspaceActions.Create(&abacdefs.UserWorkspaceEntity{
 				UniqueId:    fireback.UUID(),
 				UserId:      emigo.NullableOf(user.Item.UniqueId),
 				WorkspaceId: emigo.NullableOf(ROOT_VAR),
@@ -403,7 +404,7 @@ func CreateAdminTransaction(dto *ClassicSignupActionReq, setForRoot bool, query 
 				return err2
 			}
 
-			_, err3 := WorkspaceRoleActions.Create(&WorkspaceRoleEntity{
+			_, err3 := WorkspaceRoleActions.Create(&abacdefs.WorkspaceRoleEntity{
 				UserWorkspaceId: emigo.NullableOf(createdUserWorkspace.UniqueId),
 				RoleId:          emigo.NullableOf(ROOT_VAR),
 				WorkspaceId:     emigo.NullableOf(ROOT_VAR),

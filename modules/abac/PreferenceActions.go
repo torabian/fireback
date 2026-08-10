@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -14,9 +15,9 @@ var PERM_ROOT_PREFERENCE_UPDATE = preferencePerms.Update
 var PERM_ROOT_PREFERENCE_DELETE = preferencePerms.Delete
 var ALL_PREFERENCE_PERMISSIONS = preferencePerms.All
 
-var PreferenceActions = NewEntityActionsBundle[PreferenceEntity]()
+var PreferenceActions = NewEntityActionsBundle[abacdefs.PreferenceEntity]()
 
-func PreferenceBrowseAction(c PreferenceBrowseActionRequest) (*PreferenceBrowseActionResponse, error) {
+func PreferenceBrowseAction(c abacdefs.PreferenceBrowseActionRequest) (*abacdefs.PreferenceBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY}})
 	if err != nil {
 		return nil, err
@@ -25,10 +26,10 @@ func PreferenceBrowseAction(c PreferenceBrowseActionRequest) (*PreferenceBrowseA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PreferenceBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.PreferenceBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func PreferenceGetAction(c PreferenceGetActionRequest) (*PreferenceGetActionResponse, error) {
+func PreferenceGetAction(c abacdefs.PreferenceGetActionRequest) (*abacdefs.PreferenceGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_QUERY}})
 	if err != nil {
 		return nil, err
@@ -38,10 +39,10 @@ func PreferenceGetAction(c PreferenceGetActionRequest) (*PreferenceGetActionResp
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PreferenceGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.PreferenceGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func PreferenceCreateAction(c PreferenceCreateActionRequest) (*PreferenceCreateActionResponse, error) {
+func PreferenceCreateAction(c abacdefs.PreferenceCreateActionRequest) (*abacdefs.PreferenceCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_CREATE}})
 	if err != nil {
 		return nil, err
@@ -49,21 +50,21 @@ func PreferenceCreateAction(c PreferenceCreateActionRequest) (*PreferenceCreateA
 	// Without this, the row is invisible to PreferenceBrowseAction's workspace-scoped
 	// query (see GetSqlContext) - same workspace-stamping fix as
 	// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
-	entity := &PreferenceEntity{Timezone: c.Body.Timezone, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
+	entity := &abacdefs.PreferenceEntity{Timezone: c.Body.Timezone, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	created, err2 := PreferenceActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PreferenceCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.PreferenceCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func PreferenceUpdateAction(c PreferenceUpdateActionRequest) (*PreferenceUpdateActionResponse, error) {
+func PreferenceUpdateAction(c abacdefs.PreferenceUpdateActionRequest) (*abacdefs.PreferenceUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &PreferenceEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.PreferenceEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.Timezone.Get(); ok {
 		fields.Timezone = *v
 	}
@@ -71,27 +72,27 @@ func PreferenceUpdateAction(c PreferenceUpdateActionRequest) (*PreferenceUpdateA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PreferenceUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.PreferenceUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func PreferenceAwareDeletePreviewAction(c PreferenceAwareDeletePreviewActionRequest) (*PreferenceAwareDeletePreviewActionResponse, error) {
+func PreferenceAwareDeletePreviewAction(c abacdefs.PreferenceAwareDeletePreviewActionRequest) (*abacdefs.PreferenceAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}}); err != nil {
 		return nil, err
 	}
-	uniqueIds := PreferenceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := PreferenceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.PreferenceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.PreferenceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PreferenceAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.PreferenceAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func PreferenceAwareDeleteAction(c PreferenceAwareDeleteActionRequest) (*PreferenceAwareDeleteActionResponse, error) {
+func PreferenceAwareDeleteAction(c abacdefs.PreferenceAwareDeleteActionRequest) (*abacdefs.PreferenceAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PREFERENCE_DELETE}}); err != nil {
 		return nil, err
 	}
-	if err2 := PreferenceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.PreferenceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PreferenceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.PreferenceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

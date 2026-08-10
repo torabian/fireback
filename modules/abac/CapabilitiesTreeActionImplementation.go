@@ -5,12 +5,13 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/terminal"
 )
 
-func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeActionResponse, error) {
+func CapabilitiesTreeAction(c abacdefs.CapabilitiesTreeActionRequest) (*abacdefs.CapabilitiesTreeActionResponse, error) {
 
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
@@ -25,14 +26,14 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 	query.ItemsPerPage = 9999
 
-	var items []*CapabilityEntity
+	var items []*abacdefs.CapabilityEntity
 
-	err2 := fireback.GetDbRef().Debug().Model(&CapabilityEntity{}).Limit(1000).Find(&items).Error
+	err2 := fireback.GetDbRef().Debug().Model(&abacdefs.CapabilityEntity{}).Limit(1000).Find(&items).Error
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	itemsFiltered := []CapabilityInfoDto{}
+	itemsFiltered := []abacdefs.CapabilityInfoDto{}
 
 	workspaceAccesses, rolesPermission := GetWorkspaceAndUserAccesses(*query)
 
@@ -55,7 +56,7 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 			continue
 		}
 
-		itemsFiltered = append(itemsFiltered, CapabilityInfoDto{
+		itemsFiltered = append(itemsFiltered, abacdefs.CapabilityInfoDto{
 			UniqueId: item.UniqueId,
 			Name:     item.Name,
 		})
@@ -69,8 +70,8 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 	itemsa := tree.ToObject(true)
 
-	return &CapabilitiesTreeActionResponse{
-		Payload: fireback.GResponseSingleItem(CapabilitiesTreeActionRes{
+	return &abacdefs.CapabilitiesTreeActionResponse{
+		Payload: fireback.GResponseSingleItem(abacdefs.CapabilitiesTreeActionRes{
 			Capabilities: emigo.CollectionReplace(itemsFiltered),
 			Nested:       emigo.CollectionReplace(treeToCapabilityChild(itemsa)),
 		}),
@@ -78,18 +79,18 @@ func CapabilitiesTreeAction(c CapabilitiesTreeActionRequest) (*CapabilitiesTreeA
 
 }
 
-func treeToCapabilityChild(items []terminal.NestedNode) []CapabilityInfoDto {
-	data := []CapabilityInfoDto{}
+func treeToCapabilityChild(items []terminal.NestedNode) []abacdefs.CapabilityInfoDto {
+	data := []abacdefs.CapabilityInfoDto{}
 
 	for _, item := range items {
 
-		children := []CapabilityInfoDto{}
+		children := []abacdefs.CapabilityInfoDto{}
 
 		if len(item.Children) > 0 {
 			children = treeToCapabilityChild(item.Children)
 		}
 
-		data = append(data, CapabilityInfoDto{
+		data = append(data, abacdefs.CapabilityInfoDto{
 			UniqueId: item.UniqueId,
 			Children: emigo.CollectionReplace(children),
 		})

@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -17,9 +18,9 @@ var PERM_ROOT_TOKEN_UPDATE = tokenPerms.Update
 var PERM_ROOT_TOKEN_DELETE = tokenPerms.Delete
 var ALL_TOKEN_PERMISSIONS = tokenPerms.All
 
-var TokenActions = NewEntityActionsBundle[TokenEntity]()
+var TokenActions = NewEntityActionsBundle[abacdefs.TokenEntity]()
 
-func TokenBrowseAction(c TokenBrowseActionRequest) (*TokenBrowseActionResponse, error) {
+func TokenBrowseAction(c abacdefs.TokenBrowseActionRequest) (*abacdefs.TokenBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_QUERY}})
 	if err != nil {
 		return nil, err
@@ -28,10 +29,10 @@ func TokenBrowseAction(c TokenBrowseActionRequest) (*TokenBrowseActionResponse, 
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TokenBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.TokenBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func TokenGetAction(c TokenGetActionRequest) (*TokenGetActionResponse, error) {
+func TokenGetAction(c abacdefs.TokenGetActionRequest) (*abacdefs.TokenGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_QUERY}})
 	if err != nil {
 		return nil, err
@@ -41,10 +42,10 @@ func TokenGetAction(c TokenGetActionRequest) (*TokenGetActionResponse, error) {
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TokenGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.TokenGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func TokenCreateAction(c TokenCreateActionRequest) (*TokenCreateActionResponse, error) {
+func TokenCreateAction(c abacdefs.TokenCreateActionRequest) (*abacdefs.TokenCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
@@ -52,21 +53,21 @@ func TokenCreateAction(c TokenCreateActionRequest) (*TokenCreateActionResponse, 
 	// Without this, the row is invisible to TokenBrowseAction's workspace-scoped query
 	// (see GetSqlContext) - same workspace-stamping fix as
 	// EmailConfirmationCreateAction/PassportCreateAction/AppMenuCreateAction.
-	entity := &TokenEntity{UserId: c.Body.UserId, Token: c.Body.Token, ValidUntil: c.Body.ValidUntil, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
+	entity := &abacdefs.TokenEntity{UserId: c.Body.UserId, Token: c.Body.Token, ValidUntil: c.Body.ValidUntil, WorkspaceId: emigo.NullableOf(query.WorkspaceId)}
 	created, err2 := TokenActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TokenCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.TokenCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func TokenUpdateAction(c TokenUpdateActionRequest) (*TokenUpdateActionResponse, error) {
+func TokenUpdateAction(c abacdefs.TokenUpdateActionRequest) (*abacdefs.TokenUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &TokenEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.TokenEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.UserId.Get(); ok {
 		fields.UserId = emigo.NullableOf(*v)
 	}
@@ -78,27 +79,27 @@ func TokenUpdateAction(c TokenUpdateActionRequest) (*TokenUpdateActionResponse, 
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TokenUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.TokenUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func TokenAwareDeletePreviewAction(c TokenAwareDeletePreviewActionRequest) (*TokenAwareDeletePreviewActionResponse, error) {
+func TokenAwareDeletePreviewAction(c abacdefs.TokenAwareDeletePreviewActionRequest) (*abacdefs.TokenAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := TokenAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := TokenEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.TokenAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.TokenEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &TokenAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.TokenAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func TokenAwareDeleteAction(c TokenAwareDeleteActionRequest) (*TokenAwareDeleteActionResponse, error) {
+func TokenAwareDeleteAction(c abacdefs.TokenAwareDeleteActionRequest) (*abacdefs.TokenAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_TOKEN_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := TokenEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.TokenEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &TokenAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.TokenAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

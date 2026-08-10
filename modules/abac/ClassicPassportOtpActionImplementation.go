@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest) (*ClassicPassportOtpActionResponse, error) {
+func ClassicPassportOtpAction(c abacdefs.ClassicPassportOtpActionRequest) (*abacdefs.ClassicPassportOtpActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -18,22 +19,22 @@ func ClassicPassportOtpAction(c ClassicPassportOtpActionRequest) (*ClassicPasspo
 		return nil, err2
 	}
 
-	return &ClassicPassportOtpActionResponse{
+	return &abacdefs.ClassicPassportOtpActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }
 
 // classicPassportOtpCore holds the actual implementation, reusable by callers which
 // already have a resolved QueryDSL (such as the cli-only AuthFlow).
-func classicPassportOtpCore(req ClassicPassportOtpActionReq, query fireback.QueryDSL) (*ClassicPassportOtpActionRes, *fireback.IError) {
+func classicPassportOtpCore(req abacdefs.ClassicPassportOtpActionReq, query fireback.QueryDSL) (*abacdefs.ClassicPassportOtpActionRes, *fireback.IError) {
 	ClearPassportValue(&req.Value)
 
 	if err := fireback.CommonStructValidatorPointer(&req, false); err != nil {
 		return nil, err
 	}
 
-	olderEntity := &PublicAuthenticationEntity{}
-	fireback.GetDbRef().Where(&PublicAuthenticationEntity{
+	olderEntity := &abacdefs.PublicAuthenticationEntity{}
+	fireback.GetDbRef().Where(&abacdefs.PublicAuthenticationEntity{
 		PassportValue: req.Value,
 		Otp:           req.Otp,
 	}).Order("id DESC").Find(olderEntity)
@@ -46,7 +47,7 @@ func classicPassportOtpCore(req ClassicPassportOtpActionReq, query fireback.Quer
 		// in some cases, the otp alone should be enough and can complete signup process.
 		// for example, phone number often is enough for authroization of sms or phone call
 		// has been through
-		return &ClassicPassportOtpActionRes{
+		return &abacdefs.ClassicPassportOtpActionRes{
 			ContinueWithCreation: true,
 			SessionSecret:        olderEntity.SessionSecret,
 			TotpUrl:              olderEntity.TotpLink,
@@ -62,9 +63,9 @@ func classicPassportOtpCore(req ClassicPassportOtpActionReq, query fireback.Quer
 		if req.Otp != "" {
 
 			if req.Otp == olderEntity.Otp {
-				session := &UserSessionDto{}
+				session := &abacdefs.UserSessionDto{}
 
-				if token, err := user.AuthorizeWithToken(query); err != nil {
+				if token, err := AuthorizeWithToken(user, query); err != nil {
 					return nil, fireback.CastToIError(err)
 				} else {
 					session.Token = token
@@ -72,14 +73,14 @@ func classicPassportOtpCore(req ClassicPassportOtpActionReq, query fireback.Quer
 
 				// Delete the session so user cannot login again
 				err2 := fireback.GetDbRef().Where(
-					&PublicAuthenticationEntity{PassportId: emigo.NullableOf(passport.UniqueId), Otp: req.Otp},
-				).Delete(&PublicAuthenticationEntity{}).Error
+					&abacdefs.PublicAuthenticationEntity{PassportId: emigo.NullableOf(passport.UniqueId), Otp: req.Otp},
+				).Delete(&abacdefs.PublicAuthenticationEntity{}).Error
 
 				if err2 != nil {
 					return nil, fireback.GormErrorToIError(err2)
 				}
 
-				return &ClassicPassportOtpActionRes{
+				return &abacdefs.ClassicPassportOtpActionRes{
 					Session: emigo.NewOneNullable(*session),
 				}, nil
 			}

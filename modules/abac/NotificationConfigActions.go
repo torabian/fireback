@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -20,7 +21,7 @@ var PERM_ROOT_NOTIFICATION_CONFIG_UPDATE = notificationConfigPerms.Update
 var PERM_ROOT_NOTIFICATION_CONFIG_DELETE = notificationConfigPerms.Delete
 var ALL_NOTIFICATION_CONFIG_PERMISSIONS = notificationConfigPerms.All
 
-var NotificationConfigActions = NewEntityActionsBundle[NotificationConfigEntity]()
+var NotificationConfigActions = NewEntityActionsBundle[abacdefs.NotificationConfigEntity]()
 
 func notificationConfigSecurity(perm application.PermissionInfo, allowOnRoot bool) *fireback.SecurityModel {
 	return &fireback.SecurityModel{
@@ -30,7 +31,7 @@ func notificationConfigSecurity(perm application.PermissionInfo, allowOnRoot boo
 	}
 }
 
-func NotificationConfigBrowseAction(c NotificationConfigBrowseActionRequest) (*NotificationConfigBrowseActionResponse, error) {
+func NotificationConfigBrowseAction(c abacdefs.NotificationConfigBrowseActionRequest) (*abacdefs.NotificationConfigBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, notificationConfigSecurity(PERM_ROOT_NOTIFICATION_CONFIG_QUERY, false))
 	if err != nil {
 		return nil, err
@@ -39,10 +40,10 @@ func NotificationConfigBrowseAction(c NotificationConfigBrowseActionRequest) (*N
 	if err2 != nil {
 		return nil, err2
 	}
-	return &NotificationConfigBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.NotificationConfigBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func NotificationConfigGetAction(c NotificationConfigGetActionRequest) (*NotificationConfigGetActionResponse, error) {
+func NotificationConfigGetAction(c abacdefs.NotificationConfigGetActionRequest) (*abacdefs.NotificationConfigGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, notificationConfigSecurity(PERM_ROOT_NOTIFICATION_CONFIG_QUERY, false))
 	if err != nil {
 		return nil, err
@@ -52,15 +53,15 @@ func NotificationConfigGetAction(c NotificationConfigGetActionRequest) (*Notific
 	if err2 != nil {
 		return nil, err2
 	}
-	return &NotificationConfigGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.NotificationConfigGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func NotificationConfigCreateAction(c NotificationConfigCreateActionRequest) (*NotificationConfigCreateActionResponse, error) {
+func NotificationConfigCreateAction(c abacdefs.NotificationConfigCreateActionRequest) (*abacdefs.NotificationConfigCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, notificationConfigSecurity(PERM_ROOT_NOTIFICATION_CONFIG_CREATE, true))
 	if err != nil {
 		return nil, err
 	}
-	entity := &NotificationConfigEntity{
+	entity := &abacdefs.NotificationConfigEntity{
 		CascadeToSubWorkspaces:          c.Body.CascadeToSubWorkspaces,
 		ForcedCascadeEmailProvider:      c.Body.ForcedCascadeEmailProvider,
 		GeneralEmailProviderId:          c.Body.GeneralEmailProviderId,
@@ -85,23 +86,23 @@ func NotificationConfigCreateAction(c NotificationConfigCreateActionRequest) (*N
 	if err2 != nil {
 		return nil, err2
 	}
-	return &NotificationConfigCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.NotificationConfigCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
 // NotificationConfigUpdateAction upserts by workspace (distinctBy: workspace in the old
 // yaml): Query.WorkspaceId (resolved from ResolveStrategy: workspace above) is the
 // condition for finding-or-creating the row, not the uniqueId path param - preserved
 // from the old NotificationConfigUpdateExec's FirstOrCreate-by-workspace behavior.
-func NotificationConfigUpdateAction(c NotificationConfigUpdateActionRequest) (*NotificationConfigUpdateActionResponse, error) {
+func NotificationConfigUpdateAction(c abacdefs.NotificationConfigUpdateActionRequest) (*abacdefs.NotificationConfigUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, notificationConfigSecurity(PERM_ROOT_NOTIFICATION_CONFIG_UPDATE, true))
 	if err != nil {
 		return nil, err
 	}
 
 	dbref := fireback.GetDbRef()
-	var item NotificationConfigEntity
+	var item abacdefs.NotificationConfigEntity
 	if err2 := dbref.
-		Where(&NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
+		Where(&abacdefs.NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
 		FirstOrCreate(&item).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
@@ -168,33 +169,33 @@ func NotificationConfigUpdateAction(c NotificationConfigUpdateActionRequest) (*N
 		}
 	}
 
-	var updated NotificationConfigEntity
+	var updated abacdefs.NotificationConfigEntity
 	if err2 := dbref.Where("id = ?", item.Id).First(&updated).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &NotificationConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(&updated)}, nil
+	return &abacdefs.NotificationConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(&updated)}, nil
 }
 
-func NotificationConfigAwareDeletePreviewAction(c NotificationConfigAwareDeletePreviewActionRequest) (*NotificationConfigAwareDeletePreviewActionResponse, error) {
+func NotificationConfigAwareDeletePreviewAction(c abacdefs.NotificationConfigAwareDeletePreviewActionRequest) (*abacdefs.NotificationConfigAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, notificationConfigSecurity(PERM_ROOT_NOTIFICATION_CONFIG_DELETE, true)); err != nil {
 		return nil, err
 	}
-	uniqueIds := NotificationConfigAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := NotificationConfigEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.NotificationConfigAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.NotificationConfigEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &NotificationConfigAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.NotificationConfigAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func NotificationConfigAwareDeleteAction(c NotificationConfigAwareDeleteActionRequest) (*NotificationConfigAwareDeleteActionResponse, error) {
+func NotificationConfigAwareDeleteAction(c abacdefs.NotificationConfigAwareDeleteActionRequest) (*abacdefs.NotificationConfigAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, notificationConfigSecurity(PERM_ROOT_NOTIFICATION_CONFIG_DELETE, true)); err != nil {
 		return nil, err
 	}
-	if err2 := NotificationConfigEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.NotificationConfigEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &NotificationConfigAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.NotificationConfigAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // --- Hand business logic recovered from the pre-migration NotificationConfigActions.go ---
@@ -203,8 +204,8 @@ func NotificationConfigAwareDeleteAction(c NotificationConfigAwareDeleteActionRe
 // AppendNotificationConfigRouter indirection.)
 
 func NotificationTestMailAction(
-	dto *TestMailDto, query fireback.QueryDSL,
-) (*OkayResponseDto, *fireback.IError) {
+	dto *abacdefs.TestMailDto, query fireback.QueryDSL,
+) (*abacdefs.OkayResponseDto, *fireback.IError) {
 
 	q := query
 	q.UniqueId = dto.SenderId
@@ -241,7 +242,7 @@ func NotificationTestMailAction(
 		return nil, fireback.CastToIError(err3)
 	}
 
-	return &OkayResponseDto{}, nil
+	return &abacdefs.OkayResponseDto{}, nil
 }
 
 // NotificationWorkspaecConfigActionGet gets-or-creates the notificationConfig row for
@@ -249,18 +250,18 @@ func NotificationTestMailAction(
 // persisted) with the built-in fallback templates - preserved from the pre-migration
 // hand file. The old code also preloaded the GeneralEmailProvider/InviteToWorkspaceSender/
 // ForgetPasswordSender/ConfirmEmailSender relations here; those relations don't exist
-// anymore (see the string uniqueId FK convention note in NotificationConfigEntity.go),
+// anymore (see the string uniqueId FK convention note in abacdefs.NotificationConfigEntity.go),
 // so the preloads are dropped - callers needing the actual provider/sender now resolve
 // them explicitly by id (see NotificationTestMailAction above).
-func NotificationWorkspaecConfigActionGet(query fireback.QueryDSL) (*NotificationConfigEntity, *fireback.IError) {
+func NotificationWorkspaecConfigActionGet(query fireback.QueryDSL) (*abacdefs.NotificationConfigEntity, *fireback.IError) {
 
-	var item *NotificationConfigEntity
+	var item *abacdefs.NotificationConfigEntity
 
 	q := fireback.GetDbRef()
 	err := q.Where(fireback.RealEscape("workspace_id = ?", query.WorkspaceId)).First(&item).Error
 
 	if err == gorm.ErrRecordNotFound {
-		item = &NotificationConfigEntity{
+		item = &abacdefs.NotificationConfigEntity{
 			UniqueId:       fireback.UUID(),
 			WorkspaceId:    emigo.NullableOf(query.WorkspaceId),
 			AcceptLanguage: "*",
@@ -322,12 +323,12 @@ var InviteWorkspaceTitle string
 // workspace rather than uniqueId - preserved verbatim from the pre-migration hand file.
 func NotificationWorkspaceConfigActionUpdate(
 	query fireback.QueryDSL,
-	fields *NotificationConfigEntity,
-) (*NotificationConfigEntity, *fireback.IError) {
+	fields *abacdefs.NotificationConfigEntity,
+) (*abacdefs.NotificationConfigEntity, *fireback.IError) {
 
-	var item NotificationConfigEntity
+	var item abacdefs.NotificationConfigEntity
 	q := fireback.GetDbRef().
-		Where(&NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
+		Where(&abacdefs.NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
 		First(&item)
 
 	err := q.UpdateColumns(fields).Error
@@ -336,7 +337,7 @@ func NotificationWorkspaceConfigActionUpdate(
 	}
 
 	err = fireback.GetDbRef().
-		Where(&NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
+		Where(&abacdefs.NotificationConfigEntity{WorkspaceId: emigo.NullableOf(query.WorkspaceId)}).
 		First(&item).Error
 	if err != nil {
 		return nil, fireback.GormErrorToIError(err)

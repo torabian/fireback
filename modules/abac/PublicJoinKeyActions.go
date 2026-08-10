@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -14,9 +15,9 @@ var PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE = publicJoinKeyPerms.Update
 var PERM_ROOT_PUBLIC_JOIN_KEY_DELETE = publicJoinKeyPerms.Delete
 var ALL_PUBLIC_JOIN_KEY_PERMISSIONS = publicJoinKeyPerms.All
 
-var PublicJoinKeyActions = NewEntityActionsBundle[PublicJoinKeyEntity]()
+var PublicJoinKeyActions = NewEntityActionsBundle[abacdefs.PublicJoinKeyEntity]()
 
-func PublicJoinKeyBrowseAction(c PublicJoinKeyBrowseActionRequest) (*PublicJoinKeyBrowseActionResponse, error) {
+func PublicJoinKeyBrowseAction(c abacdefs.PublicJoinKeyBrowseActionRequest) (*abacdefs.PublicJoinKeyBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY}})
 	if err != nil {
 		return nil, err
@@ -25,10 +26,10 @@ func PublicJoinKeyBrowseAction(c PublicJoinKeyBrowseActionRequest) (*PublicJoinK
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicJoinKeyBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.PublicJoinKeyBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func PublicJoinKeyGetAction(c PublicJoinKeyGetActionRequest) (*PublicJoinKeyGetActionResponse, error) {
+func PublicJoinKeyGetAction(c abacdefs.PublicJoinKeyGetActionRequest) (*abacdefs.PublicJoinKeyGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_QUERY}})
 	if err != nil {
 		return nil, err
@@ -38,29 +39,29 @@ func PublicJoinKeyGetAction(c PublicJoinKeyGetActionRequest) (*PublicJoinKeyGetA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicJoinKeyGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.PublicJoinKeyGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func PublicJoinKeyCreateAction(c PublicJoinKeyCreateActionRequest) (*PublicJoinKeyCreateActionResponse, error) {
+func PublicJoinKeyCreateAction(c abacdefs.PublicJoinKeyCreateActionRequest) (*abacdefs.PublicJoinKeyCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_CREATE}})
 	if err != nil {
 		return nil, err
 	}
-	entity := &PublicJoinKeyEntity{RoleId: c.Body.RoleId, WorkspaceId: c.Body.WorkspaceId}
+	entity := &abacdefs.PublicJoinKeyEntity{RoleId: c.Body.RoleId, WorkspaceId: c.Body.WorkspaceId}
 	created, err2 := PublicJoinKeyActions.Create(entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicJoinKeyCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.PublicJoinKeyCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func PublicJoinKeyUpdateAction(c PublicJoinKeyUpdateActionRequest) (*PublicJoinKeyUpdateActionResponse, error) {
+func PublicJoinKeyUpdateAction(c abacdefs.PublicJoinKeyUpdateActionRequest) (*abacdefs.PublicJoinKeyUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &PublicJoinKeyEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.PublicJoinKeyEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.RoleId.Get(); ok {
 		fields.RoleId = emigo.NullableOf(*v)
 	}
@@ -71,27 +72,27 @@ func PublicJoinKeyUpdateAction(c PublicJoinKeyUpdateActionRequest) (*PublicJoinK
 	if err2 != nil {
 		return nil, err2
 	}
-	return &PublicJoinKeyUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.PublicJoinKeyUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func PublicJoinKeyAwareDeletePreviewAction(c PublicJoinKeyAwareDeletePreviewActionRequest) (*PublicJoinKeyAwareDeletePreviewActionResponse, error) {
+func PublicJoinKeyAwareDeletePreviewAction(c abacdefs.PublicJoinKeyAwareDeletePreviewActionRequest) (*abacdefs.PublicJoinKeyAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}}); err != nil {
 		return nil, err
 	}
-	uniqueIds := PublicJoinKeyAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := PublicJoinKeyEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.PublicJoinKeyAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.PublicJoinKeyEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PublicJoinKeyAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.PublicJoinKeyAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func PublicJoinKeyAwareDeleteAction(c PublicJoinKeyAwareDeleteActionRequest) (*PublicJoinKeyAwareDeleteActionResponse, error) {
+func PublicJoinKeyAwareDeleteAction(c abacdefs.PublicJoinKeyAwareDeleteActionRequest) (*abacdefs.PublicJoinKeyAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_PUBLIC_JOIN_KEY_DELETE}}); err != nil {
 		return nil, err
 	}
-	if err2 := PublicJoinKeyEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.PublicJoinKeyEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &PublicJoinKeyAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.PublicJoinKeyAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

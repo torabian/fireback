@@ -2,10 +2,11 @@ package abac
 
 import (
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func UserPassportsAction(c UserPassportsActionRequest) (*UserPassportsActionResponse, error) {
+func UserPassportsAction(c abacdefs.UserPassportsActionRequest) (*abacdefs.UserPassportsActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
@@ -14,15 +15,15 @@ func UserPassportsAction(c UserPassportsActionRequest) (*UserPassportsActionResp
 	}
 	q := *query
 
-	passports := []PassportEntity{}
-	err2 := fireback.GetRef(q).Where(PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
+	passports := []abacdefs.PassportEntity{}
+	err2 := fireback.GetRef(q).Where(abacdefs.PassportEntity{UserId: emigo.NullableOf(q.UserId)}).Find(&passports).Error
 	if err2 != nil {
 		return nil, fireback.CastToIError(err2)
 	}
 
-	result := []UserPassportsActionRes{}
+	result := []abacdefs.UserPassportsActionRes{}
 	for _, item := range passports {
-		result = append(result, UserPassportsActionRes{
+		result = append(result, abacdefs.UserPassportsActionRes{
 			Value:         item.Value,
 			Type:          item.Type,
 			UniqueId:      item.UniqueId,
@@ -30,7 +31,7 @@ func UserPassportsAction(c UserPassportsActionRequest) (*UserPassportsActionResp
 		})
 	}
 
-	return &UserPassportsActionResponse{
+	return &abacdefs.UserPassportsActionResponse{
 		Payload: fireback.GResponseQuery(result, nil, &q),
 	}, nil
 }

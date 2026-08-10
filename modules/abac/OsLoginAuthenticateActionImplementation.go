@@ -1,10 +1,11 @@
 package abac
 
 import (
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func OsLoginAuthenticateAction(c OsLoginAuthenticateActionRequest) (*OsLoginAuthenticateActionResponse, error) {
+func OsLoginAuthenticateAction(c abacdefs.OsLoginAuthenticateActionRequest) (*abacdefs.OsLoginAuthenticateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -22,7 +23,7 @@ func OsLoginAuthenticateAction(c OsLoginAuthenticateActionRequest) (*OsLoginAuth
 		return nil, err2
 	}
 
-	return &OsLoginAuthenticateActionResponse{
+	return &abacdefs.OsLoginAuthenticateActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }

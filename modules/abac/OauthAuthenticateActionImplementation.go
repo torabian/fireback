@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -25,7 +26,7 @@ type TokenInfo struct {
 }
 
 // OauthAuthenticateAction authenticates a user via OAuth
-func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthenticateActionResponse, error) {
+func OauthAuthenticateAction(c abacdefs.OauthAuthenticateActionRequest) (*abacdefs.OauthAuthenticateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthentica
 	switch req.Service {
 	case ProviderGoogle:
 		if res, err := authenticateWithGoogle(req.Token, q); err == nil {
-			return &OauthAuthenticateActionResponse{
+			return &abacdefs.OauthAuthenticateActionResponse{
 				Payload: fireback.GResponseSingleItem(res),
 			}, nil
 		} else {
@@ -44,7 +45,7 @@ func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthentica
 		}
 	case ProviderFacebook:
 		if res, err := authenticateWithFacebook(req.Token, q); err == nil {
-			return &OauthAuthenticateActionResponse{
+			return &abacdefs.OauthAuthenticateActionResponse{
 				Payload: fireback.GResponseSingleItem(res),
 			}, nil
 		} else {
@@ -55,7 +56,7 @@ func OauthAuthenticateAction(c OauthAuthenticateActionRequest) (*OauthAuthentica
 	}
 }
 
-func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fireback.QueryDSL) (*OauthAuthenticateActionRes, *fireback.IError) {
+func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fireback.QueryDSL) (*abacdefs.OauthAuthenticateActionRes, *fireback.IError) {
 	if err := validateValueFormat(info.Email); err != nil {
 		return nil, err
 	}
@@ -67,12 +68,12 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 	if passport == nil {
 
 		firstName, lastName := SplitName(info.Name, info.Email)
-		res, err := completeClassicSignupProcess(ClassicSignupActionReq{
+		res, err := completeClassicSignupProcess(abacdefs.ClassicSignupActionReq{
 			Value:     info.Email,
 			Type:      PASSPORT_METHOD_EMAIL,
 			FirstName: firstName,
 			LastName:  lastName,
-		}, q, nil, nil, func(ue *UserEntity, re *RoleEntity, we *WorkspaceEntity, pe *PassportEntity) {
+		}, q, nil, nil, func(ue *abacdefs.UserEntity, re *abacdefs.RoleEntity, we *abacdefs.WorkspaceEntity, pe *abacdefs.PassportEntity) {
 			pe.ThirdPartyVerifier = provider
 			we.Name = "My workspace"
 		})
@@ -81,25 +82,25 @@ func continueAuthenticationViaOAuthEmail(info TokenInfo, provider string, q fire
 			return nil, err
 		}
 
-		return &OauthAuthenticateActionRes{
+		return &abacdefs.OauthAuthenticateActionRes{
 			Session: res.Session,
 		}, nil
 	} else {
-		session := &UserSessionDto{}
+		session := &abacdefs.UserSessionDto{}
 		if _, err := fetchUserAndPassToSession(info.Email, session, q); err != nil {
 			return nil, err
 		}
 		if err := applyUserTokenAndWorkspacesToToken(session, q); err != nil {
 			return nil, err
 		}
-		return &OauthAuthenticateActionRes{
+		return &abacdefs.OauthAuthenticateActionRes{
 			Session: emigo.NewOne(*session),
 		}, nil
 	}
 }
 
 // authenticateWithGoogle verifies the Google access token and returns user info
-func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionRes, *fireback.IError) {
+func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*abacdefs.OauthAuthenticateActionRes, *fireback.IError) {
 	url := fmt.Sprintf("https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=%s", accessToken)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {
@@ -116,7 +117,7 @@ func authenticateWithGoogle(accessToken string, q fireback.QueryDSL) (*OauthAuth
 }
 
 // authenticateWithFacebook verifies the Facebook access token and returns user info
-func authenticateWithFacebook(accessToken string, q fireback.QueryDSL) (*OauthAuthenticateActionRes, *fireback.IError) {
+func authenticateWithFacebook(accessToken string, q fireback.QueryDSL) (*abacdefs.OauthAuthenticateActionRes, *fireback.IError) {
 	url := fmt.Sprintf("https://graph.facebook.com/me?fields=email,name,picture&access_token=%s", accessToken)
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != http.StatusOK {

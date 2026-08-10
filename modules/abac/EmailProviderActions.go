@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/fireback"
 )
@@ -75,7 +76,7 @@ func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, se
 	}
 }
 
-func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*NotificationConfigEntity, error) {
+func getCurrentNotificationConfiguration(query fireback.QueryDSL) (*abacdefs.NotificationConfigEntity, error) {
 	query.Deep = true
 	items, _, err := NotificationConfigActions.Query(query)
 

@@ -2,6 +2,7 @@ package abac
 
 import (
 	"github.com/gin-gonic/gin"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -17,12 +18,12 @@ func NotificationModuleSetup() *application.ModuleProvider {
 
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				NotificationConfigBrowseActionGin(g, NotificationConfigBrowseAction)
-				NotificationConfigGetActionGin(g, NotificationConfigGetAction)
-				NotificationConfigCreateActionGin(g, NotificationConfigCreateAction)
-				NotificationConfigUpdateActionGin(g, NotificationConfigUpdateAction)
-				NotificationConfigAwareDeletePreviewActionGin(g, NotificationConfigAwareDeletePreviewAction)
-				NotificationConfigAwareDeleteActionGin(g, NotificationConfigAwareDeleteAction)
+				abacdefs.NotificationConfigBrowseActionGin(g, NotificationConfigBrowseAction)
+				abacdefs.NotificationConfigGetActionGin(g, NotificationConfigGetAction)
+				abacdefs.NotificationConfigCreateActionGin(g, NotificationConfigCreateAction)
+				abacdefs.NotificationConfigUpdateActionGin(g, NotificationConfigUpdateAction)
+				abacdefs.NotificationConfigAwareDeletePreviewActionGin(g, NotificationConfigAwareDeletePreviewAction)
+				abacdefs.NotificationConfigAwareDeleteActionGin(g, NotificationConfigAwareDeleteAction)
 
 				AppendNotificationConfigRouter(g)
 
@@ -37,7 +38,7 @@ func NotificationModuleSetup() *application.ModuleProvider {
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		return dbref.AutoMigrate(
-			&NotificationConfigEntity{},
+			&abacdefs.NotificationConfigEntity{},
 		)
 	})
 
@@ -57,12 +58,12 @@ func NotificationModuleSetup() *application.ModuleProvider {
 				&NotificationModuleAuditCmd,
 				&EmailProviderTestCmd,
 				&NotificationConfigTestCmd,
-				NotificationConfigBrowseActionCliHandler(NotificationConfigBrowseAction),
-				NotificationConfigGetActionCliHandler(NotificationConfigGetAction),
-				NotificationConfigCreateActionCliHandler(NotificationConfigCreateAction),
-				NotificationConfigUpdateActionCliHandler(NotificationConfigUpdateAction),
-				NotificationConfigAwareDeletePreviewActionCliHandler(NotificationConfigAwareDeletePreviewAction),
-				NotificationConfigAwareDeleteActionCliHandler(NotificationConfigAwareDeleteAction),
+				abacdefs.NotificationConfigBrowseActionCliHandler(NotificationConfigBrowseAction),
+				abacdefs.NotificationConfigGetActionCliHandler(NotificationConfigGetAction),
+				abacdefs.NotificationConfigCreateActionCliHandler(NotificationConfigCreateAction),
+				abacdefs.NotificationConfigUpdateActionCliHandler(NotificationConfigUpdateAction),
+				abacdefs.NotificationConfigAwareDeletePreviewActionCliHandler(NotificationConfigAwareDeletePreviewAction),
+				abacdefs.NotificationConfigAwareDeleteActionCliHandler(NotificationConfigAwareDeleteAction),
 			},
 		},
 	})

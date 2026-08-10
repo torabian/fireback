@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/torabian/emi/emigo"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -13,7 +14,7 @@ import (
 // returns (see QueryUserRoleWorkspacesActionImplementation.go), just wrapped as a
 // single item (GResponseSingleItem) instead of a list, since this is always
 // exactly one caller's own info, never a paginated collection.
-func WhoamiAction(c WhoamiActionRequest) (*WhoamiActionResponse, error) {
+func WhoamiAction(c abacdefs.WhoamiActionRequest) (*abacdefs.WhoamiActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
@@ -22,21 +23,21 @@ func WhoamiAction(c WhoamiActionRequest) (*WhoamiActionResponse, error) {
 	}
 	q := *query
 
-	workspaces := []WhoamiActionResWorkspaces{}
+	workspaces := []abacdefs.WhoamiActionResWorkspaces{}
 
 	if q.UserAccessPerWorkspace != nil {
 		for workspaceId, content := range *q.UserAccessPerWorkspace {
-			roles := []WhoamiActionResWorkspacesRoles{}
+			roles := []abacdefs.WhoamiActionResWorkspacesRoles{}
 
 			for roleId, roleContent := range content.UserRoles {
-				roles = append(roles, WhoamiActionResWorkspacesRoles{
+				roles = append(roles, abacdefs.WhoamiActionResWorkspacesRoles{
 					Name:         roleContent.Name,
 					Capabilities: roleContent.Accesses,
 					UniqueId:     roleId,
 				})
 			}
 
-			workspaces = append(workspaces, WhoamiActionResWorkspaces{
+			workspaces = append(workspaces, abacdefs.WhoamiActionResWorkspaces{
 				Name:         content.Name,
 				UniqueId:     workspaceId,
 				Roles:        emigo.ArrayReplace(roles),
@@ -49,12 +50,12 @@ func WhoamiAction(c WhoamiActionRequest) (*WhoamiActionResponse, error) {
 		return workspaces[i].UniqueId < workspaces[j].UniqueId
 	})
 
-	res := WhoamiActionRes{
+	res := abacdefs.WhoamiActionRes{
 		UserId:     q.UserId,
 		Workspaces: emigo.ArrayReplace(workspaces),
 	}
 
-	return &WhoamiActionResponse{
+	return &abacdefs.WhoamiActionResponse{
 		Payload: fireback.GResponseSingleItem(res),
 	}, nil
 }

@@ -3,6 +3,7 @@ package abac
 import (
 	"reflect"
 
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -25,7 +26,7 @@ var ALL_WORKSPACE_PERMISSIONS = workspacePerms.All
 // see AppMenuTreeNode's doc comment for why this is a separate wrapper type rather than
 // a field on the Emi-generated WorkspaceEntity struct.
 type WorkspaceTreeNode struct {
-	WorkspaceEntity
+	abacdefs.WorkspaceEntity
 	Children []*WorkspaceTreeNode `json:"children,omitempty" yaml:"children,omitempty"`
 }
 
@@ -57,21 +58,21 @@ func (dto *WorkspaceTreeNode) Add(nodes ...*WorkspaceTreeNode) bool {
 // old <Entity>ActionsSig also had for this entity - see appMenuActionsBundle's doc
 // comment.
 type workspaceActionsBundle struct {
-	EntityActionsBundle[WorkspaceEntity]
+	EntityActionsBundle[abacdefs.WorkspaceEntity]
 	CteQuery func(query fireback.QueryDSL) ([]*WorkspaceTreeNode, *fireback.QueryResultMeta, *fireback.IError)
 }
 
 var WorkspaceActions = workspaceActionsBundle{
-	EntityActionsBundle: NewEntityActionsBundle[WorkspaceEntity](),
+	EntityActionsBundle: NewEntityActionsBundle[abacdefs.WorkspaceEntity](),
 	CteQuery:            WorkspaceActionCteQueryFn,
 }
 
-// WorkspaceActionCteQueryFn fetches every WorkspaceEntity row matching query (via the
+// WorkspaceActionCteQueryFn fetches every abacdefs.WorkspaceEntity row matching query (via the
 // recursive WorkspaceCte.vsql - see modules/abac/queries) and assembles them into a
 // forest of WorkspaceTreeNode, one root per row with no parentId.
 func WorkspaceActionCteQueryFn(query fireback.QueryDSL) ([]*WorkspaceTreeNode, *fireback.QueryResultMeta, *fireback.IError) {
-	refl := reflect.ValueOf(&WorkspaceEntity{})
-	items, meta, err := fireback.ContextAwareVSqlOperation[WorkspaceEntity](
+	refl := reflect.ValueOf(&abacdefs.WorkspaceEntity{})
+	items, meta, err := fireback.ContextAwareVSqlOperation[abacdefs.WorkspaceEntity](
 		refl, &queries.QueriesFs, "WorkspaceCte.vsql", query,
 	)
 	if err != nil {
@@ -94,7 +95,7 @@ func WorkspaceActionCteQueryFn(query fireback.QueryDSL) ([]*WorkspaceTreeNode, *
 	return tree, meta, nil
 }
 
-func WorkspaceBrowseAction(c WorkspaceBrowseActionRequest) (*WorkspaceBrowseActionResponse, error) {
+func WorkspaceBrowseAction(c abacdefs.WorkspaceBrowseActionRequest) (*abacdefs.WorkspaceBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_QUERY}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
@@ -103,10 +104,10 @@ func WorkspaceBrowseAction(c WorkspaceBrowseActionRequest) (*WorkspaceBrowseActi
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &abacdefs.WorkspaceBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func WorkspaceGetAction(c WorkspaceGetActionRequest) (*WorkspaceGetActionResponse, error) {
+func WorkspaceGetAction(c abacdefs.WorkspaceGetActionRequest) (*abacdefs.WorkspaceGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_QUERY}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
@@ -116,33 +117,33 @@ func WorkspaceGetAction(c WorkspaceGetActionRequest) (*WorkspaceGetActionRespons
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &abacdefs.WorkspaceGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func WorkspaceCreateAction(c WorkspaceCreateActionRequest) (*WorkspaceCreateActionResponse, error) {
+func WorkspaceCreateAction(c abacdefs.WorkspaceCreateActionRequest) (*abacdefs.WorkspaceCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
-	entity := &WorkspaceEntity{
+	entity := abacdefs.WorkspaceEntity{
 		Description: c.Body.Description,
 		Name:        c.Body.Name,
 		TypeId:      c.Body.TypeId,
 	}
-	created, err2 := WorkspaceActions.Create(entity, *query)
+	created, err2 := WorkspaceActions.Create(&entity, *query)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &abacdefs.WorkspaceCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func WorkspaceUpdateAction(c WorkspaceUpdateActionRequest) (*WorkspaceUpdateActionResponse, error) {
+func WorkspaceUpdateAction(c abacdefs.WorkspaceUpdateActionRequest) (*abacdefs.WorkspaceUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &WorkspaceEntity{UniqueId: c.Params.UniqueId}
+	fields := &abacdefs.WorkspaceEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.Description.Get(); ok {
 		fields.Description = *v
 	}
@@ -156,29 +157,29 @@ func WorkspaceUpdateAction(c WorkspaceUpdateActionRequest) (*WorkspaceUpdateActi
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WorkspaceUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &abacdefs.WorkspaceUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func WorkspaceAwareDeletePreviewAction(c WorkspaceAwareDeletePreviewActionRequest) (*WorkspaceAwareDeletePreviewActionResponse, error) {
+func WorkspaceAwareDeletePreviewAction(c abacdefs.WorkspaceAwareDeletePreviewActionRequest) (*abacdefs.WorkspaceAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := WorkspaceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := WorkspaceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := abacdefs.WorkspaceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := abacdefs.WorkspaceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WorkspaceAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &abacdefs.WorkspaceAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func WorkspaceAwareDeleteAction(c WorkspaceAwareDeleteActionRequest) (*WorkspaceAwareDeleteActionResponse, error) {
+func WorkspaceAwareDeleteAction(c abacdefs.WorkspaceAwareDeleteActionRequest) (*abacdefs.WorkspaceAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := WorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := abacdefs.WorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WorkspaceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &abacdefs.WorkspaceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // WorkspaceCliFn mirrors the old Module3-generated grouped "workspace" cli command
@@ -189,12 +190,12 @@ func WorkspaceAwareDeleteAction(c WorkspaceAwareDeleteActionRequest) (*Workspace
 // workspaceConfig, workspaceInvite, workspaceRole, userWorkspace, publicJoinKey, ...).
 func WorkspaceCliFn() *cli.Command {
 	commands := []*cli.Command{
-		WorkspaceBrowseActionCliHandler(WorkspaceBrowseAction),
-		WorkspaceGetActionCliHandler(WorkspaceGetAction),
-		WorkspaceCreateActionCliHandler(WorkspaceCreateAction),
-		WorkspaceUpdateActionCliHandler(WorkspaceUpdateAction),
-		WorkspaceAwareDeletePreviewActionCliHandler(WorkspaceAwareDeletePreviewAction),
-		WorkspaceAwareDeleteActionCliHandler(WorkspaceAwareDeleteAction),
+		abacdefs.WorkspaceBrowseActionCliHandler(WorkspaceBrowseAction),
+		abacdefs.WorkspaceGetActionCliHandler(WorkspaceGetAction),
+		abacdefs.WorkspaceCreateActionCliHandler(WorkspaceCreateAction),
+		abacdefs.WorkspaceUpdateActionCliHandler(WorkspaceUpdateAction),
+		abacdefs.WorkspaceAwareDeletePreviewActionCliHandler(WorkspaceAwareDeletePreviewAction),
+		abacdefs.WorkspaceAwareDeleteActionCliHandler(WorkspaceAwareDeleteAction),
 	}
 	commands = append(commands, WorkspaceCliCommands...)
 	return &cli.Command{
