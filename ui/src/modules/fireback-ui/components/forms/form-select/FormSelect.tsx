@@ -193,11 +193,24 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
     return <div>{s.components.noQuerySourceToRender}</div>;
   }
 
+  // Bug fix: this used to fetch only 20 items and never actually filter by what
+  // was typed at all (see promiseOptions below) - `keyword` was tracked but never
+  // read anywhere, so the dropdown always showed the exact same unfiltered first
+  // page regardless of the search box's contents. A generous itemsPerPage (these
+  // are admin-configuration pickers - providers/templates realistically number in
+  // the dozens, not thousands) plus real client-side filtering against `keyword`
+  // covers this without depending on server-side search support, which the
+  // generic Browse actions these querySources wrap don't have (SearchPhrase is
+  // only meaningful to reactivesearch's own hand-written providers - see
+  // abac.QueryMenusReact/QueryRolesReact - not the generic entity Browse/Query
+  // path). `query.searchPhrase` is still forwarded in case a given querySource
+  // does have real server-side search to offer, but nothing currently requires it.
   const { query, keyExtractor: queryKeyExtractor } = props.querySource({
     queryClient,
     query: {
-      itemsPerPage: 20,
+      itemsPerPage: 200,
       withPreloads: props.withPreloads,
+      searchPhrase: keyword,
     },
   });
 
@@ -272,10 +285,37 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
   //   return <VerboseSelect {...props} />;
   // }
 
+  // Bug fix: this used to always resolve the full, unfiltered `options` list
+  // regardless of inputValue - typing into the search box never actually narrowed
+  // anything down. Match case-insensitively against whatever's actually rendered
+  // for each option (fnLabelFormat, when given - the same string the user is
+  // looking at), falling back to the raw item otherwise.
   const promiseOptions = (inputValue: string) =>
     new Promise<T[]>((resolve) => {
       setTimeout(() => {
-        resolve(options);
+        if (!inputValue) {
+          resolve(options);
+          return;
+        }
+        const needle = inputValue.toLowerCase();
+        // Bug fix: falling back to String(item) for an object-shaped option
+        // (e.g. the plain { label, value } pairs createQuerySource wraps a
+        // static array in, as every EmailProvider/GsmProvider "Type" select
+        // does) stringified to the useless "[object Object]" - matching
+        // nothing typed, so the dropdown went empty for every keystroke
+        // instead of narrowing down. react-select's own default rendering
+        // (formatOptionLabel left unset, as none of these callers set it)
+        // already falls back to reading option.label - mirror that same
+        // convention here so the filter matches what's actually on screen.
+        const labelOf = (item: T) =>
+          (props.fnLabelFormat
+            ? props.fnLabelFormat(item)
+            : (item as any)?.label ?? String(item)) ?? "";
+        resolve(
+          (options || []).filter((item) =>
+            labelOf(item).toLowerCase().includes(needle),
+          ),
+        );
       }, 100);
     });
 

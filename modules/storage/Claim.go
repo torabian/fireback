@@ -16,6 +16,7 @@ package storage
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,16 +41,46 @@ var (
 //
 //	score, err := ScoreActions.Create(dto, query)
 //	if err == nil {
-//	    _, claimErr := storage.ClaimFile(ctx, pool, dto.SheetFileId, "score:"+score.UniqueId)
+//	    _, claimErr := storage.ClaimFile(ctx, storage.GetStore(), dto.SheetFileId, "score:"+score.UniqueId)
 //	    // an error here means the file was already claimed elsewhere, or
 //	    // never existed/finished uploading - surface it as a validation error
 //	}
 //
 // Claiming the same upload twice with the same claimedBy is a no-op success
-// (safe to retry). Claiming it with a different claimedBy than what's
-// already recorded returns ErrUploadAlreadyClaimed - one uploaded file
-// cannot silently be reassigned to a second owner.
-func ClaimFile(ctx context.Context, pool *pgxpool.Pool, id, claimedBy string) (*FileRecord, error) {
+// (safe to retry). Dispatches on which Store implementation it's given - see
+// pgLoStore (Postgres) and SQLiteStore.ClaimFile (StoreSQLite.go).
+func ClaimFile(ctx context.Context, store Store, id, claimedBy string) (*FileRecord, error) {
+	switch s := store.(type) {
+	case *pgLoStore:
+		return claimFilePostgres(ctx, s.Pool, id, claimedBy)
+	case *SQLiteStore:
+		return s.ClaimFile(ctx, id, claimedBy)
+	case *MySQLStore:
+		return s.ClaimFile(ctx, id, claimedBy)
+	default:
+		return nil, fmt.Errorf("fileupload: unsupported store implementation %T", store)
+	}
+}
+
+// ReleaseFile clears a claim, e.g. when the owning record is deleted, so the
+// upload becomes eligible for reaping again unless something re-claims it.
+// It only clears the claim if claimedBy matches what's currently recorded,
+// so one owner can't release another owner's claim; it's a no-op if the
+// upload isn't claimed, is claimed by someone else, or doesn't exist.
+func ReleaseFile(ctx context.Context, store Store, id, claimedBy string) error {
+	switch s := store.(type) {
+	case *pgLoStore:
+		return releaseFilePostgres(ctx, s.Pool, id, claimedBy)
+	case *SQLiteStore:
+		return s.ReleaseFile(ctx, id, claimedBy)
+	case *MySQLStore:
+		return s.ReleaseFile(ctx, id, claimedBy)
+	default:
+		return fmt.Errorf("fileupload: unsupported store implementation %T", store)
+	}
+}
+
+func claimFilePostgres(ctx context.Context, pool *pgxpool.Pool, id, claimedBy string) (*FileRecord, error) {
 	tx, err := pool.Begin(ctx)
 	if err != nil {
 		return nil, err
@@ -82,7 +113,7 @@ func ClaimFile(ctx context.Context, pool *pgxpool.Pool, id, claimedBy string) (*
 	// 	if err := tx.Commit(ctx); err != nil {
 	// 		return nil, err
 	// 	}
-	// 	return GetFile(ctx, pool, id)
+	// 	return getFilePostgres(ctx, pool, id)
 	// }
 
 	if _, err := tx.Exec(ctx, `
@@ -95,15 +126,10 @@ func ClaimFile(ctx context.Context, pool *pgxpool.Pool, id, claimedBy string) (*
 		return nil, err
 	}
 
-	return GetFile(ctx, pool, id)
+	return getFilePostgres(ctx, pool, id)
 }
 
-// ReleaseFile clears a claim, e.g. when the owning record is deleted, so the
-// upload becomes eligible for reaping again unless something re-claims it.
-// It only clears the claim if claimedBy matches what's currently recorded,
-// so one owner can't release another owner's claim; it's a no-op if the
-// upload isn't claimed, is claimed by someone else, or doesn't exist.
-func ReleaseFile(ctx context.Context, pool *pgxpool.Pool, id, claimedBy string) error {
+func releaseFilePostgres(ctx context.Context, pool *pgxpool.Pool, id, claimedBy string) error {
 	_, err := pool.Exec(ctx, `
 		UPDATE tus_uploads SET claimed_by = NULL, claimed_at = NULL
 		WHERE id = $1 AND claimed_by = $2

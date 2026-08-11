@@ -52,12 +52,12 @@ export const HeadlessEntityManager = ({
   // const { query: getQuery } = getSingleHook;
 
   useEffect(() => {
-    if (getSingleHook?.query.data?.data) {
+    if (getSingleHook?.data?.data?.item) {
       formik.current?.setValues({
-        ...getSingleHook.query.data.data,
+        ...getSingleHook.data.data.item,
       });
     }
-  }, [getSingleHook?.query.data]);
+  }, [getSingleHook?.data?.data?.item]);
 
   useEffect(() => {
     formik.current?.setSubmitting(

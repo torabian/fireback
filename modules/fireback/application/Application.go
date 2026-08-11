@@ -87,6 +87,16 @@ type ModuleProvider struct {
 	// When a gin web server is being created, the group for this module
 	// will be looking for this function. Could be used to manually add routes or other configuration
 	GinWebServerInitHooks []func(g *gin.RouterGroup, x *Application) error
+
+	// Returns this module's own generated `config:` struct (e.g. a call to that
+	// module's own emi-generated LoadConfiguration(), or just &config from its
+	// package) as a bare interface{}. fireback.GetCombinedConfigInfo reflects over it
+	// (same envconfig/description tags GoConfigGenerate already emits on every field)
+	// to fold it into one combined config listing - the same way abac.Menu lets a
+	// module contribute AppMenu items without interfacetools importing it back. A
+	// func rather than a static value so it's re-read live (a module's config can be
+	// mutated at runtime, e.g. via its own generated "config <field> set" CLI command).
+	ConfigProvider func() interface{}
 }
 
 func (x *ModuleProvider) ProvideMockImportHandler(t func()) {
@@ -132,6 +142,13 @@ func (x *ModuleProvider) ProvideTranslationList(items ...map[string]map[string]s
 // They all will be added next to each other.
 func (x *ModuleProvider) ProvideCliHandlers(t []*cli.Command) {
 	x.CliHandlers = append(x.CliHandlers, t...)
+}
+
+// Registers a function returning this module's own generated `config:` struct, so
+// it gets folded into the combined config listing - see ConfigProvider's own doc
+// comment above.
+func (x *ModuleProvider) ProvideConfigHandler(t func() interface{}) {
+	x.ConfigProvider = t
 }
 
 type PermissionInfo struct {

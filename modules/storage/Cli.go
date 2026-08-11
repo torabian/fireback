@@ -21,34 +21,38 @@ func Commands() []*cli.Command {
 }
 
 // databaseURLFlag is attached to every command in Commands so the
-// standalone fileupload-cli binary works on its own; withPool falls back to
-// fireback's own config when it's left unset, which is what happens when
-// Commands is mounted into a fireback app's CLI instead.
+// standalone fileupload-cli binary works on its own; withStore falls back
+// to fireback's own config when it's left unset, which is what happens when
+// Commands is mounted into a fireback app's CLI instead. Postgres-only -
+// there's no sqlite equivalent of a single connection-string flag, so a
+// sqlite-backed app relies on GetStore()/OpenStoreForFireback (options 1/3
+// below) instead.
 func databaseURLFlag() cli.Flag {
 	return &cli.StringFlag{
 		Name:    "database-url",
 		Sources: cli.EnvVars("DATABASE_URL"),
-		Usage:   "Postgres connection string; falls back to the fireback app's own database config if omitted",
+		Usage:   "Postgres connection string; falls back to the fireback app's own database config if omitted (works for sqlite too, via that fallback)",
 	}
 }
 
-// withPool resolves a *pgxpool.Pool and hands it to fn, trying in order:
+// withStore resolves a Store and hands it to fn, trying in order:
 //
-//  1. Pool() - the shared pool MountAll already opened, if this process is
-//     also running (or has already started) the fileupload module inside a
+//  1. GetStore() - the shared Store MountAll already opened, if this process
+//     is also running (or has already started) the storage module inside a
 //     live app. Reused as-is, not closed afterwards.
-//  2. --database-url, or the DATABASE_URL env var it falls back to - for the
-//     standalone fileupload-cli binary pointed at a database with no app
-//     running against it.
-//  3. NewPgxPool (webserver.go), the same fireback-config-derived connection
-//     mountOnFirebackApp uses - so when Commands is mounted into a fireback
-//     app's own CLI (e.g. cmd/nima-server), it resolves the same database
-//     that app's web server would, with no flag needed.
+//  2. --database-url, or the DATABASE_URL env var it falls back to (Postgres
+//     only) - for the standalone fileupload-cli binary pointed at a
+//     database with no app running against it.
+//  3. OpenStoreForFireback (webserver.go), the same fireback-config-derived
+//     connection mountOnFirebackApp uses - so when Commands is mounted into
+//     a fireback app's own CLI, it resolves the same database (postgres or
+//     sqlite) that app's web server would, with no flag needed.
 //
-// A pool opened for cases 2/3 is closed once fn returns.
-func withPool(ctx context.Context, c *cli.Command, fn func(ctx context.Context, pool *pgxpool.Pool) error) error {
-	if pool := Pool(); pool != nil {
-		return fn(ctx, pool)
+// A store opened for cases 2/3 is closed once fn returns, where closing is
+// meaningful (a *pgxpool.Pool or *sql.DB) - GetStore()'s result never is.
+func withStore(ctx context.Context, c *cli.Command, fn func(ctx context.Context, store Store) error) error {
+	if store := GetStore(); store != nil {
+		return fn(ctx, store)
 	}
 
 	if connString := c.String("database-url"); connString != "" {
@@ -57,19 +61,18 @@ func withPool(ctx context.Context, c *cli.Command, fn func(ctx context.Context, 
 			return fmt.Errorf("connecting to postgres: %w", err)
 		}
 		defer pool.Close()
-		return fn(ctx, pool)
+		return fn(ctx, NewStore(pool))
 	}
 
-	pool, err := NewPgxPool()
+	store, err := OpenStoreForFireback()
 	if err != nil {
-		return fmt.Errorf("connecting to postgres: %w", err)
+		return fmt.Errorf("connecting to the configured database: %w", err)
 	}
-	if pool == nil {
-		return errors.New("no database found: pass --database-url / set DATABASE_URL, or run this inside a fireback app configured for postgres")
+	if store == nil {
+		return errors.New("no database found: pass --database-url / set DATABASE_URL, or run this inside a fireback app configured for postgres or sqlite")
 	}
-	defer pool.Close()
 
-	return fn(ctx, pool)
+	return fn(ctx, store)
 }
 
 var usageCmd = &cli.Command{
@@ -87,15 +90,15 @@ var usageCmd = &cli.Command{
 			return errors.New("pass exactly one of --user or --workspace")
 		}
 
-		return withPool(ctx, c, func(ctx context.Context, pool *pgxpool.Pool) error {
+		return withStore(ctx, c, func(ctx context.Context, store Store) error {
 			var (
 				used int64
 				err  error
 			)
 			if userId != "" {
-				used, err = UsedBytes(ctx, pool, userId)
+				used, err = UsedBytes(ctx, store, userId)
 			} else {
-				used, err = WorkspaceUsedBytes(ctx, pool, workspaceId)
+				used, err = WorkspaceUsedBytes(ctx, store, workspaceId)
 			}
 			if err != nil {
 				return err
@@ -134,10 +137,8 @@ var uploadCmd = &cli.Command{
 			meta[key] = value
 		}
 
-		return withPool(ctx, c, func(ctx context.Context, pool *pgxpool.Pool) error {
-			store := NewStore(pool)
-
-			rec, err := UploadFile(ctx, pool, store, path, UploadFileOptions{
+		return withStore(ctx, c, func(ctx context.Context, store Store) error {
+			rec, err := UploadFile(ctx, store, path, UploadFileOptions{
 				UserId:      c.String("user"),
 				WorkspaceId: c.String("workspace"),
 				AccessLevel: c.String("access-level"),
@@ -167,8 +168,7 @@ var deleteCmd = &cli.Command{
 			return errors.New("usage: fileupload-cli delete <id>")
 		}
 
-		return withPool(ctx, c, func(ctx context.Context, pool *pgxpool.Pool) error {
-			store := NewStore(pool)
+		return withStore(ctx, c, func(ctx context.Context, store Store) error {
 			if err := DeleteFile(ctx, store, id); err != nil {
 				return err
 			}

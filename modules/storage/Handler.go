@@ -14,7 +14,7 @@ import (
 // cfg's Quota is enforced via PreUploadCreateCallback, using the owner
 // identity Mount's serve stashes into the creation request's
 // Upload-Metadata header.
-func NewTusHandler(store *Store, basePath string, cfg *StorageModuleConfig) (*handler.Handler, error) {
+func NewTusHandler(store Store, basePath string, cfg *StorageModuleConfig) (*handler.Handler, error) {
 	composer := handler.NewStoreComposer()
 	composer.UseCore(store)
 	composer.UseTerminater(store)
@@ -32,7 +32,7 @@ func NewTusHandler(store *Store, basePath string, cfg *StorageModuleConfig) (*ha
 // reserved metaKeyUserId/... keys, stripped back out again by
 // Store.NewUpload) rather than re-resolving auth itself - by the time this
 // runs, the request has already passed Mount's own auth/ownership gate.
-func enforceQuotaCallback(store *Store, cfg *StorageModuleConfig) func(handler.HookEvent) error {
+func enforceQuotaCallback(store Store, cfg *StorageModuleConfig) func(handler.HookEvent) error {
 	return func(hook handler.HookEvent) error {
 		userId := hook.Upload.MetaData[metaKeyUserId]
 		if userId == "" {
@@ -52,7 +52,7 @@ func enforceQuotaCallback(store *Store, cfg *StorageModuleConfig) func(handler.H
 			return nil // negative means unlimited for this identity
 		}
 
-		used, err := UsedBytes(context.Background(), store.Pool, userId)
+		used, err := UsedBytes(context.Background(), store, userId)
 		if err != nil {
 			return err
 		}
@@ -108,7 +108,7 @@ func injectOwnerMetadata(existingHeader string, auth AuthContext) string {
 // mount prefix already removed and, for ":id", without a leading slash
 // either. gin.WrapH alone doesn't do that rewriting, so this rewrites
 // req.URL.Path itself before handing the request to tusd.
-func Mount(r gin.IRouter, basePath string, store *Store, cfg *StorageModuleConfig) error {
+func Mount(r gin.IRouter, basePath string, store Store, cfg *StorageModuleConfig) error {
 	cfg = cfg.withDefaults()
 
 	h, err := NewTusHandler(store, basePath, cfg)

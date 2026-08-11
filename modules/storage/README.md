@@ -334,6 +334,12 @@ uploads work fine directly in `<img>`; for owned uploads, either:
   `func(*gin.Context) (AuthContext, error)` — nothing here currently
   implements that, but nothing stops an app from doing so.
 
+  The frontend's `resumable-uploader` module (`ui/src/modules/fireback-ui/
+  components/resumable-uploader`) already packages the first option as
+  `AuthenticatedThumbnail` - both `FileUploader`'s own "current file"
+  thumbnail (via `getThumbnailUrl`) and any other read-only view can use it
+  directly instead of a plain `<img>`.
+
 ## 7. Auth, ownership, and quota model
 
 - `AuthContext{UserId, WorkspaceId, AccessLevel}` (`Auth.go:11`) is the one

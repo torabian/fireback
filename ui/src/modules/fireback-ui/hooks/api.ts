@@ -60,7 +60,23 @@ const errorToStirng = (error: any, s: typeof strings) => {
   return message;
 };
 
+/*
+ * Surfaces an error to the user as a toast. `res` can be either shape callers here
+ * actually pass:
+ * - a rejected exception (network failure, thrown Error, ...) - read directly, same
+ *   fallback chain errorToStirng already has for a bare `{message}`-shaped object.
+ * - an explicit `{ error: {...} }` envelope (e.g. a resolved-but-failed mutation
+ *   response - our fetch layer resolves those instead of rejecting, see
+ *   mutationErrorsToFormik's own doc comment) - `.error` is unwrapped first, same
+ *   `response.error?.toJSON?.() ?? response.error` pattern CommonEntityManager.tsx's
+ *   onSubmit already uses.
+ *
+ * This used to be a no-op (the Toast call was commented out) - every catch/rejected-
+ * mutation branch that called it (CommonEntityManager's save, CommonDataTable's bulk
+ * patch, useDatatableFiltering's delete) silently swallowed the error instead of
+ * telling the user anything went wrong.
+ */
 export function httpErrorHanlder(res: any, s: typeof strings) {
-  // Toast has errors
-  // Toast("failed", { type: "error" });
+  const errorInfo = res?.error?.toJSON?.() ?? res?.error ?? res;
+  Toast(errorToStirng(errorInfo, s), { type: "error" });
 }

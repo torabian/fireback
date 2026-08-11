@@ -35,7 +35,9 @@ func classicPassportRequestOtpCore(req abacdefs.ClassicPassportRequestOtpActionR
 		return nil, err
 	}
 
-	var secondsToUnblock int64 = 120
+	// Configurable via Abac.emi.yml's `config:` block (env OTP_LOCKOUT_SECONDS, or
+	// "abac config otp-lockout-seconds set") - see modules/abac/defs/Configuration.go.
+	var secondsToUnblock int64 = abacdefs.LoadConfiguration().OtpLockoutSeconds
 
 	var olderEntity *abacdefs.PublicAuthenticationEntity = nil
 	fireback.GetDbRef().Where(&abacdefs.PublicAuthenticationEntity{PassportValue: req.Value}).Find(&olderEntity)

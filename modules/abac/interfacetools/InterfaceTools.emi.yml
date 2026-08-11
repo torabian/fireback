@@ -10,9 +10,9 @@ complexes:
 
 targets:
   - compiler: go
-    output: ./
+    output: ./defs
     flags:
-      pkg: interfacetools
+      pkg: interfacetoolsdefs
   - compiler: js
     output: ../../../ui/src/modules/sdk/interfacetools
     flags:

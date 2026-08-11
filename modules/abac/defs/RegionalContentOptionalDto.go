@@ -9,12 +9,17 @@ import (
 
 // The base class definition for regionalContentOptionalDto
 type RegionalContentOptionalDto struct {
-	UniqueId   emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
-	Content    emigo.Nullable[string] `json:"content" validate:"required" yaml:"content"`
-	Region     emigo.Nullable[string] `json:"region" validate:"required" yaml:"region"`
-	Title      emigo.Nullable[string] `json:"title" yaml:"title"`
+	UniqueId emigo.Nullable[string] `json:"uniqueId" yaml:"uniqueId"`
+	// The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
+	Content emigo.Nullable[string] `json:"content" validate:"required" yaml:"content"`
+	// Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
+	Region emigo.Nullable[string] `json:"region" validate:"required" yaml:"region"`
+	// Optional subject line - only used for email-type content.
+	Title emigo.Nullable[string] `json:"title" yaml:"title"`
+	// Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
 	LanguageId emigo.Nullable[string] `json:"languageId" validate:"required" yaml:"languageId"`
-	KeyGroup   emigo.Nullable[string] `json:"keyGroup" validate:"required" yaml:"keyGroup"`
+	// Which kind of message this content is used for.
+	KeyGroup emigo.Nullable[string] `json:"keyGroup" validate:"required" yaml:"keyGroup"`
 	// The unique-id of the workspace which content belongs to.
 	WorkspaceId emigo.Nullable[string] `json:"workspaceId" yaml:"workspaceId"`
 	// The unique-id of the user which created/owns the record.
@@ -37,24 +42,29 @@ func GetRegionalContentOptionalDtoCliFlags(prefix string) []emigo.CliFlag {
 			Type: "string?",
 		},
 		{
-			Name: prefix + "content",
-			Type: "string?",
+			Name:        prefix + "content",
+			Type:        "string?",
+			Description: "The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.",
 		},
 		{
-			Name: prefix + "region",
-			Type: "string?",
+			Name:        prefix + "region",
+			Type:        "string?",
+			Description: "Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.",
 		},
 		{
-			Name: prefix + "title",
-			Type: "string?",
+			Name:        prefix + "title",
+			Type:        "string?",
+			Description: "Optional subject line - only used for email-type content.",
 		},
 		{
-			Name: prefix + "language-id",
-			Type: "string?",
+			Name:        prefix + "language-id",
+			Type:        "string?",
+			Description: "Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.",
 		},
 		{
-			Name: prefix + "key-group",
-			Type: "enum?",
+			Name:        prefix + "key-group",
+			Type:        "enum?",
+			Description: "Which kind of message this content is used for.",
 		},
 		{
 			Name:        prefix + "workspace-id",

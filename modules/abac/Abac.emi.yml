@@ -39,6 +39,16 @@ targets:
     output: ./
 
 name: abac
+
+config:
+  - name: otpLockoutSeconds
+    type: int64
+    default: "120"
+    description:
+      How many seconds a passport value (email or phone) must wait before it can
+      request another OTP/magic-link, once a request is already pending. See
+      ClassicPassportRequestOtpActionImplementation.go.
+
 description:
   Fireback ABAC module provides user authentication, basic support for most projects,
   including advanced role, permission module on top of fireback core module.
@@ -1202,27 +1212,49 @@ entities:
         type: string
         tags:
           validate: required
+        description: >-
+          The template body sent to the user - supports Go template syntax to
+          insert dynamic values, such as {{.Otp}} for the one-time password.
       - name: region
         tags:
           validate: required
+          # Region is part of the uniqueness together with languageId/keyGroup
+          # below, so the same language+keyGroup can have a different variant
+          # per region (e.g. "us" vs "eu") - without it here, only a single
+          # region-less row could ever exist per language+keyGroup at all,
+          # defeating the point of a "regional" content entity.
+          gorm: "index:regional_content_index,unique"
         type: string
+        description: >-
+          Region or locale this content applies to, for example any, us, eu,
+          or asia/*. Use any unless you need to target a specific region.
       - name: title
         type: string
+        description: >-
+          Optional subject line - only used for email-type content.
       - name: languageId
         tags:
           validate: required
           gorm: "index:regional_content_index,unique"
         type: string
+        description: >-
+          Language code this content is written in, for example en, fa, or
+          pl. Falls back to English if nothing matches a user's language.
       - name: keyGroup
         tags:
           validate: required
           gorm: "index:regional_content_index,unique"
         type: enum
+        description: Which kind of message this content is used for.
         of:
           - k: SMS_OTP
-            description: Used when an email would be sent with one time password
-          - k: EMAIL_OTP
             description: Used when an sms would be sent with one time password
+          - k: EMAIL_OTP
+            description: Used when an email would be sent with one time password
+          - k: INVITE_TO_WORKSPACE
+            description: >-
+              Used as the default template when a user invites a third-party
+              into their own workspace
       - name: workspaceId
         type: string?
         description: The unique-id of the workspace which content belongs to.
@@ -1612,8 +1644,20 @@ entities:
           - name: countryCode
             type: string?
             description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
-      - name: workspaceId
+      - name: phoneNumber
         type: string?
+        description: Contact phone number for this user (separate from any passport used to sign in).
+      - name: jobTitle
+        type: string?
+        description: The user's job title/role, e.g. "Support Engineer".
+      - name: company
+        type: string?
+        description: The company or organization the user is associated with.
+      - name: bio
+        type: string?
+        description: Free-form biography/notes about the user.
+        tags:
+          gorm: text
       - name: userId
         type: string?
       - name: createdAt

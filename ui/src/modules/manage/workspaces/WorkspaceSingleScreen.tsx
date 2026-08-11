@@ -15,7 +15,7 @@ export const WorkspaceSingleScreen = () => {
   const { locale } = useLocale();
 
   const getSingleHook = useWorkspaceGetActionQuery({ params: { uniqueId } });
-  var d: any | undefined = getSingleHook.query.data?.data;
+  var d: any | undefined = getSingleHook.data?.data?.item;
   usePageTitle(d?.name || "");
 
   return (

@@ -9,3 +9,8 @@ content:
     nameHint: Name
     newCapability: New capability
     uniqueId: Identyfikator
+    uniqueIdHint: >-
+      Unikalny klucz dla tej możliwości (np. "students.query"). Opcjonalne - jeśli
+      pozostawione puste, zostanie wygenerowane automatycznie. Nie można zmienić po
+      utworzeniu.
+    uniqueIdLockedHint: Identyfikatora nie można zmienić po utworzeniu możliwości.

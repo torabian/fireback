@@ -1,6 +1,5 @@
 import { CommonSingleManager } from "../../fireback-ui/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "../../fireback-ui/components/general-entity-view/GeneralEntityView";
-import { usePageTitle } from "../../fireback-ui/hooks/authContext";
 import { useLocale } from "../../fireback-ui/hooks/useLocale";
 import { useRouter } from "../../fireback-ui/hooks/useRouter";
 import { useS } from "../../fireback-ui/hooks/useS";
@@ -9,6 +8,7 @@ import { EmailSenderDto } from "../../sdk/messaging/EmailSenderDto";
 import { EmailSenderNavigation } from "../../sdk/navigation/MessagingNavigation";
 import { useEmailSenderGetActionQuery } from "../../sdk/messaging/EmailSenderGetAction";
 import { useState } from "react";
+import { usePageTitle } from "@/modules/fireback-ui/components/page-title/PageTitle";
 
 export const EmailSenderSingleScreen = () => {
   const router = useRouter();
@@ -17,10 +17,10 @@ export const EmailSenderSingleScreen = () => {
   const { locale } = useLocale();
   const [value, setValue] = useState<string[]>([]);
 
-  const getSingleHook = useGetEmailSenderByUniqueId({
-    query: { uniqueId },
+  const getSingleHook = useEmailSenderGetActionQuery({
+    params: { uniqueId },
   });
-  var d: EmailSenderDto | undefined = getSingleHook.query.data?.data;
+  var d: EmailSenderDto | undefined = getSingleHook.data?.data?.item;
   usePageTitle(d?.fromName || "");
 
   return (

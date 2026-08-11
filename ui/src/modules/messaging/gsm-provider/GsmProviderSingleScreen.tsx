@@ -9,7 +9,7 @@ import { strings } from "./strings/translations";
 export const GsmProviderSingleScreen = () => {
   const { uniqueId, queryClient } = useCommonEntityManager<Partial<any>>({});
   const getSingleHook = useGsmProviderGetActionQuery({ params: { uniqueId } });
-  var d: GsmProviderDto | undefined = getSingleHook.query.data?.data;
+  var d: GsmProviderDto | undefined = getSingleHook.data?.data?.item;
   const t = useS(strings);
   // usePageTitle(`${d?.name}`);
   return (

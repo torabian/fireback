@@ -2,43 +2,63 @@ package interfacetools
 
 import (
 	"github.com/gin-gonic/gin"
+	interfacetoolsdefs "github.com/torabian/fireback/modules/abac/interfacetools/defs"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
+
+// InterfaceToolsModuleConfig lets a caller inject its own AppMenu definitions - e.g.
+// abac.Menu - without this package importing anything back from that caller (abac
+// deliberately only imports interfacetoolsdefs, the plain generated types, not this
+// interfacetools package itself - see abac/Menu.go's own comment). main.go is what
+// actually wires the two together, passing abac.Menu in here when it constructs the
+// module list.
+type InterfaceToolsModuleConfig struct {
+	// ExtraAppMenus are synced (SyncAppMenus - delete-by-uniqueId-then-recreate, so
+	// re-running migrations doesn't pile up duplicates) as part of this module's own
+	// migration (ProvideEntityHandlers, called from ApplyMigration), rather than
+	// requiring a separate manual "seeders" step the way this module's own
+	// AppMenuSyncSeeders/seeders/AppMenu directory still does for anything else that
+	// wants to land menu items via that older, plain-insert mechanism.
+	ExtraAppMenus []*interfacetoolsdefs.AppMenuEntity
+}
 
 // ModuleSetup registers appMenu, tableViewSizing and timezoneGroup (plus the
 // /cte-app-menus action) as their own application.ModuleProvider - split out of abac since
 // none of them need Role/Workspace/User types directly. They have no dedicated
 // front-end management screens (unlike e.g. modules/abac/messaging's providers), so only
 // the backend moved here - see AbacCompleteModules.
-func ModuleSetup() *application.ModuleProvider {
+func ModuleSetup(config *InterfaceToolsModuleConfig) *application.ModuleProvider {
+	if config == nil {
+		config = &InterfaceToolsModuleConfig{}
+	}
 	module := &application.ModuleProvider{
 		Name: "abac",
 
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				AppMenuBrowseActionGin(g, AppMenuBrowseAction)
-				AppMenuGetActionGin(g, AppMenuGetAction)
-				AppMenuCreateActionGin(g, AppMenuCreateAction)
-				AppMenuUpdateActionGin(g, AppMenuUpdateAction)
-				AppMenuAwareDeletePreviewActionGin(g, AppMenuAwareDeletePreviewAction)
-				AppMenuAwareDeleteActionGin(g, AppMenuAwareDeleteAction)
-				CteAppMenusActionGin(g, CteAppMenusAction)
+				interfacetoolsdefs.AppMenuBrowseActionGin(g, AppMenuBrowseAction)
+				interfacetoolsdefs.AppMenuGetActionGin(g, AppMenuGetAction)
+				interfacetoolsdefs.AppMenuCreateActionGin(g, AppMenuCreateAction)
+				interfacetoolsdefs.AppMenuUpdateActionGin(g, AppMenuUpdateAction)
+				interfacetoolsdefs.AppMenuAwareDeletePreviewActionGin(g, AppMenuAwareDeletePreviewAction)
+				interfacetoolsdefs.AppMenuAwareDeleteActionGin(g, AppMenuAwareDeleteAction)
+				interfacetoolsdefs.CteAppMenusActionGin(g, CteAppMenusAction)
 
-				TableViewSizingBrowseActionGin(g, TableViewSizingBrowseAction)
-				TableViewSizingGetActionGin(g, TableViewSizingGetAction)
-				TableViewSizingCreateActionGin(g, TableViewSizingCreateAction)
-				TableViewSizingUpdateActionGin(g, TableViewSizingUpdateAction)
-				TableViewSizingAwareDeletePreviewActionGin(g, TableViewSizingAwareDeletePreviewAction)
-				TableViewSizingAwareDeleteActionGin(g, TableViewSizingAwareDeleteAction)
+				interfacetoolsdefs.TableViewSizingBrowseActionGin(g, TableViewSizingBrowseAction)
+				interfacetoolsdefs.TableViewSizingGetActionGin(g, TableViewSizingGetAction)
+				interfacetoolsdefs.TableViewSizingCreateActionGin(g, TableViewSizingCreateAction)
+				interfacetoolsdefs.TableViewSizingUpdateActionGin(g, TableViewSizingUpdateAction)
+				interfacetoolsdefs.TableViewSizingAwareDeletePreviewActionGin(g, TableViewSizingAwareDeletePreviewAction)
+				interfacetoolsdefs.TableViewSizingAwareDeleteActionGin(g, TableViewSizingAwareDeleteAction)
 
-				TimezoneGroupBrowseActionGin(g, TimezoneGroupBrowseAction)
-				TimezoneGroupGetActionGin(g, TimezoneGroupGetAction)
-				TimezoneGroupCreateActionGin(g, TimezoneGroupCreateAction)
-				TimezoneGroupUpdateActionGin(g, TimezoneGroupUpdateAction)
-				TimezoneGroupAwareDeletePreviewActionGin(g, TimezoneGroupAwareDeletePreviewAction)
-				TimezoneGroupAwareDeleteActionGin(g, TimezoneGroupAwareDeleteAction)
+				interfacetoolsdefs.TimezoneGroupBrowseActionGin(g, TimezoneGroupBrowseAction)
+				interfacetoolsdefs.TimezoneGroupGetActionGin(g, TimezoneGroupGetAction)
+				interfacetoolsdefs.TimezoneGroupCreateActionGin(g, TimezoneGroupCreateAction)
+				interfacetoolsdefs.TimezoneGroupUpdateActionGin(g, TimezoneGroupUpdateAction)
+				interfacetoolsdefs.TimezoneGroupAwareDeletePreviewActionGin(g, TimezoneGroupAwareDeletePreviewAction)
+				interfacetoolsdefs.TimezoneGroupAwareDeleteActionGin(g, TimezoneGroupAwareDeleteAction)
 
 				return nil
 			},
@@ -52,11 +72,17 @@ func ModuleSetup() *application.ModuleProvider {
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
-		return dbref.AutoMigrate(
-			&AppMenuEntity{},
-			&TableViewSizingEntity{},
-			&TimezoneGroupEntity{},
-		)
+		if err := dbref.AutoMigrate(
+			&interfacetoolsdefs.AppMenuEntity{},
+			&interfacetoolsdefs.TableViewSizingEntity{},
+			&interfacetoolsdefs.TimezoneGroupEntity{},
+		); err != nil {
+			return err
+		}
+
+		SyncAppMenus(config.ExtraAppMenus)
+
+		return nil
 	})
 
 	module.ProvideSeederImportHandler(func() {
@@ -76,12 +102,12 @@ func ModuleSetup() *application.ModuleProvider {
 					Aliases:     []string{"tvs"},
 					Description: "Stores the table column configuration per user in database",
 					Commands: []*cli.Command{
-						TableViewSizingBrowseActionCliHandler(TableViewSizingBrowseAction),
-						TableViewSizingGetActionCliHandler(TableViewSizingGetAction),
-						TableViewSizingCreateActionCliHandler(TableViewSizingCreateAction),
-						TableViewSizingUpdateActionCliHandler(TableViewSizingUpdateAction),
-						TableViewSizingAwareDeletePreviewActionCliHandler(TableViewSizingAwareDeletePreviewAction),
-						TableViewSizingAwareDeleteActionCliHandler(TableViewSizingAwareDeleteAction),
+						interfacetoolsdefs.TableViewSizingBrowseActionCliHandler(TableViewSizingBrowseAction),
+						interfacetoolsdefs.TableViewSizingGetActionCliHandler(TableViewSizingGetAction),
+						interfacetoolsdefs.TableViewSizingCreateActionCliHandler(TableViewSizingCreateAction),
+						interfacetoolsdefs.TableViewSizingUpdateActionCliHandler(TableViewSizingUpdateAction),
+						interfacetoolsdefs.TableViewSizingAwareDeletePreviewActionCliHandler(TableViewSizingAwareDeletePreviewAction),
+						interfacetoolsdefs.TableViewSizingAwareDeleteActionCliHandler(TableViewSizingAwareDeleteAction),
 					},
 				},
 				{
@@ -89,12 +115,12 @@ func ModuleSetup() *application.ModuleProvider {
 					Aliases:     []string{"tz"},
 					Description: "Contains common timezones information",
 					Commands: []*cli.Command{
-						TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
-						TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
-						TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
-						TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
-						TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
-						TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
+						interfacetoolsdefs.TimezoneGroupBrowseActionCliHandler(TimezoneGroupBrowseAction),
+						interfacetoolsdefs.TimezoneGroupGetActionCliHandler(TimezoneGroupGetAction),
+						interfacetoolsdefs.TimezoneGroupCreateActionCliHandler(TimezoneGroupCreateAction),
+						interfacetoolsdefs.TimezoneGroupUpdateActionCliHandler(TimezoneGroupUpdateAction),
+						interfacetoolsdefs.TimezoneGroupAwareDeletePreviewActionCliHandler(TimezoneGroupAwareDeletePreviewAction),
+						interfacetoolsdefs.TimezoneGroupAwareDeleteActionCliHandler(TimezoneGroupAwareDeleteAction),
 					},
 				},
 			},

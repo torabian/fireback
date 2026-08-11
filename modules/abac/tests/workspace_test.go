@@ -274,3 +274,122 @@ func TestWorkspaceAwareDeletePreview_HTTP_ThenDelete(t *testing.T) {
 		t.Errorf("expected the deleted workspace %s to no longer be gettable", created.UniqueId)
 	}
 }
+
+// getWorkspace is a thin GET helper, used below to confirm the root workspace (and any
+// other workspace caught up in a rejected batch delete) is still actually there.
+func getWorkspace(t *testing.T, cfg TestConfig, uniqueId string) (*http.Response, []byte) {
+	t.Helper()
+	client := cfg.NewHTTPClient()
+	req, err := http.NewRequest(http.MethodGet, cfg.URL("/workspace/"+uniqueId), nil)
+	if err != nil {
+		t.Fatalf("failed to build get request: %v", err)
+	}
+	req.Header.Set("Authorization", cfg.CliToken)
+	req.Header.Set("Workspace-id", "root")
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("get request failed: %v", err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	return resp, body
+}
+
+// TestWorkspaceAwareDelete_HTTP_RejectsRootWorkspace is the regression guard for
+// WorkspaceAwareDeleteAction/WorkspaceAwareDeletePreviewAction's root-workspace guard
+// (WorkspaceActions.go) - every other workspace/role/permission in the install
+// bootstraps from "root" (see RepairTheWorkspaces), so deleting it would leave the
+// whole install unusable. Before that guard existed, this request would have succeeded
+// with a 200 OK.
+func TestWorkspaceAwareDelete_HTTP_RejectsRootWorkspace(t *testing.T) {
+	cfg := LoadTestConfig(t)
+	cfg.RequireServer(t)
+	cfg.RequireAuth(t)
+
+	client := cfg.NewHTTPClient()
+
+	// The preview step rejects it too, so an admin sees the problem before ever
+	// reaching the confirm step, not just when the delete itself is attempted.
+	previewReq, err := http.NewRequest(http.MethodGet, cfg.URL("/workspace/delete-preview?uniqueIds=root"), nil)
+	if err != nil {
+		t.Fatalf("failed to build delete-preview request: %v", err)
+	}
+	previewReq.Header.Set("Authorization", cfg.CliToken)
+	previewReq.Header.Set("Workspace-id", "root")
+	previewResp, err := client.Do(previewReq)
+	if err != nil {
+		t.Fatalf("delete-preview request failed: %v", err)
+	}
+	defer previewResp.Body.Close()
+	if previewResp.StatusCode == http.StatusOK {
+		t.Errorf("expected delete-preview of the root workspace to be rejected, got 200 OK")
+	}
+
+	deleteBody, _ := json.Marshal(map[string][]string{"uniqueIds": {"root"}})
+	deleteReq, err := http.NewRequest(http.MethodPost, cfg.URL("/workspace/delete"), bytes.NewReader(deleteBody))
+	if err != nil {
+		t.Fatalf("failed to build delete request: %v", err)
+	}
+	deleteReq.Header.Set("Content-Type", "application/json")
+	deleteReq.Header.Set("Authorization", cfg.CliToken)
+	deleteReq.Header.Set("Workspace-id", "root")
+	deleteResp, err := client.Do(deleteReq)
+	if err != nil {
+		t.Fatalf("delete request failed: %v", err)
+	}
+	defer deleteResp.Body.Close()
+	deleteRespBody, _ := io.ReadAll(deleteResp.Body)
+	if deleteResp.StatusCode == http.StatusOK {
+		t.Fatalf("expected deleting the root workspace to be rejected, got 200 OK: %s", deleteRespBody)
+	}
+
+	// Regardless of the rejection above, root must still actually be there.
+	getResp, getBody := getWorkspace(t, cfg, "root")
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("expected the root workspace to still exist after the rejected delete, got status %d: %s", getResp.StatusCode, getBody)
+	}
+}
+
+// TestWorkspaceAwareDelete_HTTP_RejectsBatchContainingRootWorkspace confirms the guard
+// rejects the *whole* batch - including a perfectly deletable workspace alongside "root"
+// - rather than silently dropping "root" from the list and deleting the rest, which
+// would succeed with a 200 OK and leave the caller thinking everything they asked for
+// was deleted.
+func TestWorkspaceAwareDelete_HTTP_RejectsBatchContainingRootWorkspace(t *testing.T) {
+	cfg := LoadTestConfig(t)
+	cfg.RequireServer(t)
+	cfg.RequireAuth(t)
+
+	created, wt, role := createSampleWorkspace(t, cfg)
+	defer deleteWorkspace(t, cfg, created.UniqueId)
+	defer deleteWorkspaceType(t, cfg, wt.UniqueId)
+	defer deleteRole(t, cfg, role.UniqueId)
+
+	deleteBody, _ := json.Marshal(map[string][]string{"uniqueIds": {created.UniqueId, "root"}})
+	client := cfg.NewHTTPClient()
+	deleteReq, err := http.NewRequest(http.MethodPost, cfg.URL("/workspace/delete"), bytes.NewReader(deleteBody))
+	if err != nil {
+		t.Fatalf("failed to build delete request: %v", err)
+	}
+	deleteReq.Header.Set("Content-Type", "application/json")
+	deleteReq.Header.Set("Authorization", cfg.CliToken)
+	deleteReq.Header.Set("Workspace-id", "root")
+	deleteResp, err := client.Do(deleteReq)
+	if err != nil {
+		t.Fatalf("delete request failed: %v", err)
+	}
+	defer deleteResp.Body.Close()
+	deleteRespBody, _ := io.ReadAll(deleteResp.Body)
+	if deleteResp.StatusCode == http.StatusOK {
+		t.Fatalf("expected a batch delete including the root workspace to be rejected entirely, got 200 OK: %s", deleteRespBody)
+	}
+
+	// Neither workspace should have been deleted - not root (never deletable), and not
+	// the otherwise-deletable one either (the whole batch was rejected).
+	if getResp, getBody := getWorkspace(t, cfg, "root"); getResp.StatusCode != http.StatusOK {
+		t.Errorf("expected the root workspace to still exist, got status %d: %s", getResp.StatusCode, getBody)
+	}
+	if getResp, getBody := getWorkspace(t, cfg, created.UniqueId); getResp.StatusCode != http.StatusOK {
+		t.Errorf("expected the sample workspace %s to still exist (whole batch should have been rejected), got status %d: %s", created.UniqueId, getResp.StatusCode, getBody)
+	}
+}

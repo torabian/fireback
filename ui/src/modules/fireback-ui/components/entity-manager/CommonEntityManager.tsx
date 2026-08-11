@@ -80,7 +80,19 @@ export const CommonEntityManager = ({
   const getQuery = getSingleHook;
 
   useEffect(() => {
-    const item = getQuery?.data?.data?.item?.toJSON();
+    const rawItem = getQuery?.data?.data?.item;
+    // Bug fix: rawItem's DTO classes (e.g. UserDto) use real ES private (#) fields, and
+    // their toJSON() only plainifies the top level - a nested object-type field (e.g.
+    // UserDto.primaryAddress) is handed back as-is, still an instance of its own private-
+    // fielded sub-class (see UserDto.ts's generated toJSON()). Formik/lodash's internal
+    // clone() (used by setFieldValue for every dotted path, e.g.
+    // "primaryAddress.city") can't shallow-copy such an instance - reading or writing a
+    // private field on the clone throws "Cannot read/write private member ... from an
+    // object whose class did not declare it" - which is exactly why editing a nested
+    // field like the user's address silently failed. `JSON.parse(JSON.stringify(...))`
+    // recurses into every nested toJSON() (that's how JSON.stringify itself works), so
+    // it comes out fully plain at every depth, not just the top level.
+    const item = rawItem ? JSON.parse(JSON.stringify(rawItem)) : undefined;
     if (item) {
       formik.current?.setValues(
         beforeSetValues ? beforeSetValues({ ...item }) : { ...item },

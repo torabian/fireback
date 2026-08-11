@@ -2,6 +2,7 @@ package abac
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -446,4 +447,53 @@ func CreateAdminTransaction(dto *abacdefs.ClassicSignupActionReq, setForRoot boo
 func InteractiveUserAdmin(query fireback.QueryDSL) (AdminCreationInfo, error) {
 	dto, setForRoot, _ := CreateUserInteractiveQuestions(query)
 	return CreateAdminTransaction(dto, setForRoot, query)
+}
+
+// UserMockActionCliHandler is a hand-written cli command (not emi-generated, unlike the
+// rest of UserCliFn's commands) that creates one or more mock users with realistic,
+// randomly generated information - name, avatar, birth date, ip, primary address, phone
+// number, job title, company and bio. It's built directly on top of
+// UserActions.SeederInit (the same generator the seeders framework calls) and
+// UserActionCreate (the same helper UserCreateAction's HTTP/CLI endpoint uses), so mock
+// users are indistinguishable from ones created through the regular "user create"
+// command, just filled in for you. Useful for local development and demos where an
+// empty user list isn't very convincing.
+func UserMockActionCliHandler() *cli.Command {
+	return &cli.Command{
+		Name:  "mock",
+		Usage: "Creates one or more mock users with realistic randomly generated information (name, address, phone, job title, company, bio, ...) - useful for local development and demos.",
+		Flags: []cli.Flag{
+			&cli.IntFlag{
+				Name:  "count",
+				Usage: "How many mock users to create",
+				Value: 1,
+			},
+		},
+		Action: func(ctx context.Context, c *cli.Command) error {
+			count := int(c.Int("count"))
+			if count <= 0 {
+				count = 1
+			}
+
+			created := make([]*abacdefs.UserEntity, 0, count)
+			for i := 0; i < count; i++ {
+				entity := UserActions.SeederInit()
+				entity.UniqueId = fireback.UUID()
+				user, err := UserActionCreate(entity, fireback.QueryDSL{})
+				if err != nil {
+					return err
+				}
+				created = append(created, user)
+			}
+
+			out, encErr := json.MarshalIndent(map[string]any{
+				"data": map[string]any{"items": created},
+			}, "", "  ")
+			if encErr != nil {
+				return encErr
+			}
+			fmt.Println(string(out))
+			return nil
+		},
+	}
 }

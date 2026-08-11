@@ -23,6 +23,17 @@ var PERM_ROOT_WORKSPACE_UPDATE = workspacePerms.Update
 var PERM_ROOT_WORKSPACE_DELETE = workspacePerms.Delete
 var ALL_WORKSPACE_PERMISSIONS = workspacePerms.All
 
+// WorkspaceMessages mirrors the entity-scoped messages pattern WorkspaceTypeMessages/
+// RoleMessages use - there's no Emi equivalent for entity-scoped messages, so it's
+// hand-declared here.
+var WorkspaceMessages = struct {
+	CannotDeleteRootWorkspace fireback.ErrorItem
+}{
+	CannotDeleteRootWorkspace: fireback.ErrorItem{
+		"$": "CannotDeleteRootWorkspace", "en": "The root workspace cannot be deleted.",
+	},
+}
+
 // WorkspaceTreeNode wraps WorkspaceEntity with a Children slice for the CTE tree result -
 // see AppMenuTreeNode's doc comment for why this is a separate wrapper type rather than
 // a field on the Emi-generated WorkspaceEntity struct.
@@ -171,6 +182,15 @@ func WorkspaceAwareDeletePreviewAction(c abacdefs.WorkspaceAwareDeletePreviewAct
 		return nil, err
 	}
 	uniqueIds := abacdefs.WorkspaceAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	// The root workspace is the one every other workspace/role/permission bootstraps
+	// from (see RepairTheWorkspaces, UserCli.go) - deleting it would leave the whole
+	// install unusable, so it's rejected outright, same as RoleActions.go already does
+	// for the root role. Checked here too (not just in WorkspaceAwareDeleteAction),
+	// so the confirmation step itself already surfaces the problem instead of letting
+	// an admin preview a "safe" delete that the real delete then rejects.
+	if fireback.Contains(uniqueIds, ROOT_VAR) {
+		return nil, &fireback.IError{Message: WorkspaceMessages.CannotDeleteRootWorkspace, HttpCode: 400}
+	}
 	preview, err2 := abacdefs.WorkspaceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
@@ -181,6 +201,13 @@ func WorkspaceAwareDeletePreviewAction(c abacdefs.WorkspaceAwareDeletePreviewAct
 func WorkspaceAwareDeleteAction(c abacdefs.WorkspaceAwareDeleteActionRequest) (*abacdefs.WorkspaceAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_WORKSPACE_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
+	}
+	// See WorkspaceAwareDeletePreviewAction's own comment - the root workspace must
+	// never be deletable. Rejecting the whole batch (rather than silently dropping
+	// just "root" from the list and deleting the rest) so a request that includes it
+	// fails loudly instead of quietly succeeding on everything else.
+	if fireback.Contains(c.Body.UniqueIds, ROOT_VAR) {
+		return nil, &fireback.IError{Message: WorkspaceMessages.CannotDeleteRootWorkspace, HttpCode: 400}
 	}
 	if err2 := abacdefs.WorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)

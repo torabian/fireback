@@ -9,6 +9,7 @@ import { UserDto } from "../../sdk/abac/UserDto";
 import { UserNavigation } from "../../sdk/navigation/AbacNavigation";
 import { useUserGetActionQuery } from "../../sdk/abac/UserGetAction";
 import { UserPassportList } from "./UserPassportsList";
+import { UserPhotoThumbnail } from "./UserPhotoThumbnail";
 
 export const UserSingleScreen = () => {
   const router = useRouter();
@@ -17,7 +18,7 @@ export const UserSingleScreen = () => {
   const { locale } = useLocale();
 
   const getSingleHook = useUserGetActionQuery({ params: { uniqueId } });
-  var d: UserDto | undefined = getSingleHook.query.data?.data;
+  var d: UserDto | undefined = getSingleHook.data?.data?.item;
   usePageTitle(d?.firstName || "");
 
   return (
@@ -32,12 +33,55 @@ export const UserSingleScreen = () => {
           entity={d}
           fields={[
             {
+              label: s.photo,
+              copyableContent: d?.photo || "",
+              elem: (
+                <UserPhotoThumbnail
+                  photo={d?.photo}
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ),
+            },
+            {
               label: s.firstName,
               elem: d?.firstName,
             },
             {
               label: s.lastName,
               elem: d?.lastName,
+            },
+            {
+              label: s.phoneNumber,
+              elem: d?.phoneNumber,
+            },
+            {
+              label: s.jobTitle,
+              elem: d?.jobTitle,
+            },
+            {
+              label: s.company,
+              elem: d?.company,
+            },
+            {
+              label: s.bio,
+              elem: d?.bio,
+            },
+            {
+              label: s.addressLine1,
+              elem: d?.primaryAddress?.addressLine1,
+            },
+            {
+              label: s.addressLine2,
+              elem: d?.primaryAddress?.addressLine2,
+            },
+            {
+              label: s.cityName,
+              elem: d?.primaryAddress?.city,
             },
           ]}
         />

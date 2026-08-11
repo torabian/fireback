@@ -3,15 +3,17 @@ content:
   regionalContents:
     archiveTitle: Treści regionalne
     content: Treść
-    contentHint: Treść
+    contentHint: Treść szablonu wysyłana do użytkownika. Obsługuje składnię szablonów Go do wstawiania dynamicznych wartości, np. {{.Otp}} dla kodu jednorazowego.
     editRegionalContent: Edytuj treść regionalną
     keyGroup: Grupa kluczy
-    keyGroupHint: Grupa kluczy
+    keyGroupHint: Do jakiego rodzaju wiadomości używana jest ta treść.
+    keyGroupSmsOtp: Jednorazowy kod SMS
+    keyGroupEmailOtp: Jednorazowy kod e-mail
     languageId: Identyfikator języka
-    languageIdHint: Identyfikator języka
+    languageIdHint: Kod języka, w którym napisana jest ta treść, np. en, fa lub pl. W przypadku braku dopasowania do języka użytkownika stosowany jest angielski.
     newRegionalContent: Nowa treść regionalna
     region: Region
-    regionHint: Region
+    regionHint: Region lub lokalizacja, do której odnosi się ta treść, np. any, us, eu lub asia/*. Użyj any, jeśli nie musisz celować w konkretny region.
     title: Tytuł
-    titleHint: Tytuł
+    titleHint: Opcjonalny temat - używany tylko dla treści typu e-mail.
     uniqueId: Identyfikator

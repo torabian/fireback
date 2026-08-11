@@ -11,7 +11,7 @@ export const RegionalContentSingleScreen = () => {
   const getSingleHook = useRegionalContentGetActionQuery({
     params: { uniqueId },
   });
-  var d: RegionalContentDto | undefined = getSingleHook.query.data?.data;
+  var d: RegionalContentDto | undefined = getSingleHook.data?.data?.item;
   const t = useS(strings);
   // usePageTitle(`${d?.name}`);
   return (
@@ -26,6 +26,14 @@ export const RegionalContentSingleScreen = () => {
           entity={d}
           fields={[
             {
+              // Was missing entirely - keyGroup/content are arguably the two
+              // most important fields on this entity (what it's for, and
+              // what it actually says), yet neither showed up on the detail
+              // view at all before this fix.
+              elem: d?.keyGroup,
+              label: t.regionalContents.keyGroup,
+            },
+            {
               elem: d?.region,
               label: t.regionalContents.region,
             },
@@ -36,6 +44,10 @@ export const RegionalContentSingleScreen = () => {
             {
               elem: d?.languageId,
               label: t.regionalContents.languageId,
+            },
+            {
+              elem: d?.content,
+              label: t.regionalContents.content,
             },
           ]}
         />

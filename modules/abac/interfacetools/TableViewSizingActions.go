@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/torabian/emi/emigo"
+	interfacetoolsdefs "github.com/torabian/fireback/modules/abac/interfacetools/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -39,7 +40,7 @@ var ALL_TABLE_VIEW_SIZING_PERMISSIONS = []application.PermissionInfo{
 	PERM_ROOT_TABLE_VIEW_SIZING,
 }
 
-func TableViewSizingBrowseAction(c TableViewSizingBrowseActionRequest) (*TableViewSizingBrowseActionResponse, error) {
+func TableViewSizingBrowseAction(c interfacetoolsdefs.TableViewSizingBrowseActionRequest) (*interfacetoolsdefs.TableViewSizingBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	})
@@ -48,18 +49,18 @@ func TableViewSizingBrowseAction(c TableViewSizingBrowseActionRequest) (*TableVi
 	}
 	q := *query
 
-	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	items, qrm, err2 := fireback.QueryEntitiesPointer[TableViewSizingEntity](q, refl)
+	refl := reflect.ValueOf(&interfacetoolsdefs.TableViewSizingEntity{})
+	items, qrm, err2 := fireback.QueryEntitiesPointer[interfacetoolsdefs.TableViewSizingEntity](q, refl)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	return &TableViewSizingBrowseActionResponse{
+	return &interfacetoolsdefs.TableViewSizingBrowseActionResponse{
 		Payload: fireback.GResponseQuery(items, qrm, &q),
 	}, nil
 }
 
-func TableViewSizingGetAction(c TableViewSizingGetActionRequest) (*TableViewSizingGetActionResponse, error) {
+func TableViewSizingGetAction(c interfacetoolsdefs.TableViewSizingGetActionRequest) (*interfacetoolsdefs.TableViewSizingGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_QUERY},
 	})
@@ -69,18 +70,18 @@ func TableViewSizingGetAction(c TableViewSizingGetActionRequest) (*TableViewSizi
 	q := *query
 	q.UniqueId = c.Params.UniqueId
 
-	refl := reflect.ValueOf(&TableViewSizingEntity{})
-	item, err2 := fireback.GetOneEntity[TableViewSizingEntity](q, refl)
+	refl := reflect.ValueOf(&interfacetoolsdefs.TableViewSizingEntity{})
+	item, err2 := fireback.GetOneEntity[interfacetoolsdefs.TableViewSizingEntity](q, refl)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	return &TableViewSizingGetActionResponse{
+	return &interfacetoolsdefs.TableViewSizingGetActionResponse{
 		Payload: fireback.GResponseSingleItem(item),
 	}, nil
 }
 
-func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableViewSizingCreateActionResponse, error) {
+func TableViewSizingCreateAction(c interfacetoolsdefs.TableViewSizingCreateActionRequest) (*interfacetoolsdefs.TableViewSizingCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_CREATE},
 	})
@@ -96,7 +97,7 @@ func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableVi
 		return nil, err2
 	}
 
-	entity := TableViewSizingEntity{
+	entity := interfacetoolsdefs.TableViewSizingEntity{
 		TableName:   c.Body.TableName,
 		Sizes:       c.Body.Sizes,
 		WorkspaceId: emigo.NullableOf(q.WorkspaceId),
@@ -108,12 +109,12 @@ func TableViewSizingCreateAction(c TableViewSizingCreateActionRequest) (*TableVi
 		return nil, err2
 	}
 
-	return &TableViewSizingCreateActionResponse{
+	return &interfacetoolsdefs.TableViewSizingCreateActionResponse{
 		Payload: fireback.GResponseSingleItem(created),
 	}, nil
 }
 
-func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableViewSizingUpdateActionResponse, error) {
+func TableViewSizingUpdateAction(c interfacetoolsdefs.TableViewSizingUpdateActionRequest) (*interfacetoolsdefs.TableViewSizingUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_UPDATE},
 	})
@@ -123,7 +124,7 @@ func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableVi
 	q := *query
 	q.UniqueId = c.Params.UniqueId
 
-	fields := &TableViewSizingEntity{UniqueId: c.Params.UniqueId}
+	fields := &interfacetoolsdefs.TableViewSizingEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.TableName.Get(); ok {
 		fields.TableName = *v
 	}
@@ -143,7 +144,7 @@ func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableVi
 		if err3 != nil {
 			return nil, err3
 		}
-		return &TableViewSizingUpdateActionResponse{
+		return &interfacetoolsdefs.TableViewSizingUpdateActionResponse{
 			Payload: fireback.GResponseSingleItem(created),
 		}, nil
 	}
@@ -151,12 +152,12 @@ func TableViewSizingUpdateAction(c TableViewSizingUpdateActionRequest) (*TableVi
 		return nil, err2
 	}
 
-	return &TableViewSizingUpdateActionResponse{
+	return &interfacetoolsdefs.TableViewSizingUpdateActionResponse{
 		Payload: fireback.GResponseSingleItem(updated),
 	}, nil
 }
 
-func TableViewSizingAwareDeletePreviewAction(c TableViewSizingAwareDeletePreviewActionRequest) (*TableViewSizingAwareDeletePreviewActionResponse, error) {
+func TableViewSizingAwareDeletePreviewAction(c interfacetoolsdefs.TableViewSizingAwareDeletePreviewActionRequest) (*interfacetoolsdefs.TableViewSizingAwareDeletePreviewActionResponse, error) {
 	_, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	})
@@ -164,18 +165,18 @@ func TableViewSizingAwareDeletePreviewAction(c TableViewSizingAwareDeletePreview
 		return nil, err
 	}
 
-	uniqueIds := TableViewSizingAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := TableViewSizingEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := interfacetoolsdefs.TableViewSizingAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := interfacetoolsdefs.TableViewSizingEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	return &TableViewSizingAwareDeletePreviewActionResponse{
+	return &interfacetoolsdefs.TableViewSizingAwareDeletePreviewActionResponse{
 		Payload: fireback.GResponseSingleItem(preview),
 	}, nil
 }
 
-func TableViewSizingAwareDeleteAction(c TableViewSizingAwareDeleteActionRequest) (*TableViewSizingAwareDeleteActionResponse, error) {
+func TableViewSizingAwareDeleteAction(c interfacetoolsdefs.TableViewSizingAwareDeleteActionRequest) (*interfacetoolsdefs.TableViewSizingAwareDeleteActionResponse, error) {
 	_, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ActionRequires: []application.PermissionInfo{PERM_ROOT_TABLE_VIEW_SIZING_DELETE},
 	})
@@ -183,11 +184,11 @@ func TableViewSizingAwareDeleteAction(c TableViewSizingAwareDeleteActionRequest)
 		return nil, err
 	}
 
-	if err2 := TableViewSizingEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := interfacetoolsdefs.TableViewSizingEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	return &TableViewSizingAwareDeleteActionResponse{
+	return &interfacetoolsdefs.TableViewSizingAwareDeleteActionResponse{
 		Payload: fireback.GResponseSingleItem(struct{}{}),
 	}, nil
 }

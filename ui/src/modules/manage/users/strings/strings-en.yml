@@ -3,10 +3,14 @@ content:
   addressLine1Hint: Address line 1 associated with user.
   addressLine2: Address Line 2
   addressLine2Hint: Address line 2 associated with user.
+  bio: Bio
+  bioHint: Free-form biography or notes about the user.
   birthDate: Birth date
   city: City
   cityName: City name
   cityNameHint: The city address associated with user.
+  company: Company
+  companyHint: The company or organization the user is associated with.
   confirmed: 'Confirmed:'
   countryCode: Country code
   editUser: Edit User
@@ -15,12 +19,18 @@ content:
   image: Image
   inviteFirstNameHint: Write the first name of invitee
   inviteLastNameHint: Write the last name of inviteee
+  jobTitle: Job Title
+  jobTitleHint: The user's job title or role.
   lastName: Last name
   menuTitle: Users
   na: n/a
   newUser: New User
   'no': 'No'
   passports: Passports
+  phoneNumber: Phone Number
+  phoneNumberHint: Contact phone number for the user.
+  photo: Photo
+  photoHint: Upload a profile picture for this user.
   postalCode: Postal Code
   type: 'Type:'
   value: 'Value:'

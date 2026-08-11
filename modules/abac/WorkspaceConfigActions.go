@@ -107,52 +107,68 @@ func WorkspaceConfigCreateAction(c abacdefs.WorkspaceConfigCreateActionRequest) 
 // workspaceConfigChangesFromOptionalDto turns whichever fields are actually set on body
 // into a gorm .Updates()-ready map - shared by every WorkspaceConfig update path
 // (per-workspace and the root-only /distinct one below).
+//
+// Bug fix: this used to do `if v, ok := body.X.Get(); ok { changes[...] = emigo.NullableOf(*v) }`
+// for every Nullable[bool]/Nullable[string] field. Get()'s `ok` is true both when the
+// caller sent a real value AND when they explicitly sent JSON `null` for the field (that's
+// the whole point of Nullable[T] - it distinguishes "omitted" from "set to null") - in the
+// null case v itself is nil, so `*v` panicked with a nil pointer dereference. Since there's
+// no gin.Recovery() registered on this server, that panic wasn't caught by gin at all - it
+// unwound all the way to net/http's own per-connection recovery, which just closes the
+// socket without writing any response ("empty reply from server" to the client) rather than
+// a clean 500. Any WorkspaceConfig PATCH that included an explicit `null` for one of these
+// fields (a common shape for a form that hasn't touched a given field yet) hit this.
+// Fixed by switching to the same IsSet()-and-pass-the-whole-Nullable-through pattern the
+// sibling generated WorkspaceConfigEntityUpdateFn already uses correctly: Nullable[T]
+// implements driver.Valuer, so gorm calls its Value() (nil-safe by construction) to resolve
+// the SQL value - including for the plain `string` Recaptcha2*Key columns, which accept a
+// Nullable[string] here the same way. No manual dereference left anywhere in this function.
 func workspaceConfigChangesFromOptionalDto(body abacdefs.WorkspaceConfigOptionalDto) map[string]interface{} {
 	changes := map[string]interface{}{}
-	if v, ok := body.EnableRecaptcha2.Get(); ok {
-		changes["EnableRecaptcha2"] = emigo.NullableOf(*v)
+	if body.EnableRecaptcha2.IsSet() {
+		changes["EnableRecaptcha2"] = body.EnableRecaptcha2
 	}
-	if v, ok := body.EnableOtp.Get(); ok {
-		changes["EnableOtp"] = emigo.NullableOf(*v)
+	if body.EnableOtp.IsSet() {
+		changes["EnableOtp"] = body.EnableOtp
 	}
-	if v, ok := body.RequireOtpOnSignup.Get(); ok {
-		changes["RequireOtpOnSignup"] = emigo.NullableOf(*v)
+	if body.RequireOtpOnSignup.IsSet() {
+		changes["RequireOtpOnSignup"] = body.RequireOtpOnSignup
 	}
-	if v, ok := body.RequireOtpOnSignin.Get(); ok {
-		changes["RequireOtpOnSignin"] = emigo.NullableOf(*v)
+	if body.RequireOtpOnSignin.IsSet() {
+		changes["RequireOtpOnSignin"] = body.RequireOtpOnSignin
 	}
-	if v, ok := body.Recaptcha2ServerKey.Get(); ok {
-		changes["Recaptcha2ServerKey"] = *v
+	if body.Recaptcha2ServerKey.IsSet() {
+		changes["Recaptcha2ServerKey"] = body.Recaptcha2ServerKey
 	}
-	if v, ok := body.Recaptcha2ClientKey.Get(); ok {
-		changes["Recaptcha2ClientKey"] = *v
+	if body.Recaptcha2ClientKey.IsSet() {
+		changes["Recaptcha2ClientKey"] = body.Recaptcha2ClientKey
 	}
-	if v, ok := body.EnableTotp.Get(); ok {
-		changes["EnableTotp"] = emigo.NullableOf(*v)
+	if body.EnableTotp.IsSet() {
+		changes["EnableTotp"] = body.EnableTotp
 	}
-	if v, ok := body.ForceTotp.Get(); ok {
-		changes["ForceTotp"] = emigo.NullableOf(*v)
+	if body.ForceTotp.IsSet() {
+		changes["ForceTotp"] = body.ForceTotp
 	}
-	if v, ok := body.ForcePasswordOnPhone.Get(); ok {
-		changes["ForcePasswordOnPhone"] = emigo.NullableOf(*v)
+	if body.ForcePasswordOnPhone.IsSet() {
+		changes["ForcePasswordOnPhone"] = body.ForcePasswordOnPhone
 	}
-	if v, ok := body.ForcePersonNameOnPhone.Get(); ok {
-		changes["ForcePersonNameOnPhone"] = emigo.NullableOf(*v)
+	if body.ForcePersonNameOnPhone.IsSet() {
+		changes["ForcePersonNameOnPhone"] = body.ForcePersonNameOnPhone
 	}
-	if v, ok := body.GeneralEmailProviderId.Get(); ok {
-		changes["GeneralEmailProviderId"] = emigo.NullableOf(*v)
+	if body.GeneralEmailProviderId.IsSet() {
+		changes["GeneralEmailProviderId"] = body.GeneralEmailProviderId
 	}
-	if v, ok := body.GeneralGsmProviderId.Get(); ok {
-		changes["GeneralGsmProviderId"] = emigo.NullableOf(*v)
+	if body.GeneralGsmProviderId.IsSet() {
+		changes["GeneralGsmProviderId"] = body.GeneralGsmProviderId
 	}
-	if v, ok := body.InviteToWorkspaceContentId.Get(); ok {
-		changes["InviteToWorkspaceContentId"] = emigo.NullableOf(*v)
+	if body.InviteToWorkspaceContentId.IsSet() {
+		changes["InviteToWorkspaceContentId"] = body.InviteToWorkspaceContentId
 	}
-	if v, ok := body.EmailOtpContentId.Get(); ok {
-		changes["EmailOtpContentId"] = emigo.NullableOf(*v)
+	if body.EmailOtpContentId.IsSet() {
+		changes["EmailOtpContentId"] = body.EmailOtpContentId
 	}
-	if v, ok := body.SmsOtpContentId.Get(); ok {
-		changes["SmsOtpContentId"] = emigo.NullableOf(*v)
+	if body.SmsOtpContentId.IsSet() {
+		changes["SmsOtpContentId"] = body.SmsOtpContentId
 	}
 	return changes
 }

@@ -3,6 +3,7 @@ import { UserDto } from "../../sdk/abac/UserDto";
 import { type strings as uiStrings } from "../../fireback-ui/components/strings/translations";
 import { type strings } from "./strings/translations";
 import { GenderView } from "./GenderView";
+import { UserPhotoThumbnail } from "./UserPhotoThumbnail";
 
 export const columns = (
   s: typeof strings,
@@ -56,11 +57,10 @@ export const columns = (
     title: s.image,
     width: 40,
     getCellValue: (e: UserDto) => (
-      <>
-        {e?.photo && (
-          <img src={e?.photo} style={{ width: "20px", height: "20px" }} />
-        )}
-      </>
+      <UserPhotoThumbnail
+        photo={e?.photo}
+        style={{ width: "20px", height: "20px", objectFit: "cover" }}
+      />
     ),
   },
   {
@@ -95,5 +95,26 @@ export const columns = (
     title: s.postalCode,
     width: 80,
     getCellValue: (e: UserDto) => <>{e.primaryAddress?.postalCode}</>,
+  },
+  {
+    filterable: true,
+    name: UserDto.Fields.phoneNumber,
+    title: s.phoneNumber,
+    width: 160,
+    getCellValue: (e: UserDto) => <>{e?.phoneNumber}</>,
+  },
+  {
+    filterable: true,
+    name: UserDto.Fields.jobTitle,
+    title: s.jobTitle,
+    width: 180,
+    getCellValue: (e: UserDto) => <>{e?.jobTitle}</>,
+  },
+  {
+    filterable: true,
+    name: UserDto.Fields.company,
+    title: s.company,
+    width: 180,
+    getCellValue: (e: UserDto) => <>{e?.company}</>,
   },
 ];

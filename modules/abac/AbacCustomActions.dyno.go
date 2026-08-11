@@ -33,12 +33,6 @@ var AbacCliActionsBundle = &fireback.CliActionsBundle{
 	// in WorkspaceModuleSetup's GinWebServerInitHooks (see AbacModule.go) - they moved out of
 	// here once they moved to Abac.emi.yml.
 	Commands: []*cli.Command{
-		interfacetools.TableViewSizingBrowseActionCliHandler(interfacetools.TableViewSizingBrowseAction),
-		interfacetools.TableViewSizingGetActionCliHandler(interfacetools.TableViewSizingGetAction),
-		interfacetools.TableViewSizingCreateActionCliHandler(interfacetools.TableViewSizingCreateAction),
-		interfacetools.TableViewSizingUpdateActionCliHandler(interfacetools.TableViewSizingUpdateAction),
-		interfacetools.TableViewSizingAwareDeletePreviewActionCliHandler(interfacetools.TableViewSizingAwareDeletePreviewAction),
-		interfacetools.TableViewSizingAwareDeleteActionCliHandler(interfacetools.TableViewSizingAwareDeleteAction),
 		interfacetools.AppMenuCliFn(),
 		UserCliFn(),
 		WorkspaceCliFn(),

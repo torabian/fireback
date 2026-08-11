@@ -26,13 +26,23 @@ import (
 
 func GetCommonWebServerCliActions(xapp *application.Application) []*cli.Command {
 
+	// A local copy rather than mutating the package-level ConfigCommand var directly -
+	// "list" needs xapp (to reach every module's own ConfigProvider), which isn't
+	// available at ConfigCommand's own package-init time, unlike its per-field
+	// get/set subcommands which only ever touch fireback's own package-level config.
+	combinedConfigCommand := ConfigCommand
+	combinedConfigCommand.Commands = append(
+		append([]*cli.Command{}, ConfigCommand.Commands...),
+		GetCombinedConfigListCli(xapp),
+	)
+
 	return []*cli.Command{
 		CLIInit(xapp),
 		envm.EnvManagement(xapp),
 		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
-		&ConfigCommand,
+		&combinedConfigCommand,
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)
 		}),

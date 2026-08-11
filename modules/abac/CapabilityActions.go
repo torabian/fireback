@@ -42,6 +42,34 @@ var ALL_CAPABILITY_PERMISSIONS = []application.PermissionInfo{
 	PERM_ROOT_CAPABILITY,
 }
 
+// CapabilityMessages mirrors the entity-scoped messages pattern WorkspaceTypeMessages
+// (WorkspaceTypeActions.go) uses for its own uniqueness pre-check (slug) - there's no Emi
+// equivalent for entity-scoped messages, so it's hand-declared here.
+var CapabilityMessages = struct {
+	UniqueIdAlreadyExists fireback.ErrorItem
+}{
+	UniqueIdAlreadyExists: fireback.ErrorItem{
+		"$": "CapabilityUniqueIdAlreadyExists", "en": "This id is already used by another capability.",
+	},
+}
+
+// capabilityUniqueIdTaken reports whether uniqueId is already used by some other
+// capability. This is a friendly pre-check ahead of the gorm:"unique" constraint on
+// abacdefs.CapabilityEntity.UniqueId - that constraint is still the real backstop against
+// a race between this check and the insert, but hitting it directly would surface as an
+// opaque database error instead of this field-scoped one. Mirrors
+// workspaceTypeSlugTaken (WorkspaceTypeActions.go).
+func capabilityUniqueIdTaken(uniqueId string) (bool, error) {
+	var count int64
+	err := fireback.GetDbRef().Model(&abacdefs.CapabilityEntity{}).
+		Where("unique_id = ?", uniqueId).
+		Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 // CapabilityUpsertPermissionFn is fireback.UpsertPermission's real, abacdefs.CapabilityEntity-backed
 // body (moved verbatim from the old modules/fireback/CoreUtils.go's UpsertPermission) -
 // wired into fireback.UpsertPermission from WorkspaceModuleSetup below, the same
@@ -144,7 +172,20 @@ func CapabilityCreateAction(c abacdefs.CapabilityCreateActionRequest) (*abacdefs
 	// always let the db default generate it - it's taken straight from the body when the
 	// caller sets it, falling back to gen_random_uuid() (see abacdefs.CapabilityEntity's gorm tag)
 	// only when they don't.
-	if v, ok := c.Body.UniqueId.Get(); ok && v != nil {
+	if v, ok := c.Body.UniqueId.Get(); ok && v != nil && *v != "" {
+		taken, err3 := capabilityUniqueIdTaken(*v)
+		if err3 != nil {
+			return nil, fireback.GormErrorToIError(err3)
+		}
+		if taken {
+			return nil, &fireback.IError{
+				Message:  CapabilityMessages.UniqueIdAlreadyExists,
+				HttpCode: 400,
+				Errors: []*fireback.IErrorItem{
+					{Location: "uniqueId", Message: &CapabilityMessages.UniqueIdAlreadyExists},
+				},
+			}
+		}
 		entity.UniqueId = *v
 	}
 

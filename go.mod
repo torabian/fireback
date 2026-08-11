@@ -33,6 +33,7 @@ require (
 	github.com/mavihq/persian v0.0.0-20210617052201-7c4f3764aa6b
 	github.com/medianasms/go-rest-sdk v1.1.0
 	github.com/microcosm-cc/bluemonday v1.0.23
+	github.com/ncruces/go-sqlite3 v0.34.0
 	github.com/ncruces/go-sqlite3/gormlite v0.34.0
 	github.com/pquerna/otp v1.4.0
 	github.com/pressly/goose/v3 v3.27.0
@@ -182,7 +183,6 @@ require (
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
-	github.com/ncruces/go-sqlite3 v0.34.0 // indirect
 	github.com/ncruces/go-sqlite3-wasm/v2 v2.1.35300 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/ncw/directio v1.0.5 // indirect

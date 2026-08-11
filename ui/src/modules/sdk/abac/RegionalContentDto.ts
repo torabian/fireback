@@ -29,19 +29,19 @@ export class RegionalContentDto {
     return this;
   }
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @type {string}
    **/
   #content: string = "";
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @returns {string}
    **/
   get content() {
     return this.#content;
   }
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @type {string}
    **/
   set content(value: string) {
@@ -52,19 +52,19 @@ export class RegionalContentDto {
     return this;
   }
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @type {string}
    **/
   #region: string = "";
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @returns {string}
    **/
   get region() {
     return this.#region;
   }
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @type {string}
    **/
   set region(value: string) {
@@ -75,19 +75,19 @@ export class RegionalContentDto {
     return this;
   }
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @type {string}
    **/
   #title: string = "";
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @returns {string}
    **/
   get title() {
     return this.#title;
   }
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @type {string}
    **/
   set title(value: string) {
@@ -98,19 +98,19 @@ export class RegionalContentDto {
     return this;
   }
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @type {string}
    **/
   #languageId: string = "";
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @returns {string}
    **/
   get languageId() {
     return this.#languageId;
   }
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @type {string}
    **/
   set languageId(value: string) {
@@ -121,25 +121,25 @@ export class RegionalContentDto {
     return this;
   }
   /**
-   *
-   * @type {"SMS_OTP" | "EMAIL_OTP"}
+   * Which kind of message this content is used for.
+   * @type {"SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE"}
    **/
-  #keyGroup!: "SMS_OTP" | "EMAIL_OTP";
+  #keyGroup!: "SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE";
   /**
-   *
-   * @returns {"SMS_OTP" | "EMAIL_OTP"}
+   * Which kind of message this content is used for.
+   * @returns {"SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE"}
    **/
   get keyGroup() {
     return this.#keyGroup;
   }
   /**
-   *
-   * @type {"SMS_OTP" | "EMAIL_OTP"}
+   * Which kind of message this content is used for.
+   * @type {"SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE"}
    **/
-  set keyGroup(value: "SMS_OTP" | "EMAIL_OTP") {
+  set keyGroup(value: "SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE") {
     this.#keyGroup = value;
   }
-  setKeyGroup(value: "SMS_OTP" | "EMAIL_OTP") {
+  setKeyGroup(value: "SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE") {
     this.keyGroup = value;
     return this;
   }
@@ -379,30 +379,30 @@ export type RegionalContentDtoType = {
    **/
   uniqueId?: string;
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @type {string}
    **/
   content: string;
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @type {string}
    **/
   region: string;
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @type {string}
    **/
   title: string;
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @type {string}
    **/
   languageId: string;
   /**
-   *
-   * @type {"SMS_OTP" | "EMAIL_OTP"}
+   * Which kind of message this content is used for.
+   * @type {"SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE"}
    **/
-  keyGroup: "SMS_OTP" | "EMAIL_OTP";
+  keyGroup: "SMS_OTP" | "EMAIL_OTP" | "INVITE_TO_WORKSPACE";
   /**
    * The unique-id of the workspace which content belongs to.
    * @type {string}

@@ -95,7 +95,6 @@ export function UploaderConfigProvider({
   const startUpload = useCallback(
     async (item: UploadItem) => {
       const cfg = configRef.current;
-      const headers = await resolveHeaders(cfg);
 
       const upload = new Upload(item.file, {
         endpoint: cfg.endpoint,
@@ -114,7 +113,21 @@ export function UploaderConfigProvider({
           filetype: item.file.type || "application/octet-stream",
           ...cfg.metadata,
         },
-        headers,
+        // Bug fix: this used to *also* pass a `headers` option here (a
+        // snapshot resolved once up front), on top of onBeforeRequest below
+        // re-resolving and re-applying the same headers again for every
+        // request tus-js-client makes - including this same upload's very
+        // first creation POST, which goes through both addRequiredHeaders
+        // (the static `headers` option) and onBeforeRequest on the same
+        // underlying XMLHttpRequest. XMLHttpRequest.setRequestHeader()
+        // *appends*, comma-joined, when called twice for the same header
+        // name rather than overwriting - so e.g. "authorization" arrived at
+        // the server as "<token>, <token>", which the backend's token
+        // lookup obviously can't match to a real session, 401ing every
+        // upload for any config that set an authorization header (i.e. any
+        // authenticated use of this module at all). onBeforeRequest alone
+        // already covers every request, so the static option was not just
+        // redundant but actively wrong - removed instead of deduplicated.
         onBeforeRequest: async (req) => {
           const freshHeaders = await resolveHeaders(configRef.current);
           for (const [key, value] of Object.entries(freshHeaders)) {

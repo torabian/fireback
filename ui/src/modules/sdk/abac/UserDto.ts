@@ -265,28 +265,103 @@ export class UserDto {
     return this;
   }
   /**
-   *
+   * Contact phone number for this user (separate from any passport used to sign in).
    * @type {string}
    **/
-  #workspaceId?: string | null = undefined;
+  #phoneNumber?: string | null = undefined;
   /**
-   *
+   * Contact phone number for this user (separate from any passport used to sign in).
    * @returns {string}
    **/
-  get workspaceId() {
-    return this.#workspaceId;
+  get phoneNumber() {
+    return this.#phoneNumber;
   }
   /**
-   *
+   * Contact phone number for this user (separate from any passport used to sign in).
    * @type {string}
    **/
-  set workspaceId(value: string | null | undefined) {
+  set phoneNumber(value: string | null | undefined) {
     const correctType =
       typeof value === "string" || value === undefined || value === null;
-    this.#workspaceId = correctType ? value : String(value);
+    this.#phoneNumber = correctType ? value : String(value);
   }
-  setWorkspaceId(value: string | null | undefined) {
-    this.workspaceId = value;
+  setPhoneNumber(value: string | null | undefined) {
+    this.phoneNumber = value;
+    return this;
+  }
+  /**
+   * The user's job title/role, e.g. "Support Engineer".
+   * @type {string}
+   **/
+  #jobTitle?: string | null = undefined;
+  /**
+   * The user's job title/role, e.g. "Support Engineer".
+   * @returns {string}
+   **/
+  get jobTitle() {
+    return this.#jobTitle;
+  }
+  /**
+   * The user's job title/role, e.g. "Support Engineer".
+   * @type {string}
+   **/
+  set jobTitle(value: string | null | undefined) {
+    const correctType =
+      typeof value === "string" || value === undefined || value === null;
+    this.#jobTitle = correctType ? value : String(value);
+  }
+  setJobTitle(value: string | null | undefined) {
+    this.jobTitle = value;
+    return this;
+  }
+  /**
+   * The company or organization the user is associated with.
+   * @type {string}
+   **/
+  #company?: string | null = undefined;
+  /**
+   * The company or organization the user is associated with.
+   * @returns {string}
+   **/
+  get company() {
+    return this.#company;
+  }
+  /**
+   * The company or organization the user is associated with.
+   * @type {string}
+   **/
+  set company(value: string | null | undefined) {
+    const correctType =
+      typeof value === "string" || value === undefined || value === null;
+    this.#company = correctType ? value : String(value);
+  }
+  setCompany(value: string | null | undefined) {
+    this.company = value;
+    return this;
+  }
+  /**
+   * Free-form biography/notes about the user.
+   * @type {string}
+   **/
+  #bio?: string | null = undefined;
+  /**
+   * Free-form biography/notes about the user.
+   * @returns {string}
+   **/
+  get bio() {
+    return this.#bio;
+  }
+  /**
+   * Free-form biography/notes about the user.
+   * @type {string}
+   **/
+  set bio(value: string | null | undefined) {
+    const correctType =
+      typeof value === "string" || value === undefined || value === null;
+    this.#bio = correctType ? value : String(value);
+  }
+  setBio(value: string | null | undefined) {
+    this.bio = value;
     return this;
   }
   /**
@@ -685,8 +760,17 @@ export class UserDto {
     if (d.primaryAddress !== undefined) {
       this.primaryAddress = d.primaryAddress;
     }
-    if (d.workspaceId !== undefined) {
-      this.workspaceId = d.workspaceId;
+    if (d.phoneNumber !== undefined) {
+      this.phoneNumber = d.phoneNumber;
+    }
+    if (d.jobTitle !== undefined) {
+      this.jobTitle = d.jobTitle;
+    }
+    if (d.company !== undefined) {
+      this.company = d.company;
+    }
+    if (d.bio !== undefined) {
+      this.bio = d.bio;
     }
     if (d.userId !== undefined) {
       this.userId = d.userId;
@@ -714,7 +798,10 @@ export class UserDto {
       avatar: this.#avatar,
       lastIpAddress: this.#lastIpAddress,
       primaryAddress: this.#primaryAddress,
-      workspaceId: this.#workspaceId,
+      phoneNumber: this.#phoneNumber,
+      jobTitle: this.#jobTitle,
+      company: this.#company,
+      bio: this.#bio,
       userId: this.#userId,
       createdAt: this.#createdAt,
       updatedAt: this.#updatedAt,
@@ -738,7 +825,10 @@ export class UserDto {
       get primaryAddress() {
         return withPrefix("primaryAddress", UserDto.PrimaryAddress.Fields);
       },
-      workspaceId: "workspaceId",
+      phoneNumber: "phoneNumber",
+      jobTitle: "jobTitle",
+      company: "company",
+      bio: "bio",
       userId: "userId",
       createdAt: "createdAt",
       updatedAt: "updatedAt",
@@ -825,10 +915,25 @@ export type UserDtoType = {
    **/
   primaryAddress?: UserDtoType.PrimaryAddressType;
   /**
-   *
+   * Contact phone number for this user (separate from any passport used to sign in).
    * @type {string}
    **/
-  workspaceId?: string;
+  phoneNumber?: string;
+  /**
+   * The user's job title/role, e.g. "Support Engineer".
+   * @type {string}
+   **/
+  jobTitle?: string;
+  /**
+   * The company or organization the user is associated with.
+   * @type {string}
+   **/
+  company?: string;
+  /**
+   * Free-form biography/notes about the user.
+   * @type {string}
+   **/
+  bio?: string;
   /**
    *
    * @type {string}

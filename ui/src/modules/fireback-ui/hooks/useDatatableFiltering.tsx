@@ -8,6 +8,7 @@ import {
 } from "../components/action-menu/ActionMenu";
 import { commonDialogs } from "../components/overlay/CommonOverlays";
 import { strings } from "../components/strings/translations";
+import { httpErrorHanlder } from "./api";
 import { type Filters } from "./datatabletools";
 import { osResources } from "./resources";
 import { useDebouncedEffect } from "./useDebouncedEffect";
@@ -136,16 +137,38 @@ export function useDatatableFiltering({
       description: s.deleteConfirmMessage,
     })
       .promise.then(({ type }) => {
-        if (type === "resolved") {
-          return submitDelete(
-            JSON.stringify({ uniqueIds: selection }),
-            null as any,
-          );
+        if (type !== "resolved") {
+          return;
         }
+
+        return submitDelete(
+          JSON.stringify({ uniqueIds: selection }),
+          null as any,
+        ).then((response: any) => {
+          // Bug fix: our fetch layer resolves (doesn't reject) a backend-rejected
+          // delete - e.g. WorkspaceAwareDeleteAction refusing to delete the root
+          // workspace - so `response` here can itself be an error envelope
+          // (`{error: {...}}`) even though this .then() ran. Same
+          // response.error?.toJSON?.() ?? response.error unwrapping
+          // CommonEntityManager.tsx's onSubmit already uses. Without this check, a
+          // rejected delete silently did nothing - no toast, no error, and (before
+          // this fix) still called onRecordsDeleted as if it had succeeded.
+          const errorInfo = response?.error?.toJSON?.() ?? response?.error;
+          if (
+            errorInfo?.message ||
+            errorInfo?.messageTranslated ||
+            errorInfo?.errors?.length
+          ) {
+            httpErrorHanlder({ error: errorInfo }, s);
+            return;
+          }
+
+          onRecordsDeleted && onRecordsDeleted(selection);
+        });
       })
-      .then(() => {
-        onRecordsDeleted && onRecordsDeleted(selection);
-      });
+      // A genuinely rejected promise (network failure, etc.) - distinct from the
+      // resolved-but-failed case handled above.
+      .catch((err) => httpErrorHanlder(err, s));
   };
 
   const deleteAction = (): IMenuActionItem => ({

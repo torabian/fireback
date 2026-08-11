@@ -33,6 +33,26 @@ server:
 checkendpointtests:
 	go run ./tools/checkendpointtests
 
+# Runs the Go test suite (GOEXPERIMENT=jsonv2 is required - see modules/backup/Exec.go's
+# own comment - and cmd/fireback-wasm has an unrelated, pre-existing build error, so this
+# scopes to ./modules/... rather than ./... to stay actually runnable).
+#
+# modules/abac/tests are black-box tests against a real, already-running `./app start`
+# (see modules/abac/tests/testconfig.go) - every one of them skips cleanly, rather than
+# failing, when there's no server reachable at ABAC_TEST_BASE_URL (default
+# http://localhost:4500). The ones that call an authenticated endpoint also need
+# ABAC_TEST_CLI_TOKEN set to a real session token (e.g. from `./app auth` or signing in
+# and copying data.item.session.token) - they skip too without one:
+#
+#   ./app start &
+#   TOKEN=$$(curl -s -X POST http://localhost:4500/passports/signin/classic \
+#     -H 'Content-Type: application/json' \
+#     -d '{"value":"<email>","password":"<password>"}' | \
+#     python3 -c 'import json,sys;print(json.load(sys.stdin)["data"]["item"]["session"]["token"])')
+#   ABAC_TEST_CLI_TOKEN=$$TOKEN make test
+test:
+	GOEXPERIMENT=jsonv2 go test ./modules/... -v
+
 # Builds the disk image for docker hub, as fireback can be installed as disk image
 dockerbuild:
 	docker build -t fireback . 

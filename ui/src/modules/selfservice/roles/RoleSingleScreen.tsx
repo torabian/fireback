@@ -1,7 +1,6 @@
 import { CommonSingleManager } from "../../fireback-ui/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "../../fireback-ui/components/general-entity-view/GeneralEntityView";
 import { PageSection } from "../../fireback-ui/components/page-section/PageSection";
-import { usePageTitle } from "../../fireback-ui/hooks/authContext";
 import { useRouter } from "../../fireback-ui/hooks/useRouter";
 import { useS } from "../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
@@ -9,6 +8,7 @@ import { RoleNavigation } from "../../sdk/navigation/AbacNavigation";
 import { useEffect, useState } from "react";
 import { RolePermissionTree } from "./RolePermissionTree";
 import { useRoleGetActionQuery } from "../../sdk/abac/RoleGetAction";
+import { usePageTitle } from "@/modules/fireback-ui/components/page-title/PageTitle";
 
 export const RoleSingleScreen = () => {
   const router = useRouter();

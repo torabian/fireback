@@ -33,7 +33,7 @@ export const CapabilityEntityManager = ({ data }: DtoEntity<CapabilityDto>) => {
         router.goBackOrDefault(CapabilityNavigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        CapabilityNavigation.single(response.data?.uniqueId, locale)
+        CapabilityNavigation.single(response.data?.item?.uniqueId, locale)
       }
       Form={CapabilityForm}
       onEditTitle={s.capabilities.editCapability}

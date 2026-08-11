@@ -576,26 +576,37 @@ dtos:
   - name: uniqueId
     type: string?
   - name: content
+    description: The template body sent to the user - supports Go template syntax
+      to insert dynamic values, such as {{.Otp}} for the one-time password.
     type: string?
     tags:
       validate: required
   - name: region
+    description: Region or locale this content applies to, for example any, us, eu,
+      or asia/*. Use any unless you need to target a specific region.
     type: string?
     tags:
       validate: required
   - name: title
+    description: Optional subject line - only used for email-type content.
     type: string?
   - name: languageId
+    description: Language code this content is written in, for example en, fa, or
+      pl. Falls back to English if nothing matches a user's language.
     type: string?
     tags:
       validate: required
   - name: keyGroup
+    description: Which kind of message this content is used for.
     type: enum?
     of:
     - k: SMS_OTP
-      description: Used when an email would be sent with one time password
-    - k: EMAIL_OTP
       description: Used when an sms would be sent with one time password
+    - k: EMAIL_OTP
+      description: Used when an email would be sent with one time password
+    - k: INVITE_TO_WORKSPACE
+      description: Used as the default template when a user invites a third-party
+        into their own workspace
     tags:
       validate: required
   - name: workspaceId
@@ -939,7 +950,18 @@ dtos:
     - name: countryCode
       description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
       type: string?
-  - name: workspaceId
+  - name: phoneNumber
+    description: Contact phone number for this user (separate from any passport used
+      to sign in).
+    type: string?
+  - name: jobTitle
+    description: The user's job title/role, e.g. "Support Engineer".
+    type: string?
+  - name: company
+    description: The company or organization the user is associated with.
+    type: string?
+  - name: bio
+    description: Free-form biography/notes about the user.
     type: string?
   - name: userId
     type: string?
@@ -1361,26 +1383,37 @@ dtos:
   - name: uniqueId
     type: string?
   - name: content
+    description: The template body sent to the user - supports Go template syntax
+      to insert dynamic values, such as {{.Otp}} for the one-time password.
     type: string
     tags:
       validate: required
   - name: region
+    description: Region or locale this content applies to, for example any, us, eu,
+      or asia/*. Use any unless you need to target a specific region.
     type: string
     tags:
       validate: required
   - name: title
+    description: Optional subject line - only used for email-type content.
     type: string
   - name: languageId
+    description: Language code this content is written in, for example en, fa, or
+      pl. Falls back to English if nothing matches a user's language.
     type: string
     tags:
       validate: required
   - name: keyGroup
+    description: Which kind of message this content is used for.
     type: enum
     of:
     - k: SMS_OTP
-      description: Used when an email would be sent with one time password
-    - k: EMAIL_OTP
       description: Used when an sms would be sent with one time password
+    - k: EMAIL_OTP
+      description: Used when an email would be sent with one time password
+    - k: INVITE_TO_WORKSPACE
+      description: Used as the default template when a user invites a third-party
+        into their own workspace
     tags:
       validate: required
   - name: workspaceId
@@ -1718,7 +1751,18 @@ dtos:
     - name: countryCode
       description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
       type: string?
-  - name: workspaceId
+  - name: phoneNumber
+    description: Contact phone number for this user (separate from any passport used
+      to sign in).
+    type: string?
+  - name: jobTitle
+    description: The user's job title/role, e.g. "Support Engineer".
+    type: string?
+  - name: company
+    description: The company or organization the user is associated with.
+    type: string?
+  - name: bio
+    description: Free-form biography/notes about the user.
     type: string?
   - name: userId
     type: string?
@@ -2126,27 +2170,39 @@ entities:
 - name: regionalContent
   fields:
   - name: content
+    description: The template body sent to the user - supports Go template syntax
+      to insert dynamic values, such as {{.Otp}} for the one-time password.
     type: string
     tags:
       validate: required
   - name: region
+    description: Region or locale this content applies to, for example any, us, eu,
+      or asia/*. Use any unless you need to target a specific region.
     type: string
     tags:
+      gorm: index:regional_content_index,unique
       validate: required
   - name: title
+    description: Optional subject line - only used for email-type content.
     type: string
   - name: languageId
+    description: Language code this content is written in, for example en, fa, or
+      pl. Falls back to English if nothing matches a user's language.
     type: string
     tags:
       gorm: index:regional_content_index,unique
       validate: required
   - name: keyGroup
+    description: Which kind of message this content is used for.
     type: enum
     of:
     - k: SMS_OTP
-      description: Used when an email would be sent with one time password
-    - k: EMAIL_OTP
       description: Used when an sms would be sent with one time password
+    - k: EMAIL_OTP
+      description: Used when an email would be sent with one time password
+    - k: INVITE_TO_WORKSPACE
+      description: Used as the default template when a user invites a third-party
+        into their own workspace
     tags:
       gorm: index:regional_content_index,unique
       validate: required
@@ -2513,8 +2569,21 @@ entities:
     - name: countryCode
       description: ISO 3166-1 alpha-2 (e.g., "US", "DE")
       type: string?
-  - name: workspaceId
+  - name: phoneNumber
+    description: Contact phone number for this user (separate from any passport used
+      to sign in).
     type: string?
+  - name: jobTitle
+    description: The user's job title/role, e.g. "Support Engineer".
+    type: string?
+  - name: company
+    description: The company or organization the user is associated with.
+    type: string?
+  - name: bio
+    description: Free-form biography/notes about the user.
+    type: string?
+    tags:
+      gorm: text
   - name: userId
     type: string?
   - name: createdAt
@@ -5011,3 +5080,10 @@ actions:
     - name: uniqueIds
       type: slice
       primitive: string
+config:
+- name: otpLockoutSeconds
+  type: int64
+  description: How many seconds a passport value (email or phone) must wait before
+    it can request another OTP/magic-link, once a request is already pending. See
+    ClassicPassportRequestOtpActionImplementation.go.
+  default: "120"

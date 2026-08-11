@@ -225,10 +225,9 @@ func GetOsHostUserRoleWorkspaceDef() (*abacdefs.UserEntity, *abacdefs.RoleEntity
 	osUser := fireback.GetOsUserWithPhone()
 	name := osUser.Name + "'s workspace"
 	user := &abacdefs.UserEntity{
-		UniqueId:    "OS_USER_" + osUser.Uid,
-		WorkspaceId: emigo.NullableOf(ROOT_VAR),
-		FirstName:   osUser.Username,
-		LastName:    osUser.Username,
+		UniqueId:  "OS_USER_" + osUser.Uid,
+		FirstName: osUser.Username,
+		LastName:  osUser.Username,
 	}
 
 	wid := "OS_WORKSPACE_" + osUser.Uid
