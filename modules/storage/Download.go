@@ -15,11 +15,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // MountDownloads wires read-only endpoints for stored uploads onto r, e.g.
-// MountDownloads(r, "/downloads", pool, store, cfg).
+// MountDownloads(r, "/downloads", store, cfg).
 //
 //	GET  basePath/:id      - JSON metadata (size, filename, completion state, ...)
 //	HEAD basePath/:id/raw  - same headers a GET would send, without a body
@@ -30,18 +29,18 @@ import (
 // Like Mount, every request runs through cfg.Authenticate; when it's set,
 // only the upload's recorded owner (or anyone, if it has none recorded) may
 // read it - see authorizeOwner.
-func MountDownloads(r gin.IRouter, basePath string, pool *pgxpool.Pool, store *Store, cfg *StorageModuleConfig) {
+func MountDownloads(r gin.IRouter, basePath string, store Store, cfg *StorageModuleConfig) {
 	cfg = cfg.withDefaults()
 	basePath = strings.TrimSuffix(basePath, "/")
 
-	r.GET(basePath+"/:id", fileInfoHandler(pool, cfg))
-	r.HEAD(basePath+"/:id/raw", downloadHandler(pool, store, cfg))
-	r.GET(basePath+"/:id/raw", downloadHandler(pool, store, cfg))
+	r.GET(basePath+"/:id", fileInfoHandler(store, cfg))
+	r.HEAD(basePath+"/:id/raw", downloadHandler(store, cfg))
+	r.GET(basePath+"/:id/raw", downloadHandler(store, cfg))
 }
 
-func fileInfoHandler(pool *pgxpool.Pool, cfg *StorageModuleConfig) gin.HandlerFunc {
+func fileInfoHandler(store Store, cfg *StorageModuleConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		rec, err := GetFile(c.Request.Context(), pool, c.Param("id"))
+		rec, err := GetFile(c.Request.Context(), store, c.Param("id"))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -120,12 +119,12 @@ func contentTypeAndDisposition(meta map[string]string) (contentType, disposition
 	return contentType, disposition
 }
 
-func downloadHandler(pool *pgxpool.Pool, store *Store, cfg *StorageModuleConfig) gin.HandlerFunc {
+func downloadHandler(store Store, cfg *StorageModuleConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 		id := c.Param("id")
 
-		rec, err := GetFile(ctx, pool, id)
+		rec, err := GetFile(ctx, store, id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

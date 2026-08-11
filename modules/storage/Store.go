@@ -19,21 +19,43 @@ import (
 	"github.com/tus/tusd/pkg/handler"
 )
 
-// Store implements handler.DataStore and handler.TerminaterDataStore on top
-// of a single tus_uploads table plus PostgreSQL large objects.
-type Store struct {
+// Store is the vendor-agnostic contract Handler.go/Download.go/Reaper.go/
+// Admin.go actually depend on - handler.DataStore/handler.TerminaterDataStore
+// (create/read/write/terminate an upload) plus the two extras (OpenRange,
+// OwnerOf) this module adds on top for range downloads and ownership checks.
+// pgLoStore (below, Postgres large objects) and SQLiteStore (StoreSQLite.go,
+// a chunks table - sqlite has no large-object API) are its two
+// implementations; NewStore/NewSQLiteStore construct them.
+type Store interface {
+	handler.DataStore
+	handler.TerminaterDataStore
+
+	// OpenRange opens the upload backing id for reading, seeked to offset -
+	// see pgLoStore's own doc comment on the method for the full contract.
+	OpenRange(ctx context.Context, id string, offset int64) (io.ReadCloser, error)
+
+	// OwnerOf returns the user_id stored for id, and whether id exists at
+	// all - see pgLoStore's own doc comment on the method for the full
+	// contract.
+	OwnerOf(ctx context.Context, id string) (ownerId *string, found bool, err error)
+}
+
+// pgLoStore implements Store on top of a single tus_uploads table plus
+// PostgreSQL large objects.
+type pgLoStore struct {
 	Pool *pgxpool.Pool
 }
 
 // NewStore wraps an existing pgx pool. The pool must point at a database
 // where the migration in migrations/00001_create_tus_uploads.sql has run.
-func NewStore(pool *pgxpool.Pool) *Store {
-	return &Store{Pool: pool}
+func NewStore(pool *pgxpool.Pool) Store {
+	return &pgLoStore{Pool: pool}
 }
 
 var (
-	_ handler.DataStore           = (*Store)(nil)
-	_ handler.TerminaterDataStore = (*Store)(nil)
+	_ Store                       = (*pgLoStore)(nil)
+	_ handler.DataStore           = (*pgLoStore)(nil)
+	_ handler.TerminaterDataStore = (*pgLoStore)(nil)
 )
 
 // Reserved Upload-Metadata keys Mount uses to smuggle the caller's resolved
@@ -53,7 +75,7 @@ const (
 
 // NewUpload creates the backing large object and its metadata row inside a
 // single transaction, so the two never disagree about a upload's existence.
-func (s *Store) NewUpload(ctx context.Context, info handler.FileInfo) (handler.Upload, error) {
+func (s *pgLoStore) NewUpload(ctx context.Context, info handler.FileInfo) (handler.Upload, error) {
 	if info.ID == "" {
 		info.ID = uuid.NewString()
 	}
@@ -111,7 +133,7 @@ func (s *Store) NewUpload(ctx context.Context, info handler.FileInfo) (handler.U
 // GetUpload loads the upload's bookkeeping row. The large object itself is
 // only opened lazily by WriteChunk/GetReader, since it must live inside its
 // own short transaction.
-func (s *Store) GetUpload(ctx context.Context, id string) (handler.Upload, error) {
+func (s *pgLoStore) GetUpload(ctx context.Context, id string) (handler.Upload, error) {
 	var (
 		oid      uint32
 		metaJSON []byte
@@ -145,12 +167,12 @@ func (s *Store) GetUpload(ctx context.Context, id string) (handler.Upload, error
 }
 
 // AsTerminatableUpload lets the handler package issue DELETE requests.
-func (s *Store) AsTerminatableUpload(upload handler.Upload) handler.TerminatableUpload {
+func (s *pgLoStore) AsTerminatableUpload(upload handler.Upload) handler.TerminatableUpload {
 	return upload.(*pgLoUpload)
 }
 
 type pgLoUpload struct {
-	store *Store
+	store *pgLoStore
 	info  handler.FileInfo
 	oid   uint32
 }
@@ -237,7 +259,7 @@ func (u *pgLoUpload) GetReader(ctx context.Context) (io.Reader, error) {
 // so a caller can stream out a byte range without pulling in the tusd Upload
 // type. Like GetReader, the returned reader keeps its own transaction open
 // until Close is called.
-func (s *Store) OpenRange(ctx context.Context, id string, offset int64) (io.ReadCloser, error) {
+func (s *pgLoStore) OpenRange(ctx context.Context, id string, offset int64) (io.ReadCloser, error) {
 	var oid uint32
 	if err := s.Pool.QueryRow(ctx, `SELECT oid FROM tus_uploads WHERE id = $1`, id).Scan(&oid); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -272,7 +294,7 @@ func (s *Store) OpenRange(ctx context.Context, id string, offset int64) (io.Read
 // (created while Authenticate was nil, or before this mechanism existed) -
 // callers should treat that as open to anyone, the same as when
 // Authenticate itself is nil.
-func (s *Store) OwnerOf(ctx context.Context, id string) (ownerId *string, found bool, err error) {
+func (s *pgLoStore) OwnerOf(ctx context.Context, id string) (ownerId *string, found bool, err error) {
 	err = s.Pool.QueryRow(ctx, `SELECT user_id FROM tus_uploads WHERE id = $1`, id).Scan(&ownerId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

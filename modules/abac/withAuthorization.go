@@ -228,8 +228,8 @@ func AuthorizeRequest(securityModel *fireback.SecurityModel, c *gin.Context) boo
 
 	ck, ckerr := c.Cookie("authorization")
 
-	if ckerr == nil && ck != "" {
-		// If on secure cookie we have the authorization, we prefer that one.
+	if ckerr == nil && ck != "" && tk == "" {
+		// If on secure cookie we have the authorization, and it's not defined on headers or query params.
 		tk = ck
 	}
 

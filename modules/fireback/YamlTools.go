@@ -221,7 +221,7 @@ func importYamlFromArray[T any](
 			successInsert++
 		} else {
 			failureInsert++
-			log.Default().Printf("error on insert: %v", err, filepat)
+			log.Default().Printf("error on insert: %v (file: %s)", err, filepat)
 			fmt.Println(err.Error())
 			fmt.Println(err.ToPublicEndUser(f).MessageTranslated)
 		}

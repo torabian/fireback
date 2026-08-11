@@ -2,15 +2,17 @@ content:
   regionalContents:
     archiveTitle: Regional contents
     content: Content
-    contentHint: Content
+    contentHint: The template body sent to the user. Supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
     editRegionalContent: Edit regional content
     keyGroup: Key group
-    keyGroupHint: Key group
+    keyGroupHint: Which kind of message this content is used for.
+    keyGroupSmsOtp: SMS one-time password
+    keyGroupEmailOtp: Email one-time password
     languageId: Language id
-    languageIdHint: Language id
+    languageIdHint: Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
     newRegionalContent: New regional content
     region: Region
-    regionHint: Region
+    regionHint: Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
     title: Title
-    titleHint: Title
+    titleHint: Optional subject line - only used for email-type content.
     uniqueId: Id

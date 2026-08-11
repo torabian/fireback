@@ -3,10 +3,14 @@ content:
   addressLine1Hint: خط آدرس ۱ مرتبط با کاربر.
   addressLine2: آدرس خط ۲
   addressLine2Hint: خط آدرس ۲ مرتبط با کاربر.
+  bio: بیوگرافی
+  bioHint: یادداشت‌های آزاد درباره کاربر.
   birthDate: تاریخ تولد
   city: شهر
   cityName: نام شهر
   cityNameHint: شهر آدرس مرتبط با کاربر.
+  company: شرکت
+  companyHint: شرکت یا سازمانی که کاربر به آن وابسته است.
   confirmed: 'تأیید شده:'
   countryCode: کد کشور
   editUser: ویرایش کاربر
@@ -15,12 +19,18 @@ content:
   image: تصویر
   inviteFirstNameHint: نام دعوت شده را بنویسید
   inviteLastNameHint: نام خانوادگی دعوت شده را بنویسید
+  jobTitle: عنوان شغلی
+  jobTitleHint: عنوان شغلی یا نقش کاربر.
   lastName: نام خانوادگی
   menuTitle: کاربران
   na: موجود نیست
   newUser: کاربر جدید
   'no': خیر
   passports: پاسپورت‌ها
+  phoneNumber: شماره تلفن
+  phoneNumberHint: شماره تلفن تماس کاربر.
+  photo: تصویر پروفایل
+  photoHint: تصویر پروفایل این کاربر را بارگذاری کنید.
   postalCode: کد پستی
   type: 'نوع:'
   value: 'مقدار:'

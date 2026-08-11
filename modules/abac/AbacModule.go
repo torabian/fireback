@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
-	"github.com/torabian/fireback/modules/abac/interfacetools"
 	"github.com/torabian/fireback/modules/abac/messaging"
 	"github.com/torabian/fireback/modules/abac/migrations"
 	"github.com/torabian/fireback/modules/fireback"
@@ -20,12 +19,17 @@ type MicroserviceSetupConfig struct {
 }
 
 // Inject this into any project as a complete solution
+//
+// Deliberately does NOT include interfacetools.ModuleSetup() (unlike before) - abac only
+// imports interfacetoolsdefs (see Menu.go), not the interfacetools package itself, so it
+// has no ModuleSetup to call here. main.go is what actually constructs that module now,
+// via interfacetools.ModuleSetup(&interfacetools.InterfaceToolsModuleConfig{ExtraAppMenus:
+// abac.Menu}), appended alongside whatever AbacCompleteModules returns.
 func AbacCompleteModules() []*application.ModuleProvider {
 	return []*application.ModuleProvider{
 		WorkspaceModuleSetup(),
 		NotificationModuleSetup(),
 		messaging.ModuleSetup(),
-		interfacetools.ModuleSetup(),
 		PassportsModuleSetup(),
 	}
 }
@@ -248,7 +252,23 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 
 	module.MigrationFunction = func(x *application.Application, db *gorm.DB) {
 		SyncPermissionsInDatabase(x, db)
+		// Insert-if-missing default regional content (email/sms OTP, invite-to-
+		// workspace templates in en/fa/pl) - see RegionalContentDefaults.go's own
+		// doc comment for why this replaced the old, never-actually-wired
+		// modules/abac/seeders/RegionalContent/*.yml.
+		SyncRegionalContentDefaults(db)
 	}
+
+	// Abac's own `config:` block (Abac.emi.yml) - folded into fireback's combined
+	// "config list" listing (see modules/fireback/ConfigRegistry.go) alongside
+	// fireback's own core config and every other registered module's, the same way
+	// abac.Menu lets abac contribute AppMenu items without interfacetools importing it
+	// back. LoadConfiguration() (not a cached snapshot) so it always reflects the
+	// latest env/`.env`-loaded values, including ones changed at runtime via the
+	// "abac config otp-lockout-seconds set" CLI command below.
+	module.ProvideConfigHandler(func() interface{} {
+		return abacdefs.LoadConfiguration()
+	})
 
 	module.AppendCli = func(x *application.Application) []*cli.Command {
 		return []*cli.Command{
@@ -303,6 +323,15 @@ var AbacActions cli.Command = cli.Command{
 	Usage: "All actions which are available for abac module",
 	Commands: append(
 		[]*cli.Command{
+			{
+				// Per-field get/set for Abac.emi.yml's `config:` block - abacdefs.GetConfigCli()
+				// is otherwise identical in shape to fireback's own top-level "config" command
+				// (ConfigCommand, CoreUtils.go), just nested here under "abac" to avoid a name
+				// collision between the two at the CLI root.
+				Name:     "config",
+				Usage:    "Set of tools to configure the abac module",
+				Commands: abacdefs.GetConfigCli(),
+			},
 			{
 				Name:  "internal",
 				Usage: "Internal entities which are used for processes. Manipulating these requires deep internal knowledge",

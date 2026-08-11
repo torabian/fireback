@@ -20,6 +20,7 @@ export const WorkspaceList = () => {
       <CommonListManager
         columns={columns(s, uiS)}
         queryHook={useWorkspaceBrowseActionQuery}
+        deleteHook={useWorkspaceAwareDeleteAction}
         onRecordsDeleted={({ queryClient }) => {
           queryClient.invalidateQueries("*fireback.UserRoleWorkspace");
           queryClient.invalidateQueries("*fireback.WorkspaceEntity");

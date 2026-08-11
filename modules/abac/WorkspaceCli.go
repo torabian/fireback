@@ -192,12 +192,6 @@ var MiscCli cli.Command = cli.Command{
 	Name:  "misc",
 	Usage: "Managing the application related content, thirdparty configs such as email, sms, or ui data",
 	Commands: []*cli.Command{
-		interfacetools.TableViewSizingBrowseActionCliHandler(interfacetools.TableViewSizingBrowseAction),
-		interfacetools.TableViewSizingGetActionCliHandler(interfacetools.TableViewSizingGetAction),
-		interfacetools.TableViewSizingCreateActionCliHandler(interfacetools.TableViewSizingCreateAction),
-		interfacetools.TableViewSizingUpdateActionCliHandler(interfacetools.TableViewSizingUpdateAction),
-		interfacetools.TableViewSizingAwareDeletePreviewActionCliHandler(interfacetools.TableViewSizingAwareDeletePreviewAction),
-		interfacetools.TableViewSizingAwareDeleteActionCliHandler(interfacetools.TableViewSizingAwareDeleteAction),
 		&cli.Command{
 			Name:        "regionalcontent",
 			Aliases:     []string{"rc"},
@@ -271,12 +265,7 @@ var WorkspaceCliCommands = []*cli.Command{
 			abacdefs.PublicAuthenticationAwareDeleteActionCliHandler(PublicAuthenticationAwareDeleteAction),
 		},
 	},
-	interfacetools.TimezoneGroupBrowseActionCliHandler(interfacetools.TimezoneGroupBrowseAction),
-	interfacetools.TimezoneGroupGetActionCliHandler(interfacetools.TimezoneGroupGetAction),
-	interfacetools.TimezoneGroupCreateActionCliHandler(interfacetools.TimezoneGroupCreateAction),
-	interfacetools.TimezoneGroupUpdateActionCliHandler(interfacetools.TimezoneGroupUpdateAction),
-	interfacetools.TimezoneGroupAwareDeletePreviewActionCliHandler(interfacetools.TimezoneGroupAwareDeletePreviewAction),
-	interfacetools.TimezoneGroupAwareDeleteActionCliHandler(interfacetools.TimezoneGroupAwareDeleteAction),
+
 	abacdefs.WorkspaceTypeBrowseActionCliHandler(WorkspaceTypeBrowseAction),
 	abacdefs.WorkspaceTypeGetActionCliHandler(WorkspaceTypeGetAction),
 	abacdefs.WorkspaceTypeCreateActionCliHandler(WorkspaceTypeCreateAction),

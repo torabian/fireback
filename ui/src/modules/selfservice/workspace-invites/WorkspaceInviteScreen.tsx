@@ -1,25 +1,23 @@
-import { strings } from "./strings/translations";
-import { useLocale } from "../../fireback-ui/hooks/useLocale";
-import { useS } from "../../fireback-ui/hooks/useS";
-import { useWorkspaceInviteGetActionQuery } from "../../sdk/abac/WorkspaceInviteGetAction";
-import { WorkspaceInviteDto } from "../../sdk/abac/WorkspaceInviteDto";
-import { WorkspaceInviteNavigation } from "../../sdk/navigation/AbacNavigation";
-import { usePageTitle } from "../../fireback-ui/hooks/authContext";
+import { usePageTitle } from "@/modules/fireback-ui/components/page-title/PageTitle";
 import { CommonSingleManager } from "../../fireback-ui/components/entity-manager/CommonSingleManager";
 import { GeneralEntityView } from "../../fireback-ui/components/general-entity-view/GeneralEntityView";
 import { useRouter } from "../../fireback-ui/hooks/useRouter";
+import { useS } from "../../fireback-ui/hooks/useS";
+import { WorkspaceInviteDto } from "../../sdk/abac/WorkspaceInviteDto";
+import { useWorkspaceInviteGetActionQuery } from "../../sdk/abac/WorkspaceInviteGetAction";
+import { WorkspaceInviteNavigation } from "../../sdk/navigation/AbacNavigation";
+import { strings } from "./strings/translations";
 
 export const WorkspaceInviteSingleScreen = () => {
   const router = useRouter();
   const uniqueId = router.query.uniqueId as string;
-  const { locale } = useLocale();
   const s = useS(strings);
 
   const getSingleHook = useWorkspaceInviteGetActionQuery({
     params: { uniqueId },
   });
 
-  var d: WorkspaceInviteDto | undefined = getSingleHook.query.data?.data;
+  var d: WorkspaceInviteDto | undefined = getSingleHook.data?.data?.item;
   usePageTitle(d?.firstName + " " + d?.lastName || "");
 
   return (

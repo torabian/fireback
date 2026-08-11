@@ -4,7 +4,8 @@ import (
 	"reflect"
 
 	"github.com/torabian/emi/emigo"
-	"github.com/torabian/fireback/modules/abac/interfacetools/seeders/TimezoneGroup"
+	interfacetoolsdefs "github.com/torabian/fireback/modules/abac/interfacetools/defs"
+	seeders "github.com/torabian/fireback/modules/abac/interfacetools/seeders/TimezoneGroup"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -12,7 +13,7 @@ func TimezoneGroupSyncSeeders() {
 	fireback.SeederFromFSImport(
 		fireback.QueryDSL{WorkspaceId: fireback.USER_SYSTEM},
 		TimezoneGroupActions.Create,
-		reflect.ValueOf(&TimezoneGroupEntity{}).Elem(),
+		reflect.ValueOf(&interfacetoolsdefs.TimezoneGroupEntity{}).Elem(),
 		&seeders.ViewsFs,
 		[]string{},
 		true,
@@ -30,9 +31,9 @@ var PERM_ROOT_TIMEZONE_GROUP_UPDATE = timezoneGroupPerms.Update
 var PERM_ROOT_TIMEZONE_GROUP_DELETE = timezoneGroupPerms.Delete
 var ALL_TIMEZONE_GROUP_PERMISSIONS = timezoneGroupPerms.All
 
-var TimezoneGroupActions = NewEntityActionsBundle[TimezoneGroupEntity]()
+var TimezoneGroupActions = NewEntityActionsBundle[interfacetoolsdefs.TimezoneGroupEntity]()
 
-func TimezoneGroupBrowseAction(c TimezoneGroupBrowseActionRequest) (*TimezoneGroupBrowseActionResponse, error) {
+func TimezoneGroupBrowseAction(c interfacetoolsdefs.TimezoneGroupBrowseActionRequest) (*interfacetoolsdefs.TimezoneGroupBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{})
 	if err != nil {
 		return nil, err
@@ -41,10 +42,10 @@ func TimezoneGroupBrowseAction(c TimezoneGroupBrowseActionRequest) (*TimezoneGro
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TimezoneGroupBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &interfacetoolsdefs.TimezoneGroupBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func TimezoneGroupGetAction(c TimezoneGroupGetActionRequest) (*TimezoneGroupGetActionResponse, error) {
+func TimezoneGroupGetAction(c interfacetoolsdefs.TimezoneGroupGetActionRequest) (*interfacetoolsdefs.TimezoneGroupGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{})
 	if err != nil {
 		return nil, err
@@ -54,10 +55,10 @@ func TimezoneGroupGetAction(c TimezoneGroupGetActionRequest) (*TimezoneGroupGetA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TimezoneGroupGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &interfacetoolsdefs.TimezoneGroupGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func TimezoneGroupCreateAction(c TimezoneGroupCreateActionRequest) (*TimezoneGroupCreateActionResponse, error) {
+func TimezoneGroupCreateAction(c interfacetoolsdefs.TimezoneGroupCreateActionRequest) (*interfacetoolsdefs.TimezoneGroupCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{})
 	if err != nil {
 		return nil, err
@@ -65,7 +66,7 @@ func TimezoneGroupCreateAction(c TimezoneGroupCreateActionRequest) (*TimezoneGro
 	// Without this, the row is invisible to TimezoneGroupBrowseAction's workspace-scoped
 	// query (see GetSqlContext) - same workspace-stamping fix as
 	// modules/abac/messaging/EmailProviderActions.go's EmailProviderCreateAction.
-	entity := &TimezoneGroupEntity{
+	entity := &interfacetoolsdefs.TimezoneGroupEntity{
 		Title:       c.Body.Title,
 		WorkspaceId: emigo.NullableOf(query.WorkspaceId),
 		UserId:      emigo.NullableOf(query.UserId),
@@ -74,16 +75,16 @@ func TimezoneGroupCreateAction(c TimezoneGroupCreateActionRequest) (*TimezoneGro
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TimezoneGroupCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &interfacetoolsdefs.TimezoneGroupCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func TimezoneGroupUpdateAction(c TimezoneGroupUpdateActionRequest) (*TimezoneGroupUpdateActionResponse, error) {
+func TimezoneGroupUpdateAction(c interfacetoolsdefs.TimezoneGroupUpdateActionRequest) (*interfacetoolsdefs.TimezoneGroupUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &TimezoneGroupEntity{UniqueId: c.Params.UniqueId}
+	fields := &interfacetoolsdefs.TimezoneGroupEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.Title.Get(); ok {
 		fields.Title = *v
 	}
@@ -91,27 +92,27 @@ func TimezoneGroupUpdateAction(c TimezoneGroupUpdateActionRequest) (*TimezoneGro
 	if err2 != nil {
 		return nil, err2
 	}
-	return &TimezoneGroupUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &interfacetoolsdefs.TimezoneGroupUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func TimezoneGroupAwareDeletePreviewAction(c TimezoneGroupAwareDeletePreviewActionRequest) (*TimezoneGroupAwareDeletePreviewActionResponse, error) {
+func TimezoneGroupAwareDeletePreviewAction(c interfacetoolsdefs.TimezoneGroupAwareDeletePreviewActionRequest) (*interfacetoolsdefs.TimezoneGroupAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{}); err != nil {
 		return nil, err
 	}
-	uniqueIds := TimezoneGroupAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := TimezoneGroupEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := interfacetoolsdefs.TimezoneGroupAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := interfacetoolsdefs.TimezoneGroupEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &TimezoneGroupAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &interfacetoolsdefs.TimezoneGroupAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func TimezoneGroupAwareDeleteAction(c TimezoneGroupAwareDeleteActionRequest) (*TimezoneGroupAwareDeleteActionResponse, error) {
+func TimezoneGroupAwareDeleteAction(c interfacetoolsdefs.TimezoneGroupAwareDeleteActionRequest) (*interfacetoolsdefs.TimezoneGroupAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{}); err != nil {
 		return nil, err
 	}
-	if err2 := TimezoneGroupEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := interfacetoolsdefs.TimezoneGroupEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &TimezoneGroupAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &interfacetoolsdefs.TimezoneGroupAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

@@ -11,6 +11,7 @@ import { FilePreview } from "./FilePreview";
 import type { UploadItem, UploadStatus } from "./types";
 import { ComplexFile } from "./ComplexFile";
 import type { ComplexFileInput } from "./ComplexFile";
+import { AuthenticatedThumbnail } from "./AuthenticatedThumbnail";
 import "./resumable-uploader.css";
 
 function formatBytes(bytes: number): string {
@@ -149,9 +150,10 @@ function ExistingValueRow({
   return (
     <div className="ru-existing-row">
       {thumbnailUrl && !thumbnailFailed ? (
-        <img
+        <AuthenticatedThumbnail
           src={thumbnailUrl}
           alt={t.currentFile}
+          headers={config.headers}
           onError={() => setThumbnailFailed(true)}
           className="ru-existing-row__thumbnail"
         />

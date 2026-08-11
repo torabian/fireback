@@ -25,12 +25,19 @@ type UserEntity struct {
 	// User last connecting ip address
 	LastIpAddress string `json:"lastIpAddress" yaml:"lastIpAddress"`
 	// User primary address location. Can be useful for simple projects that a user is associated with a single address.
-	PrimaryAddress    emigo.Nullable[UserEntityPrimaryAddress] `gorm:"-" json:"primaryAddress" yaml:"primaryAddress"`
-	WorkspaceId       emigo.Nullable[string]                   `json:"workspaceId" yaml:"workspaceId"`
-	UserId            emigo.Nullable[string]                   `json:"userId" yaml:"userId"`
-	CreatedAt         abaccomplexes.PlainTime                  `json:"createdAt" yaml:"createdAt"`
-	UpdatedAt         abaccomplexes.PlainTime                  `json:"updatedAt" yaml:"updatedAt"`
-	PrimaryAddressRow *UserEntityPrimaryAddress                `gorm:"embedded" json:"-" yaml:"-"`
+	PrimaryAddress emigo.Nullable[UserEntityPrimaryAddress] `gorm:"-" json:"primaryAddress" yaml:"primaryAddress"`
+	// Contact phone number for this user (separate from any passport used to sign in).
+	PhoneNumber emigo.Nullable[string] `json:"phoneNumber" yaml:"phoneNumber"`
+	// The user's job title/role, e.g. "Support Engineer".
+	JobTitle emigo.Nullable[string] `json:"jobTitle" yaml:"jobTitle"`
+	// The company or organization the user is associated with.
+	Company emigo.Nullable[string] `json:"company" yaml:"company"`
+	// Free-form biography/notes about the user.
+	Bio               emigo.Nullable[string]    `gorm:"text" json:"bio" yaml:"bio"`
+	UserId            emigo.Nullable[string]    `json:"userId" yaml:"userId"`
+	CreatedAt         abaccomplexes.PlainTime   `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt         abaccomplexes.PlainTime   `json:"updatedAt" yaml:"updatedAt"`
+	PrimaryAddressRow *UserEntityPrimaryAddress `gorm:"embedded" json:"-" yaml:"-"`
 }
 
 // The base class definition for primaryAddress
@@ -105,8 +112,24 @@ func GetUserEntityCliFlags(prefix string) []emigo.CliFlag {
 			Description: "User primary address location. Can be useful for simple projects that a user is associated with a single address.",
 		},
 		{
-			Name: prefix + "workspace-id",
-			Type: "string?",
+			Name:        prefix + "phone-number",
+			Type:        "string?",
+			Description: "Contact phone number for this user (separate from any passport used to sign in).",
+		},
+		{
+			Name:        prefix + "job-title",
+			Type:        "string?",
+			Description: "The user's job title/role, e.g. \"Support Engineer\".",
+		},
+		{
+			Name:        prefix + "company",
+			Type:        "string?",
+			Description: "The company or organization the user is associated with.",
+		},
+		{
+			Name:        prefix + "bio",
+			Type:        "string?",
+			Description: "Free-form biography/notes about the user.",
 		},
 		{
 			Name: prefix + "user-id",
@@ -163,8 +186,17 @@ func CastUserEntityFromCli(c emigo.CliCastable) UserEntity {
 	if c.IsSet("primary-address") {
 		emigo.ParseNullable(c.String("primary-address"), &data.PrimaryAddress)
 	}
-	if c.IsSet("workspace-id") {
-		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
+	if c.IsSet("phone-number") {
+		emigo.ParseNullable(c.String("phone-number"), &data.PhoneNumber)
+	}
+	if c.IsSet("job-title") {
+		emigo.ParseNullable(c.String("job-title"), &data.JobTitle)
+	}
+	if c.IsSet("company") {
+		emigo.ParseNullable(c.String("company"), &data.Company)
+	}
+	if c.IsSet("bio") {
+		emigo.ParseNullable(c.String("bio"), &data.Bio)
 	}
 	if c.IsSet("user-id") {
 		emigo.ParseNullable(c.String("user-id"), &data.UserId)
@@ -328,8 +360,17 @@ func UserEntityUpdateFn(tx *gorm.DB, uniqueId string, input UserOptionalDto) (*U
 				}
 			}
 		}
-		if input.WorkspaceId.IsSet() {
-			changes["WorkspaceId"] = input.WorkspaceId
+		if input.PhoneNumber.IsSet() {
+			changes["PhoneNumber"] = input.PhoneNumber
+		}
+		if input.JobTitle.IsSet() {
+			changes["JobTitle"] = input.JobTitle
+		}
+		if input.Company.IsSet() {
+			changes["Company"] = input.Company
+		}
+		if input.Bio.IsSet() {
+			changes["Bio"] = input.Bio
 		}
 		if input.UserId.IsSet() {
 			changes["UserId"] = input.UserId

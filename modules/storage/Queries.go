@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -36,7 +37,36 @@ type FileRecord struct {
 }
 
 // ListFiles returns the most recently created uploads, newest first.
-func ListFiles(ctx context.Context, pool *pgxpool.Pool, limit, offset int) ([]FileRecord, error) {
+// Dispatches on which Store implementation it's given - see pgLoStore
+// (Postgres) and SQLiteStore.ListFiles (StoreSQLite.go).
+func ListFiles(ctx context.Context, store Store, limit, offset int) ([]FileRecord, error) {
+	switch s := store.(type) {
+	case *pgLoStore:
+		return listFilesPostgres(ctx, s.Pool, limit, offset)
+	case *SQLiteStore:
+		return s.ListFiles(ctx, limit, offset)
+	case *MySQLStore:
+		return s.ListFiles(ctx, limit, offset)
+	default:
+		return nil, fmt.Errorf("fileupload: unsupported store implementation %T", store)
+	}
+}
+
+// GetFile returns a single upload's metadata by id, or nil if it doesn't exist.
+func GetFile(ctx context.Context, store Store, id string) (*FileRecord, error) {
+	switch s := store.(type) {
+	case *pgLoStore:
+		return getFilePostgres(ctx, s.Pool, id)
+	case *SQLiteStore:
+		return s.GetFile(ctx, id)
+	case *MySQLStore:
+		return s.GetFile(ctx, id)
+	default:
+		return nil, fmt.Errorf("fileupload: unsupported store implementation %T", store)
+	}
+}
+
+func listFilesPostgres(ctx context.Context, pool *pgxpool.Pool, limit, offset int) ([]FileRecord, error) {
 	rows, err := pool.Query(ctx, `
 		SELECT id, size, upload_offset, completed, metadata, created_at, updated_at, completed_at, claimed_by, claimed_at, user_id, workspace_id, access_level
 		FROM tus_uploads
@@ -59,8 +89,7 @@ func ListFiles(ctx context.Context, pool *pgxpool.Pool, limit, offset int) ([]Fi
 	return results, rows.Err()
 }
 
-// GetFile returns a single upload's metadata by id, or nil if it doesn't exist.
-func GetFile(ctx context.Context, pool *pgxpool.Pool, id string) (*FileRecord, error) {
+func getFilePostgres(ctx context.Context, pool *pgxpool.Pool, id string) (*FileRecord, error) {
 	row := pool.QueryRow(ctx, `
 		SELECT id, size, upload_offset, completed, metadata, created_at, updated_at, completed_at, claimed_by, claimed_at, user_id, workspace_id, access_level
 		FROM tus_uploads WHERE id = $1

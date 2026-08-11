@@ -9,8 +9,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/storage/migrations"
+	migrationsmysql "github.com/torabian/fireback/modules/storage/migrations_mysql"
+	migrationssqlite "github.com/torabian/fireback/modules/storage/migrations_sqlite"
 	"github.com/urfave/cli/v3"
 )
 
@@ -116,9 +119,29 @@ func StorageModuleSetup(cfg *StorageModuleConfig) *application.ModuleProvider {
 				return mountOnFirebackApp(g, cfg)
 			},
 		},
-		// Goose framework directory, which would contain sql files for that framework,
-		// which would be running near automigration of gorm.
-		GoMigrateDirectory: &migrations.MigrationsFs,
 	}
+
+	// Goose framework directory, which would contain sql files for that
+	// framework, which would be running near automigration of gorm - picked
+	// per-vendor since the three schemas' SQL isn't portable between each
+	// other (see migrations_sqlite/00001_create_tus_uploads.sql's own
+	// comment). Not set for any other vendor - matches
+	// mountOnFirebackApp/OpenStoreForFireback's own silent no-op for
+	// anything this module doesn't back itself with.
+	//
+	// fireback.LoadConfiguration() is safe to call this early (before
+	// CommonHeadlessAppStart's own env loading has necessarily run yet,
+	// since ModuleProvider construction typically happens in main.go before
+	// that) - same self-sufficiency NewPgxPool's own doc comment relies on.
+	vendor, _ := fireback.GetDatabaseDsn(fireback.LoadConfiguration())
+	switch vendor {
+	case "postgres":
+		module.GoMigrateDirectory = &migrations.MigrationsFs
+	case "sqlite":
+		module.GoMigrateDirectory = &migrationssqlite.MigrationsFs
+	case "mysql", "mariadb":
+		module.GoMigrateDirectory = &migrationsmysql.MigrationsFs
+	}
+
 	return module
 }

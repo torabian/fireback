@@ -131,11 +131,6 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
   // once events settle, and it reports the group's actual pixel size
   // directly instead of us having to approximate it from the window.
   useEffect(() => {
-    const element = document.querySelector<HTMLElement>(".application-panels");
-    if (!element) {
-      return;
-    }
-
     const applyLockedWidth = (groupWidthPx: number) => {
       if (detectDeviceType().isMobileView) {
         return;
@@ -164,10 +159,57 @@ export function UIStateProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    resizeObserver.observe(element);
+    // `.application-panels` (the PanelGroup) doesn't exist yet at the
+    // moment this effect first runs whenever the app boots into the
+    // unauthenticated flow: WithSelfServiceRoutes.tsx renders a completely
+    // different, login/welcome subtree until a session is confirmed, and
+    // only mounts SidebarMultiRouterSetup (which renders the group) once
+    // SessionGate lets it through — deep inside a branch this provider,
+    // mounted once near the app root, has no other way to react to. A
+    // one-shot querySelector here used to just find nothing and give up
+    // for good (empty deps array, never retried), so the ResizeObserver
+    // never got attached at all. Watch the DOM for the group's arrival
+    // (and reattach if it's ever torn down and remounted, e.g. logout then
+    // a fresh login) instead of assuming it's already there.
+    let observedElement: HTMLElement | null = null;
+
+    const attachTo = (element: HTMLElement) => {
+      if (observedElement === element) {
+        return;
+      }
+      if (observedElement) {
+        resizeObserver.unobserve(observedElement);
+      }
+      observedElement = element;
+      // Re-baseline against the newly (re)mounted group rather than trusting
+      // a target measured against a group element that no longer exists.
+      sidebarWidthPx.current = null;
+      resizeObserver.observe(element);
+    };
+
+    const existing = document.querySelector<HTMLElement>(".application-panels");
+    if (existing) {
+      attachTo(existing);
+    }
+
+    const mutationObserver = new MutationObserver(() => {
+      if (observedElement && document.body.contains(observedElement)) {
+        return;
+      }
+      const found = document.querySelector<HTMLElement>(".application-panels");
+      if (found) {
+        attachTo(found);
+      } else {
+        observedElement = null;
+      }
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      resizeObserver.unobserve(element);
+      mutationObserver.disconnect();
+      if (observedElement) {
+        resizeObserver.unobserve(observedElement);
+      }
       resizeObserver.disconnect();
     };
   }, []);

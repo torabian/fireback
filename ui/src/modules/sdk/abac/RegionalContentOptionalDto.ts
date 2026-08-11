@@ -29,19 +29,19 @@ export class RegionalContentOptionalDto {
     return this;
   }
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @type {string}
    **/
   #content?: string | null = undefined;
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @returns {string}
    **/
   get content() {
     return this.#content;
   }
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @type {string}
    **/
   set content(value: string | null | undefined) {
@@ -54,19 +54,19 @@ export class RegionalContentOptionalDto {
     return this;
   }
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @type {string}
    **/
   #region?: string | null = undefined;
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @returns {string}
    **/
   get region() {
     return this.#region;
   }
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @type {string}
    **/
   set region(value: string | null | undefined) {
@@ -79,19 +79,19 @@ export class RegionalContentOptionalDto {
     return this;
   }
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @type {string}
    **/
   #title?: string | null = undefined;
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @returns {string}
    **/
   get title() {
     return this.#title;
   }
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @type {string}
    **/
   set title(value: string | null | undefined) {
@@ -104,19 +104,19 @@ export class RegionalContentOptionalDto {
     return this;
   }
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @type {string}
    **/
   #languageId?: string | null = undefined;
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @returns {string}
    **/
   get languageId() {
     return this.#languageId;
   }
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @type {string}
    **/
   set languageId(value: string | null | undefined) {
@@ -129,19 +129,19 @@ export class RegionalContentOptionalDto {
     return this;
   }
   /**
-   *
+   * Which kind of message this content is used for.
    * @type {any}
    **/
   #keyGroup?: any | null = undefined;
   /**
-   *
+   * Which kind of message this content is used for.
    * @returns {any}
    **/
   get keyGroup() {
     return this.#keyGroup;
   }
   /**
-   *
+   * Which kind of message this content is used for.
    * @type {any}
    **/
   set keyGroup(value: any | null | undefined) {
@@ -387,27 +387,27 @@ export type RegionalContentOptionalDtoType = {
    **/
   uniqueId?: string;
   /**
-   *
+   * The template body sent to the user - supports Go template syntax to insert dynamic values, such as {{.Otp}} for the one-time password.
    * @type {string}
    **/
   content?: string;
   /**
-   *
+   * Region or locale this content applies to, for example any, us, eu, or asia/*. Use any unless you need to target a specific region.
    * @type {string}
    **/
   region?: string;
   /**
-   *
+   * Optional subject line - only used for email-type content.
    * @type {string}
    **/
   title?: string;
   /**
-   *
+   * Language code this content is written in, for example en, fa, or pl. Falls back to English if nothing matches a user's language.
    * @type {string}
    **/
   languageId?: string;
   /**
-   *
+   * Which kind of message this content is used for.
    * @type {any}
    **/
   keyGroup?: any;

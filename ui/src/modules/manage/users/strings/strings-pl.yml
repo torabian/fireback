@@ -3,10 +3,14 @@ content:
   addressLine1Hint: Linia adresu 1 powiązana z użytkownikiem.
   addressLine2: Linia adresu 2
   addressLine2Hint: Linia adresu 2 powiązana z użytkownikiem.
+  bio: Biografia
+  bioHint: Dowolne notatki lub biografia użytkownika.
   birthDate: Data urodzenia
   city: Miasto
   cityName: Nazwa miasta
   cityNameHint: Miasto adresu powiązane z użytkownikiem.
+  company: Firma
+  companyHint: Firma lub organizacja powiązana z użytkownikiem.
   confirmed: 'Potwierdzone:'
   countryCode: Kod kraju
   editUser: Edytuj użytkownika
@@ -15,12 +19,18 @@ content:
   image: Obraz
   inviteFirstNameHint: Wpisz imię zaproszonej osoby
   inviteLastNameHint: Wpisz nazwisko zaproszonej osoby
+  jobTitle: Stanowisko
+  jobTitleHint: Stanowisko lub rola użytkownika.
   lastName: Nazwisko
   menuTitle: Użytkownicy
   na: brak danych
   newUser: Nowy użytkownik
   'no': Nie
   passports: Paszporty
+  phoneNumber: Numer telefonu
+  phoneNumberHint: Numer telefonu kontaktowego użytkownika.
+  photo: Zdjęcie
+  photoHint: Prześlij zdjęcie profilowe dla tego użytkownika.
   postalCode: Kod pocztowy
   type: 'Typ:'
   value: 'Wartość:'

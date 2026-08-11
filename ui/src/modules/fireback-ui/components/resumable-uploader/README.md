@@ -155,7 +155,7 @@ pass the stored value in as `value`:
 >
   <FileUploader
     value={record.avatarUploadId /* e.g. "a1b2c3d4e5" from a prior upload */}
-    onChange={(uploadId) => setRecord({ ...record, avatarUploadId: uploadId })}
+    onChange={(file) => setRecord({ ...record, avatarUploadId: file?.id ?? null })}
   />
 </UploaderConfigProvider>
 ```
@@ -164,7 +164,18 @@ pass the stored value in as `value`:
 preview image for that id regardless of the original file's type (images,
 generated video frame, PDF first page, etc.) - the component just renders
 whatever image comes back, and falls back to a generic file icon if the
-request fails (e.g. 404).
+request fails (e.g. 404). It's fetched via `AuthenticatedThumbnail`
+(`AuthenticatedThumbnail.tsx`) using the same `config.headers` the tus
+uploads themselves use, rather than a plain `<img src>` - a plain `<img>`
+can't attach an `Authorization` header, so it would 403 against a storage
+module download URL for an owned (non-anonymous) upload. `getThumbnailUrl`
+can point straight at an owned upload's URL without any extra plumbing.
+
+`AuthenticatedThumbnail` is also exported standalone (`headers` as a plain
+prop, no `<UploaderConfigProvider>` required) for anywhere else in an app
+that needs to render an owned download behind a normal `<img>`-shaped
+component - e.g. a read-only detail view showing a previously-uploaded
+photo, with no upload widget on the page at all.
 
 The "current file" row is shown whenever `value` is set and no file has been
 picked yet in this session; as soon as a new file is picked (or dropped), it
@@ -178,12 +189,17 @@ depending on it:
 ```tsx
 <FileUploader
   value={form.avatarUploadId}
-  onChange={(uploadId) => form.setAvatarUploadId(uploadId)}
+  onChange={(file) => form.setAvatarUploadId(file?.id ?? null)}
 />
 ```
 
-- `onChange(uploadUrl)` fires once, automatically, when a picked file finishes
-  uploading.
+- `onChange(file)` fires once, automatically, when a picked file finishes
+  uploading, with a `ComplexFile` - store `file.id` (a bare upload id, e.g.
+  `"a1b2c3d4e5"`, extracted from the full upload URL tus hands back) if all
+  the field needs is the id; `file` itself also carries `filesize`/
+  `filename`/`mimeType`/`thumbnail` if the record wants to keep those too.
+  `value` accepts either shape back - a bare id string (the common case) or
+  a full upload URL - both resolve to the same `.id` internally.
 - Every row then also gets a **Clear** button (in addition to **Remove**),
   which explicitly calls `onChange(null)` - use this to let the user
   deliberately blank out the field, as opposed to **Remove**, which just

@@ -18,8 +18,22 @@ import (
 )
 
 // WorkspaceUsedBytes mirrors UsedBytes, summed by workspace_id instead of
-// user_id.
-func WorkspaceUsedBytes(ctx context.Context, pool *pgxpool.Pool, workspaceId string) (int64, error) {
+// user_id. Dispatches on which Store implementation it's given - see
+// pgLoStore (Postgres) and SQLiteStore.WorkspaceUsedBytes (StoreSQLite.go).
+func WorkspaceUsedBytes(ctx context.Context, store Store, workspaceId string) (int64, error) {
+	switch s := store.(type) {
+	case *pgLoStore:
+		return workspaceUsedBytesPostgres(ctx, s.Pool, workspaceId)
+	case *SQLiteStore:
+		return s.WorkspaceUsedBytes(ctx, workspaceId)
+	case *MySQLStore:
+		return s.WorkspaceUsedBytes(ctx, workspaceId)
+	default:
+		return 0, fmt.Errorf("fileupload: unsupported store implementation %T", store)
+	}
+}
+
+func workspaceUsedBytesPostgres(ctx context.Context, pool *pgxpool.Pool, workspaceId string) (int64, error) {
 	var used int64
 	err := pool.QueryRow(ctx, `
 		SELECT COALESCE(SUM(size), 0) FROM tus_uploads WHERE workspace_id = $1
@@ -30,7 +44,7 @@ func WorkspaceUsedBytes(ctx context.Context, pool *pgxpool.Pool, workspaceId str
 // DeleteFile removes upload id - both its tus_uploads row and backing large
 // object, the same way DELETE /files/:id does - but callable directly
 // without an HTTP round trip. Returns ErrUploadNotFound if id doesn't exist.
-func DeleteFile(ctx context.Context, store *Store, id string) error {
+func DeleteFile(ctx context.Context, store Store, id string) error {
 	upload, err := store.GetUpload(ctx, id)
 	if err != nil {
 		if errors.Is(err, handler.ErrNotFound) {
@@ -65,7 +79,7 @@ type UploadFileOptions struct {
 // single call with no HTTP involved and no chunking - meant for CLI/admin
 // use. It does not consult StorageModuleConfig.Quota; that check only
 // runs on the HTTP creation path.
-func UploadFile(ctx context.Context, pool *pgxpool.Pool, store *Store, localPath string, opts UploadFileOptions) (*FileRecord, error) {
+func UploadFile(ctx context.Context, store Store, localPath string, opts UploadFileOptions) (*FileRecord, error) {
 	f, err := os.Open(localPath)
 	if err != nil {
 		return nil, err
@@ -119,10 +133,10 @@ func UploadFile(ctx context.Context, pool *pgxpool.Pool, store *Store, localPath
 	}
 
 	if opts.ClaimedBy != "" {
-		if _, err := ClaimFile(ctx, pool, info.ID, opts.ClaimedBy); err != nil {
+		if _, err := ClaimFile(ctx, store, info.ID, opts.ClaimedBy); err != nil {
 			return nil, err
 		}
 	}
 
-	return GetFile(ctx, pool, info.ID)
+	return GetFile(ctx, store, info.ID)
 }

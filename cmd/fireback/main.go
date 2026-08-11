@@ -66,6 +66,17 @@ func main() {
 				abac.QueryRolesReact,
 			},
 		}),
+		// interfacetools.ModuleSetup is constructed here, not inside
+		// abac.AbacCompleteModules(), so abac itself never has to import
+		// interfacetools (only interfacetoolsdefs, for abac.Menu's plain data - see
+		// modules/abac/Menu.go). abac.Menu is injected as ExtraAppMenus, which
+		// interfacetools syncs (delete-by-uniqueId-then-recreate) as part of its own
+		// migration on every `migration apply`, instead of requiring the manual
+		// "seeders" command the way this used to (fireback-manage-menu.yml/
+		// fireback-menu-cloud.yml/fireback-personal-menu.yml, before they moved here).
+		interfacetools.ModuleSetup(&interfacetools.InterfaceToolsModuleConfig{
+			ExtraAppMenus: abac.Menu,
+		}),
 	}
 
 	// For fireback we have abac module added.

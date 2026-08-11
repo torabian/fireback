@@ -60,3 +60,6 @@ content:
     totpSectionDescription: استفاده از اپلیکیشن احراز هویت به‌عنوان یک لایه امنیتی
       دوم برای رمز عبور.
     totpSectionTitle: TOTP (تأیید دومرحله‌ای زمان‌دار)
+    notificationsSectionTitle: اطلاع‌رسانی‌ها
+    notificationsSectionDescription: مشخص کنید کدام سرویس به‌طور پیش‌فرض ایمیل/پیامک
+      ارسال کند، و کدام قالب‌ها برای دعوت به فضای کاری و رمزهای یکبار مصرف استفاده شوند.

@@ -15,6 +15,23 @@ func CommonHeadlessAppStart(x *application.Application, onDatabaseCompleted func
 	// Load the application configuration
 	envm.LoadFirebackAppConfiguration(&config)
 
+	// Same idea, per module: a module's own `config:` block (Abac.emi.yml's
+	// otpLockoutSeconds, for instance) only actually gets read from the environment
+	// when something calls that module's generated LoadConfiguration() - ConfigProvider
+	// does exactly that (see application.ModuleProvider.ConfigProvider's doc comment),
+	// but until now nothing ever called it unless GetCombinedConfigInfo happened to run
+	// first (i.e. "config list"). Without this, every other consumer of that module's
+	// config - its own generated per-field "get"/"set" CLI commands included - would
+	// see only the struct's hardcoded default, never an env or .env override, exactly
+	// the gap LoadFirebackAppConfiguration above already closes for fireback's own core
+	// config. Priming here, unconditionally and before RunApp dispatches to any
+	// subcommand, gives every module's config the same guarantee.
+	for _, module := range x.Modules {
+		if module.ConfigProvider != nil {
+			module.ConfigProvider()
+		}
+	}
+
 	// Use the logger
 	initLogger()
 

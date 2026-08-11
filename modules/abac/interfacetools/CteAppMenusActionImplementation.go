@@ -1,6 +1,7 @@
 package interfacetools
 
 import (
+	interfacetoolsdefs "github.com/torabian/fireback/modules/abac/interfacetools/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -9,7 +10,7 @@ import (
 // children nested under it) instead of Browse's flat list. See
 // AppMenuActions.CteQuery / AppMenuTreeNode for the actual recursive query + tree
 // assembly logic.
-func CteAppMenusAction(c CteAppMenusActionRequest) (*CteAppMenusActionResponse, error) {
+func CteAppMenusAction(c interfacetoolsdefs.CteAppMenusActionRequest) (*interfacetoolsdefs.CteAppMenusActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{})
 	if err != nil {
 		return nil, err
@@ -18,5 +19,5 @@ func CteAppMenusAction(c CteAppMenusActionRequest) (*CteAppMenusActionResponse, 
 	if err2 != nil {
 		return nil, err2
 	}
-	return &CteAppMenusActionResponse{Payload: fireback.GResponseQuery(tree, qrm, query)}, nil
+	return &interfacetoolsdefs.CteAppMenusActionResponse{Payload: fireback.GResponseQuery(tree, qrm, query)}, nil
 }

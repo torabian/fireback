@@ -2,16 +2,16 @@ import { useCommonEntityManager } from "../../fireback-ui/hooks/useCommonEntityM
 import { useS } from "../../fireback-ui/hooks/useS";
 import { strings } from "./strings/translations";
 
+import { useUserGetActionQuery } from "@/modules/sdk/abac/UserGetAction";
 import {
   CommonEntityManager,
   type DtoEntity,
 } from "../../fireback-ui/components/entity-manager/CommonEntityManager";
-import { UserEditForm } from "./UserEditForm";
-import { useUserGetActionQuery } from "../../sdk/abac/UserGetAction";
 import { useUserCreateAction } from "../../sdk/abac/UserCreateAction";
-import { useUserUpdateAction } from "../../sdk/abac/UserUpdateAction";
 import { UserDto } from "../../sdk/abac/UserDto";
+import { useUserUpdateAction } from "../../sdk/abac/UserUpdateAction";
 import { UserNavigation } from "../../sdk/navigation/AbacNavigation";
+import { UserEditForm } from "./UserEditForm";
 
 export const UserEntityManager = ({ data }: DtoEntity<UserDto>) => {
   const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
@@ -21,8 +21,8 @@ export const UserEntityManager = ({ data }: DtoEntity<UserDto>) => {
   });
   const s = useS(strings);
 
-  const getSingleHook = useGetUserByUniqueId({
-    query: { uniqueId, deep: true },
+  const getSingleHook = useUserGetActionQuery({
+    params: { uniqueId },
   });
 
   const postHook = useUserCreateAction({});
@@ -38,7 +38,7 @@ export const UserEntityManager = ({ data }: DtoEntity<UserDto>) => {
         router.goBackOrDefault(UserNavigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        UserNavigation.single(response.data?.uniqueId, locale)
+        UserNavigation.single(response.data?.item?.uniqueId, locale)
       }
       Form={UserEditForm}
       onEditTitle={s.editUser}

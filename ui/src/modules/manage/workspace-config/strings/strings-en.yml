@@ -65,3 +65,6 @@ content:
       SMS Otp Content
     smsOtpContentHint:
       Upon OTP text messages, this template will be used to create such text message, including the one time password code.
+    notificationsSectionTitle: Notifications
+    notificationsSectionDescription:
+      Choose which provider sends emails/sms by default, and which templates are used for account invitations and one-time passwords.

@@ -6,7 +6,7 @@ import { useCapabilityGetActionQuery } from "../../sdk/abac/CapabilityGetAction"
 import { CapabilityDto } from "../../sdk/abac/CapabilityDto";
 import { CapabilityNavigation } from "../../sdk/navigation/AbacNavigation";
 import { strings } from "./strings/translations";
-import { usePageTitle } from "../../fireback-ui/hooks/authContext";
+import { usePageTitle } from "@/modules/fireback-ui/components/page-title/PageTitle";
 
 export const CapabilitySingleScreen = () => {
   const { uniqueId } = useCommonEntityManager<Partial<any>>({});

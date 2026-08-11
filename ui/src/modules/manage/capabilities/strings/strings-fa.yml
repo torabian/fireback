@@ -9,3 +9,7 @@ content:
     nameHint: نام
     newCapability: قابلیت جدید
     uniqueId: شناسه
+    uniqueIdHint: >-
+      یک کلید یکتا برای این قابلیت (مثلاً «students.query»). اختیاری - اگر خالی
+      بگذارید، به‌طور خودکار ساخته می‌شود. پس از ایجاد قابل تغییر نیست.
+    uniqueIdLockedHint: پس از ایجاد قابلیت، شناسه قابل تغییر نیست.

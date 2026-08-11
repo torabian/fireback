@@ -5,9 +5,9 @@ content:
     description: Configurate how the workspaces work in terms of totp, forced otp,
       recaptcha and how the user can interact with the application.
     editWorkspaceConfig: Edit workspace config
-    emailOtpContentHint: Upon one time password request for email, the content will
-      be read to fill the message which will go to user.
-    emailOtpContentLabel: Email Otp Content
+    emailOtpContentHint: Po żądaniu jednorazowego kodu e-mail, ta treść zostanie
+      użyta do utworzenia wiadomości wysyłanej do użytkownika.
+    emailOtpContentLabel: Treść kodu jednorazowego e-mail
     enableOtp: Enable otp
     enableOtpHint: Enables the one time password for the selfservice. It would allow
       email or phone numbers to bypass password and recieve a 6 digit code on their
@@ -24,17 +24,16 @@ content:
     forceTotp: Force totp
     forceTotpHint: Forces the totp for account creation. If an account doesn't have
       it, they need to setup before they can login.
-    generalEmailProviderHint: Email provider service, which will be used to send the
-      messages using it's service. It doesn't affect the message content, rather,
-      you can choose via which third-party service, or even your own smtp service
-      to send emails.
-    generalEmailProviderLabel: General Email Provider
-    generalGsmProviderHint: General service which would be used to send text messages
-      (sms) using it's services or API.
-    generalGsmProviderLabel: General Gsm Provider
-    inviteToWorkspaceContentHint: This template would be used, as default when a user
-      is inviting a third-party into their own workspace.
-    inviteToWorkspaceContentLabel: Invite To Workspace Content
+    generalEmailProviderHint: Usługa dostawcy e-mail, która będzie używana do wysyłania
+      wiadomości. Nie wpływa na treść wiadomości - wybierasz tutaj, za pomocą jakiej
+      usługi zewnętrznej lub własnego serwera SMTP wysyłane będą e-maile.
+    generalEmailProviderLabel: Domyślny dostawca e-mail
+    generalGsmProviderHint: Ogólna usługa używana do wysyłania wiadomości tekstowych
+      (SMS) za pomocą swoich usług lub API.
+    generalGsmProviderLabel: Domyślny dostawca SMS
+    inviteToWorkspaceContentHint: Ten szablon będzie używany domyślnie, gdy użytkownik
+      zaprasza inną osobę do swojej przestrzeni roboczej.
+    inviteToWorkspaceContentLabel: Treść zaproszenia do przestrzeni roboczej
     newWorkspaceConfig: New workspace config
     otpSectionDescription: Manage the user authentication using single time password
       over sms/email
@@ -54,10 +53,13 @@ content:
     requireOtpOnSignup: Require otp on signup
     requireOtpOnSignupHint: It would force account creation to first make a one time
       password verification and then continue the process.
-    smsOtpContentHint: Upon one time password request for email, the content will
-      be read to fill the message which will go to user.
-    smsOtpContentLabel: SMS Otp Content
+    smsOtpContentHint: Przy wysyłce SMS z kodem jednorazowym, ten szablon zostanie
+      użyty do utworzenia takiej wiadomości, wraz z kodem jednorazowym.
+    smsOtpContentLabel: Treść kodu jednorazowego SMS
     title: Workspace Config
     totpSectionDescription: Usage of the authenticator app as a second security step
       for the password.
     totpSectionTitle: TOTP (Time based Dual Factor)
+    notificationsSectionTitle: Powiadomienia
+    notificationsSectionDescription: Wybierz, który dostawca domyślnie wysyła e-maile/SMS-y
+      oraz jakie szablony są używane do zaproszeń i kodów jednorazowych.

@@ -38,6 +38,7 @@ func UserCliFn() *cli.Command {
 			abacdefs.TokenAwareDeleteActionCliHandler(TokenAwareDeleteAction),
 			abacdefs.AcceptInviteActionCliHandler(AcceptInviteAction),
 			abacdefs.UserInvitationsActionCliHandler(UserInvitationsAction),
+			UserMockActionCliHandler(),
 		},
 	}
 }
@@ -73,28 +74,43 @@ func FullName(x *abacdefs.UserEntity) string {
 
 }
 
+// Unlike almost every other entity in this package, abacdefs.UserEntity is NOT
+// workspace-scoped (users belong to the system as a whole, root-only management, no
+// workspace_id column at all) - so, same as CapabilityActions.go's
+// GetCapabilitiesAction/CapabilityGetAction, this calls the entity's own generated,
+// unscoped abacdefs.UserEntityActions.Browse directly instead of going through
+// EntityActionsBundle/fireback.QueryEntitiesPointer, which unconditionally filters by
+// workspace_id and fails outright with "column workspace_id does not exist".
 func UserBrowseAction(c abacdefs.UserBrowseActionRequest) (*abacdefs.UserBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}})
 	if err != nil {
 		return nil, err
 	}
-	items, qrm, err2 := UserActions.Query(*query)
+	qs := abacdefs.UserBrowseActionQueryFromString(c.QueryParams.Encode())
+	items, qrm, err2 := abacdefs.UserEntityActions.Browse(fireback.GetDbRef(), qs, "")
 	if err2 != nil {
-		return nil, err2
+		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &abacdefs.UserBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	for _, item := range items {
+		HydrateUserPrimaryAddress(item)
+	}
+	return &abacdefs.UserBrowseActionResponse{Payload: fireback.GResponseQuery(items, &fireback.QueryResultMeta{
+		TotalItems: qrm.TotalItems,
+		Cursor:     qrm.Cursor,
+	}, query)}, nil
 }
 
+// See UserBrowseAction - not workspace-scoped, so this calls the entity's own generated,
+// unscoped abacdefs.UserEntityActions.Get directly.
 func UserGetAction(c abacdefs.UserGetActionRequest) (*abacdefs.UserGetActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}})
-	if err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_QUERY}}); err != nil {
 		return nil, err
 	}
-	query.UniqueId = c.Params.UniqueId
-	item, err2 := UserActions.GetOne(*query)
+	item, err2 := abacdefs.UserEntityActions.Get(fireback.GetDbRef(), c.Params.UniqueId)
 	if err2 != nil {
-		return nil, err2
+		return nil, fireback.GormErrorToIError(err2)
 	}
+	HydrateUserPrimaryAddress(item)
 	return &abacdefs.UserGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
@@ -118,6 +134,10 @@ func UserCreateAction(c abacdefs.UserCreateActionRequest) (*abacdefs.UserCreateA
 		BirthDate:     c.Body.BirthDate,
 		Avatar:        c.Body.Avatar,
 		LastIpAddress: c.Body.LastIpAddress,
+		PhoneNumber:   c.Body.PhoneNumber,
+		JobTitle:      c.Body.JobTitle,
+		Company:       c.Body.Company,
+		Bio:           c.Body.Bio,
 	}
 	if v, ok := c.Body.PrimaryAddress.Get(); ok && v != nil {
 		entity.PrimaryAddress = emigo.NullableOf(abacdefs.UserEntityPrimaryAddress{
@@ -136,49 +156,21 @@ func UserCreateAction(c abacdefs.UserCreateActionRequest) (*abacdefs.UserCreateA
 	return &abacdefs.UserCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
+// See UserBrowseAction - not workspace-scoped, so this calls the entity's own generated,
+// unscoped abacdefs.UserEntityActions.Update directly. UserEntityUpdateFn takes the
+// UserOptionalDto request body straight (unlike UserEntityCreateFn's *UserEntity), so
+// there's no manual field-by-field mapping to a *UserEntity needed here at all - see
+// UserEntityUpdateFn's own body (UserEntity.go) for how it applies primaryAddress's
+// sub-fields directly onto the embedded address_line1/city/... columns.
 func UserUpdateAction(c abacdefs.UserUpdateActionRequest) (*abacdefs.UserUpdateActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_UPDATE}, AllowOnRoot: true})
-	if err != nil {
+	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_USER_UPDATE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	query.UniqueId = c.Params.UniqueId
-	fields := &abacdefs.UserEntity{UniqueId: c.Params.UniqueId}
-	if v, ok := c.Body.FirstName.Get(); ok {
-		fields.FirstName = *v
-	}
-	if v, ok := c.Body.LastName.Get(); ok {
-		fields.LastName = *v
-	}
-	if v, ok := c.Body.Photo.Get(); ok {
-		fields.Photo = *v
-	}
-	if v, ok := c.Body.Gender.Get(); ok {
-		fields.Gender = emigo.NullableOf(*v)
-	}
-	if v, ok := c.Body.Title.Get(); ok {
-		fields.Title = *v
-	}
-	fields.BirthDate = c.Body.BirthDate
-	if v, ok := c.Body.Avatar.Get(); ok {
-		fields.Avatar = *v
-	}
-	if v, ok := c.Body.LastIpAddress.Get(); ok {
-		fields.LastIpAddress = *v
-	}
-	if v, ok := c.Body.PrimaryAddress.Get(); ok && v != nil {
-		fields.PrimaryAddress = emigo.NullableOf(abacdefs.UserEntityPrimaryAddress{
-			AddressLine1:    v.AddressLine1.OrDefault(""),
-			AddressLine2:    v.AddressLine2,
-			City:            v.City,
-			StateOrProvince: v.StateOrProvince,
-			PostalCode:      v.PostalCode,
-			CountryCode:     v.CountryCode,
-		})
-	}
-	updated, err2 := UserActionUpdate(*query, fields)
+	updated, err2 := abacdefs.UserEntityActions.Update(fireback.GetDbRef(), c.Params.UniqueId, c.Body)
 	if err2 != nil {
-		return nil, err2
+		return nil, fireback.GormErrorToIError(err2)
 	}
+	HydrateUserPrimaryAddress(updated)
 	return &abacdefs.UserUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
@@ -247,34 +239,30 @@ func GetUserFromToken(tokenString string) (*abacdefs.UserEntity, error) {
 		return &abacdefs.UserEntity{}, err
 	}
 
-	user, _ := UserActions.GetOne(fireback.QueryDSL{UniqueId: item.UserId.OrDefault("")})
+	// Not workspace-scoped (see UserBrowseAction's own comment) - abacdefs.UserEntityActions.Get
+	// is the entity's own generated, unscoped lookup.
+	user, _ := abacdefs.UserEntityActions.Get(fireback.GetDbRef(), item.UserId.OrDefault(""))
+	HydrateUserPrimaryAddress(user)
 	return user, nil
 }
 
+// UserActionCreate is the shared create path for every way a UserEntity row comes into
+// existence - not just UserCreateAction's own admin endpoint, but the signup/OS-login/
+// OAuth path too (see UnsafeGenerateUser) and UserMockActionCliHandler (UserCli.go). Not
+// workspace-scoped (see UserBrowseAction's own comment) - abacdefs.UserEntityActions.Create
+// is the entity's own generated, unscoped insert, and (unlike the old
+// EntityActionsBundle.Create this used to go through) actually copies dto.PrimaryAddress
+// onto the embedded PrimaryAddressRow columns before inserting - see UserEntityCreateFn,
+// UserEntity.go.
 func UserActionCreate(
 	dto *abacdefs.UserEntity, query fireback.QueryDSL,
 ) (*abacdefs.UserEntity, *fireback.IError) {
-	query.WorkspaceId = "root"
-	// Setting query.WorkspaceId above has no effect on the stored row by itself - the
-	// generic EntityActionsBundle.Create this calls into (UserActions.Create) just does
-	// fireback.CreateEntity(*dto), which never reads query at all. Without also
-	// stamping dto.WorkspaceId directly, every user ever created through this
-	// function - not just UserCreateAction's own admin endpoint, but the shared
-	// signup/OS-login/OAuth path too (see UnsafeGenerateUser) - got a permanently null
-	// workspaceId, making them invisible to UserBrowseAction's workspace-scoped query
-	// (confirmed empirically: /user/browse reported totalItems:1 for a single-user dev
-	// database but returned zero actual items).
-	if dto != nil {
-		dto.WorkspaceId = emigo.NullableOf(query.WorkspaceId)
+	created, err := abacdefs.UserEntityActions.Create(fireback.GetDbRef(), dto)
+	if err != nil {
+		return nil, fireback.GormErrorToIError(err)
 	}
-	return UserActions.Create(dto, query)
-}
-
-func UserActionUpdate(
-	query fireback.QueryDSL,
-	fields *abacdefs.UserEntity,
-) (*abacdefs.UserEntity, *fireback.IError) {
-	return UserActions.Update(query, fields)
+	HydrateUserPrimaryAddress(created)
+	return created, nil
 }
 
 func getRandomAvatarURL() string {
@@ -427,6 +415,44 @@ func RandomUserPrimaryAddress() *abacdefs.UserEntityPrimaryAddress {
 	}
 }
 
+// jobTitles/companies/bios back both the "user mock" cli command (UserMockActionCliHandler
+// in UserCli.go) and the seeders framework (UserActions.SeederInit below) with realistic
+// values for the profile detail fields (phoneNumber/jobTitle/company/bio) added alongside
+// primaryAddress.
+var jobTitles = []string{
+	"Support Engineer", "Product Manager", "Sales Representative", "Software Engineer",
+	"Data Analyst", "Marketing Specialist", "Customer Success Manager", "HR Coordinator",
+	"Operations Manager", "QA Engineer", "UX Designer", "Financial Analyst",
+	"Account Executive", "DevOps Engineer", "Business Analyst", "Office Administrator",
+	"Project Manager", "Solutions Architect", "Content Writer", "Recruiter",
+}
+
+var companies = []string{
+	"Acme Corp", "Globex Industries", "Initech", "Umbrella Logistics", "Hooli",
+	"Stark Enterprises", "Wayne Technologies", "Wonka Foods", "Cyberdyne Systems",
+	"Soylent Corp", "Vandelay Industries", "Pied Piper", "Massive Dynamic",
+	"Aperture Science", "Gringotts Financial", "Northwind Traders", "Contoso Ltd",
+	"Fabrikam Inc", "Tyrell Corporation", "Oceanic Airlines",
+}
+
+var bios = []string{
+	"Enjoys solving problems and helping teammates ship better software.",
+	"Coffee enthusiast, weekend hiker, and long-time open source contributor.",
+	"Focused on making customers happy, one ticket at a time.",
+	"Loves clean data, clear dashboards, and even clearer deadlines.",
+	"Believes good documentation is a love letter to your future self.",
+	"Spends most weekends cycling and most weekdays debugging.",
+	"Passionate about design systems that actually get used.",
+	"Ex-teacher turned engineer, still can't stop explaining things.",
+	"Runs marathons for fun, runs migrations for a living.",
+	"Firm believer that every bug is a feature request in disguise.",
+}
+
+func getRandomPhoneNumber() string {
+	rand.Seed(time.Now().UnixNano())
+	return fmt.Sprintf("+1-%03d-%03d-%04d", rand.Intn(800)+200, rand.Intn(800)+200, rand.Intn(10000))
+}
+
 func init() {
 
 	UserActions.SeederInit = func() *abacdefs.UserEntity {
@@ -438,6 +464,34 @@ func init() {
 			Gender:         emigo.NullableOf(randomZeroOrOne()),
 			LastIpAddress:  randomPublicIP(),
 			PrimaryAddress: emigo.NullableOf(*RandomUserPrimaryAddress()),
+			PhoneNumber:    emigo.NullableOf(getRandomPhoneNumber()),
+			JobTitle:       emigo.NullableOf(getRandomName(jobTitles)),
+			Company:        emigo.NullableOf(getRandomName(companies)),
+			Bio:            emigo.NullableOf(getRandomName(bios)),
 		}
 	}
+
+	// Note: UserActions (the EntityActionsBundle above) is only actually used for its
+	// SeederInit now - Browse/Get/Create/Update/AwareDelete all go through the entity's
+	// own generated abacdefs.UserEntityActions instead (see UserBrowseAction's own
+	// comment for why: UserEntity has no workspace_id column, and
+	// EntityActionsBundle/fireback.QueryEntitiesPointer unconditionally filters by it).
+}
+
+// HydrateUserPrimaryAddress copies UserEntity.PrimaryAddressRow (populated by GORM from
+// the embedded address_line1/city/... columns whenever a row is read from the DB) onto
+// PrimaryAddress, the field API responses actually serialize (`json:"primaryAddress"` vs
+// PrimaryAddressRow's `json:"-"`) - nothing does this on its own, since PrimaryAddress is
+// `gorm:"-"` (GORM never touches it) and UserEntity has no MarshalJSON override either.
+// Called after every abacdefs.UserEntityActions.Get/Browse/Update in this file. A no-op
+// if there's no row to hydrate from, or the row has no address line set (an empty
+// primaryAddress was never given in the first place).
+func HydrateUserPrimaryAddress(user *abacdefs.UserEntity) {
+	if user == nil || user.PrimaryAddressRow == nil {
+		return
+	}
+	if user.PrimaryAddressRow.AddressLine1 == "" {
+		return
+	}
+	user.PrimaryAddress = emigo.NullableOf(*user.PrimaryAddressRow)
 }

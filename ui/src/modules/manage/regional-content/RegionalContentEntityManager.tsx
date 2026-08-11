@@ -36,7 +36,7 @@ export const RegionalContentEntityManager = ({
         );
       }}
       onFinishUriResolver={(response, locale) =>
-        RegionalContentNavigation.single(response.data?.uniqueId, locale)
+        RegionalContentNavigation.single(response.data?.item?.uniqueId, locale)
       }
       Form={RegionalContentForm}
       onEditTitle={s.regionalContents.editRegionalContent}

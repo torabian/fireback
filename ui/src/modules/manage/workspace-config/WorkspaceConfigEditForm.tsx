@@ -9,6 +9,18 @@ import { FormSelect } from "../../fireback-ui/components/forms/form-select/FormS
 import { useEmailProvidersQuerySource } from "../../fireback-ui/hooks/useEmailProvidersQuerySource";
 import { useGsmProvidersQuerySource } from "../../fireback-ui/hooks/useGsmProvidersQuerySource";
 import { useRegionalContentsQuerySource } from "../../fireback-ui/hooks/useRegionalContentsQuerySource";
+import { type RegionalContentDto } from "../../sdk/abac/RegionalContentDto";
+
+// Bug fix: this used to be `${e.title})` - a stray closing paren with no matching
+// open, and most regional content rows (every OTP default - see
+// RegionalContentDefaults.go) never set a title at all, so these three dropdowns'
+// options mostly just showed ")" with nothing else to tell them apart. keyGroup +
+// languageId always identify a row meaningfully regardless of whether title/content
+// happen to be set.
+function regionalContentOptionLabel(item: RegionalContentDto) {
+  const detail = item.title || item.content?.slice(0, 40) || item.region;
+  return `${item.keyGroup} - ${item.languageId}${detail ? ` (${detail})` : ""}`;
+}
 
 export const WorkspaceConfigForm = ({
   form,
@@ -164,9 +176,14 @@ export const WorkspaceConfigForm = ({
           hint={s.workspaceConfigs.forcePersonNameOnPhoneHint}
         />
       </PageSection>
+      {/* Bug fix: this whole section - general email/sms providers plus the three
+          regional-content template pickers - used to be wrapped in a second
+          PageSection reusing passwordSectionTitle/passwordSectionDescription (the
+          same title as the actual password-settings section above it), which had
+          nothing to do with passwords at all. Gets its own section now. */}
       <PageSection
-        title={s.workspaceConfigs.passwordSectionTitle}
-        description={s.workspaceConfigs.passwordSectionDescription}
+        title={s.workspaceConfigs.notificationsSectionTitle}
+        description={s.workspaceConfigs.notificationsSectionDescription}
       >
         <FormSelect
           keyExtractor={(t) => t.uniqueId}
@@ -209,7 +226,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={(e) => `${e.title})`}
+          fnLabelFormat={regionalContentOptionLabel}
           querySource={useRegionalContentsQuerySource}
           errorMessage={errors.inviteToWorkspaceContentId}
           label={s.workspaceConfigs.inviteToWorkspaceContentLabel}
@@ -225,7 +242,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={(e) => `${e.title})`}
+          fnLabelFormat={regionalContentOptionLabel}
           querySource={useRegionalContentsQuerySource}
           errorMessage={errors.emailOtpContentId}
           label={s.workspaceConfigs.emailOtpContentLabel}
@@ -240,7 +257,7 @@ export const WorkspaceConfigForm = ({
               return item.uniqueId;
             },
           }}
-          fnLabelFormat={(e) => `${e.title})`}
+          fnLabelFormat={regionalContentOptionLabel}
           querySource={useRegionalContentsQuerySource}
           errorMessage={errors.smsOtpContentId}
           label={s.workspaceConfigs.smsOtpContentLabel}

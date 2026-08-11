@@ -34,9 +34,20 @@ export function ReactiveSearch() {
   // lives in the navbar, rendered on effectively every page).
   const { messages, restart } = useWebSocketX(
     () => {
+      // Bug fix: options.prefix ("http://localhost:4500/" in local dev, see
+      // build-variables/local.json's VITE_REMOTE_SERVICE) already ends in a
+      // slash, and NewUrl's path below ("/reactive-search?...") starts with
+      // one - naively concatenating the two produced
+      // "ws://localhost:4500//reactive-search?...", a double slash Gin's
+      // router 404s on outright (it does not collapse "//" the way a
+      // browser normalizes "//" in a same-origin relative path), so the
+      // request never even reached the handler - let alone its auth check.
+      // Trimming wsRemote's trailing slash makes this work regardless of
+      // whether options.prefix happens to end with one or not.
       const wsRemote = (options.prefix || "")
         .replace("https", "wss")
-        .replace("http", "ws");
+        .replace("http", "ws")
+        .replace(/\/+$/, "");
       // NewUrl (unlike Create) correctly folds qs into the path, so build the
       // full url here and hand it to Create as overrideUrl rather than
       // letting Create build it - Create silently ignores qs whenever

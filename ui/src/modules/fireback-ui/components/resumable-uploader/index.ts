@@ -1,6 +1,7 @@
 export { UploaderConfigProvider, useUploaderConfig, defaultUploadTranslations } from "./UploaderConfigContext";
 export { FileUploader } from "./FileUploader";
 export { FilePreview } from "./FilePreview";
+export { AuthenticatedThumbnail } from "./AuthenticatedThumbnail";
 export { ComplexFile } from "./ComplexFile";
 export { mergeTranslations, localeTranslations, en, fa } from "./translations";
 export {

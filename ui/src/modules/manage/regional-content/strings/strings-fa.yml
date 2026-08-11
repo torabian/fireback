@@ -3,15 +3,17 @@ content:
   regionalContents:
     archiveTitle: محتوای منطقه‌ای
     content: محتوا
-    contentHint: محتوا
+    contentHint: متن اصلی که برای کاربر ارسال می‌شود. از قالب Go برای درج مقادیر پویا مانند {{.Otp}} به‌عنوان رمز یک‌بار مصرف پشتیبانی می‌کند.
     editRegionalContent: ویرایش محتوای منطقه‌ای
     keyGroup: گروه کلید
-    keyGroupHint: گروه کلید
+    keyGroupHint: این محتوا برای چه نوع پیامی استفاده می‌شود.
+    keyGroupSmsOtp: رمز یک‌بار مصرف پیامکی
+    keyGroupEmailOtp: رمز یک‌بار مصرف ایمیلی
     languageId: شناسه زبان
-    languageIdHint: شناسه زبان
+    languageIdHint: کد زبانی که این محتوا به آن نوشته شده، برای مثال en، fa یا pl. اگر زبان کاربر پیدا نشود، به انگلیسی برمی‌گردد.
     newRegionalContent: محتوای منطقه‌ای جدید
     region: منطقه
-    regionHint: منطقه
+    regionHint: منطقه یا محلی که این محتوا برای آن استفاده می‌شود، برای مثال any، us، eu یا asia/*. در صورتی که نیازی به منطقه خاصی ندارید any را وارد کنید.
     title: عنوان
-    titleHint: عنوان
+    titleHint: عنوان اختیاری - فقط برای محتوای نوع ایمیل استفاده می‌شود.
     uniqueId: شناسه

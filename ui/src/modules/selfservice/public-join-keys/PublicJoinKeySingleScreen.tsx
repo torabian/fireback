@@ -18,7 +18,7 @@ export const PublicJoinKeySingleScreen = () => {
     query: { uniqueId },
   });
 
-  var d: PublicJoinKeyDto | undefined = getSingleHook.query.data?.data;
+  var d: PublicJoinKeyDto | undefined = getSingleHook.data?.data?.item;
 
   return (
     <>
