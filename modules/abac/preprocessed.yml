@@ -2709,6 +2709,9 @@ complexes:
   namespace: complexes
   location: github.com/torabian/fireback/modules/fireback/complexes
   compiler: go
+- name: TString
+  location: '@fireback/complexes'
+  compiler: ts
 actions:
 - name: CapabilitiesTree
   cliName: treex
