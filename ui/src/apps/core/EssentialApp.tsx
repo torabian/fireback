@@ -1,19 +1,19 @@
 import "react-toastify/dist/ReactToastify.css";
-import "../../modules/styles/styles.css";
+import "@fireback/styles/styles.css";
 // You do not have to use the mac-os family theme at all.
 // this is the default theme which I use for mac desktop applications
 // you could use it as a reference to build your own themes.
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
-import "../../modules/styles/apple-family/styles.css";
+import "@fireback/styles/apple-family/styles.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { useContext, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 
-import { Fallback } from "@/modules/fireback-ui/components/fallback/Fallback";
-import { AppConfigContext } from "@/modules/fireback-ui/hooks/appConfigTools";
-import { UIStateProvider } from "@/modules/fireback-ui/hooks/uiStateContext";
-import { usePureLocale } from "@/modules/fireback-ui/hooks/usePureLocale";
+import { Fallback } from "@fireback/ui-core/components/fallback/Fallback";
+import { AppConfigContext } from "@fireback/ui-core/hooks/appConfigTools";
+import { UIStateProvider } from "@fireback/ui-core/hooks/uiStateContext";
+import { usePureLocale } from "@fireback/ui-core/hooks/usePureLocale";
 import { ErrorBoundary } from "react-error-boundary";
 import { SidebarMultiRouterSetup } from "./ApplicationPanels";
 import { WithFireback } from "./WithFireback";

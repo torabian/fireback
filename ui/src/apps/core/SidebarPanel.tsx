@@ -1,13 +1,13 @@
-import { useUiState } from "../../modules/fireback-ui/hooks/uiStateContext";
+import { useUiState } from "@fireback/ui-core/hooks/uiStateContext";
 
 import { useRef } from "react";
 
 import { Panel } from "react-resizable-panels";
-import { ResizeHandle } from "../../modules/fireback-ui/components/layouts/ResizeHandle";
-import Sidebar from "../../modules/fireback-ui/components/layouts/Sidebar";
-import { AppConfigProvider } from "../../modules/fireback-ui/hooks/appConfigTools";
-import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
-import { detectDeviceType } from "../../modules/fireback-ui/hooks/deviceInformation";
+import { ResizeHandle } from "@fireback/ui-core/components/layouts/ResizeHandle";
+import Sidebar from "@fireback/ui-core/components/layouts/Sidebar";
+import { AppConfigProvider } from "@fireback/ui-core/hooks/appConfigTools";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
+import { detectDeviceType } from "@fireback/ui-core/hooks/deviceInformation";
 
 // Percentage width the sidebar opens to when there's no saved preference yet
 // (a first-time visitor) - matches the fallback useResizeThreshold(768, ...)

@@ -1,14 +1,14 @@
 import { QueryClient } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
-import { ActionMenuProvider } from "../../modules/fireback-ui/components/action-menu/ActionMenu";
+import { ActionMenuProvider } from "@fireback/ui-core/components/action-menu/ActionMenu";
 import {
   ModalManager,
   ModalProvider,
-} from "../../modules/fireback-ui/components/modal/Modal";
-import { OverlayProvider } from "../../modules/fireback-ui/components/overlay/OverlayProvider";
-import { ReactiveSearchProvider } from "../../modules/fireback-ui/components/reactive-search/ReactiveSearchContext";
-import { AppConfigProvider } from "../../modules/fireback-ui/hooks/appConfigTools";
-import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
+} from "@fireback/ui-core/components/modal/Modal";
+import { OverlayProvider } from "@fireback/ui-core/components/overlay/OverlayProvider";
+import { ReactiveSearchProvider } from "@fireback/ui-core/components/reactive-search/ReactiveSearchContext";
+import { AppConfigProvider } from "@fireback/ui-core/hooks/appConfigTools";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 
 /**
  * Shows routes of the application, can be independently used,

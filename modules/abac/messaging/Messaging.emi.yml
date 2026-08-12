@@ -13,10 +13,44 @@ targets:
     output: ./
     flags:
       pkg: messaging
+  # Generated straight into every ui/packages/* consumer that actually imports it
+  # (see ui/packages/README.md) instead of a single shared @fireback/sdk - each one
+  # ends up with its own copy, duplication is fine here.
   - compiler: js
-    output: ../../../ui/src/modules/sdk/messaging
+    output: ../../../ui/packages/ui-core/sdk/messaging
+    clean: true
     flags:
-      js-sdk-location: ../sdk
+      js-sdk-location: "@fireback/js-remote-ctx"
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: js
+    output: ../../../ui/packages/manage/sdk/messaging
+    clean: true
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: js
+    output: ../../../ui/packages/selfservice/sdk/messaging
+    clean: true
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: js
+    output: ../../../ui/packages/messaging/sdk/messaging
+    clean: true
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
     tags:
       - typescript
       - react

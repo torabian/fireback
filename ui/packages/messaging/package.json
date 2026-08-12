@@ -1,0 +1,15 @@
+{
+  "name": "@fireback/messaging",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Fireback messaging provider screens: mail providers/senders, GSM providers. Ships as raw source, compiled by the consuming app's own bundler.",
+  "dependencies": {
+    "@fireback/ui-core": "*",
+    "@fireback/js-remote-ctx": "*"
+  },
+  "peerDependencies": {
+    "react": "19",
+    "react-router-dom": "^6.9.0",
+    "@tanstack/react-query": "^5.101.4"
+  }
+}

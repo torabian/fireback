@@ -2,9 +2,9 @@ import { QueryClient } from "@tanstack/react-query";
 import classNames from "classnames";
 import { PanelGroup } from "react-resizable-panels";
 import { BrowserRouter, HashRouter, MemoryRouter } from "react-router-dom";
-import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
-import { detectDeviceType } from "../../modules/fireback-ui/hooks/deviceInformation";
-import { useUiState } from "../../modules/fireback-ui/hooks/uiStateContext";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
+import { detectDeviceType } from "@fireback/ui-core/hooks/deviceInformation";
+import { useUiState } from "@fireback/ui-core/hooks/uiStateContext";
 import { ApplicationOutlet } from "./ApplicationOutlet";
 import {
   PanelRouterWithSidebar,

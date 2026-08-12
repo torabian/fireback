@@ -5,12 +5,14 @@ targets:
   output: ./defs
 - compiler: js
   flags:
-    js-sdk-location: ../sdk
-  output: ../../ui/src/modules/sdk/eventbus
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/ui-core/sdk/eventbus
   tags:
   - typescript
   - react
   - no-sdk
+  - no-package
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Connects users to a socket, and conveys messages/notifications to them,

@@ -1,0 +1,6 @@
+{
+  "name": "@fireback/styles",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Shared fireback UI stylesheets (base theme + apple-family iOS/macOS themes). CSS only, no build step."
+}

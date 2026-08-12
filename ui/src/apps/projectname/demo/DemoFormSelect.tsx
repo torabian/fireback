@@ -1,12 +1,12 @@
-import { FormDate } from "@/modules/fireback-ui/components/forms/form-date/FormDate";
+import { FormDate } from "@fireback/ui-core/components/forms/form-date/FormDate";
 import {
   FormSelectMultiple,
   FormSelect,
-} from "@/modules/fireback-ui/components/forms/form-select/FormSelect";
-import { createQuerySource } from "@/modules/fireback-ui/hooks/useAsQuery";
-import usePresistentState from "@/modules/fireback-ui/hooks/usePresistentState";
-import { RoleDto } from "@/modules/sdk/abac/RoleDto";
-import { useRolesQuerySource } from "@/modules/fireback-ui/hooks/useRolesQuerySource";
+} from "@fireback/ui-core/components/forms/form-select/FormSelect";
+import { createQuerySource } from "@fireback/ui-core/hooks/useAsQuery";
+import usePresistentState from "@fireback/ui-core/hooks/usePresistentState";
+import { RoleDto } from "@fireback/ui-core/sdk/abac/RoleDto";
+import { useRolesQuerySource } from "@fireback/ui-core/hooks/useRolesQuerySource";
 import { Formik, type FormikProps } from "formik";
 import { useMemo, useState } from "react";
 import { CodeViewer } from "./CodeViewer";

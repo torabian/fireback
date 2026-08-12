@@ -1,8 +1,8 @@
 import { type ReactNode } from "react";
 import { Panel } from "react-resizable-panels";
-import { ResizeHandle } from "../../modules/fireback-ui/components/layouts/ResizeHandle";
-import { useUiState } from "../../modules/fireback-ui/hooks/uiStateContext";
-import { useAuthentication } from "../../modules/fireback-ui/auth/AuthenticationContext";
+import { ResizeHandle } from "@fireback/ui-core/components/layouts/ResizeHandle";
+import { useUiState } from "@fireback/ui-core/hooks/uiStateContext";
+import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
 import { SidebarPanel } from "./SidebarPanel";
 
 export const PanelRouterWithSidebar = ({

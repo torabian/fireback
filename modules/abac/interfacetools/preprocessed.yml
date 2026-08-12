@@ -5,13 +5,14 @@ targets:
   output: ./defs
 - compiler: js
   flags:
-    js-sdk-location: ../sdk
-  output: ../../../ui/src/modules/sdk/interfacetools
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../../ui/packages/ui-core/sdk/interfacetools
   tags:
   - typescript
   - react
   - no-package
   - no-sdk
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Small, front-end-facing utility entities with no cross-entity dependencies

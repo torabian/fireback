@@ -60,14 +60,43 @@ dockerbuild:
 dockerpublish:
 	make dockerbuild && docker tag fireback fireback/fireback:latest && docker push fireback/fireback:latest
 
-# Recompiles the definitions using emi compiler.
-defs:
+# Regenerates ui/packages/js-remote-ctx - the single copy of the framework-agnostic
+# runtime (fetch/WebSocket/SSE wrappers, response envelopes, react hooks) that emi's js
+# compiler otherwise would have to embed a private copy of into every module's own
+# generated output. Every js target below carries the "no-sdk" tag and points
+# js-sdk-location at "@fireback/js-remote-ctx" (see each *.emi.yml) specifically so this
+# is the one place that content is written - everything else only imports it by name.
+# Writes into a throwaway .gen/ subfolder first (js:sdk always nests its output under a
+# "sdk/" folder of its own) so we can flatten it up to the package root without ever
+# touching js-remote-ctx/package.json.
+defs-sdk:
+	rm -rf ui/packages/js-remote-ctx/.gen && \
+	./app emi js:sdk --output ui/packages/js-remote-ctx/.gen --tags typescript && \
+	rm -rf ui/packages/js-remote-ctx/common ui/packages/js-remote-ctx/react ui/packages/js-remote-ctx/js ui/packages/js-remote-ctx/envelopes && \
+	cp -r ui/packages/js-remote-ctx/.gen/sdk/. ui/packages/js-remote-ctx/ && \
+	rm -rf ui/packages/js-remote-ctx/.gen
+
+# Recompiles the definitions using emi compiler. defs-sdk must run first so every
+# module's js target has an up to date @fireback/js-remote-ctx to point at.
+defs: defs-sdk
 	./app emi compile --path modules/fireback/Fireback.emi.yml && \
 	./app emi compile --path modules/abac/Abac.emi.yml && \
 	./app emi compile --path modules/abac/messaging/Messaging.emi.yml && \
 	./app emi compile --path modules/abac/interfacetools/InterfaceTools.emi.yml && \
 	./app emi compile --path modules/eventbus/EventBus.emi.yml && \
 	./app emi compile --path modules/reactivesearch/ReactiveSearch.emi.yml
+
+# Packs every ui/packages/* workspace package (see ui/packages/README.md) into a
+# normal, npm-installable tarball under artifacts/fireback-packages/ - so a brand new
+# project can `npm install <path-or-url>.tgz` directly (from a local build, or a
+# GitHub release asset - see .github/workflows/fireback-build.yml's
+# build-ui-packages/deploy_github_release jobs) instead of vendoring this whole repo
+# as a git submodule. Raw TS/TSX source in, same raw TS/TSX source out (see
+# ui/packages/README.md on why these don't ship a dist/) - the consuming project's own
+# bundler still does the compiling, exactly like today.
+ui-packages-pack:
+	rm -rf artifacts/fireback-packages && mkdir -p artifacts/fireback-packages && \
+	cd ui && npm pack --workspaces --pack-destination ../artifacts/fireback-packages
 
 interface: interface-manage interface-ss
 

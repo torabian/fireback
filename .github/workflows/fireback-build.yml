@@ -40,6 +40,7 @@ jobs:
       - build-windows
       - build-ubuntu
       - build-macos
+      - build-ui-packages
     name: deploy_github_release
     if: ${{ inputs.release_artifacts == true }}
     runs-on: ubuntu-latest
@@ -79,6 +80,21 @@ jobs:
           name: artifacts-darwin
           path: artifacts-darwin
 
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts-ui-packages
+          path: artifacts-ui-packages
+
+      # ui/packages/* (see ui/packages/README.md) ship one npm-installable tarball
+      # per package - filenames carry each package's own version
+      # (fireback-sdk-0.1.0.tgz, ...) so a fixed asset_path/asset_name per file (the
+      # actions/upload-release-asset@v1 pattern the binaries above use) would break the
+      # moment any one package's version changes. `gh release upload` takes a glob
+      # instead, so it doesn't need updating when versions move.
+      - name: upload ui package tarballs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ env.tag_name }} artifacts-ui-packages/*.tgz --repo ${{ github.repository }}
 
       - name: upload mac amd64 zip artifact
         uses: actions/upload-release-asset@v1
@@ -336,6 +352,31 @@ jobs:
         with:
           name: artifacts-darwin
           path: artifacts
+
+  # Packs every ui/packages/* workspace package (see ui/packages/README.md) into a
+  # normal npm-installable tarball, so a brand new project can `npm install
+  # <url>.tgz` straight from this build's GitHub release instead of vendoring this
+  # whole repo as a git submodule. See Makefile's ui-packages-pack target.
+  build-ui-packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install the dependencies
+        run: cd ui && npm i --force
+
+      - name: Pack workspace packages into tarballs
+        run: make ui-packages-pack
+
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-ui-packages
+          path: artifacts/fireback-packages
 
   # run-cypress-mysql:
   #   needs:

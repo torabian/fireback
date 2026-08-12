@@ -1,0 +1,12 @@
+{
+  "name": "@fireback/js-remote-ctx",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Framework-agnostic runtime shared by every generated fireback SDK module - fetch/WebSocket/SSE wrappers, response envelopes, and the React hooks (useFetchx/useSse/useWebSocketX) actions bind to. This is the single copy `make defs` (emi's `js:sdk` target) writes to; the per-module SDKs generated straight into ui-core/manage/selfservice/messaging's own sdk/ folders (see ui/packages/README.md) only reference it, they never embed their own.",
+  "peerDependencies": {
+    "react": "19"
+  },
+  "dependencies": {
+    "qs": "^6.14.0"
+  }
+}

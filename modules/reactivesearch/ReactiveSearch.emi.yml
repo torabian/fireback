@@ -5,14 +5,17 @@ targets:
     output: ./defs
     flags:
       pkg: reactivesearchdefs
+  # Only ui-core imports this today (see ui/packages/README.md).
   - compiler: js
-    output: ../../ui/src/modules/sdk/reactivesearch
+    output: ../../ui/packages/ui-core/sdk/reactivesearch
+    clean: true
     flags:
-      js-sdk-location: ../sdk
+      js-sdk-location: "@fireback/js-remote-ctx"
     tags:
       - typescript
       - react
       - no-sdk
+      - no-package
   - compiler: preprocessor
     output: ./
 

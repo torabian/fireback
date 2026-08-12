@@ -1,13 +1,13 @@
-import { type AppConfig } from "../../modules/fireback-ui/hooks/appConfigTools";
+import { type AppConfig } from "@fireback/ui-core/hooks/appConfigTools";
 
 import React from "react";
 import { QueryClient } from "@tanstack/react-query";
-import { useAuthentication } from "../../modules/fireback-ui/auth/AuthenticationContext";
-import { AuthenticationProvider } from "../../modules/fireback-ui/auth/AuthenticationProvider";
-import { FetchxContext } from "../../modules/sdk/sdk/common/fetchx";
-import { FetchxProvider } from "../../modules/sdk/sdk/react/useFetchx";
-import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
-import { useFirebackSocket } from "../../modules/fireback-ui/hooks/useFirebackSocket";
+import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { AuthenticationProvider } from "@fireback/ui-core/auth/AuthenticationProvider";
+import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
+import { FetchxProvider } from "@fireback/js-remote-ctx/react/useFetchx";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
+import { useFirebackSocket } from "@fireback/ui-core/hooks/useFirebackSocket";
 
 export function WithFireback({
   children,

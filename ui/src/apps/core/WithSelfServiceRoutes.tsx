@@ -7,14 +7,14 @@ import {
 } from "react-router-dom";
 
 import { type ReactNode, useEffect } from "react";
-import { useCheckAuthentication } from "../../modules/fireback-ui/components/layouts/ForcedAuthenticated";
-import { BUILD_VARIABLES } from "../../modules/fireback-ui/hooks/build-variables";
-import { SelectWorkspaceScreen } from "../../modules/selfservice/SelectWorkspace.screen";
-import { useSelfServicePublicRoutes } from "../../modules/selfservice/SelfServiceRoutes";
-import { useAuthentication } from "../../modules/fireback-ui/auth/AuthenticationContext";
-import { useQueryUserRoleWorkspacesActionQuery } from "../../modules/sdk/abac/QueryUserRoleWorkspacesAction";
-import { SessionGate } from "@/modules/fireback-ui/components/session-gate/SessionGate";
-import { checkSessionViaWhoami } from "@/modules/fireback-ui/components/session-gate/checkSessionViaWhoami";
+import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/ForcedAuthenticated";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
+import { SelectWorkspaceScreen } from "@fireback/selfservice/SelectWorkspace.screen";
+import { useSelfServicePublicRoutes } from "@fireback/selfservice/SelfServiceRoutes";
+import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
+import { SessionGate } from "@fireback/ui-core/components/session-gate/SessionGate";
+import { checkSessionViaWhoami } from "@fireback/ui-core/components/session-gate/checkSessionViaWhoami";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
