@@ -5,13 +5,44 @@ targets:
   output: ./
 - compiler: js
   flags:
-    js-sdk-location: ../sdk
-  output: ../../../ui/src/modules/sdk/messaging
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../../ui/packages/ui-core/sdk/messaging
   tags:
   - typescript
   - react
   - no-package
   - no-sdk
+  clean: true
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../../ui/packages/manage/sdk/messaging
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+  clean: true
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../../ui/packages/selfservice/sdk/messaging
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+  clean: true
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../../ui/packages/messaging/sdk/messaging
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Email and SMS/GSM provider configuration and sending mechanics, split

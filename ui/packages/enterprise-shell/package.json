@@ -1,0 +1,24 @@
+{
+  "name": "@fireback/enterprise-shell",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Fireback enterprise application shell: EssentialApp/EssentialRouter, panel & sidebar layout, and the WithFireback/WithSelfServiceRoutes provider wiring every enterprise-style app boots through. Ships as raw source, compiled by the consuming app's own bundler.",
+  "dependencies": {
+    "@fireback/ui-core": "*",
+    "@fireback/auth-client": "*",
+    "@fireback/js-remote-ctx": "*",
+    "@fireback/manage": "*",
+    "@fireback/mobile-kit": "*",
+    "@fireback/selfservice": "*",
+    "@fireback/styles": "*",
+    "classnames": "^2.3.2",
+    "react-error-boundary": "^4.0.13",
+    "react-resizable-panels": "^3.0.3",
+    "react-toastify": "^11.1.0"
+  },
+  "peerDependencies": {
+    "react": "19",
+    "react-router-dom": "^6.9.0",
+    "@tanstack/react-query": "^5.101.4"
+  }
+}

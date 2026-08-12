@@ -1,0 +1,12 @@
+{
+  "name": "@fireback/mobile-kit",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Fireback mobile dashboard kit. Ships as raw source, compiled by the consuming app's own bundler.",
+  "dependencies": {
+    "@fireback/ui-core": "*"
+  },
+  "peerDependencies": {
+    "react-router-dom": "^6.9.0"
+  }
+}

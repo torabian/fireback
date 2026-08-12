@@ -4,19 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/torabian/emi/emigo"
+	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 )
 
 /**
-* Action to communicate with t he action AppMenuGetAction
+* Action to communicate with the action AppMenuGetAction
  */
 /*
 Here is a quick function implementation to make your life easier:

@@ -1,10 +1,10 @@
-import { type AppConfig } from "@/modules/fireback-ui/hooks/appConfigTools";
+import { type AppConfig } from "@fireback/ui-core/hooks/appConfigTools";
 
 import React from "react";
 import { QueryClient } from "@tanstack/react-query";
 
 // Import the Remote Query Provider from your new generated SDK
-// import { RemoteQueryProvider as TestQueryProviders } from "../../modules/sdk/projectname/core/react-tools";
+// import { RemoteQueryProvider as TestQueryProviders } from "@fireback/sdk/projectname/core/react-tools";
 
 export function WithSdk({
   children,

@@ -11,14 +11,19 @@ targets:
       pkg: fireback
     tags:
       - split-cli
+  # Not consumed by any ui/packages/* today (see ui/packages/README.md) - written into
+  # ui-core, the shared base every other frontend package already depends on, so it's
+  # ready the moment something needs it instead of picking an arbitrary owner later.
   - compiler: js
-    output: ../../ui/src/modules/sdk/fireback
+    output: ../../ui/packages/ui-core/sdk/fireback
+    clean: true
     flags:
-      js-sdk-location: ../sdk
+      js-sdk-location: "@fireback/js-remote-ctx"
     tags:
       - typescript
       - react
       - no-sdk
+      - no-package
   - compiler: preprocessor
     output: ./
 

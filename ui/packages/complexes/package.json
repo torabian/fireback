@@ -1,0 +1,6 @@
+{
+  "name": "@fireback/complexes",
+  "version": "0.1.0",
+  "private": false,
+  "description": "TypeScript counterparts of fireback's Go `complexes` package (modules/fireback/complexes/*.go) - value types like TString (a locale -> value translatable string) that (de)serialize to/from the API the same way their Go side does. Plain TypeScript, no dependencies (not even React) - safe for any project, frontend or backend-adjacent tooling, that talks to a fireback API."
+}

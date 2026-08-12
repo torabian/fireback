@@ -1,21 +1,21 @@
 import "bootstrap/dist/css/bootstrap.css";
 import { useRef } from "react";
-import "../../modules/styles/apple-family/styles.css";
-import "../../modules/styles/styles.css";
+import "@fireback/styles/apple-family/styles.css";
+import "@fireback/styles/styles.css";
 
 // You do not have to use the mac-os family theme at all.
 // this is the default theme which I use for mac desktop applications
 // you could use it as a reference to build your own themes.
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 
-import { WithFireback } from "../core/WithFireback";
+import { WithFireback } from "@fireback/enterprise-shell/WithFireback";
 
-import { useCheckAuthentication } from "@/modules/fireback-ui/components/layouts/ForcedAuthenticated";
-import { BUILD_VARIABLES } from "@/modules/fireback-ui/hooks/build-variables";
+import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/ForcedAuthenticated";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import {
   useSelfServiceAuthenticateRoutes,
   useSelfServicePublicRoutes,
-} from "@/modules/selfservice/SelfServiceRoutes";
+} from "@fireback/selfservice/SelfServiceRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,

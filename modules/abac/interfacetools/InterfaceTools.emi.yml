@@ -13,10 +13,12 @@ targets:
     output: ./defs
     flags:
       pkg: interfacetoolsdefs
+  # Only ui-core imports this today (see ui/packages/README.md).
   - compiler: js
-    output: ../../../ui/src/modules/sdk/interfacetools
+    output: ../../../ui/packages/ui-core/sdk/interfacetools
+    clean: true
     flags:
-      js-sdk-location: ../sdk
+      js-sdk-location: "@fireback/js-remote-ctx"
     tags:
       - typescript
       - react

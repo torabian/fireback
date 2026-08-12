@@ -19,17 +19,43 @@ complexes:
     location: github.com/torabian/fireback/modules/fireback/complexes
     name: TString
     namespace: complexes
+  - compiler: ts
+    location: '@fireback/complexes'
+    name: TString
 
 targets:
   - compiler: go
     output: ./defs
     flags:
       pkg: abacdefs
+  # Generated straight into every ui/packages/* consumer that actually imports it
+  # (see ui/packages/README.md) instead of a single shared @fireback/sdk - each one
+  # ends up with its own copy, duplication is fine here.
   - compiler: js
-    output: ../../ui/src/modules/sdk/abac
+    output: ../../ui/packages/ui-core/sdk/abac
     clean: true
     flags:
-      js-sdk-location: ../sdk
+      js-sdk-location: "@fireback/js-remote-ctx"
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: js
+    output: ../../ui/packages/manage/sdk/abac
+    clean: true
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
+  - compiler: js
+    output: ../../ui/packages/selfservice/sdk/abac
+    clean: true
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
     tags:
       - typescript
       - react

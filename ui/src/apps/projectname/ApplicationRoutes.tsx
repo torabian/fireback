@@ -4,7 +4,7 @@ import { DemoFormSelect } from "./demo/DemoFormSelect";
 import { DemoScreen } from "./demo/DemoScreen";
 import { DemoModal } from "./demo/DemoModal";
 import { DemoFormDates } from "./demo/DemoFormDates";
-import { FirebackEssentialRouterManager } from "../core/EssentialRouter";
+import { FirebackEssentialRouterManager } from "@fireback/enterprise-shell/EssentialRouter";
 
 export function ApplicationRoutes({ routerId }: { routerId?: string }) {
   return (

@@ -1,0 +1,59 @@
+import { useS } from "@fireback/ui-core/hooks/useS";
+import { CommonListManager } from "@fireback/ui-core/components/entity-manager/CommonListManager";
+import { strings } from "./strings/translations";
+import { userInvitationColumns } from "./UserInvitationColumns";
+
+import { ModalContext } from "@fireback/ui-core/components/modal/Modal";
+import { useContext } from "react";
+import { type UserInvitationsActionResType as UserInvitationsQueryColumns } from "@fireback/selfservice/sdk/abac/UserInvitationsAction";
+import {
+  useAcceptInviteAction,
+  AcceptInviteActionReq,
+} from "@fireback/selfservice/sdk/abac/AcceptInviteAction";
+import { useUserInvitationsActionQuery } from "@fireback/selfservice/sdk/abac/UserInvitationsAction";
+
+export const UserInvitationList = () => {
+  const s = useS(strings);
+
+  const useModal = useContext(ModalContext);
+
+  const mutation = useAcceptInviteAction();
+
+  const onAccept = (dto: UserInvitationsQueryColumns) => {
+    useModal.openModal({
+      title: s.confirmAcceptTitle,
+      confirmButtonLabel: s.acceptBtn,
+      component: () => <div>{s.confirmAcceptDescription}</div>,
+      onSubmit: async () => {
+        return mutation
+          .mutateAsync(
+            new AcceptInviteActionReq({ invitationUniqueId: dto.uniqueId }),
+          )
+          .then((res) => {
+            alert(s.successful);
+          });
+      },
+    });
+  };
+
+  const onReject = (dto: UserInvitationsQueryColumns) => {
+    useModal.openModal({
+      title: s.confirmRejectTitle,
+      confirmButtonLabel: s.acceptBtn,
+      component: () => <div>{s.confirmRejectDescription}</div>,
+      onSubmit: async () => {
+        return true;
+      },
+    });
+  };
+
+  return (
+    <>
+      <CommonListManager
+        selectable={false}
+        columns={userInvitationColumns(s, onAccept, onReject)}
+        queryHook={useUserInvitationsActionQuery}
+      ></CommonListManager>
+    </>
+  );
+};

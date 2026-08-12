@@ -1,0 +1,125 @@
+name: googleEnvelop
+description: 
+  Generating envelop API responses using Emi itself. 
+  Emi codegen is so strong that can generate deep classes in javascript which could be used
+  in itself and in this example we are doing it.
+
+  All responses can be wrapped in google json styleguide, which gives extream consistency.
+
+dtos:
+  - name: response
+    fields:
+      - name: apiVersion
+        type: string?
+        description: Version of the API used for this response.
+      - name: context
+        type: string?
+        description: Context string provided by the client or system for request tracking.
+      - name: id
+        type: string?
+        description: Unique identifier assigned to the request/response.
+      - name: method
+        type: string?
+        description: Name of the API method invoked.
+      - name: params
+        type: any
+        description: Parameters sent with the request.
+      - name: data
+        type: object
+        description: Main data payload of the response.
+        fields:
+          - name: item
+            type: any
+            description: Single item returned by the API.
+          - name: items
+            type: any
+            description: List of items returned by the API.
+          - name: editLink
+            type: string?
+            description: Link to edit this resource.
+          - name: selfLink
+            type: string?
+            description: Link to retrieve this resource.
+          - name: kind
+            type: string?
+            description: Resource type (kind) identifier.
+          - name: fields
+            type: string?
+            description: Selector specifying which fields are included in a partial response.
+          - name: etag
+            type: string?
+            description: ETag of the resource, used for caching/version control.
+          - name: cursor
+            type: string?
+            description: Cursor for paginated data fetching.
+          - name: id
+            type: string?
+            description: Unique identifier of the resource.
+          - name: lang
+            type: string?
+            description: Language code of the response data.
+          - name: updated
+            type: string?
+            description: Last modification time of the resource.
+          - name: currentItemCount
+            type: int?
+            description: Number of items in the current response page.
+          - name: itemsPerPage
+            type: int?
+            description: Maximum number of items per page.
+          - name: startIndex
+            type: int?
+            description: Index of the first item in the current page.
+          - name: totalItems
+            type: int?
+            description: Total number of items available.
+          - name: totalAvailableItems
+            type: int?
+            description: Number of items available for this user/query.
+          - name: pageIndex
+            type: int?
+            description: Current page index in the pagination.
+          - name: totalPages
+            type: int?
+            description: Total number of pages in the pagination.
+      - name: error
+        type: object
+        description: Error details, if the request failed.
+        fields:
+          - name: code
+            type: int
+            description: Numeric error code representing the failure.
+          - name: message
+            type: string
+            description: Human-readable explanation of the error.
+          - name: messageTranslated
+            type: string
+            description: Localized/translated version of the error message.
+          - name: errors
+            type: array
+            description: Detailed list of error objects.
+            fields:
+              - name: domain
+                type: string?
+                description: Logical grouping of the error (e.g., global, usageLimits).
+              - name: reason
+                type: string?
+                description: Reason identifier for the error.
+              - name: message
+                type: string?
+                description: Human-readable explanation of the sub-error.
+              - name: messageTranslated
+                type: string?
+                description: Localized/translated version of the sub-error message.
+              - name: location
+                type: string?
+                description: Field or parameter in which the error occurred.
+              - name: locationType
+                type: string?
+                description: Type of location (e.g., parameter, header).
+              - name: extendedHelp
+                type: string?
+                description: URL linking to additional documentation about the error.
+              - name: sendReport
+                type: string?
+                description: URL to submit a report for this error.

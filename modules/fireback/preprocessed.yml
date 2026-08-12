@@ -7,12 +7,14 @@ targets:
   - split-cli
 - compiler: js
   flags:
-    js-sdk-location: ../sdk
-  output: ../../ui/src/modules/sdk/fireback
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/ui-core/sdk/fireback
   tags:
   - typescript
   - react
   - no-sdk
+  - no-package
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Fireback core module. ReactiveSearch and EventBusSubscription have moved

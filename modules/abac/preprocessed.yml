@@ -5,8 +5,28 @@ targets:
   output: ./defs
 - compiler: js
   flags:
-    js-sdk-location: ../sdk
-  output: ../../ui/src/modules/sdk/abac
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/ui-core/sdk/abac
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+  clean: true
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/manage/sdk/abac
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+  clean: true
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/selfservice/sdk/abac
   tags:
   - typescript
   - react
@@ -2689,6 +2709,9 @@ complexes:
   namespace: complexes
   location: github.com/torabian/fireback/modules/fireback/complexes
   compiler: go
+- name: TString
+  location: '@fireback/complexes'
+  compiler: ts
 actions:
 - name: CapabilitiesTree
   cliName: treex

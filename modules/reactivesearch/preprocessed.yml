@@ -5,12 +5,14 @@ targets:
   output: ./defs
 - compiler: js
   flags:
-    js-sdk-location: ../sdk
-  output: ../../ui/src/modules/sdk/reactivesearch
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/ui-core/sdk/reactivesearch
   tags:
   - typescript
   - react
   - no-sdk
+  - no-package
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Reactive (websocket) search across whatever sources a project registers.

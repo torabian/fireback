@@ -6,14 +6,19 @@ targets:
     flags:
       pkg: eventbusdefs
 
+  # Not consumed by any ui/packages/* today (see ui/packages/README.md) - written into
+  # ui-core, the shared base every other frontend package already depends on, so it's
+  # ready the moment something needs it instead of picking an arbitrary owner later.
   - compiler: js
-    output: ../../ui/src/modules/sdk/eventbus
+    output: ../../ui/packages/ui-core/sdk/eventbus
+    clean: true
     flags:
-      js-sdk-location: ../sdk
+      js-sdk-location: "@fireback/js-remote-ctx"
     tags:
       - typescript
       - react
       - no-sdk
+      - no-package
   - compiler: preprocessor
     output: ./
 
