@@ -8,7 +8,7 @@ import "@fireback/styles/styles.css";
 // you could use it as a reference to build your own themes.
 // themes are nothing special, rather than wrapping a set of css (scss) on a global name
 
-import { WithFireback } from "../core/WithFireback";
+import { WithFireback } from "@fireback/enterprise-shell/WithFireback";
 
 import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/ForcedAuthenticated";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";

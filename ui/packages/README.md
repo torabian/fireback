@@ -13,6 +13,7 @@ Everything under this directory is a separate npm package, wired together with
 | `@fireback/manage` | administration screens (capabilities, users, workspaces, …) - carries its own generated `sdk/` (abac, messaging) | `@fireback/ui-core`, `@fireback/messaging`, `@fireback/js-remote-ctx` |
 | `@fireback/mobile-kit` | mobile dashboard kit | `@fireback/ui-core` |
 | `@fireback/styles` | shared stylesheets (base + apple-family themes) | — |
+| `@fireback/enterprise-shell` | enterprise application shell every app boots through - `EssentialApp`/`EssentialRouter`, panel & sidebar layout, `WithFireback`/`WithSelfServiceRoutes` provider wiring | `@fireback/ui-core`, `@fireback/manage`, `@fireback/mobile-kit`, `@fireback/selfservice`, `@fireback/styles`, `@fireback/js-remote-ctx` |
 
 ## No shared `@fireback/sdk` - each package carries its own generated SDK
 

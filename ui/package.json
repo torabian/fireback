@@ -15,6 +15,7 @@
     "build:capacitor": "vite build --mode 'projectname/capacitor'"
   },
   "dependencies": {
+    "@fireback/enterprise-shell": "*",
     "@fireback/mobile-kit": "*",
     "@fireback/manage": "*",
     "@fireback/messaging": "*",

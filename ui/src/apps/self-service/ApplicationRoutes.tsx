@@ -1,4 +1,4 @@
-import { FirebackEssentialRouterManager } from "../core/EssentialRouter";
+import { FirebackEssentialRouterManager } from "@fireback/enterprise-shell/EssentialRouter";
 
 // ~ auto:useRouteImport
 
