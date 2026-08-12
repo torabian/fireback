@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
-import { useAuthentication } from "../../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import Link from "../link/Link";
 
 export function useCheckAuthentication() {

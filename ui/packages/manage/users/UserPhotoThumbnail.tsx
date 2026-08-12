@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { AuthenticatedThumbnail } from "@fireback/ui-core/components/resumable-uploader";
 import { storageDownloadUrl } from "@fireback/ui-core/hooks/useStorageUploaderConfig";
 

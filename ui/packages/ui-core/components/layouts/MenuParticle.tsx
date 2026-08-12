@@ -10,7 +10,7 @@ import { type ReactNode } from "react";
 import ActiveLink from "../link/ActiveLink";
 import { MenuItemContent } from "./MenuItemContent";
 import { useUserWorkspaceBrowseActionQuery } from "@fireback/ui-core/sdk/abac/UserWorkspaceBrowseAction";
-import { useAuthentication } from "../../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import {
   DndContext,
   PointerSensor,

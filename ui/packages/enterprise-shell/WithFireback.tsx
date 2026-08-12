@@ -2,8 +2,8 @@ import { type AppConfig } from "@fireback/ui-core/hooks/appConfigTools";
 
 import React from "react";
 import { QueryClient } from "@tanstack/react-query";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
-import { AuthenticationProvider } from "@fireback/ui-core/auth/AuthenticationProvider";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { AuthenticationProvider } from "@fireback/auth-client/AuthenticationProvider";
 import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 import { FetchxProvider } from "@fireback/js-remote-ctx/react/useFetchx";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";

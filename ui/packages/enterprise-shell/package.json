@@ -5,6 +5,7 @@
   "description": "Fireback enterprise application shell: EssentialApp/EssentialRouter, panel & sidebar layout, and the WithFireback/WithSelfServiceRoutes provider wiring every enterprise-style app boots through. Ships as raw source, compiled by the consuming app's own bundler.",
   "dependencies": {
     "@fireback/ui-core": "*",
+    "@fireback/auth-client": "*",
     "@fireback/js-remote-ctx": "*",
     "@fireback/manage": "*",
     "@fireback/mobile-kit": "*",

@@ -4,7 +4,7 @@ import { source } from "../../hooks/source";
 import { useRouter } from "../../hooks/useRouter";
 import { useS } from "../../hooks/useS";
 import { osResources } from "../../hooks/resources";
-import { useAuthentication } from "../../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import Link from "../link/Link";
 import { strings } from "../strings/translations";
 

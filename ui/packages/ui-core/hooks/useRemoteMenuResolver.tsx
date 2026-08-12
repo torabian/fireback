@@ -2,7 +2,7 @@ import { dataMenuToMenu } from "../components/layouts/Sidebar";
 import { useCteAppMenusActionQuery } from "@fireback/ui-core/sdk/interfacetools/CteAppMenusAction";
 import { AppMenuOptionalDto } from "@fireback/ui-core/sdk/interfacetools/AppMenuOptionalDto";
 import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
-import { useAuthentication } from "../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { GResponse } from "@fireback/js-remote-ctx/envelopes";
 import { userMeetsAccess2 } from "./accessLevels";
 import { useLocale } from "./useLocale";

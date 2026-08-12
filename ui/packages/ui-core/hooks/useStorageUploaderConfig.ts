@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAuthentication } from "../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { BUILD_VARIABLES } from "./build-variables";
 import type { UploaderConfig } from "../components/resumable-uploader";
 

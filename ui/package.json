@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@fireback/enterprise-shell": "*",
+    "@fireback/auth-client": "*",
+    "@fireback/complexes": "*",
     "@fireback/mobile-kit": "*",
     "@fireback/manage": "*",
     "@fireback/messaging": "*",

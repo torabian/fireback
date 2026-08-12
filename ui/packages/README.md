@@ -7,13 +7,15 @@ Everything under this directory is a separate npm package, wired together with
 | package | what it is | depends on |
 |---|---|---|
 | `@fireback/js-remote-ctx` | shared runtime every generated SDK module references: fetch/WebSocket/SSE wrappers, response envelopes, React hooks (`useFetchx`/`useSse`/`useWebSocketX`) | — |
-| `@fireback/ui-core` | auth, hooks, component library ("the core") - carries its own generated `sdk/` (abac, messaging, interfacetools, reactivesearch, eventbus) | `@fireback/js-remote-ctx` |
+| `@fireback/auth-client` | standalone fireback self-service auth client: session/workspace state, `AuthenticationProvider`/`useAuthentication`, self-service login redirect + session capture. No fireback UI dependencies - meant to be pulled into a brand new React project on its own | — |
+| `@fireback/complexes` | TypeScript counterparts of fireback's Go `complexes` package (`TString`, …) - plain value types, no dependencies at all (not even React) | — |
+| `@fireback/ui-core` | hooks, component library ("the core") - carries its own generated `sdk/` (abac, messaging, interfacetools, reactivesearch, eventbus) | `@fireback/auth-client`, `@fireback/js-remote-ctx` |
 | `@fireback/messaging` | mail/GSM provider admin screens - carries its own generated `sdk/messaging` | `@fireback/ui-core`, `@fireback/js-remote-ctx` |
-| `@fireback/selfservice` | sign-in/up, passports, OTP/TOTP, workspace selection - carries its own generated `sdk/` (abac, messaging) | `@fireback/ui-core`, `@fireback/js-remote-ctx` |
-| `@fireback/manage` | administration screens (capabilities, users, workspaces, …) - carries its own generated `sdk/` (abac, messaging) | `@fireback/ui-core`, `@fireback/messaging`, `@fireback/js-remote-ctx` |
+| `@fireback/selfservice` | sign-in/up, passports, OTP/TOTP, workspace selection - carries its own generated `sdk/` (abac, messaging) | `@fireback/ui-core`, `@fireback/auth-client`, `@fireback/js-remote-ctx` |
+| `@fireback/manage` | administration screens (capabilities, users, workspaces, …) - carries its own generated `sdk/` (abac, messaging) | `@fireback/ui-core`, `@fireback/auth-client`, `@fireback/messaging`, `@fireback/js-remote-ctx` |
 | `@fireback/mobile-kit` | mobile dashboard kit | `@fireback/ui-core` |
 | `@fireback/styles` | shared stylesheets (base + apple-family themes) | — |
-| `@fireback/enterprise-shell` | enterprise application shell every app boots through - `EssentialApp`/`EssentialRouter`, panel & sidebar layout, `WithFireback`/`WithSelfServiceRoutes` provider wiring | `@fireback/ui-core`, `@fireback/manage`, `@fireback/mobile-kit`, `@fireback/selfservice`, `@fireback/styles`, `@fireback/js-remote-ctx` |
+| `@fireback/enterprise-shell` | enterprise application shell every app boots through - `EssentialApp`/`EssentialRouter`, panel & sidebar layout, `WithFireback`/`WithSelfServiceRoutes` provider wiring | `@fireback/ui-core`, `@fireback/auth-client`, `@fireback/manage`, `@fireback/mobile-kit`, `@fireback/selfservice`, `@fireback/styles`, `@fireback/js-remote-ctx` |
 
 ## No shared `@fireback/sdk` - each package carries its own generated SDK
 

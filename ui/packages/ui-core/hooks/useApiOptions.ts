@@ -1,4 +1,4 @@
-import { useAuthentication } from "../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { BUILD_VARIABLES } from "./build-variables";
 import { useLocale } from "./useLocale";
 

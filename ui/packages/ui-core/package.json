@@ -2,8 +2,9 @@
   "name": "@fireback/ui-core",
   "version": "0.1.0",
   "private": false,
-  "description": "Shared fireback UI core: auth, hooks, and component library. Ships as raw source, compiled by the consuming app's own bundler.",
+  "description": "Shared fireback UI core: hooks and component library. Ships as raw source, compiled by the consuming app's own bundler.",
   "dependencies": {
+    "@fireback/auth-client": "*",
     "@fireback/js-remote-ctx": "*",
     "@devexpress/dx-react-grid": "^4.0.3",
     "@devexpress/dx-react-grid-bootstrap4": "^4.0.3",

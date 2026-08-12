@@ -7,8 +7,8 @@ import { source } from "@fireback/ui-core/hooks/source";
 import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
-import { mapRawSessionToAuthenticationSession } from "@fireback/ui-core/auth/authenticationUtils";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { mapRawSessionToAuthenticationSession } from "@fireback/auth-client/authenticationUtils";
 import type { ClassicSigninActionReq } from "@fireback/selfservice/sdk/abac/ClassicSigninAction";
 import {
   OauthAuthenticateActionReq,

@@ -5,6 +5,7 @@
   "description": "Fireback administration ('manage') screens: capabilities, passports, users, workspaces, regional content. Ships as raw source, compiled by the consuming app's own bundler.",
   "dependencies": {
     "@fireback/ui-core": "*",
+    "@fireback/auth-client": "*",
     "@fireback/messaging": "*",
     "@fireback/js-remote-ctx": "*",
     "formik": "^2.2.9"

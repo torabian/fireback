@@ -11,7 +11,7 @@ import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/For
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { SelectWorkspaceScreen } from "@fireback/selfservice/SelectWorkspace.screen";
 import { useSelfServicePublicRoutes } from "@fireback/selfservice/SelfServiceRoutes";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
 import { SessionGate } from "@fireback/ui-core/components/session-gate/SessionGate";
 import { checkSessionViaWhoami } from "@fireback/ui-core/components/session-gate/checkSessionViaWhoami";

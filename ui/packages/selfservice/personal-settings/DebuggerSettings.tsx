@@ -4,7 +4,7 @@ import { PageSection } from "@fireback/ui-core/components/page-section/PageSecti
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { useUserWorkspaceBrowseActionQuery } from "@fireback/selfservice/sdk/abac/UserWorkspaceBrowseAction";
 import { useState } from "react";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { strings } from "./strings/translations";
 
 function UserRoleWorkspaceDebug() {

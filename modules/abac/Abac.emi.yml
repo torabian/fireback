@@ -19,6 +19,9 @@ complexes:
     location: github.com/torabian/fireback/modules/fireback/complexes
     name: TString
     namespace: complexes
+  - compiler: ts
+    location: '@fireback/complexes'
+    name: TString
 
 targets:
   - compiler: go

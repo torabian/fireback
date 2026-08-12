@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
-import { useAuthentication } from "../../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import type { MArray } from "@fireback/js-remote-ctx/common/operators";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";

@@ -1,5 +1,5 @@
 import { usePresenter } from "./SelectWorkspace.presenter";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import {
   QueryUserRoleWorkspacesActionRes,
   useQueryUserRoleWorkspacesActionQuery,

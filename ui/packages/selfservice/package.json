@@ -5,6 +5,7 @@
   "description": "Fireback self-service authentication flows: sign-in/up, passports, OTP, TOTP, workspace selection. Ships as raw source, compiled by the consuming app's own bundler.",
   "dependencies": {
     "@fireback/ui-core": "*",
+    "@fireback/auth-client": "*",
     "@fireback/js-remote-ctx": "*",
     "@react-oauth/google": "^0.12.1",
     "formik": "^2.2.9",

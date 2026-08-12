@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
-import { useAuthentication } from "../../auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { get, set } from "lodash";
 import type { GResponse } from "@fireback/js-remote-ctx/envelopes";
 import { ErrorsView } from "../error-view/ErrorView";

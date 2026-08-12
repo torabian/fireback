@@ -9,7 +9,7 @@ import {
   UploaderConfigProvider,
 } from "@fireback/ui-core/components/resumable-uploader";
 import { useStorageUploaderConfig } from "@fireback/ui-core/hooks/useStorageUploaderConfig";
-import { useAuthentication } from "@fireback/ui-core/auth/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 
 export const UserEditForm = ({
   form,

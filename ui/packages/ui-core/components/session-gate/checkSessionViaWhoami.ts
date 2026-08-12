@@ -1,7 +1,7 @@
 import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
 import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
-import { SESSION_STORAGE_KEY } from "../../auth/authenticationUtils";
+import { SESSION_STORAGE_KEY } from "@fireback/auth-client/authenticationUtils";
 
 // The app's real session lives under this key - see
 // fireback-ui/auth/AuthenticationProvider.tsx, which persists it there via

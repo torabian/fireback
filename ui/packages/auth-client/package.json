@@ -1,0 +1,9 @@
+{
+  "name": "@fireback/auth-client",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Standalone client for a fireback project's self-service authentication: session/workspace state (backed by localStorage), the AuthenticationProvider/useAuthentication React context, and helpers to redirect to self-service login and capture the session it hands back. No fireback-specific dependencies beyond React itself, so any React project can depend on just this package to talk to a fireback backend's auth - it doesn't require ui-core, manage, or any other fireback UI package.",
+  "peerDependencies": {
+    "react": "19"
+  }
+}
