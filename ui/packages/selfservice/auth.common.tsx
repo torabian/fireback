@@ -1,16 +1,20 @@
-import { useEffect } from "react";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
-import { useRouter } from "@fireback/ui-core/hooks/useRouter";
-import { useS } from "@fireback/ui-core/hooks/useS";
 import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { mapRawSessionToAuthenticationSession } from "@fireback/auth-client/authenticationUtils";
-import { strings } from "./strings/translations";
+import type { MOne } from "@fireback/js-remote-ctx/common/operators";
+import { MArray, MCollection } from "@fireback/js-remote-ctx/common/operators";
+import { GResponse } from "@fireback/js-remote-ctx/envelopes";
+import { useFetchxContext } from "@fireback/js-remote-ctx/react/useFetchx";
 import type { ClassicPassportOtpActionRes } from "@fireback/selfservice/sdk/abac/ClassicPassportOtpAction";
 import type { ClassicSigninActionRes } from "@fireback/selfservice/sdk/abac/ClassicSigninAction";
 import type { ClassicSignupActionRes } from "@fireback/selfservice/sdk/abac/ClassicSignupAction";
-import type { GResponse } from "@fireback/js-remote-ctx/envelopes";
-import type { MOne } from "@fireback/js-remote-ctx/common/operators";
 import type { UserSessionDto } from "@fireback/selfservice/sdk/abac/UserSessionDto";
+import { useLocale } from "@fireback/ui-core/hooks/useLocale";
+import { useRouter } from "@fireback/ui-core/hooks/useRouter";
+import { useS } from "@fireback/ui-core/hooks/useS";
+import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
+import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
+import { useEffect } from "react";
+import { strings } from "./strings/translations";
 
 export enum AuthMethod {
   Email = "email",
@@ -33,6 +37,11 @@ export const useCompleteAuth = () => {
   const { locale } = useLocale();
   const { replace } = useRouter();
   const s = useS(strings);
+  const { selectWorkspace } = useAuthentication();
+  const ctx = useFetchxContext();
+  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
+    enabled: false,
+  });
 
   const onComplete = (
     res: GResponse<
@@ -61,6 +70,40 @@ export const useCompleteAuth = () => {
     if (!token) {
       alert(s.authenticationFailed);
       return;
+    }
+
+    if (session.userWorkspaces instanceof MCollection) {
+      if (session.userWorkspaces.len() === 1) {
+        const workspace = session.userWorkspaces.get()[0];
+        const headers = {
+          authorization: token,
+          ["workspace-id"]: workspace.uniqueId,
+        };
+
+        WhoamiAction.Fetch({ headers }, { ctx })
+          .then((res) => {
+            return res.response.result;
+          })
+          .then((all) => {
+            if (all instanceof GResponse) {
+              if (all.data.item.workspaces instanceof MArray) {
+                const workspaces = all.data.item.workspaces.get();
+                if (
+                  workspaces.length === 1 &&
+                  workspaces[0].roles instanceof MArray
+                ) {
+                  if (workspaces[0].roles.len() === 1) {
+                    selectWorkspace({
+                      workspaceId: workspaces[0].uniqueId,
+                      name: workspaces[0].name,
+                      roleId: workspaces[0].roles.get()[0].uniqueId,
+                    });
+                  }
+                }
+              }
+            }
+          });
+      }
     }
 
     setSession(mapRawSessionToAuthenticationSession(session));
