@@ -26,32 +26,12 @@ export const WithSelfServiceRoutes = ({
 }) => {
   const { session, checked } = useCheckAuthentication();
   const selfServicePublicRoutes = useSelfServicePublicRoutes();
-  const { selectedWorkspace, selectWorkspace } = useAuthentication();
-
-  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
-    enabled: false,
-  });
+  const { selectedWorkspace } = useAuthentication();
 
   // AuthenticationSession.workspaces is already a plain array (see
   // mapRawSessionToAuthenticationSession) - no MCollection/localStorage
   // round-trip shape-juggling needed here anymore.
   const userWorkspaceCount = session?.workspaces?.length ?? 0;
-
-  useEffect(() => {
-    if (userWorkspaceCount === 1 && !selectedWorkspace) {
-      queryUrw.refetch().then((resp) => {
-        const items = resp?.data?.data?.items || [];
-        if (items.length !== 1) {
-          return;
-        }
-
-        selectWorkspace({
-          roleId: items[0].roles?.[0]?.uniqueId,
-          workspaceId: items[0].uniqueId,
-        });
-      });
-    }
-  }, [selectedWorkspace, session]);
 
   // Unauthenticated: self-service's own public routes (welcome/signup/signin)
   // render here directly, deliberately outside SessionGate below - there's no
