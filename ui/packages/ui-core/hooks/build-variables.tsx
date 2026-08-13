@@ -76,5 +76,5 @@ export const BUILD_VARIABLES = {
    */
   NAVIGATE_ON_SIGNOUT: UntypedEnvVariables.VITE_NAVIGATE_ON_SIGNOUT,
 
-  DEFAULT_LOCALE: UntypedEnvVariables.VITE_DEFAULT_LOCALE,
+  DEFAULT_LOCALE: UntypedEnvVariables.VITE_DEFAULT_LOCALE || "en",
 };
