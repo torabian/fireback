@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import "./SessionGate.css";
 import { SESSION_GATE_RTL_LOCALES, sessionGateStrings } from "./translations";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 /**
  * Resolves a UI locale for this component only, without depending on
@@ -17,8 +18,12 @@ function detectLocale(): string {
   )?.[1];
   if (fromUrl) return fromUrl;
 
-  const fromNavigator = (navigator.language || "en").slice(0, 2).toLowerCase();
-  return supported.includes(fromNavigator) ? fromNavigator : "en";
+  const fromNavigator = (navigator.language || BUILD_VARIABLES.DEFAULT_LOCALE)
+    .slice(0, 2)
+    .toLowerCase();
+  return supported.includes(fromNavigator)
+    ? fromNavigator
+    : BUILD_VARIABLES.DEFAULT_LOCALE;
 }
 
 export interface SessionGateProps {

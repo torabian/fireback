@@ -1,6 +1,7 @@
 import { RouterLink, useRouter } from "../../hooks/useRouter";
 import { useCompiler } from "../../hooks/useEnvironment";
 import { useLocale } from "../../hooks/useLocale";
+import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 const Link = ({
   children,
@@ -12,7 +13,7 @@ const Link = ({
 }: any) => {
   const router = useRouter();
   const { locale } = useLocale();
-  const locale$ = rest.locale || locale || "en";
+  const locale$ = rest.locale || locale || BUILD_VARIABLES.DEFAULT_LOCALE;
   const { compiler } = useCompiler();
   const noPrefix = false;
 

@@ -62,6 +62,7 @@ const Form = ({
         value={form.values.password}
         label={s.password}
         id="password-input"
+        dir="ltr"
         autoFocus
         errorMessage={form.errors.password}
         onChange={(value) =>

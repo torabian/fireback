@@ -15,6 +15,7 @@ import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/aba
 import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
 import { useEffect } from "react";
 import { strings } from "./strings/translations";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 
 export enum AuthMethod {
   Email = "email",
@@ -126,7 +127,10 @@ export const useCompleteAuth = () => {
       window.location.href = finalUrl.toString();
     } else {
       // Fallback to the default route
-      const to = "/{locale}/dashboard".replace("{locale}", locale || "en");
+      const to = "/{locale}/dashboard".replace(
+        "{locale}",
+        locale || BUILD_VARIABLES.DEFAULT_LOCALE,
+      );
 
       replace(to, to);
     }

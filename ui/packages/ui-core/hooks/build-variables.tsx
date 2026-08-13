@@ -1,4 +1,4 @@
-const UntypedEnvVariables = (import.meta as any).env.BUILD_VARIABLES
+const UntypedEnvVariables = (import.meta as any).env.BUILD_VARIABLES;
 
 export const BUILD_VARIABLES = {
   /**
@@ -74,5 +74,7 @@ export const BUILD_VARIABLES = {
    * The route, where user will be navigated upon signout from
    * the ui interface
    */
-  NAVIGATE_ON_SIGNOUT: UntypedEnvVariables.VITE_NAVIGATE_ON_SIGNOUT
-}
+  NAVIGATE_ON_SIGNOUT: UntypedEnvVariables.VITE_NAVIGATE_ON_SIGNOUT,
+
+  DEFAULT_LOCALE: UntypedEnvVariables.VITE_DEFAULT_LOCALE,
+};
