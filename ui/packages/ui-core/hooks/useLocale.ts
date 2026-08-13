@@ -2,7 +2,7 @@ import { useRouter } from "./useRouter";
 import { BUILD_VARIABLES } from "./build-variables";
 
 export function localeFromPath(path: string) {
-  let locale = "en";
+  let locale = BUILD_VARIABLES.DEFAULT_LOCALE;
 
   const match = path.match(/^\/(fa|en|ar|pl|de)\//);
   if (match && match[1]) {
@@ -15,7 +15,7 @@ export function localeFromPath(path: string) {
 export function useLocale() {
   const router = useRouter();
 
-  let locale = "en";
+  let locale = BUILD_VARIABLES.DEFAULT_LOCALE;
   let region = "us";
   let dir = "ltr";
 

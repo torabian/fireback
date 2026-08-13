@@ -7,30 +7,32 @@
  * the same flow and components.
  */
 
+import { AnimatedRouteWrapper } from "@fireback/ui-core/components/swipe-transition/SwipeTransition";
+import { usePureLocale } from "@fireback/ui-core/hooks/usePureLocale";
 import { Navigate, Route } from "react-router-dom";
-import { UserPassportsScreen } from "./UserPassports.screen";
-import { ChangePasswordScreen } from "./ChangePassword.screen";
-import { WelcomeScreen } from "./Welcome.screen";
-import { ClassicPassportScreen } from "./ClassicPassport.screen";
 import { AuthMethod } from "./auth.common";
-import { TotpSetup } from "./TotpSetup.screen";
-import { TotpEnter } from "./TotpEnter.screen";
+import { ChangePasswordScreen } from "./ChangePassword.screen";
+import { ClassicPassportScreen } from "./ClassicPassport.screen";
 import { ClassicPassportAccountCreation } from "./ClassicPassportAccountCreation.screen";
 import { ClassicSigninPassword } from "./ClassicSigninPassword.screen";
 import { OtpScreen } from "./Otp.screen";
 import { usePublicJoinKeyRoutes } from "./public-join-keys/PublicJoinKeyRoutes";
 import { useRoleRoutes } from "./roles/RoleRoutes";
-import { useUserInvitationRoutes } from "./user-invitations/UserInvitationRoutes";
-import { useWorkspaceInviteRoutes } from "./workspace-invites/WorkspaceInviteRoutes";
 import { SelfServiceHome } from "./SelfServiceHome";
-import { AnimatedRouteWrapper } from "@fireback/ui-core/components/swipe-transition/SwipeTransition";
-import { SelectWorkspaceScreen } from "./SelectWorkspace.screen";
+import { TotpEnter } from "./TotpEnter.screen";
+import { TotpSetup } from "./TotpSetup.screen";
+import { useUserInvitationRoutes } from "./user-invitations/UserInvitationRoutes";
+import { UserPassportsScreen } from "./UserPassports.screen";
+import { WelcomeScreen } from "./Welcome.screen";
+import { useWorkspaceInviteRoutes } from "./workspace-invites/WorkspaceInviteRoutes";
 
 /**
  * Public routes are those which do not require user to be authenticate,
  * or might be. Such as login form, etc.
  */
 export function useSelfServicePublicRoutes() {
+  const { locale } = usePureLocale();
+
   return (
     <>
       <Route path="selfservice">
@@ -57,7 +59,7 @@ export function useSelfServicePublicRoutes() {
 
       <Route
         path="*"
-        element={<Navigate to="/en/selfservice/welcome" replace />}
+        element={<Navigate to={`/${locale}/selfservice/welcome`} replace />}
       />
     </>
   );

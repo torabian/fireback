@@ -96,7 +96,9 @@ const Form = ({
   ) => {
     mutateAsync(new OauthAuthenticateActionReq({ service, token }))
       .then((res: GResponse<OauthAuthenticateActionRes>) => {
-        setSession(mapRawSessionToAuthenticationSession(res.data?.item?.session));
+        setSession(
+          mapRawSessionToAuthenticationSession(res.data?.item?.session),
+        );
         if ((window as any).ReactNativeWebView) {
           (window as any).ReactNativeWebView.postMessage(
             JSON.stringify(res.data?.item),
@@ -105,7 +107,7 @@ const Form = ({
         if (BUILD_VARIABLES.DEFAULT_ROUTE) {
           const to = (
             BUILD_VARIABLES.DEFAULT_ROUTE || "/{locale}/signin"
-          ).replace("{locale}", locale || "en");
+          ).replace("{locale}", locale || BUILD_VARIABLES.DEFAULT_LOCALE);
           replace(to, to);
         }
       })

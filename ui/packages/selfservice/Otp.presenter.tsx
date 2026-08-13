@@ -1,17 +1,20 @@
-import { useFormik } from "formik";
 import { mutationErrorsToFormik } from "@fireback/ui-core/hooks/api";
 import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
+import { useFormik } from "formik";
 
 import type { GResponse } from "@fireback/js-remote-ctx/envelopes";
-import { useCompleteAuth } from "./auth.common";
-import { strings } from "./strings/translations";
 import {
   ClassicPassportOtpActionReq,
   useClassicPassportOtpAction,
   type ClassicPassportOtpActionRes,
 } from "@fireback/selfservice/sdk/abac/ClassicPassportOtpAction";
+import { useCompleteAuth } from "./auth.common";
+import { strings } from "./strings/translations";
+
+import type { MOne } from "@fireback/js-remote-ctx/common/operators";
+import type { UserSessionDto } from "./sdk/abac/UserSessionDto";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
@@ -37,7 +40,8 @@ export const usePresenter = () => {
   });
 
   const successful = (res: GResponse<ClassicPassportOtpActionRes>) => {
-    if (res.data?.item.session?.token) {
+    const v = (res.data?.item.session as MOne<UserSessionDto>)?.get().token;
+    if (v) {
       onComplete(res);
     } else if (res.data?.item?.continueWithCreation) {
       push(`/${locale}/selfservice/complete`, undefined, {

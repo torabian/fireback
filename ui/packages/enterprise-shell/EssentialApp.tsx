@@ -18,6 +18,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { SidebarMultiRouterSetup } from "./ApplicationPanels";
 import { WithFireback } from "./WithFireback";
 import { WithSelfServiceRoutes } from "./WithSelfServiceRoutes";
+import { useRtlClass } from "@fireback/ui-core/hooks/useRtlClass";
 
 export function EssentialApp({
   ApplicationRoutes,
@@ -36,6 +37,12 @@ export function EssentialApp({
   }, []);
 
   const { locale } = usePureLocale();
+
+  useEffect(() => {
+    document
+      .querySelector("html")
+      ?.setAttribute("dir", ["fa", "ar"].includes(locale) ? "rtl" : "ltr");
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

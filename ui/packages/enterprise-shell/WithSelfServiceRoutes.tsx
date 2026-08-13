@@ -6,15 +6,15 @@ import {
   Routes,
 } from "react-router-dom";
 
-import { type ReactNode, useEffect } from "react";
-import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/ForcedAuthenticated";
-import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
+import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
 import { SelectWorkspaceScreen } from "@fireback/selfservice/SelectWorkspace.screen";
 import { useSelfServicePublicRoutes } from "@fireback/selfservice/SelfServiceRoutes";
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
-import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
+import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/ForcedAuthenticated";
 import { SessionGate } from "@fireback/ui-core/components/session-gate/SessionGate";
 import { checkSessionViaWhoami } from "@fireback/ui-core/components/session-gate/checkSessionViaWhoami";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
+import { usePureLocale } from "@fireback/ui-core/hooks/usePureLocale";
+import { type ReactNode } from "react";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
 const Router = useHashRouter ? HashRouter : BrowserRouter;
@@ -26,32 +26,13 @@ export const WithSelfServiceRoutes = ({
 }) => {
   const { session, checked } = useCheckAuthentication();
   const selfServicePublicRoutes = useSelfServicePublicRoutes();
-  const { selectedWorkspace, selectWorkspace } = useAuthentication();
-
-  const queryUrw = useQueryUserRoleWorkspacesActionQuery({
-    enabled: false,
-  });
+  const { selectedWorkspace } = useAuthentication();
+  const { locale } = usePureLocale();
 
   // AuthenticationSession.workspaces is already a plain array (see
   // mapRawSessionToAuthenticationSession) - no MCollection/localStorage
   // round-trip shape-juggling needed here anymore.
   const userWorkspaceCount = session?.workspaces?.length ?? 0;
-
-  useEffect(() => {
-    if (userWorkspaceCount === 1 && !selectedWorkspace) {
-      queryUrw.refetch().then((resp) => {
-        const items = resp?.data?.data?.items || [];
-        if (items.length !== 1) {
-          return;
-        }
-
-        selectWorkspace({
-          roleId: items[0].roles?.[0]?.uniqueId,
-          workspaceId: items[0].uniqueId,
-        });
-      });
-    }
-  }, [selectedWorkspace, session]);
 
   // Unauthenticated: self-service's own public routes (welcome/signup/signin)
   // render here directly, deliberately outside SessionGate below - there's no
@@ -65,7 +46,7 @@ export const WithSelfServiceRoutes = ({
           <Route path=":locale">{selfServicePublicRoutes}</Route>
           <Route
             path="*"
-            element={<Navigate to="/en/selfservice/welcome" replace />}
+            element={<Navigate to={`/${locale}/selfservice/welcome`} replace />}
           />
         </Routes>
       </Router>
