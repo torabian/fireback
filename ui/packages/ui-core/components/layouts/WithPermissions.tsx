@@ -1,7 +1,7 @@
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 import { useMemo } from "react";
 
 export function useIsRoot() {

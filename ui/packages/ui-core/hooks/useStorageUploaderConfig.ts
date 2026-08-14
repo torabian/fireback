@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 import { BUILD_VARIABLES } from "./build-variables";
 import type { UploaderConfig } from "../components/resumable-uploader";
 
@@ -18,7 +18,9 @@ function storageBaseUrl(): string {
  * modules/storage/README.md §6). Returns null for a not-yet-uploaded/empty
  * value so callers can conditionally render without an extra null check.
  */
-export function storageDownloadUrl(id: string | null | undefined): string | null {
+export function storageDownloadUrl(
+  id: string | null | undefined,
+): string | null {
   if (!id) return null;
   return `${storageBaseUrl()}/storage/downloads/${id}/raw`;
 }

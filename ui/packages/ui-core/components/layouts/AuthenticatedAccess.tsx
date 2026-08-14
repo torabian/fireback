@@ -1,4 +1,4 @@
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
 

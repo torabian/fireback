@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Upload } from "tus-js-client";
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 
 export interface ActiveUpload {
   uploadId: string;

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
-	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
 
@@ -16,24 +16,15 @@ import (
 // var ui embed.FS
 
 var xapp = &application.Application{
-	Title: "Fireback core microservice - v" + fireback.FIREBACK_VERSION,
-	Modules: []*application.ModuleProvider{
-		// Add the very core module, such as capabilities
-		fireback.FirebackModuleSetup(nil),
-	},
+
+	Modules: []*application.ModuleProvider{},
 }
 
 func main() {
 
+	fmt.Println(1, xapp)
 	// This is an important setting for some kind of app which will be installed
 	// it makes it easier for fireback to find the configuration.
 	os.Setenv("PRODUCT_UNIQUE_NAME", "fireback")
 
-	// This AppStart function is a wrapper for few things commonly can handle entire backend project
-	// startup. For mobile or desktop might other functionality be used.
-	xapp.CommonHeadlessAppStart(func() {
-		// If anything needs to be done after database initialized
-		// fireback.RegionalContentSyncSeeders()
-		// fireback.AppMenuSyncSeeders()
-	})
 }

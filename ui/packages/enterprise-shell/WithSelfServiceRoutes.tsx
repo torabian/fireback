@@ -6,7 +6,7 @@ import {
   Routes,
 } from "react-router-dom";
 
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 import { SelectWorkspaceScreen } from "@fireback/selfservice/SelectWorkspace.screen";
 import { useSelfServicePublicRoutes } from "@fireback/selfservice/SelfServiceRoutes";
 import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/ForcedAuthenticated";

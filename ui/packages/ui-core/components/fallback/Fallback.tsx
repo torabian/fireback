@@ -19,7 +19,9 @@ export function Fallback({ error, resetErrorBoundary }: any) {
   return (
     <div role="alert">
       <p>{s.components.somethingWentWrong}</p>
-      <div style={{ color: "red", padding: "30px" }}>{error?.message}</div>
+      <div style={{ color: "red", padding: "30px" }}>
+        {error?.message} {JSON.stringify(error)}
+      </div>
     </div>
   );
 }
