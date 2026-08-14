@@ -120,7 +120,7 @@ export const useCompleteAuth = () => {
       const finalUrl = new URL(redirectUrl);
       finalUrl.searchParams.set(
         "session",
-        JSON.stringify(res.data.item.session),
+        JSON.stringify(mapRawSessionToAuthenticationSession(session)),
       );
 
       // Redirect to the final URL
