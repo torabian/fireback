@@ -1,6 +1,6 @@
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 
 import { strings } from "./strings/translations";
 import { useUserPassportsActionQuery } from "@fireback/selfservice/sdk/abac/UserPassportsAction";

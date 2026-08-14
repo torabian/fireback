@@ -1,5 +1,5 @@
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
-import { mapRawSessionToAuthenticationSession } from "@fireback/auth-client/authenticationUtils";
+import { useAuthentication } from "@fireback/auth-client";
+import { mapRawSessionToAuthenticationSession } from "@fireback/auth-client";
 import type { MOne } from "@fireback/js-remote-ctx/common/operators";
 import { MArray, MCollection } from "@fireback/js-remote-ctx/common/operators";
 import { GResponse } from "@fireback/js-remote-ctx/envelopes";

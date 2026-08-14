@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { useBackButton, useCommonCrudActions } from "../action-menu/ActionMenu";
 import { QueryErrorView } from "../error-view/QueryError";
 import { usePageTitle } from "../page-title/PageTitle";
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 import { get, set } from "lodash";
 import type { GResponse } from "@fireback/js-remote-ctx/envelopes";
 import { ErrorsView } from "../error-view/ErrorView";
@@ -143,7 +143,11 @@ export const CommonEntityManager = ({
       // "$"-code (e.g. "ValidationFailedOnSomeFields") showed instead of the
       // resolved message.
       const errorInfo = response.error?.toJSON?.() ?? response.error;
-      if (errorInfo?.message || errorInfo?.messageTranslated || errorInfo?.errors?.length) {
+      if (
+        errorInfo?.message ||
+        errorInfo?.messageTranslated ||
+        errorInfo?.errors?.length
+      ) {
         formik.current.setErrors(mutationErrorsToFormik({ error: errorInfo }));
       }
     }).catch((err) => httpErrorHanlder(err, s));

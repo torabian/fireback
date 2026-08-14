@@ -6,7 +6,7 @@ import classNames from "classnames";
 import { uniqBy } from "lodash";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 
-import { useAuthentication } from "@fireback/auth-client/AuthenticationContext";
+import { useAuthentication } from "@fireback/auth-client";
 import { userMeetsAccess } from "../../hooks/accessLevels";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { useApiOptions } from "../../hooks/useApiOptions";
