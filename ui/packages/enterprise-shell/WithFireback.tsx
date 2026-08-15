@@ -44,6 +44,7 @@ const WithFetchX = ({
   // the time this mounts (it gates rendering of the router around it) — so
   // the base URL becomes irrelevant and every request instead goes through
   // wasmFetchOverride to the in-tab server. Off, this is unchanged.
+
   const fetchContext = React.useRef(
     new FetchxContext(
       BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, ""),

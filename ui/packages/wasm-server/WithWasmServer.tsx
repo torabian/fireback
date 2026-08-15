@@ -31,9 +31,9 @@ export function WithWasmServer({
   /** Replaces the default boot/error screens below. */
   fallback?: { booting?: ReactNode; error?: (error: Error) => ReactNode };
 }) {
-  // if (BUILD_VARIABLES.USE_WASM_SERVER !== "true") {
-  //   return <>{children}</>;
-  // }
+  if (BUILD_VARIABLES.USE_WASM_SERVER !== "true") {
+    return <>{children}</>;
+  }
 
   return (
     <WasmServerGate options={options} fallback={fallback}>
