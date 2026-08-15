@@ -292,6 +292,8 @@ jobs:
         run: sudo npm i -g prettier
       - name: Install the dependencies
         run: cd ui && npm i --force
+      - name: Run go tests
+        run: make test
       - name: Build and package deb files
         run: cd cmd/fireback && make deb && make linux-zip
       - name: Windows zip

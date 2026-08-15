@@ -84,7 +84,8 @@ defs: defs-sdk
 	./app emi compile --path modules/abac/messaging/Messaging.emi.yml && \
 	./app emi compile --path modules/abac/interfacetools/InterfaceTools.emi.yml && \
 	./app emi compile --path modules/eventbus/EventBus.emi.yml && \
-	./app emi compile --path modules/reactivesearch/ReactiveSearch.emi.yml
+	./app emi compile --path modules/reactivesearch/ReactiveSearch.emi.yml && \
+	./app emi compile --path modules/backup/Backup.emi.yml
 
 # Packs every ui/packages/* workspace package (see ui/packages/README.md) into a
 # normal, npm-installable tarball under artifacts/fireback-packages/ - so a brand new
