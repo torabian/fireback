@@ -8,7 +8,7 @@ import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 import { FetchxProvider } from "@fireback/js-remote-ctx/react/useFetchx";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { useFirebackSocket } from "@fireback/ui-core/hooks/useFirebackSocket";
-import { wasmFetchOverride } from "@fireback/wasm-server/wasmServer";
+// import { wasmFetchOverride } from "@fireback/wasm-server/wasmServer";
 
 export function WithFireback({
   children,
@@ -51,9 +51,9 @@ const WithFetchX = ({
       {},
       undefined,
       undefined,
-      BUILD_VARIABLES.USE_WASM_SERVER === "true"
-        ? wasmFetchOverride()
-        : undefined,
+      // BUILD_VARIABLES.USE_WASM_SERVER === "true"
+      //   ? wasmFetchOverride()
+      //   : undefined,
     ),
   );
 
