@@ -9,5 +9,6 @@
   "VITE_USE_HASH_ROUTER": "true",
   "VITE_INACCURATE_MOCK_MODE": "false",
   "VITE_TITLE": "projectname",
-  "VITE_GITHUB_DEMO": "true"
+  "VITE_GITHUB_DEMO": "true",
+  "VITE_USE_WASM_SERVER": "false"
 }

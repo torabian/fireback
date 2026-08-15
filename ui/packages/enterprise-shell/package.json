@@ -11,6 +11,7 @@
     "@fireback/mobile-kit": "*",
     "@fireback/selfservice": "*",
     "@fireback/styles": "*",
+    "@fireback/wasm-server": "*",
     "classnames": "^2.3.2",
     "react-error-boundary": "^4.0.13",
     "react-resizable-panels": "^3.0.3",

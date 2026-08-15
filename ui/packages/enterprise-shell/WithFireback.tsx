@@ -8,6 +8,7 @@ import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 import { FetchxProvider } from "@fireback/js-remote-ctx/react/useFetchx";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { useFirebackSocket } from "@fireback/ui-core/hooks/useFirebackSocket";
+import { wasmFetchOverride } from "@fireback/wasm-server/wasmServer";
 
 export function WithFireback({
   children,
@@ -38,8 +39,21 @@ const WithFetchX = ({
 }) => {
   const { token, selectedWorkspace } = useAuthentication();
 
+  // When VITE_USE_WASM_SERVER is on, WithWasmServer (@fireback/wasm-server)
+  // has already downloaded and booted a fireback server compiled to wasm by
+  // the time this mounts (it gates rendering of the router around it) — so
+  // the base URL becomes irrelevant and every request instead goes through
+  // wasmFetchOverride to the in-tab server. Off, this is unchanged.
   const fetchContext = React.useRef(
-    new FetchxContext(BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, "")),
+    new FetchxContext(
+      BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, ""),
+      {},
+      undefined,
+      undefined,
+      BUILD_VARIABLES.USE_WASM_SERVER === "true"
+        ? wasmFetchOverride()
+        : undefined,
+    ),
   );
 
   fetchContext.current.defaultHeaders = {
