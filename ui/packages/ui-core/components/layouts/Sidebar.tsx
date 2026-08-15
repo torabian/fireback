@@ -195,6 +195,12 @@ function Sidebar({
                 href: "/demo/form-select",
               },
               {
+                label: s.components.formJsf,
+                icon: "/ios-theme/icons/settings.svg",
+                children: [],
+                href: "/demo/jsf",
+              },
+              {
                 label: s.components.formDateTime,
                 icon: "/ios-theme/icons/settings.svg",
                 children: [],
