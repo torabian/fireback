@@ -7,5 +7,6 @@
   "VITE_ALLOW_OS_LOGIN": "false",
   "VITE_SUPPORTED_LANGUAGES": "fa,en",
   "VITE_USE_HASH_ROUTER": "true",
-  "VITE_TITLE": "projectname"
+  "VITE_TITLE": "projectname",
+  "VITE_USE_WASM_SERVER": "false"
 }

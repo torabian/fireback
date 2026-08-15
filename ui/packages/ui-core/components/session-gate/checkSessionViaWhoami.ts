@@ -1,7 +1,6 @@
-import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
-import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { SESSION_STORAGE_KEY } from "@fireback/auth-client";
+import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
+import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
 
 // The app's real session lives under this key - see
 // fireback-ui/auth/AuthenticationProvider.tsx, which persists it there via
@@ -43,6 +42,7 @@ function readRemoteQueryToken(): string | undefined {
  */
 export async function checkSessionViaWhoami(): Promise<void> {
   const token = readRemoteQueryToken();
+
   if (!token) {
     return;
   }
@@ -50,9 +50,7 @@ export async function checkSessionViaWhoami(): Promise<void> {
   const { response } = await WhoamiAction.Fetch(
     { headers: { authorization: token } },
     {
-      ctx: new FetchxContext(
-        BUILD_VARIABLES.REMOTE_SERVICE?.replace(/\/$/, ""),
-      ),
+      ctx: new FetchxContext("", null, null, null, undefined),
     },
   );
 

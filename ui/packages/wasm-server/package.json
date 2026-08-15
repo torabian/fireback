@@ -1,0 +1,14 @@
+{
+  "name": "@fireback/wasm-server",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Runs a fireback backend compiled to wasm (cmd/fireback-wasm) inside the browser tab, backed by an in-browser Postgres (pglite), and bridges it to a FetchxContext so the rest of the app talks to it exactly like a real network API. Not generated - hand-written, kept separate from @fireback/js-remote-ctx (which `make defs` regenerates) on purpose.",
+  "dependencies": {
+    "@fireback/js-remote-ctx": "*",
+    "@fireback/ui-core": "*",
+    "@electric-sql/pglite": "^0.4.6"
+  },
+  "peerDependencies": {
+    "react": "19"
+  }
+}

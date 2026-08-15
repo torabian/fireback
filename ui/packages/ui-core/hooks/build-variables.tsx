@@ -77,4 +77,14 @@ export const BUILD_VARIABLES = {
   NAVIGATE_ON_SIGNOUT: UntypedEnvVariables.VITE_NAVIGATE_ON_SIGNOUT,
 
   DEFAULT_LOCALE: UntypedEnvVariables.VITE_DEFAULT_LOCALE || "en",
+
+  /**
+   * When "true", the app runs its own backend inside the browser tab
+   * instead of talking to REMOTE_SERVICE over the network: a fireback
+   * server compiled to wasm (cmd/fireback-wasm), backed by an in-browser
+   * Postgres (pglite). See @fireback/wasm-server's WithWasmServer, which
+   * gates the router on this flag, and WithFireback, which points the
+   * app's FetchxContext at it once booted.
+   */
+  USE_WASM_SERVER: UntypedEnvVariables.VITE_USE_WASM_SERVER,
 };

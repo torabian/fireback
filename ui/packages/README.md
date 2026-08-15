@@ -15,7 +15,8 @@ Everything under this directory is a separate npm package, wired together with
 | `@fireback/manage` | administration screens (capabilities, users, workspaces, …) - carries its own generated `sdk/` (abac, messaging) | `@fireback/ui-core`, `@fireback/auth-client`, `@fireback/messaging`, `@fireback/js-remote-ctx` |
 | `@fireback/mobile-kit` | mobile dashboard kit | `@fireback/ui-core` |
 | `@fireback/styles` | shared stylesheets (base + apple-family themes) | — |
-| `@fireback/enterprise-shell` | enterprise application shell every app boots through - `EssentialApp`/`EssentialRouter`, panel & sidebar layout, `WithFireback`/`WithSelfServiceRoutes` provider wiring | `@fireback/ui-core`, `@fireback/auth-client`, `@fireback/manage`, `@fireback/mobile-kit`, `@fireback/selfservice`, `@fireback/styles`, `@fireback/js-remote-ctx` |
+| `@fireback/enterprise-shell` | enterprise application shell every app boots through - `EssentialApp`/`EssentialRouter`, panel & sidebar layout, `WithFireback`/`WithSelfServiceRoutes` provider wiring | `@fireback/ui-core`, `@fireback/auth-client`, `@fireback/manage`, `@fireback/mobile-kit`, `@fireback/selfservice`, `@fireback/styles`, `@fireback/js-remote-ctx`, `@fireback/wasm-server` |
+| `@fireback/wasm-server` | runs a fireback backend compiled to wasm (`cmd/fireback-wasm`) inside the browser tab, backed by an in-browser Postgres (pglite): `WithWasmServer` (gates the router on `VITE_USE_WASM_SERVER`), `useWasmServer`, `wasmFetchOverride`. Hand-written, not generated - kept separate from `@fireback/js-remote-ctx` on purpose | `@fireback/js-remote-ctx`, `@fireback/ui-core` |
 
 ## No shared `@fireback/sdk` - each package carries its own generated SDK
 
