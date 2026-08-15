@@ -8,9 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/connmonitor"
@@ -103,15 +101,6 @@ func ExecuteMockImport(x *application.Application) {
 
 }
 
-func hasSuffix(path string, suffixes []string) bool {
-	for _, suffix := range suffixes {
-		if strings.HasSuffix(path, suffix) {
-			return true
-		}
-	}
-	return false
-}
-
 type HttpServerInstanceConfig struct {
 
 	// Shows some charts and keeps track of active connections
@@ -153,42 +142,22 @@ func SetupHttpServer(x *application.Application, cfg HttpServerInstanceConfig) *
 
 	r.Use(GinMiddleware())
 
-	// Range requests (used for resumable downloads and media seeking, e.g. an
-	// HTML5 <video> tag) return a slice of the underlying resource picked
-	// after the byte length is known. Gzip-encoding just that slice produces
-	// a self-contained stream whose Content-Range still describes offsets in
-	// the *original* file, a combination browsers' media/range handling
-	// doesn't tolerate (Chrome fails such responses with
-	// ERR_CONTENT_DECODING_FAILED). So skip compression whenever a Range
-	// header is present, the same way nginx/Apache do.
-	gzipMiddleware := gzip.Gzip(gzip.DefaultCompression)
-	r.Use(func(c *gin.Context) {
-		if c.GetHeader("Range") != "" {
-			c.Next()
-			return
-		}
-		gzipMiddleware(c)
-	})
-
-	r.Use(func(c *gin.Context) {
-		cacheableSuffixes := []string{
-			".js",
-			".css",
-			".svg",
-			".png",
-			".jpg",
-			".woff",
-			".woff2",
-			".ttf",
-		}
-
-		if c.Request.Method == http.MethodGet && hasSuffix(c.Request.URL.Path, cacheableSuffixes) {
-			c.Header("Cache-Control", "public, max-age=604800") // 1 year cache
-		}
-
-		c.Next()
-	})
-
+	// Gzip compression is handled entirely inside gintools.EmbedFoldersForGin,
+	// not here. It would be tempting to add a single blanket "gzip everything
+	// under an embedded folder's Prefix" middleware at this level, but that's
+	// wrong the moment any folder is mounted at Prefix "/" (the common case
+	// for a project's default SPA, e.g. this project's own "public" folder in
+	// cmd/nima-server/main.go): every request path is a string-prefix match
+	// for "/", so a prefix-based check would compress every route in the app
+	// - including routes mounted outside PublicFolders entirely, like the
+	// storage module's tus upload endpoints and its manual Range/streaming
+	// download handler, whose protocols depend on exact byte counts and
+	// streaming semantics (tus's Content-Length/Upload-Offset contract, HTTP
+	// Range/206 responses) that a gzip-wrapped ResponseWriter can violate.
+	// gintools instead only compresses a response once a specific
+	// PublicFolderInfo has already confirmed *it* is about to write it (a
+	// real embedded file existed, or this is its own SPA/index fallback) -
+	// see mountEmbedFolder's doc comment.
 	r.Use(connmonitor.TrackConnectionsMiddleware())
 
 	if config.WithTaskServer {
