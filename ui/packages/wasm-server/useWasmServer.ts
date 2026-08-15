@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { startWasmServer, wasmFetchOverride, type WasmServerOptions } from "./wasmServer";
+import {
+  startWasmServer,
+  wasmFetchOverride,
+  onWasmDownloadProgress,
+  type WasmServerOptions,
+  type WasmDownloadProgress,
+} from "./wasmServer";
 import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 
 export interface UseWasmServerResult {
@@ -7,6 +13,11 @@ export interface UseWasmServerResult {
   ready: boolean;
   /** Set if downloading/booting the wasm server failed. */
   error: Error | null;
+  /**
+   * Byte progress of the .wasm download, or null before the download has
+   * started (or once boot is well past it, e.g. an old memory-only reload).
+   */
+  progress: WasmDownloadProgress | null;
   /**
    * A FetchxContext wired to route through the in-browser server. Pass it as
    * fetchx()'s third argument (or via FetchxProvider) the same way you'd use
@@ -29,9 +40,18 @@ export interface UseWasmServerResult {
 export function useWasmServer(opts?: WasmServerOptions): UseWasmServerResult {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [progress, setProgress] = useState<WasmDownloadProgress | null>(null);
   const [ctx] = useState(
     () => new FetchxContext("", {}, undefined, undefined, wasmFetchOverride()),
   );
+
+  useEffect(() => {
+    // Subscribed independently of who actually triggers the boot below —
+    // onWasmDownloadProgress replays the latest known progress to a late
+    // subscriber, so this works whether this component started the boot or
+    // another one already in flight did.
+    return onWasmDownloadProgress(setProgress);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,5 +70,5 @@ export function useWasmServer(opts?: WasmServerOptions): UseWasmServerResult {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { ready, error, ctx };
+  return { ready, error, progress, ctx };
 }

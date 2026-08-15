@@ -39,6 +39,37 @@ interface GoInstance {
   run(instance: WebAssembly.Instance): Promise<void>;
 }
 
+/** Byte progress of the .wasm download. `total` is null when the server didn't send a Content-Length (progress is still meaningful — just show bytes loaded, not a percentage). */
+export interface WasmDownloadProgress {
+  loaded: number;
+  total: number | null;
+}
+
+type ProgressListener = (progress: WasmDownloadProgress) => void;
+
+const progressListeners = new Set<ProgressListener>();
+let lastProgress: WasmDownloadProgress | null = null;
+
+function emitProgress(progress: WasmDownloadProgress): void {
+  lastProgress = progress;
+  for (const listener of progressListeners) listener(progress);
+}
+
+/**
+ * Subscribe to .wasm download progress. Independent of who actually calls
+ * startWasmServer — a late subscriber (e.g. a second component mounting
+ * useWasmServer after boot already started) is replayed the most recent
+ * progress immediately, then gets live updates same as everyone else.
+ * Returns an unsubscribe function.
+ */
+export function onWasmDownloadProgress(listener: ProgressListener): () => void {
+  progressListeners.add(listener);
+  if (lastProgress) listener(lastProgress);
+  return () => {
+    progressListeners.delete(listener);
+  };
+}
+
 export interface WasmServerOptions {
   /** Where to fetch the compiled server from. Default "/fireback.wasm". */
   wasmUrl?: string;
@@ -94,7 +125,7 @@ async function bootWasmServer(opts: WasmServerOptions): Promise<void> {
 
   const go = new window.Go!();
   const { instance } = await WebAssembly.instantiateStreaming(
-    fetch(wasmUrl),
+    fetchWasmWithProgress(wasmUrl),
     go.importObject,
   );
 
@@ -103,6 +134,51 @@ async function bootWasmServer(opts: WasmServerOptions): Promise<void> {
   void go.run(instance);
 
   await waitFor(() => typeof window.handleWasmRequest === "function");
+}
+
+// Wraps fetch(url) so every chunk of the (typically tens-of-MB) .wasm
+// download is reported via onWasmDownloadProgress, while still handing
+// WebAssembly.instantiateStreaming a real streamed Response — the fetch
+// itself, and streaming compilation off it, keep running exactly as before,
+// this just taps the byte stream as it passes through.
+function fetchWasmWithProgress(url: string): Promise<Response> {
+  return fetch(url).then((res) => {
+    if (!res.ok || !res.body) {
+      emitProgress({ loaded: 0, total: null });
+      return res;
+    }
+
+    const totalHeader = res.headers.get("content-length");
+    const total = totalHeader ? Number(totalHeader) : null;
+    let loaded = 0;
+
+    const reader = res.body.getReader();
+    const stream = new ReadableStream<Uint8Array>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        loaded += value.byteLength;
+        emitProgress({ loaded, total });
+        controller.enqueue(value);
+      },
+      cancel(reason) {
+        reader.cancel(reason);
+      },
+    });
+
+    // Rebuild a Response around the tapped stream. Passing the original
+    // res.headers through keeps Content-Type: application/wasm intact,
+    // which instantiateStreaming needs to accept it as a streaming compile
+    // rather than falling back to buffering the whole thing first.
+    return new Response(stream, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+    });
+  });
 }
 
 function loadWasmExec(url: string): Promise<void> {

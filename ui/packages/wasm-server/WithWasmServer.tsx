@@ -1,7 +1,7 @@
 import React, { type ReactNode } from "react";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { useWasmServer } from "./useWasmServer";
-import type { WasmServerOptions } from "./wasmServer";
+import type { WasmDownloadProgress, WasmServerOptions } from "./wasmServer";
 
 // WithWasmServer — wraps the app's essential router (see App.tsx) and, when
 // BUILD_VARIABLES.USE_WASM_SERVER ("VITE_USE_WASM_SERVER" in
@@ -55,7 +55,7 @@ function WasmServerGate({
   options?: WasmServerOptions;
   fallback?: { booting?: ReactNode; error?: (error: Error) => ReactNode };
 }) {
-  const { ready, error } = useWasmServer(options);
+  const { ready, error, progress } = useWasmServer(options);
 
   if (error) {
     return (
@@ -70,18 +70,64 @@ function WasmServerGate({
   }
 
   if (!ready) {
-    return (
-      <>
-        {fallback?.booting ?? (
-          <div style={{ padding: "2rem", fontFamily: "monospace" }}>
-            Starting in-browser server…
-          </div>
-        )}
-      </>
-    );
+    return <>{fallback?.booting ?? <DefaultBootingScreen progress={progress} />}</>;
   }
 
   return <>{children}</>;
+}
+
+const BYTES_PER_MB = 1024 * 1024;
+
+function DefaultBootingScreen({
+  progress,
+}: {
+  progress: WasmDownloadProgress | null;
+}) {
+  const percent =
+    progress?.total != null
+      ? Math.min(100, Math.round((progress.loaded / progress.total) * 100))
+      : null;
+
+  return (
+    <div style={{ padding: "2rem", fontFamily: "monospace" }}>
+      <div>Starting in-browser server…</div>
+
+      {progress && progress.loaded > 0 && (
+        <div style={{ marginTop: "0.75rem" }}>
+          <div
+            style={{
+              width: 240,
+              height: 8,
+              borderRadius: 4,
+              overflow: "hidden",
+              background: "rgba(128, 128, 128, 0.25)",
+            }}
+          >
+            <div
+              style={{
+                // No content-length to compute a real percentage from? Show
+                // a fixed-width bar instead of a 0%-forever one, so it still
+                // reads as "something is happening" rather than stuck.
+                width: percent != null ? `${percent}%` : "40%",
+                height: "100%",
+                background: "currentColor",
+                transition: "width 0.15s ease",
+              }}
+            />
+          </div>
+          <div style={{ marginTop: "0.25rem", fontSize: "0.85em" }}>
+            {percent != null
+              ? `${mb(progress.loaded)} / ${mb(progress.total!)} MB (${percent}%)`
+              : `${mb(progress.loaded)} MB downloaded`}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function mb(bytes: number): string {
+  return (bytes / BYTES_PER_MB).toFixed(1);
 }
 
 export default WithWasmServer;
