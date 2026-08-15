@@ -3,6 +3,7 @@ import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 import { BUILD_VARIABLES } from "../../hooks/build-variables";
 import { SESSION_STORAGE_KEY } from "@fireback/auth-client";
 import { useFetchxContext } from "@fireback/js-remote-ctx/react/useFetchx";
+import { wasmFetchOverride } from "@fireback/wasm-server/wasmServer";
 
 // The app's real session lives under this key - see
 // fireback-ui/auth/AuthenticationProvider.tsx, which persists it there via
@@ -43,16 +44,18 @@ function readRemoteQueryToken(): string | undefined {
  *    keeps retrying, and the stored session is left untouched.
  */
 export async function checkSessionViaWhoami(): Promise<void> {
+  console.log(1);
   const token = readRemoteQueryToken();
-  const ctx = useFetchxContext();
-  if (!token) {
-    return;
-  }
+  console.log(2, token);
+
+  // if (!token) {
+  //   return;
+  // }
 
   const { response } = await WhoamiAction.Fetch(
     { headers: { authorization: token } },
     {
-      ctx,
+      ctx: new FetchxContext("", null, null, null, wasmFetchOverride()),
     },
   );
 
