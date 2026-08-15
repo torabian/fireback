@@ -49,15 +49,12 @@ func main() {
 				emiCommand,
 			},
 		},
-		{
-			CliHandlers: []*cli.Command{
-				{
-					Name:     "backup",
-					Usage:    "Take and restore point-in-time Postgres backups via wal-g",
-					Commands: backup.Commands(),
-				},
-			},
-		},
+		// backup.ModuleSetup wires up backup's CLI commands (wal-g push/restore/...,
+		// plus dump/restore-dump), its config: block (WALG_*/BACKUP_*, see
+		// Backup.emi.yml) into fireback's combined "config list", and the HTTP
+		// endpoints `backup dump --hash` registers a job against - instead of main.go
+		// hand-assembling a bare CliHandlers-only ModuleProvider the way this used to.
+		backup.ModuleSetup(nil),
 		storage.StorageModuleSetup(nil),
 		eventbus.ModuleSetup(nil),
 		reactivesearch.ModuleSetup(&reactivesearch.ReactiveSearchModuleConfig{

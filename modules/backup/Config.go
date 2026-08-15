@@ -15,13 +15,20 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 
+	backupdefs "github.com/torabian/fireback/modules/backup/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
 // ModuleConfig holds everything Engine needs to invoke wal-g: the Postgres
 // connection it should back up/restore, and where backup artifacts live.
+// Every knob that isn't a Postgres connection detail (FilePrefix,
+// CompressionMethod, DeltaMaxSteps, RetainFullBackups) is now sourced from
+// backupdefs.LoadConfiguration() - generated from Backup.emi.yml's own
+// `config:` block by the emi compiler (`make defs`) - rather than read
+// directly from os.Getenv here. See ConfigRegistry.go for how that makes
+// these show up in fireback's combined "config list"/"config <field> set"
+// CLI, the same way every other module's config: block already does.
 type ModuleConfig struct {
 	PgHost     string
 	PgPort     string
@@ -56,6 +63,7 @@ func envOr(key, fallback string) string {
 // backup-cli binary pointed at a database with no app config nearby.
 func LoadModuleConfig() (*ModuleConfig, error) {
 	fc := fireback.LoadConfiguration()
+	bc := backupdefs.LoadConfiguration()
 
 	// Explicit PGHOST/PGDATABASE (the standalone backup-cli case, run
 	// wherever wal-g itself would be) always wins over fireback's own
@@ -74,18 +82,10 @@ func LoadModuleConfig() (*ModuleConfig, error) {
 		PgPassword: envOr("PGPASSWORD", fc.DbPassword),
 		PgDatabase: envOr("PGDATABASE", fc.DbName),
 
-		FilePrefix:        os.Getenv("WALG_FILE_PREFIX"),
-		CompressionMethod: envOr("WALG_COMPRESSION_METHOD", "lz4"),
-		DeltaMaxSteps:     envOr("WALG_DELTA_MAX_STEPS", "6"),
-		RetainFullBackups: 4,
-	}
-
-	if n := os.Getenv("BACKUP_RETAIN_FULL"); n != "" {
-		v, err := strconv.Atoi(n)
-		if err != nil {
-			return nil, fmt.Errorf("BACKUP_RETAIN_FULL must be an integer, got %q: %w", n, err)
-		}
-		cfg.RetainFullBackups = v
+		FilePrefix:        bc.FilePrefix,
+		CompressionMethod: bc.CompressionMethod,
+		DeltaMaxSteps:     bc.DeltaMaxSteps,
+		RetainFullBackups: int(bc.RetainFullBackups),
 	}
 
 	if cfg.FilePrefix == "" {

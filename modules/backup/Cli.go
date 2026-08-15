@@ -24,8 +24,9 @@ import (
 )
 
 func Commands() []*cli.Command {
-	return []*cli.Command{
+	cmds := []*cli.Command{
 		initCmd,
+		enableCmd,
 		pushCmd,
 		listCmd,
 		restoreCmd,
@@ -36,6 +37,10 @@ func Commands() []*cli.Command {
 		archivePushCmd,
 		archiveGetCmd,
 	}
+	// dump/restore-dump (Dump.go/RestoreDump.go): plain pg_dump/mysqldump/
+	// sqlite snapshots, for whichever vendor DB_VENDOR is actually set to -
+	// unlike every command above, which is wal-g and Postgres-only.
+	return append(cmds, dumpRestoreCommands()...)
 }
 
 func loadEngine() (*ModuleConfig, *Engine, error) {
@@ -65,7 +70,7 @@ var initCmd = &cli.Command{
 
 		fmt.Printf("ok: embedded wal-g runs, storage prefix %s is writable, Postgres target %s@%s:%s/%s\n",
 			cfg.FilePrefix, cfg.PgUser, cfg.PgHost, cfg.PgPort, cfg.PgDatabase)
-		fmt.Println("reminder: Postgres itself still needs wal_level=replica, archive_mode=on, and archive_command set - see modules/backup/README.md")
+		fmt.Println("reminder: Postgres itself still needs wal_level=replica, archive_mode=on, and archive_command set - run `backup enable` to configure these automatically, or see modules/backup/README.md for the manual steps")
 		return nil
 	},
 }

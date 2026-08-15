@@ -1,0 +1,91 @@
+name: backup
+
+targets:
+  - compiler: go
+    output: ./defs
+    flags:
+      pkg: backupdefs
+
+description:
+  Point-in-time Postgres backup/restore (wal-g), plus plain dump/restore for
+  Postgres, MySQL/MariaDB and SQLite - either to a local zip file or streamed
+  over HTTP behind a one-time secure hash. See modules/backup/README.md.
+
+# Every field here is read via envconfig - see modules/backup/defs/Configuration.go
+# once generated (make defs) - and folded into fireback's combined "config list"
+# (ConfigRegistry.go) via BackupModuleSetup's ConfigProvider, instead of the module
+# reading os.Getenv directly the way it used to.
+#
+# env: is set explicitly everywhere a name must match something else already
+# reading that exact variable (wal-g itself for WALG_*/PG*, psql/mysql client
+# libraries for PG*/MYSQL_PWD) - only the fields wal-g/psql/mysql don't already
+# dictate a name get the auto-generated BACKUP_* env var.
+#
+# No backticks and no double quotes in any description below - both get spliced
+# verbatim into a generated Go backtick-delimited struct tag literal, and either
+# one breaks the build (a backtick ends the tag early, a bare quote is a syntax
+# error inside the tag's own quoted description="..." value).
+config:
+  - name: filePrefix
+    env: WALG_FILE_PREFIX
+    type: string
+    description:
+      Required - LoadModuleConfig refuses to start without it. Local/mounted
+      directory wal-g stores base backups and WAL segments under. Must be
+      genuinely separate storage from the database's own disk to serve as a
+      real disaster-recovery plan - see README.md.
+
+  - name: compressionMethod
+    env: WALG_COMPRESSION_METHOD
+    type: string
+    default: lz4
+    description: Compression method wal-g uses for base backups and WAL segments.
+
+  - name: deltaMaxSteps
+    env: WALG_DELTA_MAX_STEPS
+    type: string
+    default: "6"
+    description: How many delta backups wal-g chains before forcing a full backup.
+
+  - name: retainFullBackups
+    env: BACKUP_RETAIN_FULL
+    type: int64
+    default: "4"
+    description: How many full backups the prune command keeps (plus what's needed to restore from the oldest of them forward).
+
+  - name: dumpDir
+    env: BACKUP_DUMP_DIR
+    type: string
+    default: "./backups/dumps"
+    description:
+      Directory the dump command writes its output zip into when neither
+      --output nor --hash is given.
+
+  - name: dumpHashTtlSeconds
+    env: BACKUP_DUMP_HASH_TTL_SECONDS
+    type: int64
+    default: "1800"
+    description:
+      How many seconds a dump --hash download link stays claimable before it
+      expires unfetched. The hash is single-use - once fetched (or once it
+      fails), it's disabled immediately regardless of this TTL.
+
+  - name: pgDumpBin
+    type: string
+    default: pg_dump
+    description: pg_dump executable used by the dump command for postgres.
+
+  - name: psqlBin
+    type: string
+    default: psql
+    description: psql executable used by the restore-dump command for postgres.
+
+  - name: mysqldumpBin
+    type: string
+    default: mysqldump
+    description: mysqldump executable used by the dump command for mysql/mariadb.
+
+  - name: mysqlBin
+    type: string
+    default: mysql
+    description: mysql client executable used by the restore-dump command for mysql/mariadb.
