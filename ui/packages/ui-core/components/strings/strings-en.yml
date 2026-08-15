@@ -34,6 +34,7 @@ content:
     findASetting: Find a setting
     formDateTime: Form Date/Time
     formSelect: Form select
+    formJsf: Form Jsf
     home: Home
     noAttachmentData: No attachment data
     noQuerySourceToRender: No query source to render
