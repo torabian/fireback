@@ -1,0 +1,70 @@
+name: internalstats
+
+targets:
+  - compiler: go
+    output: ./defs
+    flags:
+      pkg: internalstatsdefs
+  - compiler: preprocessor
+    output: ./
+
+description:
+  Read-only server/process health stats - CPU, memory, disk, network, Go runtime,
+  around 30-40 individual measurements (see modules/internalstats/Collector.go for the
+  full list) - as a one-shot JSON snapshot (InternalStatsSnapshot) or a reactive
+  (websocket) live feed of the same snapshot pushed on an interval
+  (InternalStatsStream). A project only gets these routes/CLI commands if its main.go
+  calls internalstats.ModuleSetup - see InternalStatsModule.go.
+
+actions:
+  - name: InternalStatsSnapshot
+    method: get
+    cliName: snapshot
+    url: /internal-stats/snapshot
+    description:
+      One point-in-time snapshot of every measured stat, as JSON. Root workspace
+      token required by default - see InternalStatsModuleConfig.Authorize.
+    out:
+      envelope: GResponse
+      fields:
+        - name: generatedAt
+          type: string
+          description: RFC3339 timestamp this snapshot was collected at.
+        - name: hostname
+          type: string
+        - name: items
+          type: array
+          description: Every measured stat, in a stable display order (grouped by category).
+          fields:
+            - name: key
+              type: string
+              description: Stable machine-readable identifier, e.g. cpu.usedPercent.
+            - name: label
+              type: string
+              description: Human-readable label for display, e.g. CPU Usage.
+            - name: category
+              type: string
+              description: Display grouping, e.g. CPU, Memory, Disk, Network, Runtime, Host.
+            - name: value
+              type: string
+              description: Pre-formatted display value, e.g. 62.3% or 8.0 GB.
+            - name: rawValue
+              type: float64
+              description: The same value as a plain number, for programmatic use (0 when not numeric).
+            - name: unit
+              type: string
+              description: Unit of rawValue, e.g. percent, bytes, seconds. Empty for non-numeric stats.
+            - name: severity
+              type: string
+              description: One of ok, warn, critical, info - a coarse threshold-based read on this stat.
+
+  - name: InternalStatsStream
+    method: reactive
+    cliName: stream
+    url: /internal-stats/stream
+    description:
+      Reactive (websocket) live feed of the same snapshot InternalStatsSnapshot
+      returns, pushed on an interval (see InternalStatsModuleConfig.Interval) until
+      the client disconnects. Each frame is the JSON-encoded snapshot object -
+      identical shape to InternalStatsSnapshot's out fields. Root workspace token
+      required by default - see InternalStatsModuleConfig.Authorize.
