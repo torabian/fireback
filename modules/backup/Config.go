@@ -18,6 +18,7 @@ import (
 
 	backupdefs "github.com/torabian/fireback/modules/backup/defs"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/dbdsn"
 )
 
 // ModuleConfig holds everything Engine needs to invoke wal-g: the Postgres
@@ -55,12 +56,12 @@ func envOr(key, fallback string) string {
 }
 
 // LoadModuleConfig resolves Postgres connection details from fireback's own
-// configuration first (the same DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD/
-// DB_NAME pieces GetDatabaseDsn builds a connection string from), so this
-// module never needs its own separate set of DB_* settings - then lets the
-// standard libpq PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE env vars
-// override them, which matters when this runs as the standalone
-// backup-cli binary pointed at a database with no app config nearby.
+// configuration first (DB_DSN, parsed back into pieces by dbdsn - see
+// modules/fireback/dbdsn), so this module never needs its own separate set
+// of DB_* settings - then lets the standard libpq PGHOST/PGPORT/PGUSER/
+// PGPASSWORD/PGDATABASE env vars override them, which matters when this
+// runs as the standalone backup-cli binary pointed at a database with no
+// app config nearby.
 func LoadModuleConfig() (*ModuleConfig, error) {
 	fc := fireback.LoadConfiguration()
 	bc := backupdefs.LoadConfiguration()
@@ -75,12 +76,20 @@ func LoadModuleConfig() (*ModuleConfig, error) {
 		return nil, fmt.Errorf("backup module only supports postgres, got DB_VENDOR=%q", fc.DbVendor)
 	}
 
+	// Best-effort: a non-postgres or unset DB_DSN just leaves info zeroed,
+	// which is fine - the PG* env vars below are exactly the fallback for
+	// that (the standalone backup-cli case explicitPg already covers).
+	var info dbdsn.ConnectionInfo
+	if fc.DbVendor == dbdsn.VendorPostgres {
+		info, _ = dbdsn.ParsePostgres(fc.DbDsn)
+	}
+
 	cfg := &ModuleConfig{
-		PgHost:     envOr("PGHOST", fc.DbHost),
-		PgPort:     envOr("PGPORT", fmt.Sprintf("%v", fc.DbPort)),
-		PgUser:     envOr("PGUSER", fc.DbUsername),
-		PgPassword: envOr("PGPASSWORD", fc.DbPassword),
-		PgDatabase: envOr("PGDATABASE", fc.DbName),
+		PgHost:     envOr("PGHOST", info.Host),
+		PgPort:     envOr("PGPORT", info.Port),
+		PgUser:     envOr("PGUSER", info.Username),
+		PgPassword: envOr("PGPASSWORD", info.Password),
+		PgDatabase: envOr("PGDATABASE", info.Database),
 
 		FilePrefix:        bc.FilePrefix,
 		CompressionMethod: bc.CompressionMethod,

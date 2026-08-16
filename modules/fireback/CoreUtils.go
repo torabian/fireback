@@ -389,12 +389,10 @@ var ConfigCommand cli.Command = cli.Command{
 					return nil
 				}
 
-				config.DbUsername = databaseData.Username
-				p, _ := strconv.Atoi(databaseData.Port)
-				config.DbPort = int64(p)
-				config.DbHost = databaseData.Host
-				config.DbPassword = databaseData.Password
-				config.DbName = databaseData.Database
+				// DbDsn is the only thing persisted for the connection - see
+				// modules/fireback/dbdsn. databaseData's other fields
+				// (Host/Port/Username/...) only existed to build that Dsn
+				// interactively; AskProjectDatabase already folded them in.
 				config.DbVendor = databaseData.Vendor
 				config.DbDsn = databaseData.Dsn
 

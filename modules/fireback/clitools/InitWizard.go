@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,8 +19,13 @@ import (
 
 // config is a pointer to the core package's package-level config instance
 // (via fireback.GetConfigRef()), so mutating config.Field here mutates the
-// same storage the core package reads from.
-var config = fireback.GetConfig()
+// same storage the core package reads from - and, just as importantly,
+// reflects whatever LoadFirebackAppConfiguration loaded from .env before
+// this package's init() ran. A plain fireback.GetConfig() (a value copy,
+// taken at package-variable-init time - i.e. before .env is ever read) was
+// the actual bug behind "defaults from .env aren't picked up": it captured
+// nothing but the struct's hardcoded zero values, permanently.
+var config = fireback.GetConfigRef()
 
 func init() {
 	fireback.CLIInit = cliInit
@@ -32,201 +36,8 @@ func init() {
 	fireback.AskFolderName = askFolderName
 }
 
-var useDsnOption = "I have dsn query string for connection"
-var useManualOption = "I enter port, host, username of database manually"
-
 var tryToSolve = "Let me retry to configurate the database parameters"
 var forceContinue = "Use the configuration without connection test"
-
-func askProjectDatabase(projectName string) (fireback.Database, error) {
-	db := fireback.Database{}
-
-	promptVariable := promptui.Select{
-		Label: "Database type",
-		Items: []string{
-			fireback.DATABASE_TYPE_SQLITE,
-			fireback.DATABASE_TYPE_SQLITE_MEMORY,
-			fireback.DATABASE_TYPE_MYSQL,
-			fireback.DATABASE_TYPE_MARIADB,
-			fireback.DATABASE_TYPE_POSTGRES,
-		},
-	}
-
-	_, databaseType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return db, err
-	}
-
-	db.Vendor = databaseType
-
-	if db.Vendor == "sqlite" {
-		path, err := askSQLiteDatabaseLocation(projectName)
-		if err != nil {
-			fmt.Printf("cannot access the sqlite database, or cannot create it %v\n", err)
-			return db, err
-		}
-		db.Database = path
-	} else if db.Vendor == fireback.DATABASE_TYPE_SQLITE_MEMORY {
-		db.Database = ":memory:"
-		db.Vendor = "sqlite"
-	} else if db.Vendor == fireback.DATABASE_TYPE_MYSQL || db.Vendor == fireback.DATABASE_TYPE_MARIADB {
-		askMysqlDetails(&db)
-	} else if db.Vendor == fireback.DATABASE_TYPE_POSTGRES {
-		askPostgresDetails(&db)
-	}
-
-	return db, nil
-}
-
-func askMysqlDetails(db *fireback.Database) (*fireback.Database, error) {
-
-	promptVariable := promptui.Select{
-		Label: "Do you have dsn string or port, host , username?",
-		Items: []string{useDsnOption, useManualOption},
-	}
-
-	_, actionType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return db, err
-	}
-
-	if actionType == useDsnOption {
-		value, err := askMysqlDsn()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return db, err
-		}
-
-		db.Dsn = value
-
-		return db, nil
-	}
-
-	if actionType == useManualOption {
-
-		db.Host = askHostName()
-		db.Port = askHostPort("3306")
-		db.Database = askDatabaseName()
-		db.Username = askHostUsername("root")
-		db.Password = askHostPassword()
-	}
-
-	return db, nil
-}
-
-func askPostgresDetails(db *fireback.Database) (*fireback.Database, error) {
-
-	promptVariable := promptui.Select{
-		Label: "Do you have dsn string or port, host , username?",
-		Items: []string{useDsnOption, useManualOption},
-	}
-
-	_, actionType, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return db, err
-	}
-
-	if actionType == useDsnOption {
-		value, err := askPostgresDsn()
-
-		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
-			return db, err
-		}
-
-		db.Dsn = value
-
-		return db, nil
-	}
-
-	if actionType == useManualOption {
-
-		db.Host = askHostName()
-		db.Port = askHostPort("5432")
-		db.Database = askDatabaseName()
-		db.Username = askHostUsername("postgres")
-		db.Password = askHostPassword()
-	}
-
-	return db, nil
-}
-
-func askHostUsername(defaultUsername string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter database username")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "Database username",
-		Validate: validate,
-		Default:  defaultUsername,
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func promptInput(label, defaultValue string, validate func(string) error) string {
-	promptVariable := promptui.Prompt{
-		Label:    label,
-		Default:  defaultValue,
-		Validate: validate,
-	}
-
-	result, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed: %v\n", err)
-		return ""
-	}
-
-	return result
-}
-
-func askDatabaseName() string {
-	validateDatabaseName := func(input string) error {
-		if input == "" {
-			return errors.New("database name is required on this type of databse.")
-		}
-		return nil
-	}
-
-	return promptInput("Database name", "", validateDatabaseName)
-}
-
-func askHostName() string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter the mysql host, for example localhost")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "The host, ip which mysql is installed. (eg. 127.0.0.1 or localhost or 210.231.20.30",
-		Validate: validate,
-		Default:  "localhost",
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
 
 func askPortName(label string, defaultPort string) string {
 	validate := func(input string) error {
@@ -263,45 +74,6 @@ func askFolderName(label string, defaultFolder string) string {
 		Label:    label,
 		Validate: validate,
 		Default:  defaultFolder,
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func askHostPassword() string {
-
-	promptVariable := promptui.Prompt{
-		Label:   "password",
-		Default: "",
-	}
-
-	hostname, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return ""
-	}
-
-	return hostname
-}
-
-func askHostPort(defaultp string) string {
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter the database port")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "port",
-		Validate: validate,
-		Default:  defaultp,
 	}
 
 	hostname, err := promptVariable.Run()
@@ -386,7 +158,7 @@ func cliInit(xapp *application.Application) *cli.Command {
 		Flags: fireback.GetConfigCliFlags(),
 		Action: func(ctx context.Context, c *cli.Command) error {
 			if c.NumFlags() > 0 {
-				fireback.CastConfigFromCli(&config, c)
+				fireback.CastConfigFromCli(config, c)
 
 				if !c.IsSet("mac-identifier") {
 					config.MacIdentifier = config.Name
@@ -419,17 +191,14 @@ func dataBaseConfigEnv(xapp *application.Application) error {
 			return nil
 		}
 
-		// 3. Check if the database could be connected, if not show error and move on
-		config.DbUsername = databaseData.Username
-		p, _ := strconv.Atoi(databaseData.Port)
-		config.DbPort = int64(p)
-		config.DbHost = databaseData.Host
-		config.DbPassword = databaseData.Password
-		config.DbName = databaseData.Database
+		// 3. Check if the database could be connected, if not show error and move on.
+		// DbDsn is the only thing persisted for the connection (see
+		// modules/fireback/dbdsn) - askProjectDatabase already folded
+		// whatever host/port/username/... it gathered into that Dsn.
 		config.DbVendor = databaseData.Vendor
 		config.DbDsn = databaseData.Dsn
 
-		db, err := fireback.DirectConnectToDb(config)
+		db, err := fireback.DirectConnectToDb(*config)
 		if err == nil && db.Exec("select 1").Error == nil {
 			config.Save(".env")
 			fmt.Println("✔ connection is successful")
@@ -502,7 +271,7 @@ func initEnvironment(xapp *application.Application, envFileName string, c *cli.C
 		return err
 	}
 
-	askSqlLogLevel(&config)
+	askSqlLogLevel(config)
 
 	// 4. Ask for the ports, it's important.
 	po, _ := strconv.Atoi(askPortName("Http port which fireback will be lifted:", fmt.Sprintf("%v", config.Port)))
@@ -514,7 +283,7 @@ func initEnvironment(xapp *application.Application, envFileName string, c *cli.C
 
 	executeSeeders(xapp)
 
-	askSSL(&config)
+	askSSL(config)
 
 	config.Save(".env")
 
@@ -551,79 +320,4 @@ func askEnvironmentName(originalName string) (string, error) {
 	}
 
 	return variable, nil
-}
-
-func askSQLiteDatabaseLocation(projectName string) (string, error) {
-
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("enter the database path on file system, eg. /tmp/database1.db")
-		}
-		return nil
-	}
-
-	workingDirectory, err := filepath.Abs(".")
-	if err != nil {
-		log.Println(err)
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "Database file location (.db)",
-		Validate: validate,
-		Default:  filepath.Join(workingDirectory, projectName+"-database.db"),
-	}
-
-	value, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return "", err
-	}
-
-	return value, nil
-}
-
-func askMysqlDsn() (string, error) {
-
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("you need to enter dsn (eg: username:password@protocol(address)/dbname?param=value)")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "DSN Connection (eg: username:password@protocol(address)/dbname?param=value)",
-		Validate: validate,
-	}
-
-	value, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return "", err
-	}
-
-	return value, nil
-}
-
-func askPostgresDsn() (string, error) {
-
-	validate := func(input string) error {
-		if input == "" {
-			return errors.New("you need to enter dsn (eg: host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai)")
-		}
-		return nil
-	}
-
-	promptVariable := promptui.Prompt{
-		Label:    "DSN Connection (eg: host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai)",
-		Validate: validate,
-	}
-
-	value, err := promptVariable.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return "", err
-	}
-
-	return value, nil
 }
