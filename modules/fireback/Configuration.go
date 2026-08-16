@@ -27,8 +27,6 @@ type Config struct {
 	WithTaskServer bool `envconfig:"WITH_TASK_SERVER" description:"Runs the tasks server asyncq library when the http server starts. Useful for all in one applications to run everything in single instance"`
 	// Environment name, such as dev, prod, test, test-eu, etc...
 	Name string `envconfig:"NAME" description:"Environment name, such as dev, prod, test, test-eu, etc..."`
-	// Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.
-	DbName string `envconfig:"DB_NAME" description:"Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite."`
 	// SSL Certification location to server on http listener
 	CertFile string `envconfig:"CERT_FILE" description:"SSL Certification location to server on http listener"`
 	// SSL Certification key file
@@ -37,16 +35,8 @@ type Config struct {
 	DbLogLevel string `envconfig:"DB_LOG_LEVEL" description:"Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options."`
 	// If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
 	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
-	// Database port for those which are having a port, 3306 on mysql for example
-	DbPort int64 `envconfig:"DB_PORT" description:"Database port for those which are having a port, 3306 on mysql for example"`
-	// Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.
-	DbDsn string `envconfig:"DB_DSN" description:"Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored."`
-	// Database host, such as localhost, or 127.0.0.1
-	DbHost string `envconfig:"DB_HOST" description:"Database host, such as localhost, or 127.0.0.1"`
-	// Database username for connection, such as root.
-	DbUsername string `envconfig:"DB_USERNAME" description:"Database username for connection, such as root."`
-	// Database password for connection. Can be empty if there is no password
-	DbPassword string `envconfig:"DB_PASSWORD" description:"Database password for connection. Can be empty if there is no password"`
+	// The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it.
+	DbDsn string `envconfig:"DB_DSN" description:"The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it."`
 	// Gin framework mode, which could be 'test', 'debug', 'release'
 	GinMode string `envconfig:"GIN_MODE" description:"Gin framework mode, which could be 'test', 'debug', 'release'"`
 	// This is the storage url which files will be uploaded to
@@ -85,7 +75,6 @@ type Config struct {
 var config Config = Config{
 	TokenGenerationStrategy: "random",
 	WithTaskServer:          false,
-	DbName:                  ":memory:",
 	DbLogLevel:              "silent",
 	DbVendor:                "sqlite",
 	WorkerAddress:           "127.0.0.1:6379",

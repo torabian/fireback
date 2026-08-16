@@ -72,22 +72,24 @@ func excludeDatabaseConnection() bool {
 	return false
 }
 
+// GetDatabaseDsn returns the connection string to hand a gorm dialector.
+// DB_DSN is the single source of truth for every vendor - there's no
+// per-vendor fallback assembled from separate DB_HOST/DB_PORT/DB_USERNAME/
+// DB_PASSWORD/DB_NAME fields anymore (see modules/fireback/dbdsn, which is
+// where those pieces get parsed back out of DB_DSN when something - the
+// interactive setup wizard, the backup module - needs them individually
+// instead of as one opaque string).
+//
+// sqlite is the one vendor where DB_DSN isn't a connection string in the
+// usual sense - it's simply the database file path (or ":memory:"), which
+// is exactly what a sqlite "dsn" already is.
 func GetDatabaseDsn(config Config) (vendor string, dsn string) {
 	uris := envm.GetEnvironmentUris()
 	vendor = config.DbVendor
+	dsn = config.DbDsn
 
-	if vendor == "mysql" || vendor == "mariadb" {
-		dsn = config.DbDsn
-		if dsn == "" {
-			dsn = config.DbUsername + ":" + config.DbPassword + "@tcp(" + config.DbHost + ":" + fmt.Sprintf("%v", config.DbPort) + ")/" + config.DbName + "?charset=utf8mb4&parseTime=True&loc=Local"
-		}
-	} else if vendor == "postgres" {
-		dsn = config.DbDsn
-		if dsn == "" {
-			dsn = "host=" + config.DbHost + " user=" + config.DbUsername + " password=" + config.DbPassword + " dbname=" + config.DbName + " port=" + fmt.Sprintf("%v", config.DbPort) + " sslmode=disable"
-		}
-	} else if vendor == "sqlite" {
-		var path = config.DbName
+	if vendor == "sqlite" {
+		path := dsn
 		if path == "" {
 			path = ":memory:"
 		}

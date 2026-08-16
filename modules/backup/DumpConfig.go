@@ -5,6 +5,7 @@ import (
 
 	backupdefs "github.com/torabian/fireback/modules/backup/defs"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/dbdsn"
 )
 
 // DumpVendor is which database engine `backup dump`/`backup restore-dump`
@@ -19,12 +20,12 @@ const (
 )
 
 // DumpConfig is everything Dump.go/RestoreDump.go need: the database
-// connection to dump/restore against (taken directly from fireback's own
-// DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD/DB_NAME - unlike ModuleConfig,
-// there's no separate PGHOST-style override here, since dump/restore is
-// meant to run inside a fireback app that already knows its own database,
-// not standalone on a bare data directory the way wal-g's push/restore
-// must), plus the dump-specific knobs from Backup.emi.yml's config: block.
+// connection to dump/restore against (parsed out of fireback's own DB_DSN
+// via modules/fireback/dbdsn - unlike ModuleConfig, there's no separate
+// PGHOST-style override here, since dump/restore is meant to run inside a
+// fireback app that already knows its own database, not standalone on a
+// bare data directory the way wal-g's push/restore must), plus the
+// dump-specific knobs from Backup.emi.yml's config: block.
 type DumpConfig struct {
 	Vendor DumpVendor
 
@@ -33,10 +34,11 @@ type DumpConfig struct {
 	User     string
 	Password string
 
-	// Database is fireback's own configured default database (DB_NAME) -
-	// used as the fallback when dump/restore aren't given an explicit
-	// --database, and as the only meaningful value for sqlite (a sqlite
-	// "database" is just this file path; there is nothing to list/select).
+	// Database is fireback's own configured default database (the dbname
+	// piece of DB_DSN) - used as the fallback when dump/restore aren't
+	// given an explicit --database, and as the only meaningful value for
+	// sqlite (a sqlite "database" is just this file path, i.e. DB_DSN
+	// itself; there is nothing to list/select).
 	Database string
 
 	DumpDir        string
@@ -65,14 +67,8 @@ func LoadDumpConfig() (*DumpConfig, error) {
 		return nil, fmt.Errorf("backup dump/restore-dump: unsupported DB_VENDOR %q (supported: postgres, mysql, mariadb, sqlite)", fc.DbVendor)
 	}
 
-	return &DumpConfig{
+	cfg := &DumpConfig{
 		Vendor: vendor,
-
-		Host:     fc.DbHost,
-		Port:     fmt.Sprintf("%v", fc.DbPort),
-		User:     fc.DbUsername,
-		Password: fc.DbPassword,
-		Database: fc.DbName,
 
 		DumpDir:        bc.DumpDir,
 		HashTTLSeconds: bc.DumpHashTtlSeconds,
@@ -81,5 +77,23 @@ func LoadDumpConfig() (*DumpConfig, error) {
 		PsqlBin:      bc.PsqlBin,
 		MysqldumpBin: bc.MysqldumpBin,
 		MysqlBin:     bc.MysqlBin,
-	}, nil
+	}
+
+	if vendor == VendorSqlite {
+		// sqlite's "dsn" is just the file path (or ":memory:") - see
+		// fireback.GetDatabaseDsn.
+		cfg.Database = fc.DbDsn
+	} else {
+		info, err := dbdsn.Parse(fc.DbVendor, fc.DbDsn)
+		if err != nil {
+			return nil, fmt.Errorf("backup dump/restore-dump: %w", err)
+		}
+		cfg.Host = info.Host
+		cfg.Port = info.Port
+		cfg.User = info.Username
+		cfg.Password = info.Password
+		cfg.Database = info.Database
+	}
+
+	return cfg, nil
 }

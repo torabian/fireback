@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/torabian/emi/emigo"
 	"github.com/torabian/emi/lib/gorunner"
 	"github.com/urfave/cli/v3"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/torabian/fireback/modules/backup"
 	"github.com/torabian/fireback/modules/eventbus"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/internalstats"
 	"github.com/torabian/fireback/modules/reactivesearch"
 
 	// clitools registers every terminal/CLI-interactive fireback feature
@@ -61,6 +63,26 @@ func main() {
 			SearchProviders: []reactivesearch.SearchProviderFn{
 				abac.QueryMenusReact,
 				abac.QueryRolesReact,
+			},
+		}),
+		// internalstats never imports abac - Authorize below is built entirely out of
+		// fireback.ResolveActionContext/SecurityModel, the same generic contract every
+		// module's own actions already use. It ends up enforcing abac's root-workspace
+		// check anyway, transitively: fireback.AuthorizeRequest is nil until some auth
+		// provider's module setup assigns it, and abac.AbacCompleteModules() (appended
+		// to modules below) is what does that here (fireback.AuthorizeRequest =
+		// abac.AuthorizeRequest - see modules/abac/AbacModule.go). Swap this whole
+		// Authorize func for your own token check to drop the abac dependency for real.
+		internalstats.ModuleSetup(&internalstats.InternalStatsModuleConfig{
+			Authorize: func(req emigo.EmiRequestContexts) (fireback.QueryDSL, error) {
+				query, err := fireback.ResolveActionContext(req, &fireback.SecurityModel{
+					ResolveStrategy: fireback.ResolveStrategyWorkspace,
+					AllowOnRoot:     true,
+				})
+				if err != nil {
+					return fireback.QueryDSL{}, err
+				}
+				return *query, nil
 			},
 		}),
 		// interfacetools.ModuleSetup is constructed here, not inside

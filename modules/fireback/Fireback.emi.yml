@@ -62,11 +62,6 @@ config:
   - name: name
     description: >-
       Environment name, such as dev, prod, test, test-eu, etc...
-  - name: dbName
-    default: ":memory:"
-    description: >-
-      Database name for vendors which provide database names, such as mysql.
-      Filename on disk for sqlite.
   - name: certFile
     description: SSL Certification location to server on http listener
   - name: keyFile
@@ -77,20 +72,14 @@ config:
   - name: useSSL
     description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
     type: bool
-  - name: dbPort
-    description: "Database port for those which are having a port, 3306 on mysql for example"
-    type: int64
   - name: dbDsn
     description: >-
-      Connection dsn to database. Some databases allow connection using a string
-      with all credentials and configs. This has hight priority, if set other
-      details will be ignored.
-  - name: dbHost
-    description: "Database host, such as localhost, or 127.0.0.1"
-  - name: dbUsername
-    description: "Database username for connection, such as root."
-  - name: dbPassword
-    description: Database password for connection. Can be empty if there is no password
+      The single source of truth for the database connection: a full DSN
+      (postgres keyword/value string, mysql go-sql-driver DSN, or - for
+      sqlite - the database file path itself, or in-memory). See
+      modules/fireback/dbdsn for reading/writing individual pieces
+      (host/port/username/password/database/ssl) of this string; there is no
+      separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it.
   - name: ginMode
     description: "Gin framework mode, which could be 'test', 'debug', 'release'"
   - name: storage

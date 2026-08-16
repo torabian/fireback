@@ -48,10 +48,6 @@ func GetConfigCliFlags() []cli.Flag {
 			Usage: "Environment name, such as dev, prod, test, test-eu, etc...",
 		},
 		&cli.StringFlag{
-			Name:  "db-name",
-			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite.",
-		},
-		&cli.StringFlag{
 			Name:  "cert-file",
 			Usage: "SSL Certification location to server on http listener",
 		},
@@ -67,25 +63,9 @@ func GetConfigCliFlags() []cli.Flag {
 			Name:  "use-ssl",
 			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
 		},
-		&cli.Int64Flag{
-			Name:  "db-port",
-			Usage: "Database port for those which are having a port, 3306 on mysql for example",
-		},
 		&cli.StringFlag{
 			Name:  "db-dsn",
-			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored.",
-		},
-		&cli.StringFlag{
-			Name:  "db-host",
-			Usage: "Database host, such as localhost, or 127.0.0.1",
-		},
-		&cli.StringFlag{
-			Name:  "db-username",
-			Usage: "Database username for connection, such as root.",
-		},
-		&cli.StringFlag{
-			Name:  "db-password",
-			Usage: "Database password for connection. Can be empty if there is no password",
+			Usage: "The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it.",
 		},
 		&cli.StringFlag{
 			Name:  "gin-mode",
@@ -181,9 +161,6 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	if c.IsSet("name") {
 		config.Name = c.String("name")
 	}
-	if c.IsSet("db-name") {
-		config.DbName = c.String("db-name")
-	}
 	if c.IsSet("cert-file") {
 		config.CertFile = c.String("cert-file")
 	}
@@ -196,20 +173,8 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	if c.IsSet("use-ssl") {
 		config.UseSSL = c.Bool("use-ssl")
 	}
-	if c.IsSet("db-port") {
-		config.DbPort = c.Int64("db-port")
-	}
 	if c.IsSet("db-dsn") {
 		config.DbDsn = c.String("db-dsn")
-	}
-	if c.IsSet("db-host") {
-		config.DbHost = c.String("db-host")
-	}
-	if c.IsSet("db-username") {
-		config.DbUsername = c.String("db-username")
-	}
-	if c.IsSet("db-password") {
-		config.DbPassword = c.String("db-password")
 	}
 	if c.IsSet("gin-mode") {
 		config.GinMode = c.String("gin-mode")
@@ -470,29 +435,6 @@ func GetConfigCli() []*cli.Command {
 			},
 		},
 		{
-			Name:  "db-name",
-			Usage: "Database name for vendors which provide database names, such as mysql. Filename on disk for sqlite. (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.DbName)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.DbName, func(value string) {
-							config.DbName = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
 			Name:  "cert-file",
 			Usage: "SSL Certification location to server on http listener (string)",
 			Commands: []*cli.Command{
@@ -585,31 +527,8 @@ func GetConfigCli() []*cli.Command {
 			},
 		},
 		{
-			Name:  "db-port",
-			Usage: "Database port for those which are having a port, 3306 on mysql for example (int64)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.DbPort)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetInt64(c, config.DbPort, func(value int64) {
-							config.DbPort = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
 			Name:  "db-dsn",
-			Usage: "Connection dsn to database. Some databases allow connection using a string with all credentials and configs. This has hight priority, if set other details will be ignored. (string)",
+			Usage: "The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it. (string)",
 			Commands: []*cli.Command{
 				{
 					Name: "get",
@@ -623,75 +542,6 @@ func GetConfigCli() []*cli.Command {
 					Action: func(ctx context.Context, c *cli.Command) error {
 						return emigo.ConfigSetString(c, config.DbDsn, func(value string) {
 							config.DbDsn = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:  "db-host",
-			Usage: "Database host, such as localhost, or 127.0.0.1 (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.DbHost)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.DbHost, func(value string) {
-							config.DbHost = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:  "db-username",
-			Usage: "Database username for connection, such as root. (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.DbUsername)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.DbUsername, func(value string) {
-							config.DbUsername = value
-							config.Save(".env")
-						})
-						return nil
-					},
-				},
-			},
-		},
-		{
-			Name:  "db-password",
-			Usage: "Database password for connection. Can be empty if there is no password (string)",
-			Commands: []*cli.Command{
-				{
-					Name: "get",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						fmt.Println(config.DbPassword)
-						return nil
-					},
-				},
-				{
-					Name: "set",
-					Action: func(ctx context.Context, c *cli.Command) error {
-						return emigo.ConfigSetString(c, config.DbPassword, func(value string) {
-							config.DbPassword = value
 							config.Save(".env")
 						})
 						return nil
