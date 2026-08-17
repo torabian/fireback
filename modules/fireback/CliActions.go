@@ -1,8 +1,9 @@
+//go:build !wasm
+
 package fireback
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -145,16 +146,4 @@ type ModuleActionsBundle struct {
 
 	// cli.Command which has Subcommands of all actions
 	CliAction *cli.Command
-}
-
-type QuerySelectionInfo struct {
-	Columns  []string
-	Preloads []string
-}
-
-func (x QuerySelectionInfo) Json() string {
-
-	str, _ := json.MarshalIndent(x, "", "  ")
-	return (string(str))
-
 }
