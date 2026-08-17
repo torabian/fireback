@@ -476,15 +476,6 @@ func CommonCliExportCmd[T any](
 		YamlExporter[T](catalog, bar)
 	}
 
-	data := &PdfExportData{
-		Name:        "General Report",
-		Description: "General report of the entities",
-		FieldsMap:   map[string]string{},
-	}
-
-	if strings.Contains(exportFilePath, ".pdf") {
-		PdfExporter[T](exportFilePath, f, fn, v, bar, data)
-	}
 }
 
 func CommonCliExportCmd2[T any](
