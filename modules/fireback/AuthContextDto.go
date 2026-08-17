@@ -12,71 +12,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/fireback/application"
-	"github.com/urfave/cli/v3"
 )
-
-func CastAuthContextFromCli(c *cli.Command) *AuthContextDto {
-	template := &AuthContextDto{}
-	if c.IsSet("skip-workspace-id") {
-		value := c.Bool("skip-workspace-id")
-		template.SkipWorkspaceId = value
-	}
-	if c.IsSet("allow-cascade") {
-		value := c.Bool("allow-cascade")
-		template.AllowCascade = value
-	}
-	if c.IsSet("workspace-id") {
-		template.WorkspaceId = c.String("workspace-id")
-	}
-	if c.IsSet("token") {
-		template.Token = c.String("token")
-	}
-
-	return template
-}
-
-var AuthContextDtoCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "Unique Id - external unique hash to query entity",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.BoolFlag{
-		Name:     "skip-workspace-id",
-		Required: false,
-		Usage:    `skipWorkspaceId (bool)`,
-	},
-	&cli.BoolFlag{
-		Name:     "allow-cascade",
-		Required: false,
-		Usage:    `For recrusive content access scenarios, such as root workspace, if true they can see the child workspaces content (bool)`,
-	},
-	&cli.StringFlag{
-		Name:     "workspace-id",
-		Required: false,
-		Usage:    `workspaceId (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "token",
-		Required: false,
-		Usage:    `token (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "security-id",
-		Required: false,
-		Usage:    `security (one)`,
-	},
-}
 
 type AuthContextDto struct {
 	SkipWorkspaceId bool `json:"skipWorkspaceId" yaml:"skipWorkspaceId"        `

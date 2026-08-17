@@ -14,7 +14,6 @@ import (
 
 	"github.com/schollz/progressbar/v3"
 	"github.com/torabian/fireback/modules/fireback/application"
-	"github.com/torabian/fireback/modules/fireback/exporting"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v2"
 )
@@ -199,57 +198,6 @@ var FIREBACK_DEFAULT_DB_COLUMNS []string = []string{
 	"ParentId",
 }
 
-func ExtractRowStringValues[T any](row *T, v reflect.Value, verbose bool) []string {
-	data := []string{}
-	for j := 0; j < v.NumField(); j++ {
-
-		f := v.Field(j)
-		n := v.Type().Field(j).Name
-		t := f.Type().String()
-
-		if strings.ToUpper(n[0:1]) != n[0:1] {
-			continue
-		}
-
-		if Contains(FIREBACK_DEFAULT_DB_COLUMNS, n) && !verbose {
-			continue
-		}
-
-		value := ExtractStringValueFromReflectCell[T](row, t, n)
-
-		data = append(data, value)
-	}
-
-	return data
-}
-func ExtractStringValueFromReflectCell[T any](row *T, t string, n string) string {
-	value := ""
-
-	if t == "string" {
-		value = GetFieldString(row, n)
-	} else if t == "*string" {
-		value = GetFieldStringP(row, n)
-	} else if t == "int32" || t == "int64" || t == "int" {
-		value = fmt.Sprint(GetFieldInt(row, n))
-	} else if t == "bool" {
-		value = fmt.Sprint(GetFieldBool(row, n))
-	} else if t == "float64" {
-		value = fmt.Sprint(GetFieldFloat(row, n))
-	} else if t == "*float64" {
-		value = fmt.Sprint(GetFieldFloatP(row, n))
-	} else if t == "*int64" {
-		v0 := GetFieldInt64P(row, n)
-		if v0 == nil {
-			value = "N/A"
-		} else {
-			value = fmt.Sprint(*v0)
-		}
-	} else {
-		value = "N/A"
-	}
-	return value
-}
-
 func SeederFromFSImport[T any](
 	f QueryDSL,
 	fn func(dto *T, query QueryDSL) (*T, *IError),
@@ -431,108 +379,6 @@ func YamlExporter[T any](catalog *ExportCatalog[T], bar *progressbar.ProgressBar
 			break
 		}
 	}
-}
-
-func CommonCliExportCmd[T any](
-	c *cli.Command,
-	fn func(query QueryDSL) ([]*T, *QueryResultMeta, *IError),
-	v reflect.Value,
-	exportFilePath string,
-	translationRef *embed.FS,
-	fsFileName string,
-	detectedPreloads []string,
-) {
-
-	f := CommonCliQueryDSLBuilder(c)
-	f.Deep = true
-	f.WithPreloads = append(f.WithPreloads, detectedPreloads...)
-
-	_, count, err := fn(f)
-	bar := progressbar.Default(int64(count.TotalItems))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	writer, err2 := os.Create(exportFilePath)
-	if err2 != nil {
-		log.Fatalf("failed creating file: %s", err)
-	}
-
-	defer writer.Close()
-
-	translationBox := map[string]interface{}{}
-	ReadYamlFileEmbed[map[string]interface{}](translationRef, fsFileName, &translationBox)
-
-	catalog := &ExportCatalog[T]{
-		Writer:          writer,
-		ReadSize:        2,
-		ExportFilePath:  exportFilePath,
-		QueryResultMeta: count,
-		F:               f,
-		Fn:              fn,
-	}
-
-	if strings.Contains(exportFilePath, ".yml") || strings.Contains(exportFilePath, ".yaml") {
-		YamlExporter[T](catalog, bar)
-	}
-
-}
-
-func CommonCliExportCmd2[T any](
-	c *cli.Command,
-	fn func(q QueryDSL) (chan []*T, *QueryResultMeta, *IError),
-	v reflect.Value,
-	exportFilePath string,
-	translationRef *embed.FS,
-	fsFileName string,
-	detectedPreloads []string,
-) error {
-
-	f := CommonCliQueryDSLBuilder(c)
-	f.Deep = true
-	f.WithPreloads = append(f.WithPreloads, detectedPreloads...)
-
-	stream, count, err := fn(f)
-	totalProgress := int64(0)
-	if count != nil {
-		totalProgress = count.TotalItems
-	}
-	bar := progressbar.Default(int64(totalProgress))
-
-	if err != nil {
-		log.Fatalln(err)
-		return err
-	}
-
-	translationBox := map[string]interface{}{}
-	ReadYamlFileEmbed[map[string]interface{}](translationRef, fsFileName, &translationBox)
-
-	var exporter func(source chan []*T, fp string) (chan exporting.ProgressUpdate, error)
-
-	if strings.Contains(exportFilePath, ".csv") {
-		exporter = exporting.CSV2ExporterWriter
-	}
-
-	if strings.Contains(exportFilePath, ".yml") || strings.Contains(exportFilePath, ".yaml") {
-		exporter = exporting.YamlExporterWriter
-	}
-
-	if strings.Contains(exportFilePath, ".json") {
-		exporter = exporting.JsonExporterWriter
-	}
-
-	stats, err3 := exporter(stream, exportFilePath)
-	if err3 != nil {
-		log.Fatalln(err)
-	}
-
-	for stat := range stats {
-		bar.Add(stat.ItemsProcessed)
-	}
-
-	bar.Finish()
-
-	return nil
 }
 
 func GetFieldString[T any](v *T, field string) string {
