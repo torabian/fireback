@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/schollz/progressbar/v3"
@@ -178,7 +179,7 @@ func GetColumnsFromReflect[T any](v reflect.Value) []string {
 			continue
 		}
 
-		if Contains(FIREBACK_DEFAULT_DB_COLUMNS, n) && !verbose {
+		if slices.Contains(FIREBACK_DEFAULT_DB_COLUMNS, n) && !verbose {
 			continue
 		}
 
@@ -218,7 +219,7 @@ func SeederFromFSImport[T any](
 	} else {
 
 		for _, path := range entity {
-			if len(fileNames) > 0 && !Contains(fileNames, path) {
+			if len(fileNames) > 0 && !slices.Contains(fileNames, path) {
 				continue
 			}
 

@@ -2,6 +2,7 @@ package abac
 
 import (
 	"reflect"
+	"slices"
 
 	"github.com/torabian/emi/emigo"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
@@ -188,7 +189,7 @@ func WorkspaceAwareDeletePreviewAction(c abacdefs.WorkspaceAwareDeletePreviewAct
 	// for the root role. Checked here too (not just in WorkspaceAwareDeleteAction),
 	// so the confirmation step itself already surfaces the problem instead of letting
 	// an admin preview a "safe" delete that the real delete then rejects.
-	if fireback.Contains(uniqueIds, ROOT_VAR) {
+	if slices.Contains(uniqueIds, ROOT_VAR) {
 		return nil, &fireback.IError{Message: WorkspaceMessages.CannotDeleteRootWorkspace, HttpCode: 400}
 	}
 	preview, err2 := abacdefs.WorkspaceEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
@@ -206,7 +207,7 @@ func WorkspaceAwareDeleteAction(c abacdefs.WorkspaceAwareDeleteActionRequest) (*
 	// never be deletable. Rejecting the whole batch (rather than silently dropping
 	// just "root" from the list and deleting the rest) so a request that includes it
 	// fails loudly instead of quietly succeeding on everything else.
-	if fireback.Contains(c.Body.UniqueIds, ROOT_VAR) {
+	if slices.Contains(c.Body.UniqueIds, ROOT_VAR) {
 		return nil, &fireback.IError{Message: WorkspaceMessages.CannotDeleteRootWorkspace, HttpCode: 400}
 	}
 	if err2 := abacdefs.WorkspaceEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {

@@ -8,6 +8,7 @@ import (
 	"os"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -496,15 +497,15 @@ func QueryEntitiesPointer[T any](query QueryDSL, refl reflect.Value) ([]*T, *Que
 		selectall := []string(query.SelectableColumnSql)
 
 		// These are default field which are needed.
-		if !Contains(selectall, "uniqueId") {
+		if !slices.Contains(selectall, "uniqueId") {
 			selectall = append(selectall, "unique_id")
 		}
 
-		if !Contains(selectall, "linkerId") {
+		if !slices.Contains(selectall, "linkerId") {
 			selectall = append(selectall, "linker_id")
 		}
 
-		if !Contains(selectall, "ID") {
+		if !slices.Contains(selectall, "ID") {
 			selectall = append(selectall, "id")
 		}
 
