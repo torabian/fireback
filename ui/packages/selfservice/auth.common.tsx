@@ -7,6 +7,7 @@ import { useFetchxContext } from "@fireback/js-remote-ctx/react/useFetchx";
 import type { ClassicPassportOtpActionRes } from "@fireback/selfservice/sdk/abac/ClassicPassportOtpAction";
 import type { ClassicSigninActionRes } from "@fireback/selfservice/sdk/abac/ClassicSigninAction";
 import type { ClassicSignupActionRes } from "@fireback/selfservice/sdk/abac/ClassicSignupAction";
+import type { CompletePassportPasswordResetActionRes } from "@fireback/selfservice/sdk/abac/CompletePassportPasswordResetAction";
 import type { UserSessionDto } from "@fireback/selfservice/sdk/abac/UserSessionDto";
 import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
@@ -49,6 +50,7 @@ export const useCompleteAuth = () => {
       | ClassicSigninActionRes
       | ClassicSignupActionRes
       | ClassicPassportOtpActionRes
+      | CompletePassportPasswordResetActionRes
     >,
   ) => {
     // Handle React Native WebView

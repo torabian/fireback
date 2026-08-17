@@ -45,12 +45,29 @@ function readDotEnv(file) {
   return out;
 }
 
+// Fireback's config now stores only DB_VENDOR + DB_DSN (the discrete
+// DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD keys were removed), so pull the
+// connection pieces we need back out of the libpq-style keyword/value DSN
+// string, e.g. "host=localhost user=changeme password=changeme dbname=foo
+// port=6900 sslmode=disable".
+function parsePgDsn(dsn) {
+  const out = {};
+  if (!dsn) return out;
+  for (const pair of dsn.trim().split(/\s+/)) {
+    const eq = pair.indexOf("=");
+    if (eq === -1) continue;
+    out[pair.slice(0, eq)] = pair.slice(eq + 1);
+  }
+  return out;
+}
+
 const dotEnv = readDotEnv(path.join(REPO_ROOT, ".env"));
-const PG_HOST = process.env.POSTGRES_HOST || dotEnv.DB_HOST || "localhost";
-const PG_PORT = process.env.POSTGRES_PORT || dotEnv.DB_PORT || "5432";
-const PG_USER = process.env.POSTGRES_USER || dotEnv.DB_USERNAME || "postgres";
+const dsnFields = parsePgDsn(dotEnv.DB_DSN);
+const PG_HOST = process.env.POSTGRES_HOST || dsnFields.host || "localhost";
+const PG_PORT = process.env.POSTGRES_PORT || dsnFields.port || "5432";
+const PG_USER = process.env.POSTGRES_USER || dsnFields.user || "postgres";
 const PG_PASSWORD =
-  process.env.POSTGRES_PASSWORD || dotEnv.DB_PASSWORD || "postgres";
+  process.env.POSTGRES_PASSWORD || dsnFields.password || "postgres";
 
 console.log("Database", PG_HOST, PG_PORT, PG_USER, PG_PASSWORD);
 

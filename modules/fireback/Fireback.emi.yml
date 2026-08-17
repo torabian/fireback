@@ -72,6 +72,33 @@ config:
   - name: useSSL
     description: If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
     type: bool
+  - name: sslProvider
+    description: >-
+      How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile
+      point at a certificate you already have), 'self-signed' (a locally
+      generated certificate, persisted to certFile/keyFile so it survives
+      restarts - not trusted by browsers), or 'letsencrypt' (an ACME
+      certificate for acmeDomains, requested and renewed automatically via
+      golang.org/x/crypto/acme/autocert while the server is running). Empty
+      falls back to the legacy behavior: manual if certFile/keyFile are set,
+      otherwise an ephemeral self-signed certificate regenerated on every
+      start. Set by 'fireback ssl enable'.
+  - name: acmeDomains
+    description: >-
+      Comma separated list of domains to request a Let's Encrypt certificate
+      for, when sslProvider is 'letsencrypt'. Each domain must resolve to
+      this server and have port 80 reachable for the ACME HTTP-01 challenge.
+  - name: acmeEmail
+    description: >-
+      Contact email registered with Let's Encrypt for expiry notices, when
+      sslProvider is 'letsencrypt'. Optional but recommended.
+  - name: acmeCacheDir
+    description: >-
+      Directory where the ACME account key and issued certificates are
+      cached, when sslProvider is 'letsencrypt'. Must persist across
+      restarts so certificates aren't re-requested (and to stay under
+      Let's Encrypt's rate limits).
+    default: ./.fireback-acme-cache
   - name: dbDsn
     description: >-
       The single source of truth for the database connection: a full DSN

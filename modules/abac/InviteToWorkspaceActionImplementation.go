@@ -38,7 +38,7 @@ func InviteToWorkspaceAction(c abacdefs.InviteToWorkspaceActionRequest) (*abacde
 		return nil, err
 	}
 
-	_, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(req.RoleId))
+	_, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(req.RoleId), query)
 	if len(roleErrors) != 0 {
 		return nil, &fireback.IError{
 			Errors: roleErrors,

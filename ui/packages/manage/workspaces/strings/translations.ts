@@ -22,6 +22,8 @@ export const en = {
   type: "Type",
   workspaceName: "Workspace name",
   workspaceNameHint: "Enter the workspace name",
+  workspaceUniqueId: "Unique id",
+  workspaceUniqueIdHint: "Optional - choose the workspace's id yourself instead of letting one be generated. Cannot be changed once the workspace is created.",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
@@ -46,6 +48,8 @@ export const fa = {
   type: "تایپ کنید",
   workspaceName: "نام فضای کاری",
   workspaceNameHint: "نام فضای کاری را وارد کنید",
+  workspaceUniqueId: "شناسه یکتا",
+  workspaceUniqueIdHint: "اختیاری - به‌جای تولید خودکار، شناسه فضای کاری را خودتان انتخاب کنید. پس از ایجاد فضای کاری قابل تغییر نیست.",
 };/**
 * Auto generated file by fireback language & translation manager.
 */
@@ -70,5 +74,7 @@ export const pl = {
   type: "Typ",
   workspaceName: "Nazwa przestrzeni roboczej",
   workspaceNameHint: "Wprowadź nazwę przestrzeni roboczej",
+  workspaceUniqueId: "Unikalny identyfikator",
+  workspaceUniqueIdHint: "Opcjonalnie - wybierz identyfikator przestrzeni roboczej samodzielnie zamiast pozwolić na jego wygenerowanie. Nie można go zmienić po utworzeniu przestrzeni roboczej.",
 };
  export const strings = {...en, $fa:fa,$pl:pl};

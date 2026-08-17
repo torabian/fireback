@@ -32,6 +32,14 @@ type Config struct {
 	DbLogLevel string `envconfig:"DB_LOG_LEVEL" description:"Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options."`
 	// If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
 	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
+	// How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile point at a certificate you already have), 'self-signed' (a locally generated certificate, persisted to certFile/keyFile so it survives restarts - not trusted by browsers), or 'letsencrypt' (an ACME certificate for acmeDomains, requested and renewed automatically via golang.org/x/crypto/acme/autocert while the server is running). Empty falls back to the legacy behavior: manual if certFile/keyFile are set, otherwise an ephemeral self-signed certificate regenerated on every start. Set by 'fireback ssl enable'.
+	SslProvider string `envconfig:"SSL_PROVIDER" description:"How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile point at a certificate you already have), 'self-signed' (a locally generated certificate, persisted to certFile/keyFile so it survives restarts - not trusted by browsers), or 'letsencrypt' (an ACME certificate for acmeDomains, requested and renewed automatically via golang.org/x/crypto/acme/autocert while the server is running). Empty falls back to the legacy behavior: manual if certFile/keyFile are set, otherwise an ephemeral self-signed certificate regenerated on every start. Set by 'fireback ssl enable'."`
+	// Comma separated list of domains to request a Let's Encrypt certificate for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server and have port 80 reachable for the ACME HTTP-01 challenge.
+	AcmeDomains string `envconfig:"ACME_DOMAINS" description:"Comma separated list of domains to request a Let's Encrypt certificate for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server and have port 80 reachable for the ACME HTTP-01 challenge."`
+	// Contact email registered with Let's Encrypt for expiry notices, when sslProvider is 'letsencrypt'. Optional but recommended.
+	AcmeEmail string `envconfig:"ACME_EMAIL" description:"Contact email registered with Let's Encrypt for expiry notices, when sslProvider is 'letsencrypt'. Optional but recommended."`
+	// Directory where the ACME account key and issued certificates are cached, when sslProvider is 'letsencrypt'. Must persist across restarts so certificates aren't re-requested (and to stay under Let's Encrypt's rate limits).
+	AcmeCacheDir string `envconfig:"ACME_CACHE_DIR" description:"Directory where the ACME account key and issued certificates are cached, when sslProvider is 'letsencrypt'. Must persist across restarts so certificates aren't re-requested (and to stay under Let's Encrypt's rate limits)."`
 	// The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it.
 	DbDsn string `envconfig:"DB_DSN" description:"The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it."`
 	// Gin framework mode, which could be 'test', 'debug', 'release'
@@ -73,6 +81,7 @@ var config Config = Config{
 	TokenGenerationStrategy: "random",
 	WithTaskServer:          false,
 	DbLogLevel:              "silent",
+	AcmeCacheDir:            "./.fireback-acme-cache",
 	DbVendor:                "sqlite",
 	WorkerAddress:           "127.0.0.1:6379",
 	WorkerConcurrency:       10,

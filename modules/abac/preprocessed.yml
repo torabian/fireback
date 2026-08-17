@@ -2943,6 +2943,106 @@ actions:
     fields:
     - name: changed
       type: bool
+- name: SetPassportPassword
+  cliName: set-password
+  url: /passport/set-password
+  method: post
+  description: Root-only. Directly sets a new password on any passport, without knowing
+    (or being) the current one - unlike ChangePassword, which only ever touches the
+    calling user's own passport. Meant for an administrator resetting a locked-out
+    user's password on their behalf.
+  in:
+    fields:
+    - name: uniqueId
+      description: The passport uniqueId whose password will be replaced.
+      type: string
+      tags:
+        validate: required
+    - name: password
+      description: New password meeting the security requirements.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: changed
+      type: bool
+- name: DisablePassportTotp
+  cliName: disable-totp
+  url: /passport/totp/disable
+  method: post
+  description: Root-only. Force-disables TOTP (2FA) on a passport by clearing its
+    secret and confirmation flag - for unblocking a user who lost their authenticator
+    device. There is no matching "enable" action, since turning TOTP on requires the
+    user's own authenticator app to scan a fresh secret (see ConfirmClassicPassportTotpAction),
+    which an administrator cannot do on their behalf.
+  in:
+    fields:
+    - name: uniqueId
+      description: The passport uniqueId to disable TOTP for.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: disabled
+      type: bool
+- name: SendPassportResetEmail
+  cliName: send-reset-email
+  url: /passport/send-reset-email
+  method: post
+  description: Root-only. Sends the same OTP/recovery email or SMS ClassicPassportRequestOtp
+    sends for self-service login, but triggered by an administrator on the user's
+    behalf and addressed by passport uniqueId instead of by value - lets an admin
+    hand a locked-out user a way to reset their own password rather than the admin
+    setting it directly (see SetPassportPassword for that alternative).
+  in:
+    fields:
+    - name: uniqueId
+      description: The passport uniqueId to send the reset email/SMS to.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: sent
+      type: bool
+- name: CompletePassportPasswordReset
+  cliName: reset-password
+  url: /passport/reset-password
+  method: post
+  description: Public. Finishes the self-service reset flow started by ClassicPassportRequestOtp
+    or SendPassportResetEmail - given the passport value and the OTP code that was
+    emailed/texted to it, sets a new password and signs the user in, the same way
+    a successful ClassicPassportOtp login would.
+  in:
+    fields:
+    - name: value
+      description: Passport value (email, phone number) the OTP was sent to.
+      type: string
+      tags:
+        validate: required
+    - name: otp
+      description: The OTP code emailed/texted to the passport value.
+      type: string
+      tags:
+        validate: required
+    - name: password
+      description: New password meeting the security requirements.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: reset
+      type: bool
+    - name: session
+      type: one?
+      target: UserSessionDto
 - name: UserPassports
   url: /user/passports
   method: get
@@ -5110,3 +5210,16 @@ config:
     it can request another OTP/magic-link, once a request is already pending. See
     ClassicPassportRequestOtpActionImplementation.go.
   default: "120"
+- name: selfServiceBaseUrl
+  type: string
+  description: Base URL of the running self-service frontend (ui/packages/selfservice),
+    used to build the recovery link sent by ClassicPassportRequestOtpActionImplementation.go
+    and SendPassportResetEmailActionImplementation.go - the value gets /en/selfservice/reset-password?value=...
+    appended directly, so include a trailing /# fragment here too if that frontend
+    build uses a HashRouter (BUILD_VARIABLES.USE_HASH_ROUTER, the default for ui/src/apps/self-service).
+    The default here matches this same binary's own embedded self-service build (see
+    cmd/fireback/main.go's PublicFolders), mounted at /selfservice on this same origin
+    - point this at wherever the self-service frontend is actually deployed in production,
+    adjusting or omitting the /selfservice path segment and the /# fragment (HashRouter
+    vs plain BrowserRouter) to match that deployment.
+  default: http://localhost:8888/selfservice/#

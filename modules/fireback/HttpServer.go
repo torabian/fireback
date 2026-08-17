@@ -14,12 +14,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/fireback/modules/fireback/vdomain"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -62,11 +64,24 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	forceSSL := config2.SSL || config.UseSSL
 
 	var useVirtualCert bool
+	var acmeManager *autocert.Manager
 
 	if forceSSL {
-		useVirtualCert = config.CertFile == "" || config.KeyFile == ""
+		switch {
+		// config.SslProvider "manual" and "self-signed" (persisted - see
+		// modules/fireback/clitools/SSLCli.go's `ssl enable`) both just point
+		// CertFile/KeyFile at real files on disk and fall through to the
+		// plain ListenAndServeTLS(config.CertFile, config.KeyFile) branch
+		// below like always - only "letsencrypt" needs a TLSConfig of its
+		// own, since its certificate isn't a static file but requested (and
+		// kept renewed) on demand by autocert.Manager.
+		case config.SslProvider == "letsencrypt" && strings.TrimSpace(config.AcmeDomains) != "":
+			acmeManager = NewAcmeManager(config.AcmeDomains, config.AcmeEmail, config.AcmeCacheDir)
+			mainServer.TLSConfig = acmeManager.TLSConfig()
+			fmt.Printf("Using Let's Encrypt certificate for %s (requested on first handshake, cached in %s)\n", config.AcmeDomains, config.AcmeCacheDir)
 
-		if useVirtualCert {
+		case config.CertFile == "" || config.KeyFile == "":
+			useVirtualCert = true
 			cert, err := GenerateSelfSignedCert(config2.VirtualDomains)
 			if err != nil {
 				log.Fatal("failed to generate self-signed cert:", err)
@@ -85,12 +100,21 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	if forceSSL {
 		mainServer.Addr = ":443"
 
+		var portEightyHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			target := "https://" + r.Host + r.URL.RequestURI()
+			http.Redirect(w, r, target, http.StatusMovedPermanently)
+		})
+
+		if acmeManager != nil {
+			// Serves the ACME HTTP-01 challenge under /.well-known/acme-challenge/
+			// (required to be plain, unredirected HTTP on port 80), falling back
+			// to the https redirect above for every other request.
+			portEightyHandler = acmeManager.HTTPHandler(portEightyHandler)
+		}
+
 		redirectServer = &http.Server{
-			Addr: ":80",
-			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				target := "https://" + r.Host + r.URL.RequestURI()
-				http.Redirect(w, r, target, http.StatusMovedPermanently)
-			}),
+			Addr:    ":80",
+			Handler: portEightyHandler,
 		}
 
 		go func() {
@@ -104,7 +128,10 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	go func() {
 		var err error
 		if forceSSL {
-			if useVirtualCert {
+			if useVirtualCert || acmeManager != nil {
+				// Both branches supply their certificate via mainServer.TLSConfig
+				// (a static self-signed cert, or acmeManager.GetCertificate)
+				// rather than a certFile/keyFile pair on disk.
 				err = mainServer.ListenAndServeTLS("", "")
 			} else {
 				err = mainServer.ListenAndServeTLS(config.CertFile, config.KeyFile)
@@ -145,10 +172,16 @@ func CreateHttpServer(handler *gin.Engine, config2 HttpServerInstanceConfig) {
 	LOG.Info("Server exited properly")
 }
 
-func GenerateSelfSignedCert(domains []string) (tls.Certificate, error) {
+// GenerateSelfSignedCertPEM does the actual cert generation for
+// GenerateSelfSignedCert, returning the raw PEM bytes rather than a parsed
+// tls.Certificate - split out so `ssl enable`'s self-signed option
+// (modules/fireback/clitools/SSLCli.go) can persist them to certFile/keyFile
+// on disk instead of the ephemeral, regenerated-every-start certificate this
+// package falls back to when forceSSL is on but no cert files are configured.
+func GenerateSelfSignedCertPEM(domains []string) (certPEM []byte, keyPEM []byte, err error) {
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return tls.Certificate{}, err
+		return nil, nil, err
 	}
 
 	if len(domains) == 0 {
@@ -175,11 +208,20 @@ func GenerateSelfSignedCert(domains []string) (tls.Certificate, error) {
 
 	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
 	if err != nil {
-		return tls.Certificate{}, err
+		return nil, nil, err
 	}
 
-	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
-	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
+	certPEM = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	keyPEM = pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
+
+	return certPEM, keyPEM, nil
+}
+
+func GenerateSelfSignedCert(domains []string) (tls.Certificate, error) {
+	certPEM, keyPEM, err := GenerateSelfSignedCertPEM(domains)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
 
 	return tls.X509KeyPair(certPEM, keyPEM)
 }

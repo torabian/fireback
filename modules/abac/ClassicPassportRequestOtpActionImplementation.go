@@ -2,6 +2,7 @@ package abac
 
 import (
 	"fmt"
+	neturl "net/url"
 	"time"
 
 	"github.com/pquerna/otp/totp"
@@ -64,7 +65,15 @@ func classicPassportRequestOtpCore(req abacdefs.ClassicPassportRequestOtpActionR
 
 	uid := fireback.UUID()
 	otp := fireback.GenerateRandomKey(6)
-	url := "http://localhost:8888/reset-password?session=" + uid
+	// Configurable via Abac.emi.yml's `config:` block (env SELF_SERVICE_BASE_URL, or
+	// "abac config self-service-base-url set") - points at
+	// ui/packages/selfservice's own "reset-password" route (SelfServiceRoutes.tsx),
+	// which reads ?value= itself (ResetPassword.presenter.tsx) to prefill the form -
+	// not the session uid below, which is only ever read back by this same row,
+	// never by the frontend. CompletePassportPasswordResetActionImplementation.go
+	// verifies the actual otp against (value, otp), the same pair
+	// ClassicPassportOtpAction does.
+	url := abacdefs.LoadConfiguration().SelfServiceBaseUrl + "/en/selfservice/reset-password?value=" + neturl.QueryEscape(req.Value)
 	secret := fireback.UUID_Long() + "." + fireback.UUID_Long()
 
 	item := &abacdefs.PublicAuthenticationEntity{

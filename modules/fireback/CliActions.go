@@ -58,6 +58,16 @@ var MeetsAccessLevel func(query QueryDSL, onlyRoot bool) (bool, []string)
 // here via init().
 var CLIInit func(xapp *application.Application) *cli.Command
 
+// SSLCliCommand builds the `ssl` command group (`ssl enable`, `ssl status`)
+// backing config.SslProvider/CertFile/KeyFile/AcmeDomains/AcmeEmail/AcmeCacheDir
+// - detects any certificate already configured, offers to keep or replace
+// it, and supports Let's Encrypt (via golang.org/x/crypto/acme/autocert -
+// see NewAcmeManager in SSL.go), a manual cert+key pair, or a persisted
+// self-signed certificate. Its real implementation lives in
+// modules/fireback/clitools/SSLCli.go (tagged !wasm) and registers itself
+// here via init() - same pattern as CLIInit above.
+var SSLCliCommand func() *cli.Command
+
 // Fireback actions run in cli as well. In this file, we place tools and helpers for that.
 
 var CommonQueryFlags = []cli.Flag{
@@ -529,6 +539,7 @@ func GetCommonWebServerCliActions(xapp *application.Application) []*cli.Command 
 		GetApplicationTasks(xapp),
 		&CLIDoctor,
 		&CLIServiceCommand,
+		SSLCliCommand(),
 		&combinedConfigCommand,
 		GetHttpCommand(func(cfg HttpServerInstanceConfig) *gin.Engine {
 			return SetupHttpServer(xapp, cfg)

@@ -208,7 +208,7 @@ func WorkspaceTypeActionCreate(
 	dto *abacdefs.WorkspaceTypeEntity, query fireback.QueryDSL,
 ) (*abacdefs.WorkspaceTypeEntity, *fireback.IError) {
 
-	if errors := ValidateTheWorkspaceTypeEntity(dto); len(errors) > 0 {
+	if errors := ValidateTheWorkspaceTypeEntity(dto, query); len(errors) > 0 {
 		return nil, &fireback.IError{
 			Message:  WorkspaceTypeMessages.CannotCreateWorkspaceType,
 			HttpCode: 400,
@@ -228,7 +228,7 @@ func WorkspaceTypeActionUpdate(
 	fields *abacdefs.WorkspaceTypeEntity,
 ) (*abacdefs.WorkspaceTypeEntity, *fireback.IError) {
 
-	if errors := ValidateTheWorkspaceTypeEntity(fields); len(errors) > 0 {
+	if errors := ValidateTheWorkspaceTypeEntity(fields, query); len(errors) > 0 {
 		return nil, &fireback.IError{
 			Message:  WorkspaceTypeMessages.CannotModifyWorkspaceType,
 			HttpCode: 400,
@@ -239,7 +239,19 @@ func WorkspaceTypeActionUpdate(
 	return WorkspaceTypeActions.Update(query, fields)
 }
 
-func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*abacdefs.RoleEntity, []*fireback.IErrorItem) {
+// ValidateRoleAndItsExistence looks roleId up via RoleActions.GetOne, using query only
+// for its WorkspaceId - the caller's own resolved workspace context, not a fresh empty
+// QueryDSL{}.
+//
+// Bug fix: this used to call RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId})
+// with no WorkspaceId at all. RoleActions.GetOne is wrapped (RoleActions.go's init()) to
+// treat the root role as invisible/404'd from any query whose WorkspaceId isn't exactly
+// "root" - a zero-value QueryDSL's WorkspaceId is "", which is never "root", so looking
+// up roleId "root" 404'd unconditionally here, even when the caller was genuinely
+// acting inside the root workspace itself (e.g. root inviting someone into root with
+// the root role - InviteToWorkspaceActionImplementation.go's ValidateRoleAndItsExistence
+// call). Threading the real query through fixes both call sites below at once.
+func ValidateRoleAndItsExistence(roleId emigo.Nullable[string], query fireback.QueryDSL) (*abacdefs.RoleEntity, []*fireback.IErrorItem) {
 	items := []*fireback.IErrorItem{}
 
 	// Bug fix: this condition was inverted (`!roleId.IsNull()`), so every workspace
@@ -255,7 +267,7 @@ func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*abacdefs.RoleE
 		return nil, items
 	}
 
-	if role, err := RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId.OrDefault("")}); err != nil {
+	if role, err := RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId.OrDefault(""), WorkspaceId: query.WorkspaceId}); err != nil {
 		items = append(items, &fireback.IErrorItem{
 			Location: "roleId",
 			Message:  &WorkspaceTypeMessages.RoleIsNotAccessible,
@@ -286,9 +298,9 @@ func ValidateRoleAndItsExistence(roleId emigo.Nullable[string]) (*abacdefs.RoleE
 // Before write or update we need some extra validation for this.
 // It's important to check if the role actually exists, and has some previliges
 // before making it available
-func ValidateTheWorkspaceTypeEntity(fields *abacdefs.WorkspaceTypeEntity) []*fireback.IErrorItem {
+func ValidateTheWorkspaceTypeEntity(fields *abacdefs.WorkspaceTypeEntity, query fireback.QueryDSL) []*fireback.IErrorItem {
 	items := []*fireback.IErrorItem{}
-	role, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(fields.RoleId))
+	role, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(fields.RoleId), query)
 	if len(roleErrors) != 0 {
 		return roleErrors
 	}

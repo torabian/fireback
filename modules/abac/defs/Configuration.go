@@ -14,11 +14,14 @@ import (
 type Config struct {
 	// How many seconds a passport value (email or phone) must wait before it can request another OTP/magic-link, once a request is already pending. See ClassicPassportRequestOtpActionImplementation.go.
 	OtpLockoutSeconds int64 `envconfig:"OTP_LOCKOUT_SECONDS" description:"How many seconds a passport value (email or phone) must wait before it can request another OTP/magic-link, once a request is already pending. See ClassicPassportRequestOtpActionImplementation.go."`
+	// Base URL of the running self-service frontend (ui/packages/selfservice), used to build the recovery link sent by ClassicPassportRequestOtpActionImplementation.go and SendPassportResetEmailActionImplementation.go - the value gets /en/selfservice/reset-password?value=... appended directly, so include a trailing /# fragment here too if that frontend build uses a HashRouter (BUILD_VARIABLES.USE_HASH_ROUTER, the default for ui/src/apps/self-service). The default here matches this same binary's own embedded self-service build (see cmd/fireback/main.go's PublicFolders), mounted at /selfservice on this same origin - point this at wherever the self-service frontend is actually deployed in production, adjusting or omitting the /selfservice path segment and the /# fragment (HashRouter vs plain BrowserRouter) to match that deployment.
+	SelfServiceBaseUrl string `envconfig:"SELF_SERVICE_BASE_URL" description:"Base URL of the running self-service frontend (ui/packages/selfservice), used to build the recovery link sent by ClassicPassportRequestOtpActionImplementation.go and SendPassportResetEmailActionImplementation.go - the value gets /en/selfservice/reset-password?value=... appended directly, so include a trailing /# fragment here too if that frontend build uses a HashRouter (BUILD_VARIABLES.USE_HASH_ROUTER, the default for ui/src/apps/self-service). The default here matches this same binary's own embedded self-service build (see cmd/fireback/main.go's PublicFolders), mounted at /selfservice on this same origin - point this at wherever the self-service frontend is actually deployed in production, adjusting or omitting the /selfservice path segment and the /# fragment (HashRouter vs plain BrowserRouter) to match that deployment."`
 }
 
 // The config is usually populated by env vars on LoadConfiguration
 var config Config = Config{
-	OtpLockoutSeconds: 120,
+	OtpLockoutSeconds:  120,
+	SelfServiceBaseUrl: "http://localhost:8888/selfservice/#",
 }
 
 func (x *Config) Json() string {
@@ -51,11 +54,18 @@ func GetConfigCliFlags() []cli.Flag {
 			Name:  "otp-lockout-seconds",
 			Usage: "How many seconds a passport value (email or phone) must wait before it can request another OTP/magic-link, once a request is already pending. See ClassicPassportRequestOtpActionImplementation.go.",
 		},
+		&cli.StringFlag{
+			Name:  "self-service-base-url",
+			Usage: "Base URL of the running self-service frontend (ui/packages/selfservice), used to build the recovery link sent by ClassicPassportRequestOtpActionImplementation.go and SendPassportResetEmailActionImplementation.go - the value gets /en/selfservice/reset-password?value=... appended directly, so include a trailing /# fragment here too if that frontend build uses a HashRouter (BUILD_VARIABLES.USE_HASH_ROUTER, the default for ui/src/apps/self-service). The default here matches this same binary's own embedded self-service build (see cmd/fireback/main.go's PublicFolders), mounted at /selfservice on this same origin - point this at wherever the self-service frontend is actually deployed in production, adjusting or omitting the /selfservice path segment and the /# fragment (HashRouter vs plain BrowserRouter) to match that deployment.",
+		},
 	}
 }
 func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	if c.IsSet("otp-lockout-seconds") {
 		config.OtpLockoutSeconds = c.Int64("otp-lockout-seconds")
+	}
+	if c.IsSet("self-service-base-url") {
+		config.SelfServiceBaseUrl = c.String("self-service-base-url")
 	}
 }
 func GetConfigCli() []*cli.Command {
@@ -76,6 +86,29 @@ func GetConfigCli() []*cli.Command {
 					Action: func(ctx context.Context, c *cli.Command) error {
 						return emigo.ConfigSetInt64(c, config.OtpLockoutSeconds, func(value int64) {
 							config.OtpLockoutSeconds = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "self-service-base-url",
+			Usage: "Base URL of the running self-service frontend (ui/packages/selfservice), used to build the recovery link sent by ClassicPassportRequestOtpActionImplementation.go and SendPassportResetEmailActionImplementation.go - the value gets /en/selfservice/reset-password?value=... appended directly, so include a trailing /# fragment here too if that frontend build uses a HashRouter (BUILD_VARIABLES.USE_HASH_ROUTER, the default for ui/src/apps/self-service). The default here matches this same binary's own embedded self-service build (see cmd/fireback/main.go's PublicFolders), mounted at /selfservice on this same origin - point this at wherever the self-service frontend is actually deployed in production, adjusting or omitting the /selfservice path segment and the /# fragment (HashRouter vs plain BrowserRouter) to match that deployment. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.SelfServiceBaseUrl)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.SelfServiceBaseUrl, func(value string) {
+							config.SelfServiceBaseUrl = value
 							config.Save(".env")
 						})
 						return nil

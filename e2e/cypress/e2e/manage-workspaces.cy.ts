@@ -225,5 +225,97 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
     });
   });
 
+  // Selects an option from one of this app's FormSelect fields (react-select/async
+  // under the hood) - same helper as manage-regional-content.cy.ts's own
+  // selectFormSelectOption, kept local here since spec files in this suite each
+  // already redeclare their own copies of shared helpers (loginAsRoot, fieldInput,
+  // ...) rather than importing them.
+  function selectFormSelectOption(labelText: string, optionText: string) {
+    cy.contains(".mb-3", labelText).find(".form-control").click();
+    cy.contains(".mb-3", labelText)
+      .find("input[role=combobox]")
+      .type(optionText, { delay: 50 });
+    cy.contains(".react-select-menu-area [role=option]", optionText, {
+      timeout: 5000,
+    }).click();
+  }
+
+  it("rejects creating a workspace with a blank name.", () => {
+    loginAsRoot();
+    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    clickIconAction("New");
+    cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
+    cy.get(".content-section fieldset").should("not.be.disabled");
+
+    // Name deliberately left blank.
+    cy.intercept("POST", "**/workspace").as("createWorkspaceRejected");
+    submitForm();
+    cy.wait("@createWorkspaceRejected").then((interception) => {
+      expect(interception.response?.statusCode).to.not.equal(200);
+    });
+    // Still on the form - nothing got created.
+    cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
+  });
+
+  const parentSuffix = Date.now();
+  const parentName = `CypressParent${parentSuffix}`;
+  const childName = `CypressChild${parentSuffix}`;
+  const customUniqueId = `cypress-custom-id-${parentSuffix}`;
+  let parentUniqueId = "";
+
+  it("creates a parent workspace with a self-chosen unique id, and it's honored.", () => {
+    loginAsRoot();
+    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    clickIconAction("New");
+    cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
+    cy.get(".content-section fieldset").should("not.be.disabled");
+
+    fieldInput("Workspace name").type(parentName);
+    fieldInput("Unique id").type(customUniqueId);
+
+    cy.intercept("POST", "**/workspace").as("createParentWorkspace");
+    submitForm();
+    cy.wait("@createParentWorkspace").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+      const item = interception.response?.body?.data?.item;
+      expect(item.uniqueId).to.equal(customUniqueId);
+      parentUniqueId = item.uniqueId;
+    });
+
+    cy.url({ timeout: 10000 }).should("include", "/manage/workspaces");
+    cy.contains(parentName).should("exist");
+  });
+
+  it("editing the parent workspace no longer offers a unique id field at all.", () => {
+    loginAsRoot();
+    cy.then(() => {
+      cy.visit(ui(`/manage/#/en/manage/workspace/edit/${parentUniqueId}`));
+    });
+    cy.get(".content-section fieldset").should("not.be.disabled");
+    cy.contains(".mb-3", "Unique id").should("not.exist");
+  });
+
+  it("creates a child workspace, picking the parent workspace via the Parent Record select, and it's saved with the right parentId.", () => {
+    loginAsRoot();
+    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    clickIconAction("New");
+    cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
+    cy.get(".content-section fieldset").should("not.be.disabled");
+
+    fieldInput("Workspace name").type(childName);
+    selectFormSelectOption("Parent Record", parentName);
+
+    cy.intercept("POST", "**/workspace").as("createChildWorkspace");
+    submitForm();
+    cy.wait("@createChildWorkspace").then((interception) => {
+      expect(interception.response?.statusCode).to.equal(200);
+      const item = interception.response?.body?.data?.item;
+      expect(item.parentId).to.equal(parentUniqueId);
+    });
+
+    cy.url({ timeout: 10000 }).should("include", "/manage/workspaces");
+    cy.contains(childName).should("exist");
+  });
+
   endFirebackServer();
 });
