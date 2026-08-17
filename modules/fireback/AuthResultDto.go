@@ -11,46 +11,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 )
-
-var AuthResultDtoCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "Unique Id - external unique hash to query entity",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "user-access-per-workspace-id",
-		Required: false,
-		Usage:    `userAccessPerWorkspace (one)`,
-	},
-	&cli.StringFlag{
-		Name:     "user-id",
-		Required: false,
-		Usage:    `user (one)`,
-	},
-	&cli.StringFlag{
-		Name:     "user-id",
-		Required: false,
-		Usage:    `userId (string?)`,
-	},
-	&cli.StringFlag{
-		Name:     "sql-context",
-		Required: false,
-		Usage:    `After authentication, this object contains the workspace permissions and current selected role permissions, to create context sql query based on that (string)`,
-	},
-}
 
 type AuthResultDto struct {
 	UserAccessPerWorkspace   *UserAccessPerWorkspaceDto `json:"userAccessPerWorkspace" yaml:"userAccessPerWorkspace"    gorm:"foreignKey:UserAccessPerWorkspaceId;references:UniqueId"      `
