@@ -5,6 +5,7 @@ targets:
   output: ./defs
   tags:
   - split-cli
+  - split-gin
 - compiler: js
   flags:
     js-sdk-location: '@fireback/js-remote-ctx'

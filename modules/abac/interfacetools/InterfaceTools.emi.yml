@@ -15,6 +15,7 @@ targets:
       pkg: interfacetoolsdefs
     tags:
       - split-cli
+      - split-gin
   # Only ui-core imports this today (see ui/packages/README.md).
   - compiler: js
     output: ../../../ui/packages/ui-core/sdk/interfacetools
