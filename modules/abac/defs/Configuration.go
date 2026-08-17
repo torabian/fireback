@@ -21,6 +21,14 @@ var config Config = Config{
 	OtpLockoutSeconds: 120,
 }
 
+func (x *Config) Json() string {
+	if x != nil {
+		str, _ := json.MarshalIndent(x, "", "  ")
+		return (string(str))
+	}
+	return ""
+}
+
 /*
 *
 You can call this function on first line of your main function.
@@ -33,13 +41,6 @@ and we generate the config struct and this function would read .env.local,
 func LoadConfiguration() Config {
 	emigo.HandleEnvVars(&config)
 	return config
-}
-func (x *Config) Json() string {
-	if x != nil {
-		str, _ := json.MarshalIndent(x, "", "  ")
-		return (string(str))
-	}
-	return ""
 }
 func (x *Config) Save(filepath string) error {
 	return emigo.SaveEnvFile(x, filepath)

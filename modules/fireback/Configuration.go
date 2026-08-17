@@ -1,9 +1,6 @@
 package fireback
 
-import (
-	"encoding/json"
-	"github.com/torabian/emi/emigo"
-)
+import "encoding/json"
 
 /**
 * Configuration generator
@@ -88,26 +85,10 @@ var config Config = Config{
 	WindowsIdentifier:       "fireback",
 }
 
-/*
-*
-You can call this function on first line of your main function.
-This is different from fireback configuration (for now), you can
-define config: in module3 file, similar to fields in entities,
-and we generate the config struct and this function would read .env.local,
-.env.prod, etc - depending on the ENV=xxx env variable.
-*
-*/
-func LoadConfiguration() Config {
-	emigo.HandleEnvVars(&config)
-	return config
-}
 func (x *Config) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
 		return (string(str))
 	}
 	return ""
-}
-func (x *Config) Save(filepath string) error {
-	return emigo.SaveEnvFile(x, filepath)
 }
