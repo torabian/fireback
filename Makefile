@@ -4,6 +4,54 @@
 default:
 	rm -rf app && cd cmd/fireback && make dev
 
+# Quick local dev reset: builds the app, drops and recreates the Postgres
+# database this checkout's DB_DSN (see .env) points at for a genuinely fresh
+# start, applies migrations, seeds the passport methods (via `seeders` - see
+# abac.PassportMethodSyncSeeders, wired as SeedersSync in cmd/fireback/main.go)
+# so "email" is enabled and the signin screen has something to show, creates a
+# root user via `auth --in-root` (the same non-interactive flow
+# e2e/cypress/support/setup.js uses), prints `ws view` to confirm it's
+# authorized, seeds a few mock users via `user mock`, and sets gin-mode to
+# release plus the server port - so once this finishes, `make default &&
+# ./app start` serves on APP_PORT and lets you log into the UI right away
+# with EMAIL/PASSWORD (override any of these on the command line, e.g.
+# `make devsetup EMAIL=me@x.com PASSWORD=secret APP_PORT=8080`).
+EMAIL ?= a@a.com
+PASSWORD ?= 123321
+MOCK_COUNT ?= 5
+APP_PORT ?= 4500
+
+devsetup: default
+	@DSN=$$(./app config db-dsn get); \
+	VENDOR=$$(./app config db-vendor get); \
+	if [ "$$VENDOR" != "postgres" ]; then \
+		echo "devsetup only knows how to reset a postgres database right now (DB_VENDOR is '$$VENDOR')"; \
+		exit 1; \
+	fi; \
+	HOST=$$(echo "$$DSN" | grep -oE 'host=[^ ]*' | cut -d= -f2); \
+	DBPORT=$$(echo "$$DSN" | grep -oE 'port=[^ ]*' | cut -d= -f2); \
+	PGUSER=$$(echo "$$DSN" | grep -oE 'user=[^ ]*' | cut -d= -f2); \
+	PGPASS=$$(echo "$$DSN" | grep -oE 'password=[^ ]*' | cut -d= -f2); \
+	DBNAME=$$(echo "$$DSN" | grep -oE 'dbname=[^ ]*' | cut -d= -f2); \
+	echo "Dropping and recreating database '$$DBNAME' on $$HOST:$$DBPORT ..."; \
+	PGPASSWORD=$$PGPASS psql -U $$PGUSER -h $$HOST -p $$DBPORT -d postgres -v ON_ERROR_STOP=1 -c \
+		"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$$DBNAME' AND pid <> pg_backend_pid();" && \
+	PGPASSWORD=$$PGPASS psql -U $$PGUSER -h $$HOST -p $$DBPORT -d postgres -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS $$DBNAME;" && \
+	PGPASSWORD=$$PGPASS psql -U $$PGUSER -h $$HOST -p $$DBPORT -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE $$DBNAME;" && \
+	./app migration apply && \
+	./app seeders && \
+	./app auth --in-root=true --value=$(EMAIL) --type=email --password=$(PASSWORD) \
+		--workspace-type-id=root --first-name=Root --last-name=User && \
+	./app ws view && \
+	./app user mock --count=$(MOCK_COUNT) && \
+	./app config gin-mode set release && \
+	./app config port set $(APP_PORT) && \
+	echo "" && \
+	echo "Root user ready - log in with:" && \
+	echo "  email:    $(EMAIL)" && \
+	echo "  password: $(PASSWORD)" && \
+	echo "  serve on: http://localhost:$(APP_PORT) (gin-mode release)"
+
 # Compiles the project into wasm, which would run in browser
 wasm:
 	cd cmd/fireback-wasm && make

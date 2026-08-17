@@ -144,11 +144,16 @@ var ViewAuthorize cli.Command = cli.Command{
 		result, err := fireback.CliAuth(nil)
 		if err != nil {
 			log.Fatalln(err)
-		} else {
-			result.JsonPrint()
 		}
+		result.JsonPrint()
 
-		return err
+		// Explicit untyped nil, not `return err`: err is a *fireback.IError, and
+		// by this point it's a nil *pointer* - wrapping that in the `error`
+		// interface return value produces a non-nil interface (the classic Go
+		// typed-nil gotcha), which made urfave/cli treat every successful `ws
+		// view` as a failed command and made FirebackApp.go's log.Fatal(err)
+		// call Error() on a nil *IError, printing "null" and exiting 1.
+		return nil
 	},
 }
 

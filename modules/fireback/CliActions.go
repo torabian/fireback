@@ -444,7 +444,7 @@ func GetHttpCommand(engineFn func(cfg2 HttpServerInstanceConfig) *gin.Engine) *c
 		Action: func(ctx context.Context, c *cli.Command) error {
 
 			initLogger()
-			if !config.Production {
+			if config.ShowDoctor {
 				Doctor()
 			}
 

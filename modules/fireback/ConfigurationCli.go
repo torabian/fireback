@@ -35,6 +35,10 @@ func GetConfigCliFlags() []cli.Flag {
 			Name:  "production",
 			Usage: "If true, set's the environment behavior to production, and some functionality will be limited",
 		},
+		&cli.BoolFlag{
+			Name:  "show-doctor",
+			Usage: "If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead.",
+		},
 		&cli.StringFlag{
 			Name:  "table-prefix",
 			Usage: "Prefix all gorm tables with some string",
@@ -171,6 +175,9 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	}
 	if c.IsSet("production") {
 		config.Production = c.Bool("production")
+	}
+	if c.IsSet("show-doctor") {
+		config.ShowDoctor = c.Bool("show-doctor")
 	}
 	if c.IsSet("table-prefix") {
 		config.TablePrefix = c.String("table-prefix")
@@ -310,6 +317,29 @@ func GetConfigCli() []*cli.Command {
 					Action: func(ctx context.Context, c *cli.Command) error {
 						return emigo.ConfigSetBoolean(c, config.Production, func(value bool) {
 							config.Production = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "show-doctor",
+			Usage: "If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead. (bool)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.ShowDoctor)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetBoolean(c, config.ShowDoctor, func(value bool) {
+							config.ShowDoctor = value
 							config.Save(".env")
 						})
 						return nil

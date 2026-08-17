@@ -10,6 +10,8 @@ type Config struct {
 	CookieAuthOnly bool `envconfig:"COOKIE_AUTH_ONLY" description:"When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie."`
 	// If true, set's the environment behavior to production, and some functionality will be limited
 	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
+	// If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead.
+	ShowDoctor bool `envconfig:"SHOW_DOCTOR" description:"If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead."`
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
 	// VAPID Web push notification public key
