@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package interfacetoolsdefs
 
 import (
@@ -31,6 +33,10 @@ func (x *TimezoneGroupEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetTimezoneGroupEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -96,8 +102,6 @@ func CastTimezoneGroupEntityFromCli(c emigo.CliCastable) TimezoneGroupEntity {
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // TimezoneGroupEntityCreateFn creates a new TimezoneGroupEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

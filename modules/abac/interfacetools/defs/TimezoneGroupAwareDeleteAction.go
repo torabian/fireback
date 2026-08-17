@@ -2,11 +2,9 @@ package interfacetoolsdefs
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
@@ -62,21 +60,6 @@ func (x *TimezoneGroupAwareDeleteActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetTimezoneGroupAwareDeleteActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "unique-ids",
-			Type: "slice",
-		},
-	}
-}
-func CastTimezoneGroupAwareDeleteActionReqFromCli(c emigo.CliCastable) TimezoneGroupAwareDeleteActionReq {
-	data := TimezoneGroupAwareDeleteActionReq{}
-	if c.IsSet("unique-ids") {
-		emigo.InflatePossibleSlice(c.String("unique-ids"), &data.UniqueIds)
-	}
-	return data
 }
 
 type TimezoneGroupAwareDeleteActionResponse struct {
@@ -421,72 +404,6 @@ func (x TimezoneGroupAwareDeleteActionRequest) IsGin() bool {
 }
 func TimezoneGroupAwareDeleteActionQueryFromGin(c *gin.Context) TimezoneGroupAwareDeleteActionQuery {
 	return TimezoneGroupAwareDeleteActionQueryFromString(c.Request.URL.RawQuery)
-}
-func (x TimezoneGroupAwareDeleteActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
-
-// TimezoneGroupAwareDeleteActionCliFlags returns every flag (request body, path parameters,
-// query parameters and typed headers) the TimezoneGroupAwareDeleteAction action can bind from
-// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
-// typed header.
-func TimezoneGroupAwareDeleteActionCliFlags() []cli.Flag {
-	flags := []cli.Flag{
-		&cli.StringSliceFlag{
-			Name:    "header",
-			Aliases: []string{"H"},
-			Usage:   `Raw request header as "Key: Value", repeatable`,
-		},
-	}
-	flags = append(flags, emigo.CastEmiFlagToUrfave(GetTimezoneGroupAwareDeleteActionReqCliFlags(""))...)
-	return flags
-}
-
-// TimezoneGroupAwareDeleteActionCliHandler builds a full *cli.Command for the
-// TimezoneGroupAwareDeleteAction action: it wires body, path parameters, query parameters and
-// headers from urfave v3 CLI flags into a TimezoneGroupAwareDeleteActionRequest the same way
-// TimezoneGroupAwareDeleteActionHandler (Gin) and TimezoneGroupAwareDeleteActionHttpHandler (net/http)
-// do from their own transports, then prints the JSON response (or returns the error) so
-// urfave reports the right exit code.
-func TimezoneGroupAwareDeleteActionCliHandler(
-	handler func(c TimezoneGroupAwareDeleteActionRequest) (*TimezoneGroupAwareDeleteActionResponse, error),
-) *cli.Command {
-	meta := TimezoneGroupAwareDeleteActionMeta()
-	cmd := &cli.Command{
-		Name:  meta.CliName,
-		Usage: meta.Description,
-		Flags: TimezoneGroupAwareDeleteActionCliFlags(),
-	}
-	cmd.Aliases = []string{meta.CliShort}
-	cmd.Action = func(ctx context.Context, c *cli.Command) error {
-		req := TimezoneGroupAwareDeleteActionRequest{
-			CliCtx:      c,
-			QueryParams: url.Values{},
-			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
-			Body:        CastTimezoneGroupAwareDeleteActionReqFromCli(c),
-		}
-		return emigo.HandleActionInCli(handler(req))
-	}
-	return cmd
-}
-
-// TimezoneGroupAwareDeleteActionCli is a high-level convenience wrapper around
-// TimezoneGroupAwareDeleteActionCliHandler. It registers the generated command as a subcommand
-// of an existing urfave v3 *cli.Command, the same way TimezoneGroupAwareDeleteActionGin
-// registers a route on a Gin engine.
-func TimezoneGroupAwareDeleteActionCli(
-	app *cli.Command,
-	handler func(c TimezoneGroupAwareDeleteActionRequest) (*TimezoneGroupAwareDeleteActionResponse, error),
-) {
-	app.Commands = append(app.Commands, TimezoneGroupAwareDeleteActionCliHandler(handler))
 }
 
 // TimezoneGroupAwareDeleteActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

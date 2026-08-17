@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package interfacetoolsdefs
 
 import (
@@ -40,6 +42,10 @@ func (x *AppMenuEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetAppMenuEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -145,8 +151,6 @@ func CastAppMenuEntityFromCli(c emigo.CliCastable) AppMenuEntity {
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // AppMenuEntityCreateFn creates a new AppMenuEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

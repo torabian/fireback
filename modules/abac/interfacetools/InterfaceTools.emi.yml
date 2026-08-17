@@ -13,6 +13,8 @@ targets:
     output: ./defs
     flags:
       pkg: interfacetoolsdefs
+    tags:
+      - split-cli
   # Only ui-core imports this today (see ui/packages/README.md).
   - compiler: js
     output: ../../../ui/packages/ui-core/sdk/interfacetools

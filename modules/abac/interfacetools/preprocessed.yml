@@ -3,6 +3,8 @@ targets:
   flags:
     pkg: interfacetoolsdefs
   output: ./defs
+  tags:
+  - split-cli
 - compiler: js
   flags:
     js-sdk-location: '@fireback/js-remote-ctx'
