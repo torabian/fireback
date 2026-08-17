@@ -9,56 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/urfave/cli/v3"
 )
-
-func CastPermissionInfoFromCli(c *cli.Command) *PermissionInfoDto {
-	template := &PermissionInfoDto{}
-	if c.IsSet("name") {
-		template.Name = c.String("name")
-	}
-	if c.IsSet("description") {
-		template.Description = c.String("description")
-	}
-	if c.IsSet("complete-key") {
-		template.CompleteKey = c.String("complete-key")
-	}
-	return template
-}
-
-var PermissionInfoDtoCommonCliFlagsOptional = []cli.Flag{
-	&cli.StringFlag{
-		Name:     "wid",
-		Required: false,
-		Usage:    "Provide workspace id, if you want to change the data workspace",
-	},
-	&cli.StringFlag{
-		Name:     "uid",
-		Required: false,
-		Usage:    "Unique Id - external unique hash to query entity",
-	},
-	&cli.StringFlag{
-		Name:     "pid",
-		Required: false,
-		Usage:    " Parent record id of the same type",
-	},
-	&cli.StringFlag{
-		Name:     "name",
-		Required: false,
-		Usage:    `name (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "description",
-		Required: false,
-		Usage:    `description (string)`,
-	},
-	&cli.StringFlag{
-		Name:     "complete-key",
-		Required: false,
-		Usage:    `completeKey (string)`,
-	},
-}
 
 type PermissionInfoDto struct {
 	Name        string `json:"name" yaml:"name"        `
