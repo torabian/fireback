@@ -12,7 +12,6 @@ import (
 	"time"
 
 	gonanoid "github.com/matoous/go-nanoid/v2"
-	"gorm.io/gorm"
 )
 
 func UUID() string {
@@ -137,52 +136,6 @@ func GenerateRandomKey(length int) string {
 	}
 
 	return key
-}
-
-func PolyglotUpdateHandler[T any, P any](dto *T, dtoPolyGlot *P, query QueryDSL) {
-
-	var dbref *gorm.DB = nil
-	if query.Tx == nil {
-		dbref = GetDbRef()
-	} else {
-		dbref = query.Tx
-	}
-
-	if dto == nil {
-		return
-	}
-
-	// Detect if it's going to be editing or creation, our action would be different
-	linkerId := GetFieldString(dto, "UniqueId")
-	if linkerId == "" {
-		linkerId = query.UniqueId
-	}
-
-	t := map[string]interface{}{}
-
-	v := reflect.ValueOf(dto).Elem()
-	for j := 0; j < v.NumField(); j++ {
-		n := v.Type().Field(j).Name
-		tag := v.Type().Field(j).Tag.Get("translate")
-		fieldType := v.Field(j).Type().String()
-
-		if tag == "true" && fieldType == "string" {
-			t[ToSnakeCase(n)] = GetFieldString(dto, n)
-		} else if tag == "true" && fieldType == "*string" {
-			t[ToSnakeCase(n)] = GetFieldStringP(dto, n)
-		}
-	}
-
-	dbref.
-		Model(dtoPolyGlot).Where(RealEscape("linker_id = ? and language_id = ?", linkerId, query.Language)).Delete(nil)
-
-	t["linker_id"] = linkerId
-	t["language_id"] = query.Language
-	if linkerId == "" || query.Language == "" {
-		return
-	}
-
-	dbref.Model(dtoPolyGlot).Create(t)
 }
 
 // Checks if the underlying value is a nil error.
