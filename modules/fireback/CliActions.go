@@ -639,7 +639,7 @@ func SetupHttpServer(x *application.Application, cfg HttpServerInstanceConfig) *
 
 	r := gin.New()
 
-	r.Use(GinAllowEverything())
+	r.Use(gintools.GinAllowEverything())
 
 	// Gzip compression is handled entirely inside gintools.EmbedFoldersForGin,
 	// not here. It would be tempting to add a single blanket "gzip everything
