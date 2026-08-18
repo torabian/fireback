@@ -36,6 +36,11 @@ config:
   type: bool
   description: If true, set's the environment behavior to production, and some functionality
     will be limited
+- name: showDoctor
+  type: bool
+  description: If true, prints the doctor report (config, environment urls, database
+    info) when the http server starts via 'start'. Defaults to false - run 'fireback
+    doctor' directly when you need it instead.
 - name: tablePrefix
   type: string
   description: Prefix all gorm tables with some string
@@ -61,10 +66,6 @@ config:
   default: "false"
 - name: name
   description: Environment name, such as dev, prod, test, test-eu, etc...
-- name: dbName
-  description: Database name for vendors which provide database names, such as mysql.
-    Filename on disk for sqlite.
-  default: ':memory:'
 - name: certFile
   description: SSL Certification location to server on http listener
 - name: keyFile
@@ -77,20 +78,33 @@ config:
   type: bool
   description: If set to true, all http traffic will be redirected into https. Needs
     certFile and keyFile to be defined otherwise no effect
-- name: dbPort
-  type: int64
-  description: Database port for those which are having a port, 3306 on mysql for
-    example
+- name: sslProvider
+  description: 'How the certificate used by useSSL is obtained: ''manual'' (certFile/keyFile
+    point at a certificate you already have), ''self-signed'' (a locally generated
+    certificate, persisted to certFile/keyFile so it survives restarts - not trusted
+    by browsers), or ''letsencrypt'' (an ACME certificate for acmeDomains, requested
+    and renewed automatically via golang.org/x/crypto/acme/autocert while the server
+    is running). Empty falls back to the legacy behavior: manual if certFile/keyFile
+    are set, otherwise an ephemeral self-signed certificate regenerated on every start.
+    Set by ''fireback ssl enable''.'
+- name: acmeDomains
+  description: Comma separated list of domains to request a Let's Encrypt certificate
+    for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server
+    and have port 80 reachable for the ACME HTTP-01 challenge.
+- name: acmeEmail
+  description: Contact email registered with Let's Encrypt for expiry notices, when
+    sslProvider is 'letsencrypt'. Optional but recommended.
+- name: acmeCacheDir
+  description: Directory where the ACME account key and issued certificates are cached,
+    when sslProvider is 'letsencrypt'. Must persist across restarts so certificates
+    aren't re-requested (and to stay under Let's Encrypt's rate limits).
+  default: ./.fireback-acme-cache
 - name: dbDsn
-  description: Connection dsn to database. Some databases allow connection using a
-    string with all credentials and configs. This has hight priority, if set other
-    details will be ignored.
-- name: dbHost
-  description: Database host, such as localhost, or 127.0.0.1
-- name: dbUsername
-  description: Database username for connection, such as root.
-- name: dbPassword
-  description: Database password for connection. Can be empty if there is no password
+  description: 'The single source of truth for the database connection: a full DSN
+    (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the
+    database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing
+    individual pieces (host/port/username/password/database/ssl) of this string; there
+    is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it.'
 - name: ginMode
   description: Gin framework mode, which could be 'test', 'debug', 'release'
 - name: storage

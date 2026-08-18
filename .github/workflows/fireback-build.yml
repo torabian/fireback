@@ -380,6 +380,63 @@ jobs:
           name: artifacts-ui-packages
           path: artifacts/fireback-packages
 
+  # Builds src/apps/wasm-demo (see that folder's own doc comments) - a fireback
+  # server compiled to wasm, running entirely client-side against an in-browser
+  # Postgres (pglite), no network backend at all - and deploys it to GitHub
+  # Pages. Only ever runs on a manual workflow_dispatch with the "Deploy docs and
+  # demo to pages" input on (never on a plain push/PR), so this is a deliberate,
+  # release-time action rather than something that fires on every commit -
+  # matching deploy_github_release's own release_artifacts input just above.
+  # needs: build-ubuntu so a broken `make test`/Go build blocks the deploy
+  # instead of publishing a demo backed by a binary that doesn't even compile.
+  deploy_wasm_demo_pages:
+    needs:
+      - build-ubuntu
+    name: deploy_wasm_demo_pages
+    if: ${{ inputs.github_pages == true }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install the dependencies
+        run: cd ui && npm i --force
+
+      # ui/public/fireback.wasm is gitignored (a real build artifact, several
+      # tens of MB) - `make wasm` (cmd/fireback-wasm's own Makefile) compiles it
+      # fresh and drops it straight into ui/public, where Vite serves it
+      # unmodified. wasm_exec.js (Go's wasm runtime glue) is committed there
+      # already, so there's nothing else to fetch before building the app.
+      - name: Build fireback.wasm
+        run: make wasm
+ 
+      - name: Build the wasm-demo app
+        run: cd ui && npm run wasm-demo:github
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ui/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
   # run-cypress-mysql:
   #   needs:
   #     - build-ubuntu

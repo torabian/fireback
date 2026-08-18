@@ -16,6 +16,7 @@ import { ClassicPassportScreen } from "./ClassicPassport.screen";
 import { ClassicPassportAccountCreation } from "./ClassicPassportAccountCreation.screen";
 import { ClassicSigninPassword } from "./ClassicSigninPassword.screen";
 import { OtpScreen } from "./Otp.screen";
+import { ResetPasswordScreen } from "./ResetPassword.screen";
 import { usePublicJoinKeyRoutes } from "./public-join-keys/PublicJoinKeyRoutes";
 import { useRoleRoutes } from "./roles/RoleRoutes";
 import { SelfServiceHome } from "./SelfServiceHome";
@@ -55,6 +56,18 @@ export function useSelfServicePublicRoutes() {
         <Route path={"password"} element={<ClassicSigninPassword />}></Route>
 
         <Route path={"otp"} element={<OtpScreen />}></Route>
+
+        {/* Reached from an emailed/texted link (ClassicPassportRequestOtpAction /
+            SendPassportResetEmailAction - see this route's own ?value= query param
+            handling in ResetPassword.presenter.tsx), not from in-app navigation - and
+            registered again, identically, under useSelfServiceAuthenticateRoutes below,
+            since App.tsx picks whichever of these two route tables to mount based on
+            whether *this browser* already has an active session at all, which has
+            nothing to do with whose passport the link is actually for (an admin
+            testing a link, or a shared/kiosk browser already signed in as someone
+            else, must still land on this screen rather than being silently bounced to
+            their own /selfservice/passports by the authenticated table's catch-all). */}
+        <Route path={"reset-password"} element={<ResetPasswordScreen />}></Route>
       </Route>
 
       <Route
@@ -82,6 +95,9 @@ export function useSelfServiceAuthenticateRoutes() {
         path={"change-password/:uniqueId"}
         element={<ChangePasswordScreen />}
       ></Route>
+      {/* See the matching route's own comment under useSelfServicePublicRoutes above -
+          registered in both tables on purpose. */}
+      <Route path={"reset-password"} element={<ResetPasswordScreen />}></Route>
       {publicJoinKeys}
       {roleRoutes}
       {userInvitationRoutes}

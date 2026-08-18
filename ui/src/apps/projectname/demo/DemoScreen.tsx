@@ -16,6 +16,12 @@ export function DemoScreen() {
       <div>
         <Link href="/demo/form-date">Check Date Inputs</Link>
       </div>
+      <div>
+        <Link href="/demo/data-grid-list">Check DataGridList</Link>
+      </div>
+      <div>
+        <Link href="/demo/form-tstring">Check FormTString</Link>
+      </div>
       <hr />
     </div>
   );

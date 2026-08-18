@@ -7,6 +7,7 @@ import (
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
+	"go.uber.org/zap"
 )
 
 func InviteToWorkspaceAction(c abacdefs.InviteToWorkspaceActionRequest) (*abacdefs.InviteToWorkspaceActionResponse, error) {
@@ -38,7 +39,7 @@ func InviteToWorkspaceAction(c abacdefs.InviteToWorkspaceActionRequest) (*abacde
 		return nil, err
 	}
 
-	_, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(req.RoleId))
+	_, roleErrors := ValidateRoleAndItsExistence(emigo.NullableOf(req.RoleId), query)
 	if len(roleErrors) != 0 {
 		return nil, &fireback.IError{
 			Errors: roleErrors,
@@ -90,9 +91,26 @@ func InviteToWorkspaceAction(c abacdefs.InviteToWorkspaceActionRequest) (*abacde
 		return nil, fireback.GormErrorToIError(err)
 	}
 
+	// Delivery is best-effort: the invite row above is already committed, and a
+	// missing/unconfigured email or SMS provider (no NotificationConfig row yet -
+	// GetOneByWorkspaceEntity turns that into a "resource not found" IError, not
+	// nil/nil -, no sender picked, no gateway set up, ...) is an entirely normal
+	// state for a fresh workspace that just hasn't wired up a mail server yet. Failing
+	// the whole request here used to report "resource not found" back to the caller
+	// even though the invite had already been created successfully - so any send
+	// failure is now logged and swallowed instead of aborting the response; the
+	// invite can still be shared manually (or resent once a provider is configured)
+	// via its uniqueId/PublicKey.
 	if invite.Email != "" {
 		if err7 := SendInviteEmail(query, &invite); err7 != nil {
-			return nil, err7
+			// Info, not Warn: zap's development logger (see initLogger) attaches a full
+			// stacktrace to Warn+ by default, which is a lot of noise for what's usually
+			// just "nobody configured a mail provider yet".
+			fireback.LOG.Info("InviteToWorkspaceAction: sending invite email failed, invite was still saved",
+				zap.String("workspaceInviteId", invite.UniqueId),
+				zap.String("email", invite.Email),
+				zap.Error(err7),
+			)
 		}
 	}
 
@@ -103,7 +121,11 @@ func InviteToWorkspaceAction(c abacdefs.InviteToWorkspaceActionRequest) (*abacde
 		// it again through GormErrorToIError (which expects a plain/gorm error) discarded
 		// its real message and status in favor of a generic one.
 		if _, err7 := GsmSendSMSUsingNotificationConfig(inviteBody, []string{invite.Phonenumber}); err7 != nil {
-			return nil, err7
+			fireback.LOG.Info("InviteToWorkspaceAction: sending invite SMS failed, invite was still saved",
+				zap.String("workspaceInviteId", invite.UniqueId),
+				zap.String("phonenumber", invite.Phonenumber),
+				zap.Error(err7),
+			)
 		}
 	}
 

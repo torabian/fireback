@@ -16,6 +16,13 @@ const PORT = 7794;
 let DB_VENDOR = "sqlite";
 const isGitHubActions = !!process.env.GITHUB_ACTIONS;
 
+// wasm-demo.cy.ts's own server - a plain static file server (no real
+// backend at all, see src/apps/wasm-demo), so it's a completely separate
+// process/port from firebackProcess/PORT above, which serve the *real*
+// Go binary the rest of this suite tests against.
+let wasmDemoProcess;
+const WASM_DEMO_PORT = 7795;
+
 if (isGitHubActions) {
   // CI installs Fireback from the .deb artifact instead of building it locally.
   BINARY = process.env.FIREBACK_BINARY || "/usr/local/bin/fireback";
@@ -45,12 +52,29 @@ function readDotEnv(file) {
   return out;
 }
 
+// Fireback's config now stores only DB_VENDOR + DB_DSN (the discrete
+// DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD keys were removed), so pull the
+// connection pieces we need back out of the libpq-style keyword/value DSN
+// string, e.g. "host=localhost user=changeme password=changeme dbname=foo
+// port=6900 sslmode=disable".
+function parsePgDsn(dsn) {
+  const out = {};
+  if (!dsn) return out;
+  for (const pair of dsn.trim().split(/\s+/)) {
+    const eq = pair.indexOf("=");
+    if (eq === -1) continue;
+    out[pair.slice(0, eq)] = pair.slice(eq + 1);
+  }
+  return out;
+}
+
 const dotEnv = readDotEnv(path.join(REPO_ROOT, ".env"));
-const PG_HOST = process.env.POSTGRES_HOST || dotEnv.DB_HOST || "localhost";
-const PG_PORT = process.env.POSTGRES_PORT || dotEnv.DB_PORT || "5432";
-const PG_USER = process.env.POSTGRES_USER || dotEnv.DB_USERNAME || "postgres";
+const dsnFields = parsePgDsn(dotEnv.DB_DSN);
+const PG_HOST = process.env.POSTGRES_HOST || dsnFields.host || "localhost";
+const PG_PORT = process.env.POSTGRES_PORT || dsnFields.port || "5432";
+const PG_USER = process.env.POSTGRES_USER || dsnFields.user || "postgres";
 const PG_PASSWORD =
-  process.env.POSTGRES_PASSWORD || dotEnv.DB_PASSWORD || "postgres";
+  process.env.POSTGRES_PASSWORD || dsnFields.password || "postgres";
 
 console.log("Database", PG_HOST, PG_PORT, PG_USER, PG_PASSWORD);
 
@@ -71,6 +95,7 @@ module.exports = defineConfig({
   env: {
     GITHUB_ACTIONS: process.env.GITHUB_ACTIONS,
     PORT: PORT,
+    WASM_DEMO_PORT: WASM_DEMO_PORT,
   },
   e2e: {
     setupNodeEvents(on, config) {
@@ -259,6 +284,57 @@ module.exports = defineConfig({
           console.log("Forcing Fireback shutdown...");
           firebackProcess.kill();
         }
+        if (wasmDemoProcess) {
+          console.log("Forcing wasm-demo static server shutdown...");
+          wasmDemoProcess.kill();
+        }
+      });
+
+      // wasm-demo.cy.ts's own setup - unlike the rest of this suite, there's
+      // no real Fireback backend/database involved at all: `make wasm`
+      // compiles cmd/fireback-wasm to ui/public/fireback.wasm (gitignored,
+      // so this has to run fresh - wasm_exec.js is already committed there),
+      // then `npm run wasm-demo:build` builds src/apps/wasm-demo (see that
+      // folder's own doc comments) into ui/dist, ready for
+      // startWasmDemoServer below to serve as plain static files. Both build
+      // steps are genuinely slow (a fresh GOOS=js GOARCH=wasm compile of the
+      // whole fireback binary, then a vite build bundling pglite) - the
+      // spec's own before() gives this task a generous timeout.
+      on("task", {
+        buildWasmDemo() {
+          return execAsync("make wasm", REPO_ROOT).then(() =>
+            execAsync("npm run wasm-demo:build", path.join(REPO_ROOT, "ui")),
+          );
+        },
+      });
+
+      on("task", {
+        startWasmDemoServer() {
+          return new Promise((resolve) => {
+            console.log("Starting wasm-demo static server...");
+            wasmDemoProcess = spawn(
+              "python3",
+              ["-m", "http.server", String(WASM_DEMO_PORT)],
+              {
+                cwd: path.join(REPO_ROOT, "ui", "dist"),
+                stdio: "inherit",
+              },
+            );
+            setTimeout(() => {
+              resolve("wasm-demo server started");
+            }, 800);
+          });
+        },
+        stopWasmDemoServer() {
+          return new Promise((resolve) => {
+            if (wasmDemoProcess) {
+              console.log("Stopping wasm-demo static server...");
+              wasmDemoProcess.kill();
+              wasmDemoProcess = null;
+            }
+            resolve("wasm-demo server stopped");
+          });
+        },
       });
 
       on("task", {

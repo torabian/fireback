@@ -1,6 +1,14 @@
 import { SESSION_STORAGE_KEY } from "@fireback/auth-client";
-import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
+import {
+  FetchxContext,
+  type TypedRequestInit,
+} from "@fireback/js-remote-ctx/common/fetchx";
 import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
+
+type FetchOverrideFn = (
+  input: RequestInfo | URL,
+  init?: TypedRequestInit,
+) => Promise<Response>;
 
 // The app's real session lives under this key - see
 // fireback-ui/auth/AuthenticationProvider.tsx, which persists it there via
@@ -39,8 +47,19 @@ function readRemoteQueryToken(): string | undefined {
  *    (network error, CORS, 5xx, ...): that's the backend being unreachable
  *    or broken, not a verdict on the session - this rejects so SessionGate
  *    keeps retrying, and the stored session is left untouched.
+ *
+ * @param fetchOverrideFn Routes the whoami call through something other than
+ *   a real network fetch - e.g. the in-browser wasm server (see
+ *   @fireback/wasm-server's WithWasmServer/WasmFetchOverrideContext).
+ *   WithSelfServiceRoutes.tsx (the one caller today) passes
+ *   useWasmFetchOverride() here, same as WithFireback's own FetchxContext -
+ *   this file lives in ui-core, shared by every app, so it takes the
+ *   override as a plain parameter instead of importing wasm-server itself
+ *   (see WasmFetchContext.ts's own doc comment for why that matters).
  */
-export async function checkSessionViaWhoami(): Promise<void> {
+export async function checkSessionViaWhoami(
+  fetchOverrideFn?: FetchOverrideFn,
+): Promise<void> {
   const token = readRemoteQueryToken();
 
   if (!token) {
@@ -50,7 +69,7 @@ export async function checkSessionViaWhoami(): Promise<void> {
   const { response } = await WhoamiAction.Fetch(
     { headers: { authorization: token } },
     {
-      ctx: new FetchxContext("", null, null, null, undefined),
+      ctx: new FetchxContext("", null, null, null, fetchOverrideFn),
     },
   );
 

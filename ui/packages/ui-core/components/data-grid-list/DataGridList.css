@@ -1,0 +1,45 @@
+.data-grid-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Zero-height on purpose - IntersectionObserver only needs this to exist near
+   the end of the scrollable content, not to take up visible space. */
+.data-grid-list__sentinel {
+  height: 1px;
+}
+
+.data-grid-list__loading-more {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* .data-table-filter-tstring layers on top of the shared, absolutely-positioned
+   .data-table-filter-input (styles.css) - resets the <button> chrome that class
+   alone doesn't cover, and lays out the language icon + current value/placeholder
+   inline. */
+.data-table-filter-tstring {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+}
+
+.data-table-filter-tstring span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-table-filter-tstring__placeholder {
+  opacity: 0.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .data-grid-list__loading-more {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+}

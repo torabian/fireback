@@ -1,9 +1,6 @@
 package abacdefs
 
-import (
-	"encoding/json"
-	"github.com/torabian/emi/emigo"
-)
+import "encoding/json"
 
 // The base class definition for phoneNumberAccountCreationDto
 type PhoneNumberAccountCreationDto struct {
@@ -16,19 +13,4 @@ func (x *PhoneNumberAccountCreationDto) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetPhoneNumberAccountCreationDtoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "phone-number",
-			Type: "string",
-		},
-	}
-}
-func CastPhoneNumberAccountCreationDtoFromCli(c emigo.CliCastable) PhoneNumberAccountCreationDto {
-	data := PhoneNumberAccountCreationDto{}
-	if c.IsSet("phone-number") {
-		data.PhoneNumber = c.String("phone-number")
-	}
-	return data
 }

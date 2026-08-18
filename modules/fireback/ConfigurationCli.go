@@ -9,6 +9,9 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+func (x *Config) Save(filepath string) error {
+	return emigo.SaveEnvFile(x, filepath)
+}
 func GetConfigCliFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.BoolFlag{
@@ -18,6 +21,10 @@ func GetConfigCliFlags() []cli.Flag {
 		&cli.BoolFlag{
 			Name:  "production",
 			Usage: "If true, set's the environment behavior to production, and some functionality will be limited",
+		},
+		&cli.BoolFlag{
+			Name:  "show-doctor",
+			Usage: "If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead.",
 		},
 		&cli.StringFlag{
 			Name:  "table-prefix",
@@ -62,6 +69,22 @@ func GetConfigCliFlags() []cli.Flag {
 		&cli.BoolFlag{
 			Name:  "use-ssl",
 			Usage: "If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect",
+		},
+		&cli.StringFlag{
+			Name:  "ssl-provider",
+			Usage: "How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile point at a certificate you already have), 'self-signed' (a locally generated certificate, persisted to certFile/keyFile so it survives restarts - not trusted by browsers), or 'letsencrypt' (an ACME certificate for acmeDomains, requested and renewed automatically via golang.org/x/crypto/acme/autocert while the server is running). Empty falls back to the legacy behavior: manual if certFile/keyFile are set, otherwise an ephemeral self-signed certificate regenerated on every start. Set by 'fireback ssl enable'.",
+		},
+		&cli.StringFlag{
+			Name:  "acme-domains",
+			Usage: "Comma separated list of domains to request a Let's Encrypt certificate for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server and have port 80 reachable for the ACME HTTP-01 challenge.",
+		},
+		&cli.StringFlag{
+			Name:  "acme-email",
+			Usage: "Contact email registered with Let's Encrypt for expiry notices, when sslProvider is 'letsencrypt'. Optional but recommended.",
+		},
+		&cli.StringFlag{
+			Name:  "acme-cache-dir",
+			Usage: "Directory where the ACME account key and issued certificates are cached, when sslProvider is 'letsencrypt'. Must persist across restarts so certificates aren't re-requested (and to stay under Let's Encrypt's rate limits).",
 		},
 		&cli.StringFlag{
 			Name:  "db-dsn",
@@ -140,6 +163,9 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	if c.IsSet("production") {
 		config.Production = c.Bool("production")
 	}
+	if c.IsSet("show-doctor") {
+		config.ShowDoctor = c.Bool("show-doctor")
+	}
 	if c.IsSet("table-prefix") {
 		config.TablePrefix = c.String("table-prefix")
 	}
@@ -172,6 +198,18 @@ func CastConfigFromCli(config *Config, c emigo.CliCastable) {
 	}
 	if c.IsSet("use-ssl") {
 		config.UseSSL = c.Bool("use-ssl")
+	}
+	if c.IsSet("ssl-provider") {
+		config.SslProvider = c.String("ssl-provider")
+	}
+	if c.IsSet("acme-domains") {
+		config.AcmeDomains = c.String("acme-domains")
+	}
+	if c.IsSet("acme-email") {
+		config.AcmeEmail = c.String("acme-email")
+	}
+	if c.IsSet("acme-cache-dir") {
+		config.AcmeCacheDir = c.String("acme-cache-dir")
 	}
 	if c.IsSet("db-dsn") {
 		config.DbDsn = c.String("db-dsn")
@@ -266,6 +304,29 @@ func GetConfigCli() []*cli.Command {
 					Action: func(ctx context.Context, c *cli.Command) error {
 						return emigo.ConfigSetBoolean(c, config.Production, func(value bool) {
 							config.Production = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "show-doctor",
+			Usage: "If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead. (bool)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.ShowDoctor)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetBoolean(c, config.ShowDoctor, func(value bool) {
+							config.ShowDoctor = value
 							config.Save(".env")
 						})
 						return nil
@@ -519,6 +580,98 @@ func GetConfigCli() []*cli.Command {
 					Action: func(ctx context.Context, c *cli.Command) error {
 						return emigo.ConfigSetBoolean(c, config.UseSSL, func(value bool) {
 							config.UseSSL = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "ssl-provider",
+			Usage: "How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile point at a certificate you already have), 'self-signed' (a locally generated certificate, persisted to certFile/keyFile so it survives restarts - not trusted by browsers), or 'letsencrypt' (an ACME certificate for acmeDomains, requested and renewed automatically via golang.org/x/crypto/acme/autocert while the server is running). Empty falls back to the legacy behavior: manual if certFile/keyFile are set, otherwise an ephemeral self-signed certificate regenerated on every start. Set by 'fireback ssl enable'. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.SslProvider)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.SslProvider, func(value string) {
+							config.SslProvider = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "acme-domains",
+			Usage: "Comma separated list of domains to request a Let's Encrypt certificate for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server and have port 80 reachable for the ACME HTTP-01 challenge. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.AcmeDomains)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.AcmeDomains, func(value string) {
+							config.AcmeDomains = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "acme-email",
+			Usage: "Contact email registered with Let's Encrypt for expiry notices, when sslProvider is 'letsencrypt'. Optional but recommended. (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.AcmeEmail)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.AcmeEmail, func(value string) {
+							config.AcmeEmail = value
+							config.Save(".env")
+						})
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:  "acme-cache-dir",
+			Usage: "Directory where the ACME account key and issued certificates are cached, when sslProvider is 'letsencrypt'. Must persist across restarts so certificates aren't re-requested (and to stay under Let's Encrypt's rate limits). (string)",
+			Commands: []*cli.Command{
+				{
+					Name: "get",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						fmt.Println(config.AcmeCacheDir)
+						return nil
+					},
+				},
+				{
+					Name: "set",
+					Action: func(ctx context.Context, c *cli.Command) error {
+						return emigo.ConfigSetString(c, config.AcmeCacheDir, func(value string) {
+							config.AcmeCacheDir = value
 							config.Save(".env")
 						})
 						return nil

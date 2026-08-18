@@ -1,9 +1,6 @@
 package abacdefs
 
-import (
-	"encoding/json"
-	"github.com/torabian/emi/emigo"
-)
+import "encoding/json"
 
 // The base class definition for resetEmailDto
 type ResetEmailDto struct {
@@ -16,19 +13,4 @@ func (x *ResetEmailDto) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetResetEmailDtoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "password",
-			Type: "string",
-		},
-	}
-}
-func CastResetEmailDtoFromCli(c emigo.CliCastable) ResetEmailDto {
-	data := ResetEmailDto{}
-	if c.IsSet("password") {
-		data.Password = c.String("password")
-	}
-	return data
 }

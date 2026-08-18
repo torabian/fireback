@@ -1,8 +1,10 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/emi/lib/gorunner"
 	"github.com/urfave/cli/v3"
@@ -112,6 +114,11 @@ func main() {
 			{Fs: &FbSelfService.FbSelfService, Folder: ".", Prefix: "/selfservice"},
 		},
 		Modules: modules,
+		SetupWebServerHook: func(e *gin.Engine, a *application.Application) {
+			e.GET("/", func(c *gin.Context) {
+				c.Redirect(http.StatusFound, "/manage")
+			})
+		},
 	}
 
 	// This is an important setting for some kind of app which will be installed

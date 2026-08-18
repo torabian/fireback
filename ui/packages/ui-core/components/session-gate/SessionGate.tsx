@@ -42,6 +42,12 @@ export interface SessionGateProps {
   children: ReactNode;
   /** Delay between a failed attempt and the next one, in ms. Default 1500. */
   retryDelayMs?: number;
+  /**
+   * Renders a Cancel button under the attempt counter when set - e.g. to fall
+   * back to an offline/degraded mode instead of retrying forever. Omit to keep
+   * the original cancel-less behavior.
+   */
+  onCancel?: () => void;
 }
 
 /**
@@ -60,6 +66,7 @@ export function SessionGate({
   checkSession,
   children,
   retryDelayMs = 1500,
+  onCancel,
 }: SessionGateProps) {
   const [ready, setReady] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -112,6 +119,11 @@ export function SessionGate({
           <div className="session-gate__attempt">
             {s.attempt.replace("{n}", String(attempt))}
           </div>
+        )}
+        {onCancel && (
+          <button className="session-gate__cancel" onClick={onCancel}>
+            {s.cancel}
+          </button>
         )}
       </div>
     </div>

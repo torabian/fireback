@@ -1,0 +1,63 @@
+.form-tstring {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.form-tstring:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.form-tstring__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.form-tstring__value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Only applied when there's more than one non-empty language to show - a single
+   value is just displayed, nothing to crossfade between. Duration/interval are kept
+   in lockstep with FormTString.tsx's setInterval(..., 2000): the element remounts
+   (via a changing `key`) right as this animation reaches its 0%-opacity end, so the
+   next language's fade-in picks up where this one's fade-out left off. */
+.form-tstring__value--cycling {
+  animation: tstring-crossfade 2s ease-in-out forwards;
+}
+
+.form-tstring__locale {
+  display: inline-block;
+  margin-right: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.5;
+}
+
+.form-tstring__placeholder {
+  opacity: 0.6;
+}
+
+@keyframes tstring-crossfade {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

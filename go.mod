@@ -6,7 +6,6 @@ require (
 	github.com/474420502/gcurl v1.2.1
 	github.com/Rhymond/go-money v1.0.15
 	github.com/SherClockHolmes/webpush-go v1.4.0
-	github.com/alexeyco/simpletable v1.0.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/expr-lang/expr v1.17.5
@@ -43,12 +42,9 @@ require (
 	github.com/sendgrid/rest v2.6.9+incompatible
 	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/signintech/gopdf v0.19.0
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/tdewolff/minify/v2 v2.23.8
-	github.com/tidwall/gjson v1.18.0
-	github.com/tidwall/sjson v1.2.5
-	github.com/torabian/emi v1.3.5
+	github.com/torabian/emi v1.4.3
 	github.com/tus/tusd v1.10.0
 	github.com/urfave/cli/v3 v3.8.0
 	github.com/wal-g/wal-g v1.1.3-rc-with-build.0.20260120170815-f81943e64bdf
@@ -197,7 +193,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/phpdave11/gofpdi v1.0.14-0.20211212211723-1f10f9844311 // indirect
 	github.com/pierrec/lz4/v4 v4.1.25 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -228,6 +223,7 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/parse/v2 v2.8.1 // indirect
+	github.com/tidwall/gjson v1.18.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect

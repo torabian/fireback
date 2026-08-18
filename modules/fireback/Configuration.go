@@ -13,6 +13,8 @@ type Config struct {
 	CookieAuthOnly bool `envconfig:"COOKIE_AUTH_ONLY" description:"When true, the sessions (after authentication) would not return the token back in the response, and token will be only accessible via secure cookie."`
 	// If true, set's the environment behavior to production, and some functionality will be limited
 	Production bool `envconfig:"PRODUCTION" description:"If true, set's the environment behavior to production, and some functionality will be limited"`
+	// If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead.
+	ShowDoctor bool `envconfig:"SHOW_DOCTOR" description:"If true, prints the doctor report (config, environment urls, database info) when the http server starts via 'start'. Defaults to false - run 'fireback doctor' directly when you need it instead."`
 	// Prefix all gorm tables with some string
 	TablePrefix string `envconfig:"TABLE_PREFIX" description:"Prefix all gorm tables with some string"`
 	// VAPID Web push notification public key
@@ -35,6 +37,14 @@ type Config struct {
 	DbLogLevel string `envconfig:"DB_LOG_LEVEL" description:"Database log level for SQL queries, used by GORM orm. Default it's silent. 'warn', 'error', 'info' are other options."`
 	// If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect
 	UseSSL bool `envconfig:"USE_SSL" description:"If set to true, all http traffic will be redirected into https. Needs certFile and keyFile to be defined otherwise no effect"`
+	// How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile point at a certificate you already have), 'self-signed' (a locally generated certificate, persisted to certFile/keyFile so it survives restarts - not trusted by browsers), or 'letsencrypt' (an ACME certificate for acmeDomains, requested and renewed automatically via golang.org/x/crypto/acme/autocert while the server is running). Empty falls back to the legacy behavior: manual if certFile/keyFile are set, otherwise an ephemeral self-signed certificate regenerated on every start. Set by 'fireback ssl enable'.
+	SslProvider string `envconfig:"SSL_PROVIDER" description:"How the certificate used by useSSL is obtained: 'manual' (certFile/keyFile point at a certificate you already have), 'self-signed' (a locally generated certificate, persisted to certFile/keyFile so it survives restarts - not trusted by browsers), or 'letsencrypt' (an ACME certificate for acmeDomains, requested and renewed automatically via golang.org/x/crypto/acme/autocert while the server is running). Empty falls back to the legacy behavior: manual if certFile/keyFile are set, otherwise an ephemeral self-signed certificate regenerated on every start. Set by 'fireback ssl enable'."`
+	// Comma separated list of domains to request a Let's Encrypt certificate for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server and have port 80 reachable for the ACME HTTP-01 challenge.
+	AcmeDomains string `envconfig:"ACME_DOMAINS" description:"Comma separated list of domains to request a Let's Encrypt certificate for, when sslProvider is 'letsencrypt'. Each domain must resolve to this server and have port 80 reachable for the ACME HTTP-01 challenge."`
+	// Contact email registered with Let's Encrypt for expiry notices, when sslProvider is 'letsencrypt'. Optional but recommended.
+	AcmeEmail string `envconfig:"ACME_EMAIL" description:"Contact email registered with Let's Encrypt for expiry notices, when sslProvider is 'letsencrypt'. Optional but recommended."`
+	// Directory where the ACME account key and issued certificates are cached, when sslProvider is 'letsencrypt'. Must persist across restarts so certificates aren't re-requested (and to stay under Let's Encrypt's rate limits).
+	AcmeCacheDir string `envconfig:"ACME_CACHE_DIR" description:"Directory where the ACME account key and issued certificates are cached, when sslProvider is 'letsencrypt'. Must persist across restarts so certificates aren't re-requested (and to stay under Let's Encrypt's rate limits)."`
 	// The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it.
 	DbDsn string `envconfig:"DB_DSN" description:"The single source of truth for the database connection: a full DSN (postgres keyword/value string, mysql go-sql-driver DSN, or - for sqlite - the database file path itself, or in-memory). See modules/fireback/dbdsn for reading/writing individual pieces (host/port/username/password/database/ssl) of this string; there is no separate set of DB_HOST/DB_PORT/etc fields to keep in sync with it."`
 	// Gin framework mode, which could be 'test', 'debug', 'release'
@@ -76,6 +86,7 @@ var config Config = Config{
 	TokenGenerationStrategy: "random",
 	WithTaskServer:          false,
 	DbLogLevel:              "silent",
+	AcmeCacheDir:            "./.fireback-acme-cache",
 	DbVendor:                "sqlite",
 	WorkerAddress:           "127.0.0.1:6379",
 	WorkerConcurrency:       10,
@@ -88,19 +99,6 @@ var config Config = Config{
 	WindowsIdentifier:       "fireback",
 }
 
-/*
-*
-You can call this function on first line of your main function.
-This is different from fireback configuration (for now), you can
-define config: in module3 file, similar to fields in entities,
-and we generate the config struct and this function would read .env.local,
-.env.prod, etc - depending on the ENV=xxx env variable.
-*
-*/
-func LoadConfiguration() Config {
-	emigo.HandleEnvVars(&config)
-	return config
-}
 func (x *Config) Json() string {
 	if x != nil {
 		str, _ := json.MarshalIndent(x, "", "  ")
@@ -108,6 +106,20 @@ func (x *Config) Json() string {
 	}
 	return ""
 }
-func (x *Config) Save(filepath string) error {
-	return emigo.SaveEnvFile(x, filepath)
+
+/*
+*
+You can call this function on first line of your main function.
+This is different from fireback configuration (for now), you can
+define config: in module3 file, similar to fields in entities,
+and we generate the config struct and this function would read .env.local,
+.env.prod, etc - depending on the ENV=xxx env variable (or, under a wasm
+build, whatever env vars the host page already set via os.Setenv before
+this ran - see emigo.HandleEnvVars's own doc comments in Config.go/
+ConfigWasm.go for the two implementations this dispatches to).
+*
+*/
+func LoadConfiguration() Config {
+	emigo.HandleEnvVars(&config)
+	return config
 }

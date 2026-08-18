@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abac
 
 import (
@@ -16,8 +18,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/urfave/cli/v3"
 )
-
-var ANONYMOUS_AUTHENTICATION = "anonymous"
 
 func discoverPassportMethodsAndPrint(c *cli.Command) []string {
 	fmt.Println("In authorization flow, first of all we need to check what are the available actions publicly, to the user.")

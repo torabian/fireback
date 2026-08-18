@@ -35,6 +35,8 @@ content:
     formDateTime: فرم تاریخ/زمان
     formSelect: فرم انتخاب
     home: خانه
+    loading: در حال بارگذاری…
+    loadingMore: در حال بارگذاری بیشتر…
     noAttachmentData: داده‌ای برای پیوست وجود ندارد
     noQuerySourceToRender: منبعی برای نمایش وجود ندارد
     onlyPngSvgAllowed: فقط فایل‌های PNG یا SVG مجاز هستند.

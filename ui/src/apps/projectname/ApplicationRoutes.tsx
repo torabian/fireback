@@ -6,6 +6,8 @@ import { DemoModal } from "./demo/DemoModal";
 import { DemoFormDates } from "./demo/DemoFormDates";
 import { FirebackEssentialRouterManager } from "@fireback/enterprise-shell/EssentialRouter";
 import { DemoJsf } from "./demo/DemoJsf";
+import { DataGridListDemo } from "./demo/data-grid-list/DataGridListDemo";
+import { DemoFormTString } from "./demo/DemoFormTString";
 
 export function ApplicationRoutes({ routerId }: { routerId?: string }) {
   return (
@@ -15,6 +17,8 @@ export function ApplicationRoutes({ routerId }: { routerId?: string }) {
       <Route path={"demo/jsf"} element={<DemoJsf />}></Route>
       <Route path={"demo/modals"} element={<DemoModal />}></Route>
       <Route path={"demo/form-date"} element={<DemoFormDates />}></Route>
+      <Route path={"demo/data-grid-list"} element={<DataGridListDemo />}></Route>
+      <Route path={"demo/form-tstring"} element={<DemoFormTString />}></Route>
       <Route path={"demo"} element={<DemoScreen />}></Route>
     </FirebackEssentialRouterManager>
   );

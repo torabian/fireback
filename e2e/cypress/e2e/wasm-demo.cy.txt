@@ -1,0 +1,110 @@
+// wasm-demo.cy.ts - unlike every other spec in this suite, there's no real
+// Fireback backend or database involved at all: src/apps/wasm-demo runs a
+// fireback server compiled to wasm (cmd/fireback-wasm) entirely inside the
+// browser tab, backed by an in-browser Postgres (pglite) - see that app's
+// own App.tsx doc comment. cypress.config.js's buildWasmDemo/
+// startWasmDemoServer/stopWasmDemoServer tasks build it (`make wasm` +
+// `npm run wasm-demo:build`) and serve the result as plain static files on
+// WASM_DEMO_PORT, completely separate from the real `./app start` process
+// (PORT) the rest of this suite drives.
+//
+// cmd/fireback-wasm/main.go only implements GET /whoami today (hardcoded -
+// see its own comments) - every other route 404s. That's enough for this
+// spec's purposes: checkSessionViaWhoami (ui-core/components/session-gate)
+// only cares about the *status code*, not the response body, and
+// AuthenticationProvider trusts a session already in localStorage outright
+// (no checkValidity configured) - so a fake session seeded before first
+// load, plus a 200 from /whoami, is enough to get past SessionGate and show
+// the real sidebar shell, same as a genuinely signed-in visitor would see.
+function wasmDemoUrl(affix: string) {
+  return `http://localhost:${Cypress.env("WASM_DEMO_PORT")}${affix}`;
+}
+
+// Matches nima_ui_session's AuthenticationSession shape (see
+// @fireback/auth-client/authenticationUtils.ts's
+// mapRawSessionToAuthenticationSession) - exactly one workspace, so
+// resolveSelectedWorkspace auto-selects it and WithSelfServiceRoutes never
+// detours into its "pick a workspace" screen.
+const FAKE_SESSION = {
+  token: "fake-wasm-token",
+  user: { uniqueId: "mock-user-id", name: "Mock User" },
+  workspaces: [{ workspaceId: "mock-workspace-id", name: "Mock Workspace" }],
+  extra: {},
+};
+
+function seedFakeSession(win: Cypress.AUTWindow) {
+  win.localStorage.setItem("nima_ui_session", JSON.stringify(FAKE_SESSION));
+}
+
+describe("wasm-demo: fireback compiled to wasm, running entirely in the browser", () => {
+  before(() => {
+    // Go->wasm compile of the whole fireback binary, then a vite build
+    // bundling pglite - both genuinely slow, hence the generous timeout
+    // (well past Cypress's default 60s command timeout).
+    cy.task("buildWasmDemo", null, { timeout: 300_000 });
+  });
+
+  after(() => {
+    cy.task("stopWasmDemoServer");
+  });
+
+  it("starts a static server for the built wasm-demo app.", () => {
+    cy.task("startWasmDemoServer");
+  });
+
+  it("boots the wasm server and in-browser Postgres with no session at all, and falls back to the signin screen.", () => {
+    cy.viewport(1366, 900);
+    Cypress.on("uncaught:exception", () => false);
+
+    // No localStorage seeded here - WithWasmServer still downloads and boots
+    // cmd/fireback-wasm regardless of auth state (it wraps the *entire* app,
+    // see wasm-demo/App.tsx), so this alone proves the wasm/pglite round
+    // trip works before any session/whoami business even enters the
+    // picture. WithSelfServiceRoutes's own "no session" branch then renders
+    // self-service's Welcome.screen.tsx (.signin-form-container), backed by
+    // cmd/fireback-wasm's own hardcoded GET /passports/available-methods
+    // (see that file's comments) - only asserting the container itself
+    // exists here, not its exact contents (a signin button vs. an
+    // auto-advanced "enter your email" form, say), since that's real
+    // frontend behavior this spec isn't trying to pin down.
+    cy.visit(wasmDemoUrl("/"));
+    cy.get(".signin-form-container", { timeout: 30_000 }).should("exist");
+  });
+
+  it("with a fake session seeded, whoami answers through the wasm server and the sidebar becomes visible.", () => {
+    cy.viewport(1366, 900);
+    Cypress.on("uncaught:exception", () => false);
+
+    cy.visit(wasmDemoUrl("/"), {
+      onBeforeLoad: seedFakeSession,
+    });
+
+    // SessionGate's own spinner while checkSessionViaWhoami is in flight -
+    // not asserted on for long (flaky by nature, a fast wasm round trip may
+    // never render it), just documents what the wait below is for.
+    cy.get(".sidebar", { timeout: 30_000 }).should("be.visible");
+  });
+
+  it("the sidebar's own routing renders real content - the wasm /whoami round trip demo.", () => {
+    cy.viewport(1366, 900);
+    Cypress.on("uncaught:exception", () => false);
+
+    // FirebackEssentialRouterManager (EssentialRouter.tsx) nests every
+    // ApplicationRoutes route (this one included) under a leading `:locale`
+    // segment - "whoami" alone would be consumed *as* that locale param
+    // instead of matching wasm-demo/ApplicationRoutes.tsx's own `whoami`
+    // route, landing on an empty content pane next to a perfectly fine
+    // sidebar.
+    cy.visit(wasmDemoUrl("/#/en/whoami"), {
+      onBeforeLoad: seedFakeSession,
+    });
+
+    cy.get(".sidebar", { timeout: 30_000 }).should("be.visible");
+    cy.contains("h1", "Fireback — wasm entry point").should("exist");
+    // WasmWhoamiDemo.tsx's own GET /whoami, answered by cmd/fireback-wasm's
+    // hardcoded mock (see its own comments) - proves this isn't just the
+    // *shell* rendering, a real request round-tripped through
+    // window.handleWasmRequest and back.
+    cy.contains("mock-user-id", { timeout: 15_000 }).should("exist");
+  });
+});

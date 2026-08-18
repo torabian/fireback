@@ -132,43 +132,27 @@ export const SSEFetch = <T = string>(
   return { response: res, done };
 };
 export class FetchxContext {
-  // Plain field declarations + constructor-body assignment rather than
-  // constructor parameter properties (`constructor(public baseUrl...)`) -
-  // parameter properties carry runtime semantics a pure type-stripping
-  // TS compiler can't erase, and trip `erasableSyntaxOnly` (on by default in
-  // recent `npm create vite` scaffolds) for anyone consuming this package
-  // straight from source.
-  baseUrl: string;
-  defaultHeaders: Record<string, string>;
-  requestInterceptor?: (
-    url: string,
-    init: TypedRequestInit<any, any>,
-  ) =>
-    | Promise<[string, TypedRequestInit<any, any>]>
-    | [string, TypedRequestInit<any, any>];
-  responseInterceptor?: <T>(res: TypedResponse<T>) => Promise<TypedResponse<T>>;
-  /**
-   * Overrides the browser fetch function, for different purposes. It would recieve the same first 2 arguments as fetch,
-   * as well as third one of fetchx context. If you pass the fetch itself to override, it should have no effect.
-   */
-  fetchOverrideFn?: (
-    input: RequestInfo | URL,
-    init?: TypedRequestInit,
-  ) => Promise<Response>;
-
   constructor(
-    baseUrl: string = "",
-    defaultHeaders: Record<string, string> = {},
-    requestInterceptor?: FetchxContext["requestInterceptor"],
-    responseInterceptor?: FetchxContext["responseInterceptor"],
-    fetchOverrideFn?: FetchxContext["fetchOverrideFn"],
-  ) {
-    this.baseUrl = baseUrl;
-    this.defaultHeaders = defaultHeaders;
-    this.requestInterceptor = requestInterceptor;
-    this.responseInterceptor = responseInterceptor;
-    this.fetchOverrideFn = fetchOverrideFn;
-  }
+    public baseUrl: string = "",
+    public defaultHeaders: Record<string, string> = {},
+    public requestInterceptor?: (
+      url: string,
+      init: TypedRequestInit<any, any>,
+    ) =>
+      | Promise<[string, TypedRequestInit<any, any>]>
+      | [string, TypedRequestInit<any, any>],
+    public responseInterceptor?: <T>(
+      res: TypedResponse<T>,
+    ) => Promise<TypedResponse<T>>,
+    /**
+     * Overrides the browser fetch function, for different purposes. It would recieve the same first 2 arguments as fetch,
+     * as well as third one of fetchx context. If you pass the fetch itself to override, it should have no effect.
+     */
+    public fetchOverrideFn?: (
+      input: RequestInfo | URL,
+      init?: TypedRequestInit,
+    ) => Promise<Response>,
+  ) {}
   async apply(
     url: string,
     init: TypedRequestInit<any, any>,

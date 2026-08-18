@@ -37,6 +37,8 @@ content:
     formJsf: Form Jsf
     formSelect: Formularz wyboru
     home: Strona główna
+    loading: Ładowanie…
+    loadingMore: Ładowanie więcej…
     noAttachmentData: Brak danych załącznika
     noQuerySourceToRender: Brak źródła danych do wyświetlenia
     onlyPngSvgAllowed: Dozwolone są tylko pliki PNG lub SVG.

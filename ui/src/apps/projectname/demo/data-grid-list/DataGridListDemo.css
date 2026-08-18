@@ -1,0 +1,36 @@
+.data-grid-list-demo__boxed {
+  height: 420px;
+  overflow: auto;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  position: relative;
+}
+
+.emi-demo-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.emi-demo-badge--draft {
+  background: rgba(148, 163, 184, 0.2);
+  color: #475569;
+}
+
+.emi-demo-badge--published {
+  background: rgba(34, 197, 94, 0.18);
+  color: #15803d;
+}
+
+.emi-demo-badge--archived {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .data-grid-list-demo__boxed {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}

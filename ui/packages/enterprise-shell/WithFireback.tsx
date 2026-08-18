@@ -8,7 +8,7 @@ import { FetchxContext } from "@fireback/js-remote-ctx/common/fetchx";
 import { FetchxProvider } from "@fireback/js-remote-ctx/react/useFetchx";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { useFirebackSocket } from "@fireback/ui-core/hooks/useFirebackSocket";
-// import { wasmFetchOverride } from "@fireback/wasm-server/wasmServer";
+import { useWasmFetchOverride } from "@fireback/wasm-server/WasmFetchContext";
 
 export function WithFireback({
   children,
@@ -39,11 +39,19 @@ const WithFetchX = ({
 }) => {
   const { token, selectedWorkspace } = useAuthentication();
 
-  // When VITE_USE_WASM_SERVER is on, WithWasmServer (@fireback/wasm-server)
-  // has already downloaded and booted a fireback server compiled to wasm by
-  // the time this mounts (it gates rendering of the router around it) — so
-  // the base URL becomes irrelevant and every request instead goes through
-  // wasmFetchOverride to the in-tab server. Off, this is unchanged.
+  // When an app mounts WithWasmServer (@fireback/wasm-server) around its
+  // router with VITE_USE_WASM_SERVER on, it has already downloaded and
+  // booted a fireback server compiled to wasm by the time this mounts (it
+  // gates rendering of its children around that) — so the base URL becomes
+  // irrelevant and every request instead goes through wasmFetchOverride to
+  // the in-tab server, picked up here via WasmFetchOverrideContext (see that
+  // file's own doc comment for why it's a context and not a direct import of
+  // @fireback/wasm-server: this file is shared by every app, and a static
+  // import of the real wasm/pglite code here would ship it in all of them).
+  // src/apps/wasm-demo/App.tsx is the one app that does this today (see its
+  // own doc comment) - for projectname/self-service there's no Provider
+  // mounted, so this stays undefined and behaves exactly as before.
+  const wasmFetchOverride = useWasmFetchOverride();
 
   const fetchContext = React.useRef(
     new FetchxContext(
@@ -51,9 +59,7 @@ const WithFetchX = ({
       {},
       undefined,
       undefined,
-      // BUILD_VARIABLES.USE_WASM_SERVER === "true"
-      //   ? wasmFetchOverride()
-      //   : undefined,
+      wasmFetchOverride,
     ),
   );
 

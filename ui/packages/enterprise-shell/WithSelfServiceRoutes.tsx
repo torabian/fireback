@@ -14,6 +14,7 @@ import { SessionGate } from "@fireback/ui-core/components/session-gate/SessionGa
 import { checkSessionViaWhoami } from "@fireback/ui-core/components/session-gate/checkSessionViaWhoami";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { usePureLocale } from "@fireback/ui-core/hooks/usePureLocale";
+import { useWasmFetchOverride } from "@fireback/wasm-server/WasmFetchContext";
 import { type ReactNode } from "react";
 
 const useHashRouter = BUILD_VARIABLES.USE_HASH_ROUTER === "true";
@@ -28,6 +29,10 @@ export const WithSelfServiceRoutes = ({
   const selfServicePublicRoutes = useSelfServicePublicRoutes();
   const { selectedWorkspace } = useAuthentication();
   const { locale } = usePureLocale();
+  // undefined outside of an app that mounts WithWasmServer (see
+  // WasmFetchContext.ts) - checkSessionViaWhoami then falls back to a real
+  // network fetch, unchanged from before.
+  const wasmFetchOverride = useWasmFetchOverride();
 
   // AuthenticationSession.workspaces is already a plain array (see
   // mapRawSessionToAuthenticationSession) - no MCollection/localStorage
@@ -58,7 +63,9 @@ export const WithSelfServiceRoutes = ({
   // that assumes real authenticated access renders: the workspace picker, or
   // the main app itself.
   return (
-    <SessionGate checkSession={checkSessionViaWhoami}>
+    <SessionGate
+      checkSession={() => checkSessionViaWhoami(wasmFetchOverride)}
+    >
       {!selectedWorkspace && userWorkspaceCount > 1 ? (
         <Router future={{ v7_startTransition: true }}>
           <SelectWorkspaceScreen />

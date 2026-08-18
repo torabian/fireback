@@ -12,26 +12,31 @@
 export const en = {
   checking: "Checking your session…",
   attempt: "Still trying to reach the server — attempt {n}…",
+  cancel: "Cancel",
 };
 
 export const pl = {
   checking: "Sprawdzanie sesji…",
   attempt: "Wciąż próbuję połączyć się z serwerem — próba {n}…",
+  cancel: "Anuluj",
 };
 
 export const ru = {
   checking: "Проверка сеанса…",
   attempt: "Пытаемся подключиться к серверу — попытка {n}…",
+  cancel: "Отмена",
 };
 
 export const es = {
   checking: "Comprobando tu sesión…",
   attempt: "Seguimos intentando conectar con el servidor — intento {n}…",
+  cancel: "Cancelar",
 };
 
 export const fa = {
   checking: "در حال بررسی نشست شما…",
   attempt: "همچنان در تلاش برای اتصال به سرور — تلاش {n}…",
+  cancel: "لغو",
 };
 
 export type SessionGateStrings = typeof en;

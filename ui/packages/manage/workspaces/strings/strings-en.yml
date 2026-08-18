@@ -1,4 +1,7 @@
 content:
+  addUser: Add user
+  addUserToWorkspaceHint: Search for an existing user and pick one of this workspace's
+    roles.
   body: Body
   confirmEmailSender: User signup confirm account email
   createNewWorkspace: New workspace
@@ -14,9 +17,12 @@ content:
   name: Name
   notificationDialogTitle: Edit the mail template
   resetToDefault: Reset to default
+  selectRole: Role
+  selectUser: User
   sender: Sender
   sidetitle: Workspaces
   title: Title
   type: Type
+  userAddedToWorkspace: User added to the workspace
   workspaceName: Workspace name
   workspaceNameHint: Enter the workspace name

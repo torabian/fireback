@@ -2,15 +2,11 @@ package abacdefs
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
-	"github.com/urfave/cli/v3"
 	"io"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
 )
 
@@ -62,21 +58,6 @@ func (x *PublicJoinKeyAwareDeleteActionReq) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetPublicJoinKeyAwareDeleteActionReqCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "unique-ids",
-			Type: "slice",
-		},
-	}
-}
-func CastPublicJoinKeyAwareDeleteActionReqFromCli(c emigo.CliCastable) PublicJoinKeyAwareDeleteActionReq {
-	data := PublicJoinKeyAwareDeleteActionReq{}
-	if c.IsSet("unique-ids") {
-		emigo.InflatePossibleSlice(c.String("unique-ids"), &data.UniqueIds)
-	}
-	return data
 }
 
 type PublicJoinKeyAwareDeleteActionResponse struct {
@@ -287,206 +268,6 @@ func PublicJoinKeyAwareDeleteActionCall(
 	}
 	// This one would execute the request and cast the result.
 	return PublicJoinKeyAwareDeleteActionClientExecuteTyped(r)
-}
-
-// PublicJoinKeyAwareDeleteActionRaw registers a raw Gin route for the PublicJoinKeyAwareDeleteAction action.
-// This gives the developer full control over middleware, handlers, and response handling.
-func PublicJoinKeyAwareDeleteActionRaw(r *gin.Engine, handlers ...gin.HandlerFunc) {
-	meta := PublicJoinKeyAwareDeleteActionMeta()
-	r.Handle(meta.Method, meta.URL, handlers...)
-}
-
-// PublicJoinKeyAwareDeleteActionHandler returns the HTTP method, route URL, and a typed Gin handler for the PublicJoinKeyAwareDeleteAction action.
-// Developers implement their business logic as a function that receives a typed request object
-// and returns either an *ActionResponse or nil. JSON marshalling, headers, and errors are handled automatically.
-func PublicJoinKeyAwareDeleteActionHandler(
-	handler func(c PublicJoinKeyAwareDeleteActionRequest) (*PublicJoinKeyAwareDeleteActionResponse, error),
-) (method, url string, h gin.HandlerFunc) {
-	meta := PublicJoinKeyAwareDeleteActionMeta()
-	return meta.Method, meta.URL, func(m *gin.Context) {
-		var body PublicJoinKeyAwareDeleteActionReq
-		if err := m.ShouldBindJSON(&body); err != nil {
-			m.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON: " + err.Error()})
-			return
-		}
-		// Build typed request wrapper
-		req := PublicJoinKeyAwareDeleteActionRequest{
-			Body:        body,
-			QueryParams: m.Request.URL.Query(),
-			Headers:     m.Request.Header,
-			GinCtx:      m,
-		}
-		resp, err := handler(req)
-		if err != nil {
-			// Some deeper call inside handler (e.g. a security/authorization check
-			// that rejects the request before the handler's own business logic ever
-			// runs) may have already written and aborted the response itself - gin
-			// tracks that on the ResponseWriter regardless of who did the writing.
-			// Rendering the bubbled-up error on top of that would append a second,
-			// invalid JSON body after the first.
-			if m.Writer.Written() {
-				return
-			}
-			status := http.StatusInternalServerError
-			// If the error knows how to render itself for a given language (e.g.
-			// fireback.IError, whose ferror.Error.ToPublicJSON resolves its
-			// {"$": ..., "en": ..., "fa": ...} message map down to one string), let it -
-			// picking the language the same way the rest of the app resolves it: the
-			// "acceptLanguage" query param first, else the Accept-Language header, else
-			// "en".
-			if converter, ok := err.(interface {
-				ToPublicJSON(lang string) ([]byte, int32)
-			}); ok {
-				lang := m.Query("acceptLanguage")
-				if lang == "" {
-					lang = m.GetHeader("Accept-Language")
-					if i := strings.IndexAny(lang, ",;-"); i >= 0 {
-						lang = lang[:i]
-					}
-					lang = strings.ToLower(strings.TrimSpace(lang))
-				}
-				if lang == "" {
-					lang = "en"
-				}
-				body, code := converter.ToPublicJSON(lang)
-				if code != 0 {
-					status = int(code)
-				}
-				// Nest the resolved object under "error" (rather than writing it as the
-				// bare response body) so every error shape - this one, the generic
-				// forwarded-JSON one below, and the plain-string one - answers with the
-				// same {"error": ...} envelope. json.RawMessage keeps body embedded as
-				// real JSON instead of being re-escaped into a string.
-				m.JSON(status, gin.H{"error": json.RawMessage(body)})
-				return
-			}
-			// Otherwise, other action errors may still stringify themselves as an
-			// indented JSON object via their Error() method. If that's what we got,
-			// forward it nested under "error" as real JSON (optionally honoring its own
-			// "httpCode" field for the response status) instead of re-escaping it into a
-			// string, which is what plain errors still get.
-			msg := err.Error()
-			trimmed := strings.TrimSpace(msg)
-			if strings.HasPrefix(trimmed, "{") && json.Valid([]byte(trimmed)) {
-				var probe struct {
-					HttpCode int32 `json:"httpCode"`
-				}
-				if uErr := json.Unmarshal([]byte(trimmed), &probe); uErr == nil && probe.HttpCode != 0 {
-					status = int(probe.HttpCode)
-				}
-				m.JSON(status, gin.H{"error": json.RawMessage(trimmed)})
-				return
-			}
-			m.JSON(status, gin.H{"error": msg})
-			return
-		}
-		// If the handler returned nil (and no error), it means the response was handled manually.
-		if resp == nil {
-			return
-		}
-		// Apply headers
-		for k, v := range resp.Headers {
-			m.Header(k, v)
-		}
-		// Apply status and payload
-		status := resp.StatusCode
-		if status == 0 {
-			status = http.StatusOK
-		}
-		if resp.Payload != nil {
-			m.JSON(status, resp.Payload)
-		} else {
-			m.Status(status)
-		}
-	}
-}
-
-// PublicJoinKeyAwareDeleteActionGin is a high-level convenience wrapper around PublicJoinKeyAwareDeleteActionHandler.
-// It automatically constructs and registers the typed route on the Gin engine.
-// Use this when you don't need custom middleware or route grouping.
-func PublicJoinKeyAwareDeleteActionGin(r gin.IRoutes, handler func(c PublicJoinKeyAwareDeleteActionRequest) (*PublicJoinKeyAwareDeleteActionResponse, error)) {
-	method, url, h := PublicJoinKeyAwareDeleteActionHandler(handler)
-	r.Handle(method, url, h)
-}
-func (x PublicJoinKeyAwareDeleteActionRequest) IsGin() bool {
-	if x.GinCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.GinCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
-func PublicJoinKeyAwareDeleteActionQueryFromGin(c *gin.Context) PublicJoinKeyAwareDeleteActionQuery {
-	return PublicJoinKeyAwareDeleteActionQueryFromString(c.Request.URL.RawQuery)
-}
-func (x PublicJoinKeyAwareDeleteActionRequest) IsCli() bool {
-	if x.CliCtx == nil {
-		return false
-	}
-	v := reflect.ValueOf(x.CliCtx)
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Interface, reflect.Func, reflect.Chan:
-		return !v.IsNil()
-	}
-	return true
-}
-
-// PublicJoinKeyAwareDeleteActionCliFlags returns every flag (request body, path parameters,
-// query parameters and typed headers) the PublicJoinKeyAwareDeleteAction action can bind from
-// urfave v3, plus a generic repeatable --header/-H flag for anything not covered by a
-// typed header.
-func PublicJoinKeyAwareDeleteActionCliFlags() []cli.Flag {
-	flags := []cli.Flag{
-		&cli.StringSliceFlag{
-			Name:    "header",
-			Aliases: []string{"H"},
-			Usage:   `Raw request header as "Key: Value", repeatable`,
-		},
-	}
-	flags = append(flags, emigo.CastEmiFlagToUrfave(GetPublicJoinKeyAwareDeleteActionReqCliFlags(""))...)
-	return flags
-}
-
-// PublicJoinKeyAwareDeleteActionCliHandler builds a full *cli.Command for the
-// PublicJoinKeyAwareDeleteAction action: it wires body, path parameters, query parameters and
-// headers from urfave v3 CLI flags into a PublicJoinKeyAwareDeleteActionRequest the same way
-// PublicJoinKeyAwareDeleteActionHandler (Gin) and PublicJoinKeyAwareDeleteActionHttpHandler (net/http)
-// do from their own transports, then prints the JSON response (or returns the error) so
-// urfave reports the right exit code.
-func PublicJoinKeyAwareDeleteActionCliHandler(
-	handler func(c PublicJoinKeyAwareDeleteActionRequest) (*PublicJoinKeyAwareDeleteActionResponse, error),
-) *cli.Command {
-	meta := PublicJoinKeyAwareDeleteActionMeta()
-	cmd := &cli.Command{
-		Name:  meta.CliName,
-		Usage: meta.Description,
-		Flags: PublicJoinKeyAwareDeleteActionCliFlags(),
-	}
-	cmd.Aliases = []string{meta.CliShort}
-	cmd.Action = func(ctx context.Context, c *cli.Command) error {
-		req := PublicJoinKeyAwareDeleteActionRequest{
-			CliCtx:      c,
-			QueryParams: url.Values{},
-			Headers:     emigo.ParseCliHeaders(c.StringSlice("header")),
-			Body:        CastPublicJoinKeyAwareDeleteActionReqFromCli(c),
-		}
-		return emigo.HandleActionInCli(handler(req))
-	}
-	return cmd
-}
-
-// PublicJoinKeyAwareDeleteActionCli is a high-level convenience wrapper around
-// PublicJoinKeyAwareDeleteActionCliHandler. It registers the generated command as a subcommand
-// of an existing urfave v3 *cli.Command, the same way PublicJoinKeyAwareDeleteActionGin
-// registers a route on a Gin engine.
-func PublicJoinKeyAwareDeleteActionCli(
-	app *cli.Command,
-	handler func(c PublicJoinKeyAwareDeleteActionRequest) (*PublicJoinKeyAwareDeleteActionResponse, error),
-) {
-	app.Commands = append(app.Commands, PublicJoinKeyAwareDeleteActionCliHandler(handler))
 }
 
 // PublicJoinKeyAwareDeleteActionHttpHandler returns the HTTP method, the ServeMux pattern, and a

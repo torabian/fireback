@@ -1,9 +1,6 @@
 package abacdefs
 
-import (
-	"encoding/json"
-	"github.com/torabian/emi/emigo"
-)
+import "encoding/json"
 
 // The base class definition for exchangeKeyInformationDto
 type ExchangeKeyInformationDto struct {
@@ -17,26 +14,4 @@ func (x *ExchangeKeyInformationDto) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetExchangeKeyInformationDtoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "key",
-			Type: "string",
-		},
-		{
-			Name: prefix + "visibility",
-			Type: "string",
-		},
-	}
-}
-func CastExchangeKeyInformationDtoFromCli(c emigo.CliCastable) ExchangeKeyInformationDto {
-	data := ExchangeKeyInformationDto{}
-	if c.IsSet("key") {
-		data.Key = c.String("key")
-	}
-	if c.IsSet("visibility") {
-		data.Visibility = c.String("visibility")
-	}
-	return data
 }

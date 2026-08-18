@@ -463,6 +463,40 @@ func TestInviteToWorkspace_HTTP_Succeeds(t *testing.T) {
 	}
 }
 
+// TestInviteToWorkspace_HTTP_RootRoleSucceeds is the regression test for: inviting
+// someone into the root workspace with the "Root" role picked from the role list fails
+// with a "role is not accessible" style error, even though it's a real, existing role
+// and the caller is root itself.
+//
+// Root cause: ValidateRoleAndItsExistence (WorkspaceTypeActions.go) looked the role up
+// via RoleActions.GetOne(fireback.QueryDSL{UniqueId: roleId}) - a bare QueryDSL with no
+// WorkspaceId at all. RoleActions.GetOne is wrapped (RoleActions.go's init()) to treat
+// the root role as invisible/404 from any query whose WorkspaceId isn't literally
+// "root" - and an empty string never is, regardless of which workspace the caller is
+// actually acting in. So a lookup for roleId "root" 404'd unconditionally, every time,
+// even from inside the root workspace itself - InviteToWorkspaceAction surfaced that as
+// RoleIsNotAccessible.
+func TestInviteToWorkspace_HTTP_RootRoleSucceeds(t *testing.T) {
+	cfg := LoadTestConfig(t)
+	cfg.RequireServer(t)
+	cfg.RequireAuth(t)
+	ensureInviteEmailSendingConfigured(t, cfg)
+
+	email := fmt.Sprintf("checkendpointtests-rootinvitee+%d@example.com", time.Now().UnixNano())
+	resp, body := postInvite(t, cfg, cfg.CliToken, cfg.WorkspaceID, validInvitePayload(email, "root"))
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK inviting with the root role from the root workspace, got %d: %s", resp.StatusCode, body)
+	}
+
+	var out googleResponseEnvelope[workspaceInviteRes]
+	if err := json.Unmarshal(body, &out); err != nil {
+		t.Fatalf("failed to decode invite response: %v\nbody: %s", err, body)
+	}
+	if out.Data.Item.RoleId != "root" {
+		t.Errorf("expected roleId %q to have been saved onto the invite, got %q", "root", out.Data.Item.RoleId)
+	}
+}
+
 // --- AcceptInviteAction (/user/invitation/accept) ---
 
 func postAccept(t *testing.T, cfg TestConfig, token, workspaceId, invitationUniqueId string) (*http.Response, []byte) {
