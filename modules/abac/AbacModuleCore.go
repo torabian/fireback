@@ -105,11 +105,11 @@ var AbacGinWebServerInitHooks = []func(g *gin.RouterGroup, x *application.Applic
 		abacdefs.CreateWorkspaceActionGin(g, CreateWorkspaceAction)
 		abacdefs.ClassicPassportRequestOtpActionGin(g, ClassicPassportRequestOtpAction)
 		abacdefs.ClassicPassportOtpActionGin(g, ClassicPassportOtpAction)
-		abacdefs.CheckClassicPassportActionGin(g, CheckClassicPassportAction)
 		abacdefs.ClassicSignupActionGin(g, ClassicSignupAction)
 		abacdefs.ClassicSigninActionGin(g, ClassicSigninAction)
 		abacdefs.QueryWorkspaceTypesPubliclyActionGin(g, QueryWorkspaceTypesPubliclyAction)
 		abacdefs.CheckPassportMethodsActionGin(g, CheckPassportMethodsAction)
+		abacdefs.CheckClassicPassportActionGin(g, CheckClassicPassportAction)
 		abacdefs.OsLoginAuthenticateActionGin(g, OsLoginAuthenticateAction)
 		// SendEmail/SendEmailWithProvider/GsmSendSmsWithProvider moved to
 		// modules/abac/messaging - see messaging.ModuleSetup. GsmSendSms stays

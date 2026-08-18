@@ -31,6 +31,11 @@ declare global {
       body: string,
       headersJSON: string,
     ) => Promise<string>;
+    // Read once, synchronously, by main()'s applyEnvFromJs
+    // (cmd/fireback-wasm/main.go) before it calls any module's
+    // LoadConfiguration() - see startWasmServer's `env` option below. Must be
+    // set before go.run() runs, same requirement as window.queryDatabase.
+    firebackEnv?: Record<string, string>;
   }
 }
 
@@ -86,6 +91,19 @@ export interface WasmServerOptions {
    * database at all). Default false.
    */
   skipDatabaseBridge?: boolean;
+  /**
+   * Env vars to seed the wasm module's config from - every module's
+   * generated LoadConfiguration() reads these exactly like it would read
+   * real process env vars on a non-wasm build (see emigo.HandleEnvVars's
+   * wasm implementation, ConfigWasm.go, and applyEnvFromJs in
+   * cmd/fireback-wasm/main.go). Typically whatever subset of the host
+   * page's own build-time env (e.g. Vite's import.meta.env) the wasm build
+   * needs at runtime - keys are the same envconfig names the CLI/.env file
+   * would use (SELF_SERVICE_BASE_URL, STORAGE, ...), see each module's own
+   * `config:` block (or `fireback config list`) for the full set. Omit to
+   * leave every field at its generated hardcoded default.
+   */
+  env?: Record<string, string>;
 }
 
 let bootPromise: Promise<void> | null = null;
@@ -122,6 +140,13 @@ async function bootWasmServer(opts: WasmServerOptions): Promise<void> {
   }
 
   await loadWasmExec(wasmExecUrl);
+
+  // Go's main() (cmd/fireback-wasm/main.go) reads window.firebackEnv
+  // synchronously at startup too, same requirement as window.queryDatabase
+  // above - has to be in place before go.run() below. Always set (even to
+  // {}) so a second startWasmServer() call with a different `env` doesn't
+  // leave a previous call's values behind.
+  window.firebackEnv = opts.env ?? {};
 
   const go = new window.Go!();
   const { instance } = await WebAssembly.instantiateStreaming(
@@ -229,12 +254,43 @@ export async function wasmFetch(
         ? JSON.stringify(init.body)
         : "";
 
-  const raw = await window.handleWasmRequest(
+  console.log(
+    "WASM ->",
     init.method || "GET",
     url,
     body,
     JSON.stringify(init.headers || {}),
   );
+
+  let raw: string;
+  try {
+    console.log(0);
+    raw = await window.handleWasmRequest(
+      init.method || "GET",
+      url,
+      body,
+      JSON.stringify(init.headers || {}),
+    );
+
+    console.log(1);
+  } catch (err) {
+    console.log(2);
+    // window.handleWasmRequest's Promise only ever rejects on an unrecovered
+    // panic in the Go handler goroutine (see emigo.LiftWasmServer's own
+    // recover()) - it settles with a plain string, not an Error, since
+    // that's all js.Value.Invoke can carry across the bridge. Real fetch()
+    // rejects with a TypeError for the equivalent "request never got a
+    // response" case (a network failure), so wrap it the same way here -
+    // callers that do `catch (err) { ... err.message ... }` or check
+    // `err instanceof Error`, same as they would for a real fetch() failure,
+    // get that instead of a bare string.
+    throw new TypeError(
+      `wasmServer: in-browser server failed to handle ${init.method || "GET"} ${url}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+
   const {
     status,
     headers,
@@ -249,6 +305,8 @@ export async function wasmFetch(
   for (const [k, vs] of Object.entries(headers || {})) {
     for (const v of vs) h.append(k, v);
   }
+
+  console.log("WASM", url, resBody, status, headers);
   return new Response(resBody, { status, headers: h });
 }
 

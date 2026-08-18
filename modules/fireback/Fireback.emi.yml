@@ -36,6 +36,12 @@ config:
   - name: production
     type: bool
     description: If true, set's the environment behavior to production, and some functionality will be limited
+  - name: showDoctor
+    type: bool
+    description:
+      If true, prints the doctor report (config, environment urls, database info)
+      when the http server starts via 'start'. Defaults to false - run 'fireback
+      doctor' directly when you need it instead.
   - name: tablePrefix
     type: string
     description: Prefix all gorm tables with some string

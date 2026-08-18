@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"syscall/js"
 
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/fireback/modules/abac"
+	abacdefs "github.com/torabian/fireback/modules/abac/defs"
+	fireback "github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
 
@@ -38,9 +41,36 @@ type SampleRecord struct {
 func main() {
 
 	fmt.Println(1, xapp)
+
+	// Every module's generated Config struct (fireback's own core one, abac's
+	// otpLockoutSeconds/selfServiceBaseUrl, ...) is populated the same way on
+	// both build targets: LoadConfiguration() -> emigo.HandleEnvVars() ->
+	// envconfig reading os.Getenv per field (see emigo/Config.go's !wasm
+	// implementation vs emigo/ConfigWasm.go's wasm one). There's no .env file
+	// to read inside a browser sandbox though, so applyEnvFromJs seeds Go's
+	// (real, if in-memory) os.Setenv store from window.firebackEnv - a plain
+	// object the host page sets before calling go.run() (see
+	// ui/packages/wasm-server/wasmServer.ts's WasmServerOptions.env) - which
+	// has to happen before any LoadConfiguration() call below reads it.
+	applyEnvFromJs()
+
 	// This is an important setting for some kind of app which will be installed
-	// it makes it easier for fireback to find the configuration.
-	os.Setenv("PRODUCT_UNIQUE_NAME", "fireback")
+	// it makes it easier for fireback to find the configuration. Only applied
+	// as a fallback - window.firebackEnv above is allowed to override it.
+	if os.Getenv("PRODUCT_UNIQUE_NAME") == "" {
+		os.Setenv("PRODUCT_UNIQUE_NAME", "fireback")
+	}
+
+	// Primes both configs from the env vars just applied - same reasoning as
+	// modules/fireback/Entrypoint.go's CommonHeadlessAppStart (the non-wasm
+	// startup path), just without that function's own !wasm-only pieces
+	// (envm.LoadFirebackAppConfiguration's interactive .env prompting, the
+	// full xapp.Modules ConfigProvider loop). Return values are discarded -
+	// LoadConfiguration also stores into its package-level config var, which
+	// is what every other call site (e.g. abacdefs.LoadConfiguration() inside
+	// ClassicPassportRequestOtpActionImplementation.go) actually reads.
+	fireback.LoadConfiguration()
+	abacdefs.LoadConfiguration()
 
 	// queryDatabase is injected by js-remote-ctx's installPgliteBridge()
 	// (ui/packages/js-remote-ctx/common/pgliteBridge.ts, a TS port of the emi
@@ -56,7 +86,7 @@ func main() {
 		return
 	}
 
-	_, err := application.ConnectWasmPostgres(queryFunc, nil)
+	con, err := application.ConnectWasmPostgres(queryFunc, nil)
 	if err != nil {
 		fmt.Println("failed to connect wasm database:", err)
 		return
@@ -64,7 +94,13 @@ func main() {
 		fmt.Println("Postgres connection enabled via gorm.")
 	}
 
-	abac.WorkspaceModuleSetup()
+	fireback.SetDbRef(con)
+
+	if err := abac.AbacMigration(fireback.GetDbRef()); err == nil {
+		fmt.Println(1, "Migration done without an issue!")
+	} else {
+		fmt.Println(2, "Migration has some errors", err.Error())
+	}
 
 	// A normal net/http router. gorm.DB is captured by closure the same way
 	// any real fireback handler would grab it off application context —
@@ -118,6 +154,12 @@ func main() {
 }`)
 	})
 
+	{
+		method, url, handler := abacdefs.CheckClassicPassportActionHttpHandler(abac.CheckClassicPassportAction)
+		pattern := fmt.Sprintf("%v %v", strings.ToUpper(method), url)
+		mux.HandleFunc(pattern, handler)
+	}
+
 	// emigo.LiftWasmServer always dispatches through mux.ServeHTTP (it needs
 	// a concrete *http.ServeMux, not just an http.Handler), so a single
 	// catch-all "/" on a wrapping mux is enough to see every request before
@@ -140,4 +182,25 @@ func main() {
 
 	// Keep the Go runtime alive so the exposed callback stays callable.
 	select {}
+}
+
+// applyEnvFromJs copies every own-enumerable key of window.firebackEnv (a
+// plain string->string object; see WasmServerOptions.env in
+// ui/packages/wasm-server/wasmServer.ts) into Go's env via os.Setenv, so
+// every module's LoadConfiguration() sees them the same way it would see
+// real process env vars on a non-wasm build. window.firebackEnv itself is
+// optional - a host page that doesn't set it just gets every config field's
+// hardcoded default (the same as running the non-wasm binary with no .env
+// file and no env vars set).
+func applyEnvFromJs() {
+	env := js.Global().Get("firebackEnv")
+	if env.IsUndefined() || env.IsNull() {
+		return
+	}
+
+	keys := js.Global().Get("Object").Call("keys", env)
+	for i := 0; i < keys.Length(); i++ {
+		key := keys.Index(i).String()
+		os.Setenv(key, env.Get(key).String())
+	}
 }
