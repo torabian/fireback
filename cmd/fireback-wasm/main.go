@@ -9,6 +9,7 @@ import (
 	"syscall/js"
 
 	"github.com/torabian/emi/emigo"
+	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
 
@@ -62,6 +63,8 @@ func main() {
 	} else {
 		fmt.Println("Postgres connection enabled via gorm.")
 	}
+
+	abac.WorkspaceModuleSetup()
 
 	// A normal net/http router. gorm.DB is captured by closure the same way
 	// any real fireback handler would grab it off application context —

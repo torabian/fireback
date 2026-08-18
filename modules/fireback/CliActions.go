@@ -17,7 +17,6 @@ import (
 	"github.com/torabian/fireback/modules/fireback/gintools"
 	statics "github.com/torabian/fireback/modules/fireback/static"
 	"github.com/urfave/cli/v3"
-	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -719,18 +718,4 @@ func SetupHttpServer(x *application.Application, cfg HttpServerInstanceConfig) *
 	FirebackAppToGin(x, group, "")
 
 	return r
-}
-
-func FirebackAppToGin(x *application.Application, g *gin.RouterGroup, prefix string) {
-
-	for _, item := range x.Modules {
-
-		for _, hook := range item.GinWebServerInitHooks {
-			if err := hook(g, x); err != nil {
-				LOG.Error("Error %w", zap.Error(err))
-				LOG.Fatal("Gin server failed to run a hook on module", zap.String("module", item.Name))
-			}
-		}
-
-	}
 }

@@ -1,15 +1,18 @@
 package abac
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"slices"
+	"strings"
 
 	"github.com/torabian/emi/emigo"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
-	"github.com/urfave/cli/v3"
+	"gorm.io/gorm"
 )
 
 // workspace had permRewrite root.modules -> root.manage, and
@@ -287,27 +290,99 @@ func WorkspaceAwareDeleteAction(c abacdefs.WorkspaceAwareDeleteActionRequest) (*
 	return &abacdefs.WorkspaceAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
-// WorkspaceCliFn mirrors the old Module3-generated grouped "workspace" cli command
-// (minus the import/export/dev commands, which had no hand-written equivalent to
-// recover), plus the "cte" subcommand for the recursive tree query. WorkspaceCliCommands
-// (see WorkspaceCli.go) carries every entity-scoped cli group that doesn't have its own
-// top-level command elsewhere (publicAuthentication, timezoneGroup, workspaceType,
-// workspaceConfig, workspaceInvite, workspaceRole, userWorkspace, publicJoinKey, ...).
-func WorkspaceCliFn() *cli.Command {
-	commands := []*cli.Command{
-		abacdefs.WorkspaceBrowseActionCliHandler(WorkspaceBrowseAction),
-		abacdefs.WorkspaceGetActionCliHandler(WorkspaceGetAction),
-		abacdefs.WorkspaceCreateActionCliHandler(WorkspaceCreateAction),
-		abacdefs.WorkspaceUpdateActionCliHandler(WorkspaceUpdateAction),
-		abacdefs.WorkspaceAwareDeletePreviewActionCliHandler(WorkspaceAwareDeletePreviewAction),
-		abacdefs.WorkspaceAwareDeleteActionCliHandler(WorkspaceAwareDeleteAction),
+/**
+*  Call this when you are going to initialize a server, it will create root workspaces
+*  It will create root workspace, assign the role to it.
+ */
+func RepairTheWorkspaces() error {
+	{
+
+		if role := GetRoleByUniqueId("root"); role == nil || role.UniqueId == "" {
+			if _, err2 := CreateRootRoleInWorkspace("root"); err2 != nil {
+				if !strings.Contains(err2.Error(), "Duplicate") {
+
+					fmt.Println(err2)
+				}
+			}
+		}
 	}
-	commands = append(commands, WorkspaceCliCommands...)
-	return &cli.Command{
-		Name:        "workspace",
-		Aliases:     []string{"ws"},
-		Description: `Fireback general user role, workspaces services.`,
-		Usage:       `Fireback general user role, workspaces services.`,
-		Commands:    commands,
+	{
+		item := &abacdefs.WorkspaceTypeEntity{}
+		err := fireback.GetDbRef().Model(&abacdefs.WorkspaceTypeEntity{}).Where(&abacdefs.WorkspaceTypeEntity{UniqueId: "root"}).First(item).Error
+		system := "system"
+		if err == gorm.ErrRecordNotFound {
+			err = fireback.GetDbRef().Create(&abacdefs.WorkspaceTypeEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "root", RoleId: ROOT_VAR}).Error
+			if err != nil {
+				return err
+			}
+		}
 	}
+
+	{
+
+		item := &abacdefs.WorkspaceEntity{}
+		err := fireback.GetDbRef().Model(&abacdefs.WorkspaceEntity{}).Where(&abacdefs.WorkspaceEntity{UniqueId: "root"}).First(item).Error
+
+		description := "The root system which holds entire software data tree"
+		if err == gorm.ErrRecordNotFound {
+			err = fireback.GetDbRef().Create(&abacdefs.WorkspaceEntity{
+				UniqueId: "root", Name: ROOT_VAR, Description: description,
+				WorkspaceId: emigo.NullableOf(ROOT_VAR),
+				TypeId:      ROOT_VAR,
+			}).Error
+
+			if err != nil {
+				return err
+			}
+
+			_, err2 := CreateRootRoleInWorkspace("root")
+
+			if err2 != nil && !strings.Contains(err2.Error(), "Duplicate") {
+				return err2
+			}
+
+		}
+
+		ws := GetWorkspaceByUniqueId("root")
+		if ws == nil || ws.UniqueId != "root" {
+			return errors.New(("ROOT_WORKSPACE_DOES_NOT_EXISTS"))
+		}
+	}
+
+	{
+		item := &abacdefs.WorkspaceEntity{}
+		err := fireback.GetDbRef().Model(&abacdefs.WorkspaceEntity{}).Where(&abacdefs.WorkspaceEntity{UniqueId: "system"}).First(item).Error
+		system := "system"
+		if err == gorm.ErrRecordNotFound {
+			description := "The workspace content which applies to everyworkspace"
+			err = fireback.GetDbRef().Create(&abacdefs.WorkspaceEntity{WorkspaceId: emigo.NullableOf(system), UniqueId: "system", Name: system, Description: description}).Error
+
+			if err != nil {
+				return err
+			}
+		}
+
+		ws := GetWorkspaceByUniqueId("system")
+		if ws == nil || ws.UniqueId != "system" {
+			return errors.New(("SYSTEM_WORKSPACE_DOES_NOT_EXISTS"))
+		}
+	}
+
+	return nil
+}
+
+func CreateRootRoleInWorkspace(workspaceId string) (*abacdefs.RoleEntity, error) {
+	sampleName := "Root Access"
+	entity := &abacdefs.RoleEntity{
+		UniqueId:           "root",
+		WorkspaceId:        emigo.NullableOf(ROOT_VAR),
+		Name:               sampleName,
+		CapabilitiesListId: RoleCapabilitiesListIdOf([]string{ROOT_ALL_ACCESS}),
+	}
+
+	err := fireback.GetDbRef().
+		Where(&abacdefs.RoleEntity{UniqueId: "root"}).
+		FirstOrCreate(&entity).Error
+
+	return entity, err
 }

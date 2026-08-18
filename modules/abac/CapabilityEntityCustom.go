@@ -35,7 +35,6 @@ func GetCapabilityRefreshCommand(xapp *application.Application) *cli.Command {
 	return &cli.Command{
 
 		Name:        "capsync",
-		Flags:       fireback.CommonQueryFlags,
 		Usage:       "Idemponent sync the modules capabilities into the database again.",
 		Description: "Fireback and sub projects need to have permissions as capability strings into database to create role or check. This is happening on env startup, but after project updates needs to be refreshed, or if you have deleted them from database.",
 		Action: func(ctx context.Context, c *cli.Command) error {
@@ -47,33 +46,9 @@ func GetCapabilityRefreshCommand(xapp *application.Application) *cli.Command {
 
 }
 
-func GetStats(xapp *application.Application) cli.Command {
-	return cli.Command{
-		Name:        "stats",
-		Flags:       fireback.CommonQueryFlags,
-		Usage:       "Some stats regarding the application will go here",
-		Description: "Some stats regarding the application will go here",
-		Action: func(ctx context.Context, c *cli.Command) error {
-
-			return nil
-		},
-	}
-
-}
-
 func SyncPermissionsInDatabase(x *application.Application, db *gorm.DB) {
 
 	for _, item := range x.Modules {
-
-		// if item.BackupTables != nil && len(item.BackupTables) > 0 {
-		// 	for _, table := range item.BackupTables {
-
-		// 		GetDbRef().Model(&BackupTableMetaEntity{}).Create(&BackupTableMetaEntity{
-		// 			UniqueId:      table.EntityName,
-		// 			TableNameInDb: table.TableNameInDb,
-		// 		})
-		// 	}
-		// }
 
 		// Insert the permissions into the database
 		item.PermissionsProvider = append(item.PermissionsProvider, application.PermissionInfo{

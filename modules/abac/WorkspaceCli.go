@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abac
 
 import (
@@ -307,4 +309,29 @@ var WorkspaceCliCommands = []*cli.Command{
 	abacdefs.PublicJoinKeyUpdateActionCliHandler(PublicJoinKeyUpdateAction),
 	abacdefs.PublicJoinKeyAwareDeletePreviewActionCliHandler(PublicJoinKeyAwareDeletePreviewAction),
 	abacdefs.PublicJoinKeyAwareDeleteActionCliHandler(PublicJoinKeyAwareDeleteAction),
+}
+
+// WorkspaceCliFn mirrors the old Module3-generated grouped "workspace" cli command
+// (minus the import/export/dev commands, which had no hand-written equivalent to
+// recover), plus the "cte" subcommand for the recursive tree query. WorkspaceCliCommands
+// (see WorkspaceCli.go) carries every entity-scoped cli group that doesn't have its own
+// top-level command elsewhere (publicAuthentication, timezoneGroup, workspaceType,
+// workspaceConfig, workspaceInvite, workspaceRole, userWorkspace, publicJoinKey, ...).
+func WorkspaceCliFn() *cli.Command {
+	commands := []*cli.Command{
+		abacdefs.WorkspaceBrowseActionCliHandler(WorkspaceBrowseAction),
+		abacdefs.WorkspaceGetActionCliHandler(WorkspaceGetAction),
+		abacdefs.WorkspaceCreateActionCliHandler(WorkspaceCreateAction),
+		abacdefs.WorkspaceUpdateActionCliHandler(WorkspaceUpdateAction),
+		abacdefs.WorkspaceAwareDeletePreviewActionCliHandler(WorkspaceAwareDeletePreviewAction),
+		abacdefs.WorkspaceAwareDeleteActionCliHandler(WorkspaceAwareDeleteAction),
+	}
+	commands = append(commands, WorkspaceCliCommands...)
+	return &cli.Command{
+		Name:        "workspace",
+		Aliases:     []string{"ws"},
+		Description: `Fireback general user role, workspaces services.`,
+		Usage:       `Fireback general user role, workspaces services.`,
+		Commands:    commands,
+	}
 }

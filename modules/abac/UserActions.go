@@ -10,38 +10,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/complexes"
-	"github.com/urfave/cli/v3"
 )
-
-// UserCliFn mirrors the old Module3-generated grouped "user" cli command (minus the
-// import/export/dev commands, which had no hand-written equivalent to recover) - tokens,
-// accept-invite and user-invitations are nested here too, since they're user-scoped
-// actions without their own cli home (preserved from the pre-migration abacdefs.UserEntity.go
-// hand file's "Tokens are related to users, so let's move them there." comment).
-func UserCliFn() *cli.Command {
-	return &cli.Command{
-		Name:        "user",
-		Description: `Manage the users who are in the current app (root only)`,
-		Usage:       `Manage the users who are in the current app (root only)`,
-		Commands: []*cli.Command{
-			abacdefs.UserBrowseActionCliHandler(UserBrowseAction),
-			abacdefs.UserGetActionCliHandler(UserGetAction),
-			abacdefs.UserCreateActionCliHandler(UserCreateAction),
-			abacdefs.UserUpdateActionCliHandler(UserUpdateAction),
-			abacdefs.UserAwareDeletePreviewActionCliHandler(UserAwareDeletePreviewAction),
-			abacdefs.UserAwareDeleteActionCliHandler(UserAwareDeleteAction),
-			abacdefs.TokenBrowseActionCliHandler(TokenBrowseAction),
-			abacdefs.TokenGetActionCliHandler(TokenGetAction),
-			abacdefs.TokenCreateActionCliHandler(TokenCreateAction),
-			abacdefs.TokenUpdateActionCliHandler(TokenUpdateAction),
-			abacdefs.TokenAwareDeletePreviewActionCliHandler(TokenAwareDeletePreviewAction),
-			abacdefs.TokenAwareDeleteActionCliHandler(TokenAwareDeleteAction),
-			abacdefs.AcceptInviteActionCliHandler(AcceptInviteAction),
-			abacdefs.UserInvitationsActionCliHandler(UserInvitationsAction),
-			UserMockActionCliHandler(),
-		},
-	}
-}
 
 // user had permRewrite root.modules -> root.manage, and security: { writeOnRoot: true }
 // in the old yaml: the old generated code set AllowOnRoot: true on Create/Update/Delete
