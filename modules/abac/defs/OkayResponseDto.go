@@ -1,9 +1,6 @@
 package abacdefs
 
-import (
-	"encoding/json"
-	"github.com/torabian/emi/emigo"
-)
+import "encoding/json"
 
 // The base class definition for okayResponseDto
 type OkayResponseDto struct {
@@ -15,11 +12,4 @@ func (x *OkayResponseDto) Json() string {
 		return string(str)
 	}
 	return ""
-}
-func GetOkayResponseDtoCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{}
-}
-func CastOkayResponseDtoFromCli(c emigo.CliCastable) OkayResponseDto {
-	data := OkayResponseDto{}
-	return data
 }

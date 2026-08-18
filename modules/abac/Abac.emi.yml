@@ -28,6 +28,9 @@ targets:
     output: ./defs
     flags:
       pkg: abacdefs
+    tags:
+      - split-cli
+      - split-gin
   # Generated straight into every ui/packages/* consumer that actually imports it
   # (see ui/packages/README.md) instead of a single shared @fireback/sdk - each one
   # ends up with its own copy, duplication is fine here.

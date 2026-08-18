@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abacdefs
 
 import (
@@ -32,6 +34,10 @@ func (x *TokenEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetTokenEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -105,8 +111,6 @@ func CastTokenEntityFromCli(c emigo.CliCastable) TokenEntity {
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // TokenEntityCreateFn creates a new TokenEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

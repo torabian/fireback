@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abacdefs
 
 import (
@@ -49,6 +51,10 @@ func (x *WorkspaceInviteEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetWorkspaceInviteEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -186,8 +192,6 @@ func CastWorkspaceInviteEntityFromCli(c emigo.CliCastable) WorkspaceInviteEntity
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // WorkspaceInviteEntityCreateFn creates a new WorkspaceInviteEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

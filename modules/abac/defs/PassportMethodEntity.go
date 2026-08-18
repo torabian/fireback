@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abacdefs
 
 import (
@@ -34,6 +36,10 @@ func (x *PassportMethodEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetPassportMethodEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -114,8 +120,6 @@ func CastPassportMethodEntityFromCli(c emigo.CliCastable) PassportMethodEntity {
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // PassportMethodEntityCreateFn creates a new PassportMethodEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

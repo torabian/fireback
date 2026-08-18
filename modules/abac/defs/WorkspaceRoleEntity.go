@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abacdefs
 
 import (
@@ -33,6 +35,10 @@ func (x *WorkspaceRoleEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetWorkspaceRoleEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -106,8 +112,6 @@ func CastWorkspaceRoleEntityFromCli(c emigo.CliCastable) WorkspaceRoleEntity {
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // WorkspaceRoleEntityCreateFn creates a new WorkspaceRoleEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

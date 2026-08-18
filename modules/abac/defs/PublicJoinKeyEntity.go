@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package abacdefs
 
 import (
@@ -31,6 +33,10 @@ func (x *PublicJoinKeyEntity) Json() string {
 	}
 	return ""
 }
+
+// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
+// appended here in this template, after the struct GoCommonStructGenerator produced.
+//
 func GetPublicJoinKeyEntityCliFlags(prefix string) []emigo.CliFlag {
 	return []emigo.CliFlag{
 		{
@@ -96,8 +102,6 @@ func CastPublicJoinKeyEntityFromCli(c emigo.CliCastable) PublicJoinKeyEntity {
 	return data
 }
 
-// Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
-// appended here in this template, after the struct GoCommonStructGenerator produced.
 // PublicJoinKeyEntityCreateFn creates a new PublicJoinKeyEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto
