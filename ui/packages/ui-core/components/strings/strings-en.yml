@@ -36,6 +36,8 @@ content:
     formSelect: Form select
     formJsf: Form Jsf
     home: Home
+    loading: Loading…
+    loadingMore: Loading more…
     noAttachmentData: No attachment data
     noQuerySourceToRender: No query source to render
     onlyPngSvgAllowed: Only PNG or SVG files are allowed.

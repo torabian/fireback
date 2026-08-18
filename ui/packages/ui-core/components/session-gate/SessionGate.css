@@ -47,6 +47,20 @@
   color: #888888;
 }
 
+.session-gate__cancel {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  color: inherit;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.session-gate__cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 @keyframes session-gate-spin {
   to {
     transform: rotate(360deg);
@@ -61,5 +75,13 @@
 
   .session-gate__attempt {
     color: #a0a0a0;
+  }
+
+  .session-gate__cancel {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .session-gate__cancel:hover {
+    background: rgba(255, 255, 255, 0.08);
   }
 }

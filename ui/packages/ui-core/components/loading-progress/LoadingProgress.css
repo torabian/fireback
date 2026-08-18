@@ -1,0 +1,97 @@
+/*
+ * Styles for <LoadingProgress> - visually mirrors session-gate/SessionGate.css's
+ * proportions/animation on purpose, kept as its own copy since the two
+ * components don't share a file (see LoadingProgress.tsx's doc comment).
+ */
+
+.loading-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2b2b2b;
+  width: 100%;
+}
+
+.loading-progress--inline {
+  padding: 32px 16px;
+}
+
+.loading-progress--overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  z-index: 5;
+}
+
+.loading-progress__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  text-align: center;
+}
+
+.loading-progress__spinner {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  border: 3px solid rgba(64, 153, 255, 0.25);
+  border-top-color: #4099ff;
+  animation: loading-progress-spin 0.8s linear infinite;
+}
+
+.loading-progress__message {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.loading-progress__count {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #888888;
+  font-variant-numeric: tabular-nums;
+}
+
+.loading-progress__cancel {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  color: inherit;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.loading-progress__cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+@keyframes loading-progress-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .loading-progress {
+    color: #f2f2f2;
+  }
+
+  .loading-progress--overlay {
+    background: rgba(28, 28, 30, 0.85);
+  }
+
+  .loading-progress__count {
+    color: #a0a0a0;
+  }
+
+  .loading-progress__cancel {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .loading-progress__cancel:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
