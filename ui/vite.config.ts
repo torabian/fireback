@@ -40,6 +40,28 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       tsconfigPaths(),
       ConditionalCompile(),
+      // public/fireback.wasm and public/wasm_exec.js are only needed by the
+      // wasm-demo build (a fireback server compiled to wasm running client-side -
+      // see the `wasm-demo` Makefile target). Vite's publicDir copy is
+      // unconditional, so every other mode (manage:build, self-service:build, ...)
+      // would otherwise drag the ~60MB wasm binary into its dist/ output too -
+      // e.g. into modules/interfaces/{fireback-manage,selfservice} via `make
+      // interface`. Strip those two files back out for anything but wasm-demo.
+      {
+        name: 'strip-wasm-assets-outside-wasm-demo',
+        apply: 'build',
+        closeBundle() {
+          if (!mode.startsWith('wasm-demo')) {
+            for (const file of ['fireback.wasm', 'wasm_exec.js']) {
+              const outPath = resolve(__dirname, 'dist', file)
+              if (fs.existsSync(outPath)) {
+                fs.rmSync(outPath)
+                console.log('Stripped', file, 'from dist (not a wasm-demo build)')
+              }
+            }
+          }
+        },
+      },
       react({
         exclude: [
           'node_modules/**', // exclude everything else in node_modules

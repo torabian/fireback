@@ -14,7 +14,8 @@
     "build": "vite build --mode 'projectname/bundle'",
     "build:capacitor": "vite build --mode 'projectname/capacitor'",
     "wasm-demo": "vite --mode 'wasm-demo/embed'",
-    "wasm-demo:build": "vite build --mode 'wasm-demo/embed'"
+    "wasm-demo:build": "vite build --mode 'wasm-demo/embed'",
+    "wasm-demo:github": "vite build --mode 'wasm-demo/github'"
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.18.6",

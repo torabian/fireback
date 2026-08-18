@@ -21,7 +21,7 @@ PASSWORD ?= 123321
 MOCK_COUNT ?= 5
 APP_PORT ?= 4500
 
-devsetup: default
+demo: default
 	@DSN=$$(./app config db-dsn get); \
 	VENDOR=$$(./app config db-vendor get); \
 	if [ "$$VENDOR" != "postgres" ]; then \
