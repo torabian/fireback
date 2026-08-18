@@ -16,6 +16,9 @@ import (
 //go:embed testdata/site
 var testSiteFS embed.FS
 
+//go:embed testdata/manage-site
+var testManageSiteFS embed.FS
+
 func TestInjectIntoHTML(t *testing.T) {
 	doc := "<html><head><title>App</title></head><body><div id=\"root\"></div></body></html>"
 
@@ -236,8 +239,8 @@ func TestAssetCacheControlMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	items := []PublicFolderInfo{
-		{Prefix: "/"},
-		{Prefix: "/manage", AssetCacheControl: "public, max-age=60"},
+		{Fs: &testSiteFS, Folder: "testdata/site", Prefix: "/"},
+		{Fs: &testManageSiteFS, Folder: "testdata/manage-site", Prefix: "/manage", AssetCacheControl: "public, max-age=60"},
 	}
 
 	r := gin.New()
@@ -251,6 +254,14 @@ func TestAssetCacheControlMiddleware(t *testing.T) {
 		{"/assets/main.js", DefaultAssetCacheControl},
 		{"/manage/assets/main.js", "public, max-age=60"},
 		{"/index.html", ""},
+		// Regression guard: a suffix match alone used to be enough to stamp the
+		// aggressive, immutable Cache-Control header - including onto a 404 for a
+		// path that doesn't correspond to a real file (a typo, a renamed/removed
+		// asset, a route hit before a rebuild landed it). A browser that ever saw
+		// that 404 would then refuse to ask again for a week even after the file
+		// showed up. The header must only ride along with a response this folder
+		// is actually about to serve.
+		{"/assets/does-not-exist.js", ""},
 	}
 
 	for _, tc := range cases {

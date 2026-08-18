@@ -1,3 +1,4 @@
+extends: []
 content:
   actions:
     addJob: + اضافه کردن شغل
@@ -10,13 +11,13 @@ content:
   common:
     cancel: لغو
     isNUll: تعیین نشده
-    'no': خیر
+    "no": خیر
     noaccess: شما به این بخش از برنامه دسترسی ندارید. برای مشاوره با سرپرست خود تماس
       بگیرید
     parent: رکورد مادر
     parentHint: اگر این رکورد دارای سر مجموعه است آن را انتخاب کنید
     save: ذخیره
-    'yes': بله
+    "yes": بله
   components:
     attachDocumentsAboutThePayment: پیوست اسناد مربوط به پرداخت
     autoReroute: تنظیم خودکار مسیر
@@ -33,6 +34,7 @@ content:
     fileTypeNotAllowed: نوع فایل مجاز نیست.
     findASetting: جستجوی یک تنظیم
     formDateTime: فرم تاریخ/زمان
+    formJsf: Form Jsf
     formSelect: فرم انتخاب
     home: خانه
     loading: در حال بارگذاری…
@@ -72,18 +74,18 @@ content:
     forcedLayoutGeneralMessage: دسترسی به این بخش نیازمند حساب کاربری و ورود به سیستم
       است
   jalaliMonths:
-    '0': فروردین
-    '1': اردیبهشت
-    '10': بهمن
-    '11': اسفند
-    '2': خرداد
-    '3': تیر
-    '4': مرداد
-    '5': شهریور
-    '6': مهر
-    '7': آبان
-    '8': آذر
-    '9': دی
+    "0": فروردین
+    "1": اردیبهشت
+    "2": خرداد
+    "3": تیر
+    "4": مرداد
+    "5": شهریور
+    "6": مهر
+    "7": آبان
+    "8": آذر
+    "9": دی
+    "10": بهمن
+    "11": اسفند
   lackOfPermission: برای دسترسی به این بخش از نرم افزار به مجوزهای بیشتری نیاز دارید.
   meta:
     titleAffix: PixelPlux
@@ -95,6 +97,7 @@ content:
   notfound: اطلاعات یا ماژول مورد نظر شما در این نسخه از سرور وجود ندارد.
   onlyOnRoot: این بخش فقط برای دسترسی روت قابل مشاهده است. در صورت نیاز به اطلاعات
     بیشتر با مدیر سیستم خود تماس بگیرید.
+  productName: Fireback
   reactiveSearch:
     noResults: جستجو هیچ نتیجه ای نداشت
     placeholder: جستجو (کلید S)...

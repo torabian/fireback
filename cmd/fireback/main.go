@@ -11,9 +11,11 @@ import (
 
 	"github.com/torabian/fireback/modules/abac"
 	"github.com/torabian/fireback/modules/abac/interfacetools"
+	interfacetoolsdefs "github.com/torabian/fireback/modules/abac/interfacetools/defs"
 	"github.com/torabian/fireback/modules/backup"
 	"github.com/torabian/fireback/modules/eventbus"
 	"github.com/torabian/fireback/modules/fireback"
+	"github.com/torabian/fireback/modules/fireback/complexes"
 	"github.com/torabian/fireback/modules/internalstats"
 	"github.com/torabian/fireback/modules/reactivesearch"
 
@@ -95,8 +97,25 @@ func main() {
 		// migration on every `migration apply`, instead of requiring the manual
 		// "seeders" command the way this used to (fireback-manage-menu.yml/
 		// fireback-menu-cloud.yml/fireback-personal-menu.yml, before they moved here).
+		//
+		// The internalstats sidebar entry is appended here rather than living inside
+		// abac.Menu itself - same reason internalstats.ModuleSetup's Authorize closure
+		// above is built in main.go and not inside modules/internalstats: internalstats
+		// never imports abac (or interfacetoolsdefs, transitively part of abac's own
+		// module tree), so a project's own main.go is what wires the two together. No
+		// CapabilityId is set (unlike most root-actions entries) because internalstats
+		// doesn't use abac's per-capability model at all - InternalStatsModuleConfig.
+		// Authorize above only ever checks for a root-workspace token.
 		interfacetools.ModuleSetup(&interfacetools.InterfaceToolsModuleConfig{
-			ExtraAppMenus: abac.Menu,
+			ExtraAppMenus: append(append([]*interfacetoolsdefs.AppMenuEntity{}, abac.Menu...), &interfacetoolsdefs.AppMenuEntity{
+				UniqueId:      "internal_stats",
+				Label:         complexes.TStringFrom(map[string]string{"en": "Internal Stats", "fa": "آمار سرور"}),
+				Href:          "/manage/internal-stats",
+				Icon:          "ios-theme/icons/dashboard.svg",
+				ActiveMatcher: "internal-stats",
+				ParentId:      emigo.NullableOf("root-actions"),
+				WorkspaceId:   emigo.NullableOf(fireback.USER_SYSTEM),
+			}),
 		}),
 	}
 

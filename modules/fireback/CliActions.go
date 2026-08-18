@@ -544,6 +544,7 @@ func GetCommonWebServerCliActions(xapp *application.Application) []*cli.Command 
 			return SetupHttpServer(xapp, cfg)
 		}),
 		GetSeeder(xapp),
+		GetPublicFoldersCli(xapp),
 
 		// Keep these in the last
 		&CLIAboutCommand,

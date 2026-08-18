@@ -433,6 +433,7 @@ func AssetCacheControlMiddleware(items []PublicFolderInfo) gin.HandlerFunc {
 		prefix       string
 		cacheControl string
 		suffixes     []string
+		fs           static.ServeFileSystem
 	}
 
 	rules := make([]rule, 0, len(items)+1)
@@ -449,7 +450,16 @@ func AssetCacheControlMiddleware(items []PublicFolderInfo) gin.HandlerFunc {
 		if len(item.ExtraCacheableSuffixes) > 0 {
 			suffixes = append(append([]string{}, DefaultCacheableSuffixes...), item.ExtraCacheableSuffixes...)
 		}
-		rules = append(rules, rule{prefix: prefix, cacheControl: cacheControl, suffixes: suffixes})
+		rules = append(rules, rule{
+			prefix:       prefix,
+			cacheControl: cacheControl,
+			suffixes:     suffixes,
+			// Its own embedFileSystem, independent of the one mountEmbedFolder built for
+			// the same item - cheap (just wraps the already-in-binary embed.FS again),
+			// and lets this middleware check existence itself instead of trusting the
+			// suffix match alone (see the Exists call below).
+			fs: EmbedFolder(*item.Fs, item.Folder, true),
+		})
 	}
 
 	// Longest (most specific) prefix first, so e.g. "/manage" isn't shadowed by
@@ -463,10 +473,23 @@ func AssetCacheControlMiddleware(items []PublicFolderInfo) gin.HandlerFunc {
 				if rule.prefix != "/" && !strings.HasPrefix(path, rule.prefix) {
 					continue
 				}
-				if hasSuffix(path, rule.suffixes) {
-					c.Header("Cache-Control", rule.cacheControl)
-					break
+				if !hasSuffix(path, rule.suffixes) {
+					continue
 				}
+				// A suffix match alone used to be enough to stamp the aggressive
+				// "immutable, max-age=604800" header - including onto a 404 for an
+				// asset that doesn't actually exist (a typo'd path, a renamed/removed
+				// file, a route hit before a rebuild landed it). A browser that ever
+				// received that 404 then refuses to ask again for a week, even after
+				// the file shows up - indistinguishable from "it's just missing"
+				// without inspecting response headers. Requiring Exists here means the
+				// header only ever rides along with a response this folder is actually
+				// about to serve successfully.
+				if !rule.fs.Exists(rule.prefix, path) {
+					continue
+				}
+				c.Header("Cache-Control", rule.cacheControl)
+				break
 			}
 		}
 		c.Next()

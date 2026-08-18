@@ -3,6 +3,16 @@ targets:
   flags:
     pkg: internalstatsdefs
   output: ./defs
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../ui/packages/manage/sdk/internalstats
+  tags:
+  - typescript
+  - react
+  - no-package
+  - no-sdk
+  clean: true
 - compiler: preprocessor
   output: ./
 description: Read-only server/process health stats - CPU, memory, disk, network, Go

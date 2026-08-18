@@ -473,6 +473,10 @@ html[dir="rtl"] {
   right: 0;
 }
 
+html[dir="rtl"] .table-copy-btn {
+  left: 15px;
+  right: initial !important;
+}
 .cell-actions {
   position: absolute;
   display: none;

@@ -39,3 +39,4 @@ modules/fireback/codegen/capacitor/android
 e2e/samples/fireback-payment/app
 modules/storage/upload-test/.tus-uploads.json
 ui/public/fireback.wasm
+/fireback-wasm

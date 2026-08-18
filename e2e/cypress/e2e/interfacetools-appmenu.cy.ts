@@ -62,7 +62,10 @@ describe("interfacetools: appMenu", () => {
       cy.request({
         method: "POST",
         url: ui("/appMenu"),
-        body: { label: "checkendpointtests appmenu", href: "/checkendpointtests" },
+        body: {
+          label: "checkendpointtests appmenu",
+          href: "/checkendpointtests",
+        },
         failOnStatusCode: false,
       }).then((noAuth) => {
         expect(noAuth.status).to.not.equal(200);
@@ -72,84 +75,115 @@ describe("interfacetools: appMenu", () => {
         method: "POST",
         url: ui("/appMenu"),
         headers: authHeaders(rootToken),
-        body: { label: "checkendpointtests appmenu", href: "/checkendpointtests" },
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string; href: string }>>) => {
-        expect(response.status).to.equal(200);
-        expect(response.body.data.item.href).to.equal("/checkendpointtests");
-        setShared("appMenuId", response.body.data.item.uniqueId);
-      });
+        body: {
+          label: "checkendpointtests appmenu",
+          href: "/checkendpointtests",
+        },
+      }).then(
+        (
+          response: Cypress.Response<
+            SingleItemResponse<{ uniqueId: string; href: string }>
+          >,
+        ) => {
+          expect(response.status).to.equal(200);
+          expect(response.body.data.item.href).to.equal("/checkendpointtests");
+          setShared("appMenuId", response.body.data.item.uniqueId);
+        },
+      );
     });
   });
 
   it("AppMenuBrowse should include the just-created record.", () => {
-    sharedValues(["rootToken", "appMenuId"]).then(({ rootToken, appMenuId }) => {
-      cy.request({
-        method: "GET",
-        url: ui("/appMenu/browse"),
-        headers: authHeaders(rootToken),
-      }).then((response: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-        expect(response.status).to.equal(200);
-        const ids = response.body.data.items.map((i) => i.uniqueId);
-        expect(ids).to.include(appMenuId);
-      });
-    });
+    sharedValues(["rootToken", "appMenuId"]).then(
+      ({ rootToken, appMenuId }) => {
+        cy.request({
+          method: "GET",
+          url: ui("/appMenu/browse?itemsPerPage=100"),
+          headers: authHeaders(rootToken),
+        }).then(
+          (response: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+            expect(response.status).to.equal(200);
+            const ids = response.body.data.items.map((i) => i.uniqueId);
+            expect(ids).to.include(appMenuId);
+          },
+        );
+      },
+    );
   });
 
   it("AppMenuGet should return the same record by id.", () => {
-    sharedValues(["rootToken", "appMenuId"]).then(({ rootToken, appMenuId }) => {
-      cy.request({
-        method: "GET",
-        url: ui(`/appMenu/${appMenuId}`),
-        headers: authHeaders(rootToken),
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-        expect(response.status).to.equal(200);
-        expect(response.body.data.item.uniqueId).to.equal(appMenuId);
-      });
-    });
+    sharedValues(["rootToken", "appMenuId"]).then(
+      ({ rootToken, appMenuId }) => {
+        cy.request({
+          method: "GET",
+          url: ui(`/appMenu/${appMenuId}`),
+          headers: authHeaders(rootToken),
+        }).then(
+          (
+            response: Cypress.Response<
+              SingleItemResponse<{ uniqueId: string }>
+            >,
+          ) => {
+            expect(response.status).to.equal(200);
+            expect(response.body.data.item.uniqueId).to.equal(appMenuId);
+          },
+        );
+      },
+    );
   });
 
   it("AppMenuUpdate should persist a field change.", () => {
-    sharedValues(["rootToken", "appMenuId"]).then(({ rootToken, appMenuId }) => {
-      cy.request({
-        method: "PATCH",
-        url: ui(`/appMenu/${appMenuId}`),
-        headers: authHeaders(rootToken),
-        body: { href: "/checkendpointtests-renamed" },
-      }).then((response: Cypress.Response<SingleItemResponse<{ href: string }>>) => {
-        expect(response.status).to.equal(200);
-        expect(response.body.data.item.href).to.equal("/checkendpointtests-renamed");
-      });
-    });
+    sharedValues(["rootToken", "appMenuId"]).then(
+      ({ rootToken, appMenuId }) => {
+        cy.request({
+          method: "PATCH",
+          url: ui(`/appMenu/${appMenuId}`),
+          headers: authHeaders(rootToken),
+          body: { href: "/checkendpointtests-renamed" },
+        }).then(
+          (
+            response: Cypress.Response<SingleItemResponse<{ href: string }>>,
+          ) => {
+            expect(response.status).to.equal(200);
+            expect(response.body.data.item.href).to.equal(
+              "/checkendpointtests-renamed",
+            );
+          },
+        );
+      },
+    );
   });
 
   it("AppMenuAwareDeletePreview then AppMenuAwareDelete should remove the record.", () => {
-    sharedValues(["rootToken", "appMenuId"]).then(({ rootToken, appMenuId }) => {
-      cy.request({
-        method: "GET",
-        url: ui(`/appMenu/delete-preview?uniqueIds=${appMenuId}`),
-        headers: authHeaders(rootToken),
-      }).then((preview) => {
-        expect(preview.status).to.equal(200);
-      });
+    sharedValues(["rootToken", "appMenuId"]).then(
+      ({ rootToken, appMenuId }) => {
+        cy.request({
+          method: "GET",
+          url: ui(`/appMenu/delete-preview?uniqueIds=${appMenuId}`),
+          headers: authHeaders(rootToken),
+        }).then((preview) => {
+          expect(preview.status).to.equal(200);
+        });
 
-      cy.request({
-        method: "POST",
-        url: ui("/appMenu/delete"),
-        headers: authHeaders(rootToken),
-        body: { uniqueIds: [appMenuId] },
-      }).then((del) => {
-        expect(del.status).to.equal(200);
-      });
+        cy.request({
+          method: "POST",
+          url: ui("/appMenu/delete"),
+          headers: authHeaders(rootToken),
+          body: { uniqueIds: [appMenuId] },
+        }).then((del) => {
+          expect(del.status).to.equal(200);
+        });
 
-      cy.request({
-        method: "GET",
-        url: ui(`/appMenu/${appMenuId}`),
-        headers: authHeaders(rootToken),
-        failOnStatusCode: false,
-      }).then((getAfterDelete) => {
-        expect(getAfterDelete.status).to.not.equal(200);
-      });
-    });
+        cy.request({
+          method: "GET",
+          url: ui(`/appMenu/${appMenuId}`),
+          headers: authHeaders(rootToken),
+          failOnStatusCode: false,
+        }).then((getAfterDelete) => {
+          expect(getAfterDelete.status).to.not.equal(200);
+        });
+      },
+    );
   });
 
   it("cte-app-menus should nest a child row under its parent's children array.", () => {
@@ -158,41 +192,61 @@ describe("interfacetools: appMenu", () => {
         method: "POST",
         url: ui("/appMenu"),
         headers: authHeaders(rootToken),
-        body: { label: "checkendpointtests cte parent", href: "/checkendpointtests/cte-parent" },
-      }).then((parentResp: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-        const parentId = parentResp.body.data.item.uniqueId;
-        setShared("cteParentId", parentId);
-
-        cy.request({
-          method: "POST",
-          url: ui("/appMenu"),
-          headers: authHeaders(rootToken),
-          body: {
-            label: "checkendpointtests cte child",
-            href: "/checkendpointtests/cte-child",
-            parentId,
-          },
-        }).then((childResp: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-          const childId = childResp.body.data.item.uniqueId;
-          setShared("cteChildId", childId);
+        body: {
+          label: "checkendpointtests cte parent",
+          href: "/checkendpointtests/cte-parent",
+        },
+      }).then(
+        (
+          parentResp: Cypress.Response<
+            SingleItemResponse<{ uniqueId: string }>
+          >,
+        ) => {
+          const parentId = parentResp.body.data.item.uniqueId;
+          setShared("cteParentId", parentId);
 
           cy.request({
-            method: "GET",
-            url: ui("/cte-app-menus"),
+            method: "POST",
+            url: ui("/appMenu"),
             headers: authHeaders(rootToken),
-          }).then((cteResp: Cypress.Response<ListResponse<Record<string, any>>>) => {
-            expect(cteResp.status).to.equal(200);
-            const parentNode = cteResp.body.data.items.find(
-              (item) => item.uniqueId === parentId,
-            );
-            expect(parentNode, "parent node present at the top level").to.exist;
-            const childIds = (parentNode?.children || []).map(
-              (c: any) => c.uniqueId,
-            );
-            expect(childIds).to.include(childId);
-          });
-        });
-      });
+            body: {
+              label: "checkendpointtests cte child",
+              href: "/checkendpointtests/cte-child",
+              parentId,
+            },
+          }).then(
+            (
+              childResp: Cypress.Response<
+                SingleItemResponse<{ uniqueId: string }>
+              >,
+            ) => {
+              const childId = childResp.body.data.item.uniqueId;
+              setShared("cteChildId", childId);
+
+              cy.request({
+                method: "GET",
+                url: ui("/cte-app-menus"),
+                headers: authHeaders(rootToken),
+              }).then(
+                (
+                  cteResp: Cypress.Response<ListResponse<Record<string, any>>>,
+                ) => {
+                  expect(cteResp.status).to.equal(200);
+                  const parentNode = cteResp.body.data.items.find(
+                    (item) => item.uniqueId === parentId,
+                  );
+                  expect(parentNode, "parent node present at the top level").to
+                    .exist;
+                  const childIds = (parentNode?.children || []).map(
+                    (c: any) => c.uniqueId,
+                  );
+                  expect(childIds).to.include(childId);
+                },
+              );
+            },
+          );
+        },
+      );
     });
   });
 
@@ -228,9 +282,13 @@ describe("interfacetools: appMenu", () => {
           href: "/checkendpointtests/sidebar-item",
           icon: "home",
         },
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-        setShared("sidebarMenuId", response.body.data.item.uniqueId);
-      });
+      }).then(
+        (
+          response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>,
+        ) => {
+          setShared("sidebarMenuId", response.body.data.item.uniqueId);
+        },
+      );
     });
 
     // Sidebar/content-section layout only renders at desktop widths - see
