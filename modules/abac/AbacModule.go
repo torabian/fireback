@@ -56,6 +56,11 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 				abacdefs.WhoamiActionGin(g, WhoamiAction)
 				abacdefs.QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
 				abacdefs.InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
+				abacdefs.AddUserToWorkspaceActionGin(g, AddUserToWorkspaceAction)
+				abacdefs.RemoveUserFromWorkspaceActionGin(g, RemoveUserFromWorkspaceAction)
+				abacdefs.ChangeUserWorkspaceRoleActionGin(g, ChangeUserWorkspaceRoleAction)
+				abacdefs.CreatePassportForUserActionGin(g, CreatePassportForUserAction)
+				abacdefs.QueryWorkspaceRolesActionGin(g, QueryWorkspaceRolesAction)
 				abacdefs.UserInvitationsActionGin(g, UserInvitationsAction)
 				abacdefs.SignoutActionGin(g, SignoutAction)
 				abacdefs.OauthAuthenticateActionGin(g, OauthAuthenticateAction)
@@ -293,6 +298,11 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		abacdefs.WhoamiActionCliHandler(WhoamiAction),
 		abacdefs.SignoutActionCliHandler(SignoutAction),
 		abacdefs.InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
+		abacdefs.AddUserToWorkspaceActionCliHandler(AddUserToWorkspaceAction),
+		abacdefs.RemoveUserFromWorkspaceActionCliHandler(RemoveUserFromWorkspaceAction),
+		abacdefs.ChangeUserWorkspaceRoleActionCliHandler(ChangeUserWorkspaceRoleAction),
+		abacdefs.CreatePassportForUserActionCliHandler(CreatePassportForUserAction),
+		abacdefs.QueryWorkspaceRolesActionCliHandler(QueryWorkspaceRolesAction),
 		abacdefs.ConfirmClassicPassportTotpActionCliHandler(ConfirmClassicPassportTotpAction),
 		abacdefs.ChangePasswordActionCliHandler(ChangePasswordAction),
 		abacdefs.CreateWorkspaceActionCliHandler(CreateWorkspaceAction),

@@ -2799,6 +2799,182 @@ actions:
     dto: WorkspaceInvitationDto
   out:
     dto: WorkspaceInvitationDto
+- name: AddUserToWorkspace
+  cliName: add-user
+  url: /workspace/add-user
+  method: post
+  description: Adds an existing user directly to a workspace with one of that workspace's
+    existing roles - no invitation/email involved, root only. Use InviteToWorkspace
+    instead when the target person doesn't have an account yet.
+  in:
+    fields:
+    - name: userId
+      description: UniqueId of the existing user to add to the workspace.
+      type: string
+      tags:
+        validate: required
+    - name: workspaceId
+      description: UniqueId of the workspace to add the user to.
+      type: string
+      tags:
+        validate: required
+    - name: roleId
+      description: UniqueId of the role (must belong to workspaceId) to assign to
+        the user.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: uniqueId
+      description: UniqueId of the created userWorkspace membership row.
+      type: string
+    - name: userId
+      type: string
+    - name: workspaceId
+      type: string
+    - name: roleId
+      type: string
+- name: RemoveUserFromWorkspace
+  cliName: remove-user
+  url: /workspace/remove-user
+  method: post
+  description: Removes an existing user's membership - and every role assignment they
+    have in it - from a workspace, root only. The counterpart to AddUserToWorkspace.
+  in:
+    fields:
+    - name: userId
+      description: UniqueId of the user to remove.
+      type: string
+      tags:
+        validate: required
+    - name: workspaceId
+      description: UniqueId of the workspace to remove the user from.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: uniqueId
+      description: UniqueId of the removed userWorkspace membership row.
+      type: string
+    - name: userId
+      type: string
+    - name: workspaceId
+      type: string
+- name: ChangeUserWorkspaceRole
+  cliName: change-user-role
+  url: /workspace/change-user-role
+  method: post
+  description: Replaces a user's role assignment(s) in a workspace with a single new
+    role, root only. roleId must belong to workspaceId, not to root - list the real
+    options with 'role browse' (or GET /role/browse) using a Workspace-Id header set
+    to workspaceId, not root.
+  in:
+    fields:
+    - name: userId
+      description: UniqueId of the user whose role is changing. Must already be a
+        member of workspaceId (see AddUserToWorkspace otherwise).
+      type: string
+      tags:
+        validate: required
+    - name: workspaceId
+      description: UniqueId of the workspace the membership belongs to.
+      type: string
+      tags:
+        validate: required
+    - name: roleId
+      description: UniqueId of the new role (must belong to workspaceId) to assign
+        to the user.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: uniqueId
+      description: UniqueId of the userWorkspace membership row.
+      type: string
+    - name: userId
+      type: string
+    - name: workspaceId
+      type: string
+    - name: roleId
+      type: string
+- name: QueryWorkspaceRoles
+  cliName: workspace-roles
+  url: /workspace/roles
+  method: post
+  description: Lists the roles that actually belong to a given workspace - root only,
+    and deliberately bypasses the normal per-workspace capability check the generic
+    'role browse'/GET /role/browse endpoint enforces (root has no real membership
+    in most workspaces, so switching Workspace-Id to one it doesn't belong to would
+    otherwise 401 there). Use this - not root's own role list - to populate a role
+    picker for AddUserToWorkspace/ChangeUserWorkspaceRole.
+  in:
+    fields:
+    - name: workspaceId
+      description: UniqueId of the workspace whose roles to list.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: uniqueId
+      type: string
+    - name: name
+      type: string
+    - name: capabilitiesListId
+      type: slice
+      primitive: string
+- name: CreatePassportForUser
+  cliName: create-for-user
+  url: /passport/create-for-user
+  method: post
+  description: Creates a new email or phone passport for an existing user with a password
+    already set, and marks it confirmed - for an admin manually provisioning a login
+    when the user can't complete the normal signup/verification flow themselves. Root
+    only. The generic 'passport create' endpoint can't do this - PassportEntity's
+    password field is deliberately write-only from JSON (json:"-"), by design, everywhere
+    except here and SetPassportPassword.
+  in:
+    fields:
+    - name: userId
+      description: UniqueId of the existing user to create the passport for.
+      type: string
+      tags:
+        validate: required
+    - name: type
+      description: 'The passport method: ''email'' or ''phone''.'
+      type: string
+      tags:
+        validate: required
+    - name: value
+      description: The email address or phone number for this passport. Must be globally
+        unique across every passport.
+      type: string
+      tags:
+        validate: required
+    - name: password
+      description: Plaintext password to set on the new passport (minimum 6 characters)
+        - hashed before it's stored, never returned.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: uniqueId
+      type: string
+    - name: userId
+      type: string
+    - name: type
+      type: string
+    - name: value
+      type: string
 - name: UserInvitations
   url: /users/invitations
   method: get

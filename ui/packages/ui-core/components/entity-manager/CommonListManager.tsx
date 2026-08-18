@@ -110,8 +110,26 @@ export const CommonListManager = ({
   const { view } = useViewMode();
   const queryClient = useQueryClient();
 
+  // Bug fix: none of the generated use*BrowseActionQuery hooks actually set a
+  // static .UKEY (it's referenced here but never assigned anywhere in the sdk
+  // codegen), so queryHook.UKEY was always undefined - every single list table in
+  // the app (workspaces, roles, email providers, ...) ended up reading and writing
+  // the *same* server-side TableViewSizing row (uniqueId "undefined") and the same
+  // "table_undefined" localStorage key. Resizing columns on one table (with N
+  // columns) then corrupted every other table's saved sizes array, which
+  // react-data-grid's internal useColumnWidths doesn't expect - a length/shape
+  // mismatch there is what threw "Cannot read properties of null (reading
+  // 'width')" on completely unrelated screens (e.g. email-providers, after having
+  // resized a column somewhere else). queryHook.name is stable and unique per
+  // generated hook (arrow functions assigned to a named export get that name per
+  // the JS spec) even though .UKEY never gets set, so it's a safe fallback -
+  // falls back further to a column-name signature only if even that's somehow
+  // empty (e.g. an inline/anonymous queryHook).
+  const tableKey =
+    id ?? queryHook.UKEY ?? queryHook.name ?? columns.map((t) => t.name).join(",");
+
   const query = useTableViewSizingGetActionQuery({
-    params: { uniqueId: queryHook.UKEY },
+    params: { uniqueId: tableKey },
   });
 
   const [columnSizes, setColumnSizes] = useState<any>(
@@ -124,18 +142,18 @@ export const CommonListManager = ({
     if (tableSizingSizes) {
       setColumnSizes(JSON.parse(tableSizingSizes));
     } else {
-      const table = localStorage.getItem(`table_${queryHook.UKEY}`);
+      const table = localStorage.getItem(`table_${tableKey}`);
       if (table) {
         setColumnSizes(JSON.parse(table));
       }
     }
   }, [tableSizingSizes]);
 
-  // tableViewSizing is addressed by a caller-chosen uniqueId (queryHook.UKEY, a
+  // tableViewSizing is addressed by a caller-chosen uniqueId (tableKey, a
   // per-table, per-user key) - the update action upserts (creates on first save)
   // for that same uniqueId server-side.
   const { mutate: submitTableSizing } = useTableViewSizingUpdateAction({
-    params: { uniqueId: queryHook.UKEY },
+    params: { uniqueId: tableKey },
   });
 
   const delHook =
@@ -176,7 +194,7 @@ export const CommonListManager = ({
     setColumnSizes(nextColumnWidths);
     const sizes = JSON.stringify(nextColumnWidths);
     submitTableSizing({ sizes });
-    localStorage.setItem(`table_${queryHook.UKEY}`, sizes);
+    localStorage.setItem(`table_${tableKey}`, sizes);
   };
 
   let UniqueIdCellRenderer = ({ value }: any) => (

@@ -1,4 +1,7 @@
 content:
+  addUser: Dodaj użytkownika
+  addUserToWorkspaceHint: Wyszukaj istniejącego użytkownika i wybierz jedną z ról
+    tej przestrzeni roboczej.
   body: Treść
   confirmEmailSender: E-mail potwierdzający rejestrację konta użytkownika
   createNewWorkspace: Nowa przestrzeń robocza
@@ -14,9 +17,12 @@ content:
   name: Nazwa
   notificationDialogTitle: Edytuj szablon wiadomości
   resetToDefault: Przywróć domyślne
+  selectRole: Rola
+  selectUser: Użytkownik
   sender: Nadawca
   sidetitle: Przestrzenie robocze
   title: Tytuł
   type: Typ
+  userAddedToWorkspace: Użytkownik dodany do przestrzeni roboczej
   workspaceName: Nazwa przestrzeni roboczej
   workspaceNameHint: Wprowadź nazwę przestrzeni roboczej

@@ -2,6 +2,8 @@
 * Auto generated file by fireback language & translation manager.
 */
 export const en = {
+  addUser: "Add user",
+  addUserToWorkspaceHint: "Search for an existing user and pick one of this workspace's roles.",
   body: "Body",
   confirmEmailSender: "User signup confirm account email",
   createNewWorkspace: "New workspace",
@@ -16,10 +18,13 @@ export const en = {
   name: "Name",
   notificationDialogTitle: "Edit the mail template",
   resetToDefault: "Reset to default",
+  selectRole: "Role",
+  selectUser: "User",
   sender: "Sender",
   sidetitle: "Workspaces",
   title: "Title",
   type: "Type",
+  userAddedToWorkspace: "User added to the workspace",
   workspaceName: "Workspace name",
   workspaceNameHint: "Enter the workspace name",
   workspaceUniqueId: "Unique id",
@@ -28,6 +33,8 @@ export const en = {
 * Auto generated file by fireback language & translation manager.
 */
 export const fa = {
+  addUser: "افزودن کاربر",
+  addUserToWorkspaceHint: "کاربر موجود را جستجو کنید و یکی از نقش‌های این فضای کاری را انتخاب کنید.",
   body: "بدن",
   confirmEmailSender: "ثبت نام کاربر ایمیل حساب را تایید کنید",
   createNewWorkspace: "فضای کاری جدید",
@@ -42,10 +49,13 @@ export const fa = {
   name: "نام",
   notificationDialogTitle: "قالب نامه را ویرایش کنید",
   resetToDefault: "تنظیم مجدد به حالت پیش فرض",
+  selectRole: "نقش",
+  selectUser: "کاربر",
   sender: "فرستنده",
   sidetitle: "فضاهای کاری",
   title: "عنوان",
   type: "تایپ کنید",
+  userAddedToWorkspace: "کاربر به فضای کاری اضافه شد",
   workspaceName: "نام فضای کاری",
   workspaceNameHint: "نام فضای کاری را وارد کنید",
   workspaceUniqueId: "شناسه یکتا",
@@ -54,6 +64,8 @@ export const fa = {
 * Auto generated file by fireback language & translation manager.
 */
 export const pl = {
+  addUser: "Dodaj użytkownika",
+  addUserToWorkspaceHint: "Wyszukaj istniejącego użytkownika i wybierz jedną z ról tej przestrzeni roboczej.",
   body: "Treść",
   confirmEmailSender: "E-mail potwierdzający rejestrację konta użytkownika",
   createNewWorkspace: "Nowa przestrzeń robocza",
@@ -68,10 +80,13 @@ export const pl = {
   name: "Nazwa",
   notificationDialogTitle: "Edytuj szablon wiadomości",
   resetToDefault: "Przywróć domyślne",
+  selectRole: "Rola",
+  selectUser: "Użytkownik",
   sender: "Nadawca",
   sidetitle: "Przestrzenie robocze",
   title: "Tytuł",
   type: "Typ",
+  userAddedToWorkspace: "Użytkownik dodany do przestrzeni roboczej",
   workspaceName: "Nazwa przestrzeni roboczej",
   workspaceNameHint: "Wprowadź nazwę przestrzeni roboczej",
   workspaceUniqueId: "Unikalny identyfikator",
