@@ -1,6 +1,7 @@
 package abac
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/torabian/emi/emigo"
@@ -25,6 +26,7 @@ var ALL_ROLE_PERMISSIONS = rolePerms.All
 var RoleMessages = struct {
 	RoleNeedsOneCapability fireback.ErrorItem
 	RoleNameReserved       fireback.ErrorItem
+	CannotDeleteRootRole   fireback.ErrorItem
 }{
 	RoleNeedsOneCapability: fireback.ErrorItem{
 		"$":  "RoleNeedsOneCapability",
@@ -33,6 +35,10 @@ var RoleMessages = struct {
 	RoleNameReserved: fireback.ErrorItem{
 		"$":  "RoleNameReserved",
 		"en": "\"root\" is a reserved role name and uniqueId - it cannot be used for a new role.",
+	},
+	CannotDeleteRootRole: fireback.ErrorItem{
+		"$":  "CannotDeleteRootRole",
+		"en": "The \"root\" role cannot be deleted.",
 	},
 }
 
@@ -241,6 +247,18 @@ func RoleAwareDeletePreviewAction(c abacdefs.RoleAwareDeletePreviewActionRequest
 		return nil, err
 	}
 	uniqueIds := abacdefs.RoleAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	// The root role is the one seeded, protected super-admin role (see RoleCreateAction's
+	// reserved-name guard and RoleActions.Query/.GetOne's visibility rules above) -
+	// RoleActions.RemoveEnqueue already excludes it from the older generic "remove"
+	// query path, but AwareDeletePreview/AwareDelete below go straight to
+	// abacdefs.RoleEntityActions, bypassing that guard entirely. Checked here too (not
+	// just in RoleAwareDeleteAction), so the confirmation step itself already surfaces
+	// the problem instead of letting an admin preview a "safe" delete that the real
+	// delete then rejects - same pattern as WorkspaceAwareDeletePreviewAction's own
+	// root-workspace guard.
+	if slices.Contains(uniqueIds, ROOT_VAR) {
+		return nil, &fireback.IError{Message: RoleMessages.CannotDeleteRootRole, HttpCode: 400}
+	}
 	preview, err2 := abacdefs.RoleEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
@@ -251,6 +269,13 @@ func RoleAwareDeletePreviewAction(c abacdefs.RoleAwareDeletePreviewActionRequest
 func RoleAwareDeleteAction(c abacdefs.RoleAwareDeleteActionRequest) (*abacdefs.RoleAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_ROLE_DELETE}}); err != nil {
 		return nil, err
+	}
+	// See RoleAwareDeletePreviewAction's own comment - the root role must never be
+	// deletable through this action. Rejecting the whole batch (rather than silently
+	// dropping just "root" from the list and deleting the rest) so a request that
+	// includes it fails loudly instead of quietly succeeding on everything else.
+	if slices.Contains(c.Body.UniqueIds, ROOT_VAR) {
+		return nil, &fireback.IError{Message: RoleMessages.CannotDeleteRootRole, HttpCode: 400}
 	}
 	if err2 := abacdefs.RoleEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)

@@ -1,0 +1,203 @@
+/* internal-stats: manage's server/process health dashboard
+   (ui/packages/manage/internal-stats). Status colors are fixed - never
+   themed, never reused for anything else - see modules/internalstats/
+   Collector.go's Severity* constants. */
+
+.internal-stats-page {
+  --is-status-ok: #0ca30c;
+  --is-status-warn: #b5760f;
+  --is-status-critical: #d03b3b;
+  --is-status-info: #898781;
+  --is-text-secondary: #52514e;
+  --is-text-muted: #898781;
+  --is-track: #eeede8;
+  --is-gridline: #e1e0d9;
+  --is-border: rgba(11, 11, 11, 0.1);
+  --is-surface: #fcfcfb;
+}
+
+body.dark-theme .internal-stats-page {
+  --is-status-ok: #0ca30c;
+  --is-status-warn: #fab219;
+  --is-status-critical: #e66767;
+  --is-status-info: #898781;
+  --is-text-secondary: #c3c2b7;
+  --is-text-muted: #898781;
+  --is-track: #232322;
+  --is-gridline: #2c2c2a;
+  --is-border: rgba(255, 255, 255, 0.1);
+  --is-surface: #1a1a19;
+}
+
+.internal-stats-meta {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.internal-stats-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.internal-stats-meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--is-text-muted);
+}
+
+/* ---------- Stat tiles ---------- */
+
+.internal-stats-category {
+  margin-bottom: 20px;
+}
+
+.internal-stats-category-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--is-text-muted);
+  margin: 0 0 8px;
+}
+
+.internal-stats-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.internal-stats-tile {
+  background: var(--is-surface);
+  border: 1px solid var(--is-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.internal-stats-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--is-text-secondary);
+}
+
+.internal-stats-tile-value {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.internal-stats-severity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.internal-stats-empty-hint {
+  color: var(--is-text-muted);
+  font-size: 13px;
+}
+
+/* ---------- Severity colors (shared by tiles, legend, chart bars) ---------- */
+
+.is-severity-ok {
+  background: var(--is-status-ok);
+  fill: var(--is-status-ok);
+}
+.is-severity-warn {
+  background: var(--is-status-warn);
+  fill: var(--is-status-warn);
+}
+.is-severity-critical {
+  background: var(--is-status-critical);
+  fill: var(--is-status-critical);
+}
+.is-severity-info {
+  background: var(--is-status-info);
+  fill: var(--is-status-info);
+}
+
+/* ---------- Chart ---------- */
+
+.internal-stats-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--is-text-secondary);
+}
+
+.internal-stats-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.internal-stats-legend-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.internal-stats-chart-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.internal-stats-facet {
+  background: var(--is-surface);
+  border: 1px solid var(--is-border);
+  border-radius: 10px;
+  padding: 14px 16px 10px;
+}
+
+.internal-stats-facet-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--is-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.internal-stats-facet svg {
+  display: block;
+  width: 100%;
+}
+
+.internal-stats-row-label {
+  font-size: 11px;
+  fill: var(--is-text-secondary);
+}
+
+.internal-stats-row-value {
+  font-size: 11px;
+  fill: var(--is-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.internal-stats-bar-track {
+  fill: var(--is-track);
+}
+
+.internal-stats-axis .tick line {
+  stroke: var(--is-gridline);
+  stroke-width: 1;
+}
+
+.internal-stats-axis .tick text {
+  fill: var(--is-text-muted);
+  font-size: 10px;
+}
+
+.internal-stats-axis .domain {
+  display: none;
+}

@@ -34,7 +34,7 @@ export const GsmProviderEntityManager = ({
         router.goBackOrDefault(GsmProviderNavigation.query(undefined, locale));
       }}
       onFinishUriResolver={(response, locale) =>
-        GsmProviderNavigation.single(response.data?.uniqueId, locale)
+        GsmProviderNavigation.single(response.data?.item?.uniqueId, locale)
       }
       Form={GsmProviderForm}
       onEditTitle={s.gsmProviders.editGsmProvider}

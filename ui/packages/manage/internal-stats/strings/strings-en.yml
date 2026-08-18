@@ -1,0 +1,22 @@
+content:
+  internalStats:
+    title: Internal Stats
+    description: Server / process health - CPU, memory, disk, network and Go runtime - refreshed automatically.
+    host: Host
+    generatedAt: Generated
+    metrics: Metrics
+    snapshotSection: Snapshot
+    chartSection: Numeric metrics
+    loadError: Could not load internal stats. This requires a root workspace session.
+    noNumericMetrics: No numeric metrics available yet.
+    severityOk: OK
+    severityWarn: Warning
+    severityCritical: Critical
+    severityInfo: Info
+    unitPercent: Usage (percent)
+    unitBytes: Memory / disk / network (bytes)
+    unitSeconds: Durations (seconds)
+    unitMhz: Frequency (MHz)
+    unitLoad: Load average
+    unitCount: Counts
+    unitOther: Other

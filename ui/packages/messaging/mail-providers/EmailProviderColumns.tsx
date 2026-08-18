@@ -18,9 +18,4 @@ export const columns = (s: typeof strings, uiS: typeof uiStrings) => [
     title: s.type,
     width: 200,
   },
-  {
-    name: EmailProviderDto.Fields.apiKey,
-    title: s.apiKey,
-    width: 200,
-  },
 ];

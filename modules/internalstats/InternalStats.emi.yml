@@ -5,6 +5,19 @@ targets:
     output: ./defs
     flags:
       pkg: internalstatsdefs
+  # internalstats is a root-only admin dashboard - only the manage app renders it,
+  # so (unlike abac/messaging, which every ui/packages/* consumer needs its own copy
+  # of) this generates straight into manage's own sdk folder rather than ui-core.
+  - compiler: js
+    output: ../../ui/packages/manage/sdk/internalstats
+    clean: true
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
+    tags:
+      - typescript
+      - react
+      - no-package
+      - no-sdk
   - compiler: preprocessor
     output: ./
 

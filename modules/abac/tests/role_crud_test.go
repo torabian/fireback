@@ -188,3 +188,122 @@ func TestRoleAwareDeletePreview_HTTP_ThenDelete(t *testing.T) {
 		t.Errorf("expected the deleted role %s to no longer be gettable", created.UniqueId)
 	}
 }
+
+// TestRoleAwareDelete_HTTP_RejectsRootRole is the regression test for
+// RoleAwareDeleteAction/RoleAwareDeletePreviewAction's root-role guard
+// (RoleActions.go) - mirrors TestWorkspaceAwareDelete_HTTP_RejectsRootWorkspace in
+// workspace_test.go for the equivalent root-role case. RoleActions.RemoveEnqueue
+// already excluded "root" from the older generic "remove" query path, but
+// AwareDeletePreview/AwareDelete go straight to abacdefs.RoleEntityActions,
+// bypassing that guard entirely - before RoleAwareDeletePreviewAction/
+// RoleAwareDeleteAction's own checks existed, this request would have succeeded
+// with a 200 OK and actually deleted the root role.
+func TestRoleAwareDelete_HTTP_RejectsRootRole(t *testing.T) {
+	cfg := LoadTestConfig(t)
+	cfg.RequireServer(t)
+	cfg.RequireAuth(t)
+
+	client := cfg.NewHTTPClient()
+
+	// The preview step rejects it too, so an admin sees the problem before ever
+	// reaching the confirm step, not just when the delete itself is attempted.
+	previewReq, err := http.NewRequest(http.MethodGet, cfg.URL("/role/delete-preview?uniqueIds=root"), nil)
+	if err != nil {
+		t.Fatalf("failed to build delete-preview request: %v", err)
+	}
+	previewReq.Header.Set("Authorization", cfg.CliToken)
+	previewReq.Header.Set("Workspace-id", "root")
+	previewResp, err := client.Do(previewReq)
+	if err != nil {
+		t.Fatalf("delete-preview request failed: %v", err)
+	}
+	defer previewResp.Body.Close()
+	if previewResp.StatusCode == http.StatusOK {
+		t.Errorf("expected delete-preview of the root role to be rejected, got 200 OK")
+	}
+
+	deleteBody, _ := json.Marshal(map[string][]string{"uniqueIds": {"root"}})
+	deleteReq, err := http.NewRequest(http.MethodPost, cfg.URL("/role/delete"), bytes.NewReader(deleteBody))
+	if err != nil {
+		t.Fatalf("failed to build delete request: %v", err)
+	}
+	deleteReq.Header.Set("Content-Type", "application/json")
+	deleteReq.Header.Set("Authorization", cfg.CliToken)
+	deleteReq.Header.Set("Workspace-id", "root")
+	deleteResp, err := client.Do(deleteReq)
+	if err != nil {
+		t.Fatalf("delete request failed: %v", err)
+	}
+	defer deleteResp.Body.Close()
+	deleteRespBody, _ := io.ReadAll(deleteResp.Body)
+	if deleteResp.StatusCode == http.StatusOK {
+		t.Fatalf("expected deleting the root role to be rejected, got 200 OK: %s", deleteRespBody)
+	}
+
+	// The root role must still be there and still gettable - the guard rejected the
+	// request outright rather than deleting it and merely returning an error.
+	getReq, err := http.NewRequest(http.MethodGet, cfg.URL("/role/root"), nil)
+	if err != nil {
+		t.Fatalf("failed to build post-delete get request: %v", err)
+	}
+	getReq.Header.Set("Authorization", cfg.CliToken)
+	getReq.Header.Set("Workspace-id", "root")
+	getResp, err := client.Do(getReq)
+	if err != nil {
+		t.Fatalf("post-delete get request failed: %v", err)
+	}
+	defer getResp.Body.Close()
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("expected the root role to still exist after a rejected delete, got %d", getResp.StatusCode)
+	}
+}
+
+// TestRoleAwareDelete_HTTP_RejectsBatchContainingRootRole confirms the guard rejects
+// the *whole* batch - including a perfectly deletable role alongside "root" - rather
+// than silently dropping "root" from the list and deleting the rest, which would
+// succeed with a 200 OK and leave the caller thinking everything they asked for was
+// deleted. Mirrors TestWorkspaceAwareDelete_HTTP_RejectsBatchContainingRootWorkspace.
+func TestRoleAwareDelete_HTTP_RejectsBatchContainingRootRole(t *testing.T) {
+	cfg := LoadTestConfig(t)
+	cfg.RequireServer(t)
+	cfg.RequireAuth(t)
+
+	created := createSampleRole(t, cfg)
+	defer deleteRole(t, cfg, created.UniqueId)
+
+	deleteBody, _ := json.Marshal(map[string][]string{"uniqueIds": {created.UniqueId, "root"}})
+	client := cfg.NewHTTPClient()
+	deleteReq, err := http.NewRequest(http.MethodPost, cfg.URL("/role/delete"), bytes.NewReader(deleteBody))
+	if err != nil {
+		t.Fatalf("failed to build delete request: %v", err)
+	}
+	deleteReq.Header.Set("Content-Type", "application/json")
+	deleteReq.Header.Set("Authorization", cfg.CliToken)
+	deleteReq.Header.Set("Workspace-id", cfg.WorkspaceID)
+	deleteResp, err := client.Do(deleteReq)
+	if err != nil {
+		t.Fatalf("delete request failed: %v", err)
+	}
+	defer deleteResp.Body.Close()
+	deleteRespBody, _ := io.ReadAll(deleteResp.Body)
+	if deleteResp.StatusCode == http.StatusOK {
+		t.Fatalf("expected a batch delete including the root role to be rejected entirely, got 200 OK: %s", deleteRespBody)
+	}
+
+	// Neither role should have been deleted - not root (never deletable), and not the
+	// otherwise-deletable one either (the whole batch was rejected).
+	getReq, err := http.NewRequest(http.MethodGet, cfg.URL("/role/"+created.UniqueId), nil)
+	if err != nil {
+		t.Fatalf("failed to build post-delete get request: %v", err)
+	}
+	getReq.Header.Set("Authorization", cfg.CliToken)
+	getReq.Header.Set("Workspace-id", cfg.WorkspaceID)
+	getResp, err := client.Do(getReq)
+	if err != nil {
+		t.Fatalf("post-delete get request failed: %v", err)
+	}
+	defer getResp.Body.Close()
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("expected the otherwise-deletable role %s to survive a rejected batch delete, got %d", created.UniqueId, getResp.StatusCode)
+	}
+}

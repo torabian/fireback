@@ -11,6 +11,10 @@ import { useTableViewSizingUpdateAction } from "@fireback/ui-core/sdk/interfacet
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { PaginateTable } from "../common-data-table/PaginateTable";
+import {
+  normalizeColumnWidths,
+  parseJsonSafely,
+} from "../common-data-table/PaginateUtils";
 import { useReindexedContent } from "../common-data-table/useReindex";
 import Link from "../link/Link";
 import { type CardComponentType, FlatListMode } from "./FlatListMode";
@@ -126,7 +130,10 @@ export const CommonListManager = ({
   // falls back further to a column-name signature only if even that's somehow
   // empty (e.g. an inline/anonymous queryHook).
   const tableKey =
-    id ?? queryHook.UKEY ?? queryHook.name ?? columns.map((t) => t.name).join(",");
+    id ??
+    queryHook.UKEY ??
+    queryHook.name ??
+    columns.map((t) => t.name).join(",");
 
   const query = useTableViewSizingGetActionQuery({
     params: { uniqueId: tableKey },
@@ -138,15 +145,46 @@ export const CommonListManager = ({
 
   const tableSizingSizes = (query.data as any)?.data?.item?.sizes;
 
+  // A 404 (no sizing saved for this tableKey yet - the normal state for any
+  // table nobody has resized) - or any other non-2xx - never throws here:
+  // GResponse.inject only ever populates data.item from a real body.data.item,
+  // so an error-shaped `{"error": ...}` response just leaves it null and
+  // tableSizingSizes falls straight through to undefined below. What isn't
+  // safe on its own is trusting the *shape* of whatever string does come back
+  // (from the server, or from localStorage - itself just as untyped) - a
+  // single malformed entry used to reach react-data-grid's own column-width
+  // computation and crash it with "Cannot read properties of null (reading
+  // 'width')", taking the whole table down. parseJsonSafely + normalizeColumnWidths
+  // (see PaginateUtils.tsx) is the one gate everything has to clear before it's
+  // ever trusted; anything that doesn't parse, isn't shaped right, or doesn't
+  // even describe one of this table's own columns is treated exactly like "no
+  // saved sizing" instead of being applied and breaking the table.
+  //
+  // columns/tableKey are intentionally not in the dependency array - callers
+  // like CapabilityList.tsx pass a fresh `columns` array literal every render,
+  // so depending on it here would re-run (and re-setColumnSizes with a new
+  // array reference) every render.
   useEffect(() => {
-    if (tableSizingSizes) {
-      setColumnSizes(JSON.parse(tableSizingSizes));
-    } else {
-      const table = localStorage.getItem(`table_${tableKey}`);
-      if (table) {
-        setColumnSizes(JSON.parse(table));
-      }
+    const fromServer = normalizeColumnWidths(
+      parseJsonSafely(tableSizingSizes),
+      columns,
+    );
+    if (fromServer) {
+      setColumnSizes(fromServer);
+      return;
     }
+
+    const fromStorage = normalizeColumnWidths(
+      parseJsonSafely(localStorage.getItem(`table_${tableKey}`)),
+      columns,
+    );
+    if (fromStorage) {
+      setColumnSizes(fromStorage);
+    }
+    // Neither had anything valid - leave columnSizes at its already-safe
+    // initial default (each column's own declared width) rather than
+    // clearing it out from under an in-progress render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableSizingSizes]);
 
   // tableViewSizing is addressed by a caller-chosen uniqueId (tableKey, a

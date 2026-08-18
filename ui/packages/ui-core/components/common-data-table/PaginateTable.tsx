@@ -13,7 +13,6 @@ import { useLocation } from "react-router-dom";
 import { type DatatableColumn } from "../../types/DatatableColumn";
 import { type Udf } from "../../hooks/useDatatableFiltering";
 import { castColumns, type TableColumnWidthInfo } from "./PaginateUtils";
-import { useReindexedContent } from "./useReindex";
 import { useLocale } from "../../hooks/useLocale";
 
 export function PaginateTable({
@@ -86,13 +85,13 @@ export function PaginateTable({
 
   const ref = useRef<DataGridHandle>();
 
-  useEffect(() => {
-    const rows: any = query.data?.data?.items || [];
+  // useEffect(() => {
+  //   const rows: any = query.data?.data?.items || [];
 
-    reindex(rows, udf.queryHash, () => {
-      ref.current.element.scrollTo({ top: 0, left: 0 });
-    });
-  }, [query.data?.data?.items]);
+  //   reindex(rows, udf.queryHash, () => {
+  //     ref.current.element.scrollTo({ top: 0, left: 0 });
+  //   });
+  // }, [query.data?.data?.items]);
 
   async function handleScroll(event: React.UIEvent<HTMLDivElement>) {
     if (query.isLoading || !isAtBottom(event)) return;
@@ -126,7 +125,7 @@ export function PaginateTable({
         }}
         selectedRows={new Set(selection)}
         ref={ref}
-        rows={indexedData}
+        rows={query.data?.data?.items || []}
         rowKeyGetter={(item) => item.uniqueId}
         style={{ height: "calc(100% - 2px)", margin: "1px -14px" }}
       />

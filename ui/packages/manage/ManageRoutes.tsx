@@ -10,6 +10,7 @@ import { Route } from "react-router-dom";
 import { useCapabilityRoutes } from "./capabilities/CapabilityRoutes";
 import { useEmailProviderRoutes } from "@fireback/messaging/mail-providers/EmailProviderRoutes";
 import { useEmailSenderRoutes } from "@fireback/messaging/mail-senders/EmailSenderRoutes";
+import { useInternalStatsRoutes } from "./internal-stats/InternalStatsRoutes";
 import { usePassportMethodRoutes } from "./passport-method/PassportMethodRoutes";
 import { useRegionalContentRoutes } from "./regional-content/RegionalContentRoutes";
 import { useUserRoutes } from "./users/UserRoutes";
@@ -23,6 +24,7 @@ export function useManageRoutes() {
   const mailProviderRoutes = useEmailProviderRoutes();
   const gsmProviderRoutes = useGsmProviderRoutes();
   const mailSenderRoutes = useEmailSenderRoutes();
+  const internalStatsRoutes = useInternalStatsRoutes();
   const passportMethodRoutes = usePassportMethodRoutes();
   const userRoutes = useUserRoutes();
   const workspaceConfigRoutes = useWorkspaceConfigRoutes();
@@ -35,6 +37,7 @@ export function useManageRoutes() {
       {capabilityRoutes}
       {mailProviderRoutes}
       {mailSenderRoutes}
+      {internalStatsRoutes}
       {passportMethodRoutes}
       {userRoutes}
       {gsmProviderRoutes}

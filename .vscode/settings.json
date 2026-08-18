@@ -2,7 +2,7 @@
   "emeraldwalk.runonsave": {
     "commands": [
       {
-        "cmd": "${workspaceFolder}/artifacts/fireback/f emi strings --langs en,pl --path ${file}",
+        "cmd": "${workspaceFolder}/artifacts/fireback/f emi strings --langs en,pl,fa --path ${file}",
         "match": "strings-([a-z][a-z]).yml$"
       },
       {

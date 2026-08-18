@@ -22,6 +22,7 @@
     "@babel/plugin-proposal-decorators": "^7.29.0",
     "@babel/plugin-transform-private-methods": "^7.28.6",
     "@babel/plugin-transform-private-property-in-object": "^7.28.6",
+    "@devexpress/dx-core": "^4.0.8",
     "@devexpress/dx-react-core": "^4.0.11",
     "@devexpress/dx-react-grid": "^4.0.3",
     "@devexpress/dx-react-grid-bootstrap4": "^4.0.3",
@@ -46,6 +47,7 @@
     "bootstrap": "^5.2.3",
     "buffer": "^6.0.3",
     "classnames": "^2.3.2",
+    "d3": "^7.9.0",
     "date-fns": "^2.30.0",
     "formik": "^2.2.9",
     "framer-motion": "^12.19.2",
@@ -81,6 +83,7 @@
   },
   "devDependencies": {
     "@types/bootstrap": "^5.2.6",
+    "@types/d3": "^7.4.3",
     "@types/lodash": "^4.14.176",
     "@types/node": "18.14.0",
     "@types/react": "^18.2.61",

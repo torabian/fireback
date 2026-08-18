@@ -65,7 +65,12 @@ func excludeDatabaseConnection() bool {
 		os.Args[1] == "config" ||
 		os.Args[1] == "init" ||
 		os.Args[1] == "new" ||
-		os.Args[1] == "doctor" {
+		os.Args[1] == "doctor" ||
+		// public-folders only ever reads xapp.PublicFolders' embed.FS content
+		// (see PublicFoldersCli.go) - no database needed, and it's useful
+		// precisely when debugging a deployment before the database is even
+		// reachable.
+		os.Args[1] == "public-folders" {
 		return true
 	}
 
