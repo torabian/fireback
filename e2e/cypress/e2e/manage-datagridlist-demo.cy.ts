@@ -57,13 +57,27 @@ function example(headingText: string) {
   return cy.contains("h2", headingText).parent();
 }
 
-// Repeatedly scrolls `container` towards its own bottom, pausing between steps so each
-// intersection has a chance to fire its own fetchNextPage - a single scrollTo("bottom")
-// only ever catches one page: by the time it lands, freshly-appended rows have already
-// moved the "bottom" further down again.
-function scrollRepeatedly(container: Cypress.Chainable<JQuery<HTMLElement>>, times = 8) {
+// Repeatedly scrolls `container` down by ~80% of its own visible height, pausing
+// between steps so each intersection has a chance to fire its own fetchNextPage.
+//
+// Deliberately NOT container.scrollTo("bottom") repeated: on a page stacking several
+// examples (this demo has three DataGridLists one after another), "bottom" is the
+// bottom of the *whole page*, which can sit far below a given example's own sentinel -
+// jumping straight there in one instant skips over that sentinel's on-screen position
+// entirely, so its IntersectionObserver is never sampled while intersecting and
+// fetchNextPage never fires for it (confirmed directly: instrumenting the real
+// onLoadMore callback showed the last example on the page - whose sentinel genuinely
+// is near the bottom - firing and growing every time under scrollTo("bottom"), while
+// an earlier example's sentinel, well above the true bottom, never fired at all).
+// Incremental, paced steps mirror actual mouse-wheel/Page-Down scrolling: the
+// viewport passes *through* every sentinel's position on the way down instead of
+// leaping past it, so each one gets its chance to intersect and trigger a fetch.
+function scrollRepeatedly(container: Cypress.Chainable<JQuery<HTMLElement>>, times = 12) {
   for (let i = 0; i < times; i++) {
-    container.scrollTo("bottom", { ensureScrollable: false });
+    container.then(($el) => {
+      const el = $el[0];
+      el.scrollTop += el.clientHeight * 0.8;
+    });
     cy.wait(400);
   }
 }
