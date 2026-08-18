@@ -205,6 +205,13 @@ export const CommonListManager = ({
       onRecordsDeleted({ queryClient });
     }
     deleteViaUniqueIds(items);
+    // PaginateTable now renders straight off q.query.data (its own reindex/
+    // indexedData wiring is temporarily disabled - see PaginateTable.tsx),
+    // so deleteViaUniqueIds above no longer has anywhere to put the removed
+    // row: it only updates indexedData, which nothing reads anymore. Refetch
+    // the underlying list query itself so the deleted row actually leaves
+    // the table, same pattern FlatListMode's onRefresh already uses.
+    q.query.refetch();
   };
 
   const udf = useDatatableFiltering({
