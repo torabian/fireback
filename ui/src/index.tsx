@@ -18,6 +18,10 @@ import App from "./apps/projectname/App";
 import App from "./apps/self-service/App";
 // #v-endif
 
+// #v-ifdef VITE_TARGET_APP == 'wasm-demo'
+import App from "./apps/wasm-demo/App";
+// #v-endif
+
 // @fireback-append-app
 
 const root = ReactDOM.createRoot(

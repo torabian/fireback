@@ -86,6 +86,35 @@ func main() {
 }`)
 	})
 
+	// Hardcoded, same stand-in status as /whoami above - the real one is
+	// abac.CheckPassportMethodsAction (modules/abac/defs/
+	// CheckPassportMethodsAction.go, GResponse<CheckPassportMethodsActionRes>
+	// - hence the data.item wrapper below, not a flat object like /whoami's).
+	// ui/packages/selfservice/Welcome.screen.tsx (the wasm-demo app's own
+	// unauthenticated landing page - see ui/src/apps/wasm-demo/App.tsx) calls
+	// this to decide which signin buttons to show; without it 404ing forever
+	// left that screen stuck on its loading spinner. Only "email" is turned
+	// on here - clicking it still won't get you signed in for real (there's
+	// no ClassicSigninAction route here yet), but the screen itself now
+	// renders instead of spinning.
+	mux.HandleFunc("GET /passports/available-methods", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{
+	"data": {
+		"item": {
+			"email": true,
+			"phone": false,
+			"google": false,
+			"facebook": false,
+			"googleOAuthClientKey": "",
+			"facebookAppId": "",
+			"enabledRecaptcha2": false,
+			"recaptcha2ClientKey": ""
+		}
+	}
+}`)
+	})
+
 	// emigo.LiftWasmServer always dispatches through mux.ServeHTTP (it needs
 	// a concrete *http.ServeMux, not just an http.Handler), so a single
 	// catch-all "/" on a wrapping mux is enough to see every request before

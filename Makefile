@@ -56,6 +56,16 @@ devsetup: default
 wasm:
 	cd cmd/fireback-wasm && make
 
+# Builds the wasm-demo app (ui/src/apps/wasm-demo) - a fireback server compiled
+# to wasm, running entirely client-side against an in-browser Postgres
+# (pglite), no network backend at all. Depends on `wasm` for a fresh
+# fireback.wasm (gitignored, ui/public/wasm_exec.js is already committed).
+# Output lands in ui/dist, ready to serve as plain static files - see
+# .github/workflows/fireback-build.yml's deploy_wasm_demo_pages job, and
+# e2e/cypress/e2e/wasm-demo.cy.ts, which drives these same two steps itself.
+wasm-demo: wasm
+	cd ui && npm run wasm-demo:build
+
 # Compiles everything, zips, and packages for all targets that we are planning.
 server:
 	cd cmd/fireback && make everything

@@ -1,7 +1,9 @@
-import React, { type ReactNode } from "react";
+import React, { type ReactNode, useMemo } from "react";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { useWasmServer } from "./useWasmServer";
+import { wasmFetchOverride } from "./wasmServer";
 import type { WasmDownloadProgress, WasmServerOptions } from "./wasmServer";
+import { WasmFetchOverrideContext } from "./WasmFetchContext";
 
 // WithWasmServer — wraps the app's essential router (see App.tsx) and, when
 // BUILD_VARIABLES.USE_WASM_SERVER ("VITE_USE_WASM_SERVER" in
@@ -56,6 +58,11 @@ function WasmServerGate({
   fallback?: { booting?: ReactNode; error?: (error: Error) => ReactNode };
 }) {
   const { ready, error, progress } = useWasmServer(options);
+  // Stable across renders (useWasmServer's own boot is memoized too - see
+  // startWasmServer) - provided once ready so WithFireback (via
+  // WasmFetchContext.ts) can pick it up without ever importing this package
+  // directly. See that file's own doc comment for why that indirection exists.
+  const fetchOverride = useMemo(() => wasmFetchOverride(), []);
 
   if (error) {
     return (
@@ -73,7 +80,11 @@ function WasmServerGate({
     return <>{fallback?.booting ?? <DefaultBootingScreen progress={progress} />}</>;
   }
 
-  return <>{children}</>;
+  return (
+    <WasmFetchOverrideContext.Provider value={fetchOverride}>
+      {children}
+    </WasmFetchOverrideContext.Provider>
+  );
 }
 
 const BYTES_PER_MB = 1024 * 1024;
