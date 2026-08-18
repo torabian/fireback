@@ -1,5 +1,3 @@
-//go:build !wasm
-
 package abacdefs
 
 import (
@@ -28,44 +26,6 @@ func (x *CapabilityEntity) Json() string {
 
 // Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
 // appended here in this template, after the struct GoCommonStructGenerator produced.
-//
-func GetCapabilityEntityCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "id",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name: prefix + "name",
-			Type: "string",
-		},
-		{
-			Name: prefix + "description",
-			Type: "string",
-		},
-	}
-}
-func CastCapabilityEntityFromCli(c emigo.CliCastable) CapabilityEntity {
-	data := CapabilityEntity{}
-	if c.IsSet("id") {
-		data.Id = int64(c.Int64("id"))
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("name") {
-		data.Name = c.String("name")
-	}
-	if c.IsSet("description") {
-		data.Description = c.String("description")
-	}
-	return data
-}
-
 // CapabilityEntityCreateFn creates a new CapabilityEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

@@ -1,9 +1,6 @@
-//go:build !wasm
-
 package abacdefs
 
 import (
-	"encoding"
 	"encoding/json"
 	"fmt"
 	"github.com/torabian/emi/emigo"
@@ -38,80 +35,6 @@ func (x *WorkspaceRoleEntity) Json() string {
 
 // Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
 // appended here in this template, after the struct GoCommonStructGenerator produced.
-//
-func GetWorkspaceRoleEntityCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "id",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "user-workspace-id",
-			Type:        "string?",
-			Description: "The unique-id of the userWorkspace this role assignment belongs to.",
-		},
-		{
-			Name:        prefix + "role-id",
-			Type:        "string?",
-			Description: "The unique-id of the assigned role.",
-		},
-		{
-			Name:        prefix + "workspace-id",
-			Type:        "string?",
-			Description: "The unique-id of the workspace which content belongs to.",
-		},
-		{
-			Name:        prefix + "user-id",
-			Type:        "string?",
-			Description: "The unique-id of the user which created/owns the record.",
-		},
-		{
-			Name: prefix + "created-at",
-			Type: "complex",
-		},
-		{
-			Name: prefix + "updated-at",
-			Type: "complex",
-		},
-	}
-}
-func CastWorkspaceRoleEntityFromCli(c emigo.CliCastable) WorkspaceRoleEntity {
-	data := WorkspaceRoleEntity{}
-	if c.IsSet("id") {
-		data.Id = int64(c.Int64("id"))
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("user-workspace-id") {
-		emigo.ParseNullable(c.String("user-workspace-id"), &data.UserWorkspaceId)
-	}
-	if c.IsSet("role-id") {
-		emigo.ParseNullable(c.String("role-id"), &data.RoleId)
-	}
-	if c.IsSet("workspace-id") {
-		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
-	}
-	if c.IsSet("user-id") {
-		emigo.ParseNullable(c.String("user-id"), &data.UserId)
-	}
-	if c.IsSet("created-at") {
-		if u, ok := any(&data.CreatedAt).(encoding.TextUnmarshaler); ok {
-			u.UnmarshalText([]byte(c.String("created-at")))
-		}
-	}
-	if c.IsSet("updated-at") {
-		if u, ok := any(&data.UpdatedAt).(encoding.TextUnmarshaler); ok {
-			u.UnmarshalText([]byte(c.String("updated-at")))
-		}
-	}
-	return data
-}
-
 // WorkspaceRoleEntityCreateFn creates a new WorkspaceRoleEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

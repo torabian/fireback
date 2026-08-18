@@ -1,9 +1,6 @@
-//go:build !wasm
-
 package abacdefs
 
 import (
-	"encoding"
 	"encoding/json"
 	"fmt"
 	"github.com/torabian/emi/emigo"
@@ -39,87 +36,6 @@ func (x *PassportMethodEntity) Json() string {
 
 // Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
 // appended here in this template, after the struct GoCommonStructGenerator produced.
-//
-func GetPassportMethodEntityCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "id",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name: prefix + "type",
-			Type: "enum",
-		},
-		{
-			Name:        prefix + "region",
-			Type:        "enum",
-			Description: "The region which would be using this method of passports for authentication. In Fireback open-source, only 'global' is available.",
-		},
-		{
-			Name:        prefix + "client-key",
-			Type:        "string",
-			Description: "Client key for those methods such as 'google' which require oauth client key",
-		},
-		{
-			Name:        prefix + "workspace-id",
-			Type:        "string?",
-			Description: "The unique-id of the workspace which content belongs to.",
-		},
-		{
-			Name:        prefix + "user-id",
-			Type:        "string?",
-			Description: "The unique-id of the user which created/owns the record.",
-		},
-		{
-			Name: prefix + "created-at",
-			Type: "complex",
-		},
-		{
-			Name: prefix + "updated-at",
-			Type: "complex",
-		},
-	}
-}
-func CastPassportMethodEntityFromCli(c emigo.CliCastable) PassportMethodEntity {
-	data := PassportMethodEntity{}
-	if c.IsSet("id") {
-		data.Id = int64(c.Int64("id"))
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("type") {
-		data.Type = c.String("type")
-	}
-	if c.IsSet("region") {
-		data.Region = c.String("region")
-	}
-	if c.IsSet("client-key") {
-		data.ClientKey = c.String("client-key")
-	}
-	if c.IsSet("workspace-id") {
-		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
-	}
-	if c.IsSet("user-id") {
-		emigo.ParseNullable(c.String("user-id"), &data.UserId)
-	}
-	if c.IsSet("created-at") {
-		if u, ok := any(&data.CreatedAt).(encoding.TextUnmarshaler); ok {
-			u.UnmarshalText([]byte(c.String("created-at")))
-		}
-	}
-	if c.IsSet("updated-at") {
-		if u, ok := any(&data.UpdatedAt).(encoding.TextUnmarshaler); ok {
-			u.UnmarshalText([]byte(c.String("updated-at")))
-		}
-	}
-	return data
-}
-
 // PassportMethodEntityCreateFn creates a new PassportMethodEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto

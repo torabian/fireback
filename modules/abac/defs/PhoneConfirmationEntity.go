@@ -1,9 +1,6 @@
-//go:build !wasm
-
 package abacdefs
 
 import (
-	"encoding"
 	"encoding/json"
 	"fmt"
 	"github.com/torabian/emi/emigo"
@@ -38,92 +35,6 @@ func (x *PhoneConfirmationEntity) Json() string {
 
 // Extra entity-specific code (hooks, custom methods, business logic, etc.) can be
 // appended here in this template, after the struct GoCommonStructGenerator produced.
-//
-func GetPhoneConfirmationEntityCliFlags(prefix string) []emigo.CliFlag {
-	return []emigo.CliFlag{
-		{
-			Name: prefix + "id",
-			Type: "int64",
-		},
-		{
-			Name: prefix + "unique-id",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "user-id",
-			Type:        "string?",
-			Description: "The unique-id of the user this confirmation belongs to.",
-		},
-		{
-			Name: prefix + "status",
-			Type: "string",
-		},
-		{
-			Name: prefix + "phone-number",
-			Type: "string",
-		},
-		{
-			Name: prefix + "key",
-			Type: "string",
-		},
-		{
-			Name: prefix + "expires-at",
-			Type: "string",
-		},
-		{
-			Name:        prefix + "workspace-id",
-			Type:        "string?",
-			Description: "The unique-id of the workspace which content belongs to.",
-		},
-		{
-			Name: prefix + "created-at",
-			Type: "complex",
-		},
-		{
-			Name: prefix + "updated-at",
-			Type: "complex",
-		},
-	}
-}
-func CastPhoneConfirmationEntityFromCli(c emigo.CliCastable) PhoneConfirmationEntity {
-	data := PhoneConfirmationEntity{}
-	if c.IsSet("id") {
-		data.Id = int64(c.Int64("id"))
-	}
-	if c.IsSet("unique-id") {
-		data.UniqueId = c.String("unique-id")
-	}
-	if c.IsSet("user-id") {
-		emigo.ParseNullable(c.String("user-id"), &data.UserId)
-	}
-	if c.IsSet("status") {
-		data.Status = c.String("status")
-	}
-	if c.IsSet("phone-number") {
-		data.PhoneNumber = c.String("phone-number")
-	}
-	if c.IsSet("key") {
-		data.Key = c.String("key")
-	}
-	if c.IsSet("expires-at") {
-		data.ExpiresAt = c.String("expires-at")
-	}
-	if c.IsSet("workspace-id") {
-		emigo.ParseNullable(c.String("workspace-id"), &data.WorkspaceId)
-	}
-	if c.IsSet("created-at") {
-		if u, ok := any(&data.CreatedAt).(encoding.TextUnmarshaler); ok {
-			u.UnmarshalText([]byte(c.String("created-at")))
-		}
-	}
-	if c.IsSet("updated-at") {
-		if u, ok := any(&data.UpdatedAt).(encoding.TextUnmarshaler); ok {
-			u.UnmarshalText([]byte(c.String("updated-at")))
-		}
-	}
-	return data
-}
-
 // PhoneConfirmationEntityCreateFn creates a new PhoneConfirmationEntity row (and its array/collection/one relations,
 // including ones nested inside object/object? fields) from dto. dto.Id/dto.UniqueId are
 // assigned by the database (see AutoMigrate's column defaults) and populated back onto
