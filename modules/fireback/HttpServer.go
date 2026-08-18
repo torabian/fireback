@@ -1,3 +1,11 @@
+// This whole file is about running a real, socket-listening HTTP(S) server
+// (TLS/ACME, OS signal-driven graceful shutdown) - meaningless under wasm,
+// where emigo.LiftWasmServer dispatches requests straight from a JS bridge
+// call into mux.ServeHTTP, no net.Listen involved at all (see
+// cmd/fireback-wasm/main.go). os/signal + syscall.SIGTERM below don't have a
+// wasm-meaningful implementation either way.
+//go:build !wasm
+
 package fireback
 
 import (

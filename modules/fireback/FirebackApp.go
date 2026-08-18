@@ -1,17 +1,20 @@
 package fireback
 
 import (
-	"context"
-	"log"
-	"os"
-
-	"github.com/torabian/fireback/modules/fireback/application"
-	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 )
 
+// SERVER_INSTANCE - a random id minted once per process, not just !wasm builds
+// (modules/eventbus's own EventBus.go/EventBusSubscriptionActionImplementation.go
+// use it to tell this instance's own published events apart from another
+// server's on the same bus) - genuinely needed everywhere, unlike RunApp below
+// (moved to RunAppCli.go, !wasm-only: CLI dispatch the wasm binary never does).
 var SERVER_INSTANCE string = UUID_Long()
 
+// GooseZapLogger adapts *zap.Logger to goose's own logger interface (used by
+// MigrationManager.go, which does run under wasm - migrations apply against
+// pglite the same as any other gorm.DB) - kept here, not in the !wasm-only
+// RunAppCli.go, for that reason.
 type GooseZapLogger struct {
 	Logger *zap.Logger
 }
@@ -22,25 +25,4 @@ func (l GooseZapLogger) Printf(format string, v ...interface{}) {
 
 func (l GooseZapLogger) Fatalf(format string, v ...interface{}) {
 	l.Logger.Sugar().Fatalf(format, v...)
-}
-
-func RunApp(xapp *application.Application) {
-
-	app := &cli.Command{
-		EnableShellCompletion: true,
-		Name:                  xapp.Title,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "al",
-				Usage: "Set's the language of the query, equal to accept-language header in http requests",
-				Value: "en-us",
-			},
-		},
-		Commands: GetCliCommands(xapp),
-	}
-
-	err := app.Run(context.Background(), os.Args)
-	if err != nil {
-		log.Fatal(err)
-	}
 }

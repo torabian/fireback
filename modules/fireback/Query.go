@@ -450,29 +450,6 @@ func GetStructFields(v interface{}) {
 	}
 }
 
-func PopulateInteractively[T any](entity T, c *cli.Command, flags []CliInteractiveFlag) {
-	for _, item := range flags {
-		if (!item.Required && !item.Recommended) && !c.Bool("all") {
-			continue
-		}
-
-		if item.Type == "string" {
-			var result string
-			if !item.Required {
-				result, _, _ = AskForInputOptional(item.Name, "")
-			} else {
-				result, _, _ = AskForInputOptional(item.Name, "")
-			}
-			SetField(entity, ToLower(item.StructField), &result)
-		}
-		if item.Type == "bool" {
-			result := AskBoolean(item.Name)
-			SetField(entity, ToLower(item.StructField), &result)
-		}
-
-	}
-}
-
 func SetFieldString[T any](v T, field string, value string) {
 	GetStructFields(v)
 	r := reflect.ValueOf(v)

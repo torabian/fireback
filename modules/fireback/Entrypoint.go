@@ -1,3 +1,15 @@
+// CommonHeadlessAppStart bootstraps CLI dispatch (RunApp), which the wasm
+// binary never does - it wires its own minimal HTTP mux + DB connection
+// directly in cmd/fireback-wasm/main.go instead (see that file's own
+// comments). Excluding this file from wasm builds isn't just tidiness: it
+// transitively imports envm.LoadFirebackAppConfiguration, which pulls in
+// manifoldco/promptui -> chzyer/readline for interactive .env prompts -
+// readline has no wasm platform support at all (no _js.go files, so it
+// doesn't even compile, let alone run), so this file has to be excluded for
+// any wasm build to succeed, whether or not CommonHeadlessAppStart is ever
+// called.
+//go:build !wasm
+
 package fireback
 
 import (
