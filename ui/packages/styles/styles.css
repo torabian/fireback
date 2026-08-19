@@ -11,6 +11,7 @@
 @import "./window-drop.css";
 @import "./role-permission-tree.css";
 @import "./internal-stats.css";
+@import "./analytics.css";
 @import "react-phone-input-2/lib/style.css";
 @import "./line-loader.css";
 @import "./theme-basic.css";

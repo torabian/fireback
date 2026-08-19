@@ -146,7 +146,7 @@ describe("Workspace role capability scoping (capabilities -> roles -> workspace 
       return false;
     });
 
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     // Unlike login.cy.js (which seeds both email and phone, so the picker stays up and
     // #using-email is clickable), this spec's earlier `it` only creates the email
     // passport method - Welcome.presenter.tsx's useEffect auto-selects the single
@@ -320,7 +320,7 @@ describe("Workspace role capability scoping (capabilities -> roles -> workspace 
 // Kept at module level (not nested inside the describe) - same as
 // login.cy.js's validateAppMenuEntity.
 function createRoleWithCapability(roleName: string, capabilityLeaf: string) {
-  cy.visit(ui("/manage/#/en/selfservice/role/new"));
+  cy.visit(ui("/manage/#/selfservice/role/new"));
 
   // Scoped to Layout.tsx's ".content-section" (the routed page content) rather than
   // the whole document - Navbar.tsx's reactive-search box also renders an

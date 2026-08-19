@@ -1,7 +1,8 @@
 content:
   internalStats:
     title: Internal Stats
-    description: Server / process health - CPU, memory, disk, network and Go runtime - refreshed automatically.
+    description: Server / process health - CPU, memory, disk, network and Go runtime
+      - refreshed automatically.
     host: Host
     generatedAt: Generated
     metrics: Metrics

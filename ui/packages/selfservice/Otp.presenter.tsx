@@ -1,5 +1,4 @@
 import { mutationErrorsToFormik } from "@fireback/ui-core/hooks/api";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { useFormik } from "formik";
@@ -18,7 +17,6 @@ import type { UserSessionDto } from "./sdk/abac/UserSessionDto";
 
 export const usePresenter = () => {
   const { goBack, state, replace, push } = useRouter();
-  const { locale } = useLocale();
   const s = useS(strings);
   const mutation = useClassicPassportOtpAction({});
   const { onComplete } = useCompleteAuth();
@@ -44,7 +42,7 @@ export const usePresenter = () => {
     if (v) {
       onComplete(res);
     } else if (res.data?.item?.continueWithCreation) {
-      push(`/${locale}/selfservice/complete`, undefined, {
+      push(`/selfservice/complete`, undefined, {
         value: state.value,
         type: state.type,
         sessionSecret: res.data.item?.sessionSecret,

@@ -1,0 +1,14 @@
+content:
+  notifications:
+    title: Send Notification
+    description: Send an in-app notification to one or more existing users. They'll
+      see it in their notifications list and can mark it read.
+    composeSection: Compose
+    recipients: Recipients
+    recipientsHint: Search users by name and select one or more.
+    notificationTitle: Title
+    notificationBody: Message
+    send: Send
+    sending: Sending…
+    sent: Sent to {count} user(s).
+    someSkipped: '{count} recipient(s) were skipped (user not found).'

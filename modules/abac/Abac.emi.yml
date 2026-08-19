@@ -1202,6 +1202,159 @@ actions:
     out:
       dto: WorkspaceConfigDto
       envelope: GResponse
+
+  - name: SendNotification
+    url: /notification/send
+    cliName: send
+    method: post
+    description:
+      Root-only. Sends a notification to one or more existing users at once -
+      creates one NotificationEntity row per userId (all sharing the same
+      title/body/senderId), rather than requiring one call per recipient. Any
+      userId that doesn't correspond to an existing user is skipped (not a hard
+      failure for the whole batch) and reported back in skippedUserIds.
+    in:
+      fields:
+        - name: userIds
+          type: slice
+          primitive: string
+          tags:
+            validate: required
+          description: UniqueIds of the existing users to notify.
+        - name: title
+          type: string
+          tags:
+            validate: required
+          description: Short notification title.
+        - name: body
+          type: string
+          tags:
+            validate: required
+          description: Notification message body.
+    out:
+      envelope: GResponse
+      fields:
+        - name: sentCount
+          type: int64
+          description: Number of notifications actually created.
+        - name: skippedUserIds
+          type: slice
+          primitive: string
+          description: userIds skipped because no matching user exists.
+
+  - name: MyNotifications
+    url: /notification/mine
+    cliName: mine
+    method: get
+    description:
+      Self-service. Lists the calling user's own notifications (whichever workspace
+      they're currently in - notifications aren't workspace-scoped from the
+      recipient's side), most recent first. See SendNotificationAction for how
+      they're created and MarkNotificationReadAction to mark one read.
+    out:
+      envelope: GResponse
+      fields:
+        - name: uniqueId
+          type: string
+        - name: title
+          type: string
+        - name: body
+          type: string
+        - name: isRead
+          type: bool
+        - name: createdAt
+          type: string
+          description: RFC3339 timestamp this notification was sent at.
+
+  - name: MarkNotificationRead
+    url: /notification/mark-read
+    cliName: mark-read
+    method: post
+    description:
+      Self-service. Marks one of the calling user's own notifications as read.
+      404s (ResourceNotFound, not a permission error) if the given uniqueId
+      doesn't belong to the caller - never lets a user learn whether some other
+      uniqueId exists at all, let alone mark it read.
+    in:
+      fields:
+        - name: uniqueId
+          type: string
+          tags:
+            validate: required
+          description: The notification uniqueId to mark as read.
+    out:
+      envelope: GResponse
+
+  - name: AnalyticsOverview
+    url: /analytics/overview
+    cliName: overview
+    method: get
+    description:
+      Root-only. Aggregate stats across users/workspaces/passports/roles/sessions -
+      a fixed set of headline numbers (items, same key/label/category/value/rawValue/
+      unit/severity shape InternalStatsSnapshot uses, so the UI can reuse the same
+      stat-tile renderer) plus a handful of named chart datasets (series - monthly
+      trends and categorical breakdowns) for the chart section below them. See
+      AnalyticsActionImplementation.go for exactly what's measured and why.
+    out:
+      envelope: GResponse
+      fields:
+        - name: generatedAt
+          type: string
+          description: RFC3339 timestamp this snapshot was computed at.
+        - name: items
+          type: array
+          description: Headline stats, in a stable display order (grouped by category).
+          fields:
+            - name: key
+              type: string
+              description: Stable machine-readable identifier, e.g. users.total.
+            - name: label
+              type: string
+              description: Human-readable label for display, e.g. Total Users.
+            - name: category
+              type: string
+              description: Display grouping, e.g. Users, Workspaces, Access, Engagement.
+            - name: value
+              type: string
+              description: Pre-formatted display value, e.g. 128 or 42.3%.
+            - name: rawValue
+              type: float64
+              description: The same value as a plain number, for programmatic use.
+            - name: unit
+              type: string
+              description: Unit of rawValue, e.g. count, percent. Empty for non-numeric stats.
+            - name: severity
+              type: string
+              description: One of ok, warn, critical, info - a coarse threshold-based read on this stat.
+        - name: series
+          type: array
+          description: Named chart datasets (monthly trends, categorical breakdowns) for the chart section.
+          fields:
+            - name: key
+              type: string
+              description: Stable machine-readable identifier, e.g. users.monthlySignups.
+            - name: label
+              type: string
+              description: Human-readable chart title.
+            - name: category
+              type: string
+              description: Display grouping, matching items' own category values where related.
+            - name: chartType
+              type: string
+              description: "One of 'line', 'bar' - a hint for which mark the UI should use."
+            - name: unit
+              type: string
+              description: Unit of each point's value, e.g. count, percent.
+            - name: points
+              type: array
+              description: Ordered data points - for time series, oldest first.
+              fields:
+                - name: label
+                  type: string
+                  description: X-axis label, e.g. "2026-03" for a month bucket, or a category name.
+                - name: value
+                  type: float64
 entities:
   - name: capability
     cliShort: cap
@@ -2076,6 +2229,44 @@ entities:
         type: string
       - name: workspaceId
         type: string?
+      - name: createdAt
+        type: complex
+        complex: PlainTime
+      - name: updatedAt
+        type: complex
+        complex: PlainTime
+
+  - name: notification
+    description: >-
+      An in-app notification delivered to one specific user - created in bulk (one
+      row per recipient) by the root-only SendNotification action, not by the
+      generic per-entity create endpoint directly, so a notification always has a
+      real recipient and, when sent by a person, a real sender.
+    fields:
+      - name: userId
+        type: string
+        tags:
+          validate: required
+        description: UniqueId of the user this notification was sent to.
+      - name: senderId
+        type: string?
+        description: UniqueId of the (root) user who sent this notification.
+      - name: title
+        type: string
+        tags:
+          validate: required
+        description: Short notification title.
+      - name: body
+        type: string
+        tags:
+          validate: required
+        description: Notification message body.
+      - name: isRead
+        type: bool
+        description: Whether the recipient has read this notification yet.
+      - name: workspaceId
+        type: string?
+        description: The unique-id of the workspace which content belongs to.
       - name: createdAt
         type: complex
         complex: PlainTime

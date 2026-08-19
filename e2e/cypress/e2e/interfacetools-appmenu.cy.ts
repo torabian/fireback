@@ -297,7 +297,7 @@ describe("interfacetools: appMenu", () => {
     Cypress.on("uncaught:exception", () => false);
 
     cy.session("root-login-appmenu", () => {
-      cy.visit(ui("/manage/#/en/welcome"));
+      cy.visit(ui("/manage/#/welcome"));
       cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
       cy.get("#submit-form").click({ force: true });
       cy.get("h1", { timeout: 10000 }).should("have.text", "Enter Password");
@@ -312,7 +312,7 @@ describe("interfacetools: appMenu", () => {
       cy.url({ timeout: 10000 }).should("include", "/dashboard");
     });
 
-    cy.visit(ui("/manage/#/en/dashboard"));
+    cy.visit(ui("/manage/#/dashboard"));
     cy.contains(".nav-link-text", "checkendpointtests sidebar item", {
       timeout: 10000,
     }).should("exist");

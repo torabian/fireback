@@ -74,11 +74,16 @@ A CDN/browser needs to know it can cache a content-hashed `main.a1b2c3.js` forev
 *not* cache `index.html` the same way (or a deploy would go invisible until the cache
 expires). `EmbedFoldersForGin` sets this for you:
 
-- Static asset requests (`.js .css .svg .png .jpg .jpeg .gif .webp .woff .woff2 .ttf .eot
-  .ico` - see `DefaultCacheableSuffixes`) get `DefaultAssetCacheControl`
-  (`"public, max-age=604800, immutable"`).
-- The index document itself (a literal `/index.html` request, and the SPA fallback used for
-  unknown routes) gets `DefaultIndexCacheControl` (`"no-cache"`).
+- Static asset requests (`.js .css .svg .png .jpg .jpeg .gif .webp` - see
+  `DefaultCacheableSuffixes`) get `DefaultAssetCacheControl`
+  (`"public, max-age=86400, immutable"`). Nothing else is cached by default -
+  fonts, `.json`, `.wasm`, etc. can opt in per folder via `ExtraCacheableSuffixes`.
+- The index document itself (a literal `/index.html` request, the SPA fallback used
+  for unknown routes, *and* that same fallback after `InjectHTML` has spliced its
+  own per-route content in) gets `DefaultIndexCacheControl`
+  (`"no-store, no-cache, must-revalidate, max-age=0"`) - so a CDN/browser never
+  keeps a stale copy around, and a new deploy is visible on the very next request
+  even for a custom `InjectHTML` route.
 
 Override either per folder:
 
@@ -91,8 +96,12 @@ Override either per folder:
 },
 ```
 
-`AssetCacheControlMiddleware(items)` (what this wires up under the hood) picks the
-longest-matching `Prefix` when more than one folder's rule could apply to a path.
+Each folder decides its own Cache-Control inline, at the point it actually serves a
+request - not via a separate, order-dependent middleware (`AssetCacheControlMiddleware`
+is still exported for standalone use outside `PublicFolderInfo`, but `EmbedFoldersForGin`
+no longer relies on it: gin-contrib/static's `Serve` aborts the middleware chain the
+moment it writes a matched file, which used to silently skip a middleware registered
+after it for every successfully-served request).
 
 ## 3. Per-route `<head>` injection (`InjectHTML`)
 

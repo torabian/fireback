@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 import { mutationErrorsToFormik } from "@fireback/ui-core/hooks/api";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 
 import { useS } from "@fireback/ui-core/hooks/useS";
@@ -22,7 +21,6 @@ import { MOne } from "@fireback/js-remote-ctx/common/operators";
 
 export const usePresenter = () => {
   const { goBack, state, push } = useRouter();
-  const { locale } = useLocale();
   const { onComplete } = useCompleteAuth();
   const mutation = useClassicSignupAction();
   const totpUrl = state?.totpUrl;
@@ -75,7 +73,7 @@ export const usePresenter = () => {
     ) {
       onComplete(res);
     } else if (res.data?.item?.continueToTotp) {
-      push(`/${locale}/selfservice/totp-setup`, undefined, {
+      push(`/selfservice/totp-setup`, undefined, {
         totpUrl: res.data.item.totpUrl || totpUrl,
         forcedTotp: res.data.item.forcedTotp,
         password: form.values.password,

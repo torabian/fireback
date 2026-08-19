@@ -1,5 +1,7 @@
-import { ContentAreaLoader } from "@fireback/ui-core/components/content-area-loader/ContentAreaLoader";
-import { PageTitle } from "@fireback/ui-core/components/page-title/PageTitle";
+import {
+  PageTitle,
+  usePageTitle,
+} from "@fireback/ui-core/components/page-title/PageTitle";
 import { PageSection } from "@fireback/ui-core/components/page-section/PageSection";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { useInternalStatsSnapshotActionQuery } from "@fireback/manage/sdk/internalstats/InternalStatsSnapshotAction";
@@ -18,6 +20,12 @@ const REFRESH_INTERVAL_MS = 2000;
 
 export const InternalStatsDashboard = () => {
   const t = useS(strings);
+  // PageTitle's own `title` prop is a documentation-only artifact of its type -
+  // the <h1> it renders actually reads from PageTitleContext (via
+  // <PageTitleManager/>), populated by this hook, not by a prop. Same pattern
+  // every other manage screen uses (see e.g. UserList.tsx) - PageTitle here only
+  // for its `description` paragraph, which *does* render its own prop directly.
+  usePageTitle(t.internalStats.title);
   const query = useInternalStatsSnapshotActionQuery({
     refetchInterval: REFRESH_INTERVAL_MS,
   });
@@ -28,10 +36,7 @@ export const InternalStatsDashboard = () => {
 
   return (
     <div className="internal-stats-page">
-      <PageTitle
-        title={t.internalStats.title}
-        description={t.internalStats.description}
-      />
+      <PageTitle description={t.internalStats.description} />
 
       {query.isError && !snapshot && (
         <div className="alert alert-danger">{t.internalStats.loadError}</div>

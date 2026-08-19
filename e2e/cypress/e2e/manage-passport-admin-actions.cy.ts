@@ -40,7 +40,7 @@ function loginAsRoot() {
   Cypress.on("uncaught:exception", () => false);
 
   cy.session("root-login", () => {
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -157,7 +157,7 @@ describe("Manage: passport admin actions (set password, disable 2FA, send reset 
   it("navigates to the target user's single screen and finds the passport, with Set password and Send reset email but not Disable 2FA (no totpSecret yet).", () => {
     loginAsRoot();
     sharedValues(["targetUserId"]).then(({ targetUserId }) => {
-      cy.visit(ui(`/manage/#/en/manage/user/${targetUserId}`));
+      cy.visit(ui(`/manage/#/manage/user/${targetUserId}`));
     });
     cy.contains(TARGET_EMAIL).should("exist");
     cy.contains("button", "Set password").should("exist");
@@ -168,7 +168,7 @@ describe("Manage: passport admin actions (set password, disable 2FA, send reset 
   it("sets a new password via the drawer, and it actually takes effect.", () => {
     loginAsRoot();
     sharedValues(["targetUserId"]).then(({ targetUserId }) => {
-      cy.visit(ui(`/manage/#/en/manage/user/${targetUserId}`));
+      cy.visit(ui(`/manage/#/manage/user/${targetUserId}`));
     });
 
     cy.contains("button", "Set password").click({ force: true });
@@ -203,7 +203,7 @@ describe("Manage: passport admin actions (set password, disable 2FA, send reset 
 
         loginAsRoot();
         sharedValues(["targetUserId"]).then(({ targetUserId }) => {
-          cy.visit(ui(`/manage/#/en/manage/user/${targetUserId}`));
+          cy.visit(ui(`/manage/#/manage/user/${targetUserId}`));
         });
 
         cy.contains("button", "Disable 2FA").click({ force: true });
@@ -231,7 +231,7 @@ describe("Manage: passport admin actions (set password, disable 2FA, send reset 
   it("sends a reset email, and the code it contains genuinely completes a self-service reset (including signing the user back in) on the real reset-password screen.", () => {
     loginAsRoot();
     sharedValues(["targetUserId"]).then(({ targetUserId }) => {
-      cy.visit(ui(`/manage/#/en/manage/user/${targetUserId}`));
+      cy.visit(ui(`/manage/#/manage/user/${targetUserId}`));
     });
 
     cy.contains("button", "Send reset email").click({ force: true });
@@ -262,7 +262,7 @@ describe("Manage: passport admin actions (set password, disable 2FA, send reset 
 
         cy.visit(
           ui(
-            `/selfservice/#/en/selfservice/reset-password?value=${encodeURIComponent(TARGET_EMAIL)}`,
+            `/selfservice/#/selfservice/reset-password?value=${encodeURIComponent(TARGET_EMAIL)}`,
           ),
         );
         cy.get("#value-input", { timeout: 10000 }).should(

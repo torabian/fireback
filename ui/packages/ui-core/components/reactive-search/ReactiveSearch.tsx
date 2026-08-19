@@ -1,6 +1,5 @@
 import { useDebouncedEffect } from "../../hooks/useDebouncedEffect";
 import { useKeyPress } from "../../hooks/useKeyPress";
-import { useLocale } from "../../hooks/useLocale";
 import { useS } from "../../hooks/useS";
 import { strings } from "../strings/translations";
 import { useRouter } from "../../hooks/useRouter";
@@ -61,7 +60,6 @@ export function ReactiveSearch() {
   const router = useRouter();
   const input = useRef<HTMLInputElement | null>();
   const [value, setValue] = useState("");
-  const { locale } = useLocale();
 
   // Clear the search box, from somewhere else in the scope
   useEffect(() => {
@@ -116,7 +114,7 @@ export function ReactiveSearch() {
         e.preventDefault();
         if (result.length > 0) {
           if (result[0].actionFn === "navigate" && result[0].uiLocation) {
-            router.push(`/${locale}${result[0].uiLocation}`);
+            router.push(result[0].uiLocation);
             reset();
           }
         }

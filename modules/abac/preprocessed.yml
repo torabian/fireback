@@ -1072,6 +1072,42 @@ dtos:
   - name: updatedAt
     type: complex
     complex: PlainTime
+- description: Every field of the "notification" entity, but optional - used both
+    as Update's partial input and as Browse's response item shape.
+  name: notificationOptional
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: UniqueId of the user this notification was sent to.
+    type: string?
+    tags:
+      validate: required
+  - name: senderId
+    description: UniqueId of the (root) user who sent this notification.
+    type: string?
+  - name: title
+    description: Short notification title.
+    type: string?
+    tags:
+      validate: required
+  - name: body
+    description: Notification message body.
+    type: string?
+    tags:
+      validate: required
+  - name: isRead
+    description: Whether the recipient has read this notification yet.
+    type: bool?
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
 - description: Plain dto mirroring the "capability" entity's own fields.
   name: capability
   fields:
@@ -1864,6 +1900,41 @@ dtos:
   - name: accessToken
     type: string
   - name: workspaceId
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+- description: Plain dto mirroring the "notification" entity's own fields.
+  name: notification
+  fields:
+  - name: uniqueId
+    type: string?
+  - name: userId
+    description: UniqueId of the user this notification was sent to.
+    type: string
+    tags:
+      validate: required
+  - name: senderId
+    description: UniqueId of the (root) user who sent this notification.
+    type: string?
+  - name: title
+    description: Short notification title.
+    type: string
+    tags:
+      validate: required
+  - name: body
+    description: Notification message body.
+    type: string
+    tags:
+      validate: required
+  - name: isRead
+    description: Whether the recipient has read this notification yet.
+    type: bool
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
     type: string?
   - name: createdAt
     type: complex
@@ -2691,6 +2762,42 @@ entities:
     complex: PlainTime
   description: Represent a mean to login in into the system, each user could have
     multiple passport (email, phone) and authenticate into the system.
+- name: notification
+  fields:
+  - name: userId
+    description: UniqueId of the user this notification was sent to.
+    type: string
+    tags:
+      validate: required
+  - name: senderId
+    description: UniqueId of the (root) user who sent this notification.
+    type: string?
+  - name: title
+    description: Short notification title.
+    type: string
+    tags:
+      validate: required
+  - name: body
+    description: Notification message body.
+    type: string
+    tags:
+      validate: required
+  - name: isRead
+    description: Whether the recipient has read this notification yet.
+    type: bool
+  - name: workspaceId
+    description: The unique-id of the workspace which content belongs to.
+    type: string?
+  - name: createdAt
+    type: complex
+    complex: PlainTime
+  - name: updatedAt
+    type: complex
+    complex: PlainTime
+  description: An in-app notification delivered to one specific user - created in
+    bulk (one row per recipient) by the root-only SendNotification action, not by
+    the generic per-entity create endpoint directly, so a notification always has
+    a real recipient and, when sent by a person, a real sender.
 complexes:
 - name: JSON
   namespace: complexes
@@ -3567,6 +3674,155 @@ actions:
   out:
     envelope: GResponse
     dto: WorkspaceConfigDto
+- name: SendNotification
+  cliName: send
+  url: /notification/send
+  method: post
+  description: Root-only. Sends a notification to one or more existing users at once
+    - creates one NotificationEntity row per userId (all sharing the same title/body/senderId),
+    rather than requiring one call per recipient. Any userId that doesn't correspond
+    to an existing user is skipped (not a hard failure for the whole batch) and reported
+    back in skippedUserIds.
+  in:
+    fields:
+    - name: userIds
+      description: UniqueIds of the existing users to notify.
+      type: slice
+      primitive: string
+      tags:
+        validate: required
+    - name: title
+      description: Short notification title.
+      type: string
+      tags:
+        validate: required
+    - name: body
+      description: Notification message body.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    fields:
+    - name: sentCount
+      description: Number of notifications actually created.
+      type: int64
+    - name: skippedUserIds
+      description: userIds skipped because no matching user exists.
+      type: slice
+      primitive: string
+- name: MyNotifications
+  cliName: mine
+  url: /notification/mine
+  method: get
+  description: Self-service. Lists the calling user's own notifications (whichever
+    workspace they're currently in - notifications aren't workspace-scoped from the
+    recipient's side), most recent first. See SendNotificationAction for how they're
+    created and MarkNotificationReadAction to mark one read.
+  out:
+    envelope: GResponse
+    fields:
+    - name: uniqueId
+      type: string
+    - name: title
+      type: string
+    - name: body
+      type: string
+    - name: isRead
+      type: bool
+    - name: createdAt
+      description: RFC3339 timestamp this notification was sent at.
+      type: string
+- name: MarkNotificationRead
+  cliName: mark-read
+  url: /notification/mark-read
+  method: post
+  description: Self-service. Marks one of the calling user's own notifications as
+    read. 404s (ResourceNotFound, not a permission error) if the given uniqueId doesn't
+    belong to the caller - never lets a user learn whether some other uniqueId exists
+    at all, let alone mark it read.
+  in:
+    fields:
+    - name: uniqueId
+      description: The notification uniqueId to mark as read.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+- name: AnalyticsOverview
+  cliName: overview
+  url: /analytics/overview
+  method: get
+  description: Root-only. Aggregate stats across users/workspaces/passports/roles/sessions
+    - a fixed set of headline numbers (items, same key/label/category/value/rawValue/
+    unit/severity shape InternalStatsSnapshot uses, so the UI can reuse the same stat-tile
+    renderer) plus a handful of named chart datasets (series - monthly trends and
+    categorical breakdowns) for the chart section below them. See AnalyticsActionImplementation.go
+    for exactly what's measured and why.
+  out:
+    envelope: GResponse
+    fields:
+    - name: generatedAt
+      description: RFC3339 timestamp this snapshot was computed at.
+      type: string
+    - name: items
+      description: Headline stats, in a stable display order (grouped by category).
+      type: array
+      fields:
+      - name: key
+        description: Stable machine-readable identifier, e.g. users.total.
+        type: string
+      - name: label
+        description: Human-readable label for display, e.g. Total Users.
+        type: string
+      - name: category
+        description: Display grouping, e.g. Users, Workspaces, Access, Engagement.
+        type: string
+      - name: value
+        description: Pre-formatted display value, e.g. 128 or 42.3%.
+        type: string
+      - name: rawValue
+        description: The same value as a plain number, for programmatic use.
+        type: float64
+      - name: unit
+        description: Unit of rawValue, e.g. count, percent. Empty for non-numeric
+          stats.
+        type: string
+      - name: severity
+        description: One of ok, warn, critical, info - a coarse threshold-based read
+          on this stat.
+        type: string
+    - name: series
+      description: Named chart datasets (monthly trends, categorical breakdowns) for
+        the chart section.
+      type: array
+      fields:
+      - name: key
+        description: Stable machine-readable identifier, e.g. users.monthlySignups.
+        type: string
+      - name: label
+        description: Human-readable chart title.
+        type: string
+      - name: category
+        description: Display grouping, matching items' own category values where related.
+        type: string
+      - name: chartType
+        description: One of 'line', 'bar' - a hint for which mark the UI should use.
+        type: string
+      - name: unit
+        description: Unit of each point's value, e.g. count, percent.
+        type: string
+      - name: points
+        description: Ordered data points - for time series, oldest first.
+        type: array
+        fields:
+        - name: label
+          description: X-axis label, e.g. "2026-03" for a month bucket, or a category
+            name.
+          type: string
+        - name: value
+          type: float64
 - name: capabilityCreate
   cliName: create
   cliShort: capability-c
@@ -5376,6 +5632,92 @@ actions:
   url: /passport/delete
   method: post
   description: Deletes the given "passport" uniqueIds, along with everything passportAwareDeletePreview
+    reports.
+  in:
+    fields:
+    - name: uniqueIds
+      type: slice
+      primitive: string
+- name: notificationCreate
+  cliName: create
+  cliShort: notification-c
+  url: /notification
+  method: post
+  description: Creates a new "notification" row.
+  in:
+    dto: NotificationDto
+  out:
+    envelope: GResponse
+    dto: NotificationDto
+- name: notificationUpdate
+  cliName: update
+  cliShort: notification-u
+  url: /notification/:uniqueId
+  method: patch
+  description: Applies a partial update to a "notification" row by uniqueId.
+  in:
+    dto: NotificationOptionalDto
+  out:
+    envelope: GResponse
+    dto: NotificationDto
+- name: notificationGet
+  cliName: get
+  cliShort: notification-g
+  url: /notification/:uniqueId
+  method: get
+  description: Looks up a single "notification" row by uniqueId.
+  out:
+    envelope: GResponse
+    dto: NotificationDto
+- name: notificationBrowse
+  cliName: browse
+  cliShort: notification-b
+  url: /notification/browse
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Returns "notification" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).
+  out:
+    envelope: GResponse
+    dto: NotificationOptionalDto
+- name: notificationAwareDeletePreview
+  cliName: delete-preview
+  cliShort: notification-dp
+  url: /notification/delete-preview
+  method: get
+  qs:
+  - name: uniqueIds
+    type: slice
+    primitive: string
+  description: Reports what deleting the given "notification" uniqueIds would affect,
+    without deleting anything.
+  out:
+    envelope: GResponse
+    fields:
+    - name: message
+      type: string
+    - name: affected
+      type: array
+      fields:
+      - name: relation
+        type: string
+      - name: count
+        type: int64
+- name: notificationAwareDelete
+  cliName: delete
+  cliShort: notification-d
+  url: /notification/delete
+  method: post
+  description: Deletes the given "notification" uniqueIds, along with everything notificationAwareDeletePreview
     reports.
   in:
     fields:

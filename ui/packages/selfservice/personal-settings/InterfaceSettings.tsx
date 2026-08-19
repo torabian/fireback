@@ -1,4 +1,4 @@
-import { Formik, type FormikHelpers, type FormikProps } from "formik";
+import { Formik, type FormikProps } from "formik";
 import { useContext, useEffect } from "react";
 import { ErrorsView } from "@fireback/ui-core/components/error-view/ErrorView";
 import { FormButton } from "@fireback/ui-core/components/forms/form-button/FormButton";
@@ -7,6 +7,7 @@ import { PageSection } from "@fireback/ui-core/components/page-section/PageSecti
 import { type KeyValue } from "@fireback/ui-core/types/KeyValue";
 import { AppConfigContext } from "@fireback/ui-core/hooks/appConfigTools";
 import { useCommonEntityManager } from "@fireback/ui-core/hooks/useCommonEntityManager";
+import { setLocale } from "@fireback/ui-core/hooks/localeStore";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { FormSelect } from "@fireback/ui-core/components/forms/form-select/FormSelect";
 import { createQuerySource } from "@fireback/ui-core/hooks/useAsQuery";
@@ -21,37 +22,27 @@ const InterfaceSettingsInformationFields = {
   interfaceLanguage: "interfaceLanguage",
 };
 
-const updateSettings = (
-  values: Partial<InterfaceSettingsInformation>,
-  d: FormikHelpers<Partial<InterfaceSettingsInformation>>,
-) => {
-  if (values.interfaceLanguage) {
-    localStorage.setItem(
-      "app_interfaceLanguage_address",
-      values.interfaceLanguage,
-    );
-  }
-};
-
 export function InterfaceSettings({}: {}) {
   const { config, patchConfig } = useContext(AppConfigContext);
 
   const s = useS(strings);
-  const { router, uniqueId, queryClient, isEditing, locale, formik } =
-    useCommonEntityManager<Partial<InterfaceSettingsInformation>>({});
+  const { uniqueId, queryClient, isEditing, formik } = useCommonEntityManager<
+    Partial<InterfaceSettingsInformation>
+  >({});
 
-  const onSubmit = (
-    values: Partial<InterfaceSettingsInformation>,
-    d: FormikHelpers<Partial<InterfaceSettingsInformation>>,
-  ) => {
+  const onSubmit = (values: Partial<InterfaceSettingsInformation>) => {
     if (!values.interfaceLanguage) {
       return;
     }
 
+    // Bug fix: this used to router.push(`/${values.interfaceLanguage}/settings`)
+    // - back when locale lived in the URL, that navigation was what actually
+    // made useLocale() pick up the new value. Locale now comes from
+    // localeStore (see its own doc comment) - setLocale() alone re-renders
+    // every useLocale()/usePureLocale() instance in the app immediately, no
+    // navigation needed (we're already on /settings, and staying there).
     patchConfig({ interfaceLanguage: values.interfaceLanguage });
-    updateSettings(values, d);
-
-    router.push(`/${values.interfaceLanguage}/settings`);
+    setLocale(values.interfaceLanguage);
   };
 
   useEffect(() => {

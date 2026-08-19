@@ -95,7 +95,7 @@ describe("wasm-demo: fireback compiled to wasm, running entirely in the browser"
     // instead of matching wasm-demo/ApplicationRoutes.tsx's own `whoami`
     // route, landing on an empty content pane next to a perfectly fine
     // sidebar.
-    cy.visit(wasmDemoUrl("/#/en/whoami"), {
+    cy.visit(wasmDemoUrl("/#/whoami"), {
       onBeforeLoad: seedFakeSession,
     });
 

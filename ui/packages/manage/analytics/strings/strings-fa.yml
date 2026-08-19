@@ -1,0 +1,11 @@
+content:
+  analytics:
+    title: تحلیل و آمار
+    description: آمار کلی کاربران، فضاهای کاری، دسترسی‌ها و میزان تعامل.
+    generatedAt: زمان تولید
+    metrics: معیارها
+    overviewSection: نمای کلی
+    chartSection: روندها و تفکیک‌ها
+    loadError: بارگذاری آمار و تحلیل ممکن نشد. این بخش نیاز به نشست فضای کاری روت دارد.
+    refresh: بازخوانی
+    refreshing: در حال بازخوانی…

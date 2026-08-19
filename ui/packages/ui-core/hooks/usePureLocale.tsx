@@ -1,54 +1,30 @@
-import { useEffect, useState } from "react";
-import { BUILD_VARIABLES } from "./build-variables";
+import { useSyncExternalStore } from "react";
+import { getLocale, subscribeToLocale, setLocale } from "./localeStore";
 
-export function localeFromPath(path: string) {
-  let locale = BUILD_VARIABLES.DEFAULT_LOCALE;
-
-  const match = path.match(/\/(fa|en|ar|pl|de)\//);
-  if (match && match[1]) {
-    locale = match[1];
-  }
-
-  return locale;
-}
-
-export function useWindowHash() {
-  const [hash, setHash] = useState(window.location.toString());
-  useEffect(() => {
-    const handleLocationChange = () => {
-      setHash(window.location.hash);
-    };
-
-    window.addEventListener("popstate", handleLocationChange);
-    window.addEventListener("pushState", handleLocationChange); // Custom event for pushState
-    window.addEventListener("replaceState", handleLocationChange); // Custom event for replaceState
-
-    return () => {
-      window.removeEventListener("popstate", handleLocationChange);
-      window.removeEventListener("pushState", handleLocationChange);
-      window.removeEventListener("replaceState", handleLocationChange);
-    };
-  }, []);
-
-  return { hash };
-}
-
+/**
+ * The Router-independent twin of useLocale() - for the handful of call sites
+ * that resolve locale *before* any <Router> (or even a session) is known to
+ * exist yet, e.g. WithSelfServiceRoutes.tsx deciding which route table to
+ * mount in the first place.
+ *
+ * Historically this parsed a locale straight out of window.location.hash
+ * (via its own useWindowHash listener), since that was the only locale
+ * signal available pre-Router. Now that locale comes from localeStore
+ * instead of the URL at all, there's no URL to watch anymore - this is just
+ * useLocale() minus the router-derived asPath/region-of-router-context
+ * requirement, so both hooks now genuinely agree on the same value at every
+ * point in the app, not just after the URL and this hook happen to sync up.
+ */
 export function usePureLocale() {
-  const { hash } = useWindowHash();
-  let locale = BUILD_VARIABLES.DEFAULT_LOCALE;
+  const locale = useSyncExternalStore(subscribeToLocale, getLocale, getLocale);
+
   let region = "us";
   let dir = "ltr";
-
-  if (BUILD_VARIABLES.FORCED_LOCALE) {
-    locale = BUILD_VARIABLES.FORCED_LOCALE;
-  } else {
-    locale = localeFromPath(hash);
-  }
 
   if (locale === "fa") {
     region = "ir";
     dir = "rtl";
   }
 
-  return { locale, region, dir };
+  return { locale, region, dir, setLocale };
 }

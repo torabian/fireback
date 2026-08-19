@@ -30,6 +30,7 @@ func AbacCompleteModules() []*application.ModuleProvider {
 
 func WorkspaceModuleSetup() *application.ModuleProvider {
 
+	m := AbacEssentialModule()
 	// Default Fireback authorization. You can Override this on microservices
 	fireback.WithAuthorizationPure = WithAuthorizationPureDefault
 	fireback.WithAuthorizationFn = WithAuthorizationFn
@@ -45,11 +46,11 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// Actions declared in Abac.emi.yml (moved out of AbacModule3.yml's old actions:
 		// section) are wired directly here, the same way FirebackModuleSetup wires the
 		// Capability* actions - rather than through the legacy Module3Action/Impl glue.
-		GinWebServerInitHooks: AbacGinWebServerInitHooks,
+		GinWebServerInitHooks: m.AbacGinWebServerInitHooks,
 	}
 
-	module.ProvidePermissionHandler(AbacPermissions...)
-	module.ProvideEntityHandlers(AbacMigration)
+	module.ProvidePermissionHandler(m.Permissions...)
+	module.ProvideEntityHandlers(m.MigrationFn)
 
 	// TimezoneGroupSyncSeeders moved to modules/abac/interfacetools - see
 	// interfacetools.ModuleSetup's own ProvideSeederImportHandler call.
@@ -91,6 +92,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// OsLoginAuthenticate/CheckPassportMethods/UserPassports/OauthAuthenticate under
 		// PassportCliFn - see UserEntity.go/WorkspaceCli.go/PassportCli.go).
 		abacdefs.WhoamiActionCliHandler(WhoamiAction),
+		abacdefs.AnalyticsOverviewActionCliHandler(AnalyticsOverviewAction),
 		abacdefs.SignoutActionCliHandler(SignoutAction),
 		abacdefs.InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
 		abacdefs.AddUserToWorkspaceActionCliHandler(AddUserToWorkspaceAction),

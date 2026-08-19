@@ -16,27 +16,39 @@ import (
 
 // DefaultCacheableSuffixes are the file extensions treated as long-lived static
 // assets by AssetCacheControlMiddleware when a PublicFolderInfo doesn't add its
-// own via ExtraCacheableSuffixes.
+// own via ExtraCacheableSuffixes. Deliberately just JS, CSS and images - fonts
+// (.woff/.woff2/.ttf/.eot) and .ico used to be included too, but everything
+// that isn't a script/stylesheet/image is left uncached by default now; a
+// folder that wants those long-cached as well can still opt back in via
+// ExtraCacheableSuffixes.
 var DefaultCacheableSuffixes = []string{
 	".js", ".css", ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp",
-	".woff", ".woff2", ".ttf", ".eot", ".ico",
 }
 
 // DefaultAssetCacheControl is the Cache-Control applied to static asset requests
 // (see DefaultCacheableSuffixes) when a PublicFolderInfo doesn't set
 // AssetCacheControl. A CDN or browser is told it can cache these aggressively -
 // safe because a production JS/CSS build names its bundles with a content hash,
-// so a new deploy is served under a new URL rather than overwriting a cached one.
-const DefaultAssetCacheControl = "public, max-age=604800, immutable"
+// so a new deploy is served under a new URL rather than overwriting a cached
+// one. max-age is a single day (86400s) - long enough to actually matter for a
+// CDN/repeat visitor, short enough that even a non-hashed asset a folder opts
+// in via ExtraCacheableSuffixes doesn't stay stale for too long.
+const DefaultAssetCacheControl = "public, max-age=86400, immutable"
 
 // DefaultIndexCacheControl is the Cache-Control applied to a folder's index
-// document (both a literal "/index.html" request and the SPA fallback used for
-// unknown client-side routes) when a PublicFolderInfo doesn't set
-// IndexCacheControl. Kept to "no revalidation-free caching" by default so a
-// redeploy is visible on the very next request - the document itself is what
-// points at the (aggressively cached) hashed asset bundle, so it can't be
-// cached the same way without risking a stale app being served indefinitely.
-const DefaultIndexCacheControl = "no-cache"
+// document - a literal "/index.html" request, the SPA fallback used for
+// unknown client-side routes, *and* that same fallback after InjectHTML has
+// spliced its own per-route content in - when a PublicFolderInfo doesn't set
+// IndexCacheControl. This is the one response a redeploy actually changes the
+// content of at the same URL (the hashed asset bundles it points at get a
+// brand new URL every build, so they're safe to cache hard above), so it
+// can't be cached at all: "no-cache" alone still permits a CDN/browser to
+// store the response and merely revalidate it (which - with no ETag/
+// Last-Modified on these responses - most caches skip, serving the stored
+// copy indefinitely instead). no-store is the actual "never keep a copy"
+// signal; must-revalidate/max-age=0 ride along for older/less strict caches
+// that only understand the HTTP/1.0-era directives.
+const DefaultIndexCacheControl = "no-store, no-cache, must-revalidate, max-age=0"
 
 /*
 Public folders are used when you want to make an embed folder available through
@@ -59,10 +71,11 @@ worked example of all three:
     compression cost isn't worth it for mostly-tiny files).
 
   - AssetCacheControl / ExtraCacheableSuffixes: override the Cache-Control
-    applied to static asset requests (js/css/images/fonts/...) under this
-    folder's Prefix, and/or add extra file extensions treated as cacheable
-    assets. Left unset, DefaultAssetCacheControl applies to
-    DefaultCacheableSuffixes only.
+    applied to static asset requests (js/css/images by default - see
+    DefaultCacheableSuffixes) under this folder's Prefix, and/or add extra
+    file extensions treated as cacheable assets (e.g. fonts, .json, .wasm).
+    Left unset, DefaultAssetCacheControl applies to DefaultCacheableSuffixes
+    only.
 
   - IndexCacheControl: override the Cache-Control applied to the index document
     itself. Defaults to DefaultIndexCacheControl.
@@ -295,6 +308,26 @@ func serveGzipped(c *gin.Context, fn func()) {
 // folder mounted at "/" (matching every path as a string prefix) still can't
 // leak compression onto some other route - see the longer explanation on
 // SetupHttpServer in FirebackApp.go.
+//
+// Cache-Control for a matched, existing file is decided and set right here too
+// - deliberately not left to the separate AssetCacheControlMiddleware, even
+// though that's what it exists for. Bug fix: gin-contrib/static's Serve calls
+// c.Abort() the instant it writes a response for a request fileSystem.Exists
+// confirmed, and Abort short-circuits every engine-level middleware
+// registered after this one in the chain - AssetCacheControlMiddleware is
+// registered *after* every folder's own mountEmbedFolder call in
+// EmbedFoldersForGin, so it never actually ran for a real, successfully
+// served file (verified: a request for an existing asset got no Cache-Control
+// header at all through the real EmbedFoldersForGin path, despite the
+// isolated AssetCacheControlMiddleware unit test passing in identical
+// isolation). Deciding it inline here, at the exact point this folder commits
+// to serving the request, is correct regardless of registration order: a
+// matched cacheable-suffix file (see DefaultCacheableSuffixes) gets
+// assetCacheControl; anything else this folder actually serves - index.html
+// itself, a directory path net/http resolves to it (e.g. a bare "/" or
+// "/manage" request), or any other embedded file type - gets
+// indexCacheControl, so it's never cached and a redeploy is visible on the
+// very next request.
 func mountEmbedFolder(item PublicFolderInfo, r *gin.Engine) func(c *gin.Context) {
 	prefix := item.Prefix
 	if prefix == "" {
@@ -304,7 +337,29 @@ func mountEmbedFolder(item PublicFolderInfo, r *gin.Engine) func(c *gin.Context)
 	fileSystem := EmbedFolder(*item.Fs, item.Folder, true)
 	staticServer := static.Serve(prefix, fileSystem)
 
+	assetCacheControl := item.AssetCacheControl
+	if assetCacheControl == "" {
+		assetCacheControl = DefaultAssetCacheControl
+	}
+	cacheableSuffixes := DefaultCacheableSuffixes
+	if len(item.ExtraCacheableSuffixes) > 0 {
+		cacheableSuffixes = append(append([]string{}, DefaultCacheableSuffixes...), item.ExtraCacheableSuffixes...)
+	}
+
+	indexCacheControl := item.IndexCacheControl
+	if indexCacheControl == "" {
+		indexCacheControl = DefaultIndexCacheControl
+	}
+
 	r.Use(func(c *gin.Context) {
+		if c.Request.Method == http.MethodGet && fileSystem.Exists(prefix, c.Request.URL.Path) {
+			if hasSuffix(c.Request.URL.Path, cacheableSuffixes) {
+				c.Header("Cache-Control", assetCacheControl)
+			} else {
+				c.Header("Cache-Control", indexCacheControl)
+			}
+		}
+
 		if !item.DisableGzip &&
 			c.Request.Method == http.MethodGet &&
 			acceptsGzip(c.Request) &&
@@ -314,11 +369,6 @@ func mountEmbedFolder(item PublicFolderInfo, r *gin.Engine) func(c *gin.Context)
 		}
 		staticServer(c)
 	})
-
-	indexCacheControl := item.IndexCacheControl
-	if indexCacheControl == "" {
-		indexCacheControl = DefaultIndexCacheControl
-	}
 
 	// Best-effort: a folder without an index.html (unusual for a SPA mount)
 	// just never gets injection - it still falls back to staticServer below.
@@ -365,8 +415,11 @@ func EmbedFolderForGin(ui *embed.FS, folder string, r *gin.Engine, prefix string
 // of 404ing. The most specific (longest) matching prefix wins; folders
 // mounted at "/" act as the default fallback when no other prefix matches.
 //
-// It also installs AssetCacheControlMiddleware for the given folders. Gzip
-// compression is handled per-folder inside mountEmbedFolder itself, not here.
+// Cache-Control is handled per-folder too, inline inside mountEmbedFolder
+// itself - see that function's own doc comment for why it can't be a
+// separate middleware registered here the way it used to be. Gzip
+// compression is likewise handled per-folder inside mountEmbedFolder, not
+// here.
 func EmbedFoldersForGin(items []PublicFolderInfo, r *gin.Engine) {
 	type fallback struct {
 		prefix string
@@ -384,8 +437,6 @@ func EmbedFoldersForGin(items []PublicFolderInfo, r *gin.Engine) {
 			handle: mountEmbedFolder(item, r),
 		})
 	}
-
-	r.Use(AssetCacheControlMiddleware(items))
 
 	r.NoRoute(func(c *gin.Context) {
 		if c.Request.Method != http.MethodGet ||
@@ -421,13 +472,23 @@ func EmbedFoldersForGin(items []PublicFolderInfo, r *gin.Engine) {
 // AssetCacheControlMiddleware sets a Cache-Control header on GET requests for
 // static asset file types (see DefaultCacheableSuffixes), so a CDN or browser
 // in front of the app (Cloudflare, etc) knows it's safe to cache hashed
-// js/css/font/image bundles aggressively - while leaving index.html and API
-// responses alone (those get their own Cache-Control from mountEmbedFolder,
-// or none at all).
+// js/css/image bundles aggressively - while leaving everything else (in
+// particular index.html and API responses) alone.
 //
 // Folders in items may set AssetCacheControl and ExtraCacheableSuffixes to
 // override the default for requests under their Prefix; the longest matching
-// prefix wins. This is called for you by EmbedFoldersForGin/EmbedFolderForGin.
+// prefix wins.
+//
+// NOT called by EmbedFoldersForGin/EmbedFolderForGin (it used to be, but
+// mountEmbedFolder's own gin-contrib/static Serve call c.Abort()s the moment
+// it serves a real matched file, which - since that middleware is always
+// registered earlier in the chain than this one would be - silently
+// short-circuited it for every successfully-served file; see
+// mountEmbedFolder's own doc comment). EmbedFoldersForGin now decides
+// Cache-Control inline instead. Kept exported and still independently useful
+// for a caller driving gin-contrib/static (or ServeFileSystem generally)
+// directly, outside PublicFolderInfo/mountEmbedFolder's own Abort-prone
+// request flow.
 func AssetCacheControlMiddleware(items []PublicFolderInfo) gin.HandlerFunc {
 	type rule struct {
 		prefix       string

@@ -6,6 +6,7 @@ import { FormText } from "@fireback/ui-core/components/forms/form-text/FormText"
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { AuthMethod } from "./auth.common";
 import { usePresenter } from "./ClassicPassport.presenter";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { strings } from "./strings/translations";
 import { ClassicSigninActionReq } from "@fireback/selfservice/sdk/abac/ClassicSigninAction";
 
@@ -27,25 +28,37 @@ export const ClassicPassportScreen = ({ method }: { method: AuthMethod }) => {
 
   return (
     <div className="signin-form-container">
-      <h1>{title}</h1>
-      <p>{description}</p>
-      <QueryErrorView query={mutation} />
+      <div className="card auth-card">
+        <div className="card-body">
+          {/* Welcome.screen.tsx normally has the first (and only) crack at this -
+              but Welcome.presenter.tsx auto-skips straight here, with no user
+              interaction, whenever exactly one auth method is configured (see its
+              own comment) - which makes this screen the real first landing page
+              for that (common) case, and Welcome's own LanguageSwitcher
+              unreachable. Shown here too so switching language never depends on
+              how many auth methods happen to be enabled. */}
+          <LanguageSwitcher />
+          <h1>{title}</h1>
+          <p>{description}</p>
+          <QueryErrorView query={mutation} />
 
-      <Form form={form} method={method} mutation={mutation} />
+          <Form form={form} method={method} mutation={mutation} />
 
-      <Recaptcha />
+          <Recaptcha />
 
-      {canGoBack ? (
-        <button
-          id="go-back-button"
-          className="btn bg-transparent w-100 mt-4"
-          onClick={goBack}
-        >
-          {s.chooseAnotherMethod}
-        </button>
-      ) : null}
+          {canGoBack ? (
+            <button
+              id="go-back-button"
+              className="btn bg-transparent w-100 mt-4"
+              onClick={goBack}
+            >
+              {s.chooseAnotherMethod}
+            </button>
+          ) : null}
 
-      <LegalNotice />
+          <LegalNotice />
+        </div>
+      </div>
     </div>
   );
 };

@@ -42,7 +42,7 @@ function loginAs(sessionKey: string, email: string, password: string) {
   Cypress.on("uncaught:exception", () => false);
 
   cy.session(sessionKey, () => {
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(email);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1", { timeout: 10000 }).should("have.text", "Enter Password");
@@ -74,10 +74,12 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
       method: "POST",
       url: ui("/workspace/passport/check"),
       body: { value },
-    }).then((response: Cypress.Response<SingleItemResponse<{ next: string[] }>>) => {
-      expect(response.status).to.equal(200);
-      expect(response.body.data.item.next).to.include("create-with-password");
-    });
+    }).then(
+      (response: Cypress.Response<SingleItemResponse<{ next: string[] }>>) => {
+        expect(response.status).to.equal(200);
+        expect(response.body.data.item.next).to.include("create-with-password");
+      },
+    );
   });
 
   it("ClassicSignup should reject a missing workspaceTypeId, and succeed with one.", () => {
@@ -100,8 +102,9 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
       "exec",
       ` role create --name "checkendpointtests core-session role" --capabilities-list-id '["root.abac.email-confirmation.query"]'`,
     ).then((content: string) => {
-      const roleId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const roleId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
       cy.task(
         "exec",
         ` ws workspaceType-c --title "checkendpointtests core-session type" --slug /checkendpointtests-core-session --role-id ${roleId}`,
@@ -127,7 +130,9 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
         }).then((response: Cypress.Response<SignupResponse>) => {
           expect(response.status).to.equal(200);
           setShared("sessionToken", response.body.data.item.session.token);
-          expect(response.body.data.item.session.userWorkspaces).to.have.length.above(0);
+          expect(
+            response.body.data.item.session.userWorkspaces,
+          ).to.have.length.above(0);
         });
       });
     });
@@ -139,10 +144,16 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
         method: "POST",
         url: ui("/workspace/passport/check"),
         body: { value: sessionEmail },
-      }).then((response: Cypress.Response<SingleItemResponse<{ next: string[] }>>) => {
-        expect(response.status).to.equal(200);
-        expect(response.body.data.item.next).to.include("signin-with-password");
-      });
+      }).then(
+        (
+          response: Cypress.Response<SingleItemResponse<{ next: string[] }>>,
+        ) => {
+          expect(response.status).to.equal(200);
+          expect(response.body.data.item.next).to.include(
+            "signin-with-password",
+          );
+        },
+      );
     });
   });
 
@@ -151,16 +162,20 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
 
   it("should log into the manage UI with the signed-up account, then sign out.", () => {
     sharedValues(["sessionEmail"]).then(({ sessionEmail }) => {
-      loginAs("core-session-login", sessionEmail, "checkendpointtests-pass-123");
+      loginAs(
+        "core-session-login",
+        sessionEmail,
+        "checkendpointtests-pass-123",
+      );
 
-      cy.visit(ui("/manage/#/en/dashboard"));
+      cy.visit(ui("/manage/#/dashboard"));
       cy.url().should("include", "/dashboard");
 
       // Signout button - see selfservice/UserPassports.screen.tsx (root-level manage
       // navbar also renders a sign-out control, but this screen's is a plain, stable
       // button to target). Only clears local session state (see file header comment) -
       // proven here by the redirect back to a public/welcome screen.
-      cy.visit(ui("/manage/#/en/selfservice/passports"));
+      cy.visit(ui("/manage/#/selfservice/passports"));
       cy.contains("button", "Sign").click({ force: true });
       cy.url({ timeout: 10000 }).should("not.include", "/dashboard");
     });
@@ -170,13 +185,21 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
 
   it("should log back in, change the password through the UI, and the new password should work.", () => {
     sharedValues(["sessionEmail"]).then(({ sessionEmail }) => {
-      loginAs("core-session-login-2", sessionEmail, "checkendpointtests-pass-123");
+      loginAs(
+        "core-session-login-2",
+        sessionEmail,
+        "checkendpointtests-pass-123",
+      );
 
-      cy.visit(ui("/manage/#/en/selfservice/passports"));
-      cy.contains("button", "Change", { timeout: 10000 }).click({ force: true });
+      cy.visit(ui("/manage/#/selfservice/passports"));
+      cy.contains("button", "Change", { timeout: 10000 }).click({
+        force: true,
+      });
 
       cy.url({ timeout: 10000 }).should("include", "/change-password/");
-      cy.get("#password-input", { timeout: 10000 }).type("checkendpointtests-new-pass-789");
+      cy.get("#password-input", { timeout: 10000 }).type(
+        "checkendpointtests-new-pass-789",
+      );
       cy.get("#password-input-2").type("checkendpointtests-new-pass-789");
       cy.get("#submit-form").should("not.be.disabled").click({ force: true });
       cy.wait(1000);
@@ -197,7 +220,10 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
       cy.request({
         method: "POST",
         url: ui("/passports/signin/classic"),
-        body: { value: sessionEmail, password: "checkendpointtests-new-pass-789" },
+        body: {
+          value: sessionEmail,
+          password: "checkendpointtests-new-pass-789",
+        },
       }).then((newPassResp: Cypress.Response<SignupResponse>) => {
         expect(newPassResp.status).to.equal(200);
         setShared("sessionToken", newPassResp.body.data.item.session.token);
@@ -214,10 +240,15 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
         method: "GET",
         url: ui("/whoami"),
         headers: { authorization: sessionToken },
-      }).then((response: Cypress.Response<SingleItemResponse<{ userId: string }>>) => {
-        expect(response.status).to.equal(200);
-        expect(response.body.data.item.userId).to.be.a("string").and.not.be.empty;
-      });
+      }).then(
+        (
+          response: Cypress.Response<SingleItemResponse<{ userId: string }>>,
+        ) => {
+          expect(response.status).to.equal(200);
+          expect(response.body.data.item.userId).to.be.a("string").and.not.be
+            .empty;
+        },
+      );
 
       cy.request({
         method: "GET",
@@ -281,7 +312,10 @@ describe("Abac: core session lifecycle (signup, check-passport, signin, whoami, 
     cy.request({
       method: "POST",
       url: ui("/passports/signin/classic"),
-      body: { value: `checkendpointtests-nobody-${Date.now()}@example.com`, password: "whatever" },
+      body: {
+        value: `checkendpointtests-nobody-${Date.now()}@example.com`,
+        password: "whatever",
+      },
       failOnStatusCode: false,
     }).then((unknown) => {
       expect(unknown.status).to.not.equal(200);

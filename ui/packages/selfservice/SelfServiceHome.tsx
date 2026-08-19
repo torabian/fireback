@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { PageSection } from "@fireback/ui-core/components/page-section/PageSection";
 import { useS } from "@fireback/ui-core/hooks/useS";
+import { NotificationsSection } from "./notifications/NotificationsSection";
 import { strings } from "./strings/translations";
 
 export const SelfServiceHome = () => {
@@ -8,6 +9,8 @@ export const SelfServiceHome = () => {
   return (
     <>
       <PageSection title={s.home.title} description={s.home.description} />
+
+      <NotificationsSection />
 
       <h2>
         <Link to="passports">{s.home.passportsTitle}</Link>

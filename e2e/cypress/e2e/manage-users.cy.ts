@@ -52,7 +52,7 @@ function loginAsRoot() {
     // Only the "email" passport method is registered (see the "should be able to
     // create the passport method" step below), so /welcome auto-redirects straight to
     // the email-entry screen instead of showing a method-choice screen first.
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -162,16 +162,13 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
         const usersEntry = (rootGroup.children || []).find(
           (item: any) => item.uniqueId === "users",
         );
-        expect(usersEntry, '"Users" menu entry present under "Root"').to
-          .exist;
+        expect(usersEntry, '"Users" menu entry present under "Root"').to.exist;
         expect(usersEntry.href).to.equal("/manage/users");
-        expect(usersEntry.capabilityId).to.equal(
-          "root.manage.abac.user.query",
-        );
+        expect(usersEntry.capabilityId).to.equal("root.manage.abac.user.query");
       });
     });
 
-    cy.visit(ui("/manage/#/en/manage/users"));
+    cy.visit(ui("/manage/#/manage/users"));
     // The list's own rendered grid - proof the datatable (not just the URL) loaded, and
     // it already has at least the root account itself in it (root's own UserEntity row,
     // created by withFirebackServer()'s `auth --in-root=true ... --first-name testagent
@@ -184,9 +181,9 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
   const lastName = `CypressUser${suffix}`;
   const editedLastName = `CypressUserEdited${suffix}`;
 
-  it("creates a user through the UI form, filling in the address and the new profile fields, reachable via the list's own \"New\" action.", () => {
+  it('creates a user through the UI form, filling in the address and the new profile fields, reachable via the list\'s own "New" action.', () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/users"));
+    cy.visit(ui("/manage/#/manage/users"));
     clickIconAction("New");
     cy.url({ timeout: 10000 }).should("include", "/manage/user/new");
     cy.get(".content-section fieldset").should("not.be.disabled");
@@ -224,7 +221,7 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
     // than awaited. Read it inside a .then() too, so it runs in order after the intercept
     // callback has set it.
     cy.then(() => {
-      cy.visit(ui(`/manage/#/en/manage/user/${userUniqueId}`));
+      cy.visit(ui(`/manage/#/manage/user/${userUniqueId}`));
     });
     cy.get('[data-test-id="First name"]').should("contain.text", "Cypress");
     cy.get('[data-test-id="Last name"]').should("contain.text", lastName);
@@ -248,15 +245,18 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
 
   it("the new user shows up in the list.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/users"));
+    cy.visit(ui("/manage/#/manage/users"));
     cy.contains(lastName).should("exist");
   });
 
   it("edits the user - including its address fields - via the single screen's Edit action, and the change persists. Regression guard for the primaryAddress private-field clone bug.", () => {
     loginAsRoot();
-    cy.visit(ui(`/manage/#/en/manage/user/${userUniqueId}`));
+    cy.visit(ui(`/manage/#/manage/user/${userUniqueId}`));
     clickIconAction("Edit");
-    cy.url({ timeout: 10000 }).should("include", `/manage/user/edit/${userUniqueId}`);
+    cy.url({ timeout: 10000 }).should(
+      "include",
+      `/manage/user/edit/${userUniqueId}`,
+    );
     cy.get(".content-section fieldset").should("not.be.disabled");
 
     // The form should already be pre-filled with what was just created - if this ever
@@ -280,10 +280,7 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
       "include",
       `/manage/user/${userUniqueId}`,
     );
-    cy.get('[data-test-id="Last name"]').should(
-      "contain.text",
-      editedLastName,
-    );
+    cy.get('[data-test-id="Last name"]').should("contain.text", editedLastName);
     cy.get('[data-test-id="Address Line 1"]').should(
       "contain.text",
       "221B Baker Street",
@@ -304,7 +301,7 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
 
   it("the list reflects the edited name and address.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/users"));
+    cy.visit(ui("/manage/#/manage/users"));
     cy.contains(editedLastName).should("exist");
     cy.contains(lastName).should("not.exist");
     cy.contains("221B Baker Street").should("exist");
@@ -312,7 +309,7 @@ describe("Manage: Users - menu visibility, list, create, edit (incl. address), d
 
   it("deletes the user from the list via row selection + the Delete action, and it disappears.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/users"));
+    cy.visit(ui("/manage/#/manage/users"));
     // The grid is react-data-grid, not a plain <table> - rows are div.rdg-row, each
     // with its own div.rdg-checkbox-input selection checkbox as the first cell.
     cy.contains(".rdg-row", editedLastName)

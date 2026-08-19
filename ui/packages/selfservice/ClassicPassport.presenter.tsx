@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import { useEffect } from "react";
 import { mutationErrorsToFormik } from "@fireback/ui-core/hooks/api";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRecaptcha2 } from "@fireback/ui-core/hooks/useRecaptcha2";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
@@ -20,7 +19,6 @@ import {
 export const usePresenter = ({ method }: { method: AuthMethod }) => {
   const s = useS(strings);
   const { goBack, push, state } = useRouter();
-  const { locale } = useLocale();
   const mutation = useCheckClassicPassportAction();
   const canGoBack = state?.canGoBack === false ? false : true;
 
@@ -48,19 +46,19 @@ export const usePresenter = ({ method }: { method: AuthMethod }) => {
 
         // this condition means there is only otp available. So no other chance.
         if (next.includes("otp") && next.length === 1) {
-          push(`/${locale}/selfservice/otp`, undefined, {
+          push(`/selfservice/otp`, undefined, {
             value: data.value,
             type: method,
           });
         } else if (next.includes("signin-with-password")) {
-          push(`/${locale}/selfservice/password`, undefined, {
+          push(`/selfservice/password`, undefined, {
             value: data.value,
             next,
             canContinueOnOtp: next?.includes("otp"),
             flags,
           });
         } else if (next.includes("create-with-password")) {
-          push(`/${locale}/selfservice/complete`, undefined, {
+          push(`/selfservice/complete`, undefined, {
             value: data.value,
             type: method,
             next,
