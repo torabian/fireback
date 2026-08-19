@@ -1,8 +1,8 @@
 {
   "VITE_REMOTE_SERVICE": "/",
-  "PUBLIC_URL": "/fireback/demo/",
-  "VITE_PUBLIC_URL": "/fireback/demo/",
-  "VITE_DEFAULT_ROUTE": "/dashboard",
+  "PUBLIC_URL": "/fireback/",
+  "VITE_PUBLIC_URL": "/fireback/",
+  "VITE_DEFAULT_ROUTE": "/{locale}/dashboard",
   "VITE_TARGET_APP": "wasm-demo",
   "VITE_ALLOW_OS_LOGIN": "false",
   "VITE_SUPPORTED_LANGUAGES": "en",
