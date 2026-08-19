@@ -8,7 +8,6 @@
  */
 
 import { AnimatedRouteWrapper } from "@fireback/ui-core/components/swipe-transition/SwipeTransition";
-import { usePureLocale } from "@fireback/ui-core/hooks/usePureLocale";
 import { Navigate, Route } from "react-router-dom";
 import { AuthMethod } from "./auth.common";
 import { ChangePasswordScreen } from "./ChangePassword.screen";
@@ -32,8 +31,6 @@ import { useWorkspaceInviteRoutes } from "./workspace-invites/WorkspaceInviteRou
  * or might be. Such as login form, etc.
  */
 export function useSelfServicePublicRoutes() {
-  const { locale } = usePureLocale();
-
   return (
     <>
       <Route path="selfservice">
@@ -72,7 +69,7 @@ export function useSelfServicePublicRoutes() {
 
       <Route
         path="*"
-        element={<Navigate to={`/${locale}/selfservice/welcome`} replace />}
+        element={<Navigate to="/selfservice/welcome" replace />}
       />
     </>
   );

@@ -1,6 +1,5 @@
 import { type FormikProps } from "formik";
 import { useEffect, useRef, useState } from "react";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useCheckPassportMethodsActionQuery } from "@fireback/selfservice/sdk/abac/CheckPassportMethodsAction";
 import {
@@ -11,13 +10,19 @@ import {
 import type { ClassicSigninActionReq } from "@fireback/selfservice/sdk/abac/ClassicSigninAction";
 
 export const usePresenter = () => {
-  const { locale } = useLocale();
   const { push } = useRouter();
   const formik = useRef<FormikProps<Partial<ClassicSigninActionReq>> | null>();
 
   const query = useCheckPassportMethodsActionQuery({});
 
-  useTemporaryParamOptions(["redirect_temporary", "workspace_type_id"]);
+  // Key must be "redirect" - it's both the ?redirect=... query/hash param name
+  // useTemporaryParamOptions looks for *and* the sessionStorage key it's stashed
+  // under (see its own implementation - the same string is used for both), which
+  // is what auth.common.tsx's onComplete later reads back as `redirect2`. A
+  // mismatched name here (this used to read "redirect_temporary", a param no
+  // caller ever actually sent) meant a real `?redirect=` was silently never
+  // captured - the login flow always fell through to the default route instead.
+  useTemporaryParamOptions(["redirect", "workspace_type_id"]);
 
   const [availableOptions, setAvailableOptions] =
     useState<AuthAvailableMethods>(undefined);
@@ -31,12 +36,12 @@ export const usePresenter = () => {
   const onSelect = (value: AuthMethod, canGoBack = true) => {
     switch (value) {
       case AuthMethod.Email:
-        push(`/${locale}/selfservice/email`, undefined, {
+        push(`/selfservice/email`, undefined, {
           canGoBack,
         });
         break;
       case AuthMethod.Phone:
-        push(`/${locale}/selfservice/phone`, undefined, {
+        push(`/selfservice/phone`, undefined, {
           canGoBack,
         });
         break;

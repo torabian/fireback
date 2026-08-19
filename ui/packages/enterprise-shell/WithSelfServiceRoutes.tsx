@@ -1,10 +1,4 @@
-import {
-  BrowserRouter,
-  HashRouter,
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes } from "react-router-dom";
 
 import { useAuthentication } from "@fireback/auth-client";
 import { SelectWorkspaceScreen } from "@fireback/selfservice/SelectWorkspace.screen";
@@ -13,7 +7,6 @@ import { useCheckAuthentication } from "@fireback/ui-core/components/layouts/For
 import { SessionGate } from "@fireback/ui-core/components/session-gate/SessionGate";
 import { checkSessionViaWhoami } from "@fireback/ui-core/components/session-gate/checkSessionViaWhoami";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
-import { usePureLocale } from "@fireback/ui-core/hooks/usePureLocale";
 import { useWasmFetchOverride } from "@fireback/wasm-server/WasmFetchContext";
 import { type ReactNode } from "react";
 
@@ -28,7 +21,6 @@ export const WithSelfServiceRoutes = ({
   const { session, checked } = useCheckAuthentication();
   const selfServicePublicRoutes = useSelfServicePublicRoutes();
   const { selectedWorkspace } = useAuthentication();
-  const { locale } = usePureLocale();
   // undefined outside of an app that mounts WithWasmServer (see
   // WasmFetchContext.ts) - checkSessionViaWhoami then falls back to a real
   // network fetch, unchanged from before.
@@ -47,13 +39,7 @@ export const WithSelfServiceRoutes = ({
   if (!session && checked) {
     return (
       <Router future={{ v7_startTransition: true }}>
-        <Routes>
-          <Route path=":locale">{selfServicePublicRoutes}</Route>
-          <Route
-            path="*"
-            element={<Navigate to={`/${locale}/selfservice/welcome`} replace />}
-          />
-        </Routes>
+        <Routes>{selfServicePublicRoutes}</Routes>
       </Router>
     );
   }

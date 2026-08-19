@@ -91,6 +91,7 @@ func WorkspaceModuleSetup() *application.ModuleProvider {
 		// OsLoginAuthenticate/CheckPassportMethods/UserPassports/OauthAuthenticate under
 		// PassportCliFn - see UserEntity.go/WorkspaceCli.go/PassportCli.go).
 		abacdefs.WhoamiActionCliHandler(WhoamiAction),
+		abacdefs.AnalyticsOverviewActionCliHandler(AnalyticsOverviewAction),
 		abacdefs.SignoutActionCliHandler(SignoutAction),
 		abacdefs.InviteToWorkspaceActionCliHandler(InviteToWorkspaceAction),
 		abacdefs.AddUserToWorkspaceActionCliHandler(AddUserToWorkspaceAction),

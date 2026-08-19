@@ -1,6 +1,7 @@
 import EssentialApp from "@fireback/enterprise-shell/EssentialApp";
 import { WithWasmServer } from "@fireback/wasm-server/WithWasmServer";
 import { ApplicationRoutes } from "./ApplicationRoutes";
+import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 
 // wasm-demo is its own app entry point (VITE_TARGET_APP == 'wasm-demo', see
 // src/index.tsx) specifically so @fireback/wasm-server - which transitively
@@ -37,7 +38,12 @@ import { ApplicationRoutes } from "./ApplicationRoutes";
 // visiting and asserts .sidebar shows up once whoami answers 200.
 function App() {
   return (
-    <WithWasmServer>
+    <WithWasmServer
+      options={{
+        wasmUrl: BUILD_VARIABLES.PUBLIC_URL + "wasm_exec.js",
+        wasmExecUrl: BUILD_VARIABLES.PUBLIC_URL + "fireback.wasm",
+      }}
+    >
       <EssentialApp ApplicationRoutes={ApplicationRoutes} />
     </WithWasmServer>
   );

@@ -1,5 +1,4 @@
 import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
-import { localeFromPath } from "./localeFromPath";
 
 export const RouterLink = (props: any) => {
   return (
@@ -10,26 +9,23 @@ export const RouterLink = (props: any) => {
 };
 
 export function useRouter() {
-  const noPrefix = false;
   const navigate = useNavigate();
   const params = useParams();
   const location$ = useLocation();
+  // Bug fix: this used to also replace a literal "{locale}" placeholder in
+  // `path` with a locale parsed back out of window.location.pathname, and
+  // (dead code - the flag driving it was hardcoded false) strip a leading
+  // "/xx/" locale segment when set. Routes no longer carry a locale segment
+  // at all (see EssentialRouter.tsx/App.tsx's own history) and no caller
+  // builds a "{locale}"-templated path anymore, so this is just a plain
+  // passthrough now.
   const push = (
     path: string,
     actual?: string,
     params?: any,
     replace = false
   ) => {
-    const locale = localeFromPath(window.location.pathname);
-    let goToPath = path.replace("{locale}", locale);
-
-    if (noPrefix) {
-      if (goToPath.match(/\/[a-z]{2}\//)) {
-        goToPath = goToPath.substring(3);
-      }
-    }
-
-    navigate(goToPath, { replace, state: params });
+    navigate(path, { replace, state: params });
   };
 
   const replace = (path: string, actual?: string, params?: any) => {

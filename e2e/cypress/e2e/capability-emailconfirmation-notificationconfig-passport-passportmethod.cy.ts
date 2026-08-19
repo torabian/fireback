@@ -43,7 +43,7 @@ function loginAs(sessionKey: string, email: string, password: string) {
   Cypress.on("uncaught:exception", () => false);
 
   cy.session(sessionKey, () => {
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(email);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1", { timeout: 10000 }).should("have.text", "Enter Password");
@@ -99,13 +99,13 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
   it("should create a passport method through the real admin form and see it in the list.", () => {
     loginAs("root-login", ROOT_EMAIL, ROOT_PASSWORD);
 
-    visitForm(ui("/manage/#/en/manage/passport-method/new"));
+    visitForm(ui("/manage/#/manage/passport-method/new"));
     selectFormSelectOption("Type", "Google");
     cy.contains(".mb-3", "Region").find("input").clear().type("global");
     submitForm();
     cy.wait(500);
 
-    cy.visit(ui("/manage/#/en/manage/passport-methods"));
+    cy.visit(ui("/manage/#/manage/passport-methods"));
     cy.contains("google", { timeout: 10000 }).should("exist");
   });
 
@@ -114,13 +114,13 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
 
     // A fresh, disposable row ("facebook", not "google") so this doesn't depend on the
     // previous test's row or collide with its type+region duplicate-check.
-    visitForm(ui("/manage/#/en/manage/passport-method/new"));
+    visitForm(ui("/manage/#/manage/passport-method/new"));
     selectFormSelectOption("Type", "Facebook");
     cy.contains(".mb-3", "Region").find("input").clear().type("global");
     submitForm();
     cy.wait(500);
 
-    cy.visit(ui("/manage/#/en/manage/passport-methods"));
+    cy.visit(ui("/manage/#/manage/passport-methods"));
     cy.contains("facebook", { timeout: 10000 }).should("exist");
     // The devexpress grid's cells aren't plain <td>/<tr> here (confirmed by both a
     // parents("tr") and a contains("td", ...) miss against a row visibly on screen), so
@@ -168,46 +168,59 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
         method: "POST",
         url: ui("/capability"),
         headers: rootHeaders(rootToken),
-        body: { name: "checkendpointtests capability", description: "checkendpointtests" },
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string; name: string }>>) => {
-        expect(response.status).to.equal(200);
-        const id = response.body.data.item.uniqueId;
+        body: {
+          name: "checkendpointtests capability",
+          description: "checkendpointtests",
+        },
+      }).then(
+        (
+          response: Cypress.Response<
+            SingleItemResponse<{ uniqueId: string; name: string }>
+          >,
+        ) => {
+          expect(response.status).to.equal(200);
+          const id = response.body.data.item.uniqueId;
 
-        cy.request({
-          method: "GET",
-          url: ui("/capability/browse"),
-          headers: rootHeaders(rootToken),
-        }).then((browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-          expect(browse.status).to.equal(200);
-          expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(id);
-        });
+          cy.request({
+            method: "GET",
+            url: ui("/capability/browse"),
+            headers: rootHeaders(rootToken),
+          }).then(
+            (browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+              expect(browse.status).to.equal(200);
+              expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(
+                id,
+              );
+            },
+          );
 
-        cy.request({
-          method: "PATCH",
-          url: ui(`/capability/${id}`),
-          headers: rootHeaders(rootToken),
-          body: { name: "checkendpointtests renamed capability" },
-        }).then((update) => {
-          expect(update.status).to.equal(200);
-        });
+          cy.request({
+            method: "PATCH",
+            url: ui(`/capability/${id}`),
+            headers: rootHeaders(rootToken),
+            body: { name: "checkendpointtests renamed capability" },
+          }).then((update) => {
+            expect(update.status).to.equal(200);
+          });
 
-        cy.request({
-          method: "GET",
-          url: ui(`/capability/delete-preview?uniqueIds=${id}`),
-          headers: rootHeaders(rootToken),
-        }).then((preview) => {
-          expect(preview.status).to.equal(200);
-        });
+          cy.request({
+            method: "GET",
+            url: ui(`/capability/delete-preview?uniqueIds=${id}`),
+            headers: rootHeaders(rootToken),
+          }).then((preview) => {
+            expect(preview.status).to.equal(200);
+          });
 
-        cy.request({
-          method: "POST",
-          url: ui("/capability/delete"),
-          headers: rootHeaders(rootToken),
-          body: { uniqueIds: [id] },
-        }).then((del) => {
-          expect(del.status).to.equal(200);
-        });
-      });
+          cy.request({
+            method: "POST",
+            url: ui("/capability/delete"),
+            headers: rootHeaders(rootToken),
+            body: { uniqueIds: [id] },
+          }).then((del) => {
+            expect(del.status).to.equal(200);
+          });
+        },
+      );
     });
   });
 
@@ -219,38 +232,50 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
         url: ui("/emailConfirmation"),
         headers: rootHeaders(rootToken),
         body: { email, status: "pending", key: "checkendpointtests" },
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-        expect(response.status).to.equal(200);
-        const id = response.body.data.item.uniqueId;
+      }).then(
+        (
+          response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>,
+        ) => {
+          expect(response.status).to.equal(200);
+          const id = response.body.data.item.uniqueId;
 
-        cy.request({
-          method: "GET",
-          url: ui("/emailConfirmation/browse"),
-          headers: rootHeaders(rootToken),
-        }).then((browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-          expect(browse.status).to.equal(200);
-          expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(id);
-        });
+          cy.request({
+            method: "GET",
+            url: ui("/emailConfirmation/browse"),
+            headers: rootHeaders(rootToken),
+          }).then(
+            (browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+              expect(browse.status).to.equal(200);
+              expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(
+                id,
+              );
+            },
+          );
 
-        cy.request({
-          method: "PATCH",
-          url: ui(`/emailConfirmation/${id}`),
-          headers: rootHeaders(rootToken),
-          body: { status: "confirmed" },
-        }).then((update: Cypress.Response<SingleItemResponse<{ status: string }>>) => {
-          expect(update.status).to.equal(200);
-          expect(update.body.data.item.status).to.equal("confirmed");
-        });
+          cy.request({
+            method: "PATCH",
+            url: ui(`/emailConfirmation/${id}`),
+            headers: rootHeaders(rootToken),
+            body: { status: "confirmed" },
+          }).then(
+            (
+              update: Cypress.Response<SingleItemResponse<{ status: string }>>,
+            ) => {
+              expect(update.status).to.equal(200);
+              expect(update.body.data.item.status).to.equal("confirmed");
+            },
+          );
 
-        cy.request({
-          method: "POST",
-          url: ui("/emailConfirmation/delete"),
-          headers: rootHeaders(rootToken),
-          body: { uniqueIds: [id] },
-        }).then((del) => {
-          expect(del.status).to.equal(200);
-        });
-      });
+          cy.request({
+            method: "POST",
+            url: ui("/emailConfirmation/delete"),
+            headers: rootHeaders(rootToken),
+            body: { uniqueIds: [id] },
+          }).then((del) => {
+            expect(del.status).to.equal(200);
+          });
+        },
+      );
     });
   });
 
@@ -261,28 +286,36 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
         url: ui("/notificationConfig"),
         headers: rootHeaders(rootToken),
         body: { acceptLanguage: `checkendpointtests-${Date.now()}` },
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-        expect(response.status).to.equal(200);
-        const id = response.body.data.item.uniqueId;
+      }).then(
+        (
+          response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>,
+        ) => {
+          expect(response.status).to.equal(200);
+          const id = response.body.data.item.uniqueId;
 
-        cy.request({
-          method: "GET",
-          url: ui("/notificationConfig/browse"),
-          headers: rootHeaders(rootToken),
-        }).then((browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-          expect(browse.status).to.equal(200);
-          expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(id);
-        });
+          cy.request({
+            method: "GET",
+            url: ui("/notificationConfig/browse"),
+            headers: rootHeaders(rootToken),
+          }).then(
+            (browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+              expect(browse.status).to.equal(200);
+              expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(
+                id,
+              );
+            },
+          );
 
-        cy.request({
-          method: "POST",
-          url: ui("/notificationConfig/delete"),
-          headers: rootHeaders(rootToken),
-          body: { uniqueIds: [id] },
-        }).then((del) => {
-          expect(del.status).to.equal(200);
-        });
-      });
+          cy.request({
+            method: "POST",
+            url: ui("/notificationConfig/delete"),
+            headers: rootHeaders(rootToken),
+            body: { uniqueIds: [id] },
+          }).then((del) => {
+            expect(del.status).to.equal(200);
+          });
+        },
+      );
 
       const title = `checkendpointtests invite title ${Date.now()}`;
       cy.request({
@@ -290,10 +323,16 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
         url: ui("/notificationConfig/checkendpointtests-any-placeholder"),
         headers: rootHeaders(rootToken),
         body: { inviteToWorkspaceTitle: title },
-      }).then((update: Cypress.Response<SingleItemResponse<{ inviteToWorkspaceTitle: string }>>) => {
-        expect(update.status).to.equal(200);
-        expect(update.body.data.item.inviteToWorkspaceTitle).to.equal(title);
-      });
+      }).then(
+        (
+          update: Cypress.Response<
+            SingleItemResponse<{ inviteToWorkspaceTitle: string }>
+          >,
+        ) => {
+          expect(update.status).to.equal(200);
+          expect(update.body.data.item.inviteToWorkspaceTitle).to.equal(title);
+        },
+      );
     });
   });
 
@@ -315,28 +354,36 @@ describe("Abac: Capability, EmailConfirmation, NotificationConfig, Passport, Pas
         url: ui("/passport"),
         headers: rootHeaders(rootToken),
         body: { type: "email", value },
-      }).then((response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
-        expect(response.status).to.equal(200);
-        const id = response.body.data.item.uniqueId;
+      }).then(
+        (
+          response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>,
+        ) => {
+          expect(response.status).to.equal(200);
+          const id = response.body.data.item.uniqueId;
 
-        cy.request({
-          method: "GET",
-          url: ui("/passport/browse"),
-          headers: rootHeaders(rootToken),
-        }).then((browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-          expect(browse.status).to.equal(200);
-          expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(id);
-        });
+          cy.request({
+            method: "GET",
+            url: ui("/passport/browse"),
+            headers: rootHeaders(rootToken),
+          }).then(
+            (browse: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+              expect(browse.status).to.equal(200);
+              expect(browse.body.data.items.map((i) => i.uniqueId)).to.include(
+                id,
+              );
+            },
+          );
 
-        cy.request({
-          method: "POST",
-          url: ui("/passport/delete"),
-          headers: rootHeaders(rootToken),
-          body: { uniqueIds: [id] },
-        }).then((del) => {
-          expect(del.status).to.equal(200);
-        });
-      });
+          cy.request({
+            method: "POST",
+            url: ui("/passport/delete"),
+            headers: rootHeaders(rootToken),
+            body: { uniqueIds: [id] },
+          }).then((del) => {
+            expect(del.status).to.equal(200);
+          });
+        },
+      );
     });
   });
 

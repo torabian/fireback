@@ -81,13 +81,12 @@ html[dir="rtl"] {
 }
 
 .page-title {
-  margin: -20px;
-  padding: 20px 5px;
+  padding: 20px 30px;
   padding-top: 40px;
+  margin-top: 20px;
   padding-left: 30px;
-  background-color: #2b2b2b;
+  background-color: #e8e8e8;
   border-left: 2px solid orange;
-  color: white;
   margin-bottom: 20px;
 
   h1 {

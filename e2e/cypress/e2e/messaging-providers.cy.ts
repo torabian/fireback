@@ -1,7 +1,7 @@
 import { ui, endFirebackServer, withFirebackServer } from "../support/setup";
 
 // Covers modules/abac/messaging's admin screens (Gsm Provider / Email Provider / Email
-// Sender "create" forms, under /manage/#/en/manage/<entity>/new - see
+// Sender "create" forms, under /manage/#/manage/<entity>/new - see
 // modules/manage/ManageRoutes.tsx): required-field validation actually reaching the
 // user (see CommonEntityManager.tsx's response.error handling - a bug that, until
 // fixed, meant field errors never rendered anywhere in the app, only a raw untranslated
@@ -30,7 +30,7 @@ function loginAsRoot() {
     // Only the "email" passport method is registered (see the "should be able to
     // create the passport method" step below), so /welcome auto-redirects straight to
     // the email-entry screen instead of showing a method-choice screen first.
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -109,7 +109,7 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Gsm Provider: submitting the new-provider form empty shows required-field errors for mainSenderNumber and type.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/gsm-provider/new"));
+    visitForm(ui("/manage/#/manage/gsm-provider/new"));
     submitForm();
     cy.contains(".mb-3", "Main sender number")
       .find(".invalid-feedback")
@@ -121,13 +121,15 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Gsm Provider: filling required fields and submitting succeeds, and the new row appears in the list.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/gsm-provider/new"));
-    cy.contains(".mb-3", "Main sender number").find("input").type("+19998887771");
+    visitForm(ui("/manage/#/manage/gsm-provider/new"));
+    cy.contains(".mb-3", "Main sender number")
+      .find("input")
+      .type("+19998887771");
     selectFormSelectOption("Type", "Terminal");
     submitForm();
     cy.wait(1000);
 
-    cy.visit(ui("/manage/#/en/manage/gsm-providers"));
+    cy.visit(ui("/manage/#/manage/gsm-providers"));
     cy.contains("+19998887771").should("exist");
   });
 
@@ -135,7 +137,7 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Email Provider: submitting the new-provider form empty shows a required-field error for its Service Type.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/email-provider/new"));
+    visitForm(ui("/manage/#/manage/email-provider/new"));
     submitForm();
     cy.contains(".mb-3", "Service Type")
       .find(".invalid-feedback")
@@ -144,7 +146,7 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Email Provider: switching the Service Type swaps in the right dynamic config fields.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/email-provider/new"));
+    visitForm(ui("/manage/#/manage/email-provider/new"));
     selectFormSelectOption("Service Type", "SMTP");
     cy.contains(".mb-3", "Host").should("exist");
     cy.contains(".mb-3", "Port").should("exist");
@@ -158,13 +160,15 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Email Provider: filling the required Service Type and submitting succeeds, and the new row appears in the list.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/email-provider/new"));
-    cy.contains(".mb-3", "Title").find("input").type("checkendpointtests provider");
+    visitForm(ui("/manage/#/manage/email-provider/new"));
+    cy.contains(".mb-3", "Title")
+      .find("input")
+      .type("checkendpointtests provider");
     selectFormSelectOption("Service Type", "Terminal (Debug)");
     submitForm();
     cy.wait(1000);
 
-    cy.visit(ui("/manage/#/en/manage/email-providers"));
+    cy.visit(ui("/manage/#/manage/email-providers"));
     cy.contains("checkendpointtests provider").should("exist");
   });
 
@@ -172,9 +176,14 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Email Sender: submitting the new-sender form empty shows required-field errors for every field.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/email-sender/new"));
+    visitForm(ui("/manage/#/manage/email-sender/new"));
     submitForm();
-    for (const label of ["From email address", "From name", "Nick name", "Reply to"]) {
+    for (const label of [
+      "From email address",
+      "From name",
+      "Nick name",
+      "Reply to",
+    ]) {
       cy.contains(".mb-3", label)
         .find(".invalid-feedback")
         .should("have.text", "This field is required");
@@ -183,17 +192,21 @@ describe("Messaging providers (Gsm/Email Provider/Sender) - create form validati
 
   it("Email Sender: filling required fields and submitting succeeds, and the new row appears in the list.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/email-sender/new"));
+    visitForm(ui("/manage/#/manage/email-sender/new"));
     cy.contains(".mb-3", "From email address")
       .find("input")
       .type("checkendpointtests@example.com");
-    cy.contains(".mb-3", "From name").find("input").type("Checkendpointtests Sender");
+    cy.contains(".mb-3", "From name")
+      .find("input")
+      .type("Checkendpointtests Sender");
     cy.contains(".mb-3", "Nick name").find("input").type("checkendpointtests");
-    cy.contains(".mb-3", "Reply to").find("input").type("checkendpointtests@example.com");
+    cy.contains(".mb-3", "Reply to")
+      .find("input")
+      .type("checkendpointtests@example.com");
     submitForm();
     cy.wait(1000);
 
-    cy.visit(ui("/manage/#/en/manage/email-senders"));
+    cy.visit(ui("/manage/#/manage/email-senders"));
     cy.contains("checkendpointtests@example.com").should("exist");
   });
 

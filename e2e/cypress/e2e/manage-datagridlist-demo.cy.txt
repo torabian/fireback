@@ -29,7 +29,7 @@ function loginAsRoot() {
   Cypress.on("uncaught:exception", () => false);
 
   cy.session("root-login", () => {
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -95,7 +95,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("Example 1 renders a column for every emi field type, with real values.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     const grid = () => example("Every emi field type").find(".rdg");
 
@@ -152,7 +152,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("Example 1's column filter narrows the grid to matching rows only (debounced JsonLogic).", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     const grid = () => example("Every emi field type").find(".rdg");
     grid().find(".rdg-row", { timeout: 15000 }).should("have.length.greaterThan", 0);
@@ -176,7 +176,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("Example 1's TString column opens a drawer to filter by per-language text.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     const grid = () => example("Every emi field type").find(".rdg");
     grid().find(".rdg-row", { timeout: 15000 }).should("have.length.greaterThan", 0);
@@ -226,7 +226,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("Example 1 loads more rows as the page scrolls (infinite scroll, page-level).", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     const grid = () => example("Every emi field type").find(".rdg");
     grid().find(".rdg-row", { timeout: 15000 }).should("have.length.greaterThan", 0);
@@ -248,7 +248,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("Example 2 (boxed in its own scrollable div) loads more rows on its own scroll, independent of the page.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     const grid = () => example("Contained in a scrollable box").find(".rdg");
     grid().find(".rdg-row", { timeout: 15000 }).should("have.length.greaterThan", 0);
@@ -269,7 +269,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("Example 3: selecting a row and confirming Delete removes it and updates the deleted count.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     const scope = () => example("Selection + delete");
     scope().find(".rdg-row", { timeout: 15000 }).should("have.length.greaterThan", 0);
@@ -299,7 +299,7 @@ describe("Manage: DataGridList demo - all emi column types, filtering, infinite 
 
   it("shows a loading indicator (with a Cancel option) while the very first page is still loading.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/demo/data-grid-list"));
+    cy.visit(ui("/manage/#/demo/data-grid-list"));
 
     // The fake dataset's own simulated latency (~500-900ms, see
     // useFakeCursorListQuery.ts) is what this races against - Cypress's default

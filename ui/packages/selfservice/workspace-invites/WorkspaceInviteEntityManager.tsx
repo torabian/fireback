@@ -9,13 +9,14 @@ import { useWorkspaceInviteGetActionQuery } from "@fireback/selfservice/sdk/abac
 import { useInviteToWorkspaceAction } from "@fireback/selfservice/sdk/abac/InviteToWorkspaceAction";
 import { useWorkspaceInviteUpdateAction } from "@fireback/selfservice/sdk/abac/WorkspaceInviteUpdateAction";
 import { WorkspaceInviteDto } from "@fireback/selfservice/sdk/abac/WorkspaceInviteDto";
+import { WorkspaceInviteNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { WorkspaceInviteForm } from "./WorkspaceInviteForm";
 
 export const WorkspaceInviteEntityManager = ({
   data,
 }: DtoEntity<WorkspaceInviteDto>) => {
   const s = useS(strings);
-  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
+  const { router, uniqueId, queryClient } = useCommonEntityManager<
     Partial<WorkspaceInviteDto>
   >({
     data,
@@ -54,9 +55,9 @@ export const WorkspaceInviteEntityManager = ({
       getSingleHook={getSingleHook}
       patchHook={patchHook}
       onCancel={() => {
-        router.goBackOrDefault(`/${locale}/workspace-invites`);
+        router.goBackOrDefault(WorkspaceInviteNavigation.query());
       }}
-      onFinishUriResolver={(_, locale) => `/${locale}/workspace-invites`}
+      onFinishUriResolver={() => WorkspaceInviteNavigation.query()}
       Form={WorkspaceInviteForm}
       onEditTitle={s.editInvitation}
       onCreateTitle={s.createInvitation}

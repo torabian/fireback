@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import { useEffect } from "react";
 import { mutationErrorsToFormik } from "@fireback/ui-core/hooks/api";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
 
@@ -21,7 +20,6 @@ import {
 export const usePresenter = () => {
   const s = useS(strings);
   const { goBack, state, push } = useRouter();
-  const { locale } = useLocale();
   const { onComplete } = useCompleteAuth();
   const mutation = useClassicSigninAction();
   const otpEnabled = state?.canContinueOnOtp;
@@ -84,12 +82,12 @@ export const usePresenter = () => {
     if (res.data.item.session) {
       onComplete(res);
     } else if (res.data.item.next?.includes("enter-totp")) {
-      push(`/${locale}/selfservice/totp-enter`, undefined, {
+      push(`/selfservice/totp-enter`, undefined, {
         value: form.values.value,
         password: form.values.password,
       });
     } else if (res.data.item.next?.includes("setup-totp")) {
-      push(`/${locale}/selfservice/totp-setup`, undefined, {
+      push(`/selfservice/totp-setup`, undefined, {
         totpUrl: res.data.item.totpUrl,
 
         // since we do not allow user to join, it means it's forced :)

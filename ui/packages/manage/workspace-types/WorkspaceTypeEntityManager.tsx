@@ -10,12 +10,13 @@ import { useWorkspaceTypeCreateAction } from "@fireback/manage/sdk/abac/Workspac
 import { WorkspaceTypeDto } from "@fireback/manage/sdk/abac/WorkspaceTypeDto";
 import { useWorkspaceTypeGetActionQuery } from "@fireback/manage/sdk/abac/WorkspaceTypeGetAction";
 import { useWorkspaceTypeUpdateAction } from "@fireback/manage/sdk/abac/WorkspaceTypeUpdateAction";
+import { WorkspaceTypeNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { WorkspaceTypeEditForm } from "./WorkspaceTypeEditForm";
 
 export const WorkspaceTypeEntityManager = ({
   data,
 }: DtoEntity<WorkspaceTypeDto>) => {
-  const { router, uniqueId, queryClient, locale } = useCommonEntityManager<
+  const { router, uniqueId, queryClient } = useCommonEntityManager<
     Partial<WorkspaceTypeDto>
   >({
     data,
@@ -36,10 +37,10 @@ export const WorkspaceTypeEntityManager = ({
       getSingleHook={getSingleHook}
       patchHook={patchHook}
       onCancel={() => {
-        router.goBackOrDefault(`/${locale}/workspace-types`);
+        router.goBackOrDefault(WorkspaceTypeNavigation.query());
       }}
-      onFinishUriResolver={(response, locale) =>
-        `/${locale}/workspace-type/${response.data?.uniqueId}`
+      onFinishUriResolver={(response) =>
+        WorkspaceTypeNavigation.single(response.data?.uniqueId)
       }
       Form={WorkspaceTypeEditForm}
       onEditTitle={s.editWorkspaceType}

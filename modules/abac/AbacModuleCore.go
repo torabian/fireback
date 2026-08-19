@@ -79,11 +79,14 @@ var AbacPermissions = [][]application.PermissionInfo{
 	ALL_PENDING_WORKSPACE_INVITE_PERMISSIONS,
 	ALL_TOKEN_PERMISSIONS,
 	ALL_CAPABILITY_PERMISSIONS,
+	ALL_ANALYTICS_PERMISSIONS,
+	ALL_INTERNAL_STATS_PERMISSIONS,
 }
 
 var AbacGinWebServerInitHooks = []func(g *gin.RouterGroup, x *application.Application) error{
 	func(g *gin.RouterGroup, x *application.Application) error {
 		abacdefs.WhoamiActionGin(g, WhoamiAction)
+		abacdefs.AnalyticsOverviewActionGin(g, AnalyticsOverviewAction)
 		abacdefs.QueryUserRoleWorkspacesActionGin(g, QueryUserRoleWorkspacesAction)
 		abacdefs.InviteToWorkspaceActionGin(g, InviteToWorkspaceAction)
 		abacdefs.AddUserToWorkspaceActionGin(g, AddUserToWorkspaceAction)

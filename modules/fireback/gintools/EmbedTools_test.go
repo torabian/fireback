@@ -162,6 +162,15 @@ func TestEmbedFoldersForGin_GzipAndInjectHTML(t *testing.T) {
 				t.Fatalf("%s: expected a gzip Content-Encoding, got %q", tc.path, enc)
 			}
 
+			// Regression guard: this is a *custom InjectHTML route*, not the
+			// plain SPA fallback - it must still get the same
+			// never-cache-me Cache-Control as index.html itself, so a CDN
+			// never keeps serving a stale injected page (or a stale build)
+			// after a redeploy.
+			if got := w.Header().Get("Cache-Control"); got != DefaultIndexCacheControl {
+				t.Fatalf("%s: expected Cache-Control %q on an injected route, got %q", tc.path, DefaultIndexCacheControl, got)
+			}
+
 			body := mustGunzip(t, w.Body.Bytes())
 			if !strings.Contains(body, tc.wantInjected) {
 				t.Fatalf("%s: expected injected marker %q in the decompressed body, got: %s", tc.path, tc.wantInjected, body)
@@ -201,6 +210,18 @@ func TestEmbedFoldersForGin_GzipAndInjectHTML(t *testing.T) {
 			}
 			if !strings.Contains(body, `console.log("app shell inline bootstrap");`) {
 				t.Fatalf("%s: expected the app shell's own trailing inline script to survive, got: %s", tc.path, body)
+			}
+		}
+	})
+
+	t.Run("a plain SPA fallback (no InjectHTML match) and a literal index.html request both get the never-cache header", func(t *testing.T) {
+		for _, path := range []string{"/some/unmatched/route", "/index.html"} {
+			req := httptest.NewRequest(http.MethodGet, path, nil)
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+
+			if got := w.Header().Get("Cache-Control"); got != DefaultIndexCacheControl {
+				t.Fatalf("%s: expected Cache-Control %q, got %q", path, DefaultIndexCacheControl, got)
 			}
 		}
 	})
@@ -272,5 +293,75 @@ func TestAssetCacheControlMiddleware(t *testing.T) {
 		if got := w.Header().Get("Cache-Control"); got != tc.want {
 			t.Fatalf("path %s: expected Cache-Control %q, got %q", tc.path, tc.want, got)
 		}
+	}
+}
+
+// TestEmbedFoldersForGin_CacheControl is the real end-to-end regression test for
+// the bug TestAssetCacheControlMiddleware's own isolated setup couldn't catch:
+// through the actual EmbedFoldersForGin/mountEmbedFolder wiring, gin-contrib/
+// static's Serve aborts the middleware chain the instant it writes a response
+// for a request fileSystem.Exists confirmed - which used to silently skip
+// AssetCacheControlMiddleware (registered afterwards) for every real,
+// successfully-served file. Confirmed via a throwaway probe before the fix: a
+// request for an existing asset came back with an empty Cache-Control header
+// end to end, despite the isolated unit test above passing. This test exercises
+// the real path both folders (EmbedFoldersForGin, not a bare
+// AssetCacheControlMiddleware) actually run through in production.
+func TestEmbedFoldersForGin_CacheControl(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	r := gin.New()
+	EmbedFoldersForGin([]PublicFolderInfo{
+		{Fs: &testSiteFS, Folder: "testdata/site", Prefix: "/"},
+	}, r)
+
+	cases := []struct {
+		name string
+		path string
+		want string
+	}{
+		{"a real cacheable asset", "/assets/main.js", DefaultAssetCacheControl},
+		{"the bare root path (net/http resolves this to index.html)", "/", DefaultIndexCacheControl},
+		{"a literal /index.html request", "/index.html", DefaultIndexCacheControl},
+		{"an unmatched path falling through to the SPA fallback", "/some/deep/route", DefaultIndexCacheControl},
+	}
+
+	for _, tc := range cases {
+		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, req)
+
+		if got := w.Header().Get("Cache-Control"); got != tc.want {
+			t.Fatalf("%s (%s): expected Cache-Control %q, got %q", tc.name, tc.path, tc.want, got)
+		}
+	}
+}
+
+// TestDefaultCacheableSuffixes_OnlyJSCSSAndImages locks in the "cache js/css/
+// images, nothing else by default" contract at the value level, independent of
+// any fixture files - so it can't accidentally pass just because a testdata
+// folder happens not to contain a font/icon file to exercise.
+func TestDefaultCacheableSuffixes_OnlyJSCSSAndImages(t *testing.T) {
+	allowed := map[string]bool{
+		".js": true, ".css": true,
+		".svg": true, ".png": true, ".jpg": true, ".jpeg": true, ".gif": true, ".webp": true,
+	}
+	for _, suffix := range DefaultCacheableSuffixes {
+		if !allowed[suffix] {
+			t.Fatalf("unexpected cacheable suffix %q in DefaultCacheableSuffixes - only "+
+				"js/css/image types should be long-cached by default", suffix)
+		}
+	}
+}
+
+// TestDefaultIndexCacheControl_PreventsCaching guards against DefaultIndexCacheControl
+// ever regressing to a directive (like a bare "no-cache") that still permits a
+// CDN/browser to store a copy of the document, just with revalidation - the
+// actual requirement is that a redeploy is visible on the very next request, which
+// only "no-store" (never keep a copy at all) unambiguously guarantees.
+func TestDefaultIndexCacheControl_PreventsCaching(t *testing.T) {
+	if !strings.Contains(DefaultIndexCacheControl, "no-store") {
+		t.Fatalf("expected DefaultIndexCacheControl to include \"no-store\" so a CDN/browser "+
+			"never keeps a copy of the index document, got %q", DefaultIndexCacheControl)
 	}
 }

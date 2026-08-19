@@ -82,6 +82,10 @@ func main() {
 				query, err := fireback.ResolveActionContext(req, &fireback.SecurityModel{
 					ResolveStrategy: fireback.ResolveStrategyWorkspace,
 					AllowOnRoot:     true,
+					// abac.PERM_ROOT_INTERNAL_STATS_QUERY - see
+					// modules/abac/InternalStatsPermissions.go's own comment on why it lives
+					// there instead of inside modules/internalstats itself.
+					ActionRequires: []application.PermissionInfo{abac.PERM_ROOT_INTERNAL_STATS_QUERY},
 				})
 				if err != nil {
 					return fireback.QueryDSL{}, err
@@ -102,20 +106,50 @@ func main() {
 		// abac.Menu itself - same reason internalstats.ModuleSetup's Authorize closure
 		// above is built in main.go and not inside modules/internalstats: internalstats
 		// never imports abac (or interfacetoolsdefs, transitively part of abac's own
-		// module tree), so a project's own main.go is what wires the two together. No
-		// CapabilityId is set (unlike most root-actions entries) because internalstats
-		// doesn't use abac's per-capability model at all - InternalStatsModuleConfig.
-		// Authorize above only ever checks for a root-workspace token.
+		// module tree), so a project's own main.go is what wires the two together.
+		// CapabilityId is set the same way analytics/notifications_send below are -
+		// see modules/abac/InternalStatsPermissions.go and the Authorize closure above.
 		interfacetools.ModuleSetup(&interfacetools.InterfaceToolsModuleConfig{
-			ExtraAppMenus: append(append([]*interfacetoolsdefs.AppMenuEntity{}, abac.Menu...), &interfacetoolsdefs.AppMenuEntity{
-				UniqueId:      "internal_stats",
-				Label:         complexes.TStringFrom(map[string]string{"en": "Internal Stats", "fa": "آمار سرور"}),
-				Href:          "/manage/internal-stats",
-				Icon:          "ios-theme/icons/dashboard.svg",
-				ActiveMatcher: "internal-stats",
-				ParentId:      emigo.NullableOf("root-actions"),
-				WorkspaceId:   emigo.NullableOf(fireback.USER_SYSTEM),
-			}),
+			ExtraAppMenus: append(append([]*interfacetoolsdefs.AppMenuEntity{}, abac.Menu...),
+				&interfacetoolsdefs.AppMenuEntity{
+					UniqueId:      "internal_stats",
+					Label:         complexes.TStringFrom(map[string]string{"en": "Internal Stats", "fa": "آمار سرور"}),
+					Href:          "/manage/internal-stats",
+					Icon:          "ios-theme/icons/dashboard.svg",
+					ActiveMatcher: "internal-stats",
+					ParentId:      emigo.NullableOf("root-actions"),
+					WorkspaceId:   emigo.NullableOf(fireback.USER_SYSTEM),
+					CapabilityId:  emigo.NullableOf("root.modules.abac.internal-stats.query"),
+				},
+				// Root-only (AnalyticsOverviewAction - AllowOnRoot, see
+				// AnalyticsActionImplementation.go), same reasoning as internal_stats
+				// above for why this lives here rather than inside abac.Menu itself:
+				// abac.Menu is abac's own bundled defaults, not a place for one
+				// project's specific screens.
+				&interfacetoolsdefs.AppMenuEntity{
+					UniqueId:      "analytics",
+					Label:         complexes.TStringFrom(map[string]string{"en": "Analytics", "fa": "تحلیل و آمار"}),
+					Href:          "/manage/analytics",
+					Icon:          "ios-theme/icons/dashboard.svg",
+					ActiveMatcher: "manage/analytics",
+					ParentId:      emigo.NullableOf("root-actions"),
+					WorkspaceId:   emigo.NullableOf(fireback.USER_SYSTEM),
+					CapabilityId:  emigo.NullableOf("root.modules.abac.analytics.query"),
+				},
+				// Root-only (SendNotificationAction - PERM_ROOT_NOTIFICATION_CREATE,
+				// AllowOnRoot - see NotificationActions.go), same reasoning as analytics
+				// above for why this lives here rather than inside abac.Menu itself.
+				&interfacetoolsdefs.AppMenuEntity{
+					UniqueId:      "notifications_send",
+					Label:         complexes.TStringFrom(map[string]string{"en": "Send Notification", "fa": "ارسال اعلان"}),
+					Href:          "/manage/notifications/send",
+					Icon:          "ios-theme/icons/dashboard.svg",
+					ActiveMatcher: "manage/notifications",
+					ParentId:      emigo.NullableOf("root-actions"),
+					WorkspaceId:   emigo.NullableOf(fireback.USER_SYSTEM),
+					CapabilityId:  emigo.NullableOf("root.modules.abac.notification.create"),
+				},
+			),
 		}),
 	}
 

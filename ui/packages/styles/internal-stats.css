@@ -16,6 +16,11 @@
   --is-surface: #fcfcfb;
 }
 
+/* Dark applies in two cases - the user's explicit choice (body.dark-theme), or
+   "automatic" (neither .dark-theme nor .light-theme) deferring to the OS. Without
+   the second rule, this page stayed light-only whenever the app's theme was left on
+   automatic and only the system was dark - see authentication.css's .auth-card for
+   the same two-rule shape, and its own comment on the three theme states. */
 body.dark-theme .internal-stats-page {
   --is-status-ok: #0ca30c;
   --is-status-warn: #fab219;
@@ -27,6 +32,23 @@ body.dark-theme .internal-stats-page {
   --is-gridline: #2c2c2a;
   --is-border: rgba(255, 255, 255, 0.1);
   --is-surface: #1a1a19;
+}
+
+body.mac-theme:not(.light-theme) {
+  @media (prefers-color-scheme: dark) {
+    .internal-stats-page {
+      --is-status-ok: #0ca30c;
+      --is-status-warn: #fab219;
+      --is-status-critical: #e66767;
+      --is-status-info: #898781;
+      --is-text-secondary: #c3c2b7;
+      --is-text-muted: #898781;
+      --is-track: #232322;
+      --is-gridline: #2c2c2a;
+      --is-border: rgba(255, 255, 255, 0.1);
+      --is-surface: #1a1a19;
+    }
+  }
 }
 
 .internal-stats-meta {

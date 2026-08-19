@@ -47,7 +47,7 @@ function loginAsRoot() {
     // Only the "email" passport method is registered (see the "should be able to
     // create the passport method" step below), so /welcome auto-redirects straight to
     // the email-entry screen instead of showing a method-choice screen first.
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -119,8 +119,8 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
         const workspacesEntry = (rootGroup.children || []).find(
           (item: any) => item.uniqueId === "workspaces",
         );
-        expect(workspacesEntry, '"Workspaces" menu entry present under "Root"').to
-          .exist;
+        expect(workspacesEntry, '"Workspaces" menu entry present under "Root"')
+          .to.exist;
         expect(workspacesEntry.href).to.equal("/manage/workspaces");
         expect(workspacesEntry.capabilityId).to.equal(
           "root.manage.abac.workspace.query",
@@ -128,7 +128,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
       });
     });
 
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
     // "root" itself is always a row here (see RepairTheWorkspaces) - proof the list
     // (not just the URL) actually rendered.
     cy.contains("root").should("exist");
@@ -136,7 +136,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
 
   it("shows an error toast (and does not delete anything) when trying to delete the root workspace via the UI.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
 
     cy.contains(".rdg-row", "root")
       .find("input.rdg-checkbox-input")
@@ -167,9 +167,9 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
   const suffix = Date.now();
   const workspaceName = `CypressWorkspace${suffix}`;
 
-  it("creates a workspace through the UI form, reachable via the list's own \"New\" action, and it shows up in the list.", () => {
+  it('creates a workspace through the UI form, reachable via the list\'s own "New" action, and it shows up in the list.', () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
     clickIconAction("New");
     cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
     cy.get(".content-section fieldset").should("not.be.disabled");
@@ -196,7 +196,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
 
   it("deletes the workspace from the list via row selection + the Delete action, and it disappears.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
     cy.contains(workspaceName).should("exist");
 
     // The grid is react-data-grid, not a plain <table> - rows are div.rdg-row, each
@@ -242,7 +242,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
 
   it("rejects creating a workspace with a blank name.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
     clickIconAction("New");
     cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
     cy.get(".content-section fieldset").should("not.be.disabled");
@@ -265,7 +265,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
 
   it("creates a parent workspace with a self-chosen unique id, and it's honored.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
     clickIconAction("New");
     cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
     cy.get(".content-section fieldset").should("not.be.disabled");
@@ -289,7 +289,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
   it("editing the parent workspace no longer offers a unique id field at all.", () => {
     loginAsRoot();
     cy.then(() => {
-      cy.visit(ui(`/manage/#/en/manage/workspace/edit/${parentUniqueId}`));
+      cy.visit(ui(`/manage/#/manage/workspace/edit/${parentUniqueId}`));
     });
     cy.get(".content-section fieldset").should("not.be.disabled");
     cy.contains(".mb-3", "Unique id").should("not.exist");
@@ -297,7 +297,7 @@ describe("Manage: Workspaces - menu, create via UI, delete via UI", () => {
 
   it("creates a child workspace, picking the parent workspace via the Parent Record select, and it's saved with the right parentId.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/workspaces"));
+    cy.visit(ui("/manage/#/manage/workspaces"));
     clickIconAction("New");
     cy.url({ timeout: 10000 }).should("include", "/manage/workspace/new");
     cy.get(".content-section fieldset").should("not.be.disabled");

@@ -10,6 +10,10 @@ import { FormText } from "@fireback/ui-core/components/forms/form-text/FormText"
 import { PassportDto } from "@fireback/manage/sdk/abac/PassportDto";
 import { usePassportBrowseActionQuery } from "@fireback/manage/sdk/abac/PassportBrowseAction";
 import {
+  CreatePassportForUserActionReq,
+  useCreatePassportForUserAction,
+} from "@fireback/manage/sdk/abac/CreatePassportForUserAction";
+import {
   SetPassportPasswordActionReq,
   useSetPassportPasswordAction,
 } from "@fireback/manage/sdk/abac/SetPassportPasswordAction";
@@ -31,11 +35,51 @@ export const UserPassportList = ({ userId }: { userId: string }) => {
   });
   const items = (data as any)?.data?.items as PassportDto[] | undefined;
   const s = useS(strings);
+  const cs = useS(coreStrings);
+  const { openDrawer } = useOverlay();
+  const createPassportMutation = useCreatePassportForUserAction({});
+
+  // Root-only (CreatePassportForUserAction - see modules/abac/
+  // CreatePassportForUserActionImplementation.go): lets a manager provision a working
+  // email/phone login for a user directly, password included, without the user having
+  // to complete signup/email-confirmation themselves - handy when there's no mail
+  // server configured yet, or the manager just wants to hand someone credentials.
+  const addPassport = () => {
+    openDrawer<AddPassportDrawerResult | undefined>((props) => (
+      <AddPassportDrawer {...props} s={s} cs={cs} />
+    ))
+      .promise.then(({ type, data: form }) => {
+        if (type !== "resolved" || !form) {
+          return;
+        }
+        return createPassportMutation
+          .mutateAsync(
+            new CreatePassportForUserActionReq({
+              userId,
+              type: form.type,
+              value: form.value,
+              password: form.password,
+            }),
+          )
+          .then(() => {
+            Toast(s.passportCreated, { type: "success" });
+            refetch();
+          });
+      })
+      .catch((err) => httpErrorHanlder(err, cs));
+  };
 
   return (
     <div>
-      {/* <Link href={"/passport"}>Add passport</Link> */}
       <PageSection title={s.passports}>
+        <div className="mb-3">
+          <button
+            className="btn btn-sm btn-outline-primary"
+            onClick={addPassport}
+          >
+            {s.addPassport}
+          </button>
+        </div>
         {(items || []).map((item) => {
           return (
             <UserPassportItem
@@ -47,6 +91,77 @@ export const UserPassportList = ({ userId }: { userId: string }) => {
           );
         })}
       </PageSection>
+    </div>
+  );
+};
+
+type AddPassportDrawerResult = {
+  type: "email" | "phone";
+  value: string;
+  password: string;
+};
+
+// Mirrors SetPasswordDrawer below - a minimal, non-formik drawer form (plain useState,
+// resolved value read by the opener) since this is a one-off admin action, not a
+// regular entity edit form.
+const AddPassportDrawer = ({
+  close,
+  resolve,
+  s,
+  cs,
+}: {
+  close: () => void;
+  resolve: (result?: AddPassportDrawerResult) => void;
+  s: typeof strings;
+  cs: typeof coreStrings;
+}) => {
+  const [type, setType] = useState<"email" | "phone">("email");
+  const [value, setValue] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Same minimum-length rule the backend enforces (see
+  // CreatePassportForUserActionImplementation.go) - caught here too so the request
+  // never round-trips just to be rejected for a password that's obviously too short.
+  const canSubmit = value.trim().length > 0 && password.length >= 6;
+
+  return (
+    <div className="confirm-drawer-container p-3">
+      <h2>{s.addPassport}</h2>
+      <div className="mb-3">
+        <label className="form-label">{s.passportTypeLabel}</label>
+        <select
+          className="form-select"
+          value={type}
+          onChange={(e) => setType(e.target.value as "email" | "phone")}
+        >
+          <option value="email">{s.email}</option>
+          <option value="phone">{s.phone}</option>
+        </select>
+      </div>
+      <FormText
+        value={value}
+        onChange={setValue}
+        autoFocus
+        label={type === "email" ? s.emailAddress : s.phoneNumberValue}
+      />
+      <FormText
+        type="password"
+        value={password}
+        onChange={setPassword}
+        label={s.newPassword}
+      />
+      <div>
+        <button
+          className="d-block w-100 btn btn-primary"
+          disabled={!canSubmit}
+          onClick={() => resolve({ type, value, password })}
+        >
+          {cs.common.save}
+        </button>
+        <button className="d-block w-100 btn" onClick={() => close()}>
+          {cs.common.cancel}
+        </button>
+      </div>
     </div>
   );
 };

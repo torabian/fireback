@@ -29,6 +29,23 @@ func NotificationModuleSetup() *application.ModuleProvider {
 
 				AppendNotificationConfigRouter(g)
 
+				// NotificationEntity (an actual notification delivered to a user) is a
+				// separate entity from NotificationConfig (per-workspace email/sms settings)
+				// above - see NotificationActions.go. Create/Update aren't wired here: the
+				// only sanctioned way to create one is SendNotificationAction, which calls
+				// abacdefs.NotificationEntityActions.Create directly rather than going through
+				// a public "notification create" endpoint.
+				abacdefs.NotificationBrowseActionGin(g, NotificationBrowseAction)
+				abacdefs.NotificationGetActionGin(g, NotificationGetAction)
+				abacdefs.NotificationAwareDeletePreviewActionGin(g, NotificationAwareDeletePreviewAction)
+				abacdefs.NotificationAwareDeleteActionGin(g, NotificationAwareDeleteAction)
+				abacdefs.SendNotificationActionGin(g, SendNotificationAction)
+
+				// Self-service side (any authenticated user, not root) - see
+				// NotificationSelfServiceActionImplementation.go.
+				abacdefs.MyNotificationsActionGin(g, MyNotificationsAction)
+				abacdefs.MarkNotificationReadActionGin(g, MarkNotificationReadAction)
+
 				return nil
 			},
 		},
@@ -36,11 +53,13 @@ func NotificationModuleSetup() *application.ModuleProvider {
 
 	module.ProvidePermissionHandler(
 		ALL_NOTIFICATION_CONFIG_PERMISSIONS,
+		ALL_NOTIFICATION_PERMISSIONS,
 	)
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		return dbref.AutoMigrate(
 			&abacdefs.NotificationConfigEntity{},
+			&abacdefs.NotificationEntity{},
 		)
 	})
 
@@ -66,6 +85,25 @@ func NotificationModuleSetup() *application.ModuleProvider {
 				abacdefs.NotificationConfigUpdateActionCliHandler(NotificationConfigUpdateAction),
 				abacdefs.NotificationConfigAwareDeletePreviewActionCliHandler(NotificationConfigAwareDeletePreviewAction),
 				abacdefs.NotificationConfigAwareDeleteActionCliHandler(NotificationConfigAwareDeleteAction),
+
+				// The actual "send a notification to users" entry point - `notification send
+				// --user-ids u1,u2 --title ... --body ...` (see SendNotificationAction).
+				abacdefs.SendNotificationActionCliHandler(SendNotificationAction),
+
+				// Self-service side - runs as whichever user the CLI's own session belongs
+				// to, not root (see NotificationSelfServiceActionImplementation.go).
+				abacdefs.MyNotificationsActionCliHandler(MyNotificationsAction),
+				abacdefs.MarkNotificationReadActionCliHandler(MarkNotificationReadAction),
+				{
+					Name:        "list",
+					Description: "Manage delivered notifications (root only) - browse/get/delete. See 'notification send' to create one.",
+					Commands: []*cli.Command{
+						abacdefs.NotificationBrowseActionCliHandler(NotificationBrowseAction),
+						abacdefs.NotificationGetActionCliHandler(NotificationGetAction),
+						abacdefs.NotificationAwareDeletePreviewActionCliHandler(NotificationAwareDeletePreviewAction),
+						abacdefs.NotificationAwareDeleteActionCliHandler(NotificationAwareDeleteAction),
+					},
+				},
 			},
 		},
 	})

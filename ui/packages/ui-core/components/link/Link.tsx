@@ -1,7 +1,5 @@
 import { RouterLink, useRouter } from "../../hooks/useRouter";
 import { useCompiler } from "../../hooks/useEnvironment";
-import { useLocale } from "../../hooks/useLocale";
-import { BUILD_VARIABLES } from "../../hooks/build-variables";
 
 const Link = ({
   children,
@@ -12,20 +10,12 @@ const Link = ({
   ...rest
 }: any) => {
   const router = useRouter();
-  const { locale } = useLocale();
-  const locale$ = rest.locale || locale || BUILD_VARIABLES.DEFAULT_LOCALE;
   const { compiler } = useCompiler();
-  const noPrefix = false;
 
+  // Bug fix: this used to prepend "/${locale}" to every href (routes used to
+  // be wrapped in a ":locale" segment - see EssentialRouter.tsx/App.tsx's own
+  // history for why that's gone), so hrefs are used exactly as given now.
   let href: string = rest?.href || router?.asPath || "";
-
-  if (typeof href === "string" && href?.indexOf && href.indexOf("http") === 0)
-    skip = true;
-  if (typeof href === "string" && locale$ && !skip && !href.startsWith(".")) {
-    href = href
-      ? (!noPrefix ? `/${locale}` : "") + href
-      : router.pathname?.replace("[locale]", locale$);
-  }
 
   if (isActive) {
     rest.className = `${rest.className || ""} ${activeClassName || "active"}`;

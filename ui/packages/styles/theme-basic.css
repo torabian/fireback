@@ -495,6 +495,11 @@ html[dir="rtl"] .table-copy-btn {
   }
 }
 
+html[dir="rtl"] .cell-actions {
+  right: initial !important;
+  left: -8px;
+}
+
 .table-open-in-new-router {
   right: 15px;
 }

@@ -28,7 +28,7 @@ function loginAsRoot() {
     // Only the "email" passport method is registered (see the "should be able to
     // create the passport method" step below), so /welcome auto-redirects straight to
     // the email-entry screen instead of showing a method-choice screen first.
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -98,7 +98,7 @@ describe("Manage: Capabilities - create with a chosen id, id uniqueness, id lock
     loginAsRoot();
 
     // --- Capability #1 ---
-    cy.visit(ui("/manage/#/en/manage/capabilities"));
+    cy.visit(ui("/manage/#/manage/capabilities"));
     clickIconAction("New");
     cy.url({ timeout: 10000 }).should("include", "/manage/capability/new");
     cy.get(".content-section fieldset").should("not.be.disabled");
@@ -145,12 +145,12 @@ describe("Manage: Capabilities - create with a chosen id, id uniqueness, id lock
 
     // Both capabilities' own single screens confirm id/name/description together, as
     // actually rendered by the UI (not just the raw API response above).
-    cy.visit(ui(`/manage/#/en/manage/capability/${capOneId}`));
+    cy.visit(ui(`/manage/#/manage/capability/${capOneId}`));
     cy.url().should("include", `/manage/capability/${capOneId}`);
     cy.contains(capOneName).should("exist");
     cy.contains(capOneDescription).should("exist");
 
-    cy.visit(ui(`/manage/#/en/manage/capability/${capTwoId}`));
+    cy.visit(ui(`/manage/#/manage/capability/${capTwoId}`));
     cy.url().should("include", `/manage/capability/${capTwoId}`);
     cy.contains(capTwoName).should("exist");
     cy.contains(capTwoDescription).should("exist");
@@ -158,7 +158,7 @@ describe("Manage: Capabilities - create with a chosen id, id uniqueness, id lock
 
   it("rejects creating a capability whose id is already taken, with a field error under Id (not a raw database error).", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/capability/new"));
+    visitForm(ui("/manage/#/manage/capability/new"));
 
     fieldInput("Id").type(capOneId);
     fieldInput("Name").type("Should not be created");
@@ -183,7 +183,7 @@ describe("Manage: Capabilities - create with a chosen id, id uniqueness, id lock
     // createEntityNavigation's absolute paths ("/en/capability/...") don't carry the
     // "/manage" prefix ManageRoutes.tsx nests these routes under, so that resolved URI
     // is only actually reachable via history, not a fresh page load.
-    cy.visit(ui(`/manage/#/en/manage/capability/${capOneId}`));
+    cy.visit(ui(`/manage/#/manage/capability/${capOneId}`));
     clickIconAction("Edit");
     cy.url({ timeout: 10000 }).should(
       "include",
@@ -208,7 +208,10 @@ describe("Manage: Capabilities - create with a chosen id, id uniqueness, id lock
     });
 
     // Back on the single screen for the same (unchanged) id.
-    cy.url({ timeout: 10000 }).should("include", `/manage/capability/${capOneId}`);
+    cy.url({ timeout: 10000 }).should(
+      "include",
+      `/manage/capability/${capOneId}`,
+    );
     cy.contains(editedName).should("exist");
   });
 

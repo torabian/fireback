@@ -66,7 +66,7 @@ function loginAs(sessionKey: string, email: string, password: string) {
   cy.session(sessionKey, () => {
     // Only the "email" passport method is registered, so /welcome auto-redirects
     // straight to the email-entry screen instead of showing a method-choice screen.
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(email);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1", { timeout: 10000 }).should("have.text", "Enter Password");
@@ -134,8 +134,9 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
       "exec",
       ` role create --name "checkendpointtests admin role" --capabilities-list-id '["root.modules.abac.workspace-invite.create", "root.modules.abac.role.create", "root.modules.abac.role.query"]'`,
     ).then((content: string) => {
-      const roleId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const roleId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
 
       cy.task(
         "exec",
@@ -153,8 +154,9 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
       "exec",
       ` role create --name "checkendpointtests invitee own role" --capabilities-list-id '["root.abac.email-confirmation.query"]'`,
     ).then((content: string) => {
-      const roleId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const roleId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
       cy.task(
         "exec",
         ` ws workspaceType-c --title "checkendpointtests invitee type" --slug /checkendpointtests-invitee --role-id ${roleId}`,
@@ -171,15 +173,18 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
       "exec",
       ` messaging emailSender-c --from-name Checkendpointtests --from-email-address checkendpointtests-sender@example.com --reply-to checkendpointtests-sender@example.com --nick-name checkendpointtests`,
     ).then((content: string) => {
-      const senderId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const senderId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
 
       cy.task(
         "exec",
         ` messaging emailProvider-c --type terminal --title checkendpointtests`,
       ).then((providerContent: string) => {
         const providerId = (
-          JSON.parse(providerContent) as SingleItemResponse<{ uniqueId: string }>
+          JSON.parse(providerContent) as SingleItemResponse<{
+            uniqueId: string;
+          }>
         ).data.item.uniqueId;
 
         cy.task(
@@ -226,16 +231,23 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
         cy.request({
           method: "POST",
           url: ui("/role"),
-          headers: { authorization: adminToken, "workspace-id": adminWorkspaceId },
+          headers: {
+            authorization: adminToken,
+            "workspace-id": adminWorkspaceId,
+          },
           body: {
             name: INVITEE_ROLE_NAME,
             capabilitiesListId: ["root.modules.abac.workspace-invite.create"],
           },
         }).then(
-          (response: Cypress.Response<SingleItemResponse<{ uniqueId: string }>>) => {
+          (
+            response: Cypress.Response<
+              SingleItemResponse<{ uniqueId: string }>
+            >,
+          ) => {
             expect(response.status).to.equal(200);
-            expect(response.body.data.item.uniqueId).to.be.a("string").and.not.be
-              .empty;
+            expect(response.body.data.item.uniqueId).to.be.a("string").and.not
+              .be.empty;
           },
         );
       },
@@ -248,7 +260,7 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
     loginAs("admin-login", ADMIN_EMAIL, ADMIN_PASSWORD);
     cy.intercept("POST", "**/workspace/invite").as("createInvite");
 
-    visitForm(ui("/manage/#/en/selfservice/workspace-invite/new"));
+    visitForm(ui("/manage/#/selfservice/workspace-invite/new"));
     cy.contains(".mb-3", "First name").find("input").type("Checkendpointtests");
     cy.contains(".mb-3", "Last name").find("input").type("Invitee");
     cy.contains(".mb-3", "Email address").find("input").type(INVITEE_EMAIL);
@@ -295,7 +307,7 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
   it("should log into the manage UI as the invitee, see the pending invitation, and accept it.", () => {
     loginAs("invitee-login", INVITEE_EMAIL, INVITEE_PASSWORD);
 
-    cy.visit(ui("/manage/#/en/selfservice/user-invitations"));
+    cy.visit(ui("/manage/#/selfservice/user-invitations"));
     cy.wait(1000);
 
     // The invite is matched to the invitee purely by their email's passport (see
@@ -312,22 +324,24 @@ describe("Workspace invite: an admin (capability-driven, not root) invites someo
   });
 
   it("whoami should confirm the invitee now belongs to the admin's workspace, in addition to their own.", () => {
-    sharedValues(["inviteeToken", "adminWorkspaceId", "inviteeOwnWorkspaceId"]).then(
-      ({ inviteeToken, adminWorkspaceId, inviteeOwnWorkspaceId }) => {
-        cy.request({
-          method: "GET",
-          url: ui("/whoami"),
-          headers: { authorization: inviteeToken },
-        }).then((response: Cypress.Response<WhoamiResponse>) => {
-          expect(response.status).to.equal(200);
-          const workspaceIds = response.body.data.item.workspaces.map(
-            (w) => w.uniqueId,
-          );
-          expect(workspaceIds).to.include(adminWorkspaceId);
-          expect(workspaceIds).to.include(inviteeOwnWorkspaceId);
-        });
-      },
-    );
+    sharedValues([
+      "inviteeToken",
+      "adminWorkspaceId",
+      "inviteeOwnWorkspaceId",
+    ]).then(({ inviteeToken, adminWorkspaceId, inviteeOwnWorkspaceId }) => {
+      cy.request({
+        method: "GET",
+        url: ui("/whoami"),
+        headers: { authorization: inviteeToken },
+      }).then((response: Cypress.Response<WhoamiResponse>) => {
+        expect(response.status).to.equal(200);
+        const workspaceIds = response.body.data.item.workspaces.map(
+          (w) => w.uniqueId,
+        );
+        expect(workspaceIds).to.include(adminWorkspaceId);
+        expect(workspaceIds).to.include(inviteeOwnWorkspaceId);
+      });
+    });
   });
 
   endFirebackServer();

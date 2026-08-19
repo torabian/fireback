@@ -4,7 +4,6 @@ import { AuthLoader } from "@fireback/ui-core/components/auth-loader/AuthLoader"
 import { QueryErrorView } from "@fireback/ui-core/components/error-view/QueryError";
 import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 import { source } from "@fireback/ui-core/hooks/source";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { useAuthentication } from "@fireback/auth-client";
@@ -18,6 +17,7 @@ import {
 import type { GResponse } from "@fireback/js-remote-ctx/envelopes";
 import { type AuthAvailableMethods, AuthMethod } from "./auth.common";
 import { FacebookLogin } from "./FacebookLogin";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { strings } from "./strings/translations";
 import { usePresenter } from "./Welcome.presenter";
 
@@ -34,6 +34,7 @@ export const WelcomeScreen = () => {
   if (passportMethodsQuery.isError || passportMethodsQuery.error) {
     return (
       <div className="signin-form-container">
+        <LanguageSwitcher />
         <QueryErrorView query={passportMethodsQuery} />
       </div>
     );
@@ -42,6 +43,7 @@ export const WelcomeScreen = () => {
   if (totalAvailableMethods === undefined || isLoadingMethods) {
     return (
       <div className="signin-form-container">
+        <LanguageSwitcher />
         <AuthLoader />
       </div>
     );
@@ -50,6 +52,7 @@ export const WelcomeScreen = () => {
   if (totalAvailableMethods === 0) {
     return (
       <div className="signin-form-container">
+        <LanguageSwitcher />
         <NoMethodAvailable />
       </div>
     );
@@ -57,6 +60,7 @@ export const WelcomeScreen = () => {
 
   return (
     <div className="signin-form-container">
+      <LanguageSwitcher />
       {availableOptions.googleOAuthClientKey ? (
         <GoogleOAuthProvider clientId={availableOptions.googleOAuthClientKey}>
           <Form
@@ -87,7 +91,6 @@ const Form = ({
 }) => {
   const { mutateAsync } = useOauthAuthenticateAction({});
   const { setSession } = useAuthentication();
-  const { locale } = useLocale();
   const { replace } = useRouter();
 
   const continueWithResult = (
@@ -105,9 +108,7 @@ const Form = ({
           );
         }
         if (BUILD_VARIABLES.DEFAULT_ROUTE) {
-          const to = (
-            BUILD_VARIABLES.DEFAULT_ROUTE || "/{locale}/signin"
-          ).replace("{locale}", locale || BUILD_VARIABLES.DEFAULT_LOCALE);
+          const to = BUILD_VARIABLES.DEFAULT_ROUTE || "/signin";
           replace(to, to);
         }
       })

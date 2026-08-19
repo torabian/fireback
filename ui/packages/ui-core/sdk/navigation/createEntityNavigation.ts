@@ -6,19 +6,38 @@
 // - this factory reproduces the exact same shape/behavior by hand, driven by the
 // same two inputs the old template used: the entity's own kebab-case slug (e.g.
 // "role") and its plural form (e.g. "roles").
+// Bug fix: edit/create/single/query used to build "/${locale}/..." whenever a
+// locale was passed, which - since useCommonEntityManager's own `locale`
+// (the 2nd argument every *EntityManager.tsx call site passes) was *always*
+// truthy - was in practice unconditional, permanently shadowing the "no
+// locale" fallback below it that built a relative "../${slug}/..." path
+// instead. That fallback was the only one of the two that ever actually
+// worked: every entity's Rcreate/Redit/Rsingle/Rquery routes are registered
+// as flat siblings directly under one shared parent segment ("manage" or
+// "selfservice" - see e.g. WorkspaceTypeRoutes.tsx/UserRoutes.tsx and how
+// ManageRoutes.tsx concatenates every entity's route fragment under a single
+// <Route path="manage">), so "/${slug}/..." (missing that parent segment
+// entirely) 404'd - it needed to omit the locale segment (fixed elsewhere in
+// this same change - see EssentialRouter.tsx/App.tsx's own history) AND go
+// through the relative form to land under the correct parent regardless of
+// which one a given entity happens to live under. Now that locale is never
+// part of a route at all, the relative form applies unconditionally - `..`
+// steps back out of whichever sibling route the caller is currently on
+// (list, edit, create, single - all equally one level deep under the shared
+// parent) before stepping into the target sibling.
 export function createEntityNavigation(slug: string, plural: string) {
   return {
     edit(uniqueId: string, locale?: string) {
-      return `${locale ? "/" + locale : ".."}/${slug}/edit/${uniqueId}`;
+      return `../${slug}/edit/${uniqueId}`;
     },
     create(locale?: string) {
-      return `${locale ? "/" + locale : ".."}/${slug}/new`;
+      return `../${slug}/new`;
     },
     single(uniqueId: string, locale?: string) {
-      return `${locale ? "/" + locale : ".."}/${slug}/${uniqueId}`;
+      return `../${slug}/${uniqueId}`;
     },
     query(params: any = {}, locale?: string) {
-      return `${locale ? "/" + locale : ".."}/${plural}`;
+      return `../${plural}`;
     },
     /**
      * Use R series while building router in CRA or nextjs, or react navigation for react Native

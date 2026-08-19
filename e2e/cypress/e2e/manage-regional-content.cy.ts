@@ -55,7 +55,7 @@ function loginAsRoot() {
     // Only the "email" passport method is registered (see the "should be able to
     // create the passport method" step below), so /welcome auto-redirects straight to
     // the email-entry screen instead of showing a method-choice screen first.
-    cy.visit(ui("/manage/#/en/welcome"));
+    cy.visit(ui("/manage/#/welcome"));
     cy.get("#value-input", { timeout: 10000 }).type(ROOT_EMAIL);
     cy.get("#submit-form").click({ force: true });
     cy.get("h1").should("have.text", "Enter Password");
@@ -159,7 +159,7 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
       });
     });
 
-    cy.visit(ui("/manage/#/en/manage/regional-contents"));
+    cy.visit(ui("/manage/#/manage/regional-contents"));
     cy.get(".content-section").should("exist");
   });
 
@@ -175,9 +175,12 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
 
   it('creates a regional content through the UI ("SMS one-time password", region "us"), with keyGroup actually selectable, and content/keyGroup both show on its own single screen.', () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/regional-contents"));
+    cy.visit(ui("/manage/#/manage/regional-contents"));
     clickIconAction("New");
-    cy.url({ timeout: 10000 }).should("include", "/manage/regional-content/new");
+    cy.url({ timeout: 10000 }).should(
+      "include",
+      "/manage/regional-content/new",
+    );
     cy.get(".content-section fieldset").should("not.be.disabled");
 
     selectFormSelectOption("Key group", keyGroupLabel);
@@ -201,7 +204,7 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
     cy.url({ timeout: 10000 }).should("include", "/manage/regional-contents");
 
     cy.then(() => {
-      cy.visit(ui(`/manage/#/en/manage/regional-content/${idUs}`));
+      cy.visit(ui(`/manage/#/manage/regional-content/${idUs}`));
       cy.url().should("include", `/manage/regional-content/${idUs}`);
       // Regression guard: content/keyGroup used to be entirely absent from this
       // screen's field list.
@@ -214,7 +217,7 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
 
   it('allows creating a second regional content with the same key group and language, but a different region ("eu") - the per-region uniqueness fix.', () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/regional-content/new"));
+    visitForm(ui("/manage/#/manage/regional-content/new"));
 
     selectFormSelectOption("Key group", keyGroupLabel);
     cy.contains(".mb-3", "Content").find("textarea").type(contentEu);
@@ -235,10 +238,12 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
 
   it("rejects creating a third regional content with the exact same key group, language, and region as an existing one.", () => {
     loginAsRoot();
-    visitForm(ui("/manage/#/en/manage/regional-content/new"));
+    visitForm(ui("/manage/#/manage/regional-content/new"));
 
     selectFormSelectOption("Key group", keyGroupLabel);
-    cy.contains(".mb-3", "Content").find("textarea").type("should not be created");
+    cy.contains(".mb-3", "Content")
+      .find("textarea")
+      .type("should not be created");
     fieldInput("Region").clear().type("us"); // same triple as the very first one created above
     fieldInput("Language id").clear().type(languageId);
 
@@ -255,7 +260,7 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
     // than a direct visit to the edit URL - CommonEntityManager's onSubmit prefers going
     // back in browser history over its resolved onFinishUriResolver URI, same as
     // manage-capabilities.cy.ts's own edit test.
-    cy.visit(ui(`/manage/#/en/manage/regional-content/${idUs}`));
+    cy.visit(ui(`/manage/#/manage/regional-content/${idUs}`));
     clickIconAction("Edit");
     cy.url({ timeout: 10000 }).should(
       "include",
@@ -287,7 +292,7 @@ describe("Manage: Regional Content - menu, keyGroup select, per-region uniquenes
 
   it("deletes the second regional content from the list via row selection + the Delete action, and it disappears.", () => {
     loginAsRoot();
-    cy.visit(ui("/manage/#/en/manage/regional-contents"));
+    cy.visit(ui("/manage/#/manage/regional-contents"));
     cy.contains(contentEu).should("exist");
 
     // The grid is react-data-grid, not a plain <table> - rows are div.rdg-row, each with

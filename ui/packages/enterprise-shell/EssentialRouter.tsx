@@ -1,12 +1,9 @@
-import { AppConfigContext } from "@fireback/ui-core/hooks/appConfigTools";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { strings } from "@fireback/ui-core/components/strings/translations";
 
 import { NotFound404 } from "@fireback/ui-core/components/404/NotFound404";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRtlClass } from "@fireback/ui-core/hooks/useRtlClass";
 
-import { useContext } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@fireback/ui-core/components/layouts/Layout";
 import { PageTitleProvider } from "@fireback/ui-core/components/page-title/PageTitle";
@@ -27,8 +24,6 @@ export function FirebackEssentialRouterManager({
 }) {
   const s = useS(strings);
   useRtlClass();
-  const { locale } = useLocale();
-  const { config } = useContext(AppConfigContext);
   const sidebarMenu = useRemoteMenuResolver("sidebar");
 
   const selfServiceAuthenticateRoutes = useSelfServiceAuthenticateRoutes();
@@ -43,19 +38,10 @@ export function FirebackEssentialRouterManager({
         <Route
           path="/"
           element={
-            <Navigate
-              to={(BUILD_VARIABLES.DEFAULT_ROUTE || "/{locale}/signin").replace(
-                "{locale}",
-                config.interfaceLanguage || locale || "en",
-              )}
-              replace
-            />
+            <Navigate to={BUILD_VARIABLES.DEFAULT_ROUTE || "/signin"} replace />
           }
         />
-        <Route
-          path=":locale"
-          element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}
-        >
+        <Route element={<Layout routerId={routerId} sidebarMenu={sidebarMenu} />}>
           <Route
             path="settings"
             element={

@@ -9,14 +9,12 @@ import type { ClassicSigninActionRes } from "@fireback/selfservice/sdk/abac/Clas
 import type { ClassicSignupActionRes } from "@fireback/selfservice/sdk/abac/ClassicSignupAction";
 import type { CompletePassportPasswordResetActionRes } from "@fireback/selfservice/sdk/abac/CompletePassportPasswordResetAction";
 import type { UserSessionDto } from "@fireback/selfservice/sdk/abac/UserSessionDto";
-import { useLocale } from "@fireback/ui-core/hooks/useLocale";
 import { useRouter } from "@fireback/ui-core/hooks/useRouter";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { useQueryUserRoleWorkspacesActionQuery } from "@fireback/ui-core/sdk/abac/QueryUserRoleWorkspacesAction";
 import { WhoamiAction } from "@fireback/ui-core/sdk/abac/WhoamiAction";
 import { useEffect } from "react";
 import { strings } from "./strings/translations";
-import { BUILD_VARIABLES } from "@fireback/ui-core/hooks/build-variables";
 
 export enum AuthMethod {
   Email = "email",
@@ -36,7 +34,6 @@ export interface AuthAvailableMethods {
 
 export const useCompleteAuth = () => {
   const { setSession } = useAuthentication();
-  const { locale } = useLocale();
   const { replace } = useRouter();
   const s = useS(strings);
   const { selectWorkspace } = useAuthentication();
@@ -62,8 +59,13 @@ export const useCompleteAuth = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get("redirect");
 
-    // check also, if there is localstorage to redirect regardless
-    const redirect2 = sessionStorage.getItem("redirect_temporary");
+    // check also, if there is localstorage to redirect regardless - captured on
+    // Welcome mount by useTemporaryParamOptions(["redirect", ...]) (see
+    // Welcome.presenter.tsx), which also catches a ?redirect= placed *after* the
+    // hash-router's own "#" (e.g. .../selfservice/#/selfservice/welcome?redirect=...),
+    // unlike the plain window.location.search read below, which only ever sees a
+    // redirect param placed before the "#".
+    const redirect2 = sessionStorage.getItem("redirect");
 
     const session = (res?.data?.item?.session as MOne<UserSessionDto>)?.get();
 
@@ -112,7 +114,7 @@ export const useCompleteAuth = () => {
     setSession(mapRawSessionToAuthenticationSession(session));
 
     // Clean up url options which are set earlier.
-    sessionStorage.removeItem("redirect_temporary");
+    sessionStorage.removeItem("redirect");
     sessionStorage.removeItem("workspace_type_id");
 
     if (redirect2) {
@@ -129,10 +131,7 @@ export const useCompleteAuth = () => {
       window.location.href = finalUrl.toString();
     } else {
       // Fallback to the default route
-      const to = "/{locale}/dashboard".replace(
-        "{locale}",
-        locale || BUILD_VARIABLES.DEFAULT_LOCALE,
-      );
+      const to = "/dashboard";
 
       replace(to, to);
     }
@@ -142,6 +141,24 @@ export const useCompleteAuth = () => {
 };
 
 /**
+ * Reads `key` from wherever a query param can actually show up in this
+ * (hash-routed) app: before the "#" (plain window.location.search - the shape
+ * ForcedAuthenticated.tsx's own /selfservice?redirect=... link uses) or after
+ * it, embedded in the hash route's own query (.../#/selfservice/welcome?
+ * redirect=...). Shared by useTemporaryParamOptions below and by App.tsx's own
+ * already-authenticated redirect check, so both agree on where a param can live.
+ */
+export function readUrlParam(key: string): string | null {
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashIndex = window.location.hash.indexOf("?");
+  const hashParams =
+    hashIndex !== -1
+      ? new URLSearchParams(window.location.hash.slice(hashIndex))
+      : new URLSearchParams();
+  return searchParams.get(key) || hashParams.get(key);
+}
+
+/**
  * @description A lot of times, we need to set an option for authentication,
  * from external source such as query params, such as redirect url, selected workspace.
  * This function would read that from query params or hash, and store it in session storage.
@@ -149,15 +166,8 @@ export const useCompleteAuth = () => {
  */
 export const useTemporaryParamOptions = (keys: string[]) => {
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const hashIndex = window.location.hash.indexOf("?");
-    const hashParams =
-      hashIndex !== -1
-        ? new URLSearchParams(window.location.hash.slice(hashIndex))
-        : new URLSearchParams();
-
     keys.forEach((key) => {
-      const value = searchParams.get(key) || hashParams.get(key);
+      const value = readUrlParam(key);
       if (value) {
         sessionStorage.setItem(key, value);
       }
