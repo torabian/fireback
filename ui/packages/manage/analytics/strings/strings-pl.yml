@@ -1,0 +1,13 @@
+content:
+  analytics:
+    title: Analityka
+    description: Zbiorcze statystyki dotyczące użytkowników, przestrzeni roboczych,
+      dostępu i zaangażowania.
+    generatedAt: Wygenerowano
+    metrics: Metryki
+    overviewSection: Przegląd
+    chartSection: Trendy i zestawienia
+    loadError: Nie udało się wczytać analityki. Wymagana jest sesja w przestrzeni
+      roboczej root.
+    refresh: Odśwież
+    refreshing: Odświeżanie…

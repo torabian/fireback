@@ -1,0 +1,24 @@
+content:
+  internalStats:
+    title: Statystyki serwera
+    description: Kondycja serwera i procesów - CPU, pamięć, dysk, sieć oraz środowisko
+      uruchomieniowe Go - odświeżane automatycznie.
+    host: Host
+    generatedAt: Wygenerowano
+    metrics: Metryki
+    snapshotSection: Migawka
+    chartSection: Metryki liczbowe
+    loadError: Nie udało się wczytać statystyk serwera. Wymagana jest sesja w przestrzeni
+      roboczej root.
+    noNumericMetrics: Brak dostępnych metryk liczbowych.
+    severityOk: OK
+    severityWarn: Ostrzeżenie
+    severityCritical: Krytyczny
+    severityInfo: Informacja
+    unitPercent: Użycie (procent)
+    unitBytes: Pamięć / dysk / sieć (bajty)
+    unitSeconds: Czas trwania (sekundy)
+    unitMhz: Częstotliwość (MHz)
+    unitLoad: Średnie obciążenie
+    unitCount: Liczniki
+    unitOther: Inne

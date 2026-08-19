@@ -1,0 +1,15 @@
+content:
+  notifications:
+    title: Wyślij powiadomienie
+    description: Wyślij powiadomienie w aplikacji do jednego lub kilku istniejących
+      użytkowników. Zobaczą je na liście powiadomień i będą mogli oznaczyć je jako
+      przeczytane.
+    composeSection: Tworzenie
+    recipients: Odbiorcy
+    recipientsHint: Wyszukaj użytkowników po nazwie i wybierz jednego lub więcej.
+    notificationTitle: Tytuł
+    notificationBody: Wiadomość
+    send: Wyślij
+    sending: Wysyłanie…
+    sent: Wysłano do {count} użytkownik(ów).
+    someSkipped: 'Pominięto {count} odbiorcę/ów (użytkownika nie znaleziono).'

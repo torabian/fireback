@@ -1,0 +1,11 @@
+content:
+  analytics:
+    title: Analytics
+    description: Aggregate stats across users, workspaces, access and engagement.
+    generatedAt: Generated
+    metrics: Metrics
+    overviewSection: Overview
+    chartSection: Trends & breakdowns
+    loadError: Could not load analytics. This requires a root workspace session.
+    refresh: Refresh
+    refreshing: Refreshing…

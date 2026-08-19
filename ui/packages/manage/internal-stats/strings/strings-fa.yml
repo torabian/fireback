@@ -1,0 +1,23 @@
+content:
+  internalStats:
+    title: آمار سرور
+    description: سلامت سرور و پردازش‌ها - پردازنده، حافظه، دیسک، شبکه و Go runtime
+      - به‌صورت خودکار به‌روزرسانی می‌شود.
+    host: میزبان
+    generatedAt: زمان تولید
+    metrics: معیارها
+    snapshotSection: لحظه‌نگار
+    chartSection: معیارهای عددی
+    loadError: بارگذاری آمار سرور ممکن نشد. این بخش نیاز به نشست فضای کاری روت دارد.
+    noNumericMetrics: هنوز معیار عددی در دسترس نیست.
+    severityOk: سالم
+    severityWarn: هشدار
+    severityCritical: بحرانی
+    severityInfo: اطلاعات
+    unitPercent: میزان استفاده (درصد)
+    unitBytes: حافظه / دیسک / شبکه (بایت)
+    unitSeconds: مدت زمان (ثانیه)
+    unitMhz: فرکانس (مگاهرتز)
+    unitLoad: میانگین بار
+    unitCount: تعداد
+    unitOther: سایر

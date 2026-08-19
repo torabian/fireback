@@ -1,0 +1,14 @@
+content:
+  notifications:
+    title: ارسال اعلان
+    description: یک اعلان درون‌برنامه‌ای برای یک یا چند کاربر موجود ارسال کنید. آن‌ها
+      این را در فهرست اعلان‌های خود می‌بینند و می‌توانند آن را خوانده‌شده علامت بزنند.
+    composeSection: نگارش
+    recipients: گیرندگان
+    recipientsHint: کاربران را با نام جستجو کنید و یک یا چند مورد را انتخاب کنید.
+    notificationTitle: عنوان
+    notificationBody: پیام
+    send: ارسال
+    sending: در حال ارسال…
+    sent: به {count} کاربر ارسال شد.
+    someSkipped: '{count} گیرنده نادیده گرفته شد (کاربر یافت نشد).'

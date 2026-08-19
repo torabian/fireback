@@ -1,0 +1,196 @@
+/* analytics: manage's users/workspaces analytics dashboard
+   (ui/packages/manage/analytics). Mirrors internal-stats.css's structure/tokens -
+   same stat-tile grid, same severity dots - but the chart section uses one
+   sequential hue (magnitude comparison, no per-point severity) instead of a
+   status palette. */
+
+.analytics-page {
+  --an-status-ok: #0ca30c;
+  --an-status-warn: #b5760f;
+  --an-status-critical: #d03b3b;
+  --an-status-info: #898781;
+  --an-text-secondary: #52514e;
+  --an-text-muted: #898781;
+  --an-track: #eeede8;
+  --an-gridline: #e1e0d9;
+  --an-border: rgba(11, 11, 11, 0.1);
+  --an-surface: #fcfcfb;
+  --an-bar: #2a78d6;
+}
+
+/* Dark applies in two cases - the user's explicit choice (body.dark-theme), or
+   "automatic" (neither .dark-theme nor .light-theme) deferring to the OS. Without
+   the second rule, this page stayed light-only whenever the app's theme was left on
+   automatic and only the system was dark - see authentication.css's .auth-card for
+   the same two-rule shape, and its own comment on the three theme states. */
+body.dark-theme .analytics-page {
+  --an-status-ok: #0ca30c;
+  --an-status-warn: #fab219;
+  --an-status-critical: #e66767;
+  --an-status-info: #898781;
+  --an-text-secondary: #c3c2b7;
+  --an-text-muted: #898781;
+  --an-track: #232322;
+  --an-gridline: #2c2c2a;
+  --an-border: rgba(255, 255, 255, 0.1);
+  --an-surface: #1a1a19;
+  --an-bar: #3987e5;
+}
+
+body.mac-theme:not(.light-theme) {
+  @media (prefers-color-scheme: dark) {
+    .analytics-page {
+      --an-status-ok: #0ca30c;
+      --an-status-warn: #fab219;
+      --an-status-critical: #e66767;
+      --an-status-info: #898781;
+      --an-text-secondary: #c3c2b7;
+      --an-text-muted: #898781;
+      --an-track: #232322;
+      --an-gridline: #2c2c2a;
+      --an-border: rgba(255, 255, 255, 0.1);
+      --an-surface: #1a1a19;
+      --an-bar: #3987e5;
+    }
+  }
+}
+
+.analytics-meta {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.analytics-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analytics-meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--an-text-muted);
+}
+
+/* ---------- Stat tiles ---------- */
+
+.analytics-category {
+  margin-bottom: 20px;
+}
+
+.analytics-category-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--an-text-muted);
+  margin: 0 0 8px;
+}
+
+.analytics-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.analytics-tile {
+  background: var(--an-surface);
+  border: 1px solid var(--an-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.analytics-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--an-text-secondary);
+}
+
+.analytics-tile-value {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.analytics-severity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.analytics-severity-dot.is-severity-ok {
+  background: var(--an-status-ok);
+}
+.analytics-severity-dot.is-severity-warn {
+  background: var(--an-status-warn);
+}
+.analytics-severity-dot.is-severity-critical {
+  background: var(--an-status-critical);
+}
+.analytics-severity-dot.is-severity-info {
+  background: var(--an-status-info);
+}
+
+/* ---------- Chart ---------- */
+
+.analytics-chart-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.analytics-facet {
+  background: var(--an-surface);
+  border: 1px solid var(--an-border);
+  border-radius: 10px;
+  padding: 14px 16px 10px;
+}
+
+.analytics-facet-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--an-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.analytics-facet svg {
+  display: block;
+  width: 100%;
+}
+
+.analytics-bar-fill {
+  fill: var(--an-bar);
+}
+
+.analytics-bar-value {
+  font-size: 10px;
+  fill: var(--an-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.analytics-grid line {
+  stroke: var(--an-gridline);
+  stroke-width: 1;
+}
+
+.analytics-grid .domain {
+  display: none;
+}
+
+.analytics-axis-x text {
+  fill: var(--an-text-muted);
+  font-size: 10px;
+}
+
+.analytics-axis-x .domain,
+.analytics-axis-x line {
+  stroke: var(--an-gridline);
+}
