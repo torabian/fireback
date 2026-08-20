@@ -139,7 +139,6 @@ export const CommonListManager2 = ({
 
   async function handleScroll(event: React.UIEvent<HTMLDivElement>) {
     if (q.query.isLoading || !isAtBottom(event)) return;
-    alert(2);
     setStartIndex(indexedData.length);
   }
 
