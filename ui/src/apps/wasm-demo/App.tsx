@@ -40,8 +40,8 @@ function App() {
   return (
     <WithWasmServer
       options={{
-        wasmUrl: BUILD_VARIABLES.PUBLIC_URL + "wasm_exec.js",
-        wasmExecUrl: BUILD_VARIABLES.PUBLIC_URL + "fireback.wasm",
+        wasmUrl: BUILD_VARIABLES.PUBLIC_URL + "fireback.wasm",
+        wasmExecUrl: BUILD_VARIABLES.PUBLIC_URL + "wasm_exec.js",
       }}
     >
       <EssentialApp ApplicationRoutes={ApplicationRoutes} />

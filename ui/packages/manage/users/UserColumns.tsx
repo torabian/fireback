@@ -15,7 +15,8 @@ export const columns = (
     width: 100,
   },
   {
-    name: "firstName",
+    name: UserDto.Fields.firstName,
+    filterKey: "first_name",
     title: s.firstName,
     width: 200,
     sortable: true,
@@ -26,6 +27,7 @@ export const columns = (
   {
     filterable: true,
     name: "lastName",
+    filterKey: "last_name",
     sortable: true,
     title: s.lastName,
     width: 200,
@@ -34,6 +36,7 @@ export const columns = (
 
   {
     name: "birthDate",
+    filterKey: "birth_date",
     title: s.birthDate,
     width: 140,
     getCellValue: (e: UserDto) => <>{e?.birthDate}</>,
@@ -52,17 +55,17 @@ export const columns = (
     ),
   },
 
-  {
-    name: "Image",
-    title: s.image,
-    width: 40,
-    getCellValue: (e: UserDto) => (
-      <UserPhotoThumbnail
-        photo={e?.photo}
-        style={{ width: "20px", height: "20px", objectFit: "cover" }}
-      />
-    ),
-  },
+  // {
+  //   name: "Image",
+  //   title: s.image,
+  //   width: 40,
+  //   getCellValue: (e: UserDto) => (
+  //     <UserPhotoThumbnail
+  //       photo={e?.photo}
+  //       style={{ width: "20px", height: "20px", objectFit: "cover" }}
+  //     />
+  //   ),
+  // },
   {
     name: UserDto.Fields.primaryAddress.countryCode,
     title: s.countryCode,
@@ -72,6 +75,7 @@ export const columns = (
   {
     filterable: true,
     name: UserDto.Fields.primaryAddress.addressLine1,
+    filterKey: "address_line1",
     title: s.addressLine1,
     width: 180,
     getCellValue: (e: UserDto) => <>{e.primaryAddress?.addressLine1}</>,
@@ -79,6 +83,7 @@ export const columns = (
   {
     filterable: true,
     name: UserDto.Fields.primaryAddress.addressLine2,
+    filterKey: "address_line2",
     title: s.addressLine2,
     width: 180,
     getCellValue: (e: UserDto) => <>{e.primaryAddress?.addressLine2}</>,
@@ -86,6 +91,7 @@ export const columns = (
   {
     filterable: true,
     name: UserDto.Fields.primaryAddress.city,
+    filterKey: "city",
     title: s.city,
     width: 180,
     getCellValue: (e: UserDto) => <>{e.primaryAddress?.city}</>,
@@ -99,6 +105,7 @@ export const columns = (
   {
     filterable: true,
     name: UserDto.Fields.phoneNumber,
+    filterKey: "phone_number",
     title: s.phoneNumber,
     width: 160,
     getCellValue: (e: UserDto) => <>{e?.phoneNumber}</>,
@@ -106,6 +113,7 @@ export const columns = (
   {
     filterable: true,
     name: UserDto.Fields.jobTitle,
+    filterKey: "job_title",
     title: s.jobTitle,
     width: 180,
     getCellValue: (e: UserDto) => <>{e?.jobTitle}</>,
@@ -113,6 +121,7 @@ export const columns = (
   {
     filterable: true,
     name: UserDto.Fields.company,
+    filterKey: "company",
     title: s.company,
     width: 180,
     getCellValue: (e: UserDto) => <>{e?.company}</>,

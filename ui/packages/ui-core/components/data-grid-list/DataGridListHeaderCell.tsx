@@ -31,13 +31,19 @@ export function DataGridListHeaderCell<R>({
   filterType,
   sortable,
   filterable,
+  filterKey,
 }: RenderHeaderCellProps<R> & {
   filterType?: "string" | "date" | "tstring";
   filterable?: boolean;
   sortable?: boolean;
+  // The field name to filter by, when it differs from column.key - see
+  // DatatableColumn.tsx's own doc comment. Sorting still keys off
+  // column.key - only the filter value/JsonLogic field name is affected.
+  filterKey?: string;
 }) {
   const columnFilters = useColumnFiltersContext();
-  const field = column.key;
+  const sortField = column.key;
+  const field = filterKey ?? column.key;
   const [internalValue, setInternalValue] = useState(columnFilters.values[field] ?? "");
 
   useEffect(() => {
@@ -45,7 +51,7 @@ export function DataGridListHeaderCell<R>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters.values[field]]);
 
-  const sort = columnFilters.sort?.columnName === field ? columnFilters.sort.direction : undefined;
+  const sort = columnFilters.sort?.columnName === sortField ? columnFilters.sort.direction : undefined;
 
   return (
     <>
@@ -53,7 +59,7 @@ export function DataGridListHeaderCell<R>({
         <span className="data-table-sort-actions">
           <button
             className={`active-sort-col ${sort ? "active" : ""}`}
-            onClick={() => columnFilters.toggleSort(field)}
+            onClick={() => columnFilters.toggleSort(sortField)}
           >
             {sort === "asc" && <ArrowDownAZ className="sort-icon" />}
             {sort === "desc" && <ArrowDownZA className="sort-icon" />}

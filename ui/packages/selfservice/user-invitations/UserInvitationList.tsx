@@ -11,6 +11,7 @@ import {
   AcceptInviteActionReq,
 } from "@fireback/selfservice/sdk/abac/AcceptInviteAction";
 import { useUserInvitationsActionQuery } from "@fireback/selfservice/sdk/abac/UserInvitationsAction";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const UserInvitationList = () => {
   const s = useS(strings);
@@ -52,7 +53,7 @@ export const UserInvitationList = () => {
       <CommonListManager
         selectable={false}
         columns={userInvitationColumns(s, onAccept, onReject)}
-        queryHook={useUserInvitationsActionQuery}
+        queryHook={createUdfBrowseQueryHook(useUserInvitationsActionQuery)}
       ></CommonListManager>
     </>
   );

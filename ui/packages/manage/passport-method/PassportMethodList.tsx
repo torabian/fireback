@@ -5,13 +5,14 @@ import { usePassportMethodBrowseActionQuery } from "@fireback/manage/sdk/abac/Pa
 import { PassportMethodNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { columns } from "./PassportMethodColumns";
 import { strings } from "./strings/translations";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 export const PassportMethodList = () => {
   const s = useS(strings);
   return (
     <>
       <CommonListManager
         columns={columns(s)}
-        queryHook={usePassportMethodBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(usePassportMethodBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           PassportMethodNavigation.single(uniqueId)
         }

@@ -1,11 +1,12 @@
-import { usePageTitle } from "@fireback/ui-core/components/page-title/PageTitle";
-import { useUserBrowseActionQuery } from "@fireback/manage/sdk/abac/UserBrowseAction";
 import { useUserAwareDeleteAction } from "@fireback/manage/sdk/abac/UserAwareDeleteAction";
+import { useUserBrowseActionQuery } from "@fireback/manage/sdk/abac/UserBrowseAction";
+import { usePageTitle } from "@fireback/ui-core/components/page-title/PageTitle";
 
-import { useS } from "@fireback/ui-core/hooks/useS";
 import { strings as uiStrings } from "@fireback/ui-core/components/strings/translations";
+import { useS } from "@fireback/ui-core/hooks/useS";
 
 import { CommonListManager } from "@fireback/ui-core/components/entity-manager/CommonListManager";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 import { UserNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { columns } from "./UserColumns";
 import { strings } from "./strings/translations";
@@ -19,8 +20,7 @@ export const UserList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        // CardComponent={UserCard}
-        queryHook={useUserBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useUserBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           UserNavigation.single(uniqueId)
         }

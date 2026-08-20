@@ -2,7 +2,7 @@ import { type Filter, type Sorting } from "@devexpress/dx-react-grid";
 
 export interface Filters {
   itemsPerPage: number;
-  startIndex: number;
+  cursor?: string;
   sort?: string;
   sorting?: Sorting[];
 }
@@ -23,7 +23,7 @@ const camelToSnakeCase = (str: string) =>
 
 export function dxFilterToSqlAlike(
   filters: Array<Filter | undefined> | undefined,
-  overrides?: { [key: string]: string }
+  overrides?: { [key: string]: string },
 ): string {
   if (!filters) {
     return "";
@@ -37,8 +37,8 @@ export function dxFilterToSqlAlike(
     }
     query.push(
       `${camelToSnakeCase(item.columnName)} ${oprationCast(
-        item.operation
-      )} "${item.value?.replaceAll('"', `\"`)}"`
+        item.operation,
+      )} "${item.value?.replaceAll('"', `\"`)}"`,
     );
   }
 

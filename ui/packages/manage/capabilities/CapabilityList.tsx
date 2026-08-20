@@ -5,6 +5,7 @@ import { useCapabilityBrowseActionQuery } from "@fireback/manage/sdk/abac/Capabi
 import { CapabilityNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { columns } from "./CapabilityColumns";
 import { strings } from "./strings/translations";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const CapabilityList = () => {
   const s = useS(strings);
@@ -13,7 +14,7 @@ export const CapabilityList = () => {
     <>
       <CommonListManager
         columns={columns(s)}
-        queryHook={useCapabilityBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useCapabilityBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           CapabilityNavigation.single(uniqueId)
         }

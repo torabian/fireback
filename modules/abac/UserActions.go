@@ -56,6 +56,9 @@ func UserBrowseAction(c abacdefs.UserBrowseActionRequest) (*abacdefs.UserBrowseA
 		return nil, err
 	}
 	qs := abacdefs.UserBrowseActionQueryFromString(c.QueryParams.Encode())
+
+	fmt.Println("Filters:", qs.Filter)
+
 	items, qrm, err2 := abacdefs.UserEntityActions.Browse(fireback.GetDbRef(), qs, "")
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)

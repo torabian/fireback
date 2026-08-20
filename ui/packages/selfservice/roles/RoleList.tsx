@@ -6,6 +6,7 @@ import { useRoleAwareDeleteAction } from "@fireback/selfservice/sdk/abac/RoleAwa
 import { useRoleBrowseActionQuery } from "@fireback/selfservice/sdk/abac/RoleBrowseAction";
 import { RoleNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { columns } from "./RoleColumns";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const RoleList = () => {
   const s = useS(strings);
@@ -15,7 +16,7 @@ export const RoleList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        queryHook={useRoleBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useRoleBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           RoleNavigation.single(uniqueId)
         }

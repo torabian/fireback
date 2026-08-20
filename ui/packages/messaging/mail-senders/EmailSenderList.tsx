@@ -7,6 +7,7 @@ import { EmailSenderDto } from "@fireback/messaging/sdk/messaging/EmailSenderDto
 import { EmailSenderNavigation } from "@fireback/ui-core/sdk/navigation/MessagingNavigation";
 import { columns } from "./EmailSenderColumns";
 import { strings } from "./strings/translations";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const EmailSenderList = () => {
   const s = useS(strings);
@@ -16,7 +17,7 @@ export const EmailSenderList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        queryHook={useEmailSenderBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useEmailSenderBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           EmailSenderNavigation.single(uniqueId)
         }
