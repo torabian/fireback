@@ -1,6 +1,5 @@
 import "react-data-grid/lib/styles.css";
 
-import { type Filter } from "@devexpress/dx-react-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
@@ -16,7 +15,6 @@ import { useLocale } from "../../hooks/useLocale";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { castColumns } from "../common-data-table/PaginateUtils";
 import { useReindexedContent } from "../common-data-table/useReindex";
-import { type CardComponentType } from "./FlatListMode";
 import { useTableSizingManager } from "./useTableSizingManager";
 
 interface ListState {
@@ -28,46 +26,26 @@ export const CommonListManager2 = ({
   columns,
   deleteHook,
   uniqueIdHrefHandler,
-  withFilters,
   queryHook,
   onRecordsDeleted,
-  selectable,
   id,
-
-  withPreloads,
-  queryFilters,
-  deep,
-  inlineInsertHook,
-  bulkEditHook,
-  urlMask,
-  CardComponent,
 }: {
   queryHook: ({ state }: { state: ListState }) => any;
-  bulkEditHook?: any;
-  inlineInsertHook?: any;
   deleteHook?: any;
   columns: QueryArchiveColumn[] | any;
   id?: string;
-  urlMask?: string;
-  withPreloads?: string;
   uniqueIdHrefHandler?: (id: string) => string;
-  deep?: boolean;
-  selectable?: boolean;
-  withFilters?: boolean;
   onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
   children?: any;
-  queryFilters?: Array<Filter | undefined>;
-  CardComponent?: CardComponentType<unknown>;
 }) => {
   const queryClient = useQueryClient();
   const { pathname } = useLocation();
   const { dir } = useLocale();
 
-  const { columnSizes, onColumnWidthsChange, defaultColumnWidths } =
-    useTableSizingManager({
-      columns,
-      tableId: id,
-    });
+  const { columnSizes, onColumnWidthsChange } = useTableSizingManager({
+    columns,
+    tableId: id,
+  });
 
   const delHook =
     deleteHook &&
