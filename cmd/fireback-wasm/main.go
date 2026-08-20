@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"syscall/js"
 
 	"github.com/torabian/emi/emigo"
-	"github.com/torabian/fireback/modules/abac"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	fireback "github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
@@ -96,11 +94,11 @@ func main() {
 
 	fireback.SetDbRef(con)
 
-	if err := abac.AbacMigration(fireback.GetDbRef()); err == nil {
-		fmt.Println(1, "Migration done without an issue!")
-	} else {
-		fmt.Println(2, "Migration has some errors", err.Error())
-	}
+	// if err := abac.AbacMigration(fireback.GetDbRef()); err == nil {
+	// 	fmt.Println(1, "Migration done without an issue!")
+	// } else {
+	// 	fmt.Println(2, "Migration has some errors", err.Error())
+	// }
 
 	// A normal net/http router. gorm.DB is captured by closure the same way
 	// any real fireback handler would grab it off application context —
@@ -154,11 +152,11 @@ func main() {
 }`)
 	})
 
-	{
-		method, url, handler := abacdefs.CheckClassicPassportActionHttpHandler(abac.CheckClassicPassportAction)
-		pattern := fmt.Sprintf("%v %v", strings.ToUpper(method), url)
-		mux.HandleFunc(pattern, handler)
-	}
+	// {
+	// 	method, url, handler := abacdefs.CheckClassicPassportActionHttpHandler(abac.CheckClassicPassportAction)
+	// 	pattern := fmt.Sprintf("%v %v", strings.ToUpper(method), url)
+	// 	mux.HandleFunc(pattern, handler)
+	// }
 
 	// emigo.LiftWasmServer always dispatches through mux.ServeHTTP (it needs
 	// a concrete *http.ServeMux, not just an http.Handler), so a single
