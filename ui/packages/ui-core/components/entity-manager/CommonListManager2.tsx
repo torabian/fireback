@@ -1,8 +1,20 @@
+import "react-data-grid/lib/styles.css";
+
 import { DataTypeProvider, type Filter } from "@devexpress/dx-react-grid";
 import { useQueryClient } from "@tanstack/react-query";
+import { debounce } from "lodash";
+import { useMemo, useRef } from "react";
+import {
+  type CalculatedColumn,
+  DataGrid,
+  type DataGridHandle,
+  SelectColumn,
+} from "react-data-grid";
+import { useLocation } from "react-router-dom";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
+import { useLocale } from "../../hooks/useLocale";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
-import { PaginateTable2 } from "../common-data-table/PaginateTable2";
+import { castColumns } from "../common-data-table/PaginateUtils";
 import { useReindexedContent } from "../common-data-table/useReindex";
 import Link from "../link/Link";
 import { type CardComponentType } from "./FlatListMode";
@@ -49,6 +61,8 @@ export const CommonListManager2 = ({
   CardComponent?: CardComponentType<unknown>;
 }) => {
   const queryClient = useQueryClient();
+  const { pathname } = useLocation();
+  const { dir } = useLocale();
 
   const { columnSizes, onColumnWidthsChange, defaultColumnWidths } =
     useTableSizingManager({
@@ -103,29 +117,70 @@ export const CommonListManager2 = ({
   const q = source.query ? source : { query: source };
   const rows: any = q.query.data?.data?.items || [];
 
+  const { setStartIndex, selection, setSelection } = udf;
+
+  const cols = useMemo(() => {
+    return [
+      SelectColumn,
+      ...castColumns(
+        columns,
+        (field, value) => {
+          udf.setFilter({ [field]: value });
+        },
+        udf,
+        columnSizes,
+        uniqueIdHrefHandler,
+        pathname,
+      ),
+    ];
+  }, [columns, columnSizes]);
+
+  const ref = useRef<DataGridHandle>();
+
+  async function handleScroll(event: React.UIEvent<HTMLDivElement>) {
+    if (q.query.isLoading || !isAtBottom(event)) return;
+    alert(2);
+    setStartIndex(indexedData.length);
+  }
+
+  const onColumnResize = debounce(
+    (column: CalculatedColumn<any, unknown>, width: number) => {
+      const newSizes = cols.map((col: any) => {
+        return {
+          columnName: col.key,
+          width: col.name === column.name ? width : col.width,
+        };
+      });
+
+      onColumnWidthsChange(newSizes);
+    },
+    300,
+  );
+
+  // Note: BooleanTypeProvider (dx-react-grid) and `children` are kept
+  // defined for parity with the previous PaginateTable2-based structure,
+  // but were never actually rendered there either (PaginateTable2 never
+  // rendered its `children` prop) - rendering DataTypeProvider standalone
+  // (without a dx-react-grid Grid/PluginHost ancestor) throws at runtime.
+  void BooleanTypeProvider;
+  void children;
+
   return (
     <>
-      <PaginateTable2
-        udf={udf}
-        selectable={selectable}
-        bulkEditHook={bulkEditHook}
-        reindex={reindex}
-        indexedData={indexedData}
-        uniqueIdHrefHandler={uniqueIdHrefHandler}
-        onColumnWidthsChange={onColumnWidthsChange}
-        columns={columns}
-        columnSizes={columnSizes}
-        inlineInsertHook={inlineInsertHook}
+      <DataGrid
+        columns={cols}
+        onScroll={handleScroll}
+        onColumnResize={onColumnResize}
+        direction={dir as any}
+        onSelectedRowsChange={(value) => {
+          setSelection(Array.from(value));
+        }}
+        selectedRows={new Set(selection)}
+        ref={ref}
         rows={rows}
-        defaultColumnWidths={defaultColumnWidths as any}
-        query={q.query}
-        booleanColumns={["uniqueId"]}
-        withFilters={withFilters}
-      >
-        <BooleanTypeProvider for={["uniqueId"]} />
-
-        {children}
-      </PaginateTable2>
+        rowKeyGetter={(item) => item.uniqueId}
+        style={{ height: "calc(100% - 2px)", margin: "1px -14px" }}
+      />
     </>
   );
 };
