@@ -52,17 +52,17 @@ export const columns = (
     ),
   },
 
-  {
-    name: "Image",
-    title: s.image,
-    width: 40,
-    getCellValue: (e: UserDto) => (
-      <UserPhotoThumbnail
-        photo={e?.photo}
-        style={{ width: "20px", height: "20px", objectFit: "cover" }}
-      />
-    ),
-  },
+  // {
+  //   name: "Image",
+  //   title: s.image,
+  //   width: 40,
+  //   getCellValue: (e: UserDto) => (
+  //     <UserPhotoThumbnail
+  //       photo={e?.photo}
+  //       style={{ width: "20px", height: "20px", objectFit: "cover" }}
+  //     />
+  //   ),
+  // },
   {
     name: UserDto.Fields.primaryAddress.countryCode,
     title: s.countryCode,
