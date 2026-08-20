@@ -3,7 +3,7 @@ import "react-data-grid/lib/styles.css";
 import { DataTypeProvider, type Filter } from "@devexpress/dx-react-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   type CalculatedColumn,
   DataGrid,
@@ -81,12 +81,10 @@ export const CommonListManager2 = ({
       onRecordsDeleted({ queryClient });
     }
     deleteViaUniqueIds(items);
-    // PaginateTable now renders straight off q.query.data (its own reindex/
-    // indexedData wiring is temporarily disabled - see PaginateTable.tsx),
-    // so deleteViaUniqueIds above no longer has anywhere to put the removed
-    // row: it only updates indexedData, which nothing reads anymore. Refetch
-    // the underlying list query itself so the deleted row actually leaves
-    // the table, same pattern FlatListMode's onRefresh already uses.
+    // deleteViaUniqueIds only trims the locally accumulated indexedData.
+    // Refetch the underlying list query too, so a since-scrolled-past page
+    // doesn't bring the deleted row back on the next cursor advance, same
+    // pattern FlatListMode's onRefresh already uses.
     q.query.refetch();
   };
 
@@ -100,24 +98,20 @@ export const CommonListManager2 = ({
 
   const { indexedData, reindex, deleteViaUniqueIds } = useReindexedContent(udf);
 
-  let UniqueIdCellRenderer = ({ value }: any) => (
-    <div style={{ position: "relative" }}>
-      <Link href={uniqueIdHrefHandler && uniqueIdHrefHandler(value)}>
-        {value}
-      </Link>
-      {/* <CopyCell value={value} />
-      <OpenInNewRouter value={value} /> */}
-    </div>
-  );
-
-  let BooleanTypeProvider = (props: any) => (
-    <DataTypeProvider formatterComponent={UniqueIdCellRenderer} {...props} />
-  );
-
   const q = source.query ? source : { query: source };
-  const rows: any = q.query.data?.data?.items || [];
 
-  const { setStartIndex, selection, setSelection } = udf;
+  // Accumulate pages as the cursor advances: reindex() appends the new
+  // page's rows while udf.queryHash stays the same (cursor is stripped out
+  // of it), and resets to just the new rows whenever the actual filters
+  // change. See useReindex.tsx.
+  useEffect(() => {
+    if (!q.query.data) return;
+    reindex(q.query.data?.data?.items || [], udf.queryHash);
+  }, [q.query.data]);
+
+  const rows: any = indexedData;
+
+  const { setCursor, selection, setSelection } = udf;
 
   const cols = useMemo(() => {
     return [
@@ -139,7 +133,12 @@ export const CommonListManager2 = ({
 
   async function handleScroll(event: React.UIEvent<HTMLDivElement>) {
     if (q.query.isLoading || !isAtBottom(event)) return;
-    setStartIndex(indexedData.length);
+
+    // GResponse.next.cursor is "" once the server has no more rows to give.
+    const nextCursor = q.query.data?.data.cursor;
+    if (nextCursor) {
+      setCursor(nextCursor);
+    }
   }
 
   const onColumnResize = debounce(
@@ -161,7 +160,7 @@ export const CommonListManager2 = ({
   // but were never actually rendered there either (PaginateTable2 never
   // rendered its `children` prop) - rendering DataTypeProvider standalone
   // (without a dx-react-grid Grid/PluginHost ancestor) throws at runtime.
-  void BooleanTypeProvider;
+
   void children;
 
   return (

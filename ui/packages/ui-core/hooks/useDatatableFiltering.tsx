@@ -75,6 +75,10 @@ export function useDatatableFiltering({
     const queryHashItems = { ...filters };
     delete queryHashItems.startIndex;
     delete queryHashItems.itemsPerPage;
+    // cursor advances page-to-page within the same logical query (same as
+    // startIndex used to), so it must not be part of the hash either -
+    // otherwise every "load next page" would look like a brand new query.
+    delete queryHashItems.cursor;
     if (queryHashItems?.sorting?.length === 0) {
       delete queryHashItems.sorting;
     }
@@ -95,6 +99,7 @@ export function useDatatableFiltering({
 
     if (reset) {
       newFilters.startIndex = 0;
+      newFilters.cursor = "";
     }
 
     setFilters(newFilters);
@@ -122,6 +127,13 @@ export function useDatatableFiltering({
 
   const setStartIndex = (index: number) => {
     setFilter({ startIndex: index }, false);
+  };
+
+  // Advances a cursor-paginated query to its next page: `cursor` should be
+  // the `next.cursor` value from the most recent GResponse. `reset: false`
+  // so it doesn't clobber startIndex or restart the query.
+  const setCursor = (cursor: string) => {
+    setFilter({ cursor }, false);
   };
 
   const onFiltersChange = (filters: Filter[] | undefined) => {
@@ -202,6 +214,7 @@ export function useDatatableFiltering({
     setFilter,
     setSorting,
     setStartIndex,
+    setCursor,
     selection,
     setSelection,
     onFiltersChange,

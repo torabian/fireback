@@ -5,13 +5,14 @@ type NextPageInfo struct {
 }
 
 type GoogleResponseData[V any] struct {
-	Item                V            `json:"item"`
-	Items               []V          `json:"items"`
-	Next                NextPageInfo `json:"next"`
-	TotalItems          int64        `json:"totalItems"`
-	TotalAvailableItems int64        `json:"totalAvailableItems"`
-	StartIndex          int64        `json:"startIndex"`
-	ItemsPerPage        int64        `json:"itemsPerPage"`
+	Item  V   `json:"item"`
+	Items []V `json:"items"`
+	// Next                NextPageInfo `json:"next"`
+	Cursor              string `json:"cursor"`
+	TotalItems          int64  `json:"totalItems"`
+	TotalAvailableItems int64  `json:"totalAvailableItems"`
+	StartIndex          int64  `json:"startIndex"`
+	ItemsPerPage        int64  `json:"itemsPerPage"`
 }
 
 type GoogleResponse[V any] struct {
@@ -32,7 +33,7 @@ func GResponseQuery[T any](v []T, meta *QueryResultMeta, q *QueryDSL) GoogleResp
 
 	if meta != nil {
 		if meta.Cursor != nil {
-			res.Data.Next.Cursor = *meta.Cursor
+			res.Data.Cursor = *meta.Cursor
 		}
 		res.Data.TotalItems = meta.TotalItems
 		res.Data.TotalAvailableItems = meta.TotalAvailableItems
@@ -50,7 +51,7 @@ func GResponseQueryP[T any](v []*T, meta *QueryResultMeta, q *QueryDSL) GoogleRe
 
 	if meta != nil {
 		if meta.Cursor != nil {
-			res.Data.Next.Cursor = *meta.Cursor
+			res.Data.Cursor = *meta.Cursor
 		}
 		res.Data.TotalItems = meta.TotalItems
 		res.Data.TotalAvailableItems = meta.TotalAvailableItems

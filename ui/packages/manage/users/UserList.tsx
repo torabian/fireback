@@ -23,9 +23,9 @@ export const UserList = () => {
       <CommonListManager2
         columns={columns(s, uiS)}
         queryHook={({ state }) => {
-          console.log(1, state.udf.debouncedFilters);
           const qs = new UserBrowseActionQueryParams();
           qs.setItemsPerPage(state.udf.debouncedFilters.itemsPerPage);
+          qs.setCursor(state.udf.debouncedFilters.cursor);
           return useUserBrowseActionQuery({ qs });
         }}
         uniqueIdHrefHandler={(uniqueId: string) =>

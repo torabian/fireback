@@ -6,6 +6,8 @@ import {
 import { useTableViewSizingGetActionQuery } from "../../sdk/interfacetools/TableViewSizingGetAction";
 import type { QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { useTableViewSizingUpdateAction } from "../../sdk/interfacetools/TableViewSizingUpdateAction";
+import type { CalculatedColumn } from "react-data-grid";
+import { debounce } from "lodash";
 
 export interface ColumnSizingInfo {
   columnName: string;
@@ -76,5 +78,9 @@ export const useTableSizingManager = ({
     localStorage.setItem(`table_${tableKey}`, sizes);
   };
 
-  return { columnSizes, onColumnWidthsChange, defaultColumnWidths };
+  return {
+    columnSizes,
+    onColumnWidthsChange,
+    defaultColumnWidths,
+  };
 };
