@@ -6,6 +6,7 @@ import { strings as uiStrings } from "@fireback/ui-core/components/strings/trans
 import { strings } from "./strings/translations";
 import { WorkspaceInviteNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { columns } from "./WorkspaceInviteColumns";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const WorkspaceInviteList = () => {
   const s = useS(strings);
@@ -15,7 +16,9 @@ export const WorkspaceInviteList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        queryHook={useWorkspaceInviteBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(
+          useWorkspaceInviteBrowseActionQuery,
+        )}
         uniqueIdHrefHandler={(uniqueId: string) =>
           WorkspaceInviteNavigation.single(uniqueId)
         }

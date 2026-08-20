@@ -7,6 +7,7 @@ import { useWorkspaceTypeAwareDeleteAction } from "@fireback/manage/sdk/abac/Wor
 import { WorkspaceTypeNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { CommonListManager } from "@fireback/ui-core/components/entity-manager/CommonListManager";
 import { columns } from "./WorkspaceTypeColumns";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const WorkspaceTypeList = () => {
   const s = useS(strings);
@@ -16,7 +17,7 @@ export const WorkspaceTypeList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        queryHook={useWorkspaceTypeBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useWorkspaceTypeBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           WorkspaceTypeNavigation.single(uniqueId)
         }

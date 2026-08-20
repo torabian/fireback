@@ -5,7 +5,7 @@ import { usePageTitle } from "@fireback/ui-core/components/page-title/PageTitle"
 import { strings as uiStrings } from "@fireback/ui-core/components/strings/translations";
 import { useS } from "@fireback/ui-core/hooks/useS";
 
-import { CommonListManager2 } from "@fireback/ui-core/components/entity-manager/CommonListManager2";
+import { CommonListManager } from "@fireback/ui-core/components/entity-manager/CommonListManager";
 import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 import { UserNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
 import { columns } from "./UserColumns";
@@ -18,14 +18,14 @@ export const UserList = () => {
 
   return (
     <>
-      <CommonListManager2
+      <CommonListManager
         columns={columns(s, uiS)}
         queryHook={createUdfBrowseQueryHook(useUserBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           UserNavigation.single(uniqueId)
         }
         deleteHook={useUserAwareDeleteAction}
-      ></CommonListManager2>
+      ></CommonListManager>
     </>
   );
 };

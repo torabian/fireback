@@ -1,197 +1,82 @@
+import "react-data-grid/lib/styles.css";
+
+import { type GResponse } from "@fireback/js-remote-ctx/envelopes/index";
 import {
-  DataTypeProvider,
-  type Filter,
-  type Sorting,
-  type TableColumnWidthInfo,
-} from "@devexpress/dx-react-grid";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { useTableViewSizingGetActionQuery } from "@fireback/ui-core/sdk/interfacetools/TableViewSizingGetAction";
-import { useTableViewSizingUpdateAction } from "@fireback/ui-core/sdk/interfacetools/TableViewSizingUpdateAction";
+  type QueryClient,
+  type UseQueryResult,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { debounce } from "lodash";
+import { useEffect, useMemo, useRef } from "react";
+import {
+  type CalculatedColumn,
+  DataGrid,
+  type DataGridHandle,
+  SelectColumn,
+} from "react-data-grid";
+import { useLocation } from "react-router-dom";
 import { useDatatableFiltering } from "../../hooks/useDatatableFiltering";
+import { useLocale } from "../../hooks/useLocale";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
-import { PaginateTable } from "../common-data-table/PaginateTable";
-import {
-  normalizeColumnWidths,
-  parseJsonSafely,
-} from "../common-data-table/PaginateUtils";
+import { castColumns } from "../common-data-table/PaginateUtils";
 import { useReindexedContent } from "../common-data-table/useReindex";
-import Link from "../link/Link";
-import { type CardComponentType, FlatListMode } from "./FlatListMode";
-import { MapListMode } from "./MapListMode";
+import { useTableSizingManager } from "./useTableSizingManager";
 
-// `queryHook` is a *hook function* (e.g. `useGetCapabilities` from the old
-// "react-query" v3 generator, or `useCapabilityBrowseActionQuery` from the
-// newer "@tanstack/react-query" v5 action generator), not a resolved query
-// result — the two generators don't even share the same UseQueryResult
-// shape, so the return type is kept loose here and narrowed with `any`
-// where it's consumed below. It's called from inside this component and,
-// on the older generated hooks, also carries a static `UKEY` string used
-// as a cache/storage key (not yet present on the newer action hooks).
-type QueryHook = ((args: { query?: any; queryClient?: any }) => any) & {
-  UKEY?: string;
+interface ListState {
+  udf: ReturnType<typeof useDatatableFiltering>;
+}
+
+// What every emi-generated useXxxBrowseActionQuery hook actually returns
+// (see e.g. UserBrowseAction.ts) - the underlying react-query result plus
+// isCompleted/response bolted on, always resolving to a GResponse whose
+// data.items/data.cursor this component reads directly below (the reindex
+// effect, handleScroll's nextCursor). GResponse<any> rather than a specific
+// entity's item type since CommonListManager2 itself is entity-agnostic -
+// columns/getCellValue already work in terms of `any` rows for the same
+// reason.
+type BrowseQueryResult = UseQueryResult<GResponse<any> | undefined, unknown>;
+
+// queryHook may return that result directly, or nested under a `query` key -
+// see `const q = source.query ? source : { query: source };` below.
+type BrowseQuerySource =
+  | BrowseQueryResult
+  | { query: BrowseQueryResult; [key: string]: unknown };
+
+// Mirrors every emi-generated useXxxAwareDeleteAction hook's shape (see e.g.
+// UserAwareDeleteAction.ts's `useUserAwareDeleteAction`) - a mutation hook
+// invoked with `{ queryClient }` below, whose mutateAsync deletes the
+// selected uniqueIds.
+type DeleteHook = (args: { queryClient: QueryClient }) => {
+  mutateAsync?: (body: any, options?: any) => Promise<any>;
+  [key: string]: unknown;
 };
-
-const media = matchMedia("(max-width: 600px)");
-
-function useViewMode() {
-  const matchRef = useRef(media);
-
-  const [view, setView] = useState<"datatable" | "card" | "map">(
-    media.matches ? "card" : "datatable",
-  );
-
-  useEffect(() => {
-    const query = matchRef.current;
-    function listener() {
-      if (query.matches) {
-        setView("card");
-      } else {
-        setView("datatable");
-      }
-    }
-    query.addEventListener("change", listener);
-
-    return () => query.removeEventListener("change", listener);
-  }, []);
-
-  return { view };
-}
-
-function castSortToString(sorting?: Array<Sorting>): string {
-  if (!sorting) {
-    return "";
-  }
-
-  return sorting
-    .map((item) => {
-      let name = item.columnName;
-      if (name === "createdFormatted" || name === "updatedFormatted") {
-        name = name.replaceAll("Formatted", "");
-      }
-      return `${name} ${item.direction}`;
-    })
-    .join(",");
-}
 
 export const CommonListManager = ({
   children,
   columns,
   deleteHook,
   uniqueIdHrefHandler,
-  withFilters,
   queryHook,
   onRecordsDeleted,
-  selectable,
   id,
-  RowDetail,
-  withPreloads,
-  queryFilters,
-  deep,
-  inlineInsertHook,
-  bulkEditHook,
-  urlMask,
-  CardComponent,
 }: {
-  queryHook: QueryHook;
-  RowDetail?: any;
-  bulkEditHook?: any;
-  inlineInsertHook?: any;
+  queryHook: any;
   deleteHook?: any;
+  // queryHook: ({ state }: { state: ListState }) => BrowseQuerySource;
+  // deleteHook?: DeleteHook;
   columns: QueryArchiveColumn[] | any;
   id?: string;
-  urlMask?: string;
-  withPreloads?: string;
   uniqueIdHrefHandler?: (id: string) => string;
-  deep?: boolean;
-  selectable?: boolean;
-  withFilters?: boolean;
-  onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
+  onRecordsDeleted?: ({ queryClient }: { queryClient: QueryClient }) => void;
   children?: any;
-  queryFilters?: Array<Filter | undefined>;
-  CardComponent?: CardComponentType<unknown>;
 }) => {
-  const { view } = useViewMode();
   const queryClient = useQueryClient();
+  const { pathname } = useLocation();
+  const { dir } = useLocale();
 
-  // Bug fix: none of the generated use*BrowseActionQuery hooks actually set a
-  // static .UKEY (it's referenced here but never assigned anywhere in the sdk
-  // codegen), so queryHook.UKEY was always undefined - every single list table in
-  // the app (workspaces, roles, email providers, ...) ended up reading and writing
-  // the *same* server-side TableViewSizing row (uniqueId "undefined") and the same
-  // "table_undefined" localStorage key. Resizing columns on one table (with N
-  // columns) then corrupted every other table's saved sizes array, which
-  // react-data-grid's internal useColumnWidths doesn't expect - a length/shape
-  // mismatch there is what threw "Cannot read properties of null (reading
-  // 'width')" on completely unrelated screens (e.g. email-providers, after having
-  // resized a column somewhere else). queryHook.name is stable and unique per
-  // generated hook (arrow functions assigned to a named export get that name per
-  // the JS spec) even though .UKEY never gets set, so it's a safe fallback -
-  // falls back further to a column-name signature only if even that's somehow
-  // empty (e.g. an inline/anonymous queryHook).
-  const tableKey =
-    id ??
-    queryHook.UKEY ??
-    queryHook.name ??
-    columns.map((t) => t.name).join(",");
-
-  const query = useTableViewSizingGetActionQuery({
-    params: { uniqueId: tableKey },
-  });
-
-  const [columnSizes, setColumnSizes] = useState<any>(
-    columns.map((t) => ({ columnName: t.name, width: t.width })),
-  );
-
-  const tableSizingSizes = (query.data as any)?.data?.item?.sizes;
-
-  // A 404 (no sizing saved for this tableKey yet - the normal state for any
-  // table nobody has resized) - or any other non-2xx - never throws here:
-  // GResponse.inject only ever populates data.item from a real body.data.item,
-  // so an error-shaped `{"error": ...}` response just leaves it null and
-  // tableSizingSizes falls straight through to undefined below. What isn't
-  // safe on its own is trusting the *shape* of whatever string does come back
-  // (from the server, or from localStorage - itself just as untyped) - a
-  // single malformed entry used to reach react-data-grid's own column-width
-  // computation and crash it with "Cannot read properties of null (reading
-  // 'width')", taking the whole table down. parseJsonSafely + normalizeColumnWidths
-  // (see PaginateUtils.tsx) is the one gate everything has to clear before it's
-  // ever trusted; anything that doesn't parse, isn't shaped right, or doesn't
-  // even describe one of this table's own columns is treated exactly like "no
-  // saved sizing" instead of being applied and breaking the table.
-  //
-  // columns/tableKey are intentionally not in the dependency array - callers
-  // like CapabilityList.tsx pass a fresh `columns` array literal every render,
-  // so depending on it here would re-run (and re-setColumnSizes with a new
-  // array reference) every render.
-  useEffect(() => {
-    const fromServer = normalizeColumnWidths(
-      parseJsonSafely(tableSizingSizes),
-      columns,
-    );
-    if (fromServer) {
-      setColumnSizes(fromServer);
-      return;
-    }
-
-    const fromStorage = normalizeColumnWidths(
-      parseJsonSafely(localStorage.getItem(`table_${tableKey}`)),
-      columns,
-    );
-    if (fromStorage) {
-      setColumnSizes(fromStorage);
-    }
-    // Neither had anything valid - leave columnSizes at its already-safe
-    // initial default (each column's own declared width) rather than
-    // clearing it out from under an in-progress render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tableSizingSizes]);
-
-  // tableViewSizing is addressed by a caller-chosen uniqueId (tableKey, a
-  // per-table, per-user key) - the update action upserts (creates on first save)
-  // for that same uniqueId server-side.
-  const { mutate: submitTableSizing } = useTableViewSizingUpdateAction({
-    params: { uniqueId: tableKey },
+  const { columnSizes, onColumnWidthsChange } = useTableSizingManager({
+    columns,
+    tableId: id,
   });
 
   const delHook =
@@ -205,12 +90,10 @@ export const CommonListManager = ({
       onRecordsDeleted({ queryClient });
     }
     deleteViaUniqueIds(items);
-    // PaginateTable now renders straight off q.query.data (its own reindex/
-    // indexedData wiring is temporarily disabled - see PaginateTable.tsx),
-    // so deleteViaUniqueIds above no longer has anywhere to put the removed
-    // row: it only updates indexedData, which nothing reads anymore. Refetch
-    // the underlying list query itself so the deleted row actually leaves
-    // the table, same pattern FlatListMode's onRefresh already uses.
+    // deleteViaUniqueIds only trims the locally accumulated indexedData.
+    // Refetch the underlying list query too, so a since-scrolled-past page
+    // doesn't bring the deleted row back on the next cursor advance, same
+    // pattern FlatListMode's onRefresh already uses.
     q.query.refetch();
   };
 
@@ -220,91 +103,96 @@ export const CommonListManager = ({
     onRecordsDeleted: onRecordsDeleted$,
   });
 
-  const source = queryHook({
-    query: {
-      deep: deep === undefined ? true : deep,
-      ...udf.debouncedFilters,
-      withPreloads,
-    },
-    queryClient: queryClient,
-  });
+  const source = queryHook({ state: { udf } });
 
   const { indexedData, reindex, deleteViaUniqueIds } = useReindexedContent(udf);
 
-  const [defaultColumnWidths] = useState(
-    columns.map((t) => ({ columnName: t.name, width: t.width })),
-  );
-
-  const onColumnWidthsChange = (nextColumnWidths: TableColumnWidthInfo[]) => {
-    setColumnSizes(nextColumnWidths);
-    const sizes = JSON.stringify(nextColumnWidths);
-    submitTableSizing({ sizes });
-    localStorage.setItem(`table_${tableKey}`, sizes);
-  };
-
-  let UniqueIdCellRenderer = ({ value }: any) => (
-    <div style={{ position: "relative" }}>
-      <Link href={uniqueIdHrefHandler && uniqueIdHrefHandler(value)}>
-        {value}
-      </Link>
-      {/* <CopyCell value={value} />
-      <OpenInNewRouter value={value} /> */}
-    </div>
-  );
-
-  let BooleanTypeProvider = (props: any) => (
-    <DataTypeProvider formatterComponent={UniqueIdCellRenderer} {...props} />
-  );
-
   const q = source.query ? source : { query: source };
-  const rows: any = q.query.data?.data?.items || [];
+
+  // Accumulate pages as the cursor advances: reindex() appends the new
+  // page's rows while udf.queryHash stays the same (cursor is stripped out
+  // of it), and resets to just the new rows whenever the actual filters
+  // change. See useReindex.tsx.
+  useEffect(() => {
+    if (!q.query.data) return;
+    reindex(q.query.data?.data?.items || [], udf.queryHash);
+  }, [q.query.data]);
+
+  const rows: any = indexedData;
+
+  const { setCursor, selection, setSelection } = udf;
+
+  const cols = useMemo(() => {
+    return [
+      SelectColumn,
+      ...castColumns(
+        columns,
+        (field, value) => {
+          udf.setFilter({ [field]: value });
+        },
+        udf,
+        columnSizes,
+        uniqueIdHrefHandler,
+        pathname,
+      ),
+    ];
+  }, [columns, columnSizes]);
+
+  const ref = useRef<DataGridHandle>();
+
+  async function handleScroll(event: React.UIEvent<HTMLDivElement>) {
+    if (q.query.isLoading || !isAtBottom(event)) return;
+
+    // GResponse.next.cursor is "" once the server has no more rows to give.
+    const nextCursor = q.query.data?.data.cursor;
+    if (nextCursor) {
+      setCursor(nextCursor);
+    }
+  }
+
+  const onColumnResize = debounce(
+    (column: CalculatedColumn<any, unknown>, width: number) => {
+      const newSizes = cols.map((col: any) => {
+        return {
+          columnName: col.key,
+          width: col.name === column.name ? width : col.width,
+        };
+      });
+
+      onColumnWidthsChange(newSizes);
+    },
+    300,
+  );
+
+  // Note: BooleanTypeProvider (dx-react-grid) and `children` are kept
+  // defined for parity with the previous PaginateTable2-based structure,
+  // but were never actually rendered there either (PaginateTable2 never
+  // rendered its `children` prop) - rendering DataTypeProvider standalone
+  // (without a dx-react-grid Grid/PluginHost ancestor) throws at runtime.
+
+  void children;
 
   return (
-    <>
-      {view === "map" && (
-        <MapListMode
-          columns={columns}
-          deleteHook={deleteHook}
-          uniqueIdHrefHandler={uniqueIdHrefHandler}
-          q={q}
-          udf={udf}
-        />
-      )}
-      {view === "card" && (
-        <FlatListMode
-          columns={columns}
-          CardComponent={CardComponent}
-          deleteHook={deleteHook}
-          uniqueIdHrefHandler={uniqueIdHrefHandler}
-          q={q}
-          udf={udf}
-        />
-      )}
-
-      {view === "datatable" && (
-        <PaginateTable
-          udf={udf}
-          selectable={selectable}
-          bulkEditHook={bulkEditHook}
-          RowDetail={RowDetail}
-          reindex={reindex}
-          indexedData={indexedData}
-          uniqueIdHrefHandler={uniqueIdHrefHandler}
-          onColumnWidthsChange={onColumnWidthsChange}
-          columns={columns}
-          columnSizes={columnSizes}
-          inlineInsertHook={inlineInsertHook}
-          rows={rows}
-          defaultColumnWidths={defaultColumnWidths as any}
-          query={q.query}
-          booleanColumns={["uniqueId"]}
-          withFilters={withFilters}
-        >
-          <BooleanTypeProvider for={["uniqueId"]} />
-
-          {children}
-        </PaginateTable>
-      )}
-    </>
+    <DataGrid
+      columns={cols}
+      onScroll={handleScroll}
+      onColumnResize={onColumnResize}
+      direction={dir as any}
+      onSelectedRowsChange={(value) => {
+        setSelection(Array.from(value));
+      }}
+      selectedRows={new Set(selection)}
+      ref={ref}
+      rows={rows}
+      rowKeyGetter={(item) => item.uniqueId}
+      style={{ height: "calc(100% - 2px)", margin: "1px -14px" }}
+    />
   );
 };
+
+function isAtBottom({ currentTarget }: React.UIEvent<HTMLDivElement>): boolean {
+  return (
+    currentTarget.scrollTop + 300 >=
+    currentTarget.scrollHeight - currentTarget.clientHeight
+  );
+}

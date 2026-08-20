@@ -7,6 +7,7 @@ import { CommonListManager } from "@fireback/ui-core/components/entity-manager/C
 import { EmailProviderDto } from "@fireback/messaging/sdk/messaging/EmailProviderDto";
 import { EmailProviderNavigation } from "@fireback/ui-core/sdk/navigation/MessagingNavigation";
 import { strings } from "./strings/translations";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const EmailProviderList = () => {
   const s = useS(strings);
@@ -16,7 +17,7 @@ export const EmailProviderList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        queryHook={useEmailProviderBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useEmailProviderBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           EmailProviderNavigation.single(uniqueId)
         }

@@ -8,6 +8,7 @@ import { CommonRowDetail } from "@fireback/ui-core/components/detail-table/Detai
 import { CommonListManager } from "@fireback/ui-core/components/entity-manager/CommonListManager";
 import { columns } from "./WorkspaceColumns";
 import { WorkspaceNavigation } from "@fireback/ui-core/sdk/navigation/AbacNavigation";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 
 export const WorkspaceList = () => {
   const s = useS(strings);
@@ -19,7 +20,7 @@ export const WorkspaceList = () => {
     <>
       <CommonListManager
         columns={columns(s, uiS)}
-        queryHook={useWorkspaceBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useWorkspaceBrowseActionQuery)}
         deleteHook={useWorkspaceAwareDeleteAction}
         onRecordsDeleted={({ queryClient }) => {
           queryClient.invalidateQueries("*fireback.UserRoleWorkspace");

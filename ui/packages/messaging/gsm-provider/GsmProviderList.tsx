@@ -6,13 +6,14 @@ import { GsmProviderDto } from "@fireback/messaging/sdk/messaging/GsmProviderDto
 import { GsmProviderNavigation } from "@fireback/ui-core/sdk/navigation/MessagingNavigation";
 import { useS } from "@fireback/ui-core/hooks/useS";
 import { strings } from "./strings/translations";
+import { createUdfBrowseQueryHook } from "@fireback/ui-core/hooks/useUdfBrowseQuery";
 export const GsmProviderList = () => {
   const s = useS(strings);
   return (
     <>
       <CommonListManager
         columns={columns(s)}
-        queryHook={useGsmProviderBrowseActionQuery}
+        queryHook={createUdfBrowseQueryHook(useGsmProviderBrowseActionQuery)}
         uniqueIdHrefHandler={(uniqueId: string) =>
           GsmProviderNavigation.single(uniqueId)
         }
