@@ -1,6 +1,6 @@
 import { type Filter, type Sorting } from "@devexpress/dx-react-grid";
 import { parse, stringify } from "qs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   type IMenuActionItem,
@@ -39,28 +39,45 @@ export function useDatatableFiltering({
     ...(initialFilters || {}),
   };
 
-  const [filters, setFilters] = useState<Partial<Filters>>(init);
-  const [debouncedFilters, setDebouncedFilters] =
-    useState<Partial<Filters>>(init);
-
   const { search } = useLocation();
 
-  const locked = useRef(false);
-  useEffect(() => {
-    if (locked.current) {
-      return;
-    }
-    locked.current = true;
-
-    let filters: Partial<Filters> = {};
-
+  // Parsed once, straight into the initial state below (not a post-mount
+  // useEffect, which is where this used to live) - on a hard refresh, the
+  // browser already has the real filters/sort sitting in the URL, so
+  // there's no reason to render (and fire off a real query for) `init`'s
+  // empty defaults first and only pick up the URL a render later. That
+  // extra render used to matter: CommonListManager2's queryHook fires an
+  // actual react-data-grid/react-query fetch off of `debouncedFilters` on
+  // every render, so the discarded first render meant a wasted "no filter"
+  // fetch immediately followed by a second, cold (uncached) fetch for the
+  // real, URL-derived query - and until that second fetch resolved, the
+  // table had nothing to show, i.e. exactly the "empty on refresh" flash
+  // this was causing. A lazy useState initializer runs exactly once, before
+  // that first render ever happens, so the very first fetch is already the
+  // right one.
+  const parseUrlFilters = (): Partial<Filters> => {
     try {
-      filters = parse(search.substring(1));
-    } catch (error) {}
+      const parsed = parse(search.substring(1)) as Partial<Filters>;
+      // setFilter no longer writes cursor into the URL (see its own doc
+      // comment), but strip it defensively anyway - an old bookmarked/
+      // shared link from before that change, or someone hand-editing the
+      // URL, could still carry one, and replaying it against a page that
+      // hasn't fetched anything yet is exactly the "table looks empty on
+      // refresh" bug this whole thing is fixing.
+      delete parsed.cursor;
+      return parsed;
+    } catch (error) {
+      return {};
+    }
+  };
 
-    setFilters({ ...init, ...filters });
-    setDebouncedFilters({ ...init, ...filters });
-  }, [search]);
+  const [filters, setFilters] = useState<Partial<Filters>>(() => ({
+    ...init,
+    ...parseUrlFilters(),
+  }));
+  const [debouncedFilters, setDebouncedFilters] = useState<
+    Partial<Filters>
+  >(() => ({ ...init, ...parseUrlFilters() }));
 
   const [selection, setSelection$] = useState<Array<string>>([]);
   // const [queryHash, setQueryHash] = useState("{}");
@@ -96,7 +113,17 @@ export function useDatatableFiltering({
 
     setFilters(newFilters);
 
-    router.push("?" + stringify(newFilters), undefined, {}, true);
+    // cursor is deliberately left out of the URL - it's a live "where the
+    // infinite scroll currently is" pointer into a page of already-fetched,
+    // client-accumulated rows (see useReindexedContent), not something a
+    // fresh load can resume from. A refreshed page starts with zero
+    // accumulated rows, so replaying a stale cursor from a previous scroll
+    // session would ask the backend for "everything after row X" and get
+    // back nothing to show - table looks empty, but it's actually just
+    // stuck on a page that was never fetched. Leaving cursor out of the URL
+    // means a refresh always restarts from the real first page instead.
+    const { cursor, ...urlFilters } = newFilters;
+    router.push("?" + stringify(urlFilters), undefined, {}, true);
     withDebounce(() => {
       setDebouncedFilters(newFilters);
     }, 500);

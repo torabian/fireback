@@ -1,6 +1,6 @@
 import "react-data-grid/lib/styles.css";
 
-import { DataTypeProvider, type Filter } from "@devexpress/dx-react-grid";
+import { type Filter } from "@devexpress/dx-react-grid";
 import { useQueryClient } from "@tanstack/react-query";
 import { debounce } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
@@ -16,7 +16,6 @@ import { useLocale } from "../../hooks/useLocale";
 import { type QueryArchiveColumn } from "../../types/QueryArchiveColumn";
 import { castColumns } from "../common-data-table/PaginateUtils";
 import { useReindexedContent } from "../common-data-table/useReindex";
-import Link from "../link/Link";
 import { type CardComponentType } from "./FlatListMode";
 import { useTableSizingManager } from "./useTableSizingManager";
 
@@ -164,22 +163,20 @@ export const CommonListManager2 = ({
   void children;
 
   return (
-    <>
-      <DataGrid
-        columns={cols}
-        onScroll={handleScroll}
-        onColumnResize={onColumnResize}
-        direction={dir as any}
-        onSelectedRowsChange={(value) => {
-          setSelection(Array.from(value));
-        }}
-        selectedRows={new Set(selection)}
-        ref={ref}
-        rows={rows}
-        rowKeyGetter={(item) => item.uniqueId}
-        style={{ height: "calc(100% - 2px)", margin: "1px -14px" }}
-      />
-    </>
+    <DataGrid
+      columns={cols}
+      onScroll={handleScroll}
+      onColumnResize={onColumnResize}
+      direction={dir as any}
+      onSelectedRowsChange={(value) => {
+        setSelection(Array.from(value));
+      }}
+      selectedRows={new Set(selection)}
+      ref={ref}
+      rows={rows}
+      rowKeyGetter={(item) => item.uniqueId}
+      style={{ height: "calc(100% - 2px)", margin: "1px -14px" }}
+    />
   );
 };
 
