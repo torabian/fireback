@@ -1,6 +1,11 @@
 import "react-data-grid/lib/styles.css";
 
-import { useQueryClient } from "@tanstack/react-query";
+import { type GResponse } from "@fireback/js-remote-ctx/envelopes/index";
+import {
+  type QueryClient,
+  type UseQueryResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { debounce } from "lodash";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -21,6 +26,31 @@ interface ListState {
   udf: ReturnType<typeof useDatatableFiltering>;
 }
 
+// What every emi-generated useXxxBrowseActionQuery hook actually returns
+// (see e.g. UserBrowseAction.ts) - the underlying react-query result plus
+// isCompleted/response bolted on, always resolving to a GResponse whose
+// data.items/data.cursor this component reads directly below (the reindex
+// effect, handleScroll's nextCursor). GResponse<any> rather than a specific
+// entity's item type since CommonListManager2 itself is entity-agnostic -
+// columns/getCellValue already work in terms of `any` rows for the same
+// reason.
+type BrowseQueryResult = UseQueryResult<GResponse<any> | undefined, unknown>;
+
+// queryHook may return that result directly, or nested under a `query` key -
+// see `const q = source.query ? source : { query: source };` below.
+type BrowseQuerySource =
+  | BrowseQueryResult
+  | { query: BrowseQueryResult; [key: string]: unknown };
+
+// Mirrors every emi-generated useXxxAwareDeleteAction hook's shape (see e.g.
+// UserAwareDeleteAction.ts's `useUserAwareDeleteAction`) - a mutation hook
+// invoked with `{ queryClient }` below, whose mutateAsync deletes the
+// selected uniqueIds.
+type DeleteHook = (args: { queryClient: QueryClient }) => {
+  mutateAsync?: (body: any, options?: any) => Promise<any>;
+  [key: string]: unknown;
+};
+
 export const CommonListManager2 = ({
   children,
   columns,
@@ -30,12 +60,12 @@ export const CommonListManager2 = ({
   onRecordsDeleted,
   id,
 }: {
-  queryHook: ({ state }: { state: ListState }) => any;
-  deleteHook?: any;
+  queryHook: ({ state }: { state: ListState }) => BrowseQuerySource;
+  deleteHook?: DeleteHook;
   columns: QueryArchiveColumn[] | any;
   id?: string;
   uniqueIdHrefHandler?: (id: string) => string;
-  onRecordsDeleted?: ({ queryClient }: { queryClient: any }) => void;
+  onRecordsDeleted?: ({ queryClient }: { queryClient: QueryClient }) => void;
   children?: any;
 }) => {
   const queryClient = useQueryClient();
