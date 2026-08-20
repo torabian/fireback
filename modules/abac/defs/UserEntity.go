@@ -3,6 +3,7 @@ package abacdefs
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/torabian/emi/emigo"
 	"github.com/torabian/emi/emigorm"
 	"github.com/torabian/fireback/modules/abac/abaccomplexes"
@@ -202,6 +203,7 @@ func UserEntityBrowseFn(tx *gorm.DB, qs UserBrowseActionQuery, scope string, sco
 	if err != nil {
 		return nil, nil, err
 	}
+
 	filtered = emigorm.ApplyQueryScope(filtered, scope, scopeArgs...)
 	var total int64
 	if err := filtered.Count(&total).Error; err != nil {

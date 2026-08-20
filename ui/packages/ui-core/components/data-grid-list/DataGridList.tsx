@@ -167,6 +167,7 @@ export function DataGridList<T extends { uniqueId?: string } = any>({
           {...props}
           filterType={col.filterType}
           filterable={withFilters && col.filterable}
+          filterKey={col.filterKey}
           sortable={col.sortable}
         />
       ),

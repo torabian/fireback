@@ -171,6 +171,7 @@ export const castColumns = (
           sortable={col.sortable}
           filterable={col.filterable}
           filterType={col.filterType}
+          filterKey={col.filterKey ?? col.name}
           udf={udf}
         />
       ),

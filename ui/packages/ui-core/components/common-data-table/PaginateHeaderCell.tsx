@@ -11,33 +11,43 @@ export function FilterRenderer<R>({
   sortable,
   filterable,
   selectable,
+  filterKey,
   udf,
 }: RenderHeaderCellProps<R> & {
   filterType: any;
   filterable: boolean;
   selectable: boolean;
   sortable?: boolean;
+  // The key udf.filters/setFilter actually reads/writes - see
+  // DatatableColumn.tsx's own doc comment. Falls back to column.key so
+  // callers that never set it keep working exactly as before.
+  filterKey?: string;
   udf: Udf;
 }) {
+  // Same key the "sort" query string is built from (useDatatableFiltering's
+  // toSortString does `${columnName} ${direction}` verbatim) - so this needs
+  // to be the backend column name too, exactly like the filter field above.
+  const field = filterKey ?? (column.key as string);
+
   // Single sort for now, assumes 1st one.
   const columnSort = udf.filters.sorting?.find(
-    (col) => col.columnName === column.key,
+    (col) => col.columnName === field,
   );
 
   const [internalValue, setInternalValue] = useState("");
 
   useEffect(() => {
-    if (internalValue !== get(udf.filters, column.key)) {
-      setInternalValue(get(udf.filters, column.key));
+    if (internalValue !== get(udf.filters, field)) {
+      setInternalValue(get(udf.filters, field));
     }
   }, [udf.filters]);
 
   let sorting: "asc" | "desc" | undefined = undefined;
-  if (columnSort?.columnName === column.key && columnSort?.direction == "asc") {
+  if (columnSort?.columnName === field && columnSort?.direction == "asc") {
     sorting = "asc";
   }
   if (
-    columnSort?.columnName === column.key &&
+    columnSort?.columnName === field &&
     columnSort?.direction == "desc"
   ) {
     sorting = "desc";
@@ -47,14 +57,14 @@ export function FilterRenderer<R>({
     if (columnSort) {
       if (columnSort?.direction === "desc") {
         udf.setSorting(
-          udf.filters.sorting.filter((m) => m.columnName !== column.key),
+          udf.filters.sorting.filter((m) => m.columnName !== field),
         );
       }
 
       if (columnSort?.direction === "asc") {
         udf.setSorting(
           udf.filters.sorting.map((m) => {
-            if (m.columnName === column.key) {
+            if (m.columnName === field) {
               return {
                 ...m,
                 direction: "desc",
@@ -68,7 +78,7 @@ export function FilterRenderer<R>({
       udf.setSorting([
         ...udf.filters.sorting,
         {
-          columnName: column.key.toString(),
+          columnName: field,
           direction: "asc",
         },
       ]);
@@ -81,7 +91,7 @@ export function FilterRenderer<R>({
         <span className="data-table-sort-actions">
           <button
             className={`active-sort-col ${
-              column.key == columnSort?.columnName ? "active" : ""
+              field == columnSort?.columnName ? "active" : ""
             }`}
             onClick={onSortButtonClick}
           >
@@ -102,7 +112,7 @@ export function FilterRenderer<R>({
               value={internalValue}
               onChange={(e) => {
                 setInternalValue(e.target.value);
-                udf.setFilter({ [column.key]: e.target.value });
+                udf.setFilter({ [field]: e.target.value });
               }}
               placeholder={(column.name as any) || ""}
               type="date"
@@ -119,7 +129,7 @@ export function FilterRenderer<R>({
               value={internalValue}
               onChange={(e) => {
                 setInternalValue(e.target.value);
-                udf.setFilter({ [column.key]: e.target.value });
+                udf.setFilter({ [field]: e.target.value });
               }}
               placeholder={(column.name as any) || ""}
             />

@@ -35,7 +35,6 @@ export function useDatatableFiltering({
   const { withDebounce } = useDebouncedEffect();
   const init = {
     itemsPerPage: 100,
-    startIndex: 0,
     sorting: [],
     ...(initialFilters || {}),
   };
@@ -57,11 +56,6 @@ export function useDatatableFiltering({
 
     try {
       filters = parse(search.substring(1));
-
-      // startIndex is being removed, and I am not sure if that's a good idea or not.
-      // When user scrolls down a lot, and then tries to share the link with someone or refresh,
-      // He doesn't have the content which was there before hand, therefor sees a empty screen
-      delete filters.startIndex;
     } catch (error) {}
 
     setFilters({ ...init, ...filters });
@@ -73,7 +67,6 @@ export function useDatatableFiltering({
 
   const computeQueryKey = (filters) => {
     const queryHashItems = { ...filters };
-    delete queryHashItems.startIndex;
     delete queryHashItems.itemsPerPage;
     // cursor advances page-to-page within the same logical query (same as
     // startIndex used to), so it must not be part of the hash either -
@@ -98,12 +91,10 @@ export function useDatatableFiltering({
     };
 
     if (reset) {
-      newFilters.startIndex = 0;
       newFilters.cursor = "";
     }
 
     setFilters(newFilters);
-    // setQueryHash(computeQueryKey(newFilters));
 
     router.push("?" + stringify(newFilters), undefined, {}, true);
     withDebounce(() => {
@@ -125,10 +116,6 @@ export function useDatatableFiltering({
     setFilter({ sorting, sort: toSortString(sorting) }, false);
   };
 
-  const setStartIndex = (index: number) => {
-    setFilter({ startIndex: index }, false);
-  };
-
   // Advances a cursor-paginated query to its next page: `cursor` should be
   // the `next.cursor` value from the most recent GResponse. `reset: false`
   // so it doesn't clobber startIndex or restart the query.
@@ -137,7 +124,7 @@ export function useDatatableFiltering({
   };
 
   const onFiltersChange = (filters: Filter[] | undefined) => {
-    let newFilters = { startIndex: 0 };
+    let newFilters = { cursor: "" };
     setFilter(newFilters);
   };
 
@@ -213,7 +200,6 @@ export function useDatatableFiltering({
     setFilters,
     setFilter,
     setSorting,
-    setStartIndex,
     setCursor,
     selection,
     setSelection,
