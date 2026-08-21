@@ -1,0 +1,341 @@
+package resolve
+
+import "github.com/torabian/fireback/modules/fireback"
+
+type abacCode string
+
+const (
+	ActionOnlyInRoot                          abacCode = "ActionOnlyInRoot"
+	AlreadyConfirmed                          abacCode = "AlreadyConfirmed"
+	BodyIsMissing                             abacCode = "BodyIsMissing"
+	DataTypeDoesNotExistsInFireback           abacCode = "DataTypeDoesNotExistsInFireback"
+	EmailConfigurationIsNotAvailable          abacCode = "EmailConfigurationIsNotAvailable"
+	EmailConfigurationMissing                 abacCode = "EmailConfigurationMissing"
+	EmailIsNotConfigured                      abacCode = "EmailIsNotConfigured"
+	EmailIsNotValid                           abacCode = "EmailIsNotValid"
+	EmailNotFound                             abacCode = "EmailNotFound"
+	FailedToDecodeGoogle                      abacCode = "FailedToDecodeGoogle"
+	FieldInvalidEmail                         abacCode = "FieldInvalidEmail"
+	FieldOneOf                                abacCode = "FieldOneOf"
+	FieldRequired                             abacCode = "FieldRequired"
+	FileNotFound                              abacCode = "FileNotFound"
+	GsmConfigurationIsNotAvailable            abacCode = "GsmConfigurationIsNotAvailable"
+	InvalidContent                            abacCode = "InvalidContent"
+	InvalidExchangeKey                        abacCode = "InvalidExchangeKey"
+	InvalidToken                              abacCode = "InvalidToken"
+	InvitationExpired                         abacCode = "InvitationExpired"
+	InvitationNotFound                        abacCode = "InvitationNotFound"
+	InviteToWorkspaceMailSenderMissing        abacCode = "InviteToWorkspaceMailSenderMissing"
+	InvokeUrlMissing                          abacCode = "InvokeUrlMissing"
+	NotEnoughPermission                       abacCode = "NotEnoughPermission"
+	OtaRequestBlockedUntil                    abacCode = "OtaRequestBlockedUntil"
+	OtpCodeInvalid                            abacCode = "OtpCodeInvalid"
+	OtpFailed                                 abacCode = "OtpFailed"
+	OtpNotAvailableForThisType                abacCode = "OtpNotAvailableForThisType"
+	PassportMethodAlreadyExists               abacCode = "PassportMethodAlreadyExists"
+	PassportNotAvailable                      abacCode = "PassportNotAvailable"
+	PassportNotFound                          abacCode = "PassportNotFound"
+	PassportTotpNotConfirmed                  abacCode = "PassportTotpNotConfirmed"
+	PassportUserNotAvailable                  abacCode = "PassportUserNotAvailable"
+	PasswordDidNotUpdated                     abacCode = "PasswordDidNotUpdated"
+	PasswordDoesNotMeetTheSecurityRequirement abacCode = "PasswordDoesNotMeetTheSecurityRequirement"
+	PasswordRequired                          abacCode = "PasswordRequired"
+	PhoneNumberIsNotValid                     abacCode = "PhoneNumberIsNotValid"
+	ProvideTokenInAuthorization               abacCode = "ProvideTokenInAuthorization"
+	Recaptcha2Error                           abacCode = "Recaptcha2Error"
+	Recaptcha2Needed                          abacCode = "Recaptcha2Needed"
+	ResetNotFound                             abacCode = "ResetNotFound"
+	RootWorkspaceTypeIsNotAllowed             abacCode = "RootWorkspaceTypeIsNotAllowed"
+	SelectWorkspaceId                         abacCode = "SelectWorkspaceId"
+	SessionSecretIsNeeded                     abacCode = "SessionSecretIsNeeded"
+	SessionSecretIsNotAvailable               abacCode = "SessionSecretIsNotAvailable"
+	SmsNotSent                                abacCode = "SmsNotSent"
+	TokenNotFound                             abacCode = "TokenNotFound"
+	TotpCodeIsNotValid                        abacCode = "TotpCodeIsNotValid"
+	TotpIsNotAvailableForThisPassport         abacCode = "TotpIsNotAvailableForThisPassport"
+	UnsupportedOAuth                          abacCode = "UnsupportedOAuth"
+	UserDoesNotExist                          abacCode = "UserDoesNotExist"
+	UserNotFoundOrDeleted                     abacCode = "UserNotFoundOrDeleted"
+	UserWhichHasThisTokenDoesNotExist         abacCode = "UserWhichHasThisTokenDoesNotExist"
+	ValidationFailedOnSomeFields              abacCode = "ValidationFailedOnSomeFields"
+)
+
+var AbacMessages = newAbacMessageCode()
+
+func newAbacMessageCode() *abacMsgs {
+	return &abacMsgs{
+		ActionOnlyInRoot: fireback.ErrorItem{
+			"$":  "ActionOnlyInRoot",
+			"en": "This action is only allowed when user belongs to root workspace, and root is selected",
+		},
+		AlreadyConfirmed: fireback.ErrorItem{
+			"$":  "AlreadyConfirmed",
+			"en": "Already confirmed",
+		},
+		BodyIsMissing: fireback.ErrorItem{
+			"$":  "BodyIsMissing",
+			"en": "Body content is not correct. You need a valid json.",
+		},
+		DataTypeDoesNotExistsInFireback: fireback.ErrorItem{
+			"$":  "DataTypeDoesNotExistsInFireback",
+			"en": "This data type does not exist in fireback. %name %location",
+		},
+		EmailConfigurationIsNotAvailable: fireback.ErrorItem{
+			"$":  "EmailConfigurationIsNotAvailable",
+			"en": "Email configuration is not available",
+		},
+		EmailConfigurationMissing: fireback.ErrorItem{
+			"$":  "EmailConfigurationMissing",
+			"en": "Email configuration is not available",
+		},
+		EmailIsNotConfigured: fireback.ErrorItem{
+			"$":  "EmailIsNotConfigured",
+			"en": "Email server is not configured",
+		},
+		EmailIsNotValid: fireback.ErrorItem{
+			"$":  "EmailIsNotValid",
+			"en": "The email address is not valid.",
+		},
+		EmailNotFound: fireback.ErrorItem{
+			"$":  "EmailNotFound",
+			"en": "Email is not found",
+		},
+		FailedToDecodeGoogle: fireback.ErrorItem{
+			"$":  "FailedToDecodeGoogle",
+			"en": "Failed to decode the google token, it's not available at this moment.",
+		},
+		FieldInvalidEmail: fireback.ErrorItem{
+			"$":  "FieldInvalidEmail",
+			"en": "Invalid email address",
+		},
+		FieldOneOf: fireback.ErrorItem{
+			"$":  "FieldOneOf",
+			"en": "The value you have provided needs to be one of these values: %s",
+		},
+		FieldRequired: fireback.ErrorItem{
+			"$":  "FieldRequired",
+			"en": "This field is required",
+		},
+		FileNotFound: fireback.ErrorItem{
+			"$":  "FileNotFound",
+			"en": "File not found",
+		},
+		GsmConfigurationIsNotAvailable: fireback.ErrorItem{
+			"$":  "GsmConfigurationIsNotAvailable",
+			"en": "GSM Services configuration is not available",
+		},
+		InvalidContent: fireback.ErrorItem{
+			"$":  "InvalidContent",
+			"en": "Body content is not correct. You need a valid json.",
+		},
+		InvalidExchangeKey: fireback.ErrorItem{
+			"$":  "InvalidExchangeKey",
+			"en": "Invalid exchange key",
+		},
+		InvalidToken: fireback.ErrorItem{
+			"$":  "InvalidToken",
+			"en": "Token provided is not valid.",
+		},
+		InvitationExpired: fireback.ErrorItem{
+			"$":  "InvitationExpired",
+			"en": "Invitation has been expired.",
+		},
+		InvitationNotFound: fireback.ErrorItem{
+			"$":  "InvitationNotFound",
+			"en": "Invitation not found or expired.",
+		},
+		InviteToWorkspaceMailSenderMissing: fireback.ErrorItem{
+			"$":  "InviteToWorkspaceMailSenderMissing",
+			"en": "We cannot send the invitation via email address, because sender email is not available, or not configurated.",
+			"fa": "امکان ارسال دعوت نامه از طریق ایمیل وجود ندارد، چون مدیریت تنظیمات لازم برای ایمیل را انجام نداده یا آن را برای شما محدود کرده است.",
+		},
+		InvokeUrlMissing: fireback.ErrorItem{
+			"$":  "InvokeUrlMissing",
+			"en": "Invoking url is missing",
+		},
+		NotEnoughPermission: fireback.ErrorItem{
+			"$":  "NotEnoughPermission",
+			"en": "You do not have enough permission for this section",
+		},
+		OtaRequestBlockedUntil: fireback.ErrorItem{
+			"$":  "OtaRequestBlockedUntil",
+			"en": "Request is blocked until.",
+		},
+		OtpCodeInvalid: fireback.ErrorItem{
+			"$":  "OtpCodeInvalid",
+			"en": "Otp code is invalid",
+		},
+		OtpFailed: fireback.ErrorItem{
+			"$":  "OtpFailed",
+			"en": "At the moment we cannot send you one time password. Please contact the support.",
+		},
+		OtpNotAvailableForThisType: fireback.ErrorItem{
+			"$":  "OtpNotAvailableForThisType",
+			"en": "This type of account does not have any otp method for authentication.",
+		},
+		PassportMethodAlreadyExists: fireback.ErrorItem{
+			"$":  "PassportMethodAlreadyExists",
+			"en": "A passport method with this type and region already exists. Type and region combination must be unique.",
+		},
+		PassportNotAvailable: fireback.ErrorItem{
+			"$":  "PassportNotAvailable",
+			"en": "This passport is not available. Please check credentials and try again",
+		},
+		PassportNotFound: fireback.ErrorItem{
+			"$":  "PassportNotFound",
+			"en": "This passport is not available. Please check credentials and try again",
+		},
+		PassportTotpNotConfirmed: fireback.ErrorItem{
+			"$":  "PassportTotpNotConfirmed",
+			"en": "The totp code from app is correct, but we could not store it in your account. You might be asked to setup again later.",
+		},
+		PassportUserNotAvailable: fireback.ErrorItem{
+			"$":  "PassportUserNotAvailable",
+			"en": "User with this passport is not available at this moment",
+		},
+		PasswordDidNotUpdated: fireback.ErrorItem{
+			"$":  "PasswordDidNotUpdated",
+			"en": "Password did not get updated for some unknown reason.",
+		},
+		PasswordDoesNotMeetTheSecurityRequirement: fireback.ErrorItem{
+			"$":  "PasswordDoesNotMeetTheSecurityRequirement",
+			"en": "Password choosen doesn't meet the security requirement.",
+		},
+		PasswordRequired: fireback.ErrorItem{
+			"$":  "PasswordRequired",
+			"en": "Password is required",
+		},
+		PhoneNumberIsNotValid: fireback.ErrorItem{
+			"$":  "PhoneNumberIsNotValid",
+			"en": "The phone number is not valid.",
+		},
+		ProvideTokenInAuthorization: fireback.ErrorItem{
+			"$":  "ProvideTokenInAuthorization",
+			"en": "Request requires authroization, please make sure you are logged in, and have enough access level",
+			"fa": "شما باید توکن دسترسی را در بخش هدر و قسمت authorization وارد کنید",
+		},
+		Recaptcha2Error: fireback.ErrorItem{
+			"$":  "Recaptcha2Error",
+			"en": "Recaptcha is not correct. Try again to solve the recaptcha.",
+		},
+		Recaptcha2Needed: fireback.ErrorItem{
+			"$":  "Recaptcha2Needed",
+			"en": "You need to provide recaptcha2 for this api.",
+		},
+		ResetNotFound: fireback.ErrorItem{
+			"$":  "ResetNotFound",
+			"en": "Reset not found",
+		},
+		RootWorkspaceTypeIsNotAllowed: fireback.ErrorItem{
+			"$":  "RootWorkspaceTypeIsNotAllowed",
+			"en": "Root workspace type creation is not allowed on the web.",
+		},
+		SelectWorkspaceId: fireback.ErrorItem{
+			"$":  "SelectWorkspaceId",
+			"en": "You need to select a correct workspace-id in header section",
+			"fa": "شما باید تیم یا ورک اسپیس را در بخش هدر با فیلد workspace-id تعیین کنید",
+		},
+		SessionSecretIsNeeded: fireback.ErrorItem{
+			"$":  "SessionSecretIsNeeded",
+			"en": "Session secret is needed to continue creating a user. Use checkClassicPassport first with value, to get the required steps for account creation.",
+		},
+		SessionSecretIsNotAvailable: fireback.ErrorItem{
+			"$":  "SessionSecretIsNotAvailable",
+			"en": "Session secret is not available or expired. Try to use the checkClassicPassport flow again.",
+		},
+		SmsNotSent: fireback.ErrorItem{
+			"$":  "SmsNotSent",
+			"en": "Sending text message has failed.",
+		},
+		TokenNotFound: fireback.ErrorItem{
+			"$":  "TokenNotFound",
+			"en": "Token not found or no longer valid.",
+		},
+		TotpCodeIsNotValid: fireback.ErrorItem{
+			"$":  "TotpCodeIsNotValid",
+			"en": "The totp code from the app is incorrect. Double check and try again.",
+		},
+		TotpIsNotAvailableForThisPassport: fireback.ErrorItem{
+			"$":  "TotpIsNotAvailableForThisPassport",
+			"en": "This passport doesn't have totp setup. Contact the administrator to set it up for you.",
+		},
+		UnsupportedOAuth: fireback.ErrorItem{
+			"$":  "UnsupportedOAuth",
+			"en": "OAuth service is not available or not supported yet.",
+		},
+		UserDoesNotExist: fireback.ErrorItem{
+			"$":  "UserDoesNotExist",
+			"en": "User is not available.",
+		},
+		UserNotFoundOrDeleted: fireback.ErrorItem{
+			"$":  "UserNotFoundOrDeleted",
+			"en": "User not found, your account might be deleted, or access level has been reduced.",
+			"fa": "کاربر پیدا نشد ممکن است اکانت حذف شده باشد یا سطح دسترسی آن کاهش پیدا کرده باشد",
+		},
+		UserWhichHasThisTokenDoesNotExist: fireback.ErrorItem{
+			"$":  "UserWhichHasThisTokenDoesNotExist",
+			"en": "User which has this token does not exists",
+			"fa": "کاربری که با این دسترسی وارد شده بود وجود ندارد. لطفا دوباره به سیستم وارد شوید",
+		},
+		ValidationFailedOnSomeFields: fireback.ErrorItem{
+			"$":  "ValidationFailedOnSomeFields",
+			"en": "Validation has failed on some fields",
+		},
+	}
+}
+
+type abacMsgs struct {
+	ActionOnlyInRoot                          fireback.ErrorItem
+	AlreadyConfirmed                          fireback.ErrorItem
+	BodyIsMissing                             fireback.ErrorItem
+	DataTypeDoesNotExistsInFireback           fireback.ErrorItem
+	EmailConfigurationIsNotAvailable          fireback.ErrorItem
+	EmailConfigurationMissing                 fireback.ErrorItem
+	EmailIsNotConfigured                      fireback.ErrorItem
+	EmailIsNotValid                           fireback.ErrorItem
+	EmailNotFound                             fireback.ErrorItem
+	FailedToDecodeGoogle                      fireback.ErrorItem
+	FieldInvalidEmail                         fireback.ErrorItem
+	FieldOneOf                                fireback.ErrorItem
+	FieldRequired                             fireback.ErrorItem
+	FileNotFound                              fireback.ErrorItem
+	GsmConfigurationIsNotAvailable            fireback.ErrorItem
+	InvalidContent                            fireback.ErrorItem
+	InvalidExchangeKey                        fireback.ErrorItem
+	InvalidToken                              fireback.ErrorItem
+	InvitationExpired                         fireback.ErrorItem
+	InvitationNotFound                        fireback.ErrorItem
+	InviteToWorkspaceMailSenderMissing        fireback.ErrorItem
+	InvokeUrlMissing                          fireback.ErrorItem
+	NotEnoughPermission                       fireback.ErrorItem
+	OtaRequestBlockedUntil                    fireback.ErrorItem
+	OtpCodeInvalid                            fireback.ErrorItem
+	OtpFailed                                 fireback.ErrorItem
+	OtpNotAvailableForThisType                fireback.ErrorItem
+	PassportMethodAlreadyExists               fireback.ErrorItem
+	PassportNotAvailable                      fireback.ErrorItem
+	PassportNotFound                          fireback.ErrorItem
+	PassportTotpNotConfirmed                  fireback.ErrorItem
+	PassportUserNotAvailable                  fireback.ErrorItem
+	PasswordDidNotUpdated                     fireback.ErrorItem
+	PasswordDoesNotMeetTheSecurityRequirement fireback.ErrorItem
+	PasswordRequired                          fireback.ErrorItem
+	PhoneNumberIsNotValid                     fireback.ErrorItem
+	ProvideTokenInAuthorization               fireback.ErrorItem
+	Recaptcha2Error                           fireback.ErrorItem
+	Recaptcha2Needed                          fireback.ErrorItem
+	ResetNotFound                             fireback.ErrorItem
+	RootWorkspaceTypeIsNotAllowed             fireback.ErrorItem
+	SelectWorkspaceId                         fireback.ErrorItem
+	SessionSecretIsNeeded                     fireback.ErrorItem
+	SessionSecretIsNotAvailable               fireback.ErrorItem
+	SmsNotSent                                fireback.ErrorItem
+	TokenNotFound                             fireback.ErrorItem
+	TotpCodeIsNotValid                        fireback.ErrorItem
+	TotpIsNotAvailableForThisPassport         fireback.ErrorItem
+	UnsupportedOAuth                          fireback.ErrorItem
+	UserDoesNotExist                          fireback.ErrorItem
+	UserNotFoundOrDeleted                     fireback.ErrorItem
+	UserWhichHasThisTokenDoesNotExist         fireback.ErrorItem
+	ValidationFailedOnSomeFields              fireback.ErrorItem
+}
