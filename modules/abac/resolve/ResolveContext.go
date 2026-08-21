@@ -12,9 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/torabian/emi/emigo"
-	"github.com/torabian/fireback/modules/abac"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
-	"github.com/torabian/fireback/modules/abac/interfacetools/queries"
+	queries "github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/torabian/fireback/modules/fireback/ferror"
@@ -404,6 +403,7 @@ func GetUserFromToken(tokenString string) (*abacdefs.UserEntity, error) {
 	// Not workspace-scoped (see UserBrowseAction's own comment) - abacdefs.UserEntityActions.Get
 	// is the entity's own generated, unscoped lookup.
 	user, _ := abacdefs.UserEntityActions.Get(fireback.GetDbRef(), item.UserId.OrDefault(""))
+
 	// HydrateUserPrimaryAddress(user)
 	return user, nil
 }
@@ -472,7 +472,7 @@ func WithAuthorizationPureDefault(context *AuthContextDto) (*AuthResultDto, *fir
 		if context.WorkspaceId != fireback.ROOT_VAR {
 			return nil, &fireback.IError{
 				HttpCode: 400,
-				Message:  abac.AbacMessages.ActionOnlyInRoot,
+				Message:  AbacMessages.ActionOnlyInRoot,
 			}
 		}
 	}

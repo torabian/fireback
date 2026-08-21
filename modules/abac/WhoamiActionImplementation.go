@@ -5,6 +5,7 @@ import (
 
 	"github.com/torabian/emi/emigo"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
+	"github.com/torabian/fireback/modules/abac/resolve"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -15,7 +16,7 @@ import (
 // single item (GResponseSingleItem) instead of a list, since this is always
 // exactly one caller's own info, never a paginated collection.
 func WhoamiAction(c abacdefs.WhoamiActionRequest) (*abacdefs.WhoamiActionResponse, error) {
-	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
+	query, err := resolve.ResolveActionContext(c, &resolve.SecurityModel{
 		ResolveStrategy: fireback.ResolveStrategyUser,
 	})
 	if err != nil {
