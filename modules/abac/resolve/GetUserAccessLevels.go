@@ -8,7 +8,6 @@ import (
 func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *fireback.IError) {
 
 	access := &UserAccessLevelDto{}
-	query.ItemsPerPage = 1000
 
 	items, _, err := fireback.UnsafeQuerySqlFromFs[UserRoleWorkspacePermissionDto](
 		&queries.QueriesFs, "UserRolePermission", fireback.QueryDSL{

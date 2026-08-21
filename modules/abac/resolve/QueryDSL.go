@@ -12,16 +12,6 @@ import (
 
 type QueryDSL struct {
 
-	// Usefull for the paginated queries, it would add the start index
-	// and in SQL becomes as offset
-	StartIndex int `json:"startIndex"`
-
-	// Numeric cursor
-	Cursor *string `json:"cursor"`
-
-	// Useful for paginated queries, similar to limit in SQL queries
-	ItemsPerPage int `json:"itemsPerPage"`
-
 	// It's gonna make left joins on the query, if the entity has
 	// objects or arrays. It would slow down the query dramatically.
 	Deep bool `json:"deep"`
