@@ -27,13 +27,13 @@ func WithAuthorizationPureDefault(context *AuthContextDto) (*AuthResultDto, *fir
 		return nil, fireback.Create401Error(&AbacMessages.UserNotFoundOrDeleted, []string{})
 	}
 
-	access, accessError := GetUserAccessLevels(QueryDSL{UserId: user.UniqueId})
+	access, accessError := GetUserAccessLevels(MsgContext{UserId: user.UniqueId})
 
 	if accessError != nil {
 		return nil, accessError
 	}
 
-	query := QueryDSL{
+	query := MsgContext{
 		UserAccessPerWorkspace: access.UserAccessPerWorkspace,
 		ActionRequires:         context.Capabilities,
 		WorkspaceId:            context.WorkspaceId,

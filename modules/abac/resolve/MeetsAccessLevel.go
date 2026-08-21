@@ -7,8 +7,8 @@ import (
 	"github.com/torabian/fireback/modules/fireback/application"
 )
 
-func MeetsAccessLevel(query QueryDSL, onlyRoot bool) (bool, []string) {
-	if onlyRoot && (query.WorkspaceId != ROOT_VAR && query.WorkspaceId != "system") {
+func MeetsAccessLevel(query MsgContext, onlyRoot bool) (bool, []string) {
+	if onlyRoot && (query.WorkspaceId != ROOT_VAR) {
 		return false, []string{"SYSTEM_OR_ROOT_ALLOWED"}
 	}
 

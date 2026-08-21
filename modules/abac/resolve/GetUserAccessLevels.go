@@ -5,7 +5,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func GetUserAccessLevels(query QueryDSL) (*UserAccessLevelDto, *fireback.IError) {
+func GetUserAccessLevels(query MsgContext) (*UserAccessLevelDto, *fireback.IError) {
 
 	access := &UserAccessLevelDto{}
 

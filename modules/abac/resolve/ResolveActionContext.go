@@ -122,7 +122,7 @@ func maskToken(token string) string {
 	return token[:2] + "***" + token[len(token)-4:]
 }
 
-func GetWorkspaceAndUserAccesses(query QueryDSL) ([]string, []string) {
+func GetWorkspaceAndUserAccesses(query MsgContext) ([]string, []string) {
 
 	if query.UserAccessPerWorkspace == nil {
 		return []string{}, []string{}

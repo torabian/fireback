@@ -6,7 +6,7 @@ import (
 	"github.com/torabian/fireback/modules/fireback/application"
 )
 
-type QueryDSL struct {
+type MsgContext struct {
 
 	// Automatically assigned UserId to the request after analising the token
 	// This will be used to save each entity and determine the owner of the record
@@ -32,22 +32,22 @@ type QueryDSL struct {
 	Language      string `json:"-"`
 }
 
-func (x QueryDSL) Json() string {
+func (x MsgContext) Json() string {
 	str, _ := json.MarshalIndent(x, "", "  ")
 	return (string(str))
 
 }
 
-func (x QueryDSL) GetLanguage() string {
+func (x MsgContext) GetLanguage() string {
 	return x.Language
 }
 
 // GetWorkspaceId implements owner.Owner.
-func (x QueryDSL) GetWorkspaceId() string {
+func (x MsgContext) GetWorkspaceId() string {
 	return x.WorkspaceId
 }
 
 // GetUserId implements owner.Owner.
-func (x QueryDSL) GetUserId() string {
+func (x MsgContext) GetUserId() string {
 	return x.UserId
 }
