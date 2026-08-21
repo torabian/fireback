@@ -2,7 +2,6 @@ package resolve
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"slices"
 	"strings"
@@ -21,29 +20,28 @@ import (
 var ROOT_ALL_ACCESS = "root.*"
 var ROOT_VAR = "root"
 
-func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *SecurityModel) (*QueryDSL, error) {
+func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *SecurityModel) (*AuthResultDto, error) {
 	GinCtx := request.GetGinCtx()
 	CliCtx := request.GetCliCtx()
 
-	var qsdl QueryDSL
-
 	if value, ok := GinCtx.(*gin.Context); ok {
-		resolved, err := ResolveActionContextFromGinContext(value, securityModel)
-		if err != nil {
-			return nil, err
+		if securityModel != nil && !fireback.IsNilish(GinCtx) {
+			// Fireback no longer plans to check security anymore. Do it manually,
+			// on every action. This is fr transparency.
+			return AuthorizeRequest(securityModel, value)
+
 		}
-		qsdl = *resolved
 	}
 
 	if !fireback.IsNilish(CliCtx) {
 		// Fireback no longer plans to check security anymore. Do it manually,
 		// on every action. This is fr transparency.
 		if value, ok := CliCtx.(*cli.Command); ok {
-			qsdl = CommonCliQueryDSLBuilderAuthorize(value, securityModel)
+			return CommonCliQueryDSLBuilderAuthorize(value, securityModel)
 		}
 	}
 
-	return &qsdl, nil
+	return nil, nil
 }
 func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	workspaceId := c.GetString("workspaceId")
@@ -107,32 +105,7 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 type AccessState struct {
 }
 
-// Keeps the functionality to resolve access level.
-
-// ResolveActionContextFromGinContext resolves the QueryDSL for a plain
-// *gin.Context, enforcing the security model if one is given. This holds the
-// gin-specific logic shared by ResolveActionContext so it isn't duplicated
-// wherever only a *gin.Context (and no emigo.EmiRequestContexts) is available.
-func ResolveActionContextFromGinContext(ginCtx *gin.Context, securityModel *SecurityModel) (*QueryDSL, error) {
-	qsdl := ExtractQueryDslFromGinContext(ginCtx)
-
-	// Only handles the gin security, and this is a problem needs to handle cli as well
-	// perfectly
-	if securityModel != nil && !fireback.IsNilish(ginCtx) {
-		// Fireback no longer plans to check security anymore. Do it manually,
-		// on every action. This is fr transparency.
-		if !AuthorizeRequest(securityModel, ginCtx) {
-			return nil, errors.New("Authorization general failed")
-		}
-
-		// Important because now we have more details of security
-		qsdl = ExtractQueryDslFromGinContext(ginCtx)
-	}
-
-	return &qsdl, nil
-}
-
-func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) bool {
+func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) (*AuthResultDto, error) {
 	q := fireback.ExtractQueryDslFromGinContext(c)
 
 	// A WebSocket handshake can't carry custom headers from the browser, so
@@ -185,20 +158,13 @@ func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) bool {
 			// (the reactive action's generated Gin handler) reports the
 			// failure as a websocket frame instead, using the real
 			// connection rather than gin's now-unusable writer.
-			return false
+			return nil, nil
 		}
 		c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
-		return false
+		return nil, nil
 	}
 
-	c.Set("urw", result.UserAccessPerWorkspace)
-	c.Set("resolveStrategy", securityModel.ResolveStrategy)
-	c.Set("role_id", ri)
-	c.Set("user_id", result.UserId.OrDefault(""))
-	c.Set("authResult", result)
-	c.Set("workspaceId", wi)
-
-	return true
+	return result, nil
 }
 
 func WithAuthorizationFn(securityModel *SecurityModel) gin.HandlerFunc {
@@ -207,26 +173,20 @@ func WithAuthorizationFn(securityModel *SecurityModel) gin.HandlerFunc {
 	}
 }
 
-func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) QueryDSL {
-	lang := "en"
-	workspaceId := fireback.GetConfig().CliWorkspace
+type Translatable struct{}
 
+func (x Translatable) GetLanguage() string {
+	lang := "en"
 	if fireback.GetConfig().CliLanguage != "" {
 		lang = fireback.GetConfig().CliLanguage
 	}
 
-	var q QueryDSL = QueryDSL{
-		WorkspaceId: workspaceId,
-		Language:    lang,
-	}
+	return lang
+}
 
-	if c.IsSet("lang") {
-		q.Language = c.String("lang")
-	}
+func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) (*AuthResultDto, error) {
 
-	if c.IsSet("workspaceId") {
-		q.WorkspaceId = c.String("workspaceId")
-	}
+	t := Translatable{}
 
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
 
@@ -241,22 +201,17 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) 
 
 		if err != nil {
 
-			if err.ToPublicEndUser(&q).Message != err.ToPublicEndUser(&q).MessageTranslated {
-				log.Fatalf("%s", err.ToPublicEndUser(&q).Message)
+			if err.ToPublicEndUser(t).Message != err.ToPublicEndUser(t).MessageTranslated {
+				log.Fatalf("%s", err.ToPublicEndUser(t).Message)
 			}
-			log.Default().Printf("%s", err.ToPublicEndUser(&q).MessageTranslated)
+			log.Default().Printf("%s", err.ToPublicEndUser(t).MessageTranslated)
 		}
 
-		q.ResolveStrategy = security.ResolveStrategy
-		q.InternalQuery = result.SqlContext
-		if result.UserId.IsSet() && result.UserId.OrDefault("") != "" {
-			q.UserId = result.UserId.OrDefault("")
-		}
-		q.UserAccessPerWorkspace = result.UserAccessPerWorkspace
+		return result, nil
 
 	}
 
-	return q
+	return nil, nil
 }
 
 func maskToken(token string) string {

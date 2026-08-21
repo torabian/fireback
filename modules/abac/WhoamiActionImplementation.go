@@ -52,7 +52,7 @@ func WhoamiAction(c abacdefs.WhoamiActionRequest) (*abacdefs.WhoamiActionRespons
 	})
 
 	res := abacdefs.WhoamiActionRes{
-		UserId:     q.UserId,
+		UserId:     q.UserId.OrDefault(""),
 		Workspaces: emigo.ArrayReplace(workspaces),
 	}
 
