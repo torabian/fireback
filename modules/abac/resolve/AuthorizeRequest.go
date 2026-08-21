@@ -3,11 +3,11 @@ package resolve
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/torabian/fireback/modules/fireback"
 )
 
 func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) (*AuthResultDto, error) {
-	q := fireback.ExtractQueryDslFromGinContext(c)
+
+	t := Translatable{}
 
 	// A WebSocket handshake can't carry custom headers from the browser, so
 	// clients of a reactive action (e.g. eventbus's /ws, opened by the UI's
@@ -61,7 +61,7 @@ func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) (*AuthResult
 			// connection rather than gin's now-unusable writer.
 			return nil, nil
 		}
-		c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(&q)})
+		c.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(t)})
 		return nil, nil
 	}
 

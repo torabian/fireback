@@ -3,7 +3,6 @@ package resolve
 import (
 	"encoding/json"
 	"log"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/torabian/emi/emigo"
@@ -41,64 +40,6 @@ func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *Secur
 	}
 
 	return nil, nil
-}
-func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
-	workspaceId := c.GetString("workspaceId")
-	id := c.Param("uniqueId")
-
-	resolveStrategy := c.GetString("resolveStrategy")
-	userHas := c.GetStringSlice("user_has")
-	workspaceHas := c.GetStringSlice("workspace_has")
-
-	user, isUserSet := c.Get("user_id")
-	var userId string
-
-	if isUserSet {
-		value, ok := user.(string)
-		if ok {
-			userId = value
-		} else if value2, ok2 := user.(*string); ok2 {
-			userId = *value2
-		}
-	}
-
-	uniqueID := c.GetString("uniqueId")
-	if uniqueID != "" {
-		id = uniqueID
-	}
-
-	var f QueryDSL = QueryDSL{
-
-		UserHas:      userHas,
-		WorkspaceHas: workspaceHas,
-		WorkspaceId:  workspaceId,
-
-		Language:      "en",
-		Region:        "us",
-		UniqueId:      id,
-		Authorization: c.GetHeader("Authorization"),
-	}
-
-	if resolveStrategy != "" {
-		f.ResolveStrategy = resolveStrategy
-	} else {
-		f.ResolveStrategy = ResolveStrategyWorkspace
-	}
-
-	f.UserId = userId
-
-	acceptLang := c.GetHeader("accept-language")
-	if acceptLang != "" && len(acceptLang) == 2 {
-		f.Language = strings.ToLower(acceptLang)
-	}
-
-	// The language set in the header has higher priority
-	language := c.Query("acceptLanguage")
-	if language != "" {
-		f.Language = language
-	}
-
-	return f
 }
 
 type AccessState struct {
