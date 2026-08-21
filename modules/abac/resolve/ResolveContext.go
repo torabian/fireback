@@ -3,10 +3,8 @@ package resolve
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +14,6 @@ import (
 	queries "github.com/torabian/fireback/modules/abac/queries"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
-	"github.com/torabian/fireback/modules/fireback/ferror"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
 )
@@ -24,38 +21,35 @@ import (
 var ROOT_ALL_ACCESS = "root.*"
 var ROOT_VAR = "root"
 
+func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *SecurityModel) (*QueryDSL, error) {
+	GinCtx := request.GetGinCtx()
+	CliCtx := request.GetCliCtx()
+
+	var qsdl QueryDSL
+
+	if value, ok := GinCtx.(*gin.Context); ok {
+		resolved, err := ResolveActionContextFromGinContext(value, securityModel)
+		if err != nil {
+			return nil, err
+		}
+		qsdl = *resolved
+	}
+
+	if !fireback.IsNilish(CliCtx) {
+		// Fireback no longer plans to check security anymore. Do it manually,
+		// on every action. This is fr transparency.
+		if value, ok := CliCtx.(*cli.Command); ok {
+			qsdl = CommonCliQueryDSLBuilderAuthorize(value, securityModel)
+		}
+	}
+
+	return &qsdl, nil
+}
 func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	workspaceId := c.GetString("workspaceId")
 	id := c.Param("uniqueId")
-	sort := c.Query("sort")
 
 	resolveStrategy := c.GetString("resolveStrategy")
-	linkerId := c.Param("linkerId")
-	queryString, _ := c.GetQuery("query")
-	withPreloads, _ := c.GetQuery("withPreloads")
-	isDeep, _ := c.GetQuery("deep")
-
-	searchPhrase := c.Query("searchPhrase")
-
-	o, _ := c.GetQuery("startIndex")
-	startIndex, _ := strconv.Atoi(o)
-
-	cursor, _ := c.GetQuery("cursor")
-
-	l, _ := c.GetQuery("itemsPerPage")
-	itemsPerPage, _ := strconv.Atoi(l)
-
-	if startIndex < 0 {
-		startIndex = 0
-	}
-
-	switch {
-	case itemsPerPage > 1000:
-		itemsPerPage = 1000
-	case itemsPerPage <= 0:
-		itemsPerPage = 20
-	}
-
 	userHas := c.GetStringSlice("user_has")
 	workspaceHas := c.GetStringSlice("workspace_has")
 
@@ -76,27 +70,11 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 		id = uniqueID
 	}
 
-	var urw *UserAccessPerWorkspaceDto
-	if value, exists := c.Get("urw"); exists {
-		if casted, ok := value.(*UserAccessPerWorkspaceDto); ok {
-			urw = casted
-		}
-	}
-
 	var f QueryDSL = QueryDSL{
-		Query:        queryString,
-		StartIndex:   startIndex,
-		ItemsPerPage: itemsPerPage,
 
-		G:                      c,
-		UserAccessPerWorkspace: urw,
-		Cursor:                 &cursor,
-		UserHas:                userHas,
-		WorkspaceHas:           workspaceHas,
-		Sort:                   sort,
-		SearchPhrase:           searchPhrase,
-		LinkerId:               linkerId,
-		WorkspaceId:            workspaceId,
+		UserHas:      userHas,
+		WorkspaceHas: workspaceHas,
+		WorkspaceId:  workspaceId,
 
 		Language:      "en",
 		Region:        "us",
@@ -111,21 +89,6 @@ func ExtractQueryDslFromGinContext(c *gin.Context) QueryDSL {
 	}
 
 	f.UserId = userId
-
-	if len(withPreloads) > 0 {
-		f.WithPreloads = strings.Split(strings.Trim(withPreloads, " "), ",")
-	}
-
-	deep := c.GetHeader("deep")
-
-	if deep == "true" || deep == "yes" || deep == "1" || isDeep == "true" || isDeep == "yes" || isDeep == "1" {
-		f.Deep = true
-	}
-
-	query := c.GetHeader("query")
-	if query != "" && f.Query == "" {
-		f.Query = query
-	}
 
 	acceptLang := c.GetHeader("accept-language")
 	if acceptLang != "" && len(acceptLang) == 2 {
@@ -164,31 +127,6 @@ func ResolveActionContextFromGinContext(ginCtx *gin.Context, securityModel *Secu
 
 		// Important because now we have more details of security
 		qsdl = ExtractQueryDslFromGinContext(ginCtx)
-	}
-
-	return &qsdl, nil
-}
-
-func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *SecurityModel) (*QueryDSL, error) {
-	GinCtx := request.GetGinCtx()
-	CliCtx := request.GetCliCtx()
-
-	var qsdl QueryDSL
-
-	if value, ok := GinCtx.(*gin.Context); ok {
-		resolved, err := ResolveActionContextFromGinContext(value, securityModel)
-		if err != nil {
-			return nil, err
-		}
-		qsdl = *resolved
-	}
-
-	if !fireback.IsNilish(CliCtx) {
-		// Fireback no longer plans to check security anymore. Do it manually,
-		// on every action. This is fr transparency.
-		if value, ok := CliCtx.(*cli.Command); ok {
-			qsdl = CommonCliQueryDSLBuilderAuthorize(value, securityModel)
-		}
 	}
 
 	return &qsdl, nil
@@ -269,22 +207,37 @@ func WithAuthorizationFn(securityModel *SecurityModel) gin.HandlerFunc {
 	}
 }
 
-func CliAuth(security *SecurityModel) (*AuthResultDto, *ferror.Error) {
-	context := &AuthContextDto{
-		WorkspaceId:  fireback.GetConfig().CliWorkspace,
-		Token:        fireback.GetConfig().CliToken,
-		Capabilities: []application.PermissionInfo{},
-		Security:     security,
+func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) QueryDSL {
+	lang := "en"
+	workspaceId := fireback.GetConfig().CliWorkspace
+
+	if fireback.GetConfig().CliLanguage != "" {
+		lang = fireback.GetConfig().CliLanguage
 	}
 
-	return WithAuthorizationPureDefault(context)
-}
+	var q QueryDSL = QueryDSL{
+		WorkspaceId: workspaceId,
+		Language:    lang,
+	}
 
-func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) QueryDSL {
-	q := CommonCliQueryDSLBuilder(c)
+	if c.IsSet("lang") {
+		q.Language = c.String("lang")
+	}
+
+	if c.IsSet("workspaceId") {
+		q.WorkspaceId = c.String("workspaceId")
+	}
 
 	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
-		result, err := CliAuth(security)
+
+		context := &AuthContextDto{
+			WorkspaceId:  fireback.GetConfig().CliWorkspace,
+			Token:        fireback.GetConfig().CliToken,
+			Capabilities: []application.PermissionInfo{},
+			Security:     security,
+		}
+
+		result, err := WithAuthorizationPureDefault(context)
 
 		if err != nil {
 
@@ -304,85 +257,6 @@ func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) 
 	}
 
 	return q
-}
-
-func CommonCliQueryDSLBuilder(c *cli.Command) QueryDSL {
-
-	queryString := c.String("query")
-	startIndex := c.Int("offset")
-	var cursor *string = nil
-	if c.IsSet("cursor") {
-		val := c.String("cursor")
-		cursor = &val
-	}
-
-	itemsPerPage := c.Int("limit")
-
-	if startIndex < 0 {
-		startIndex = 0
-	}
-
-	switch {
-	case itemsPerPage > 1000:
-		itemsPerPage = 1000
-	case itemsPerPage <= 0:
-		itemsPerPage = 20
-	}
-
-	lang := "en"
-	region := "US"
-	workspaceId := fireback.GetConfig().CliWorkspace
-
-	if fireback.GetConfig().CliLanguage != "" {
-		lang = fireback.GetConfig().CliLanguage
-	}
-
-	if fireback.GetConfig().CliRegion != "" {
-		region = fireback.GetConfig().CliRegion
-	}
-
-	withPreloads := c.String("wp")
-
-	var f QueryDSL = QueryDSL{
-		Query:        queryString,
-		StartIndex:   startIndex,
-		C:            c,
-		Cursor:       cursor,
-		WorkspaceId:  workspaceId,
-		Language:     lang,
-		Region:       strings.ToUpper(region),
-		ItemsPerPage: itemsPerPage,
-	}
-
-	if len(withPreloads) > 0 {
-		f.WithPreloads = strings.Split(strings.Trim(withPreloads, " "), ",")
-	}
-
-	if c.IsSet("lang") {
-		f.Language = c.String("lang")
-	}
-
-	if c.IsSet("deep") {
-		f.Deep = c.Bool("deep")
-	}
-	if c.IsSet("sort") {
-		f.Sort = c.String("sort")
-	}
-
-	if c.IsSet("workspaceId") {
-		f.WorkspaceId = c.String("workspaceId")
-	}
-
-	if c.IsSet("userId") {
-		f.UserId = c.String("userId")
-	}
-
-	if c.IsSet("id") {
-		f.UniqueId = c.String("id")
-		fmt.Println(f.UniqueId)
-	}
-
-	return f
 }
 
 func maskToken(token string) string {
@@ -699,9 +573,6 @@ func (x UserAccessPerWorkspaceDto) Json() string {
 }
 
 type QueryDSL struct {
-
-	// It's a common string query againt database in text format.
-	Query string `json:"query"`
 
 	// Usefull for the paginated queries, it would add the start index
 	// and in SQL becomes as offset
