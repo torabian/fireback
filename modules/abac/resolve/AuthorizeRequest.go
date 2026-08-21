@@ -5,9 +5,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) (*AuthResultDto, error) {
-
-	t := Translatable{}
+func CreateContextFromGin(securityModel *SecurityModel, c *gin.Context) (*AuthContextDto, bool) {
 
 	// A WebSocket handshake can't carry custom headers from the browser, so
 	// clients of a reactive action (e.g. eventbus's /ws, opened by the UI's
@@ -44,13 +42,19 @@ func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) (*AuthResult
 		tk = ck
 	}
 
-	context := &AuthContextDto{
+	return &AuthContextDto{
 		WorkspaceId:  wi,
 		Token:        tk,
 		Capabilities: securityModel.ActionRequires,
 		Security:     securityModel,
-	}
+	}, isWebsocketUpgrade
 
+}
+
+func AuthorizeRequest(securityModel *SecurityModel, c *gin.Context) (*AuthResultDto, error) {
+
+	t := Translatable{}
+	context, isWebsocketUpgrade := CreateContextFromGin(securityModel, c)
 	result, err := WithAuthorizationPureDefault(context)
 
 	if err != nil {

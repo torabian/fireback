@@ -26,23 +26,60 @@ func ResolveActionContext(request emigo.EmiRequestContexts, securityModel *Secur
 		if securityModel != nil && !fireback.IsNilish(GinCtx) {
 			// Fireback no longer plans to check security anymore. Do it manually,
 			// on every action. This is fr transparency.
-			return AuthorizeRequest(securityModel, value)
 
+			t := Translatable{}
+			context, isWebsocketUpgrade := CreateContextFromGin(securityModel, value)
+			result, err := WithAuthorizationPureDefault(context)
+
+			if err != nil {
+				if isWebsocketUpgrade {
+					// Already hijacked - can't send an HTTP response. The caller
+					// (the reactive action's generated Gin handler) reports the
+					// failure as a websocket frame instead, using the real
+					// connection rather than gin's now-unusable writer.
+					return nil, nil
+				}
+				value.AbortWithStatusJSON(int(err.HttpCode), gin.H{"error": err.ToPublicEndUser(t)})
+				return nil, nil
+			}
+
+			return result, nil
 		}
 	}
 
 	if !fireback.IsNilish(CliCtx) {
 		// Fireback no longer plans to check security anymore. Do it manually,
 		// on every action. This is fr transparency.
-		if value, ok := CliCtx.(*cli.Command); ok {
-			return CommonCliQueryDSLBuilderAuthorize(value, securityModel)
+		if _, ok := CliCtx.(*cli.Command); ok {
+			t := Translatable{}
+
+			if securityModel != nil && securityModel.ResolveStrategy != ResolveStrategyPublic {
+
+				context := &AuthContextDto{
+					WorkspaceId:  fireback.GetConfig().CliWorkspace,
+					Token:        fireback.GetConfig().CliToken,
+					Capabilities: []application.PermissionInfo{},
+					Security:     securityModel,
+				}
+
+				result, err := WithAuthorizationPureDefault(context)
+
+				if err != nil {
+
+					if err.ToPublicEndUser(t).Message != err.ToPublicEndUser(t).MessageTranslated {
+						log.Fatalf("%s", err.ToPublicEndUser(t).Message)
+					}
+					log.Default().Printf("%s", err.ToPublicEndUser(t).MessageTranslated)
+				}
+
+				return result, nil
+
+			}
+
 		}
 	}
 
 	return nil, nil
-}
-
-type AccessState struct {
 }
 
 func WithAuthorizationFn(securityModel *SecurityModel) gin.HandlerFunc {
@@ -60,36 +97,6 @@ func (x Translatable) GetLanguage() string {
 	}
 
 	return lang
-}
-
-func CommonCliQueryDSLBuilderAuthorize(c *cli.Command, security *SecurityModel) (*AuthResultDto, error) {
-
-	t := Translatable{}
-
-	if security != nil && security.ResolveStrategy != ResolveStrategyPublic {
-
-		context := &AuthContextDto{
-			WorkspaceId:  fireback.GetConfig().CliWorkspace,
-			Token:        fireback.GetConfig().CliToken,
-			Capabilities: []application.PermissionInfo{},
-			Security:     security,
-		}
-
-		result, err := WithAuthorizationPureDefault(context)
-
-		if err != nil {
-
-			if err.ToPublicEndUser(t).Message != err.ToPublicEndUser(t).MessageTranslated {
-				log.Fatalf("%s", err.ToPublicEndUser(t).Message)
-			}
-			log.Default().Printf("%s", err.ToPublicEndUser(t).MessageTranslated)
-		}
-
-		return result, nil
-
-	}
-
-	return nil, nil
 }
 
 func maskToken(token string) string {
