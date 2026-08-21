@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"github.com/torabian/emi/emigo"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -16,9 +17,9 @@ func webPushConfigSecurity() *fireback.SecurityModel {
 	return &fireback.SecurityModel{ResolveStrategy: fireback.ResolveStrategyUser}
 }
 
-var WebPushConfigActions = NewEntityActionsBundle[WebPushConfigEntity]()
+var WebPushConfigActions = NewEntityActionsBundle[messagingdefs.WebPushConfigEntity]()
 
-func WebPushConfigBrowseAction(c WebPushConfigBrowseActionRequest) (*WebPushConfigBrowseActionResponse, error) {
+func WebPushConfigBrowseAction(c messagingdefs.WebPushConfigBrowseActionRequest) (*messagingdefs.WebPushConfigBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, webPushConfigSecurity())
 	if err != nil {
 		return nil, err
@@ -27,14 +28,14 @@ func WebPushConfigBrowseAction(c WebPushConfigBrowseActionRequest) (*WebPushConf
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WebPushConfigBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &messagingdefs.WebPushConfigBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
 // webPushConfigGetOwn fetches a webPushConfig by uniqueId and verifies it belongs to
 // the resolved query.UserId - GetOneEntity itself only filters by uniqueId, so without
 // this check any authenticated user could look up (or, via the callers below,
 // update/delete) another user's push subscription by guessing its uniqueId.
-func webPushConfigGetOwn(query fireback.QueryDSL) (*WebPushConfigEntity, *fireback.IError) {
+func webPushConfigGetOwn(query fireback.QueryDSL) (*messagingdefs.WebPushConfigEntity, *fireback.IError) {
 	item, err := WebPushConfigActions.GetOne(query)
 	if err != nil {
 		return nil, err
@@ -48,7 +49,7 @@ func webPushConfigGetOwn(query fireback.QueryDSL) (*WebPushConfigEntity, *fireba
 	return item, nil
 }
 
-func WebPushConfigGetAction(c WebPushConfigGetActionRequest) (*WebPushConfigGetActionResponse, error) {
+func WebPushConfigGetAction(c messagingdefs.WebPushConfigGetActionRequest) (*messagingdefs.WebPushConfigGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, webPushConfigSecurity())
 	if err != nil {
 		return nil, err
@@ -58,10 +59,10 @@ func WebPushConfigGetAction(c WebPushConfigGetActionRequest) (*WebPushConfigGetA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WebPushConfigGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &messagingdefs.WebPushConfigGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func WebPushConfigCreateAction(c WebPushConfigCreateActionRequest) (*WebPushConfigCreateActionResponse, error) {
+func WebPushConfigCreateAction(c messagingdefs.WebPushConfigCreateActionRequest) (*messagingdefs.WebPushConfigCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, webPushConfigSecurity())
 	if err != nil {
 		return nil, err
@@ -69,7 +70,7 @@ func WebPushConfigCreateAction(c WebPushConfigCreateActionRequest) (*WebPushConf
 	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
 		return nil, err2
 	}
-	entity := &WebPushConfigEntity{
+	entity := &messagingdefs.WebPushConfigEntity{
 		Subscription: c.Body.Subscription,
 		UserId:       emigo.NullableOf(query.UserId),
 		WorkspaceId:  emigo.NullableOf(query.WorkspaceId),
@@ -78,10 +79,10 @@ func WebPushConfigCreateAction(c WebPushConfigCreateActionRequest) (*WebPushConf
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WebPushConfigCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &messagingdefs.WebPushConfigCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func WebPushConfigUpdateAction(c WebPushConfigUpdateActionRequest) (*WebPushConfigUpdateActionResponse, error) {
+func WebPushConfigUpdateAction(c messagingdefs.WebPushConfigUpdateActionRequest) (*messagingdefs.WebPushConfigUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, webPushConfigSecurity())
 	if err != nil {
 		return nil, err
@@ -90,12 +91,12 @@ func WebPushConfigUpdateAction(c WebPushConfigUpdateActionRequest) (*WebPushConf
 	if _, err2 := webPushConfigGetOwn(*query); err2 != nil {
 		return nil, err2
 	}
-	fields := &WebPushConfigEntity{UniqueId: c.Params.UniqueId, Subscription: c.Body.Subscription}
+	fields := &messagingdefs.WebPushConfigEntity{UniqueId: c.Params.UniqueId, Subscription: c.Body.Subscription}
 	updated, err2 := WebPushConfigActions.Update(*query, fields)
 	if err2 != nil {
 		return nil, err2
 	}
-	return &WebPushConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &messagingdefs.WebPushConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
 // webPushConfigOwnedUniqueIds narrows a requested uniqueIds list down to the ones the
@@ -113,28 +114,28 @@ func webPushConfigOwnedUniqueIds(query fireback.QueryDSL, uniqueIds []string) []
 	return owned
 }
 
-func WebPushConfigAwareDeletePreviewAction(c WebPushConfigAwareDeletePreviewActionRequest) (*WebPushConfigAwareDeletePreviewActionResponse, error) {
+func WebPushConfigAwareDeletePreviewAction(c messagingdefs.WebPushConfigAwareDeletePreviewActionRequest) (*messagingdefs.WebPushConfigAwareDeletePreviewActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, webPushConfigSecurity())
 	if err != nil {
 		return nil, err
 	}
-	uniqueIds := WebPushConfigAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	uniqueIds := messagingdefs.WebPushConfigAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
 	owned := webPushConfigOwnedUniqueIds(*query, uniqueIds)
-	preview, err2 := WebPushConfigEntityActions.AwareDeletePreview(fireback.GetDbRef(), owned)
+	preview, err2 := messagingdefs.WebPushConfigEntityActions.AwareDeletePreview(fireback.GetDbRef(), owned)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WebPushConfigAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &messagingdefs.WebPushConfigAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func WebPushConfigAwareDeleteAction(c WebPushConfigAwareDeleteActionRequest) (*WebPushConfigAwareDeleteActionResponse, error) {
+func WebPushConfigAwareDeleteAction(c messagingdefs.WebPushConfigAwareDeleteActionRequest) (*messagingdefs.WebPushConfigAwareDeleteActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, webPushConfigSecurity())
 	if err != nil {
 		return nil, err
 	}
 	owned := webPushConfigOwnedUniqueIds(*query, c.Body.UniqueIds)
-	if err2 := WebPushConfigEntityActions.AwareDelete(fireback.GetDbRef(), owned); err2 != nil {
+	if err2 := messagingdefs.WebPushConfigEntityActions.AwareDelete(fireback.GetDbRef(), owned); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &WebPushConfigAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &messagingdefs.WebPushConfigAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }

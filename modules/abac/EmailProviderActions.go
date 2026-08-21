@@ -6,6 +6,7 @@ import (
 
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -21,7 +22,7 @@ const (
 	GENERAL_SENDER EmailSenderCategory = "GENERAL_SENDER"
 )
 
-func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, sender EmailSenderCategory) (*messaging.SendEmailWithProviderActionRes, *fireback.IError) {
+func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, sender EmailSenderCategory) (*messagingdefs.SendEmailWithProviderActionRes, *fireback.IError) {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 
@@ -39,10 +40,10 @@ func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, se
 	// the whole request (OTP emails, workspace invites, ...) on every send attempt
 	// until any admin configured a provider - same fix as
 	// GsmProviderActions.go's GsmSendSMSUsingNotificationConfig.
-	printToTerminal := func() (*messaging.SendEmailWithProviderActionRes, *fireback.IError) {
+	printToTerminal := func() (*messagingdefs.SendEmailWithProviderActionRes, *fireback.IError) {
 		log.Default().Println("There are no email providers configured, we are printing the email into the console assuming this is development.")
 		log.Default().Println(content.Json())
-		return &messaging.SendEmailWithProviderActionRes{QueueId: "printed-to-terminal"}, nil
+		return &messagingdefs.SendEmailWithProviderActionRes{QueueId: "printed-to-terminal"}, nil
 	}
 
 	if config == nil {
@@ -71,7 +72,7 @@ func SendEmailUsingNotificationConfig(content *messaging.EmailMessageContent, se
 		if err := messaging.SendMail(*content, provider); err != nil {
 			return nil, fireback.CastToIError(err)
 		} else {
-			return &messaging.SendEmailWithProviderActionRes{}, nil
+			return &messagingdefs.SendEmailWithProviderActionRes{}, nil
 		}
 	}
 }

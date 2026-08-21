@@ -5,6 +5,7 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/torabian/emi/emigo"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -20,13 +21,13 @@ var PERM_ROOT_EMAIL_PROVIDER_UPDATE = emailProviderPerms.Update
 var PERM_ROOT_EMAIL_PROVIDER_DELETE = emailProviderPerms.Delete
 var ALL_EMAIL_PROVIDER_PERMISSIONS = emailProviderPerms.All
 
-var EmailProviderActions = NewEntityActionsBundle[EmailProviderEntity]()
+var EmailProviderActions = NewEntityActionsBundle[messagingdefs.EmailProviderEntity]()
 
 func emailProviderSecurity(perm application.PermissionInfo) *fireback.SecurityModel {
 	return &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{perm}, AllowOnRoot: true}
 }
 
-func EmailProviderBrowseAction(c EmailProviderBrowseActionRequest) (*EmailProviderBrowseActionResponse, error) {
+func EmailProviderBrowseAction(c messagingdefs.EmailProviderBrowseActionRequest) (*messagingdefs.EmailProviderBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_QUERY))
 	if err != nil {
 		return nil, err
@@ -35,10 +36,10 @@ func EmailProviderBrowseAction(c EmailProviderBrowseActionRequest) (*EmailProvid
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailProviderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &messagingdefs.EmailProviderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func EmailProviderGetAction(c EmailProviderGetActionRequest) (*EmailProviderGetActionResponse, error) {
+func EmailProviderGetAction(c messagingdefs.EmailProviderGetActionRequest) (*messagingdefs.EmailProviderGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_QUERY))
 	if err != nil {
 		return nil, err
@@ -48,10 +49,10 @@ func EmailProviderGetAction(c EmailProviderGetActionRequest) (*EmailProviderGetA
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailProviderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &messagingdefs.EmailProviderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func EmailProviderCreateAction(c EmailProviderCreateActionRequest) (*EmailProviderCreateActionResponse, error) {
+func EmailProviderCreateAction(c messagingdefs.EmailProviderCreateActionRequest) (*messagingdefs.EmailProviderCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_CREATE))
 	if err != nil {
 		return nil, err
@@ -59,7 +60,7 @@ func EmailProviderCreateAction(c EmailProviderCreateActionRequest) (*EmailProvid
 	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
 		return nil, err2
 	}
-	entity := &EmailProviderEntity{
+	entity := &messagingdefs.EmailProviderEntity{
 		Type:        c.Body.Type,
 		Title:       c.Body.Title,
 		Config:      c.Body.Config,
@@ -70,16 +71,16 @@ func EmailProviderCreateAction(c EmailProviderCreateActionRequest) (*EmailProvid
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailProviderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &messagingdefs.EmailProviderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func EmailProviderUpdateAction(c EmailProviderUpdateActionRequest) (*EmailProviderUpdateActionResponse, error) {
+func EmailProviderUpdateAction(c messagingdefs.EmailProviderUpdateActionRequest) (*messagingdefs.EmailProviderUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_UPDATE))
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &EmailProviderEntity{UniqueId: c.Params.UniqueId}
+	fields := &messagingdefs.EmailProviderEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.Type.Get(); ok {
 		fields.Type = *v
 	}
@@ -91,29 +92,29 @@ func EmailProviderUpdateAction(c EmailProviderUpdateActionRequest) (*EmailProvid
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailProviderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &messagingdefs.EmailProviderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func EmailProviderAwareDeletePreviewAction(c EmailProviderAwareDeletePreviewActionRequest) (*EmailProviderAwareDeletePreviewActionResponse, error) {
+func EmailProviderAwareDeletePreviewAction(c messagingdefs.EmailProviderAwareDeletePreviewActionRequest) (*messagingdefs.EmailProviderAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_DELETE)); err != nil {
 		return nil, err
 	}
-	uniqueIds := EmailProviderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := EmailProviderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := messagingdefs.EmailProviderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := messagingdefs.EmailProviderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &EmailProviderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &messagingdefs.EmailProviderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func EmailProviderAwareDeleteAction(c EmailProviderAwareDeleteActionRequest) (*EmailProviderAwareDeleteActionResponse, error) {
+func EmailProviderAwareDeleteAction(c messagingdefs.EmailProviderAwareDeleteActionRequest) (*messagingdefs.EmailProviderAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, emailProviderSecurity(PERM_ROOT_EMAIL_PROVIDER_DELETE)); err != nil {
 		return nil, err
 	}
-	if err2 := EmailProviderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := messagingdefs.EmailProviderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &EmailProviderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &messagingdefs.EmailProviderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // --- Hand business logic recovered from the pre-migration EmailProviderEntity.go ---

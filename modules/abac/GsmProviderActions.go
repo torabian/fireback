@@ -4,15 +4,16 @@ import (
 	"log"
 
 	"github.com/torabian/fireback/modules/abac/messaging"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
 // GsmProvider CRUD, and the raw sms-sending mechanics (GsmSendSMS/SendSms et al.), moved
-// to modules/abac/messaging - see messaging.GsmProviderActions/GsmSendSMS. What's left
+// to modules/abac/messaging - see messagingdefs.GsmProviderActions/GsmSendSMS. What's left
 // here is the one orchestration function that ties NotificationConfigEntity (which stays
-// here, in abac) to a specific provider from messaging.
+// here, in abac) to a specific provider from messagingdefs.
 
-func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*messaging.GsmSendSmsWithProviderActionRes, *fireback.IError) {
+func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*messagingdefs.GsmSendSmsWithProviderActionRes, *fireback.IError) {
 
 	config, err := NotificationConfigActionGetOneByWorkspace(fireback.QueryDSL{WorkspaceId: ROOT_VAR})
 	if err != nil {
@@ -32,7 +33,7 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*messagin
 		log.Default().Println("There is no gsm configuration unfortunately. We are printing the sms to the terminal for the sake of development.")
 		log.Default().Println(message, recp)
 
-		return &messaging.GsmSendSmsWithProviderActionRes{QueueId: "print-to-terminal"}, nil
+		return &messagingdefs.GsmSendSmsWithProviderActionRes{QueueId: "print-to-terminal"}, nil
 	}
 
 	generalGsmProviderId, hasProvider := config.GeneralGsmProviderId.Get()
@@ -41,7 +42,7 @@ func GsmSendSMSUsingNotificationConfig(message string, recp []string) (*messagin
 		log.Default().Println(message, recp)
 
 		terminalQueue := "print-to-terminal"
-		return &messaging.GsmSendSmsWithProviderActionRes{QueueId: terminalQueue}, nil
+		return &messagingdefs.GsmSendSmsWithProviderActionRes{QueueId: terminalQueue}, nil
 	}
 
 	return messaging.GsmSendSMS(*generalGsmProviderId, message, recp)
