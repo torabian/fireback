@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"github.com/gin-gonic/gin"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
 	"gorm.io/gorm"
@@ -21,37 +22,37 @@ func ModuleSetup() *application.ModuleProvider {
 
 		GinWebServerInitHooks: []func(g *gin.RouterGroup, x *application.Application) error{
 			func(g *gin.RouterGroup, x *application.Application) error {
-				GsmProviderBrowseActionGin(g, GsmProviderBrowseAction)
-				GsmProviderGetActionGin(g, GsmProviderGetAction)
-				GsmProviderCreateActionGin(g, GsmProviderCreateAction)
-				GsmProviderUpdateActionGin(g, GsmProviderUpdateAction)
-				GsmProviderAwareDeletePreviewActionGin(g, GsmProviderAwareDeletePreviewAction)
-				GsmProviderAwareDeleteActionGin(g, GsmProviderAwareDeleteAction)
+				messagingdefs.GsmProviderBrowseActionGin(g, GsmProviderBrowseAction)
+				messagingdefs.GsmProviderGetActionGin(g, GsmProviderGetAction)
+				messagingdefs.GsmProviderCreateActionGin(g, GsmProviderCreateAction)
+				messagingdefs.GsmProviderUpdateActionGin(g, GsmProviderUpdateAction)
+				messagingdefs.GsmProviderAwareDeletePreviewActionGin(g, GsmProviderAwareDeletePreviewAction)
+				messagingdefs.GsmProviderAwareDeleteActionGin(g, GsmProviderAwareDeleteAction)
 
-				EmailProviderBrowseActionGin(g, EmailProviderBrowseAction)
-				EmailProviderGetActionGin(g, EmailProviderGetAction)
-				EmailProviderCreateActionGin(g, EmailProviderCreateAction)
-				EmailProviderUpdateActionGin(g, EmailProviderUpdateAction)
-				EmailProviderAwareDeletePreviewActionGin(g, EmailProviderAwareDeletePreviewAction)
-				EmailProviderAwareDeleteActionGin(g, EmailProviderAwareDeleteAction)
+				messagingdefs.EmailProviderBrowseActionGin(g, EmailProviderBrowseAction)
+				messagingdefs.EmailProviderGetActionGin(g, EmailProviderGetAction)
+				messagingdefs.EmailProviderCreateActionGin(g, EmailProviderCreateAction)
+				messagingdefs.EmailProviderUpdateActionGin(g, EmailProviderUpdateAction)
+				messagingdefs.EmailProviderAwareDeletePreviewActionGin(g, EmailProviderAwareDeletePreviewAction)
+				messagingdefs.EmailProviderAwareDeleteActionGin(g, EmailProviderAwareDeleteAction)
 
-				EmailSenderBrowseActionGin(g, EmailSenderBrowseAction)
-				EmailSenderGetActionGin(g, EmailSenderGetAction)
-				EmailSenderCreateActionGin(g, EmailSenderCreateAction)
-				EmailSenderUpdateActionGin(g, EmailSenderUpdateAction)
-				EmailSenderAwareDeletePreviewActionGin(g, EmailSenderAwareDeletePreviewAction)
-				EmailSenderAwareDeleteActionGin(g, EmailSenderAwareDeleteAction)
+				messagingdefs.EmailSenderBrowseActionGin(g, EmailSenderBrowseAction)
+				messagingdefs.EmailSenderGetActionGin(g, EmailSenderGetAction)
+				messagingdefs.EmailSenderCreateActionGin(g, EmailSenderCreateAction)
+				messagingdefs.EmailSenderUpdateActionGin(g, EmailSenderUpdateAction)
+				messagingdefs.EmailSenderAwareDeletePreviewActionGin(g, EmailSenderAwareDeletePreviewAction)
+				messagingdefs.EmailSenderAwareDeleteActionGin(g, EmailSenderAwareDeleteAction)
 
-				WebPushConfigBrowseActionGin(g, WebPushConfigBrowseAction)
-				WebPushConfigGetActionGin(g, WebPushConfigGetAction)
-				WebPushConfigCreateActionGin(g, WebPushConfigCreateAction)
-				WebPushConfigUpdateActionGin(g, WebPushConfigUpdateAction)
-				WebPushConfigAwareDeletePreviewActionGin(g, WebPushConfigAwareDeletePreviewAction)
-				WebPushConfigAwareDeleteActionGin(g, WebPushConfigAwareDeleteAction)
+				messagingdefs.WebPushConfigBrowseActionGin(g, WebPushConfigBrowseAction)
+				messagingdefs.WebPushConfigGetActionGin(g, WebPushConfigGetAction)
+				messagingdefs.WebPushConfigCreateActionGin(g, WebPushConfigCreateAction)
+				messagingdefs.WebPushConfigUpdateActionGin(g, WebPushConfigUpdateAction)
+				messagingdefs.WebPushConfigAwareDeletePreviewActionGin(g, WebPushConfigAwareDeletePreviewAction)
+				messagingdefs.WebPushConfigAwareDeleteActionGin(g, WebPushConfigAwareDeleteAction)
 
-				SendEmailActionGin(g, SendEmailAction)
-				SendEmailWithProviderActionGin(g, SendEmailWithProviderAction)
-				GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
+				messagingdefs.SendEmailActionGin(g, SendEmailAction)
+				messagingdefs.SendEmailWithProviderActionGin(g, SendEmailWithProviderAction)
+				messagingdefs.GsmSendSmsWithProviderActionGin(g, GsmSendSmsWithProviderAction)
 
 				return nil
 			},
@@ -66,10 +67,10 @@ func ModuleSetup() *application.ModuleProvider {
 
 	module.ProvideEntityHandlers(func(dbref *gorm.DB) error {
 		return dbref.AutoMigrate(
-			&EmailProviderEntity{},
-			&EmailSenderEntity{},
-			&GsmProviderEntity{},
-			&WebPushConfigEntity{},
+			&messagingdefs.EmailProviderEntity{},
+			&messagingdefs.EmailSenderEntity{},
+			&messagingdefs.GsmProviderEntity{},
+			&messagingdefs.WebPushConfigEntity{},
 		)
 	})
 
@@ -86,34 +87,34 @@ func ModuleSetup() *application.ModuleProvider {
 				},
 			},
 			Commands: []*cli.Command{
-				EmailProviderBrowseActionCliHandler(EmailProviderBrowseAction),
-				EmailProviderGetActionCliHandler(EmailProviderGetAction),
-				EmailProviderCreateActionCliHandler(EmailProviderCreateAction),
-				EmailProviderUpdateActionCliHandler(EmailProviderUpdateAction),
-				EmailProviderAwareDeletePreviewActionCliHandler(EmailProviderAwareDeletePreviewAction),
-				EmailProviderAwareDeleteActionCliHandler(EmailProviderAwareDeleteAction),
-				EmailSenderBrowseActionCliHandler(EmailSenderBrowseAction),
-				EmailSenderGetActionCliHandler(EmailSenderGetAction),
-				EmailSenderCreateActionCliHandler(EmailSenderCreateAction),
-				EmailSenderUpdateActionCliHandler(EmailSenderUpdateAction),
-				EmailSenderAwareDeletePreviewActionCliHandler(EmailSenderAwareDeletePreviewAction),
-				EmailSenderAwareDeleteActionCliHandler(EmailSenderAwareDeleteAction),
+				messagingdefs.EmailProviderBrowseActionCliHandler(EmailProviderBrowseAction),
+				messagingdefs.EmailProviderGetActionCliHandler(EmailProviderGetAction),
+				messagingdefs.EmailProviderCreateActionCliHandler(EmailProviderCreateAction),
+				messagingdefs.EmailProviderUpdateActionCliHandler(EmailProviderUpdateAction),
+				messagingdefs.EmailProviderAwareDeletePreviewActionCliHandler(EmailProviderAwareDeletePreviewAction),
+				messagingdefs.EmailProviderAwareDeleteActionCliHandler(EmailProviderAwareDeleteAction),
+				messagingdefs.EmailSenderBrowseActionCliHandler(EmailSenderBrowseAction),
+				messagingdefs.EmailSenderGetActionCliHandler(EmailSenderGetAction),
+				messagingdefs.EmailSenderCreateActionCliHandler(EmailSenderCreateAction),
+				messagingdefs.EmailSenderUpdateActionCliHandler(EmailSenderUpdateAction),
+				messagingdefs.EmailSenderAwareDeletePreviewActionCliHandler(EmailSenderAwareDeletePreviewAction),
+				messagingdefs.EmailSenderAwareDeleteActionCliHandler(EmailSenderAwareDeleteAction),
 				&GsmProviderTestCmd,
-				GsmProviderBrowseActionCliHandler(GsmProviderBrowseAction),
-				GsmProviderGetActionCliHandler(GsmProviderGetAction),
-				GsmProviderCreateActionCliHandler(GsmProviderCreateAction),
-				GsmProviderUpdateActionCliHandler(GsmProviderUpdateAction),
-				GsmProviderAwareDeletePreviewActionCliHandler(GsmProviderAwareDeletePreviewAction),
-				GsmProviderAwareDeleteActionCliHandler(GsmProviderAwareDeleteAction),
-				SendEmailActionCliHandler(SendEmailAction),
-				SendEmailWithProviderActionCliHandler(SendEmailWithProviderAction),
-				GsmSendSmsWithProviderActionCliHandler(GsmSendSmsWithProviderAction),
-				WebPushConfigBrowseActionCliHandler(WebPushConfigBrowseAction),
-				WebPushConfigGetActionCliHandler(WebPushConfigGetAction),
-				WebPushConfigCreateActionCliHandler(WebPushConfigCreateAction),
-				WebPushConfigUpdateActionCliHandler(WebPushConfigUpdateAction),
-				WebPushConfigAwareDeletePreviewActionCliHandler(WebPushConfigAwareDeletePreviewAction),
-				WebPushConfigAwareDeleteActionCliHandler(WebPushConfigAwareDeleteAction),
+				messagingdefs.GsmProviderBrowseActionCliHandler(GsmProviderBrowseAction),
+				messagingdefs.GsmProviderGetActionCliHandler(GsmProviderGetAction),
+				messagingdefs.GsmProviderCreateActionCliHandler(GsmProviderCreateAction),
+				messagingdefs.GsmProviderUpdateActionCliHandler(GsmProviderUpdateAction),
+				messagingdefs.GsmProviderAwareDeletePreviewActionCliHandler(GsmProviderAwareDeletePreviewAction),
+				messagingdefs.GsmProviderAwareDeleteActionCliHandler(GsmProviderAwareDeleteAction),
+				messagingdefs.SendEmailActionCliHandler(SendEmailAction),
+				messagingdefs.SendEmailWithProviderActionCliHandler(SendEmailWithProviderAction),
+				messagingdefs.GsmSendSmsWithProviderActionCliHandler(GsmSendSmsWithProviderAction),
+				messagingdefs.WebPushConfigBrowseActionCliHandler(WebPushConfigBrowseAction),
+				messagingdefs.WebPushConfigGetActionCliHandler(WebPushConfigGetAction),
+				messagingdefs.WebPushConfigCreateActionCliHandler(WebPushConfigCreateAction),
+				messagingdefs.WebPushConfigUpdateActionCliHandler(WebPushConfigUpdateAction),
+				messagingdefs.WebPushConfigAwareDeletePreviewActionCliHandler(WebPushConfigAwareDeletePreviewAction),
+				messagingdefs.WebPushConfigAwareDeleteActionCliHandler(WebPushConfigAwareDeleteAction),
 			},
 		},
 	})

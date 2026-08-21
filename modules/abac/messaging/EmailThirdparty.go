@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/474420502/gcurl"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback/complexes"
 )
 
@@ -171,7 +172,7 @@ type smtpInfo struct {
 	Pass string `json:"pass"`
 }
 
-func SendMail(msg EmailMessageContent, p *EmailProviderEntity) error {
+func SendMail(msg EmailMessageContent, p *messagingdefs.EmailProviderEntity) error {
 	if p == nil {
 		return errors.New("provider required")
 	}

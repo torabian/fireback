@@ -1,10 +1,11 @@
 package messaging
 
 import (
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
-func SendEmailWithProviderAction(c SendEmailWithProviderActionRequest) (*SendEmailWithProviderActionResponse, error) {
+func SendEmailWithProviderAction(c messagingdefs.SendEmailWithProviderActionRequest) (*messagingdefs.SendEmailWithProviderActionResponse, error) {
 	_, err := fireback.ResolveActionContext(c, nil)
 	if err != nil {
 		return nil, err
@@ -45,7 +46,7 @@ func SendEmailWithProviderAction(c SendEmailWithProviderActionRequest) (*SendEma
 		return nil, err3
 	}
 
-	return &SendEmailWithProviderActionResponse{
-		Payload: &SendEmailWithProviderActionRes{QueueId: fireback.UUID()},
+	return &messagingdefs.SendEmailWithProviderActionResponse{
+		Payload: &messagingdefs.SendEmailWithProviderActionRes{QueueId: fireback.UUID()},
 	}, nil
 }

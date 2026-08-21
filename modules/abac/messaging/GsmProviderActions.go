@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/torabian/emi/emigo"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"github.com/urfave/cli/v3"
@@ -33,9 +34,9 @@ type xGsmProviderType struct {
 	Mediana  string
 }
 
-var GsmProviderActions = NewEntityActionsBundle[GsmProviderEntity]()
+var GsmProviderActions = NewEntityActionsBundle[messagingdefs.GsmProviderEntity]()
 
-func GsmProviderBrowseAction(c GsmProviderBrowseActionRequest) (*GsmProviderBrowseActionResponse, error) {
+func GsmProviderBrowseAction(c messagingdefs.GsmProviderBrowseActionRequest) (*messagingdefs.GsmProviderBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY}})
 	if err != nil {
 		return nil, err
@@ -44,10 +45,10 @@ func GsmProviderBrowseAction(c GsmProviderBrowseActionRequest) (*GsmProviderBrow
 	if err2 != nil {
 		return nil, err2
 	}
-	return &GsmProviderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &messagingdefs.GsmProviderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func GsmProviderGetAction(c GsmProviderGetActionRequest) (*GsmProviderGetActionResponse, error) {
+func GsmProviderGetAction(c messagingdefs.GsmProviderGetActionRequest) (*messagingdefs.GsmProviderGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_QUERY}})
 	if err != nil {
 		return nil, err
@@ -57,10 +58,10 @@ func GsmProviderGetAction(c GsmProviderGetActionRequest) (*GsmProviderGetActionR
 	if err2 != nil {
 		return nil, err2
 	}
-	return &GsmProviderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &messagingdefs.GsmProviderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func GsmProviderCreateAction(c GsmProviderCreateActionRequest) (*GsmProviderCreateActionResponse, error) {
+func GsmProviderCreateAction(c messagingdefs.GsmProviderCreateActionRequest) (*messagingdefs.GsmProviderCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_CREATE}})
 	if err != nil {
 		return nil, err
@@ -68,7 +69,7 @@ func GsmProviderCreateAction(c GsmProviderCreateActionRequest) (*GsmProviderCrea
 	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
 		return nil, err2
 	}
-	entity := &GsmProviderEntity{
+	entity := &messagingdefs.GsmProviderEntity{
 		ApiKey:           c.Body.ApiKey,
 		MainSenderNumber: c.Body.MainSenderNumber,
 		Type:             c.Body.Type,
@@ -81,16 +82,16 @@ func GsmProviderCreateAction(c GsmProviderCreateActionRequest) (*GsmProviderCrea
 	if err2 != nil {
 		return nil, err2
 	}
-	return &GsmProviderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &messagingdefs.GsmProviderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func GsmProviderUpdateAction(c GsmProviderUpdateActionRequest) (*GsmProviderUpdateActionResponse, error) {
+func GsmProviderUpdateAction(c messagingdefs.GsmProviderUpdateActionRequest) (*messagingdefs.GsmProviderUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_UPDATE}})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &GsmProviderEntity{UniqueId: c.Params.UniqueId}
+	fields := &messagingdefs.GsmProviderEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.ApiKey.Get(); ok {
 		fields.ApiKey = *v
 	}
@@ -110,29 +111,29 @@ func GsmProviderUpdateAction(c GsmProviderUpdateActionRequest) (*GsmProviderUpda
 	if err2 != nil {
 		return nil, err2
 	}
-	return &GsmProviderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &messagingdefs.GsmProviderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func GsmProviderAwareDeletePreviewAction(c GsmProviderAwareDeletePreviewActionRequest) (*GsmProviderAwareDeletePreviewActionResponse, error) {
+func GsmProviderAwareDeletePreviewAction(c messagingdefs.GsmProviderAwareDeletePreviewActionRequest) (*messagingdefs.GsmProviderAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}}); err != nil {
 		return nil, err
 	}
-	uniqueIds := GsmProviderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := GsmProviderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := messagingdefs.GsmProviderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := messagingdefs.GsmProviderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &GsmProviderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &messagingdefs.GsmProviderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func GsmProviderAwareDeleteAction(c GsmProviderAwareDeleteActionRequest) (*GsmProviderAwareDeleteActionResponse, error) {
+func GsmProviderAwareDeleteAction(c messagingdefs.GsmProviderAwareDeleteActionRequest) (*messagingdefs.GsmProviderAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_GSM_PROVIDER_DELETE}}); err != nil {
 		return nil, err
 	}
-	if err2 := GsmProviderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := messagingdefs.GsmProviderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &GsmProviderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &messagingdefs.GsmProviderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // --- Hand business logic recovered from the pre-migration GsmProviderEntity.go ---
@@ -170,34 +171,34 @@ var GsmProviderTestCmd cli.Command = cli.Command{
 	},
 }
 
-func GsmSendSMS(providerId string, message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
+func GsmSendSMS(providerId string, message string, recp []string) (*messagingdefs.GsmSendSmsWithProviderActionRes, *fireback.IError) {
 
 	if provider, err := GsmProviderActions.GetOne(fireback.QueryDSL{UniqueId: providerId}); err != nil {
 		return nil, err
 	} else {
-		return provider.SendSms(message, recp)
+		return SendSms(provider, message, recp)
 	}
 }
 
-func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsWithProviderActionRes, *fireback.IError) {
+func SendSms(x *messagingdefs.GsmProviderEntity, message string, recp []string) (*messagingdefs.GsmSendSmsWithProviderActionRes, *fireback.IError) {
 
 	if x.Type == GsmProviderType.Url {
 		if j, err := GsmSendSMSByHttpCall(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
+			return &messagingdefs.GsmSendSmsWithProviderActionRes{QueueId: j}, nil
 		}
 	} else if x.Type == GsmProviderType.Terminal {
 		if j, err := GsmSendSMSByTerminal(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
+			return &messagingdefs.GsmSendSmsWithProviderActionRes{QueueId: j}, nil
 		}
 	} else if x.Type == GsmProviderType.Mediana {
 		if j, err := GsmSendSMSByMediana(x, message, recp); err != nil {
 			return nil, err
 		} else {
-			return &GsmSendSmsWithProviderActionRes{QueueId: j}, nil
+			return &messagingdefs.GsmSendSmsWithProviderActionRes{QueueId: j}, nil
 		}
 	}
 
@@ -205,7 +206,7 @@ func (x *GsmProviderEntity) SendSms(message string, recp []string) (*GsmSendSmsW
 	return nil, fireback.Create401Error(&messagingMessages.SmsNotSent, []string{})
 }
 
-func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
+func GsmSendSMSByHttpCall(provider *messagingdefs.GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
 	fmt.Println("Sending sms using http call", provider.UniqueId)
 
 	if provider.InvokeUrl == "" {
@@ -247,7 +248,7 @@ func GsmSendSMSByHttpCall(provider *GsmProviderEntity, message string, recp []st
 	return string(resBody), nil
 }
 
-func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
+func GsmSendSMSByTerminal(provider *messagingdefs.GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
 
 	fmt.Println("Sending sms using terminal by", provider.UniqueId)
 
@@ -258,7 +259,7 @@ func GsmSendSMSByTerminal(provider *GsmProviderEntity, message string, recp []st
 
 }
 
-func GsmSendSMSByMediana(provider *GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
+func GsmSendSMSByMediana(provider *messagingdefs.GsmProviderEntity, message string, recp []string) (string, *fireback.IError) {
 
 	fmt.Println("Using mediana")
 	sms := medianasms.New(provider.ApiKey)

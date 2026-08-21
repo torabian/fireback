@@ -2,6 +2,7 @@ package messaging
 
 import (
 	"github.com/torabian/emi/emigo"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 )
@@ -20,9 +21,9 @@ var ALL_EMAIL_SENDER_PERMISSIONS = emailSenderPerms.All
 // EmailSenderActions preserves the exact bundle shape (GetOne/Query/...) the old Module3
 // entity compiler generated - abac's NotificationConfigActions.go/NotificationCli.go call
 // into it directly (as messaging.EmailSenderActions).
-var EmailSenderActions = NewEntityActionsBundle[EmailSenderEntity]()
+var EmailSenderActions = NewEntityActionsBundle[messagingdefs.EmailSenderEntity]()
 
-func EmailSenderBrowseAction(c EmailSenderBrowseActionRequest) (*EmailSenderBrowseActionResponse, error) {
+func EmailSenderBrowseAction(c messagingdefs.EmailSenderBrowseActionRequest) (*messagingdefs.EmailSenderBrowseActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY}})
 	if err != nil {
 		return nil, err
@@ -31,10 +32,10 @@ func EmailSenderBrowseAction(c EmailSenderBrowseActionRequest) (*EmailSenderBrow
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailSenderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
+	return &messagingdefs.EmailSenderBrowseActionResponse{Payload: fireback.GResponseQuery(items, qrm, query)}, nil
 }
 
-func EmailSenderGetAction(c EmailSenderGetActionRequest) (*EmailSenderGetActionResponse, error) {
+func EmailSenderGetAction(c messagingdefs.EmailSenderGetActionRequest) (*messagingdefs.EmailSenderGetActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_QUERY}})
 	if err != nil {
 		return nil, err
@@ -44,10 +45,10 @@ func EmailSenderGetAction(c EmailSenderGetActionRequest) (*EmailSenderGetActionR
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailSenderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
+	return &messagingdefs.EmailSenderGetActionResponse{Payload: fireback.GResponseSingleItem(item)}, nil
 }
 
-func EmailSenderCreateAction(c EmailSenderCreateActionRequest) (*EmailSenderCreateActionResponse, error) {
+func EmailSenderCreateAction(c messagingdefs.EmailSenderCreateActionRequest) (*messagingdefs.EmailSenderCreateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_CREATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func EmailSenderCreateAction(c EmailSenderCreateActionRequest) (*EmailSenderCrea
 	if err2 := fireback.CommonStructValidatorPointer(&c.Body, false); err2 != nil {
 		return nil, err2
 	}
-	entity := &EmailSenderEntity{
+	entity := &messagingdefs.EmailSenderEntity{
 		FromName:         c.Body.FromName,
 		FromEmailAddress: c.Body.FromEmailAddress,
 		ReplyTo:          c.Body.ReplyTo,
@@ -67,16 +68,16 @@ func EmailSenderCreateAction(c EmailSenderCreateActionRequest) (*EmailSenderCrea
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailSenderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
+	return &messagingdefs.EmailSenderCreateActionResponse{Payload: fireback.GResponseSingleItem(created)}, nil
 }
 
-func EmailSenderUpdateAction(c EmailSenderUpdateActionRequest) (*EmailSenderUpdateActionResponse, error) {
+func EmailSenderUpdateAction(c messagingdefs.EmailSenderUpdateActionRequest) (*messagingdefs.EmailSenderUpdateActionResponse, error) {
 	query, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_UPDATE}, AllowOnRoot: true})
 	if err != nil {
 		return nil, err
 	}
 	query.UniqueId = c.Params.UniqueId
-	fields := &EmailSenderEntity{UniqueId: c.Params.UniqueId}
+	fields := &messagingdefs.EmailSenderEntity{UniqueId: c.Params.UniqueId}
 	if v, ok := c.Body.FromName.Get(); ok {
 		fields.FromName = *v
 	}
@@ -93,34 +94,34 @@ func EmailSenderUpdateAction(c EmailSenderUpdateActionRequest) (*EmailSenderUpda
 	if err2 != nil {
 		return nil, err2
 	}
-	return &EmailSenderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
+	return &messagingdefs.EmailSenderUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func EmailSenderAwareDeletePreviewAction(c EmailSenderAwareDeletePreviewActionRequest) (*EmailSenderAwareDeletePreviewActionResponse, error) {
+func EmailSenderAwareDeletePreviewAction(c messagingdefs.EmailSenderAwareDeletePreviewActionRequest) (*messagingdefs.EmailSenderAwareDeletePreviewActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	uniqueIds := EmailSenderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
-	preview, err2 := EmailSenderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
+	uniqueIds := messagingdefs.EmailSenderAwareDeletePreviewActionQueryFromString(c.QueryParams.Encode()).UniqueIds
+	preview, err2 := messagingdefs.EmailSenderEntityActions.AwareDeletePreview(fireback.GetDbRef(), uniqueIds)
 	if err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &EmailSenderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
+	return &messagingdefs.EmailSenderAwareDeletePreviewActionResponse{Payload: fireback.GResponseSingleItem(preview)}, nil
 }
 
-func EmailSenderAwareDeleteAction(c EmailSenderAwareDeleteActionRequest) (*EmailSenderAwareDeleteActionResponse, error) {
+func EmailSenderAwareDeleteAction(c messagingdefs.EmailSenderAwareDeleteActionRequest) (*messagingdefs.EmailSenderAwareDeleteActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{ActionRequires: []application.PermissionInfo{PERM_ROOT_EMAIL_SENDER_DELETE}, AllowOnRoot: true}); err != nil {
 		return nil, err
 	}
-	if err2 := EmailSenderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
+	if err2 := messagingdefs.EmailSenderEntityActions.AwareDelete(fireback.GetDbRef(), c.Body.UniqueIds); err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
-	return &EmailSenderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
+	return &messagingdefs.EmailSenderAwareDeleteActionResponse{Payload: fireback.GResponseSingleItem(struct{}{})}, nil
 }
 
 // GetEmailSenderAsStringList formats email senders for interactive CLI prompts (see
 // abac's EmailProviderTestCmd, which calls this as messaging.GetEmailSenderAsStringList).
-func GetEmailSenderAsStringList(items []*EmailSenderEntity) ([]string, error) {
+func GetEmailSenderAsStringList(items []*messagingdefs.EmailSenderEntity) ([]string, error) {
 	result := []string{}
 	for _, entity := range items {
 		result = append(result, entity.UniqueId+" >>> "+entity.FromEmailAddress+" - "+entity.FromName)

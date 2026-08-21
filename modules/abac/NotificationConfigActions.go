@@ -4,6 +4,7 @@ import (
 	"github.com/torabian/emi/emigo"
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"github.com/torabian/fireback/modules/fireback/application"
 	"gorm.io/gorm"
@@ -221,7 +222,7 @@ func NotificationTestMailAction(
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
-	var provider *messaging.EmailProviderEntity
+	var provider *messagingdefs.EmailProviderEntity
 	if v, ok := conf.GeneralEmailProviderId.Get(); ok {
 		provider, err2 = messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *v})
 		if err2 != nil {

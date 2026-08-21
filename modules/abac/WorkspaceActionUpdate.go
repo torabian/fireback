@@ -5,6 +5,7 @@ import (
 
 	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	"github.com/torabian/fireback/modules/abac/messaging"
+	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 )
 
@@ -65,7 +66,7 @@ func SendInviteEmail(query fireback.QueryDSL, invite *abacdefs.WorkspaceInviteEn
 	}
 	content = strings.ReplaceAll(content, "ROLE_NAME", roleName)
 
-	var provider *messaging.EmailProviderEntity
+	var provider *messagingdefs.EmailProviderEntity
 	if generalEmailProviderId, ok := config.GeneralEmailProviderId.Get(); ok && *generalEmailProviderId != "" {
 		provider, _ = messaging.EmailProviderActions.GetOne(fireback.QueryDSL{UniqueId: *generalEmailProviderId})
 	}
