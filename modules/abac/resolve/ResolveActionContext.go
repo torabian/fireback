@@ -61,7 +61,7 @@ func resolveGinActionContext(
 		gin.H{"error": err.ToPublicEndUser(t)},
 	)
 
-	return nil, nil
+	return nil, err
 }
 
 func resolveCLIActionContext(
