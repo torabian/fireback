@@ -1,0 +1,355 @@
+targets:
+- compiler: js
+  flags:
+    js-sdk-location: '@fireback/js-remote-ctx'
+  output: ../../../ui/packages/finance/walletpublic/sdk
+  tags:
+  - typescript
+  - react
+  - no-sdk
+  - no-package
+- compiler: go
+  flags:
+    pkg: walletpublicdefs
+  output: ./defs
+- compiler: preprocessor
+  output: .
+description: 'Owner-facing wallet API: lets a logged-in user or a workspace member
+  create wallets (within the root-configured limits), list their own wallets, top
+  them up through a registered gateway, and view their own balance history and payment
+  attempts. Declares no entities of its own - its Go implementation reads/writes the
+  wallet module''s tables directly (imports github.com/torabian/fireback/modules/finance/wallet/defs)
+  and returns the public-view dtos declared below instead of the internal wallet module''s
+  dtos, so internal-only fields (gateway config/secrets, other owners'' data) never
+  reach this API. The gateway webhook receiver is intentionally NOT modeled here as
+  an emi action (it needs the raw request body/headers for signature verification,
+  and has no caller-supplied session) - it''s a hand-wired plain Gin route registered
+  in modules/wallet/WalletModule.go instead.'
+name: walletpublic
+dtos:
+- description: Public projection of a wallet - only what its owner is allowed to see.
+  name: walletView
+  fields:
+  - name: uniqueId
+    description: Unique id of the wallet.
+    type: string
+  - name: ownerType
+    description: '"user" or "workspace".'
+    type: string
+  - name: workspaceId
+    description: Owning workspace id, set only when ownerType is "workspace".
+    type: string?
+  - name: currency
+    description: Currency code this wallet holds.
+    type: string
+  - name: balance
+    description: Current balance as a minor-units decimal string.
+    type: string
+  - name: status
+    description: '"active", "frozen", or "closed".'
+    type: string
+  - name: label
+    description: Owner-given nickname, if any.
+    type: string?
+  - name: isDefault
+    description: Whether this is the owner's default wallet for its currency.
+    type: bool
+- description: Public projection of one balance-history ledger entry.
+  name: walletTransactionView
+  fields:
+  - name: uniqueId
+    description: Unique id of this ledger entry.
+    type: string
+  - name: direction
+    description: '"credit" or "debit".'
+    type: string
+  - name: amount
+    description: Magnitude of the change, as a positive minor-units string.
+    type: string
+  - name: balanceAfter
+    description: Wallet balance immediately after this entry, as a minor-units string.
+    type: string
+  - name: reason
+    description: What kind of event produced this entry.
+    type: string
+  - name: referenceType
+    description: Free-form name of the module/feature that caused this entry.
+    type: string?
+  - name: referenceId
+    description: Id within referenceType this entry relates to.
+    type: string?
+  - name: note
+    description: Optional human-readable note.
+    type: string?
+  - name: createdAt
+    description: When this entry was recorded.
+    type: complex
+    complex: XDate
+- description: Public projection of one payment attempt.
+  name: walletPaymentAttemptView
+  fields:
+  - name: uniqueId
+    description: Unique id of this attempt.
+    type: string
+  - name: purpose
+    description: '"topup", "purchase", or "withdrawal".'
+    type: string
+  - name: amount
+    description: Requested amount as a minor-units string.
+    type: string
+  - name: currency
+    description: Currency code for amount.
+    type: string
+  - name: status
+    description: Current lifecycle state of this attempt.
+    type: string
+  - name: gatewayCode
+    description: Code of the gateway this attempt is routed through.
+    type: string
+  - name: failureReason
+    description: Human-readable reason, populated when status is "failed".
+    type: string?
+  - name: createdAt
+    description: When this attempt was created.
+    type: complex
+    complex: XDate
+complexes:
+- name: JSON
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go
+- name: XDate
+  namespace: complexes
+  location: github.com/torabian/fireback/modules/fireback/complexes
+  compiler: go
+actions:
+- name: createWallet
+  cliShort: create
+  url: /wallet/create
+  method: post
+  description: Creates a new wallet for the caller (ownerType "user") or for a workspace
+    the caller belongs to (ownerType "workspace"), in the given currency, with a starting
+    balance of "0". Rejected if it would exceed walletConfig's maxWalletsPer{User,Workspace}[PerCurrency]
+    limits, or if currency has no active walletCurrency.
+  in:
+    fields:
+    - name: ownerType
+      description: Whether this wallet belongs to the caller directly or to a workspace.
+      type: string
+      tags:
+        validate: required,oneof=user workspace
+    - name: workspaceId
+      description: Unique id of the owning workspace. Required when ownerType is "workspace"
+        - the caller must belong to this workspace.
+      type: string?
+      tags:
+        validate: required_if=ownerType workspace
+    - name: currency
+      description: Currency code for the new wallet - must match an active walletCurrency.
+      type: string
+      tags:
+        validate: required
+    - name: label
+      description: Optional nickname for the new wallet.
+      type: string?
+  out:
+    envelope: GResponse
+    dto: WalletViewDto
+- name: myWallets
+  cliShort: my
+  url: /wallet/my
+  method: get
+  qs:
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Lists the caller's own user-owned wallets (ownerType "user").
+  out:
+    envelope: GResponse
+    dto: WalletViewDto
+- name: myWorkspaceWallets
+  cliShort: workspace
+  url: /wallet/workspace
+  method: get
+  qs:
+  - name: workspaceId
+    type: string
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Lists the wallets owned by a workspace the caller belongs to. Rejected
+    if the caller isn't a member of workspaceId.
+  out:
+    envelope: GResponse
+    dto: WalletViewDto
+- name: getWallet
+  cliShort: get
+  url: /wallet/get
+  method: get
+  qs:
+  - name: walletId
+    type: string
+  description: Reads one wallet by id, scoped to the caller - the caller must be the
+    owning user or a member of the owning workspace.
+  out:
+    envelope: GResponse
+    dto: WalletViewDto
+- name: walletHistory
+  cliShort: history
+  url: /wallet/transactions
+  method: get
+  qs:
+  - name: walletId
+    type: string
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Paginated balance-history ledger for one wallet, scoped to the caller
+    the same way getWallet is.
+  out:
+    envelope: GResponse
+    dto: WalletTransactionViewDto
+- name: walletPaymentAttempts
+  cliShort: attempts
+  url: /wallet/attempts
+  method: get
+  qs:
+  - name: walletId
+    type: string
+  - name: filter
+    type: string
+  - name: sort
+    type: string
+  - name: startIndex
+    type: int
+  - name: itemsPerPage
+    type: int
+  - name: cursor
+    type: string
+  description: Paginated list of the caller's own payment attempts for one wallet,
+    scoped to the caller the same way getWallet is.
+  out:
+    envelope: GResponse
+    dto: WalletPaymentAttemptViewDto
+- name: topup
+  cliShort: topup
+  url: /wallet/topup
+  method: post
+  description: 'Starts a topup of walletId through gatewayCode: creates a pending
+    walletPaymentAttempt and asks the gateway adapter to initiate payment, returning
+    whatever the caller needs to complete it (redirect URL and/or a client secret,
+    gateway-dependent). idempotencyKey makes retrying a timed-out call safe - it will
+    not create a second attempt at the gateway.'
+  in:
+    fields:
+    - name: walletId
+      description: Unique id of the wallet to top up.
+      type: string
+      tags:
+        validate: required
+    - name: gatewayCode
+      description: Code of the walletGateway to pay through.
+      type: string
+      tags:
+        validate: required
+    - name: amount
+      description: Amount to top up, as a positive minor-units string.
+      type: string
+      tags:
+        validate: required
+    - name: idempotencyKey
+      description: Makes this topup-initiation safe to retry.
+      type: string
+      tags:
+        validate: required
+    - name: returnUrl
+      description: Where to send the caller's browser back to once a redirect-based
+        gateway (Przelewy24, ZarinPal, BLIK) completes the payment. Not needed for
+        gateways that never redirect the browser (e.g. Stripe's client-secret confirmation
+        flow) - effectively required for the others.
+      type: string?
+  out:
+    fields:
+    - name: attempt
+      description: The created payment attempt.
+      type: object
+      fields:
+      - name: uniqueId
+        type: string
+      - name: status
+        type: string
+      - name: gatewayCode
+        type: string
+    - name: redirectUrl
+      description: URL to send the owner to, for gateways that need one.
+      type: string?
+    - name: clientSecret
+      description: Client-side secret/token, for gateways that need one instead.
+      type: string?
+- name: cancelPaymentAttempt
+  cliShort: cancel
+  url: /wallet/attempts/cancel
+  method: post
+  description: Cancels one of the caller's own payment attempts, only while it is
+    still "pending".
+  in:
+    fields:
+    - name: attemptId
+      description: Unique id of the payment attempt to cancel.
+      type: string
+      tags:
+        validate: required
+  out:
+    envelope: GResponse
+    dto: WalletPaymentAttemptViewDto
+- name: updateWalletSettings
+  cliShort: settings
+  url: /wallet/settings
+  method: post
+  description: Updates a wallet's non-financial fields only (label/status/isDefault)
+    - balance can never be set through this action. The caller must be the wallet's
+    owning user, or a member of its owning workspace.
+  in:
+    fields:
+    - name: walletId
+      description: Unique id of the wallet to update.
+      type: string
+      tags:
+        validate: required
+    - name: label
+      description: New label. Omit to leave unchanged.
+      type: string?
+    - name: status
+      description: New status. Only active/frozen may be set here - closing a wallet
+        is a separate, root-only operation (see wallet module's adjustBalance/admin
+        tooling).
+      type: string?
+      tags:
+        validate: omitempty,oneof=active frozen
+    - name: isDefault
+      description: New isDefault flag. Omit to leave unchanged.
+      type: bool?
+  out:
+    envelope: GResponse
+    dto: WalletViewDto

@@ -1,0 +1,750 @@
+name: wallet
+
+description: >-
+  Internal wallet engine: wallets (owned by a user or a workspace), supported
+  currencies (fiat and crypto), the append-only balance-history ledger,
+  registered payment gateways, payment/topup attempts against those gateways,
+  raw gateway event log, and root-only wallet limits configuration. Owner-
+  facing endpoints (create/list/topup/history for the wallet's own owner) live
+  in the separate walletpublic module, which reads these same tables through
+  Go, not through this module's HTTP surface.
+
+targets:
+  - compiler: js
+    output: ../../../ui/packages/finance/wallet/sdk
+    tags:
+      - typescript
+      - react
+      - no-sdk
+      - no-package
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
+  - compiler: go
+    output: ./defs
+    flags:
+      pkg: walletdefs
+  - compiler: preprocessor
+    output: .
+
+complexes:
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: JSON
+    namespace: complexes
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: XDate
+    namespace: complexes
+
+entities:
+  - name: wallet
+    description: >-
+      A single balance-holding account, owned by exactly one user OR one
+      workspace (never both) in exactly one currency. Balance is stored as a
+      string of integer minor-units (e.g. cents for USD, satoshi-like units
+      for crypto) at the precision declared by the matching walletCurrency's
+      decimals field - never a float - so arithmetic never loses precision.
+      No public create/update action is generated for this entity: creation
+      goes through walletpublic's createWallet (which enforces walletConfig's
+      per-owner limits), and balance never changes except through this
+      module's purchase/adjustBalance actions and the internal wallet.Purchase
+      Go function, all of which run inside a locked DB transaction. Only
+      non-financial fields (label/status/isDefault) can be changed afterwards,
+      via walletpublic's updateWalletSettings action.
+    features:
+      createAction: false
+      updateAction: false
+    fields:
+      - name: ownerType
+        type: string
+        tags:
+          validate: "required,oneof=user workspace"
+        description: >-
+          Who owns this wallet: "user" (userId is set, workspaceId empty) or
+          "workspace" (workspaceId is set, userId empty). Exactly one of
+          userId/workspaceId is populated, matching ownerType.
+
+      - name: userId
+        type: string?
+        description: >-
+          Unique id of the owning user. Set only when ownerType is "user".
+
+      - name: workspaceId
+        type: string?
+        description: >-
+          Unique id of the owning workspace. Set only when ownerType is
+          "workspace".
+
+      - name: currency
+        type: string
+        tags:
+          validate: required
+        description: >-
+          Currency code this wallet holds (must match an active
+          walletCurrency.code, e.g. "USD" or "BTC"). Fixed for the wallet's
+          lifetime - a currency change would invalidate its whole balance
+          history, so a new wallet is created instead.
+
+      - name: balance
+        type: string
+        default: "0"
+        description: >-
+          Current balance as a decimal string of integer minor-units at the
+          wallet's currency's declared precision (see walletCurrency.decimals).
+          Never read or written as a float. Only ever mutated inside a locked
+          DB transaction by wallet.Purchase/adjustBalance, mirrored by a
+          walletTransaction ledger row on every change.
+
+      - name: status
+        type: string
+        default: active
+        tags:
+          validate: "required,oneof=active frozen closed"
+        description: >-
+          "active" wallets can be topped up and purchased from. "frozen"
+          blocks purchases/topups but keeps the wallet visible (e.g. pending
+          dispute). "closed" is a terminal, non-reactivatable state.
+
+      - name: label
+        type: string?
+        description: >-
+          Optional owner-given nickname for the wallet (e.g. "Main",
+          "Savings") - purely cosmetic, shown in the owner-facing UI.
+
+      - name: isDefault
+        type: bool
+        default: false
+        description: >-
+          Whether this is the owner's default wallet for its currency, used
+          by internal purchase callers that don't specify a walletId
+          explicitly. At most one wallet per (owner, currency) should have
+          this set - enforced in Go, not at the DB level.
+
+      - name: version
+        type: int64
+        default: 0
+        description: >-
+          Incremented on every balance mutation. The actual concurrency guard
+          is a DB row lock (SELECT ... FOR UPDATE) taken during
+          purchase/adjustBalance; this field is a defense-in-depth optimistic
+          check and an easy audit signal ("has this wallet ever moved").
+
+  - name: walletCurrency
+    description: >-
+      A currency this installation accepts for wallets - fiat or crypto.
+      Defines the decimal precision (decimals) that every amount string
+      belonging to a wallet in this currency is expressed in. Root/admin
+      managed.
+    fields:
+      - name: code
+        type: string
+        tags:
+          validate: required
+          gorm: "unique;not null;size:20"
+        description: >-
+          Currency code, e.g. "USD", "EUR", "BTC", "ETH". Unique across all
+          currencies.
+
+      - name: name
+        type: string
+        tags:
+          validate: required
+        description: Display name, e.g. "US Dollar" or "Bitcoin".
+
+      - name: kind
+        type: string
+        tags:
+          validate: "required,oneof=fiat crypto"
+        description: Whether this is a fiat or crypto currency.
+
+      - name: decimals
+        type: int
+        tags:
+          validate: required
+        description: >-
+          Number of decimal places a minor-unit amount string represents for
+          this currency (e.g. 2 for USD so "10050" means $100.50, 8 for BTC,
+          18 for ETH). Every wallet/transaction/attempt amount in this
+          currency must be interpreted at this precision.
+
+      - name: symbol
+        type: string?
+        description: Optional display symbol, e.g. "$" or "₿".
+
+      - name: isActive
+        type: bool
+        default: true
+        description: >-
+          Whether wallets/topups can currently be created in this currency.
+          Existing wallets in a deactivated currency keep working; only new
+          creation is blocked.
+
+  - name: walletTransaction
+    description: >-
+      Append-only balance-history ledger entry. One row is written every time
+      a wallet's balance changes (topup, purchase, refund, adjustment,
+      transfer, fee, chargeback), always inside the same DB transaction as
+      the balance update itself, so the ledger and the wallet's current
+      balance never drift apart. Never updated or deleted after creation -
+      corrections are made with a new offsetting row, never an edit.
+    features:
+      createAction: false
+      updateAction: false
+      deleteAction: false
+    fields:
+      - name: wallet
+        type: one
+        target: WalletEntity
+        tags:
+          validate: required
+        description: The wallet this ledger entry belongs to.
+
+      - name: direction
+        type: string
+        tags:
+          validate: "required,oneof=credit debit"
+        description: >-
+          "credit" increases the wallet's balance, "debit" decreases it.
+          amount is always a positive minor-units string; direction carries
+          the sign.
+
+      - name: amount
+        type: string
+        tags:
+          validate: required
+        description: >-
+          Magnitude of this change, as a positive decimal string of integer
+          minor-units at the wallet's currency precision.
+
+      - name: balanceAfter
+        type: string
+        tags:
+          validate: required
+        description: >-
+          Snapshot of the wallet's balance immediately after this entry was
+          applied, as a minor-units string. Kept for audit/debugging even
+          though it's derivable by replaying the ledger.
+
+      - name: reason
+        type: string
+        tags:
+          validate: "required,oneof=topup purchase refund adjustment transfer_in transfer_out fee chargeback"
+        description: What kind of event produced this ledger entry.
+
+      - name: referenceType
+        type: string?
+        description: >-
+          Free-form identifier of the calling module/feature that caused this
+          entry, e.g. "course-purchase" - lets other nima modules tag their
+          own purchases without editing this module's yaml.
+
+      - name: referenceId
+        type: string?
+        description: >-
+          Id within referenceType this entry relates to (e.g. the order id in
+          the calling module).
+
+      - name: idempotencyKey
+        type: string
+        tags:
+          validate: required
+          gorm: "unique;not null"
+        description: >-
+          Caller-supplied key that makes the operation that produced this
+          entry safe to retry - a second call with the same key returns the
+          existing row instead of double-applying the change. Unique across
+          all wallet transactions.
+
+      - name: note
+        type: string?
+        description: Optional human-readable note, e.g. why an adjustment was made.
+
+      - name: createdBy
+        type: string?
+        description: >-
+          Unique id of the user who triggered this entry, or a fixed marker
+          such as "system" or the gateway code, for entries with no human
+          actor.
+
+      - name: createdAt
+        type: complex
+        complex: XDate
+        description: When this ledger entry was recorded.
+
+      - name: metadata
+        type: complex
+        complex: JSON
+        description: >-
+          Extra structured, reason-specific data (e.g. gateway fee breakdown)
+          not worth a dedicated column.
+
+  - name: walletGateway
+    description: >-
+      A registered payment gateway/provider - the abstract "how do we take
+      money" side of a topup. Concrete providers (Stripe, a manual bank
+      transfer flow, an on-chain crypto watcher, ...) implement the
+      GatewayAdapter Go interface (modules/wallet/GatewayAdapter.go) and are
+      registered under the code declared here at startup
+      (WalletModuleConfig.Gateways). Root/admin managed.
+    fields:
+      - name: code
+        type: string
+        tags:
+          validate: required
+          gorm: "unique;not null;size:50"
+        description: >-
+          Unique code identifying this gateway's GatewayAdapter
+          implementation, e.g. "stripe", "manual", "onchain_eth".
+
+      - name: name
+        type: string
+        tags:
+          validate: required
+        description: Display name shown to wallet owners choosing a topup method.
+
+      - name: kind
+        type: string
+        tags:
+          validate: "required,oneof=fiat crypto"
+        description: Whether this gateway settles in fiat or crypto.
+
+      - name: isActive
+        type: bool
+        default: true
+        description: Whether wallet owners can currently start a topup through this gateway.
+
+      - name: config
+        type: complex
+        complex: JSON
+        description: >-
+          Provider configuration. Must only hold references to secrets (e.g.
+          a secrets-manager key name), never raw API keys/webhook secrets in
+          plaintext.
+
+      - name: supportedCurrencies
+        type: complex
+        complex: JSON
+        description: >-
+          JSON array of walletCurrency codes this gateway can top up (e.g.
+          ["USD","EUR"]).
+
+  - name: walletPaymentAttempt
+    description: >-
+      One attempt to move money through a gateway - a topup, a gateway-routed
+      purchase, or a withdrawal. Created by walletpublic's topup action,
+      updated only by this module's gatewayWebhook handling and
+      cancelPaymentAttempt action, never by a generic public update/delete.
+    features:
+      createAction: false
+      updateAction: false
+      deleteAction: false
+    fields:
+      - name: wallet
+        type: one
+        target: WalletEntity
+        tags:
+          validate: required
+        description: The wallet this attempt would credit/debit if it succeeds.
+
+      - name: gateway
+        type: one
+        target: WalletGatewayEntity
+        tags:
+          validate: required
+        description: The gateway this attempt is routed through.
+
+      - name: purpose
+        type: string
+        default: topup
+        tags:
+          validate: "required,oneof=topup purchase withdrawal"
+        description: What this attempt is for.
+
+      - name: amount
+        type: string
+        tags:
+          validate: required
+        description: Requested amount as a minor-units string, in currency.
+
+      - name: currency
+        type: string
+        tags:
+          validate: required
+        description: Currency code for amount - must match the wallet's currency.
+
+      - name: status
+        type: string
+        default: pending
+        tags:
+          validate: "required,oneof=pending requires_action succeeded failed cancelled expired"
+        description: Current lifecycle state of this attempt.
+
+      - name: gatewayReference
+        type: string?
+        description: >-
+          The gateway's own id for this attempt (e.g. a PaymentIntent id or a
+          transaction hash), once known. Indexed for webhook lookups.
+
+      - name: idempotencyKey
+        type: string
+        tags:
+          validate: required
+          gorm: "unique;not null"
+        description: >-
+          Caller-supplied key making topup-initiation safe to retry without
+          creating duplicate attempts at the gateway.
+
+      - name: createdAt
+        type: complex
+        complex: XDate
+        description: When this attempt was created.
+
+      - name: failureReason
+        type: string?
+        description: Human-readable reason, populated when status is "failed".
+
+      - name: rawRequest
+        type: complex
+        complex: JSON
+        description: The raw request sent to the gateway when initiating this attempt.
+
+      - name: rawResponse
+        type: complex
+        complex: JSON
+        description: The raw response/init payload received back from the gateway.
+
+      - name: walletTransaction
+        type: one?
+        target: WalletTransactionEntity
+        description: >-
+          The ledger entry that was created once this attempt succeeded.
+          Empty until then.
+
+      - name: expiresAt
+        type: complex
+        complex: XDate
+        description: >-
+          When this attempt expires if not completed (gateway-dependent).
+          Empty if the gateway doesn't impose one.
+
+      - name: completedAt
+        type: complex
+        complex: XDate
+        description: When this attempt reached a terminal status. Empty until then.
+
+      - name: returnUrl
+        type: string?
+        description: >-
+          Where to send the caller's browser back to once a redirect-based
+          gateway (e.g. Przelewy24, ZarinPal) completes the payment. Not
+          needed by gateways that never redirect the browser (e.g. Stripe's
+          client-secret confirmation flow).
+
+  - name: walletEvent
+    description: >-
+      Raw inbound event/webhook received from a gateway, kept for audit and
+      replay regardless of whether it was successfully processed. Append-only.
+    features:
+      createAction: false
+      updateAction: false
+      deleteAction: false
+    fields:
+      - name: gateway
+        type: one
+        target: WalletGatewayEntity
+        tags:
+          validate: required
+        description: The gateway this event came from.
+
+      - name: eventType
+        type: string
+        tags:
+          validate: required
+        description: >-
+          Gateway-specific event type string, e.g. "payment_intent.succeeded".
+
+      - name: externalEventId
+        type: string?
+        tags:
+          gorm: "unique"
+        description: >-
+          The gateway's own id for this event, when it provides one - used to
+          deduplicate webhook retries.
+
+      - name: payload
+        type: complex
+        complex: JSON
+        description: The full raw event payload as received from the gateway.
+
+      - name: processed
+        type: bool
+        default: false
+        description: Whether this event was successfully applied (e.g. wallet credited).
+
+      - name: processingError
+        type: string?
+        description: Error message from the last failed processing attempt, if any.
+
+      - name: paymentAttempt
+        type: one?
+        target: WalletPaymentAttemptEntity
+        description: The payment attempt this event relates to, if identifiable.
+
+      - name: receivedAt
+        type: complex
+        complex: XDate
+        description: When this event was received.
+
+  - name: walletConfig
+    description: >-
+      Root-only wallet limits configuration. In practice a single
+      well-known row, read/written exclusively through the getWalletConfig/
+      updateWalletConfig actions below (never through a generic entity
+      action - see features.actions below).
+    features:
+      actions: false
+    fields:
+      - name: maxWalletsPerUser
+        type: int64
+        default: 5
+        description: >-
+          Maximum number of wallets a single user may own in total, across
+          all currencies. 0 means unlimited.
+
+      - name: maxWalletsPerWorkspace
+        type: int64
+        default: 5
+        description: >-
+          Maximum number of wallets a single workspace may own in total,
+          across all currencies. 0 means unlimited.
+
+      - name: maxWalletsPerUserPerCurrency
+        type: int64?
+        description: >-
+          Maximum wallets a user may own in a single currency. Empty means
+          no per-currency limit beyond maxWalletsPerUser.
+
+      - name: maxWalletsPerWorkspacePerCurrency
+        type: int64?
+        description: >-
+          Maximum wallets a workspace may own in a single currency. Empty
+          means no per-currency limit beyond maxWalletsPerWorkspace.
+
+  - name: walletProviderConfig
+    description: >-
+      Root-only, DB-backed configuration for one payment provider adapter
+      (modules/wallet/providers/{stripe,przelewy24,blik,zarinpal}) in one
+      region. At most one row may exist per (providerType, region) pair -
+      enforced by a composite unique index on those two fields, not just by
+      convention. Standard generated create/get/browse/update/delete cover
+      enabling/disabling a provider and editing its config - "enabled" and
+      "config" are just fields, updated through the regular update action
+      like any other; there are no separate enable/disable actions.
+    fields:
+      - name: providerType
+        type: string
+        tags:
+          validate: required
+          gorm: "uniqueIndex:idx_wallet_provider_config_type_region"
+        description: >-
+          Which GatewayAdapter this configures - must match a registered
+          adapter's Code(), e.g. "stripe", "przelewy24", "blik", "zarinpal".
+          Free-form (not a closed oneof) so a new provider package doesn't
+          require a schema change here.
+
+      - name: region
+        type: string
+        default: global
+        tags:
+          validate: required
+          gorm: "uniqueIndex:idx_wallet_provider_config_type_region"
+        description: >-
+          Which region this config applies to - an ISO-3166-ish code (e.g.
+          "PL", "IR", "US") or "global", meaning every region. Combined with
+          providerType, must be unique: you can't have two rows configuring
+          the same provider for the same region.
+
+      - name: isEnabled
+        type: bool
+        default: false
+        description: >-
+          Whether this provider+region combination is currently usable.
+          Toggled through the regular update action - there is no dedicated
+          enable/disable endpoint.
+
+      - name: config
+        type: complex
+        complex: JSON
+        description: >-
+          Provider-specific, non-secret settings (e.g. preferred/allowed
+          currencies, routing hints, sandbox overrides). Must never hold raw
+          API keys/secrets - those stay in each provider package's own
+          environment variables (see modules/wallet/providers/*'s doc
+          comments), matching walletGateway.config's same convention.
+
+actions:
+  - name: getWalletConfig
+    cliShort: config-get
+    description: >-
+      Root-only: reads the current wallet limits configuration (creating the
+      well-known config row with defaults on first read).
+    method: get
+    url: /wallet/config
+    out:
+      dto: WalletConfigDto
+      envelope: GResponse
+
+  - name: updateWalletConfig
+    cliShort: config-set
+    description: >-
+      Root-only: updates the wallet limits configuration. Unset fields are
+      left unchanged (partial update).
+    method: post
+    url: /wallet/config
+    in:
+      fields:
+        - name: maxWalletsPerUser
+          type: int64?
+          description: New maximum wallets per user, across all currencies.
+        - name: maxWalletsPerWorkspace
+          type: int64?
+          description: New maximum wallets per workspace, across all currencies.
+        - name: maxWalletsPerUserPerCurrency
+          type: int64?
+          description: New maximum wallets per user per single currency.
+        - name: maxWalletsPerWorkspacePerCurrency
+          type: int64?
+          description: New maximum wallets per workspace per single currency.
+    out:
+      dto: WalletConfigDto
+      envelope: GResponse
+
+  - name: adminCreateWallet
+    cliShort: admin-create
+    description: >-
+      Root-only: creates a wallet on behalf of any user or workspace, not
+      just the caller - the admin/support counterpart to walletpublic's
+      createWallet (which only ever creates for the caller themselves).
+      Enforces the same walletConfig.maxWalletsPer{User,Workspace}
+      [PerCurrency] limits and active-currency check as the owner-facing
+      path (see wallet.CheckWalletLimit in WalletLimit.go, shared by both).
+      Rejects if the target userId/workspaceId doesn't exist.
+    method: post
+    url: /wallet/admin-create
+    in:
+      fields:
+        - name: ownerType
+          type: string
+          tags:
+            validate: "required,oneof=user workspace"
+          description: Whether the new wallet belongs to a user or a workspace.
+        - name: userId
+          type: string?
+          tags:
+            validate: "required_if=ownerType user"
+          description: >-
+            Unique id of the target user. Required when ownerType is "user" -
+            must be an existing user.
+        - name: workspaceId
+          type: string?
+          tags:
+            validate: "required_if=ownerType workspace"
+          description: >-
+            Unique id of the target workspace. Required when ownerType is
+            "workspace" - must be an existing workspace. Unlike
+            walletpublic's createWallet, the caller does not need to be a
+            member of it.
+        - name: currency
+          type: string
+          tags:
+            validate: required
+          description: Currency code for the new wallet - must match an active walletCurrency.
+        - name: label
+          type: string?
+          description: Optional nickname for the new wallet.
+    out:
+      dto: WalletDto
+      envelope: GResponse
+
+  - name: adjustBalance
+    cliShort: adjust
+    description: >-
+      Root-only manual balance correction (support/ops use). Runs through the
+      same locked-transaction path as purchase, and always requires a note
+      for audit. reason on the resulting ledger entry is always "adjustment".
+    method: post
+    url: /wallet/adjust
+    in:
+      fields:
+        - name: walletId
+          type: string
+          tags:
+            validate: required
+          description: Unique id of the wallet to adjust.
+        - name: direction
+          type: string
+          tags:
+            validate: "required,oneof=credit debit"
+          description: Whether this adjustment increases or decreases the balance.
+        - name: amount
+          type: string
+          tags:
+            validate: required
+          description: Magnitude of the adjustment, as a positive minor-units string.
+        - name: note
+          type: string
+          tags:
+            validate: required
+          description: Required human explanation of why this adjustment was made.
+        - name: idempotencyKey
+          type: string
+          tags:
+            validate: required
+          description: Makes this adjustment safe to retry without double-applying.
+    out:
+      dto: WalletTransactionDto
+      envelope: GResponse
+
+  - name: purchase
+    cliShort: purchase
+    description: >-
+      Internal/service-only: debits a wallet for a purchase made by another
+      module. This is the HTTP-callable twin of the in-process
+      wallet.Purchase Go function (modules/wallet/Purchase.go) - both share
+      the same locked-transaction implementation. Not exposed to wallet
+      owners directly.
+    method: post
+    url: /wallet/purchase
+    in:
+      fields:
+        - name: walletId
+          type: string
+          tags:
+            validate: required
+          description: Unique id of the wallet to debit.
+        - name: amount
+          type: string
+          tags:
+            validate: required
+          description: Amount to debit, as a positive minor-units string.
+        - name: referenceType
+          type: string
+          tags:
+            validate: required
+          description: Free-form name of the calling module/feature, e.g. "course-purchase".
+        - name: referenceId
+          type: string
+          tags:
+            validate: required
+          description: Id within referenceType this purchase relates to.
+        - name: idempotencyKey
+          type: string
+          tags:
+            validate: required
+          description: Makes this purchase safe to retry without double-debiting.
+        - name: note
+          type: string?
+          description: Optional human-readable note.
+    out:
+      dto: WalletTransactionDto
+      envelope: GResponse

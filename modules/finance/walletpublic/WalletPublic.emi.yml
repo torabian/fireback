@@ -1,0 +1,388 @@
+name: walletpublic
+
+description: >-
+  Owner-facing wallet API: lets a logged-in user or a workspace member create
+  wallets (within the root-configured limits), list their own wallets, top
+  them up through a registered gateway, and view their own balance history
+  and payment attempts. Declares no entities of its own - its Go
+  implementation reads/writes the wallet module's tables directly (imports
+  github.com/torabian/fireback/modules/finance/wallet/defs) and returns the public-view
+  dtos declared below instead of the internal wallet module's dtos, so
+  internal-only fields (gateway config/secrets, other owners' data) never
+  reach this API. The gateway webhook receiver is intentionally NOT modeled
+  here as an emi action (it needs the raw request body/headers for signature
+  verification, and has no caller-supplied session) - it's a hand-wired plain
+  Gin route registered in modules/wallet/WalletModule.go instead.
+
+targets:
+  - compiler: js
+    output: ../../../ui/packages/finance/walletpublic/sdk
+    tags:
+      - typescript
+      - react
+      - no-sdk
+      - no-package
+    flags:
+      js-sdk-location: "@fireback/js-remote-ctx"
+  - compiler: go
+    output: ./defs
+    flags:
+      pkg: walletpublicdefs
+  - compiler: preprocessor
+    output: .
+
+complexes:
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: JSON
+    namespace: complexes
+  - compiler: go
+    location: github.com/torabian/fireback/modules/fireback/complexes
+    name: XDate
+    namespace: complexes
+
+dtos:
+  - name: walletView
+    description: >-
+      Public projection of a wallet - only what its owner is allowed to see.
+    fields:
+      - name: uniqueId
+        type: string
+        description: Unique id of the wallet.
+      - name: ownerType
+        type: string
+        description: '"user" or "workspace".'
+      - name: workspaceId
+        type: string?
+        description: Owning workspace id, set only when ownerType is "workspace".
+      - name: currency
+        type: string
+        description: Currency code this wallet holds.
+      - name: balance
+        type: string
+        description: Current balance as a minor-units decimal string.
+      - name: status
+        type: string
+        description: '"active", "frozen", or "closed".'
+      - name: label
+        type: string?
+        description: Owner-given nickname, if any.
+      - name: isDefault
+        type: bool
+        description: Whether this is the owner's default wallet for its currency.
+
+  - name: walletTransactionView
+    description: Public projection of one balance-history ledger entry.
+    fields:
+      - name: uniqueId
+        type: string
+        description: Unique id of this ledger entry.
+      - name: direction
+        type: string
+        description: '"credit" or "debit".'
+      - name: amount
+        type: string
+        description: Magnitude of the change, as a positive minor-units string.
+      - name: balanceAfter
+        type: string
+        description: Wallet balance immediately after this entry, as a minor-units string.
+      - name: reason
+        type: string
+        description: What kind of event produced this entry.
+      - name: referenceType
+        type: string?
+        description: Free-form name of the module/feature that caused this entry.
+      - name: referenceId
+        type: string?
+        description: Id within referenceType this entry relates to.
+      - name: note
+        type: string?
+        description: Optional human-readable note.
+      - name: createdAt
+        type: complex
+        complex: XDate
+        description: When this entry was recorded.
+
+  - name: walletPaymentAttemptView
+    description: Public projection of one payment attempt.
+    fields:
+      - name: uniqueId
+        type: string
+        description: Unique id of this attempt.
+      - name: purpose
+        type: string
+        description: '"topup", "purchase", or "withdrawal".'
+      - name: amount
+        type: string
+        description: Requested amount as a minor-units string.
+      - name: currency
+        type: string
+        description: Currency code for amount.
+      - name: status
+        type: string
+        description: Current lifecycle state of this attempt.
+      - name: gatewayCode
+        type: string
+        description: Code of the gateway this attempt is routed through.
+      - name: failureReason
+        type: string?
+        description: Human-readable reason, populated when status is "failed".
+      - name: createdAt
+        type: complex
+        complex: XDate
+        description: When this attempt was created.
+
+actions:
+  - name: createWallet
+    cliShort: create
+    description: >-
+      Creates a new wallet for the caller (ownerType "user") or for a
+      workspace the caller belongs to (ownerType "workspace"), in the given
+      currency, with a starting balance of "0". Rejected if it would exceed
+      walletConfig's maxWalletsPer{User,Workspace}[PerCurrency] limits, or if
+      currency has no active walletCurrency.
+    method: post
+    url: /wallet/create
+    in:
+      fields:
+        - name: ownerType
+          type: string
+          tags:
+            validate: "required,oneof=user workspace"
+          description: Whether this wallet belongs to the caller directly or to a workspace.
+        - name: workspaceId
+          type: string?
+          tags:
+            validate: "required_if=ownerType workspace"
+          description: >-
+            Unique id of the owning workspace. Required when ownerType is
+            "workspace" - the caller must belong to this workspace.
+        - name: currency
+          type: string
+          tags:
+            validate: required
+          description: Currency code for the new wallet - must match an active walletCurrency.
+        - name: label
+          type: string?
+          description: Optional nickname for the new wallet.
+    out:
+      dto: WalletViewDto
+      envelope: GResponse
+
+  - name: myWallets
+    cliShort: my
+    description: >-
+      Lists the caller's own user-owned wallets (ownerType "user").
+    method: get
+    url: /wallet/my
+    qs:
+      - name: filter
+        type: string
+      - name: sort
+        type: string
+      - name: startIndex
+        type: int
+      - name: itemsPerPage
+        type: int
+      - name: cursor
+        type: string
+    out:
+      dto: WalletViewDto
+      envelope: GResponse
+
+  - name: myWorkspaceWallets
+    cliShort: workspace
+    description: >-
+      Lists the wallets owned by a workspace the caller belongs to. Rejected
+      if the caller isn't a member of workspaceId.
+    method: get
+    url: /wallet/workspace
+    qs:
+      - name: workspaceId
+        type: string
+      - name: filter
+        type: string
+      - name: sort
+        type: string
+      - name: startIndex
+        type: int
+      - name: itemsPerPage
+        type: int
+      - name: cursor
+        type: string
+    out:
+      dto: WalletViewDto
+      envelope: GResponse
+
+  - name: getWallet
+    cliShort: get
+    description: >-
+      Reads one wallet by id, scoped to the caller - the caller must be the
+      owning user or a member of the owning workspace.
+    method: get
+    url: /wallet/get
+    qs:
+      - name: walletId
+        type: string
+    out:
+      dto: WalletViewDto
+      envelope: GResponse
+
+  - name: walletHistory
+    cliShort: history
+    description: >-
+      Paginated balance-history ledger for one wallet, scoped to the caller
+      the same way getWallet is.
+    method: get
+    url: /wallet/transactions
+    qs:
+      - name: walletId
+        type: string
+      - name: filter
+        type: string
+      - name: sort
+        type: string
+      - name: startIndex
+        type: int
+      - name: itemsPerPage
+        type: int
+      - name: cursor
+        type: string
+    out:
+      dto: WalletTransactionViewDto
+      envelope: GResponse
+
+  - name: walletPaymentAttempts
+    cliShort: attempts
+    description: >-
+      Paginated list of the caller's own payment attempts for one wallet,
+      scoped to the caller the same way getWallet is.
+    method: get
+    url: /wallet/attempts
+    qs:
+      - name: walletId
+        type: string
+      - name: filter
+        type: string
+      - name: sort
+        type: string
+      - name: startIndex
+        type: int
+      - name: itemsPerPage
+        type: int
+      - name: cursor
+        type: string
+    out:
+      dto: WalletPaymentAttemptViewDto
+      envelope: GResponse
+
+  - name: topup
+    cliShort: topup
+    description: >-
+      Starts a topup of walletId through gatewayCode: creates a pending
+      walletPaymentAttempt and asks the gateway adapter to initiate payment,
+      returning whatever the caller needs to complete it (redirect URL and/or
+      a client secret, gateway-dependent). idempotencyKey makes retrying a
+      timed-out call safe - it will not create a second attempt at the
+      gateway.
+    method: post
+    url: /wallet/topup
+    in:
+      fields:
+        - name: walletId
+          type: string
+          tags:
+            validate: required
+          description: Unique id of the wallet to top up.
+        - name: gatewayCode
+          type: string
+          tags:
+            validate: required
+          description: Code of the walletGateway to pay through.
+        - name: amount
+          type: string
+          tags:
+            validate: required
+          description: Amount to top up, as a positive minor-units string.
+        - name: idempotencyKey
+          type: string
+          tags:
+            validate: required
+          description: Makes this topup-initiation safe to retry.
+        - name: returnUrl
+          type: string?
+          description: >-
+            Where to send the caller's browser back to once a redirect-based
+            gateway (Przelewy24, ZarinPal, BLIK) completes the payment. Not
+            needed for gateways that never redirect the browser (e.g.
+            Stripe's client-secret confirmation flow) - effectively required
+            for the others.
+    out:
+      fields:
+        - name: attempt
+          type: object
+          description: The created payment attempt.
+          fields:
+            - name: uniqueId
+              type: string
+            - name: status
+              type: string
+            - name: gatewayCode
+              type: string
+        - name: redirectUrl
+          type: string?
+          description: URL to send the owner to, for gateways that need one.
+        - name: clientSecret
+          type: string?
+          description: Client-side secret/token, for gateways that need one instead.
+
+  - name: cancelPaymentAttempt
+    cliShort: cancel
+    description: >-
+      Cancels one of the caller's own payment attempts, only while it is
+      still "pending".
+    method: post
+    url: /wallet/attempts/cancel
+    in:
+      fields:
+        - name: attemptId
+          type: string
+          tags:
+            validate: required
+          description: Unique id of the payment attempt to cancel.
+    out:
+      dto: WalletPaymentAttemptViewDto
+      envelope: GResponse
+
+  - name: updateWalletSettings
+    cliShort: settings
+    description: >-
+      Updates a wallet's non-financial fields only (label/status/isDefault) -
+      balance can never be set through this action. The caller must be the
+      wallet's owning user, or a member of its owning workspace.
+    method: post
+    url: /wallet/settings
+    in:
+      fields:
+        - name: walletId
+          type: string
+          tags:
+            validate: required
+          description: Unique id of the wallet to update.
+        - name: label
+          type: string?
+          description: New label. Omit to leave unchanged.
+        - name: status
+          type: string?
+          tags:
+            validate: "omitempty,oneof=active frozen"
+          description: >-
+            New status. Only active/frozen may be set here - closing a
+            wallet is a separate, root-only operation (see wallet module's
+            adjustBalance/admin tooling).
+        - name: isDefault
+          type: bool?
+          description: New isDefault flag. Omit to leave unchanged.
+    out:
+      dto: WalletViewDto
+      envelope: GResponse
