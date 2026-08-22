@@ -41,7 +41,7 @@ func RegionalContentUpdateActionMeta() struct {
 	}{
 		Name:        "RegionalContentUpdateAction",
 		CliName:     "update",
-		CliShort:    "regionalContent-u",
+		CliShort:    "u",
 		URL:         "/regionalContent/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "regionalContent" row by uniqueId.`,

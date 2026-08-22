@@ -198,7 +198,7 @@ export class EmailSenderBrowseAction {
   static Definition = {
     name: "emailSenderBrowse",
     cliName: "browse",
-    cliShort: "emailSender-b",
+    cliShort: "b",
     url: "/emailSender/browse",
     method: "get",
     qs: [

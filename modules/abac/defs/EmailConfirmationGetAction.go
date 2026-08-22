@@ -40,7 +40,7 @@ func EmailConfirmationGetActionMeta() struct {
 	}{
 		Name:        "EmailConfirmationGetAction",
 		CliName:     "get",
-		CliShort:    "emailConfirmation-g",
+		CliShort:    "g",
 		URL:         "/emailConfirmation/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "emailConfirmation" row by uniqueId.`,

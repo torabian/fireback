@@ -41,7 +41,7 @@ func EmailConfirmationUpdateActionMeta() struct {
 	}{
 		Name:        "EmailConfirmationUpdateAction",
 		CliName:     "update",
-		CliShort:    "emailConfirmation-u",
+		CliShort:    "u",
 		URL:         "/emailConfirmation/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "emailConfirmation" row by uniqueId.`,

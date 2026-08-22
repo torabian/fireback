@@ -213,7 +213,7 @@ export class PendingWorkspaceInviteGetAction {
   static Definition = {
     name: "pendingWorkspaceInviteGet",
     cliName: "get",
-    cliShort: "pendingWorkspaceInvite-g",
+    cliShort: "g",
     url: "/pendingWorkspaceInvite/:uniqueId string",
     method: "get",
     description: 'Looks up a single "pendingWorkspaceInvite" row by uniqueId.',

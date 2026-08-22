@@ -40,7 +40,7 @@ func UserWorkspaceAwareDeleteActionMeta() struct {
 	}{
 		Name:        "UserWorkspaceAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "userWorkspace-d",
+		CliShort:    "d",
 		URL:         "/userWorkspace/delete",
 		Method:      "POST",
 		Description: `Deletes the given "userWorkspace" uniqueIds, along with everything userWorkspaceAwareDeletePreview reports.`,

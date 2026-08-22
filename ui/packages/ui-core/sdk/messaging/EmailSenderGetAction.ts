@@ -206,7 +206,7 @@ export class EmailSenderGetAction {
   static Definition = {
     name: "emailSenderGet",
     cliName: "get",
-    cliShort: "emailSender-g",
+    cliShort: "g",
     url: "/emailSender/:uniqueId string",
     method: "get",
     description: 'Looks up a single "emailSender" row by uniqueId.',

@@ -39,7 +39,7 @@ func RegionalContentBrowseActionMeta() struct {
 	}{
 		Name:        "RegionalContentBrowseAction",
 		CliName:     "browse",
-		CliShort:    "regionalContent-b",
+		CliShort:    "b",
 		URL:         "/regionalContent/browse",
 		Method:      "GET",
 		Description: `Returns "regionalContent" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

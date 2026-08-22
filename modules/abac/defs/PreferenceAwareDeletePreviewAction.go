@@ -39,7 +39,7 @@ func PreferenceAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "PreferenceAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "preference-dp",
+		CliShort:    "dp",
 		URL:         "/preference/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "preference" uniqueIds would affect, without deleting anything.`,

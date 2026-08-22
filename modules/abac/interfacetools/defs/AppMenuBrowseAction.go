@@ -39,7 +39,7 @@ func AppMenuBrowseActionMeta() struct {
 	}{
 		Name:        "AppMenuBrowseAction",
 		CliName:     "browse",
-		CliShort:    "appMenu-b",
+		CliShort:    "b",
 		URL:         "/appMenu/browse",
 		Method:      "GET",
 		Description: `Returns "appMenu" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

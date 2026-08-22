@@ -135,7 +135,7 @@ export class TableViewSizingCreateAction {
   static Definition = {
     name: "tableViewSizingCreate",
     cliName: "create",
-    cliShort: "tableViewSizing-c",
+    cliShort: "c",
     url: "/tableViewSizing",
     method: "post",
     description: 'Creates a new "tableViewSizing" row.',

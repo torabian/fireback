@@ -39,7 +39,7 @@ func CapabilityBrowseActionMeta() struct {
 	}{
 		Name:        "CapabilityBrowseAction",
 		CliName:     "browse",
-		CliShort:    "capability-b",
+		CliShort:    "b",
 		URL:         "/capability/browse",
 		Method:      "GET",
 		Description: `Returns "capability" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

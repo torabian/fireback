@@ -40,12 +40,13 @@ function signupFreshAccount(label: string) {
       ` role create --name "checkendpointtests ${label} role" --capabilities-list-id '["root.abac.email-confirmation.query"]'`,
     )
     .then((content: string) => {
-      const roleId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const roleId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
       return cy
         .task(
           "exec",
-          ` ws workspaceType-c --title "checkendpointtests ${label} type" --slug /checkendpointtests-${label} --role-id ${roleId}`,
+          ` ws type c  --title "checkendpointtests ${label} type" --slug /checkendpointtests-${label} --role-id ${roleId}`,
         )
         .then((wtContent: string) => {
           const workspaceTypeId = (
@@ -73,7 +74,9 @@ function signupFreshAccount(label: string) {
               // http.Client) would otherwise keep resending, silently overriding any
               // explicit Authorization header used for a *different* account later in
               // the same test.
-              return cy.clearCookie("authorization").then(() => ({ email, token }));
+              return cy
+                .clearCookie("authorization")
+                .then(() => ({ email, token }));
             });
         });
     });
@@ -102,22 +105,31 @@ describe("Abac: misc standalone account/workspace actions", () => {
         url: ui("/workspaces/create"),
         headers: { authorization: token },
         body: { name: "checkendpointtests new workspace" },
-      }).then((response: Cypress.Response<SingleItemResponse<{ workspaceId: string }>>) => {
-        expect(response.status).to.equal(200);
-        const newWorkspaceId = response.body.data.item.workspaceId;
-        expect(newWorkspaceId, "workspaceId in the response").to.be.a("string").and.not.be
-          .empty;
+      }).then(
+        (
+          response: Cypress.Response<
+            SingleItemResponse<{ workspaceId: string }>
+          >,
+        ) => {
+          expect(response.status).to.equal(200);
+          const newWorkspaceId = response.body.data.item.workspaceId;
+          expect(newWorkspaceId, "workspaceId in the response").to.be.a(
+            "string",
+          ).and.not.be.empty;
 
-        cy.request({
-          method: "GET",
-          url: ui("/urw/query"),
-          headers: { authorization: token },
-        }).then((urw: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-          expect(urw.status).to.equal(200);
-          const ids = urw.body.data.items.map((w) => w.uniqueId);
-          expect(ids).to.include(newWorkspaceId);
-        });
-      });
+          cy.request({
+            method: "GET",
+            url: ui("/urw/query"),
+            headers: { authorization: token },
+          }).then(
+            (urw: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+              expect(urw.status).to.equal(200);
+              const ids = urw.body.data.items.map((w) => w.uniqueId);
+              expect(ids).to.include(newWorkspaceId);
+            },
+          );
+        },
+      );
     });
   });
 
@@ -127,10 +139,12 @@ describe("Abac: misc standalone account/workspace actions", () => {
         method: "GET",
         url: ui("/urw/query"),
         headers: { authorization: token },
-      }).then((response: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-        expect(response.status).to.equal(200);
-        expect(response.body.data.items.length).to.be.greaterThan(0);
-      });
+      }).then(
+        (response: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+          expect(response.status).to.equal(200);
+          expect(response.body.data.items.length).to.be.greaterThan(0);
+        },
+      );
     });
   });
 
@@ -139,11 +153,12 @@ describe("Abac: misc standalone account/workspace actions", () => {
       "exec",
       ` role create --name "checkendpointtests public-types role" --capabilities-list-id '["root.abac.email-confirmation.query"]'`,
     ).then((content: string) => {
-      const roleId = (JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>)
-        .data.item.uniqueId;
+      const roleId = (
+        JSON.parse(content) as SingleItemResponse<{ uniqueId: string }>
+      ).data.item.uniqueId;
       cy.task(
         "exec",
-        ` ws workspaceType-c --title "checkendpointtests public-types type" --slug /checkendpointtests-public-types --role-id ${roleId}`,
+        ` ws type c  --title "checkendpointtests public-types type" --slug /checkendpointtests-public-types --role-id ${roleId}`,
       ).then((wtContent: string) => {
         const customId = (
           JSON.parse(wtContent) as SingleItemResponse<{ uniqueId: string }>
@@ -152,12 +167,14 @@ describe("Abac: misc standalone account/workspace actions", () => {
         cy.request({
           method: "GET",
           url: ui("/workspace/public/types"),
-        }).then((response: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
-          expect(response.status).to.equal(200);
-          const ids = response.body.data.items.map((w) => w.uniqueId);
-          expect(ids).to.include(customId);
-          expect(ids).to.not.include("root");
-        });
+        }).then(
+          (response: Cypress.Response<ListResponse<{ uniqueId: string }>>) => {
+            expect(response.status).to.equal(200);
+            const ids = response.body.data.items.map((w) => w.uniqueId);
+            expect(ids).to.include(customId);
+            expect(ids).to.not.include("root");
+          },
+        );
       });
     });
   });
@@ -188,11 +205,17 @@ describe("Abac: misc standalone account/workspace actions", () => {
         method: "GET",
         url: ui("/user/passports"),
         headers: { authorization: token },
-      }).then((response: Cypress.Response<ListResponse<{ value: string; type: string }>>) => {
-        expect(response.status).to.equal(200);
-        const values = response.body.data.items.map((p) => p.value);
-        expect(values).to.include(email);
-      });
+      }).then(
+        (
+          response: Cypress.Response<
+            ListResponse<{ value: string; type: string }>
+          >,
+        ) => {
+          expect(response.status).to.equal(200);
+          const values = response.body.data.items.map((p) => p.value);
+          expect(values).to.include(email);
+        },
+      );
     });
   });
 

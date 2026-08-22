@@ -206,7 +206,7 @@ export class GsmProviderGetAction {
   static Definition = {
     name: "gsmProviderGet",
     cliName: "get",
-    cliShort: "gsmProvider-g",
+    cliShort: "g",
     url: "/gsmProvider/:uniqueId string",
     method: "get",
     description: 'Looks up a single "gsmProvider" row by uniqueId.',

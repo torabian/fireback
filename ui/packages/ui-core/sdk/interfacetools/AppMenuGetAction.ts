@@ -206,7 +206,7 @@ export class AppMenuGetAction {
   static Definition = {
     name: "appMenuGet",
     cliName: "get",
-    cliShort: "appMenu-g",
+    cliShort: "g",
     url: "/appMenu/:uniqueId string",
     method: "get",
     description: 'Looks up a single "appMenu" row by uniqueId.',

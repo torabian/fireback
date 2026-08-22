@@ -135,7 +135,7 @@ export class RegionalContentCreateAction {
   static Definition = {
     name: "regionalContentCreate",
     cliName: "create",
-    cliShort: "regionalContent-c",
+    cliShort: "c",
     url: "/regionalContent",
     method: "post",
     description: 'Creates a new "regionalContent" row.',

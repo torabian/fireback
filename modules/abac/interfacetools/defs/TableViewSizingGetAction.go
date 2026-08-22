@@ -40,7 +40,7 @@ func TableViewSizingGetActionMeta() struct {
 	}{
 		Name:        "TableViewSizingGetAction",
 		CliName:     "get",
-		CliShort:    "tableViewSizing-g",
+		CliShort:    "g",
 		URL:         "/tableViewSizing/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "tableViewSizing" row by uniqueId.`,

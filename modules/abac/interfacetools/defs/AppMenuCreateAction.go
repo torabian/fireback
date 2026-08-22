@@ -40,7 +40,7 @@ func AppMenuCreateActionMeta() struct {
 	}{
 		Name:        "AppMenuCreateAction",
 		CliName:     "create",
-		CliShort:    "appMenu-c",
+		CliShort:    "c",
 		URL:         "/appMenu",
 		Method:      "POST",
 		Description: `Creates a new "appMenu" row.`,

@@ -39,7 +39,7 @@ func RegionalContentAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "RegionalContentAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "regionalContent-dp",
+		CliShort:    "dp",
 		URL:         "/regionalContent/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "regionalContent" uniqueIds would affect, without deleting anything.`,

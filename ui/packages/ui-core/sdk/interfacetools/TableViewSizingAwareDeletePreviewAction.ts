@@ -209,7 +209,7 @@ export class TableViewSizingAwareDeletePreviewAction {
   static Definition = {
     name: "tableViewSizingAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "tableViewSizing-dp",
+    cliShort: "dp",
     url: "/tableViewSizing/delete-preview",
     method: "get",
     qs: [

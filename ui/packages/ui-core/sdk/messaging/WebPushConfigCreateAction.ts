@@ -135,7 +135,7 @@ export class WebPushConfigCreateAction {
   static Definition = {
     name: "webPushConfigCreate",
     cliName: "create",
-    cliShort: "webPushConfig-c",
+    cliShort: "c",
     url: "/webPushConfig",
     method: "post",
     description: 'Creates a new "webPushConfig" row.',

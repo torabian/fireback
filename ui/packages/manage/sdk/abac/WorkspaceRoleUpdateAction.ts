@@ -153,7 +153,7 @@ export class WorkspaceRoleUpdateAction {
   static Definition = {
     name: "workspaceRoleUpdate",
     cliName: "update",
-    cliShort: "workspaceRole-u",
+    cliShort: "u",
     url: "/workspaceRole/:uniqueId string",
     method: "patch",
     description:

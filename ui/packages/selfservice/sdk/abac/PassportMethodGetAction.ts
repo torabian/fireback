@@ -206,7 +206,7 @@ export class PassportMethodGetAction {
   static Definition = {
     name: "passportMethodGet",
     cliName: "get",
-    cliShort: "passportMethod-g",
+    cliShort: "g",
     url: "/passportMethod/:uniqueId string",
     method: "get",
     description: 'Looks up a single "passportMethod" row by uniqueId.',

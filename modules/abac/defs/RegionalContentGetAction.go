@@ -40,7 +40,7 @@ func RegionalContentGetActionMeta() struct {
 	}{
 		Name:        "RegionalContentGetAction",
 		CliName:     "get",
-		CliShort:    "regionalContent-g",
+		CliShort:    "g",
 		URL:         "/regionalContent/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "regionalContent" row by uniqueId.`,

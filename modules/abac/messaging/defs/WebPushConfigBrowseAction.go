@@ -44,7 +44,7 @@ func WebPushConfigBrowseActionMeta() struct {
 	}{
 		Name:        "WebPushConfigBrowseAction",
 		CliName:     "browse",
-		CliShort:    "webPushConfig-b",
+		CliShort:    "b",
 		URL:         "/webPushConfig/browse",
 		Method:      "GET",
 		Description: `Returns "webPushConfig" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

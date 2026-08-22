@@ -40,7 +40,7 @@ func RoleGetActionMeta() struct {
 	}{
 		Name:        "RoleGetAction",
 		CliName:     "get",
-		CliShort:    "role-g",
+		CliShort:    "g",
 		URL:         "/role/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "role" row by uniqueId.`,

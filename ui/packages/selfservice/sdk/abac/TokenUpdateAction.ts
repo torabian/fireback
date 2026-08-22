@@ -149,7 +149,7 @@ export class TokenUpdateAction {
   static Definition = {
     name: "tokenUpdate",
     cliName: "update",
-    cliShort: "token-u",
+    cliShort: "u",
     url: "/token/:uniqueId string",
     method: "patch",
     description: 'Applies a partial update to a "token" row by uniqueId.',

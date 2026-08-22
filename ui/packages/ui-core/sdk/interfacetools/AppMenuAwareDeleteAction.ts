@@ -115,7 +115,7 @@ export class AppMenuAwareDeleteAction {
   static Definition = {
     name: "appMenuAwareDelete",
     cliName: "delete",
-    cliShort: "appMenu-d",
+    cliShort: "d",
     url: "/appMenu/delete",
     method: "post",
     description:

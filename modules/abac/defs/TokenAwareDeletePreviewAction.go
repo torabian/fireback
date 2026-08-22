@@ -39,7 +39,7 @@ func TokenAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "TokenAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "token-dp",
+		CliShort:    "dp",
 		URL:         "/token/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "token" uniqueIds would affect, without deleting anything.`,

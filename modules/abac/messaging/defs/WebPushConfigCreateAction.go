@@ -44,7 +44,7 @@ func WebPushConfigCreateActionMeta() struct {
 	}{
 		Name:        "WebPushConfigCreateAction",
 		CliName:     "create",
-		CliShort:    "webPushConfig-c",
+		CliShort:    "c",
 		URL:         "/webPushConfig",
 		Method:      "POST",
 		Description: `Creates a new "webPushConfig" row.`,

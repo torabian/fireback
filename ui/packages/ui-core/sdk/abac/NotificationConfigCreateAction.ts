@@ -139,7 +139,7 @@ export class NotificationConfigCreateAction {
   static Definition = {
     name: "notificationConfigCreate",
     cliName: "create",
-    cliShort: "notificationConfig-c",
+    cliShort: "c",
     url: "/notificationConfig",
     method: "post",
     description: 'Creates a new "notificationConfig" row.',

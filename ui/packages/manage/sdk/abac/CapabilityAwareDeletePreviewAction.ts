@@ -207,7 +207,7 @@ export class CapabilityAwareDeletePreviewAction {
   static Definition = {
     name: "capabilityAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "capability-dp",
+    cliShort: "dp",
     url: "/capability/delete-preview",
     method: "get",
     qs: [

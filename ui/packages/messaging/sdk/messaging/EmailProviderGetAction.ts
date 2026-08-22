@@ -206,7 +206,7 @@ export class EmailProviderGetAction {
   static Definition = {
     name: "emailProviderGet",
     cliName: "get",
-    cliShort: "emailProvider-g",
+    cliShort: "g",
     url: "/emailProvider/:uniqueId string",
     method: "get",
     description: 'Looks up a single "emailProvider" row by uniqueId.',

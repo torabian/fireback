@@ -153,7 +153,7 @@ export class RegionalContentUpdateAction {
   static Definition = {
     name: "regionalContentUpdate",
     cliName: "update",
-    cliShort: "regionalContent-u",
+    cliShort: "u",
     url: "/regionalContent/:uniqueId string",
     method: "patch",
     description:

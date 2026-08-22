@@ -40,7 +40,7 @@ func CapabilityGetActionMeta() struct {
 	}{
 		Name:        "CapabilityGetAction",
 		CliName:     "get",
-		CliShort:    "capability-g",
+		CliShort:    "g",
 		URL:         "/capability/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "capability" row by uniqueId.`,

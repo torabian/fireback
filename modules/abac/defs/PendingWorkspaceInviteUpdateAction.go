@@ -41,7 +41,7 @@ func PendingWorkspaceInviteUpdateActionMeta() struct {
 	}{
 		Name:        "PendingWorkspaceInviteUpdateAction",
 		CliName:     "update",
-		CliShort:    "pendingWorkspaceInvite-u",
+		CliShort:    "u",
 		URL:         "/pendingWorkspaceInvite/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "pendingWorkspaceInvite" row by uniqueId.`,

@@ -135,7 +135,7 @@ export class GsmProviderCreateAction {
   static Definition = {
     name: "gsmProviderCreate",
     cliName: "create",
-    cliShort: "gsmProvider-c",
+    cliShort: "c",
     url: "/gsmProvider",
     method: "post",
     description: 'Creates a new "gsmProvider" row.',

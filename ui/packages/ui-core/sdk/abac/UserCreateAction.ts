@@ -130,7 +130,7 @@ export class UserCreateAction {
   static Definition = {
     name: "userCreate",
     cliName: "create",
-    cliShort: "user-c",
+    cliShort: "c",
     url: "/user",
     method: "post",
     description: 'Creates a new "user" row.',

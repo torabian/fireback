@@ -208,7 +208,7 @@ export class PublicJoinKeyAwareDeletePreviewAction {
   static Definition = {
     name: "publicJoinKeyAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "publicJoinKey-dp",
+    cliShort: "dp",
     url: "/publicJoinKey/delete-preview",
     method: "get",
     qs: [

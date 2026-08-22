@@ -39,7 +39,7 @@ func AppMenuAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "AppMenuAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "appMenu-dp",
+		CliShort:    "dp",
 		URL:         "/appMenu/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "appMenu" uniqueIds would affect, without deleting anything.`,

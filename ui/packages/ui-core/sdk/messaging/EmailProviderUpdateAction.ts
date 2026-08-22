@@ -153,7 +153,7 @@ export class EmailProviderUpdateAction {
   static Definition = {
     name: "emailProviderUpdate",
     cliName: "update",
-    cliShort: "emailProvider-u",
+    cliShort: "u",
     url: "/emailProvider/:uniqueId string",
     method: "patch",
     description:

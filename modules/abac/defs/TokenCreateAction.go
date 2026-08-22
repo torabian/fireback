@@ -40,7 +40,7 @@ func TokenCreateActionMeta() struct {
 	}{
 		Name:        "TokenCreateAction",
 		CliName:     "create",
-		CliShort:    "token-c",
+		CliShort:    "c",
 		URL:         "/token",
 		Method:      "POST",
 		Description: `Creates a new "token" row.`,

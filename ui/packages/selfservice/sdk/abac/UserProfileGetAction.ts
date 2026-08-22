@@ -206,7 +206,7 @@ export class UserProfileGetAction {
   static Definition = {
     name: "userProfileGet",
     cliName: "get",
-    cliShort: "userProfile-g",
+    cliShort: "g",
     url: "/userProfile/:uniqueId string",
     method: "get",
     description: 'Looks up a single "userProfile" row by uniqueId.',

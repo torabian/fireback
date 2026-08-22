@@ -39,7 +39,7 @@ func TimezoneGroupBrowseActionMeta() struct {
 	}{
 		Name:        "TimezoneGroupBrowseAction",
 		CliName:     "browse",
-		CliShort:    "timezoneGroup-b",
+		CliShort:    "b",
 		URL:         "/timezoneGroup/browse",
 		Method:      "GET",
 		Description: `Returns "timezoneGroup" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

@@ -218,7 +218,7 @@ export class PublicAuthenticationAwareDeletePreviewAction {
   static Definition = {
     name: "publicAuthenticationAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "publicAuthentication-dp",
+    cliShort: "dp",
     url: "/publicAuthentication/delete-preview",
     method: "get",
     qs: [

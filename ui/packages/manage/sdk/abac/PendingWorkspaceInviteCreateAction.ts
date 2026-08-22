@@ -139,7 +139,7 @@ export class PendingWorkspaceInviteCreateAction {
   static Definition = {
     name: "pendingWorkspaceInviteCreate",
     cliName: "create",
-    cliShort: "pendingWorkspaceInvite-c",
+    cliShort: "c",
     url: "/pendingWorkspaceInvite",
     method: "post",
     description: 'Creates a new "pendingWorkspaceInvite" row.',

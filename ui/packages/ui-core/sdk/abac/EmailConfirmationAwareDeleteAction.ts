@@ -115,7 +115,7 @@ export class EmailConfirmationAwareDeleteAction {
   static Definition = {
     name: "emailConfirmationAwareDelete",
     cliName: "delete",
-    cliShort: "emailConfirmation-d",
+    cliShort: "d",
     url: "/emailConfirmation/delete",
     method: "post",
     description:

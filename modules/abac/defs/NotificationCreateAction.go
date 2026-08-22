@@ -40,7 +40,7 @@ func NotificationCreateActionMeta() struct {
 	}{
 		Name:        "NotificationCreateAction",
 		CliName:     "create",
-		CliShort:    "notification-c",
+		CliShort:    "c",
 		URL:         "/notification",
 		Method:      "POST",
 		Description: `Creates a new "notification" row.`,

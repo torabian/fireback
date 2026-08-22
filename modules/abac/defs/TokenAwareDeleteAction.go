@@ -40,7 +40,7 @@ func TokenAwareDeleteActionMeta() struct {
 	}{
 		Name:        "TokenAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "token-d",
+		CliShort:    "d",
 		URL:         "/token/delete",
 		Method:      "POST",
 		Description: `Deletes the given "token" uniqueIds, along with everything tokenAwareDeletePreview reports.`,

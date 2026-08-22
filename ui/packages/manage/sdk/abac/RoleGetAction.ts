@@ -194,7 +194,7 @@ export class RoleGetAction {
   static Definition = {
     name: "roleGet",
     cliName: "get",
-    cliShort: "role-g",
+    cliShort: "g",
     url: "/role/:uniqueId string",
     method: "get",
     description: 'Looks up a single "role" row by uniqueId.',

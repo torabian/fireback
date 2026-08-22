@@ -45,7 +45,7 @@ func WebPushConfigUpdateActionMeta() struct {
 	}{
 		Name:        "WebPushConfigUpdateAction",
 		CliName:     "update",
-		CliShort:    "webPushConfig-u",
+		CliShort:    "u",
 		URL:         "/webPushConfig/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "webPushConfig" row by uniqueId.`,

@@ -198,7 +198,7 @@ export class PassportMethodBrowseAction {
   static Definition = {
     name: "passportMethodBrowse",
     cliName: "browse",
-    cliShort: "passportMethod-b",
+    cliShort: "b",
     url: "/passportMethod/browse",
     method: "get",
     qs: [

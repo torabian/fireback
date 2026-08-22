@@ -115,7 +115,7 @@ export class WorkspaceAwareDeleteAction {
   static Definition = {
     name: "workspaceAwareDelete",
     cliName: "delete",
-    cliShort: "workspace-d",
+    cliShort: "d",
     url: "/workspace/delete",
     method: "post",
     description:

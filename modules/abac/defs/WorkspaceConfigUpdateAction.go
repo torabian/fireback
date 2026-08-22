@@ -41,7 +41,7 @@ func WorkspaceConfigUpdateActionMeta() struct {
 	}{
 		Name:        "WorkspaceConfigUpdateAction",
 		CliName:     "update",
-		CliShort:    "workspaceConfig-u",
+		CliShort:    "u",
 		URL:         "/workspaceConfig/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "workspaceConfig" row by uniqueId.`,

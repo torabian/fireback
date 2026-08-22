@@ -208,7 +208,7 @@ export class EmailProviderAwareDeletePreviewAction {
   static Definition = {
     name: "emailProviderAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "emailProvider-dp",
+    cliShort: "dp",
     url: "/emailProvider/delete-preview",
     method: "get",
     qs: [

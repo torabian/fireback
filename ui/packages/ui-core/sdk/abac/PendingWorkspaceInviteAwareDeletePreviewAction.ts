@@ -216,7 +216,7 @@ export class PendingWorkspaceInviteAwareDeletePreviewAction {
   static Definition = {
     name: "pendingWorkspaceInviteAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "pendingWorkspaceInvite-dp",
+    cliShort: "dp",
     url: "/pendingWorkspaceInvite/delete-preview",
     method: "get",
     qs: [

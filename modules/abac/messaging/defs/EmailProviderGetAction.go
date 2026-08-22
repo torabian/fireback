@@ -44,7 +44,7 @@ func EmailProviderGetActionMeta() struct {
 	}{
 		Name:        "EmailProviderGetAction",
 		CliName:     "get",
-		CliShort:    "emailProvider-g",
+		CliShort:    "g",
 		URL:         "/emailProvider/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "emailProvider" row by uniqueId.`,

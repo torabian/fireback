@@ -40,7 +40,7 @@ func PassportAwareDeleteActionMeta() struct {
 	}{
 		Name:        "PassportAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "passport-d",
+		CliShort:    "d",
 		URL:         "/passport/delete",
 		Method:      "POST",
 		Description: `Deletes the given "passport" uniqueIds, along with everything passportAwareDeletePreview reports.`,

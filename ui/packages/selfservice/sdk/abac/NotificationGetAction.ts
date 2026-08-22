@@ -206,7 +206,7 @@ export class NotificationGetAction {
   static Definition = {
     name: "notificationGet",
     cliName: "get",
-    cliShort: "notification-g",
+    cliShort: "g",
     url: "/notification/:uniqueId string",
     method: "get",
     description: 'Looks up a single "notification" row by uniqueId.',

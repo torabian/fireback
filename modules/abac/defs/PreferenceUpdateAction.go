@@ -41,7 +41,7 @@ func PreferenceUpdateActionMeta() struct {
 	}{
 		Name:        "PreferenceUpdateAction",
 		CliName:     "update",
-		CliShort:    "preference-u",
+		CliShort:    "u",
 		URL:         "/preference/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "preference" row by uniqueId.`,

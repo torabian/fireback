@@ -193,7 +193,7 @@ export class CapabilityBrowseAction {
   static Definition = {
     name: "capabilityBrowse",
     cliName: "browse",
-    cliShort: "capability-b",
+    cliShort: "b",
     url: "/capability/browse",
     method: "get",
     qs: [

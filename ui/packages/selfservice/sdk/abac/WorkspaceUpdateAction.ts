@@ -149,7 +149,7 @@ export class WorkspaceUpdateAction {
   static Definition = {
     name: "workspaceUpdate",
     cliName: "update",
-    cliShort: "workspace-u",
+    cliShort: "u",
     url: "/workspace/:uniqueId string",
     method: "patch",
     description: 'Applies a partial update to a "workspace" row by uniqueId.',

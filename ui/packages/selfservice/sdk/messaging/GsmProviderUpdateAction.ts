@@ -149,7 +149,7 @@ export class GsmProviderUpdateAction {
   static Definition = {
     name: "gsmProviderUpdate",
     cliName: "update",
-    cliShort: "gsmProvider-u",
+    cliShort: "u",
     url: "/gsmProvider/:uniqueId string",
     method: "patch",
     description: 'Applies a partial update to a "gsmProvider" row by uniqueId.',

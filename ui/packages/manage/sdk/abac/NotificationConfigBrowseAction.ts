@@ -201,7 +201,7 @@ export class NotificationConfigBrowseAction {
   static Definition = {
     name: "notificationConfigBrowse",
     cliName: "browse",
-    cliShort: "notificationConfig-b",
+    cliShort: "b",
     url: "/notificationConfig/browse",
     method: "get",
     qs: [

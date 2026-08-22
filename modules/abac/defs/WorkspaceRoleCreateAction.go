@@ -40,7 +40,7 @@ func WorkspaceRoleCreateActionMeta() struct {
 	}{
 		Name:        "WorkspaceRoleCreateAction",
 		CliName:     "create",
-		CliShort:    "workspaceRole-c",
+		CliShort:    "c",
 		URL:         "/workspaceRole",
 		Method:      "POST",
 		Description: `Creates a new "workspaceRole" row.`,

@@ -110,7 +110,7 @@ export class UserAwareDeleteAction {
   static Definition = {
     name: "userAwareDelete",
     cliName: "delete",
-    cliShort: "user-d",
+    cliShort: "d",
     url: "/user/delete",
     method: "post",
     description:

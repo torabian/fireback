@@ -115,7 +115,7 @@ export class NotificationConfigAwareDeleteAction {
   static Definition = {
     name: "notificationConfigAwareDelete",
     cliName: "delete",
-    cliShort: "notificationConfig-d",
+    cliShort: "d",
     url: "/notificationConfig/delete",
     method: "post",
     description:

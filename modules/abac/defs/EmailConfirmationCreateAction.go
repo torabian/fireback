@@ -40,7 +40,7 @@ func EmailConfirmationCreateActionMeta() struct {
 	}{
 		Name:        "EmailConfirmationCreateAction",
 		CliName:     "create",
-		CliShort:    "emailConfirmation-c",
+		CliShort:    "c",
 		URL:         "/emailConfirmation",
 		Method:      "POST",
 		Description: `Creates a new "emailConfirmation" row.`,

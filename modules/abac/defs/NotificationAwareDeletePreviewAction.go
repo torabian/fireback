@@ -39,7 +39,7 @@ func NotificationAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "NotificationAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "notification-dp",
+		CliShort:    "dp",
 		URL:         "/notification/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "notification" uniqueIds would affect, without deleting anything.`,

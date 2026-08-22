@@ -110,7 +110,7 @@ export class TokenAwareDeleteAction {
   static Definition = {
     name: "tokenAwareDelete",
     cliName: "delete",
-    cliShort: "token-d",
+    cliShort: "d",
     url: "/token/delete",
     method: "post",
     description:

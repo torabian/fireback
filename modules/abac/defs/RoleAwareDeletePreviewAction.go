@@ -39,7 +39,7 @@ func RoleAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "RoleAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "role-dp",
+		CliShort:    "dp",
 		URL:         "/role/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "role" uniqueIds would affect, without deleting anything.`,

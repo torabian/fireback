@@ -354,11 +354,11 @@ func TestEmailProviderCreate_CLI_Help(t *testing.T) {
 	// across every entity nested in the "messaging" group - each is only unambiguously
 	// reachable via its own alias (see EmailProviderCreateActionCliHandler's
 	// cmd.Aliases = []string{meta.CliShort}; confirmed against `./app messaging --help`).
-	cmd := exec.CommandContext(ctx, bin, "messaging", "emailProvider-c", "--help")
+	cmd := exec.CommandContext(ctx, bin, "messaging", "email provider c", "--help")
 	cmd.Dir = cfg.WorkDir(t)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatalf("`%s messaging emailProvider-c --help` failed: %v\noutput:\n%s", bin, err, out)
+		t.Fatalf("`%s messaging email provider c --help` failed: %v\noutput:\n%s", bin, err, out)
 	}
 
 	// urfave's default help renderer only prints the primary Name ("create", shared by

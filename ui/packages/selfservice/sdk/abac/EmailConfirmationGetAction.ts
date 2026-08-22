@@ -206,7 +206,7 @@ export class EmailConfirmationGetAction {
   static Definition = {
     name: "emailConfirmationGet",
     cliName: "get",
-    cliShort: "emailConfirmation-g",
+    cliShort: "g",
     url: "/emailConfirmation/:uniqueId string",
     method: "get",
     description: 'Looks up a single "emailConfirmation" row by uniqueId.',

@@ -39,7 +39,7 @@ func EmailConfirmationBrowseActionMeta() struct {
 	}{
 		Name:        "EmailConfirmationBrowseAction",
 		CliName:     "browse",
-		CliShort:    "emailConfirmation-b",
+		CliShort:    "b",
 		URL:         "/emailConfirmation/browse",
 		Method:      "GET",
 		Description: `Returns "emailConfirmation" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

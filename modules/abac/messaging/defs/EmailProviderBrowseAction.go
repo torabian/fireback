@@ -44,7 +44,7 @@ func EmailProviderBrowseActionMeta() struct {
 	}{
 		Name:        "EmailProviderBrowseAction",
 		CliName:     "browse",
-		CliShort:    "emailProvider-b",
+		CliShort:    "b",
 		URL:         "/emailProvider/browse",
 		Method:      "GET",
 		Description: `Returns "emailProvider" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

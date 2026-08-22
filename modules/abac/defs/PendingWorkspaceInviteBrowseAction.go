@@ -39,7 +39,7 @@ func PendingWorkspaceInviteBrowseActionMeta() struct {
 	}{
 		Name:        "PendingWorkspaceInviteBrowseAction",
 		CliName:     "browse",
-		CliShort:    "pendingWorkspaceInvite-b",
+		CliShort:    "b",
 		URL:         "/pendingWorkspaceInvite/browse",
 		Method:      "GET",
 		Description: `Returns "pendingWorkspaceInvite" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

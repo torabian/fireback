@@ -40,7 +40,7 @@ func TokenGetActionMeta() struct {
 	}{
 		Name:        "TokenGetAction",
 		CliName:     "get",
-		CliShort:    "token-g",
+		CliShort:    "g",
 		URL:         "/token/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "token" row by uniqueId.`,

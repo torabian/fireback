@@ -41,7 +41,7 @@ func UserProfileUpdateActionMeta() struct {
 	}{
 		Name:        "UserProfileUpdateAction",
 		CliName:     "update",
-		CliShort:    "userProfile-u",
+		CliShort:    "u",
 		URL:         "/userProfile/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "userProfile" row by uniqueId.`,

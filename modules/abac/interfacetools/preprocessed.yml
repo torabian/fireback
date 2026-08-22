@@ -315,7 +315,7 @@ actions:
     dto: AppMenuOptionalDto
 - name: appMenuCreate
   cliName: create
-  cliShort: appMenu-c
+  cliShort: c
   url: /appMenu
   method: post
   description: Creates a new "appMenu" row.
@@ -326,7 +326,7 @@ actions:
     dto: AppMenuDto
 - name: appMenuUpdate
   cliName: update
-  cliShort: appMenu-u
+  cliShort: u
   url: /appMenu/:uniqueId
   method: patch
   description: Applies a partial update to a "appMenu" row by uniqueId.
@@ -337,7 +337,7 @@ actions:
     dto: AppMenuDto
 - name: appMenuGet
   cliName: get
-  cliShort: appMenu-g
+  cliShort: g
   url: /appMenu/:uniqueId
   method: get
   description: Looks up a single "appMenu" row by uniqueId.
@@ -346,7 +346,7 @@ actions:
     dto: AppMenuDto
 - name: appMenuBrowse
   cliName: browse
-  cliShort: appMenu-b
+  cliShort: b
   url: /appMenu/browse
   method: get
   qs:
@@ -366,7 +366,7 @@ actions:
     dto: AppMenuOptionalDto
 - name: appMenuAwareDeletePreview
   cliName: delete-preview
-  cliShort: appMenu-dp
+  cliShort: dp
   url: /appMenu/delete-preview
   method: get
   qs:
@@ -389,7 +389,7 @@ actions:
         type: int64
 - name: appMenuAwareDelete
   cliName: delete
-  cliShort: appMenu-d
+  cliShort: d
   url: /appMenu/delete
   method: post
   description: Deletes the given "appMenu" uniqueIds, along with everything appMenuAwareDeletePreview
@@ -401,7 +401,7 @@ actions:
       primitive: string
 - name: tableViewSizingCreate
   cliName: create
-  cliShort: tableViewSizing-c
+  cliShort: c
   url: /tableViewSizing
   method: post
   description: Creates a new "tableViewSizing" row.
@@ -412,7 +412,7 @@ actions:
     dto: TableViewSizingDto
 - name: tableViewSizingUpdate
   cliName: update
-  cliShort: tableViewSizing-u
+  cliShort: u
   url: /tableViewSizing/:uniqueId
   method: patch
   description: Applies a partial update to a "tableViewSizing" row by uniqueId.
@@ -423,7 +423,7 @@ actions:
     dto: TableViewSizingDto
 - name: tableViewSizingGet
   cliName: get
-  cliShort: tableViewSizing-g
+  cliShort: g
   url: /tableViewSizing/:uniqueId
   method: get
   description: Looks up a single "tableViewSizing" row by uniqueId.
@@ -432,7 +432,7 @@ actions:
     dto: TableViewSizingDto
 - name: tableViewSizingBrowse
   cliName: browse
-  cliShort: tableViewSizing-b
+  cliShort: b
   url: /tableViewSizing/browse
   method: get
   qs:
@@ -453,7 +453,7 @@ actions:
     dto: TableViewSizingOptionalDto
 - name: tableViewSizingAwareDeletePreview
   cliName: delete-preview
-  cliShort: tableViewSizing-dp
+  cliShort: dp
   url: /tableViewSizing/delete-preview
   method: get
   qs:
@@ -476,7 +476,7 @@ actions:
         type: int64
 - name: tableViewSizingAwareDelete
   cliName: delete
-  cliShort: tableViewSizing-d
+  cliShort: d
   url: /tableViewSizing/delete
   method: post
   description: Deletes the given "tableViewSizing" uniqueIds, along with everything
@@ -488,7 +488,7 @@ actions:
       primitive: string
 - name: timezoneGroupCreate
   cliName: create
-  cliShort: timezoneGroup-c
+  cliShort: c
   url: /timezoneGroup
   method: post
   description: Creates a new "timezoneGroup" row.
@@ -499,7 +499,7 @@ actions:
     dto: TimezoneGroupDto
 - name: timezoneGroupUpdate
   cliName: update
-  cliShort: timezoneGroup-u
+  cliShort: u
   url: /timezoneGroup/:uniqueId
   method: patch
   description: Applies a partial update to a "timezoneGroup" row by uniqueId.
@@ -510,7 +510,7 @@ actions:
     dto: TimezoneGroupDto
 - name: timezoneGroupGet
   cliName: get
-  cliShort: timezoneGroup-g
+  cliShort: g
   url: /timezoneGroup/:uniqueId
   method: get
   description: Looks up a single "timezoneGroup" row by uniqueId.
@@ -519,7 +519,7 @@ actions:
     dto: TimezoneGroupDto
 - name: timezoneGroupBrowse
   cliName: browse
-  cliShort: timezoneGroup-b
+  cliShort: b
   url: /timezoneGroup/browse
   method: get
   qs:
@@ -539,7 +539,7 @@ actions:
     dto: TimezoneGroupOptionalDto
 - name: timezoneGroupAwareDeletePreview
   cliName: delete-preview
-  cliShort: timezoneGroup-dp
+  cliShort: dp
   url: /timezoneGroup/delete-preview
   method: get
   qs:
@@ -562,7 +562,7 @@ actions:
         type: int64
 - name: timezoneGroupAwareDelete
   cliName: delete
-  cliShort: timezoneGroup-d
+  cliShort: d
   url: /timezoneGroup/delete
   method: post
   description: Deletes the given "timezoneGroup" uniqueIds, along with everything

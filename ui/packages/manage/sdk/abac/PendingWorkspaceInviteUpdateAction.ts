@@ -153,7 +153,7 @@ export class PendingWorkspaceInviteUpdateAction {
   static Definition = {
     name: "pendingWorkspaceInviteUpdate",
     cliName: "update",
-    cliShort: "pendingWorkspaceInvite-u",
+    cliShort: "u",
     url: "/pendingWorkspaceInvite/:uniqueId string",
     method: "patch",
     description:

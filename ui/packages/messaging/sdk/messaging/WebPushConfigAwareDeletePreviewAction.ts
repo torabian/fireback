@@ -208,7 +208,7 @@ export class WebPushConfigAwareDeletePreviewAction {
   static Definition = {
     name: "webPushConfigAwareDeletePreview",
     cliName: "delete-preview",
-    cliShort: "webPushConfig-dp",
+    cliShort: "dp",
     url: "/webPushConfig/delete-preview",
     method: "get",
     qs: [

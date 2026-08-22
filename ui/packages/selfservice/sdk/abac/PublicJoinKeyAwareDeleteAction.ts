@@ -115,7 +115,7 @@ export class PublicJoinKeyAwareDeleteAction {
   static Definition = {
     name: "publicJoinKeyAwareDelete",
     cliName: "delete",
-    cliShort: "publicJoinKey-d",
+    cliShort: "d",
     url: "/publicJoinKey/delete",
     method: "post",
     description:

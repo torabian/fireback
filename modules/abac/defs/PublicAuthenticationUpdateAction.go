@@ -41,7 +41,7 @@ func PublicAuthenticationUpdateActionMeta() struct {
 	}{
 		Name:        "PublicAuthenticationUpdateAction",
 		CliName:     "update",
-		CliShort:    "publicAuthentication-u",
+		CliShort:    "u",
 		URL:         "/publicAuthentication/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "publicAuthentication" row by uniqueId.`,

@@ -39,7 +39,7 @@ func PassportMethodBrowseActionMeta() struct {
 	}{
 		Name:        "PassportMethodBrowseAction",
 		CliName:     "browse",
-		CliShort:    "passportMethod-b",
+		CliShort:    "b",
 		URL:         "/passportMethod/browse",
 		Method:      "GET",
 		Description: `Returns "passportMethod" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

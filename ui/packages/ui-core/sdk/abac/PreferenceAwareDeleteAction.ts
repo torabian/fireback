@@ -115,7 +115,7 @@ export class PreferenceAwareDeleteAction {
   static Definition = {
     name: "preferenceAwareDelete",
     cliName: "delete",
-    cliShort: "preference-d",
+    cliShort: "d",
     url: "/preference/delete",
     method: "post",
     description:

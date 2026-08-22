@@ -135,7 +135,7 @@ export class TimezoneGroupCreateAction {
   static Definition = {
     name: "timezoneGroupCreate",
     cliName: "create",
-    cliShort: "timezoneGroup-c",
+    cliShort: "c",
     url: "/timezoneGroup",
     method: "post",
     description: 'Creates a new "timezoneGroup" row.',

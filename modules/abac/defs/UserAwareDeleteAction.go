@@ -40,7 +40,7 @@ func UserAwareDeleteActionMeta() struct {
 	}{
 		Name:        "UserAwareDeleteAction",
 		CliName:     "delete",
-		CliShort:    "user-d",
+		CliShort:    "d",
 		URL:         "/user/delete",
 		Method:      "POST",
 		Description: `Deletes the given "user" uniqueIds, along with everything userAwareDeletePreview reports.`,

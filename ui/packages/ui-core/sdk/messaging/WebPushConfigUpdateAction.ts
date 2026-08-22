@@ -153,7 +153,7 @@ export class WebPushConfigUpdateAction {
   static Definition = {
     name: "webPushConfigUpdate",
     cliName: "update",
-    cliShort: "webPushConfig-u",
+    cliShort: "u",
     url: "/webPushConfig/:uniqueId string",
     method: "patch",
     description:

@@ -207,7 +207,7 @@ describe("Workspace role capability scoping (capabilities -> roles -> workspace 
 
   //     cy.task(
   //       "exec",
-  //       ` ws workspaceType-c --title Students --slug /students --role-id ${studentRole!.uniqueId}`,
+  //       ` ws type c  --title Students --slug /students --role-id ${studentRole!.uniqueId}`,
   //     ).then((wtContent: string) => {
   //       const workspaceType = (
   //         JSON.parse(wtContent) as SingleItemResponse<WorkspaceTypeItem>
@@ -218,7 +218,7 @@ describe("Workspace role capability scoping (capabilities -> roles -> workspace 
 
   //     cy.task(
   //       "exec",
-  //       ` ws workspaceType-c --title Teachers --slug /teachers --role-id ${teacherRole!.uniqueId}`,
+  //       ` ws type c  --title Teachers --slug /teachers --role-id ${teacherRole!.uniqueId}`,
   //     ).then((wtContent: string) => {
   //       const workspaceType = (
   //         JSON.parse(wtContent) as SingleItemResponse<WorkspaceTypeItem>

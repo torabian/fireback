@@ -153,7 +153,7 @@ export class TableViewSizingUpdateAction {
   static Definition = {
     name: "tableViewSizingUpdate",
     cliName: "update",
-    cliShort: "tableViewSizing-u",
+    cliShort: "u",
     url: "/tableViewSizing/:uniqueId string",
     method: "patch",
     description:

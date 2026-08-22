@@ -41,7 +41,7 @@ func NotificationUpdateActionMeta() struct {
 	}{
 		Name:        "NotificationUpdateAction",
 		CliName:     "update",
-		CliShort:    "notification-u",
+		CliShort:    "u",
 		URL:         "/notification/:uniqueId",
 		Method:      "PATCH",
 		Description: `Applies a partial update to a "notification" row by uniqueId.`,

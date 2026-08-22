@@ -40,7 +40,7 @@ func UserProfileCreateActionMeta() struct {
 	}{
 		Name:        "UserProfileCreateAction",
 		CliName:     "create",
-		CliShort:    "userProfile-c",
+		CliShort:    "c",
 		URL:         "/userProfile",
 		Method:      "POST",
 		Description: `Creates a new "userProfile" row.`,

@@ -153,7 +153,7 @@ export class PhoneConfirmationUpdateAction {
   static Definition = {
     name: "phoneConfirmationUpdate",
     cliName: "update",
-    cliShort: "phoneConfirmation-u",
+    cliShort: "u",
     url: "/phoneConfirmation/:uniqueId string",
     method: "patch",
     description:

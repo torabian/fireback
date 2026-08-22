@@ -39,7 +39,7 @@ func PendingWorkspaceInviteAwareDeletePreviewActionMeta() struct {
 	}{
 		Name:        "PendingWorkspaceInviteAwareDeletePreviewAction",
 		CliName:     "delete-preview",
-		CliShort:    "pendingWorkspaceInvite-dp",
+		CliShort:    "dp",
 		URL:         "/pendingWorkspaceInvite/delete-preview",
 		Method:      "GET",
 		Description: `Reports what deleting the given "pendingWorkspaceInvite" uniqueIds would affect, without deleting anything.`,

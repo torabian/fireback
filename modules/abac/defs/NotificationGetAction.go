@@ -40,7 +40,7 @@ func NotificationGetActionMeta() struct {
 	}{
 		Name:        "NotificationGetAction",
 		CliName:     "get",
-		CliShort:    "notification-g",
+		CliShort:    "g",
 		URL:         "/notification/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "notification" row by uniqueId.`,

@@ -40,7 +40,7 @@ func PassportGetActionMeta() struct {
 	}{
 		Name:        "PassportGetAction",
 		CliName:     "get",
-		CliShort:    "passport-g",
+		CliShort:    "g",
 		URL:         "/passport/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "passport" row by uniqueId.`,

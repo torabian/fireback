@@ -39,7 +39,7 @@ func PreferenceBrowseActionMeta() struct {
 	}{
 		Name:        "PreferenceBrowseAction",
 		CliName:     "browse",
-		CliShort:    "preference-b",
+		CliShort:    "b",
 		URL:         "/preference/browse",
 		Method:      "GET",
 		Description: `Returns "preference" rows matching a filter, sorted/paged (see emigorm.ApplyQueryFilter/ApplyQueryScope).`,

@@ -149,7 +149,7 @@ export class PreferenceUpdateAction {
   static Definition = {
     name: "preferenceUpdate",
     cliName: "update",
-    cliShort: "preference-u",
+    cliShort: "u",
     url: "/preference/:uniqueId string",
     method: "patch",
     description: 'Applies a partial update to a "preference" row by uniqueId.',

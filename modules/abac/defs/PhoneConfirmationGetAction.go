@@ -40,7 +40,7 @@ func PhoneConfirmationGetActionMeta() struct {
 	}{
 		Name:        "PhoneConfirmationGetAction",
 		CliName:     "get",
-		CliShort:    "phoneConfirmation-g",
+		CliShort:    "g",
 		URL:         "/phoneConfirmation/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "phoneConfirmation" row by uniqueId.`,

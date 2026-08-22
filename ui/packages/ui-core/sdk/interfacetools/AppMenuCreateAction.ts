@@ -130,7 +130,7 @@ export class AppMenuCreateAction {
   static Definition = {
     name: "appMenuCreate",
     cliName: "create",
-    cliShort: "appMenu-c",
+    cliShort: "c",
     url: "/appMenu",
     method: "post",
     description: 'Creates a new "appMenu" row.',

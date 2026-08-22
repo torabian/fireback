@@ -40,7 +40,7 @@ func AppMenuGetActionMeta() struct {
 	}{
 		Name:        "AppMenuGetAction",
 		CliName:     "get",
-		CliShort:    "appMenu-g",
+		CliShort:    "g",
 		URL:         "/appMenu/:uniqueId",
 		Method:      "GET",
 		Description: `Looks up a single "appMenu" row by uniqueId.`,

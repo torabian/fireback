@@ -198,7 +198,7 @@ export class PublicJoinKeyBrowseAction {
   static Definition = {
     name: "publicJoinKeyBrowse",
     cliName: "browse",
-    cliShort: "publicJoinKey-b",
+    cliShort: "b",
     url: "/publicJoinKey/browse",
     method: "get",
     qs: [

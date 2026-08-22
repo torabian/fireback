@@ -205,7 +205,7 @@ export class PendingWorkspaceInviteBrowseAction {
   static Definition = {
     name: "pendingWorkspaceInviteBrowse",
     cliName: "browse",
-    cliShort: "pendingWorkspaceInvite-b",
+    cliShort: "b",
     url: "/pendingWorkspaceInvite/browse",
     method: "get",
     qs: [
