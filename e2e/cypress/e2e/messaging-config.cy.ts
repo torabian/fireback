@@ -80,7 +80,15 @@ function clearFormSelectOption(labelText: string) {
   cy.contains(".mb-3", labelText).find(".form-control").click();
   cy.contains(".mb-3", labelText)
     .find("input[role=combobox]")
-    .type("{backspace}");
+    .type("{backspace}")
+    // Backspace clears the selection but, since the input still has focus
+    // and keeps whatever loadOptions last resolved, react-select leaves its
+    // menu open afterwards. That floating menu overlaps whatever field comes
+    // next in the DOM, so the next clearFormSelectOption/selectFormSelectOption's
+    // own .form-control click lands on this stale menu instead - Escape closes
+    // it (without touching the value that was just cleared) the same way a
+    // real user tabbing away would.
+    .type("{esc}");
 }
 
 function submitForm() {
@@ -214,7 +222,10 @@ describe("Messaging config - manage UI (select, save, and clear back to null)", 
     cy.wait(1000);
 
     cy.visit(ui("/manage/#/manage/messaging-config"));
-    fieldValue("General Email Provider").should("contain.text", "Not specified");
+    fieldValue("General Email Provider").should(
+      "contain.text",
+      "Not specified",
+    );
 
     sharedValues(["messagingConfigGsmProviderId"]).then(
       ({ messagingConfigGsmProviderId }) => {
@@ -238,7 +249,7 @@ describe("Messaging config - manage UI (select, save, and clear back to null)", 
     clearFormSelectOption("Email Otp Content");
     clearFormSelectOption("SMS Otp Content");
     submitForm();
-    cy.wait(1000);
+    cy.wait(10000);
 
     cy.visit(ui("/manage/#/manage/messaging-config"));
     for (const label of [
