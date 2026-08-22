@@ -3,7 +3,6 @@ package messaging
 import (
 	"errors"
 
-	abacdefs "github.com/torabian/fireback/modules/abac/defs"
 	messagingdefs "github.com/torabian/fireback/modules/abac/messaging/defs"
 	"github.com/torabian/fireback/modules/fireback"
 	"gorm.io/gorm"
@@ -24,7 +23,7 @@ func MessagingConfigUpdateAction(c messagingdefs.MessagingConfigUpdateActionRequ
 	return &messagingdefs.MessagingConfigUpdateActionResponse{Payload: fireback.GResponseSingleItem(updated)}, nil
 }
 
-func MessagingConfigGetAction(c abacdefs.WorkspaceConfigDistinctGetActionRequest) (*messagingdefs.MessagingConfigGetActionResponse, error) {
+func MessagingConfigGetAction(c messagingdefs.MessagingConfigGetActionRequest) (*messagingdefs.MessagingConfigGetActionResponse, error) {
 	if _, err := fireback.ResolveActionContext(c, &fireback.SecurityModel{
 		ResolveStrategy: "workspace",
 		AllowOnRoot:     true,
@@ -32,11 +31,17 @@ func MessagingConfigGetAction(c abacdefs.WorkspaceConfigDistinctGetActionRequest
 		return nil, err
 	}
 
+	// MessagingConfig is a single, global row (no workspaceId column - see its own
+	// features.actions:false in Messaging.emi.yml), so this is a plain First() with no
+	// filter, not a lookup scoped to the caller's workspace.
 	var item messagingdefs.MessagingConfigEntity
-	err2 := fireback.GetDbRef().Where(&messagingdefs.MessagingConfigEntity{WorkspaceId: "root"}).First(&item).Error
+	err2 := fireback.GetDbRef().First(&item).Error
 	if err2 != nil {
 		if errors.Is(err2, gorm.ErrRecordNotFound) {
-			return &messagingdefs.MessagingConfigGetActionResponse{Payload: fireback.GResponseSingleItem(&abacdefs.WorkspaceConfigEntity{})}, nil
+			// Always return the dto shape, even with nothing configured yet, rather
+			// than a 404 - there's nothing exceptional about a fresh install that
+			// hasn't set this up.
+			return &messagingdefs.MessagingConfigGetActionResponse{Payload: fireback.GResponseSingleItem(&messagingdefs.MessagingConfigEntity{})}, nil
 		}
 		return nil, fireback.GormErrorToIError(err2)
 	}
@@ -46,10 +51,10 @@ func MessagingConfigGetAction(c abacdefs.WorkspaceConfigDistinctGetActionRequest
 
 func messagingConfigUpsert(query fireback.QueryDSL, body messagingdefs.MessagingConfigOptionalDto) (*messagingdefs.MessagingConfigEntity, *fireback.IError) {
 	dbref := fireback.GetDbRef()
+	// Same single-global-row reasoning as MessagingConfigGetAction above: FirstOrCreate
+	// with no filter/condition either finds the one existing row or creates it fresh.
 	var item messagingdefs.MessagingConfigEntity
-	if err2 := dbref.
-		Where(&messagingdefs.MessagingConfigEntity{WorkspaceId: "root"}).
-		FirstOrCreate(&item).Error; err2 != nil {
+	if err2 := dbref.FirstOrCreate(&item).Error; err2 != nil {
 		return nil, fireback.GormErrorToIError(err2)
 	}
 
