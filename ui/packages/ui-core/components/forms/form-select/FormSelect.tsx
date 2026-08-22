@@ -98,6 +98,20 @@ export interface FormSelectBase<
    * Goes to the query to left join inner tables (objects) or foreign relations if needed.
    */
   withPreloads?: string;
+
+  /**
+   * @description When true, the field can be explicitly cleared back to null (not just
+   * left at its current selection) - a "x" clear control appears on the react-select
+   * variant, and picking the placeholder option on the native <select> variant sets the
+   * field to null instead of leaving it untouched. This matters specifically because a
+   * cleared value has to serialize as a literal `null` in the request body, not just be
+   * missing/undefined - fireback's generated Update actions only clear a database
+   * column when the field is explicitly `null` in the JSON body (see
+   * emigo.Nullable[T].UnmarshalJSON: an absent key never touches it at all, only `null`
+   * does), so without this there was no way to null out a value the user had
+   * previously set, only to leave it alone or pick a different one.
+   */
+  nullable?: boolean;
 }
 
 interface FormSelectEffectBase<TargetType, T, ValueIdentifier> {
@@ -219,13 +233,27 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
 
   const options = query?.data?.data?.items;
 
-  const onChange = (value: T | T[]) => {
+  const onChange = (value: T | T[] | null) => {
     // if there are form effect, we need to apply them, depending on the type
     if (props?.formEffect?.form) {
       const { formEffect } = props;
       const newValue = {
         ...formEffect.form.values,
       };
+
+      // A cleared selection (react-select's isClearable "x", or the native <select>'s
+      // placeholder option when nullable - see props.nullable's doc comment) comes in
+      // as `null`, never a T to run beforeSet on - calling e.g. `item.uniqueId` on it
+      // would throw. Set the field to a literal null directly instead, so it actually
+      // serializes as `null` on save rather than being silently dropped.
+      if (value === null) {
+        set(newValue, formEffect.field, null);
+        formEffect?.form.setValues(newValue);
+        if (props.onChange && typeof props.onChange === "function") {
+          props.onChange(null as any);
+        }
+        return;
+      }
 
       if (formEffect.beforeSet) {
         value = formEffect.beforeSet(value as T) as any;
@@ -331,7 +359,12 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
               (t: any) => t.uniqueId === e.target.value,
             ) as any;
 
-            onChange(item);
+            // The placeholder option's value is "" - with no match found, `item` is
+            // undefined. Only turn that into an explicit null (see props.nullable's
+            // doc comment) when the caller actually opted in; otherwise keep the
+            // previous "leave it alone" behavior every other FormSelect usage relies
+            // on.
+            onChange(item ?? (props.nullable ? null : undefined));
           }}
           className={classNames(
             "form-select",
@@ -361,6 +394,7 @@ export function FormSelect<T, V>(props: FormSelectProps<T, V>) {
               onChange(newValue as T);
             }}
             isMulti={props.multiple}
+            isClearable={props.nullable}
             classNames={{
               container(propsx: any) {
                 return classNames(

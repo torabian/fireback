@@ -12,6 +12,7 @@ import { useCapabilityRoutes } from "./capabilities/CapabilityRoutes";
 import { useEmailProviderRoutes } from "@fireback/messaging/mail-providers/EmailProviderRoutes";
 import { useEmailSenderRoutes } from "@fireback/messaging/mail-senders/EmailSenderRoutes";
 import { useInternalStatsRoutes } from "./internal-stats/InternalStatsRoutes";
+import { useMessagingConfigRoutes } from "./messaging-config/MessagingConfigRoutes";
 import { useNotificationsRoutes } from "./notifications/NotificationsRoutes";
 import { usePassportMethodRoutes } from "./passport-method/PassportMethodRoutes";
 import { useRegionalContentRoutes } from "./regional-content/RegionalContentRoutes";
@@ -28,6 +29,7 @@ export function useManageRoutes() {
   const gsmProviderRoutes = useGsmProviderRoutes();
   const mailSenderRoutes = useEmailSenderRoutes();
   const internalStatsRoutes = useInternalStatsRoutes();
+  const messagingConfigRoutes = useMessagingConfigRoutes();
   const notificationsRoutes = useNotificationsRoutes();
   const passportMethodRoutes = usePassportMethodRoutes();
   const userRoutes = useUserRoutes();
@@ -43,6 +45,7 @@ export function useManageRoutes() {
       {mailProviderRoutes}
       {mailSenderRoutes}
       {internalStatsRoutes}
+      {messagingConfigRoutes}
       {notificationsRoutes}
       {passportMethodRoutes}
       {userRoutes}

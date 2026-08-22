@@ -1,0 +1,19 @@
+content:
+  messagingConfigs:
+    archiveTitle: Konfiguracja wiadomości
+    title: Konfiguracja wiadomości
+    description: Skonfiguruj domyślnych dostawców e-mail/SMS oraz szablony używane w całej instalacji (nie per przestrzeń robocza).
+    editMessagingConfig: Edytuj konfigurację wiadomości
+    newMessagingConfig: Nowa konfiguracja wiadomości
+    notificationsSectionTitle: Powiadomienia
+    notificationsSectionDescription: Wybierz, który dostawca domyślnie wysyła e-maile/SMS-y oraz jakie szablony są używane do zaproszeń i kodów jednorazowych.
+    generalEmailProviderLabel: Domyślny dostawca e-mail
+    generalEmailProviderHint: Usługa dostawcy e-mail, która będzie używana do wysyłania wiadomości. Nie wpływa na treść wiadomości - wybierasz tutaj, za pomocą jakiej usługi zewnętrznej lub własnego serwera SMTP wysyłane będą e-maile.
+    generalGsmProviderLabel: Domyślny dostawca SMS
+    generalGsmProviderHint: Ogólna usługa używana do wysyłania wiadomości tekstowych (SMS) za pomocą swoich usług lub API.
+    inviteToWorkspaceContentLabel: Treść zaproszenia do przestrzeni roboczej
+    inviteToWorkspaceContentHint: Ten szablon będzie używany domyślnie, gdy użytkownik zaprasza inną osobę do swojej przestrzeni roboczej.
+    emailOtpContentLabel: Treść kodu jednorazowego e-mail
+    emailOtpContentHint: Po żądaniu jednorazowego kodu e-mail, ta treść zostanie użyta do utworzenia wiadomości wysyłanej do użytkownika.
+    smsOtpContentLabel: Treść kodu jednorazowego SMS
+    smsOtpContentHint: Przy wysyłce SMS z kodem jednorazowym, ten szablon zostanie użyty do utworzenia takiej wiadomości, wraz z kodem jednorazowym.

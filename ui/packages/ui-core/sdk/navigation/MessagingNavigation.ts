@@ -16,3 +16,7 @@ export const WebPushConfigNavigation = createEntityNavigation(
   "web-push-config",
   "web-push-configs"
 );
+export const MessagingConfigNavigation = createEntityNavigation(
+  "messaging-config",
+  "messaging-configs"
+);
